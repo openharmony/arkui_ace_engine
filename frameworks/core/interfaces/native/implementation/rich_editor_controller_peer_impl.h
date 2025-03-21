@@ -22,26 +22,20 @@
 #include "rich_editor_controller_structs.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class RichEditorControllerPeerImpl : public Referenced {
+class RichEditorControllerPeerImpl : public RichEditorBaseControllerPeer, public Referenced {
 public:
     RichEditorControllerPeerImpl() = default;
-
-    void AddTargetController(const WeakPtr<RichEditorController> &handler)
-    {
-        handler_ = handler;
-    }
 
     int32_t AddTextSpanImpl(const TextSpanOptions& options)
     {
         int32_t result = 0;
         if (auto controller = handler_.Upgrade(); controller) {
-            result = controller->AddTextSpan(options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddTextSpan(options);
         }
         return result;
     }
@@ -50,7 +44,9 @@ public:
     {
         int32_t result = 0;
         if (auto controller = handler_.Upgrade(); controller) {
-            result = controller->AddImageSpan(options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddImageSpan(options);
         }
         return result;
     }
@@ -61,7 +57,9 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId(); // May be incorrect way
             auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
-            result = controller->AddPlaceholderSpan(spanNode, options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddPlaceholderSpan(spanNode, options);
         }
         return result;
     }
@@ -70,7 +68,9 @@ public:
     {
         int32_t result = 0;
         if (auto controller = handler_.Upgrade(); controller) {
-            result = controller->AddPlaceholderSpan(spanNode, options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddPlaceholderSpan(spanNode, options);
         }
         return result;
     }
@@ -79,7 +79,9 @@ public:
     {
         int32_t result = 0;
         if (auto controller = handler_.Upgrade(); controller) {
-            result = controller->AddSymbolSpan(options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->AddSymbolSpan(options);
         }
         return result;
     }
@@ -87,7 +89,9 @@ public:
     void UpdateSpanStyleImpl(const Converter::TextSpanOptionsForUpdate& options)
     {
         if (auto controller = handler_.Upgrade(); controller && options.textStyle) {
-            controller->UpdateSpanStyle(
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->UpdateSpanStyle(
                 options.start, options.end, options.textStyle.value(), options.imageSpanAttribute);
         }
     }
@@ -95,14 +99,18 @@ public:
     void UpdateParagraphStyleImpl(const Converter::UpdateParagraphStyleForUpdate& options)
     {
         if (auto controller = handler_.Upgrade(); controller && options.style) {
-            controller->UpdateParagraphStyle(options.start, options.end, options.style.value());
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->UpdateParagraphStyle(options.start, options.end, options.style.value());
         }
     }
 
     void DeleteSpansImpl(const RangeOptions& options)
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            controller->DeleteSpans(options);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->DeleteSpans(options);
         }
     }
 
@@ -111,14 +119,18 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto start = options.start.value_or(0);
             auto end = options.end.value_or(0);
-            controller->GetSpansInfo(start, end);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->GetSpansInfo(start, end);
         }
     }
 
     SelectionInfo GetSelectionImpl()
     {
         if (auto controller = handler_.Upgrade(); controller) {
-            return controller->GetSelectionSpansInfo();
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, {});
+            return richEditorController->GetSelectionSpansInfo();
         }
         return {};
     }
@@ -129,7 +141,9 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto start = options.start.value_or(0);
             auto end = options.end.value_or(0);
-            ret = controller->GetParagraphsInfo(start, end);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, ret);
+            ret = richEditorController->GetParagraphsInfo(start, end);
         }
         return ret;
     }
@@ -137,7 +151,9 @@ public:
     void FromStyledStringImpl(RefPtr<SpanStringBase> value)
     {
         if (auto controller = handler_.Upgrade(); controller && value) {
-            controller->FromStyledString(value);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->FromStyledString(value);
         }
     }
 
@@ -147,18 +163,12 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto start = options.start.value_or(0);
             auto end = options.end.value_or(0);
-            ret = controller->ToStyledString(start, end);
+            auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
+            CHECK_NULL_RETURN(richEditorController, ret);
+            ret = richEditorController->ToStyledString(start, end);
         }
         return ret;
     }
-
-    Ace::WeakPtr<RichEditorController> GetController() const
-    {
-        return handler_;
-    }
-
-private:
-    Ace::WeakPtr<RichEditorController> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
