@@ -2612,9 +2612,12 @@ void TextFieldPattern::HandleOnDragStatusCallback(
 {
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnDragStatusCallback dragEventType=%{public}d", dragEventType);
-    if (dragEventType == DragEventType::DROP && dragRecipientStatus_ == DragStatus::DRAGGING) {
-        StopContentScroll();
-        StopTwinkling();
+    if (dragEventType == DragEventType::DROP) {
+        if (dragRecipientStatus_ == DragStatus::DRAGGING) {
+            StopContentScroll();
+            StopTwinkling();
+        }
+        dragRecipientStatus_ = DragStatus::NONE;
     }
 }
 
