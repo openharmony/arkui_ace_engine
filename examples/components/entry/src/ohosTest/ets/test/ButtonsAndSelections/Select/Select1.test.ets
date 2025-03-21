@@ -29,7 +29,7 @@ import {
   titleSearch,
   ToggleClick
 } from '../../../utils';
-import { SelectStart } from './Select';
+import { SelectStart } from './Select.test';
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
