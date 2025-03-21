@@ -40,7 +40,7 @@ using namespace testing::ext;
 using namespace OHOS::Ace::NG::Converter;
 namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
-    const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
+const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 }
 namespace {
 struct CheckEvent {
@@ -150,7 +150,8 @@ public:
         CheckOffsetOption(menuParam);
         CheckPreviewAnimationOptions(menuParam);
         if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM &&
-            menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
+            !menuParam.hasPreviewTransitionEffect && !menuParam.hasTransitionEffect &&
+            menuParam.contextMenuRegisterType != NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             CheckHoverImageAnimationOptions(menuParam);
         }
         MockSubwindowBind::ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
@@ -294,6 +295,14 @@ public:
         uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     }
 
+    static AceEngine& InitBindContextMenu1()
+    {
+        AceEngine& aceEngine = AceEngine::Get();
+        aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
+        uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
+        return aceEngine;
+    }
+
     static void TearDownTestCase()
     {
         MockContainer::Current()->SetTaskExecutor(nullptr);
@@ -352,6 +361,22 @@ public:
         auto inputEventHub = eventHub->GetInputEventHub();
         CHECK_NULL_VOID(inputEventHub);
         inputEventHub->ClearUserOnMouse();
+    }
+
+    static void ResetAceEngine(Ark_NodeHandle node, AceEngine& aceEngine)
+    {
+        ResetParams(node);
+        aceEngine.RemoveContainer(CONTAINER_INSTANCE_ID);
+    }
+
+    static void SetSubwindow()
+    {
+        auto containerId = Container::CurrentId();
+        auto subwindowBind = AceType::MakeRefPtr<MockSubwindowBindTest>();
+        subwindowBind->InitContainer();
+        SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindowBind);
+        SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindowBind);
+        EXPECT_CALL(*subwindowBind, GetOverlayManager()).Times(1);
     }
 };
 
@@ -900,31 +925,560 @@ HWTEST_F(CommonMethodModifierTest16, BindContextMenu0TestEnbaleHoverMode, TestSi
 }
 
 /*
- * @tc.name: BindContextMenu0Test
+ * @tc.name: BindContextMenu1Test
  * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest16, BindContextMenu1Test, TestSize.Level1)
 {
-    AceEngine& aceEngine = AceEngine::Get();
-    aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
-    auto containerId = Container::CurrentId();
-    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
     ASSERT_TRUE(modifier_->setBindContextMenu1);
-    auto taskExecutorFalse = AceType::MakeRefPtr<MockTaskExecutor>(true);
-    MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutorFalse);
     auto builder = getBuilderCb();
     auto options = getContextMenuOptions();
     auto isShown = ArkValue<Ark_Boolean>(true);
-    auto subwindowBind = AceType::MakeRefPtr<MockSubwindowBindTest>();
-    subwindowBind->InitContainer();
-    SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindowBind);
-    SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindowBind);
-    EXPECT_CALL(*subwindowBind, GetOverlayManager()).Times(1);
+    CommonMethodModifierTest16::SetSubwindow();
     modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
-    CommonMethodModifierTest16::ResetParams(node_);
-    aceEngine.RemoveContainer(CONTAINER_INSTANCE_ID);
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestPlacementTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestPlacementTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    for (auto& [text, value, expected] : testFixtureEnumPlacementValidValues) {
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .placement = getPlacement(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        auto isShown = ArkValue<Ark_Boolean>(true);
+        CommonMethodModifierTest16::SetSubwindow();
+        modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestEnableArrow
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestEnableArrow, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    for (auto& [text, value, expected] : testFixtureBooleanValidValues) {
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .placement = ArkValue<Opt_Placement>(),
+            .enableArrow = ArkValue<Opt_Boolean>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        auto isShown = ArkValue<Ark_Boolean>(true);
+        CommonMethodModifierTest16::SetSubwindow();
+        modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+        ASSERT_TRUE(menuParams);
+        EXPECT_EQ(menuParams->enableArrow, expected) << "Passed value is: " << text;
+        std::optional<Placement> expectedPlacement = std::nullopt;
+        if (expected) {
+            expectedPlacement = Placement::TOP;
+        }
+        EXPECT_EQ(menuParams->placement, expectedPlacement) << "Passed value is: " << text;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestArrowOffset
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestArrowOffset, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    for (auto& [text, value, expected] : testFixtureDimensionAnyValidValues) {
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .arrowOffset = ArkValue<Opt_Length>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        auto isShown = ArkValue<Ark_Boolean>(true);
+        CommonMethodModifierTest16::SetSubwindow();
+        modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+        ASSERT_TRUE(menuParams);
+        EXPECT_EQ(menuParams->arrowOffset, expected) << "Passed value is: " << text;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestPreviewPreviewMode
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestPreviewPreviewMode, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    for (auto& [text, value, expected] : testFixtureMenuPreviewMode) {
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .preview = ArkUnion<Opt_Union_MenuPreviewMode_CustomBuilder, Ark_MenuPreviewMode>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        auto isShown = ArkValue<Ark_Boolean>(true);
+        CommonMethodModifierTest16::SetSubwindow();
+        modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+        ASSERT_TRUE(menuParams);
+        EXPECT_EQ(menuParams->previewMode, expected) << "Passed value is: " << text;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestPreviewCustomBuilder
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestPreviewCustomBuilder, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    Ark_ContextMenuOptions optionsPlacement = {
+        .preview = getPreviewCustomBuilder(),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    EXPECT_EQ(menuParams->previewMode, MenuPreviewMode::CUSTOM)
+        << "Passed value is: " << static_cast<int>(MenuPreviewMode::CUSTOM);
+    ASSERT_TRUE(checkEvent2);
+    EXPECT_EQ(checkEvent2->resourceId, TEST_RESOURCE_ID_2);
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBorderRadiusLength
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBorderRadiusLength, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    auto arkLenght = ArkValue<Ark_Length>(LENGHT_TEST_VALUE);
+    auto radiuses = ArkUnion<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_Length>(arkLenght);
+    Ark_ContextMenuOptions optionsPlacement = {
+        .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    ASSERT_TRUE(menuParams->borderRadius);
+    EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGHT_TEST_VALUE, false));
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBorderRadiusBorderRadiuses
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBorderRadiusBorderRadiuses, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    auto arkLenght = ArkValue<Ark_Length>(LENGHT_TEST_VALUE);
+    Ark_BorderRadiuses arkRadiuses = {
+        .topLeft = ArkValue<Opt_Length>(arkLenght),
+        .topRight = ArkValue<Opt_Length>(arkLenght),
+        .bottomLeft = ArkValue<Opt_Length>(arkLenght),
+        .bottomRight = ArkValue<Opt_Length>(arkLenght),
+    };
+    auto radiuses = ArkUnion<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses,
+    Ark_BorderRadiuses>(arkRadiuses); Ark_ContextMenuOptions optionsPlacement = {
+        .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    ASSERT_TRUE(menuParams->borderRadius);
+    EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGHT_TEST_VALUE, false));
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBorderRadiusLocalizedRadius
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBorderRadiusLocalizedRadius, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    auto arkLenght = ArkValue<Ark_LengthMetrics>(LENGHT_TEST_VALUE);
+    Ark_LocalizedBorderRadiuses arkRadiuses = {
+        .topStart = ArkValue<Opt_LengthMetrics>(arkLenght),
+        .topEnd = ArkValue<Opt_LengthMetrics>(arkLenght),
+        .bottomStart = ArkValue<Opt_LengthMetrics>(arkLenght),
+        .bottomEnd = ArkValue<Opt_LengthMetrics>(arkLenght),
+    };
+    auto radiuses =
+        ArkUnion<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_LocalizedBorderRadiuses>(arkRadiuses);
+    Ark_ContextMenuOptions optionsPlacement = {
+        .borderRadius = ArkValue<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(radiuses),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    ASSERT_TRUE(menuParams->borderRadius);
+    EXPECT_THAT(menuParams->borderRadius.value(), CompareBorderRadius(LENGHT_TEST_VALUE, true));
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestOnAppear
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestOnAppear, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkCallbackEvent = std::nullopt;
+    auto onAppear = [](const Ark_Int32 resourceId) {
+        checkCallbackEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+        };
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto arkCallback = ArkValue<Callback_Void>(onAppear, frameNode->GetId());
+    Ark_ContextMenuOptions optionsPlacement = {
+        .onAppear = ArkValue<Opt_Callback_Void>(arkCallback),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+    EXPECT_FALSE(checkCallbackEvent);
+    CommonMethodModifierTest16::EmitLongPressEvent(node_);
+    ASSERT_TRUE(checkCallbackEvent);
+    EXPECT_EQ(checkCallbackEvent->nodeId, frameNode->GetId());
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestOnDisappear
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestOnDisappear, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkCallbackEvent = std::nullopt;
+    auto onDisappear = [](const Ark_Int32 resourceId) {
+        checkCallbackEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+        };
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto arkCallback = ArkValue<Callback_Void>(onDisappear, frameNode->GetId());
+    Ark_ContextMenuOptions optionsPlacement = {
+        .onDisappear = ArkValue<Opt_Callback_Void>(arkCallback),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+    EXPECT_FALSE(checkCallbackEvent);
+    CommonMethodModifierTest16::EmitLongPressEvent(node_);
+    ASSERT_TRUE(checkCallbackEvent);
+    EXPECT_EQ(checkCallbackEvent->nodeId, frameNode->GetId());
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestAboutToAppear
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestAboutToAppear, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkCallbackEvent = std::nullopt;
+    auto aboutToAppear = [](const Ark_Int32 resourceId) {
+        checkCallbackEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+        };
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto arkCallback = ArkValue<Callback_Void>(aboutToAppear, frameNode->GetId());
+    Ark_ContextMenuOptions optionsPlacement = {
+        .aboutToAppear = ArkValue<Opt_Callback_Void>(arkCallback),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+    EXPECT_FALSE(checkCallbackEvent);
+    CommonMethodModifierTest16::EmitLongPressEvent(node_);
+    ASSERT_TRUE(checkCallbackEvent);
+    EXPECT_EQ(checkCallbackEvent->nodeId, frameNode->GetId());
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestAboutToDisappear
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestAboutToDisappear, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkCallbackEvent = std::nullopt;
+    auto aboutToDisappear = [](const Ark_Int32 resourceId) {
+        checkCallbackEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+        };
+    };
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto arkCallback = ArkValue<Callback_Void>(aboutToDisappear, frameNode->GetId());
+    Ark_ContextMenuOptions optionsPlacement = {
+        .aboutToDisappear = ArkValue<Opt_Callback_Void>(arkCallback),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+    EXPECT_FALSE(checkCallbackEvent);
+    CommonMethodModifierTest16::EmitLongPressEvent(node_);
+    ASSERT_TRUE(checkCallbackEvent);
+    EXPECT_EQ(checkCallbackEvent->nodeId, frameNode->GetId());
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestLayoutRegionMargin
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestLayoutRegionMargin, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    auto arkLenght = ArkValue<Ark_Length>(LENGHT_TEST_VALUE);
+    Ark_Padding arkPadding = {
+        .left = ArkValue<Opt_Length>(arkLenght),
+        .right = ArkValue<Opt_Length>(arkLenght),
+        .bottom = ArkValue<Opt_Length>(arkLenght),
+        .top = ArkValue<Opt_Length>(arkLenght),
+    };
+    Ark_ContextMenuOptions optionsPlacement = {
+        .layoutRegionMargin = ArkValue<Opt_Padding>(arkPadding),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    ASSERT_TRUE(menuParams->layoutRegionMargin);
+    EXPECT_THAT(menuParams->layoutRegionMargin.value(), CompareMarginPadding(CalcLength(LENGHT_TEST_VALUE)));
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBackgroundColorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBackgroundColorValidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto checkValue = [this](const std::string& input, const std::string& expected, Opt_ResourceColor colorValue) {
+        auto builder = getBuilderCb();
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .backgroundColor = colorValue,
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+        CommonMethodModifierTest16::EmitLongPressEvent(node_);
+        ASSERT_TRUE(menuParams);
+        ASSERT_TRUE(menuParams->backgroundColor);
+        EXPECT_THAT(menuParams->backgroundColor->ToString(), expected) << "Color: " << input;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    };
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+}
+/*
+ * @tc.name: BindContextMenu1TestBackgroundColorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBackgroundColorInvalidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto checkValue = [this](const std::string& input, Opt_ResourceColor colorValue) {
+        auto builder = getBuilderCb();
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .backgroundColor = colorValue,
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+        CommonMethodModifierTest16::EmitLongPressEvent(node_);
+        ASSERT_TRUE(menuParams);
+        EXPECT_FALSE(menuParams->backgroundColor) << "Color: " << input;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    };
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBackgroundBlurStyleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBackgroundBlurStyleValidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    for (auto& [input, value, expected] : testFixtureBlurStyleActivePolicyValidValues) {
+        auto builder = getBuilderCb();
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .backgroundBlurStyle = ArkValue<Opt_BlurStyle>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+        CommonMethodModifierTest16::EmitLongPressEvent(node_);
+        ASSERT_TRUE(menuParams);
+        ASSERT_TRUE(menuParams->backgroundBlurStyle) << "BlurStyle: " << input;
+        EXPECT_EQ(menuParams->backgroundBlurStyle, static_cast<int32_t>(expected))
+            << "BlurStyleActivePolicy: " << input;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestBackgroundBlurStyleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestBackgroundBlurStyleInvalidValues, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    for (auto& [input, value] : testFixtureEnumBlurStyleInvalidValues) {
+        auto builder = getBuilderCb();
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .backgroundBlurStyle = ArkValue<Opt_BlurStyle>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        modifier_->setBindContextMenu0(node_, &builder, ARK_RESPONSE_TYPE_LONG_PRESS, &options);
+        CommonMethodModifierTest16::EmitLongPressEvent(node_);
+        ASSERT_TRUE(menuParams);
+        EXPECT_FALSE(menuParams->backgroundBlurStyle) << "BlurStyle: " << input;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
+}
+
+/*
+ * @tc.name: BindContextMenu1TestTransition
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestTransition, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    auto builder = getBuilderCb();
+    auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+    Ark_ContextMenuOptions optionsPlacement = {
+        .transition = getTransitionEffect(),
+    };
+    auto options = getContextMenuOptions(optionsPlacement);
+    auto isShown = ArkValue<Ark_Boolean>(true);
+    CommonMethodModifierTest16::SetSubwindow();
+    modifier_->setBindContextMenu1(node_, isShown, &builder, &options);
+    ASSERT_TRUE(menuParams);
+    EXPECT_TRUE(menuParams->hasTransitionEffect);
+    EXPECT_EQ(menuParams->transition, effect->handler);
+    CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+}
+
+/*
+ * @tc.name: BindContextMenu1TestEnbaleHoverMode
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest16, BindContextMenu1TestEnbaleHoverMode, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setBindContextMenu1);
+    for (auto& [text, value, expected] : testFixtureBooleanValidValues) {
+        auto builder = getBuilderCb();
+        auto& aceEngine = CommonMethodModifierTest16::InitBindContextMenu1();
+        Ark_ContextMenuOptions optionsPlacement = {
+            .enableHoverMode = ArkValue<Opt_Boolean>(value),
+        };
+        auto options = getContextMenuOptions(optionsPlacement);
+        modifier_->setBindContextMenu0(node_, &builder, DEFAULT_RESPONSE_TYPE, &options);
+        CommonMethodModifierTest16::EmitFocusEvent(node_);
+        ASSERT_TRUE(menuParams);
+        EXPECT_EQ(menuParams->enableHoverMode, expected) << "Passed value is: " << text;
+        CommonMethodModifierTest16::ResetAceEngine(node_, aceEngine);
+    }
 }
 } // namespace OHOS::Ace::NG
