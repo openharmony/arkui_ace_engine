@@ -71,9 +71,11 @@ private:
     {
         RecognizerGroup::OnResetStatus();
         currentBatchRecognizer_.Reset();
+        succeedBlockRecognizer_.Reset();
     }
 
     RefPtr<NGGestureRecognizer> currentBatchRecognizer_;
+    RefPtr<NGGestureRecognizer> succeedBlockRecognizer_;
 };
 
 } // namespace OHOS::Ace::NG
