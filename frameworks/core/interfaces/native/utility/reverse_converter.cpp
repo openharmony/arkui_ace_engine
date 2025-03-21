@@ -411,16 +411,20 @@ void AssignArkValue(Ark_String& dst, const Color& src, ConvContext *ctx)
     dst = ArkValue<Ark_String>(src.ToString(), ctx);
 }
 
+void AssignArkValue(Ark_BorderRadiuses& dst, const BorderRadiusProperty& src)
+{
+    Ark_BorderRadiuses arkBorder = {
+        .topLeft = ArkValue<Opt_Length>(src.radiusTopLeft),
+        .topRight = ArkValue<Opt_Length>(src.radiusTopRight),
+        .bottomLeft = ArkValue<Opt_Length>(src.radiusBottomLeft),
+        .bottomRight = ArkValue<Opt_Length>(src.radiusBottomRight),
+    };
+    dst = arkBorder;
+}
+
 void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx)
 {
-    Ark_BorderRadiuses borderRadiuses;
-    if (src.backgroundRadius.has_value()) {
-        borderRadiuses.topLeft = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusTopLeft);
-        borderRadiuses.topRight = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusTopRight);
-        borderRadiuses.bottomLeft = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusBottomLeft);
-        borderRadiuses.bottomRight = ArkValue<Opt_Length>(src.backgroundRadius.value().radiusBottomRight);
-    }
-    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(borderRadiuses);
+    dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
 } // namespace OHOS::Ace::NG::Converter
