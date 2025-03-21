@@ -777,7 +777,7 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
         OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC, EVENT_KEY_PACKAGE_NAME, progressName);
 }
 
-void EventRport::ReportPageSlidInfo(OHOS : Ace::NG::SlidInfo &slidInfo) 
+void EventRport::ReportPageSlidInfo(OHOS::Ace::NG::SlidInfo &slidInfo) 
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_PAGE_SLID_INFO,
         OHOS::HiviewDFX::HiSysEvent::EventType::BEHJAVIOR,
