@@ -30653,7 +30653,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
-      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style);
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style, this.value?.headerComponent, this.value?.footerComponent);
     }
   }
 }
