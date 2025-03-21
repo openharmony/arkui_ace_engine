@@ -183,6 +183,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
+    void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageFit& dst, const ImageFit& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
@@ -194,6 +195,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
     void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src);
+    void AssignArkValue(Ark_Length& dst, const CalcLength& src);
     void AssignArkValue(Ark_Length& dst, const Dimension& src);
     void AssignArkValue(Ark_Length& dst, const double& src);
     void AssignArkValue(Ark_Length& dst, const float& src);
@@ -225,6 +227,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const long& src);
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_OffsetResult& dst, const Offset& src);
+    void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
