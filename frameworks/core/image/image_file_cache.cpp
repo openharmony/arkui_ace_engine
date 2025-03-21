@@ -116,7 +116,7 @@ bool ImageFileCache::WriteFile(const std::string& url, const void* const data, s
     }
     outFile.write(reinterpret_cast<const char*>(data), size);
     TAG_LOGI(
-        AceLogTag::ACE_IMAGE, "write image cache: %{private}s %{private}s", url.c_str(), writeFilePath.c_str());
+        AceLogTag::ACE_IMAGE, "WriteImage:%{private}s %{private}s", url.c_str(), writeFilePath.c_str());
 #ifndef WINDOWS_PLATFORM
     if (chmod(writeFilePath.c_str(), CHOWN_RW_UG) != 0) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "write image cache chmod failed: %{private}s %{private}s",
