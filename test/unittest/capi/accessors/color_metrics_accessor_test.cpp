@@ -71,9 +71,9 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Opt_Number>(0xdd), Converter::ArkValue<Ark_Number>(0x11),
             Converter::ArkValue<Ark_Number>(0x22), Converter::ArkValue<Ark_Number>(0x33), 0xdd112233 },
         { Converter::ArkValue<Opt_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff),
-            Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff), 0xffffffff }, // Test max value
+            Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff), 0xffffffff },
         { Converter::ArkValue<Opt_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00),
-            Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },  // Test min value
+            Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },
     };
     Ark_ColorMetrics resultPeer;
     for (auto [inputAlpha, inputRed, inputGreen, inputBlue, expectedValue]: testPlan) {
