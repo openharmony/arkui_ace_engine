@@ -19,7 +19,28 @@
 import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterialized"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
-import { nullptr } from "@koalaui/interop"
+import { nullptr, KNativePointer } from "@koalaui/interop"
+
+interface FrameRaterRangeOptions {
+    min: number
+    max: number
+    expected: number
+}
+
+class DynamicSyncScene {
+    frameRateRange_: FrameRaterRangeOptions
+    nodePtr_: KNativePointer
+    type_: number = 0
+
+    constructor(nodePtr: KNativePointer, frameRateRange: FrameRaterRangeOptions) {
+        this.nodePtr_ = nodePtr;
+        this.frameRateRange_ = frameRateRange;
+    }
+
+    getFrameRateRange(): FrameRaterRangeOptions {
+        return this.frameRateRange_;
+    }
+}
 
 export class UIContext {
     instanceId_: int32 = 10001;
