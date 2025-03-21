@@ -75,7 +75,7 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
 
     UpdateCurrentOffset(300.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
+    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 1));
 
     UpdateCurrentOffset(-51.0f);
@@ -266,25 +266,21 @@ HWTEST_F(GridArkoalaTest, Reset001, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.startIndex_, 50);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
 
-    lazy_.MarkDataUpdate(52);
     frameNode_->ChildrenUpdatedFrom(52);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    lazy_.NormalModeUpdate(50, 56, nullptr);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 52)); // data cleared
+    lazy_.NormalModeUpdate(50, nullptr);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
     FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56)); // data cleared
     EXPECT_EQ(pattern_->info_.startIndex_, 50);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
 
-    ASSERT_TRUE(GetChildFrameNode(frameNode_, 52));
     EXPECT_EQ(GetChildY(frameNode_, 52), 466.0f);
     frameNode_->ChildrenUpdatedFrom(52);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     UpdateCurrentOffset(-20.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
-    ASSERT_TRUE(GetChildFrameNode(frameNode_, 52));
     EXPECT_EQ(GetChildY(frameNode_, 52), 446.0f);
 }
 } // namespace OHOS::Ace::NG

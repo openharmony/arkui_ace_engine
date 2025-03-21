@@ -37,22 +37,25 @@ Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer
     return scrollWindowAdapter->NeedMoreElements(
         reinterpret_cast<FrameNode*>(mark), static_cast<FillDirection>(direction));
 }
-void OnRangeUpdateImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_RangeUpdate* updater)
+void OnRangeUpdateImpl(Ark_NativePointer node,
+                       Ark_Int32 totalCount,
+                       const Callback_RangeUpdate* updater)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(updater);
 
-    auto onEvent = [callback = CallbackHelper(*updater)](const Ark_Int32 start, const Ark_Int32 end,
-                       const Ark_NativePointer mark) { callback.Invoke(start, mark, end); };
+    auto onEvent = [callback = CallbackHelper(*updater)](
+                       const Ark_Int32 index, const Ark_NativePointer mark) { callback.Invoke(index, mark, 0); };
     auto* scrollWindowAdapter = frameNode->GetOrCreateScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
     scrollWindowAdapter->RegisterUpdater(std::move(onEvent));
     scrollWindowAdapter->SetTotalCount(totalCount);
 }
-void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index)
+void SetCurrentIndexImpl(Ark_NativePointer node,
+                         Ark_Int32 index)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
@@ -61,7 +64,7 @@ void PrepareImpl(Ark_NativePointer node, Ark_Int32, Ark_Int32)
     CHECK_NULL_VOID(frameNode);
     auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
     CHECK_NULL_VOID(scrollWindowAdapter);
-    scrollWindowAdapter->Prepare(0);                           // use parameter when new Idl is generated
+    scrollWindowAdapter->Prepare(0); // use parameter when new Idl is generated
     int32_t totalCount = scrollWindowAdapter->GetTotalCount(); // use parameter when new Idl is generated
     scrollWindowAdapter->SetTotalCount(totalCount);
 }
@@ -79,7 +82,7 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
-} // namespace LazyForEachOpsAccessor
+} // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
