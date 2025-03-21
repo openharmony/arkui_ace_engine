@@ -19,7 +19,6 @@ let LogTag;
   LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
   LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
 })(LogTag || (LogTag = {}));
-const VERSION_TWENTY = 20; // API Version 20
 class ArkLogConsole {
   static log(...args) {
       aceConsole.log(LogTag.ARK_COMPONENT, ...args);
@@ -8602,7 +8601,7 @@ class ImageSpanBorderRadiusModifier extends ModifierWithKey {
         getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
         let keys = Object.keys(this.value);
-        if (Utils.isApiVersionEQAbove(VERSION_TWENTY) &&
+        if (Utils.isApiVersionEQAbove(20) &&
           (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
           keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0)) {
           let localizedBorderRadius = this.value;
