@@ -15,7 +15,39 @@
 
 export default namespace matrix4 {
     loadLibrary("matrix4_ani");
-    class Matrix4Result implements Matrix4Transit {
+    export interface TranslateOption {
+        x?: number;
+        y?: number;
+        z?: number;
+    }
+
+    export interface ScaleOption {
+        x?: number;
+        y?: number;
+        z?: number;
+        centerX?: number;
+        centerY?: number;
+    }
+
+    export interface RotateOption {
+        x?: number;
+        y?: number;
+        z?: number;
+        centerX?: number;
+        centerY?: number;
+        angle?: number;
+    }
+
+    export default interface Matrix4Transit {
+        copy():Matrix4Transit;
+        invert(): Matrix4Transit;
+        combine(options: Matrix4Transit): Matrix4Transit;
+        scale(options: ScaleOption): Matrix4Transit;
+        rotate(options: RotateOption): Matrix4Transit;
+        translate(options: TranslateOption): Matrix4Transit;
+    }
+
+    class Matrix4TransitInner implements Matrix4Transit {
         private matrix4Object:long = 0;
 
         constructor(context:long) {
@@ -23,10 +55,17 @@ export default namespace matrix4 {
                 this.matrix4Object = context;
             }
         }
+        public native copy():Matrix4Transit;
+        public native invert():Matrix4Transit;
+        public native combine(options: Matrix4Transit): Matrix4Transit;
+        public native scale(options: ScaleOption): Matrix4Transit;
+        public native rotate(options: RotateOption): Matrix4Transit;
+        public native translate(options: TranslateOption): Matrix4Transit;
     }
-    
-    export default interface Matrix4Transit {}
-
-    export native function Matrix4_Identity():Matrix4Transit;
-
+    export native function identity():Matrix4Transit;
+    export native function init(options: [
+        number, number, number, number, 
+        number, number, number, number,
+        number, number, number, number,
+        number, number, number, number]):Matrix4Transit;
 }
