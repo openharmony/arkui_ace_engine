@@ -1009,6 +1009,7 @@ void NavigationPattern::CheckTopNavPathChange(
         // back to navBar case
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
+        navBarNode->SetNodeFreeze(false);
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
         if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
@@ -2802,6 +2803,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
+        topDestination->SetNodeFreeze(false);
+    }
+    if (preDestination) {
+        preDestination->SetNodeFreeze(false);
     }
     UpdatePageViewportConfigIfNeeded(preDestination, topDestination);
     ShowOrHideSystemBarIfNeeded(false);
