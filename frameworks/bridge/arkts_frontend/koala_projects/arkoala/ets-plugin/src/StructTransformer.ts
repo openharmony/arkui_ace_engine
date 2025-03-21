@@ -330,6 +330,8 @@ export class StructTransformer extends AbstractVisitor {
         // TODO: check this is a builtin component call!!
 
         const callExpression = singleStatement.expression
+        const name = callExpression.expression
+        if (!ts.isIdentifier(name)) return node
         if (!callExpression.arguments?.[0]) return node
         const firstArgument = callExpression.arguments[0]
 
@@ -338,10 +340,17 @@ export class StructTransformer extends AbstractVisitor {
             newFirstArgument = id(buildBuilderArgument())
         } else if (ts.isArrowFunction(firstArgument)) {
             const firstArgumentBody = firstArgument.body
+            let componentName = ts.idText(name) + "Component"
+            if (!componentName.startsWith("Ark")) componentName = "Ark" + componentName
             newFirstArgument = ts.factory.createArrowFunction(
                 undefined,
                 undefined,
-                [ts.factory.createParameterDeclaration(undefined, undefined, styledInstance, undefined, undefined, undefined)],
+                [
+                    parameter(
+                        styledInstance,
+                        ts.factory.createTypeReferenceNode(componentName)
+                    )
+                ],
                 undefined,
                 ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
                 ts.factory.createBlock(

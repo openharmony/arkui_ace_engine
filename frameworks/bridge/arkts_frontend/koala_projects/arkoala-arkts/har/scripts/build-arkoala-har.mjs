@@ -19,9 +19,9 @@ function execCmdSync(cmd, options) {
     return execSync(cmd, options).toString().trim().replace("\n", " ")
 }
 
-function rollupLaunch(loaderArch) {
+function rollupLaunch(loaderArch, vmkind) {
     console.log(`> Run rollup`)
-    execCmdSync(`npx rollup -c --arch ${loaderArch}`)
+    execCmdSync(`npx rollup -c --arch ${loaderArch} --vmkind ${vmkind}`)
 }
 
 function copyFileToHar(from, to) {
@@ -42,25 +42,30 @@ function copySoLibs(from, to) {
     })
 }
 
-function main(targetLibDir, loaderArch) {
+function main(targetLibDir, loaderArch, vmkind) {
 
     process.chdir(BUNDLE_PATH)
 
-    rollupLaunch(loaderArch)
+    rollupLaunch(loaderArch, vmkind)
     /* we don't yet know which files should be in har */
     copyFileToHar(path.join(_dirname, `../../../arkoala/framework/build/libc++.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libc++.so`))
     copyFileToHar(path.join(_dirname, `../../../arkoala/framework/build/libArkoalaLoader.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libArkoalaLoader.so`))
     copyFileToHar(path.join(_dirname, `../../../arkoala/framework/build/libvmloader.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libvmloader.so`))
-    copyFileToHar(path.join(_dirname, `../../../arkoala/framework/build/libArkoalaNative_ark.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libArkoalaNative_ark.so`))
+    copyFileToHar(path.join(_dirname, `../../../arkoala/framework/build/libArkoalaNative_${vmkind}.so`), path.join(HAR_PATH, `libs/${targetLibDir}/libArkoalaNative_${vmkind}.so`))
     copyFileToHar(path.join(_dirname, `../../build/arkoala.abc`), path.join(HAR_PATH, `libs/${targetLibDir}/arkoala.abc.so`))
 }
 
+const vmkind = args["vmkind"]
+if (vmkind !== "ani" && vmkind !== "ets") {
+    console.log("Unsupported vmkind: ", vmkind)
+    process.exit(1)
+}
 const arch = args["arch"]
 if (arch == "arm32") {
-    main("armeabi-v7a", "arm")
+    main("armeabi-v7a", "arm", vmkind)
 } else if (arch == "arm64") {
-    main("arm64-v8a", arch)
+    main("arm64-v8a", arch, vmkind)
 } else {
     console.log("Unsupported architecture: ", arch)
-    exit(1)
+    process.exit(1)
 }

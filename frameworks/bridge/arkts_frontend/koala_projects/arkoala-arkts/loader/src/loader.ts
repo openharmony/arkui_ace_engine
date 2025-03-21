@@ -135,12 +135,13 @@ export function checkLoader(variant: string, app: string, params: string, loopIt
             nativePath = __dirname + "/../native"
             break
         }
+        case 'panda-ani':
         case 'panda': {
-            vmKind = 2
+            vmKind = 4
             break
         }
-        case 'panda-ani': {
-            vmKind = 4
+        case 'panda-ets': {
+            vmKind = 2
             break
         }
         default:
@@ -175,10 +176,14 @@ checkLoader(
         switch (app) {
             case "ComExampleTrivialApplication": {
                 trivialChecker(control)
-                break;
+                break
             }
             case "ComExampleNavigationApplication": {
                 navigationChecker(control)
+                break
+            }
+            case "ComExampleRoutingApplication": {
+                routerChecker(control)
                 break;
             }
             default: {
@@ -231,6 +236,58 @@ function navigationChecker(control: AppControl) {
             default:
                 // wait
                 break;
+        }
+    }, 1000)
+}
+
+function routerChecker(control: AppControl) {
+    const steps = [
+        "ClickPage3",
+        "Wait",
+        "GoPage2",
+        "Wait",
+        "Wait",
+        "ClickPage2",
+        "Wait",
+        "GoBack",
+        "Wait",
+        "ClickPage3",
+        "Wait",
+        "Exit"
+    ]
+    let currentStep = 0
+    let button1Page3Id = 1003
+    let button2Page3Id = 1004
+    let button1Page2Id = 1007
+    let button2Page2Id = 1008
+
+    const interval = setInterval(() => {
+        const kind = steps[currentStep++]
+        switch (kind) {
+            case "Exit": {
+                control.emitEvent(2, 1000, 100, 100)
+                clearInterval(interval)
+                break;
+            }
+            case "GoBack": {
+                control.emitEvent(0, button2Page2Id, 100, 100)
+                break;
+            }
+            case "ClickPage3": {
+                control.emitEvent(0, button1Page3Id, 100, 100)
+                break;
+            }
+            case "ClickPage2": {
+                control.emitEvent(0, button1Page2Id, 100, 100)
+                break;
+            }
+            case "GoPage2": {
+                control.emitEvent(0, button2Page3Id, 100, 100)
+                break;
+            }
+            case "Wait": break
+            default:
+                throw new Error(`Unknown command: ${kind}`)
         }
     }, 1000)
 }

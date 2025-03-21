@@ -104,7 +104,7 @@ export function checkLoader(variant, appName) {
     let nativePath = classPath;
     switch (variant) {
         case 'panda': {
-            vm = 2;
+            vm = 4;
             break;
         }
     }
