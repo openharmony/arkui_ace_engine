@@ -365,9 +365,9 @@ Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(imagedata, {});
     std::vector<uint8_t> vbuffer(0);
-    uint32_t width = imagedata->value.dirtyWidth;
-    uint32_t height = imagedata->value.dirtyHeight;
-    peerImpl->CreateImageData(vbuffer, width, height);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    peerImpl->CreateImageData(vbuffer, imagedata->value, width, height);
     InteropBuffer interOpBuffer = {
         .data = vbuffer.data(),
         .length = vbuffer.size()

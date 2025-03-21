@@ -36,7 +36,7 @@ public:
     std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
 
-    OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> GetPixelMap() const
+    virtual OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> GetPixelMap() const
     {
         return pixelMap_;
     }
