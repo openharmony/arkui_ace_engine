@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkFlowItem")
-export declare function ArkFlowItem(
+@BuildLambda("FlowItem")
+export declare function FlowItem(
     
     @memo
     _content?: () => void,
 ): ArkFlowItemComponent
 
 @memo
-export declare function ArkFlowItemImpl(
+export declare function FlowItemImpl(
     @memo
     _style: ((attributes: ArkFlowItemComponent) => void) | undefined,
     

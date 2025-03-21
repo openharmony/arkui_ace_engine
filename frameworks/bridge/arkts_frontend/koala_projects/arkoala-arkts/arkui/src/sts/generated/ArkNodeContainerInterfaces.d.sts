@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkNodeContainer")
-export declare function ArkNodeContainer(
+@BuildLambda("NodeContainer")
+export declare function NodeContainer(
     controller: NodeController, 
     @memo
     _content?: () => void,
 ): ArkNodeContainerComponent
 
 @memo
-export declare function ArkNodeContainerImpl(
+export declare function NodeContainerImpl(
     @memo
     _style: ((attributes: ArkNodeContainerComponent) => void) | undefined,
     controller: NodeController, 

@@ -45,7 +45,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = RichEditorStyledStringController.ctor_richeditorstyledstringcontroller()
         this.peer = new Finalizable(ctorPtr, RichEditorStyledStringController.getFinalizer())
@@ -86,7 +86,7 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
     private onContentChanged_serialize(listener: StyledStringChangedListener): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeStyledStringChangedListener(listener)
-        ArkUIGeneratedNativeModule._RichEditorStyledStringController_onContentChanged(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorStyledStringController_onContentChanged(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCounter")
-export declare function ArkCounter(
+@BuildLambda("Counter")
+export declare function Counter(
     
     @memo
     _content?: () => void,
 ): ArkCounterComponent
 
 @memo
-export declare function ArkCounterImpl(
+export declare function CounterImpl(
     @memo
     _style: ((attributes: ArkCounterComponent) => void) | undefined,
     

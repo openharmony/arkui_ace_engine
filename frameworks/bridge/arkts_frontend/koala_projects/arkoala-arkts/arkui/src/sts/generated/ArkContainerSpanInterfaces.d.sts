@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkContainerSpan")
-export declare function ArkContainerSpan(
+@BuildLambda("ContainerSpan")
+export declare function ContainerSpan(
     
     @memo
     _content?: () => void,
 ): ArkContainerSpanComponent
 
 @memo
-export declare function ArkContainerSpanImpl(
+export declare function ContainerSpanImpl(
     @memo
     _style: ((attributes: ArkContainerSpanComponent) => void) | undefined,
     

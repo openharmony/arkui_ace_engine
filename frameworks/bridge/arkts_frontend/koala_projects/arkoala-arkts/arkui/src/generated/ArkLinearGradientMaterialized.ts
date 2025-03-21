@@ -43,11 +43,11 @@ export class LinearGradient implements MaterializedBase {
             const colorStops_element : ColorStop = colorStops[i]
             thisSerializer.writeColorStop(colorStops_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._LinearGradient_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._LinearGradient_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(colorStops?: Array<ColorStop>) {
+    constructor(colorStops?: Array<ColorStop>) {
         if ((colorStops) !== (undefined))
         {
             const ctorPtr : KPointer = LinearGradient.ctor_lineargradient((colorStops)!)

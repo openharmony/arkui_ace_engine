@@ -34,7 +34,7 @@ export class NavExtender {
     }
     public static syncStack(peer: NavPathStack): void {
         const peer_casted = peer as (NavPathStack)
-        // NavExtender.syncStack_serialize(peer_casted)
+        NavExtender.syncStack_serialize(peer_casted)
         return
     }
     public static checkNeedCreate(navigation: KPointer, index: int32): boolean {
@@ -63,8 +63,11 @@ export class NavExtender {
     private static setUpdateStackCallback_serialize(peer: NavPathStack, callback: NavExtender_OnUpdateStack): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._NavExtender_setUpdateStackCallback(toPeerPtr(peer), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavExtender_setUpdateStackCallback(toPeerPtr(peer), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private static syncStack_serialize(peer: NavPathStack): void {
+        ArkUIGeneratedNativeModule._NavExtender_syncStack(toPeerPtr(peer))
     }
     private static checkNeedCreate_serialize(navigation: KPointer, index: int32): boolean {
         const retval  = ArkUIGeneratedNativeModule._NavExtender_checkNeedCreate(navigation, index)

@@ -13,32 +13,27 @@
  * limitations under the License.
  */
 
-import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, NativeBuffer, loadNativeModuleLibrary } from "@koalaui/interop"
+import { KInt, KLong, KBoolean, KFloat, KUInt, KStringPtr, KPointer, KNativePointer, KInt32ArrayPtr, KUint8ArrayPtr, KFloat32ArrayPtr, pointer, KInteropReturnBuffer, KSerializerBuffer, loadNativeModuleLibrary, NativeBuffer } from "@koalaui/interop"
 import { int32, float32 } from "@koalaui/common"
 
 export class TestNativeModule {
     static {
         loadNativeModuleLibrary("TestNativeModule")
     }
-    @ani.unsafe.Quick
     native static _TestCallIntNoArgs(arg0: int32): int32
-    @ani.unsafe.Quick
     native static _TestCallIntIntArraySum(arg0: int32, arg1: KInt32ArrayPtr, arg2: int32): int32
-    @ani.unsafe.Quick
     native static _TestCallVoidIntArrayPrefixSum(arg0: int32, arr: KInt32ArrayPtr, arg2: int32): void
-    @ani.unsafe.Quick
     native static _TestCallIntRecursiveCallback(arg0: int32, arr: KUint8ArrayPtr, arg2: int32): int32
-    @ani.unsafe.Quick
     native static _TestCallIntMemory(arg0: int32, arg1: int32): int32
     @ani.unsafe.Quick
     native static _TestWithBuffer(buffer: NativeBuffer): void
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _TestGetManagedCaller(kind: int32): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _TestGetManagedCallerSync(kind: int32): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _TestGetManagedHolder(): KPointer
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _TestGetManagedReleaser(): KPointer
     @ani.unsafe.Quick
     native static _TestReadAndMutateManagedBuffer(arr: KUint8ArrayPtr, len: int32): void

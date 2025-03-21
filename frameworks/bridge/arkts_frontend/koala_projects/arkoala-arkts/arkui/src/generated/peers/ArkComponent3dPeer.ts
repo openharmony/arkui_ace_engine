@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -60,8 +59,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -86,7 +83,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const sceneOptions_value  = sceneOptions!
             thisSerializer.writeSceneOptions(sceneOptions_value)
         }
-        ArkUIGeneratedNativeModule._Component3DInterface_setComponent3DOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Component3DInterface_setComponent3DOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     environmentAttribute(value: ResourceStr): void {
@@ -103,7 +100,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._Component3DAttribute_environment(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Component3DAttribute_environment(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     shaderAttribute(value: ResourceStr): void {
@@ -120,7 +117,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._Component3DAttribute_shader(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Component3DAttribute_shader(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     shaderImageTextureAttribute(value: ResourceStr): void {
@@ -137,7 +134,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._Component3DAttribute_shaderImageTexture(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Component3DAttribute_shaderImageTexture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     shaderInputBufferAttribute(value: Array<number>): void {
@@ -147,7 +144,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const value_element : number = value[i]
             thisSerializer.writeNumber(value_element)
         }
-        ArkUIGeneratedNativeModule._Component3DAttribute_shaderInputBuffer(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Component3DAttribute_shaderInputBuffer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     renderWidthAttribute(value: Dimension): void {
@@ -170,7 +167,7 @@ export class ArkComponent3DPeer extends ArkCommonMethodPeer {
             const uri_1  = uri as Resource
             thisSerializer.writeResource(uri_1)
         }
-        ArkUIGeneratedNativeModule._Component3DAttribute_customRender(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length(), selfRenderUpdate ? 1 : 0)
+        ArkUIGeneratedNativeModule._Component3DAttribute_customRender(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), selfRenderUpdate ? 1 : 0)
         thisSerializer.release()
     }
 }

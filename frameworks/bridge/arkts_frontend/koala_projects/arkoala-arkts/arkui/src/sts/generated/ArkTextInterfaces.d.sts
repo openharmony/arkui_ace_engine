@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkText")
-export declare function ArkText(
+@BuildLambda("Text")
+export declare function Text(
     content?: string | Resource | undefined, value?: TextOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTextComponent
 
 @memo
-export declare function ArkTextImpl(
+export declare function TextImpl(
     @memo
     _style: ((attributes: ArkTextComponent) => void) | undefined,
     content?: string | Resource | undefined, value?: TextOptions | undefined, 

@@ -39,7 +39,7 @@ export class EventResult implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._EventResult_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = EventResult.ctor_eventresult()
         this.peer = new Finalizable(ctorPtr, EventResult.getFinalizer())
     }

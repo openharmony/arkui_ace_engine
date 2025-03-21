@@ -183,6 +183,13 @@ typedef KFloat* KFloatArray;
 typedef const uint8_t* KStringArray;
 typedef KNativePointer* KNativePointerArray;
 
+struct KSerializerBufferOpaque {
+  explicit operator KByte* () {
+    return reinterpret_cast<KByte*>(this);
+  }
+};
+typedef KSerializerBufferOpaque* KSerializerBuffer;
+
 struct KInteropBuffer {
 
   KInteropBuffer(KLong len = 0, KNativePointer ptr = nullptr, KInt resId = 0, void (*dis)(KInt) = nullptr)

@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { KUint8ArrayPtr } from "./InteropTypes"
+import { KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { int32 } from "@koalaui/common"
 
-export type CallbackType = (args: KUint8ArrayPtr, length: int32) => int32
+export type CallbackType = (args: KSerializerBuffer, length: int32) => int32
 
 class CallbackRecord {
     public readonly callback: CallbackType
@@ -25,7 +25,7 @@ class CallbackRecord {
     constructor(
         callback: CallbackType,
         autoDisposable: boolean
-    ) { 
+    ) {
         this.callback = callback
         this.autoDisposable = autoDisposable
     }
@@ -40,7 +40,7 @@ class CallbackRegistry {
 
     constructor() {
         this.callbacks.set(0, new CallbackRecord(
-            (args: KUint8ArrayPtr, length: int32): int32 => {
+            (args: KSerializerBuffer, length: int32): int32 => {
                 console.log(`Callback 0 called with args = ${args} and length = ${length}`)
                 throw new Error(`Null callback called`)
             }, false)
@@ -58,7 +58,7 @@ class CallbackRegistry {
         return id
     }
 
-    call(id: int32, args: KUint8ArrayPtr, length: int32): int32 {
+    call(id: int32, args: KSerializerBuffer, length: int32): int32 {
         const record = this.callbacks.get(id)
         if (!record) {
             console.log(`Callback ${id} is not known`)
@@ -87,6 +87,6 @@ export function disposeCallback(id: int32) {
     CallbackRegistry.INSTANCE.dispose(id)
 }
 
-export function callCallback(id: int32, args: KUint8ArrayPtr, length: int32): int32 {
+export function callCallback(id: int32, args: KSerializerBuffer, length: int32): int32 {
     return CallbackRegistry.INSTANCE.call(id, args, length)
 }

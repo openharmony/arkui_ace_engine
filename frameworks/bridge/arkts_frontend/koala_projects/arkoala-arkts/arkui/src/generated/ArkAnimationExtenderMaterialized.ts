@@ -62,7 +62,7 @@ export class AnimationExtender {
     private static OpenImplicitAnimation_serialize(param: AnimateParam): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAnimateParam(param)
-        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._AnimationExtender_OpenImplicitAnimation(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static CloseImplicitAnimation_serialize(): void {
@@ -71,13 +71,13 @@ export class AnimationExtender {
     private static StartDoubleAnimation_serialize(node: KPointer, param: DoubleAnimationParam): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDoubleAnimationParam(param)
-        ArkUIGeneratedNativeModule._AnimationExtender_StartDoubleAnimation(node, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._AnimationExtender_StartDoubleAnimation(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static AnimationTranslate_serialize(node: KPointer, options: TranslateOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTranslateOptions(options)
-        ArkUIGeneratedNativeModule._AnimationExtender_AnimationTranslate(node, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._AnimationExtender_AnimationTranslate(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

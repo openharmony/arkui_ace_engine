@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkDivider")
-export declare function ArkDivider(
+@BuildLambda("Divider")
+export declare function Divider(
     
     @memo
     _content?: () => void,
 ): ArkDividerComponent
 
 @memo
-export declare function ArkDividerImpl(
+export declare function DividerImpl(
     @memo
     _style: ((attributes: ArkDividerComponent) => void) | undefined,
     

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSearch")
-export declare function ArkSearch(
+@BuildLambda("Search")
+export declare function Search(
     options?: SearchOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkSearchComponent
 
 @memo
-export declare function ArkSearchImpl(
+export declare function SearchImpl(
     @memo
     _style: ((attributes: ArkSearchComponent) => void) | undefined,
     options?: SearchOptions | undefined, 

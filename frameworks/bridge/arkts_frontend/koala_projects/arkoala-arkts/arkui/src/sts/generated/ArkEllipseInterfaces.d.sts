@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkEllipse")
-export declare function ArkEllipse(
+@BuildLambda("Ellipse")
+export declare function Ellipse(
     options?: EllipseOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkEllipseComponent
 
 @memo
-export declare function ArkEllipseImpl(
+export declare function EllipseImpl(
     @memo
     _style: ((attributes: ArkEllipseComponent) => void) | undefined,
     options?: EllipseOptions | undefined, 

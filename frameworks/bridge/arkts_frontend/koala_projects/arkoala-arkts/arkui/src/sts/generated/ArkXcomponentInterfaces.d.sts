@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkXComponent")
-export declare function ArkXComponent(
+@BuildLambda("XComponent")
+export declare function XComponent(
     value: Type_XComponentInterface_value | XComponentOptions, 
     @memo
     _content?: () => void,
 ): ArkXComponentComponent
 
 @memo
-export declare function ArkXComponentImpl(
+export declare function XComponentImpl(
     @memo
     _style: ((attributes: ArkXComponentComponent) => void) | undefined,
     value: Type_XComponentInterface_value | XComponentOptions, 

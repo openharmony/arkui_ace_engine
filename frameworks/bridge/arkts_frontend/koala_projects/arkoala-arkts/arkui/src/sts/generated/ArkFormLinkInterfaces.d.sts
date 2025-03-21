@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkFormLink")
-export declare function ArkFormLink(
+@BuildLambda("FormLink")
+export declare function FormLink(
     options: FormLinkOptions, 
     @memo
     _content?: () => void,
 ): ArkFormLinkComponent
 
 @memo
-export declare function ArkFormLinkImpl(
+export declare function FormLinkImpl(
     @memo
     _style: ((attributes: ArkFormLinkComponent) => void) | undefined,
     options: FormLinkOptions, 

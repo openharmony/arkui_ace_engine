@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, ContentModifier } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -61,8 +60,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -81,7 +78,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     setGaugeOptionsAttribute(options: GaugeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeGaugeOptions(options)
-        ArkUIGeneratedNativeModule._GaugeInterface_setGaugeOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeInterface_setGaugeOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     valueAttribute(value: number): void {
@@ -105,7 +102,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             if (TypeChecker.isColor(value_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_0_0  = value_0 as Color
-                thisSerializer.writeInt32(((value_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -145,7 +142,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                     if (TypeChecker.isColor(value_2_element_0_0)) {
                         thisSerializer.writeInt8(0 as int32)
                         const value_2_element_0_0_0  = value_2_element_0_0 as Color
-                        thisSerializer.writeInt32(((value_2_element_0_0_0 as Color) as int32))
+                        thisSerializer.writeInt32(value_2_element_0_0_0.valueOf())
                     }
                     else if (RuntimeType.NUMBER == value_2_element_0_0_type) {
                         thisSerializer.writeInt8(1 as int32)
@@ -172,7 +169,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeNumber(value_2_element_1)
             }
         }
-        ArkUIGeneratedNativeModule._GaugeAttribute_colors(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_colors(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     strokeWidthAttribute(value: Length): void {
@@ -181,19 +178,19 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
     descriptionAttribute(value: CustomBuilder): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value))
-        ArkUIGeneratedNativeModule._GaugeAttribute_description(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_description(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     trackShadowAttribute(value: GaugeShadowOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeGaugeShadowOptions(value)
-        ArkUIGeneratedNativeModule._GaugeAttribute_trackShadow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_trackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     indicatorAttribute(value: GaugeIndicatorOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeGaugeIndicatorOptions(value)
-        ArkUIGeneratedNativeModule._GaugeAttribute_indicator(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_indicator(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     privacySensitiveAttribute(value?: boolean): void {
@@ -205,13 +202,13 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
-        ArkUIGeneratedNativeModule._GaugeAttribute_privacySensitive(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_privacySensitive(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     contentModifierAttribute(value: ContentModifier<object>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("ContentModifier", value)
-        ArkUIGeneratedNativeModule._GaugeAttribute_contentModifier(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GaugeAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

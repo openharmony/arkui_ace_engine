@@ -48,7 +48,7 @@ export class AlertDialog {
             const value_2  = value as AlertDialogParamWithOptions
             thisSerializer.writeAlertDialogParamWithOptions(value_2)
         }
-        const retval  = ArkUIGeneratedNativeModule._AlertDialog_show(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._AlertDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

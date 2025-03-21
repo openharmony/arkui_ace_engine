@@ -39,7 +39,7 @@ export class SpringProp implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._SpringProp_ctor(mass, stiffness, damping)
         return retval
     }
-     constructor(mass?: number, stiffness?: number, damping?: number) {
+    constructor(mass?: number, stiffness?: number, damping?: number) {
         if (((mass) !== (undefined)) || ((stiffness) !== (undefined)) || ((damping) !== (undefined)))
         {
             const ctorPtr : KPointer = SpringProp.ctor_springprop((mass)!, (stiffness)!, (damping)!)

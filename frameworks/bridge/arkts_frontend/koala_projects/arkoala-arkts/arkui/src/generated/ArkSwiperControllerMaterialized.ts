@@ -40,7 +40,7 @@ export class SwiperController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._SwiperController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = SwiperController.ctor_swipercontroller()
         this.peer = new Finalizable(ctorPtr, SwiperController.getFinalizer())
     }
@@ -79,7 +79,7 @@ export class SwiperController implements MaterializedBase {
             const useAnimation_value  = useAnimation!
             thisSerializer.writeBoolean(useAnimation_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, index, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -92,7 +92,7 @@ export class SwiperController implements MaterializedBase {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        const retval  = ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._SwiperController_finishAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

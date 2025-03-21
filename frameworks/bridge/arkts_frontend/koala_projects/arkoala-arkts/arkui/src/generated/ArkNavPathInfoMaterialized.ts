@@ -81,11 +81,11 @@ export class NavPathInfo implements MaterializedBase {
             const isEntry_value  = isEntry!
             thisSerializer.writeBoolean(isEntry_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_ctor(name, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_ctor(name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
+    constructor(name?: string, param?: object, onPop?: ((parameter: PopInfo) => void), isEntry?: boolean) {
         if (((name) !== (undefined)) || ((param) !== (undefined)) || ((onPop) !== (undefined)) || ((isEntry) !== (undefined)))
         {
             const ctorPtr : KPointer = NavPathInfo.ctor_navpathinfo((name)!, (param)!, (onPop)!, (isEntry)!)
@@ -102,6 +102,9 @@ export class NavPathInfo implements MaterializedBase {
         const name_casted = name as (string)
         this.setName_serialize(name_casted)
         return
+    }
+    private getParam(): object {
+        return this.getParam_serialize()
     }
     private setParam(param: object): void {
         const param_casted = param as (object)
@@ -131,10 +134,14 @@ export class NavPathInfo implements MaterializedBase {
     private setName_serialize(name: string): void {
         ArkUIGeneratedNativeModule._NavPathInfo_setName(this.peer!.ptr, name)
     }
+    private getParam_serialize(): object {
+        const retval  = ArkUIGeneratedNativeModule._NavPathInfo_getParam(this.peer!.ptr)
+        return retval
+    }
     private setParam_serialize(param: object): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("Any", param)
-        ArkUIGeneratedNativeModule._NavPathInfo_setParam(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathInfo_setParam(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getOnPop_serialize(): ((parameter: PopInfo) => void) {
@@ -144,7 +151,7 @@ export class NavPathInfo implements MaterializedBase {
     private setOnPop_serialize(onPop: ((parameter: PopInfo) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(onPop)
-        ArkUIGeneratedNativeModule._NavPathInfo_setOnPop(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavPathInfo_setOnPop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getIsEntry_serialize(): boolean {

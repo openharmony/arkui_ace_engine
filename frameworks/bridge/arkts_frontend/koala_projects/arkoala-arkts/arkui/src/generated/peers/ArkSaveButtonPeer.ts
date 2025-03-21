@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer, ArkSecurityComponentMethodAttributes } from "./ArkSecurityComponentPeer"
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./../ArkSecurityComponentInterfaces"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -33,8 +32,6 @@ import { ClickEvent } from "./../ArkClickEventMaterialized"
 import { SaveButtonOnClickResult, SaveButtonAttribute, SaveButtonOptions } from "./../ArkSaveButtonInterfaces"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -56,13 +53,13 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
     setSaveButtonOptions1Attribute(options: SaveButtonOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSaveButtonOptions(options)
-        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SaveButtonInterface_setSaveButtonOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onClickAttribute(value: ((event: ClickEvent,result: SaveButtonOnClickResult) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SaveButtonAttribute_onClick(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SaveButtonAttribute_onClick(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

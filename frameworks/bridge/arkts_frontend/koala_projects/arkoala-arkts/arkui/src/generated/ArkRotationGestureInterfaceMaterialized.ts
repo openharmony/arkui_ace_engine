@@ -42,7 +42,7 @@ export class RotationGestureInterfaceInternal implements MaterializedBase,Gestur
         const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = RotationGestureInterfaceInternal.ctor_rotationgestureinterface()
         this.peer = new Finalizable(ctorPtr, RotationGestureInterfaceInternal.getFinalizer())
     }
@@ -68,7 +68,7 @@ export class RotationGestureInterfaceInternal implements MaterializedBase,Gestur
     private onActionStart_serialize(event: ((event: GestureEvent) => void)): RotationGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RotationGestureInterface = RotationGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -76,7 +76,7 @@ export class RotationGestureInterfaceInternal implements MaterializedBase,Gestur
     private onActionUpdate_serialize(event: ((event: GestureEvent) => void)): RotationGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RotationGestureInterface = RotationGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -84,7 +84,7 @@ export class RotationGestureInterfaceInternal implements MaterializedBase,Gestur
     private onActionEnd_serialize(event: ((event: GestureEvent) => void)): RotationGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RotationGestureInterface = RotationGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -92,7 +92,7 @@ export class RotationGestureInterfaceInternal implements MaterializedBase,Gestur
     private onActionCancel_serialize(event: (() => void)): RotationGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RotationGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RotationGestureInterface = RotationGestureInterfaceInternal.fromPtr(retval)
         return obj

@@ -26,7 +26,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface TextBaseController {
-    setSelection(selectionStart: number, selectionEnd: number, options: SelectionOptions): void
+    setSelection(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void
     closeSelectionMenu(): void
     getLayoutManager(): LayoutManager
 }
@@ -39,7 +39,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
         const retval  = ArkUIGeneratedNativeModule._TextBaseController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TextBaseControllerInternal.ctor_textbasecontroller()
         this.peer = new Finalizable(ctorPtr, TextBaseControllerInternal.getFinalizer())
     }
@@ -69,7 +69,7 @@ export class TextBaseControllerInternal implements MaterializedBase,TextBaseCont
             const options_value  = options!
             thisSerializer.writeSelectionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._TextBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private closeSelectionMenu_serialize(): void {

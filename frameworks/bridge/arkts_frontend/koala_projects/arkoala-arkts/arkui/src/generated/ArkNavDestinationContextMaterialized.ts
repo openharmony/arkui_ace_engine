@@ -29,7 +29,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
     pathStack: NavPathStack
-    navDestinationId?: string
+    navDestinationId?: string | undefined
     getConfigInRouteMap(): RouteMapConfig | undefined
 }
 export class NavDestinationContextInternal implements MaterializedBase,NavDestinationContext {
@@ -60,7 +60,7 @@ export class NavDestinationContextInternal implements MaterializedBase,NavDestin
         const retval  = ArkUIGeneratedNativeModule._NavDestinationContext_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = NavDestinationContextInternal.ctor_navdestinationcontext()
         this.peer = new Finalizable(ctorPtr, NavDestinationContextInternal.getFinalizer())
     }

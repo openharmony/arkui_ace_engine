@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkGauge")
-export declare function ArkGauge(
+@BuildLambda("Gauge")
+export declare function Gauge(
     options: GaugeOptions, 
     @memo
     _content?: () => void,
 ): ArkGaugeComponent
 
 @memo
-export declare function ArkGaugeImpl(
+export declare function GaugeImpl(
     @memo
     _style: ((attributes: ArkGaugeComponent) => void) | undefined,
     options: GaugeOptions, 

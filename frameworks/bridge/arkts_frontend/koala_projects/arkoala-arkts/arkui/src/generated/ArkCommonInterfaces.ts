@@ -47,7 +47,6 @@ import { RectShape } from "./ArkRectShapeMaterialized"
 import { ProgressMask } from "./ArkProgressMaskMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureModifier } from "./ArkGestureModifierMaterialized"
-import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
 import { ScrollState } from "./ArkListInterfaces"
 import { AccessibilityHoverEvent } from "./ArkAccessibilityHoverEventMaterialized"
 import { SymbolGlyphModifier } from "../handwritten/modifiers/ArkSymbolGlyphModifier"
@@ -903,8 +902,6 @@ export interface ScrollableCommonMethod<T> extends CommonMethod<T> {
     enableScrollInteraction: boolean;
     friction: number | Resource;
     onScroll: ((first: number,last: number) => void);
-    onWillScroll: ScrollOnWillScrollCallback | undefined;
-    onDidScroll: ScrollOnScrollCallback;
     onReachStart: (() => void);
     onReachEnd: (() => void);
     onScrollStart: (() => void);

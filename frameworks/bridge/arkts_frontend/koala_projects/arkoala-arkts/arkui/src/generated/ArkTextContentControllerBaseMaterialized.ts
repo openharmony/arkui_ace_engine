@@ -40,7 +40,7 @@ export class TextContentControllerBase implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextContentControllerBase_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TextContentControllerBase.ctor_textcontentcontrollerbase()
         this.peer = new Finalizable(ctorPtr, TextContentControllerBase.getFinalizer())
     }

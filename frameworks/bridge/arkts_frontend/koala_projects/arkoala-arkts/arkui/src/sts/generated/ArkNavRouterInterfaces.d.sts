@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkNavRouter")
-export declare function ArkNavRouter(
+@BuildLambda("NavRouter")
+export declare function NavRouter(
     value?: RouteInfo | undefined, 
     @memo
     _content?: () => void,
 ): ArkNavRouterComponent
 
 @memo
-export declare function ArkNavRouterImpl(
+export declare function NavRouterImpl(
     @memo
     _style: ((attributes: ArkNavRouterComponent) => void) | undefined,
     value?: RouteInfo | undefined, 

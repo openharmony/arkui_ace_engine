@@ -52,11 +52,11 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
             const settings_value  = settings!
             thisSerializer.writeRenderingContextSettings(settings_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_ctor(width, height, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_ctor(width, height, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(width?: number, height?: number, settings?: RenderingContextSettings) {
+    constructor(width?: number, height?: number, settings?: RenderingContextSettings) {
         super()
         if (((width) !== (undefined)) || ((height) !== (undefined)) || ((settings) !== (undefined)))
         {
@@ -91,7 +91,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
             const quality_value  = quality!
             thisSerializer.writeFloat32(quality_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

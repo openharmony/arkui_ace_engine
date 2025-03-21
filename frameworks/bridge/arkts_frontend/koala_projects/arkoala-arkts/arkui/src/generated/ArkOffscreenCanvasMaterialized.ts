@@ -55,7 +55,7 @@ export class OffscreenCanvas implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_ctor(width, height)
         return retval
     }
-     constructor(width?: number, height?: number) {
+    constructor(width?: number, height?: number) {
         if (((width) !== (undefined)) || ((height) !== (undefined)))
         {
             const ctorPtr : KPointer = OffscreenCanvas.ctor_offscreencanvas((width)!, (height)!)
@@ -105,7 +105,7 @@ export class OffscreenCanvas implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeRenderingContextSettings(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getContext2d(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getContext2d(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : OffscreenCanvasRenderingContext2D = OffscreenCanvasRenderingContext2DInternal.fromPtr(retval)
         return obj

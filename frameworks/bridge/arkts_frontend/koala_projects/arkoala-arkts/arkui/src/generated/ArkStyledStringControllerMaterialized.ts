@@ -38,7 +38,7 @@ export class StyledStringControllerInternal implements MaterializedBase,StyledSt
         const retval  = ArkUIGeneratedNativeModule._StyledStringController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = StyledStringControllerInternal.ctor_styledstringcontroller()
         this.peer = new Finalizable(ctorPtr, StyledStringControllerInternal.getFinalizer())
     }

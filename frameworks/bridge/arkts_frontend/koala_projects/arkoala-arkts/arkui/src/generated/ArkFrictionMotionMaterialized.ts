@@ -39,7 +39,7 @@ export class FrictionMotion implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FrictionMotion_ctor(friction, position, velocity)
         return retval
     }
-     constructor(friction?: number, position?: number, velocity?: number) {
+    constructor(friction?: number, position?: number, velocity?: number) {
         if (((friction) !== (undefined)) || ((position) !== (undefined)) || ((velocity) !== (undefined)))
         {
             const ctorPtr : KPointer = FrictionMotion.ctor_frictionmotion((friction)!, (position)!, (velocity)!)

@@ -78,6 +78,16 @@ struct InteropTypeConverter<KFloat> {
 };
 
 template<>
+struct InteropTypeConverter<KSerializerBuffer> {
+    using InteropType = ets_long;
+    static KSerializerBuffer convertFrom(EtsEnv* env, InteropType value) {
+      return reinterpret_cast<KSerializerBuffer>(static_cast<intptr_t>(value));
+    }
+    static InteropType convertTo(EtsEnv* env, KSerializerBuffer value) = delete;
+    static void release(EtsEnv* env, InteropType value, KSerializerBuffer converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KVMObjectHandle> {
     using InteropType = ets_object;
     static KVMObjectHandle convertFrom(EtsEnv* env, InteropType value) {
@@ -279,6 +289,44 @@ template <typename Type>
 inline void releaseArgument(EtsEnv* env, typename InteropTypeConverter<Type>::InteropType arg, Type& data) {
   InteropTypeConverter<Type>::release(env, arg, data);
 }
+
+template<class T>
+struct DirectInteropTypeConverter {
+    using InteropType = T;
+    static T convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(T value) { return value; }
+};
+
+template<>
+struct DirectInteropTypeConverter<KNativePointer> {
+    using InteropType = ets_long;
+    static KNativePointer convertFrom(InteropType value) {
+      return reinterpret_cast<KNativePointer>(value);
+    }
+    static InteropType convertTo(KNativePointer value) {
+      return reinterpret_cast<ets_long>(value);
+    }
+};
+
+template<>
+struct DirectInteropTypeConverter<KSerializerBuffer> {
+    using InteropType = ets_long;
+    static KSerializerBuffer convertFrom(InteropType value) {
+      return reinterpret_cast<KSerializerBuffer>(static_cast<intptr_t>(value));
+    }
+    static InteropType convertTo(KSerializerBuffer value) = delete;
+};
+
+template <>
+struct DirectInteropTypeConverter<KInteropNumber> {
+  using InteropType = ets_double;
+  static KInteropNumber convertFrom(InteropType value) {
+    return KInteropNumber::fromDouble(value);
+  }
+  static InteropType convertTo(KInteropNumber value) {
+    return value.asDouble();
+  }
+};
 
 #define ETS_SLOW_NATIVE_FLAG 1
 
@@ -1431,6 +1479,307 @@ MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3,
   } \
 MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, ETS_SLOW_NATIVE_FLAG)
 
+#define KOALA_INTEROP_DIRECT_0(name, Ret) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name()); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret, 0)
+#define KOALA_INTEROP_DIRECT_1(name, Ret, P0) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0, 0)
+#define KOALA_INTEROP_DIRECT_2(name, Ret, P0, P1) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1, 0)
+#define KOALA_INTEROP_DIRECT_3(name, Ret, P0, P1, P2) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2, 0)
+#define KOALA_INTEROP_DIRECT_4(name, Ret, P0, P1, P2, P3) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3, 0)
+#define KOALA_INTEROP_DIRECT_5(name, Ret, P0, P1, P2, P3, P4) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, 0)
+#define KOALA_INTEROP_DIRECT_6(name, Ret, P0, P1, P2, P3, P4, P5) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5, 0)
+#define KOALA_INTEROP_DIRECT_7(name, Ret, P0, P1, P2, P3, P4, P5, P6) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
+#define KOALA_INTEROP_DIRECT_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7, 0)
+#define KOALA_INTEROP_DIRECT_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8, 0)
+#define KOALA_INTEROP_DIRECT_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9, 0)
+#define KOALA_INTEROP_DIRECT_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    inline InteropTypeConverter<Ret>::InteropType Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9, \
+        InteropTypeConverter<P10>::InteropType p10 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9), DirectInteropTypeConverter<P10>::convertFrom(p10))); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10, 0)
+#define KOALA_INTEROP_DIRECT_V0(name) \
+    inline void Ark_##name( \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void", 0)
+#define KOALA_INTEROP_DIRECT_V1(name, P0) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0, 0)
+#define KOALA_INTEROP_DIRECT_V2(name, P0, P1) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1, 0)
+#define KOALA_INTEROP_DIRECT_V3(name, P0, P1, P2) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2, 0)
+#define KOALA_INTEROP_DIRECT_V4(name, P0, P1, P2, P3) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3, 0)
+#define KOALA_INTEROP_DIRECT_V5(name, P0, P1, P2, P3, P4) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, 0)
+#define KOALA_INTEROP_DIRECT_V6(name, P0, P1, P2, P3, P4, P5) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5, 0)
+#define KOALA_INTEROP_DIRECT_V7(name, P0, P1, P2, P3, P4, P5, P6) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
+#define KOALA_INTEROP_DIRECT_V8(name, P0, P1, P2, P3, P4, P5, P6, P7) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7, 0)
+#define KOALA_INTEROP_DIRECT_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8, 0)
+#define KOALA_INTEROP_DIRECT_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9, 0)
+#define KOALA_INTEROP_DIRECT_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    inline void Ark_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9, \
+        InteropTypeConverter<P10>::InteropType p10 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9), DirectInteropTypeConverter<P10>::convertFrom(p10)); \
+    } \
+    MAKE_ETS_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10, 0)
+
 bool setKoalaEtsNapiCallbackDispatcher(
     EtsEnv* etsEnv,
     ets_class clazz,
@@ -1446,10 +1795,7 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
   EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(vmContext);                              \
   etsEnv->PushLocalFrame(1);                                                          \
-  ets_byteArray args_ets = etsEnv->NewByteArray(length);                              \
-  etsEnv->SetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  etsEnv->CallStaticIntMethod(clazz, method, id, args_ets, length);                   \
-  etsEnv->GetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
+  etsEnv->CallStaticIntMethod(clazz, method, id, args, length);                   \
   etsEnv->PopLocalFrame(nullptr);                                                     \
 }
 
@@ -1459,11 +1805,8 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   ets_method method = nullptr;                                                        \
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
   EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                              \
-  etsEnv->PushLocalFrame(1);                                                          \
-  ets_byteArray args_ets = etsEnv->NewByteArray(length);                              \
-  etsEnv->SetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
-  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args_ets, length);      \
-  etsEnv->GetByteArrayRegion(args_ets, 0, length, reinterpret_cast<ets_byte*>(args)); \
+  etsEnv->PushLocalFrame(1);                                                      \
+  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args, length);      \
   etsEnv->PopLocalFrame(nullptr);                                                     \
   return rv;                                                                          \
 }

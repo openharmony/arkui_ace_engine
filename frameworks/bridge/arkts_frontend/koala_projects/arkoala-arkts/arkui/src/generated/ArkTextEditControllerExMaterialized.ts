@@ -39,7 +39,7 @@ export class TextEditControllerExInternal extends TextBaseControllerInternal imp
         const retval  = ArkUIGeneratedNativeModule._TextEditControllerEx_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = TextEditControllerExInternal.ctor_texteditcontrollerex()
         this.peer = new Finalizable(ctorPtr, TextEditControllerExInternal.getFinalizer())

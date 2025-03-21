@@ -57,7 +57,7 @@ export class ColorMetrics implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ColorMetrics_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
@@ -115,7 +115,7 @@ export class ColorMetrics implements MaterializedBase {
             const alpha_value  = alpha!
             thisSerializer.writeNumber(alpha_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_rgba(red, green, blue, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_rgba(red, green, blue, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj
@@ -127,7 +127,7 @@ export class ColorMetrics implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -144,7 +144,7 @@ export class ColorMetrics implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ColorMetrics_resourceColor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : ColorMetrics = ColorMetricsInternal.fromPtr(retval)
         return obj

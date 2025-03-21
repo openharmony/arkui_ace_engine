@@ -29,3 +29,4 @@ export type KPointer = number | bigint
 export type pointer = KPointer
 export type KNativePointer = KPointer
 export type KInteropReturnBuffer = Uint8Array
+export type KSerializerBuffer = KUint8ArrayPtr

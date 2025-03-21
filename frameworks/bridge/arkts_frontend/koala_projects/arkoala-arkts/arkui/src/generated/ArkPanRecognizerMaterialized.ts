@@ -40,7 +40,7 @@ export class PanRecognizer extends GestureRecognizer implements MaterializedBase
         const retval  = ArkUIGeneratedNativeModule._PanRecognizer_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = PanRecognizer.ctor_panrecognizer()
         this.peer = new Finalizable(ctorPtr, PanRecognizer.getFinalizer())

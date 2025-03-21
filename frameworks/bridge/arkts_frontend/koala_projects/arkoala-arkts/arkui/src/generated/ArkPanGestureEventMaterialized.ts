@@ -69,7 +69,7 @@ export class PanGestureEventInternal extends BaseGestureEventInternal implements
         const retval  = ArkUIGeneratedNativeModule._PanGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = PanGestureEventInternal.ctor_pangestureevent()
         this.peer = new Finalizable(ctorPtr, PanGestureEventInternal.getFinalizer())

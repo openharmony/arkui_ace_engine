@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -60,8 +59,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -80,55 +77,55 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
     setFormComponentOptionsAttribute(value: FormInfo): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFormInfo(value)
-        ArkUIGeneratedNativeModule._FormComponentInterface_setFormComponentOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentInterface_setFormComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     sizeAttribute(value: SizeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_size(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_size(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     moduleNameAttribute(value: string): void {
         ArkUIGeneratedNativeModule._FormComponentAttribute_moduleName(this.peer.ptr, value)
     }
     dimensionAttribute(value: FormDimension): void {
-        ArkUIGeneratedNativeModule._FormComponentAttribute_dimension(this.peer.ptr, ((value as FormDimension) as int32))
+        ArkUIGeneratedNativeModule._FormComponentAttribute_dimension(this.peer.ptr, value.valueOf())
     }
     allowUpdateAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._FormComponentAttribute_allowUpdate(this.peer.ptr, value ? 1 : 0)
     }
     visibilityAttribute(value: Visibility): void {
-        ArkUIGeneratedNativeModule._FormComponentAttribute_visibility(this.peer.ptr, ((value as Visibility) as int32))
+        ArkUIGeneratedNativeModule._FormComponentAttribute_visibility(this.peer.ptr, value.valueOf())
     }
     onAcquiredAttribute(value: ((parameter: FormCallbackInfo) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_onAcquired(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_onAcquired(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onErrorAttribute(value: ((info: Literal_Number_errcode_String_msg) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_onError(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onRouterAttribute(value: ((info: object) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_onRouter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_onRouter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onUninstallAttribute(value: ((parameter: FormCallbackInfo) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_onUninstall(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_onUninstall(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onLoadAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._FormComponentAttribute_onLoad(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FormComponentAttribute_onLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

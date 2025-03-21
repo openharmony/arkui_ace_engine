@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { int32 } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
@@ -6,15 +21,15 @@ import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
 
 export const PeerNodeType = 11
 export const LazyForEachType = 13
-const InitialID = 999
+const INITIAL_ID = 1000
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {
         return ArkRootPeer.create()
     }
     peer: NativePeerNode
-    protected static currentId: int32 = InitialID
-    static nextId(): int32 { return ++PeerNode.currentId }
+    protected static currentId: int32 = INITIAL_ID
+    static nextId(): int32 { return PeerNode.currentId++ }
     private id: int32
     private _onReuse?: () => void
     private _onRecycle?: () => void

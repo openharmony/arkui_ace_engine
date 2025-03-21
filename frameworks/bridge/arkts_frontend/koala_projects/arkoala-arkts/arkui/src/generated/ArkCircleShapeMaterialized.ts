@@ -48,11 +48,11 @@ export class CircleShape implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeShapeSize(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._CircleShape_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CircleShape_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(options?: ShapeSize) {
+    constructor(options?: ShapeSize) {
         const ctorPtr : KPointer = CircleShape.ctor_circleshape((options)!)
         this.peer = new Finalizable(ctorPtr, CircleShape.getFinalizer())
     }
@@ -86,7 +86,7 @@ export class CircleShape implements MaterializedBase {
     private offset_serialize(offset: Position): CircleShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(offset)
-        const retval  = ArkUIGeneratedNativeModule._CircleShape_offset(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CircleShape_offset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CircleShape = CircleShapeInternal.fromPtr(retval)
         return obj
@@ -98,7 +98,7 @@ export class CircleShape implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -115,7 +115,7 @@ export class CircleShape implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._CircleShape_fill(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CircleShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CircleShape = CircleShapeInternal.fromPtr(retval)
         return obj
@@ -123,7 +123,7 @@ export class CircleShape implements MaterializedBase {
     private position_serialize(position: Position): CircleShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(position)
-        const retval  = ArkUIGeneratedNativeModule._CircleShape_position(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CircleShape_position(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CircleShape = CircleShapeInternal.fromPtr(retval)
         return obj
@@ -141,7 +141,7 @@ export class CircleShape implements MaterializedBase {
     private size_serialize(size: SizeOptions): CircleShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(size)
-        const retval  = ArkUIGeneratedNativeModule._CircleShape_size(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CircleShape_size(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CircleShape = CircleShapeInternal.fromPtr(retval)
         return obj

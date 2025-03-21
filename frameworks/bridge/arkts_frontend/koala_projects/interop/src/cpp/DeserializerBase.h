@@ -24,6 +24,7 @@
 
 #include "interop-types.h"
 #include "interop-logging.h"
+#include "koala-types.h"
 
 void holdManagedCallbackResource(InteropInt32);
 void releaseManagedCallbackResource(InteropInt32);
@@ -252,6 +253,19 @@ inline void WriteToString(std::string *result, const InteropCustomObject *value)
   result->append(value->kind);
   result->append("\"}");
 }
+template <>
+inline void WriteToString(std::string *result, const InteropObject *value)
+{
+  result->append("{");
+  result->append(".resource=");
+  WriteToString(result, &(value->resource));
+  result->append("}");
+}
+template <>
+inline void WriteToString(std::string *result, const InteropObject value)
+{
+  WriteToString(result, &value);
+}
 
 struct CustomDeserializer
 {
@@ -277,7 +291,10 @@ protected:
   static CustomDeserializer *customDeserializers;
 
 public:
-  DeserializerBase(uint8_t *data, int32_t length)
+  DeserializerBase(KSerializerBuffer data, int32_t length)
+      : data(reinterpret_cast<uint8_t*>(data)), length(length), position(0) {}
+
+  DeserializerBase(uint8_t* data, int32_t length)
       : data(data), length(length), position(0) {}
 
   ~DeserializerBase()
@@ -373,6 +390,12 @@ public:
     result.hold = reinterpret_cast<void(*)(InteropInt32)>(readPointerOrDefault(reinterpret_cast<void*>(holdManagedCallbackResource)));
     result.release = reinterpret_cast<void(*)(InteropInt32)>(readPointerOrDefault(reinterpret_cast<void*>(releaseManagedCallbackResource)));
     return result;
+  }
+
+  InteropObject readObject() {
+    InteropObject obj;
+    obj.resource = readCallbackResource();
+    return obj;
   }
 
   int8_t readInt8()

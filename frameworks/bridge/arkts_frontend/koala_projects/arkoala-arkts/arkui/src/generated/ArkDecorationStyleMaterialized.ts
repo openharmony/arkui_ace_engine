@@ -51,11 +51,11 @@ export class DecorationStyle implements MaterializedBase {
     static ctor_decorationstyle(value: DecorationStyleInterface): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDecorationStyleInterface(value)
-        const retval  = ArkUIGeneratedNativeModule._DecorationStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._DecorationStyle_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: DecorationStyleInterface) {
+    constructor(value?: DecorationStyleInterface) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = DecorationStyle.ctor_decorationstyle((value)!)
@@ -68,11 +68,18 @@ export class DecorationStyle implements MaterializedBase {
     private getType(): TextDecorationType {
         return this.getType_serialize()
     }
+    private getColor(): ResourceColor {
+        return this.getColor_serialize()
+    }
     private getStyle(): TextDecorationStyle {
         return this.getStyle_serialize()
     }
     private getType_serialize(): TextDecorationType {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getType(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getColor_serialize(): ResourceColor {
+        const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getColor(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private getStyle_serialize(): TextDecorationStyle {

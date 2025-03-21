@@ -41,7 +41,7 @@ export class WebResourceResponse implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceResponse_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebResourceResponse.ctor_webresourceresponse()
         this.peer = new Finalizable(ctorPtr, WebResourceResponse.getFinalizer())
     }
@@ -166,7 +166,7 @@ export class WebResourceResponse implements MaterializedBase {
             const data_3  = data as NativeBuffer
             thisSerializer.writeBuffer(data_3)
         }
-        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseData(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseData(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setResponseEncoding_serialize(encoding: string): void {
@@ -185,7 +185,7 @@ export class WebResourceResponse implements MaterializedBase {
             const header_element : Header = header[i]
             thisSerializer.writeHeader(header_element)
         }
-        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._WebResourceResponse_setResponseHeader(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setResponseCode_serialize(code: number): void {

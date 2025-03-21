@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkScroll")
-export declare function ArkScroll(
+@BuildLambda("Scroll")
+export declare function Scroll(
     scroller?: Scroller | undefined, 
     @memo
     _content?: () => void,
 ): ArkScrollComponent
 
 @memo
-export declare function ArkScrollImpl(
+export declare function ScrollImpl(
     @memo
     _style: ((attributes: ArkScrollComponent) => void) | undefined,
     scroller?: Scroller | undefined, 

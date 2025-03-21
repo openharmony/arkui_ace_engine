@@ -70,7 +70,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = TouchEventInternal.ctor_touchevent()
         this.peer = new Finalizable(ctorPtr, TouchEventInternal.getFinalizer())
@@ -137,7 +137,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: TouchType): void {
-        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, ((type as TouchType) as int32))
+        ArkUIGeneratedNativeModule._TouchEvent_setType(this.peer!.ptr, type.valueOf())
     }
     private getTouches_serialize(): Array<TouchObject> {
         const retval  = ArkUIGeneratedNativeModule._TouchEvent_getTouches(this.peer!.ptr)
@@ -157,7 +157,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             const touches_element : TouchObject = touches[i]
             thisSerializer.writeTouchObject(touches_element)
         }
-        ArkUIGeneratedNativeModule._TouchEvent_setTouches(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TouchEvent_setTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getChangedTouches_serialize(): Array<TouchObject> {
@@ -178,7 +178,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
             const changedTouches_element : TouchObject = changedTouches[i]
             thisSerializer.writeTouchObject(changedTouches_element)
         }
-        ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TouchEvent_setChangedTouches(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getStopPropagation_serialize(): (() => void) {
@@ -188,7 +188,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._TouchEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TouchEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getPreventDefault_serialize(): (() => void) {
@@ -198,7 +198,7 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._TouchEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TouchEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): TouchEventInternal {

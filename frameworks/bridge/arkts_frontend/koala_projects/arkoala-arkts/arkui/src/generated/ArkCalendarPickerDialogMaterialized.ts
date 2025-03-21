@@ -39,7 +39,7 @@ export class CalendarPickerDialog {
             const options_value  = options!
             thisSerializer.writeCalendarDialogOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CalendarPickerDialog_show(thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarPickerDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

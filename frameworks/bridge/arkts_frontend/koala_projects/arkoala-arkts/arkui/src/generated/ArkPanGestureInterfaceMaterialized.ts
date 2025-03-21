@@ -43,7 +43,7 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
         const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PanGestureInterfaceInternal.ctor_pangestureinterface()
         this.peer = new Finalizable(ctorPtr, PanGestureInterfaceInternal.getFinalizer())
     }
@@ -69,7 +69,7 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
     private onActionStart_serialize(event: ((event: GestureEvent) => void)): PanGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PanGestureInterface = PanGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -77,7 +77,7 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
     private onActionUpdate_serialize(event: ((event: GestureEvent) => void)): PanGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PanGestureInterface = PanGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -85,7 +85,7 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
     private onActionEnd_serialize(event: ((event: GestureEvent) => void)): PanGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PanGestureInterface = PanGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -93,7 +93,7 @@ export class PanGestureInterfaceInternal implements MaterializedBase,GestureInte
     private onActionCancel_serialize(event: (() => void)): PanGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PanGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PanGestureInterface = PanGestureInterfaceInternal.fromPtr(retval)
         return obj

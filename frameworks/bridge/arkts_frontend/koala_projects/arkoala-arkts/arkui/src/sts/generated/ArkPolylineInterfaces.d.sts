@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPolyline")
-export declare function ArkPolyline(
+@BuildLambda("Polyline")
+export declare function Polyline(
     options?: PolylineOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkPolylineComponent
 
 @memo
-export declare function ArkPolylineImpl(
+export declare function PolylineImpl(
     @memo
     _style: ((attributes: ArkPolylineComponent) => void) | undefined,
     options?: PolylineOptions | undefined, 

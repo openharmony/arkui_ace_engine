@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkImage")
-export declare function ArkImage(
+@BuildLambda("Image")
+export declare function Image(
     src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkImageComponent
 
 @memo
-export declare function ArkImageImpl(
+export declare function ImageImpl(
     @memo
     _style: ((attributes: ArkImageComponent) => void) | undefined,
     src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions | undefined, 

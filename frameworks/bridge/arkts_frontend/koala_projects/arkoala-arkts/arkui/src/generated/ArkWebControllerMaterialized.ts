@@ -43,7 +43,7 @@ export class WebController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebController.ctor_webcontroller()
         this.peer = new Finalizable(ctorPtr, WebController.getFinalizer())
     }
@@ -142,7 +142,7 @@ export class WebController implements MaterializedBase {
             const options_callback__value  = options_callback_!
             thisSerializer.holdAndWriteCallback(options_callback__value)
         }
-        const retval  = ArkUIGeneratedNativeModule._WebController_runJavaScript(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WebController_runJavaScript(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -170,7 +170,7 @@ export class WebController implements MaterializedBase {
             const options_historyUrl_value  = options_historyUrl!
             thisSerializer.writeString(options_historyUrl_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._WebController_loadData(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WebController_loadData(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -201,7 +201,7 @@ export class WebController implements MaterializedBase {
                 thisSerializer.writeHeader(options_headers_value_element)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._WebController_loadUrl(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WebController_loadUrl(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -225,7 +225,7 @@ export class WebController implements MaterializedBase {
             const options_methodList_element : string = options_methodList[i]
             thisSerializer.writeString(options_methodList_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._WebController_registerJavaScriptProxy(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WebController_registerJavaScriptProxy(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

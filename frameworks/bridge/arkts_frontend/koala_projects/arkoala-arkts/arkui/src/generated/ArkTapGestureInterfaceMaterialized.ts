@@ -39,7 +39,7 @@ export class TapGestureInterfaceInternal implements MaterializedBase,GestureInte
         const retval  = ArkUIGeneratedNativeModule._TapGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TapGestureInterfaceInternal.ctor_tapgestureinterface()
         this.peer = new Finalizable(ctorPtr, TapGestureInterfaceInternal.getFinalizer())
     }
@@ -53,7 +53,7 @@ export class TapGestureInterfaceInternal implements MaterializedBase,GestureInte
     private onAction_serialize(event: ((event: GestureEvent) => void)): TapGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._TapGestureInterface_onAction(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TapGestureInterface_onAction(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : TapGestureInterface = TapGestureInterfaceInternal.fromPtr(retval)
         return obj

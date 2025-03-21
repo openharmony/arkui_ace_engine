@@ -16,13 +16,11 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { GlobalScope } from "./peers/GlobalScope"
+import { GlobalScope } from "./GlobalScope"
 export namespace Profiler {
     export function registerVsyncCallback(callback_: ((info: string) => void)): void {
         GlobalScope.Profiler_registerVsyncCallback(callback_)
     }
-}
-export namespace Profiler {
     export function unregisterVsyncCallback(): void {
         GlobalScope.Profiler_unregisterVsyncCallback()
     }

@@ -765,6 +765,55 @@ KOALA_INTEROP_EXPORT void name(                                            \
     impl_##name(nullptr, p0, p1, p2, p3);                                  \
 }
 
+#define KOALA_INTEROP_DIRECT_0(name, Ret) \
+    KOALA_INTEROP_0(name, Ret)
+#define KOALA_INTEROP_DIRECT_1(name, Ret, P0) \
+    KOALA_INTEROP_1(name, Ret, P0)
+#define KOALA_INTEROP_DIRECT_2(name, Ret, P0, P1) \
+    KOALA_INTEROP_2(name, Ret, P0, P1)
+#define KOALA_INTEROP_DIRECT_3(name, Ret, P0, P1, P2) \
+    KOALA_INTEROP_3(name, Ret, P0, P1, P2)
+#define KOALA_INTEROP_DIRECT_4(name, Ret, P0, P1, P2, P3) \
+    KOALA_INTEROP_4(name, Ret, P0, P1, P2, P3)
+#define KOALA_INTEROP_DIRECT_5(name, Ret, P0, P1, P2, P3, P4) \
+    KOALA_INTEROP_5(name, Ret, P0, P1, P2, P3, P4)
+#define KOALA_INTEROP_DIRECT_6(name, Ret, P0, P1, P2, P3, P4, P5) \
+    KOALA_INTEROP_6(name, Ret, P0, P1, P2, P3, P4, P5)
+#define KOALA_INTEROP_DIRECT_7(name, Ret, P0, P1, P2, P3, P4, P5, P6) \
+    KOALA_INTEROP_7(name, Ret, P0, P1, P2, P3, P4, P5, P6)
+#define KOALA_INTEROP_DIRECT_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
+    KOALA_INTEROP_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7)
+#define KOALA_INTEROP_DIRECT_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    KOALA_INTEROP_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8)
+#define KOALA_INTEROP_DIRECT_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    KOALA_INTEROP_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9)
+#define KOALA_INTEROP_DIRECT_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    KOALA_INTEROP_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
+#define KOALA_INTEROP_DIRECT_V0(name) \
+    KOALA_INTEROP_V0(name)
+#define KOALA_INTEROP_DIRECT_V1(name, P0) \
+    KOALA_INTEROP_V1(name, P0)
+#define KOALA_INTEROP_DIRECT_V2(name, P0, P1) \
+    KOALA_INTEROP_V2(name, P0, P1)
+#define KOALA_INTEROP_DIRECT_V3(name, P0, P1, P2) \
+    KOALA_INTEROP_V3(name, P0, P1, P2)
+#define KOALA_INTEROP_DIRECT_V4(name, P0, P1, P2, P3) \
+    KOALA_INTEROP_V4(name, P0, P1, P2, P3)
+#define KOALA_INTEROP_DIRECT_V5(name, P0, P1, P2, P3, P4) \
+    KOALA_INTEROP_V5(name, P0, P1, P2, P3, P4)
+#define KOALA_INTEROP_DIRECT_V6(name, P0, P1, P2, P3, P4, P5) \
+    KOALA_INTEROP_V6(name, P0, P1, P2, P3, P4, P5)
+#define KOALA_INTEROP_DIRECT_V7(name, P0, P1, P2, P3, P4, P5, P6) \
+    KOALA_INTEROP_V7(name, P0, P1, P2, P3, P4, P5, P6)
+#define KOALA_INTEROP_DIRECT_V8(name, P0, P1, P2, P3, P4, P5, P6, P7) \
+    KOALA_INTEROP_V8(name, P0, P1, P2, P3, P4, P5, P6, P7)
+#define KOALA_INTEROP_DIRECT_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    KOALA_INTEROP_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8)
+#define KOALA_INTEROP_DIRECT_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    KOALA_INTEROP_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9)
+#define KOALA_INTEROP_DIRECT_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    KOALA_INTEROP_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
+
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
      assert(false); /* TODO: implement*/ \

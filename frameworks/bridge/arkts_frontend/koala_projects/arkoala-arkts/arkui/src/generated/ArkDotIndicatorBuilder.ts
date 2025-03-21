@@ -18,7 +18,7 @@ export class DotIndicator {
     _color?: ResourceColor | undefined
     _selectedColor?: ResourceColor | undefined
     _maxDisplayCount?: number | undefined
-     constructor() {
+    constructor() {
     }
     static dot(): DotIndicator {
         return new DotIndicator()

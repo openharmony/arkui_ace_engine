@@ -96,7 +96,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         const retval  = ArkUIGeneratedNativeModule._ClickEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = ClickEventInternal.ctor_clickevent()
         this.peer = new Finalizable(ctorPtr, ClickEventInternal.getFinalizer())
@@ -239,7 +239,7 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
     private setPreventDefault_serialize(preventDefault: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(preventDefault)
-        ArkUIGeneratedNativeModule._ClickEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ClickEvent_setPreventDefault(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): ClickEventInternal {

@@ -158,11 +158,11 @@ KNativePointer impl_StringMake(const KStringPtr& str) {
 KOALA_INTEROP_1(StringMake, KNativePointer, KStringPtr)
 
 // For slow runtimes w/o fast encoders.
-KInt impl_ManagedStringWrite(const KStringPtr& string, KByte* buffer, KInt offset) {
-    memcpy(buffer + offset, string.c_str(), string.length() + 1);
+KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt offset) {
+    memcpy((uint8_t*)buffer + offset, string.c_str(), string.length() + 1);
     return string.length() + 1;
 }
-KOALA_INTEROP_3(ManagedStringWrite, KInt, KStringPtr, KByte*, KInt)
+KOALA_INTEROP_3(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt)
 
 void stringFinalizer(string* ptr) {
     delete ptr;
@@ -338,43 +338,58 @@ void impl_RestartWith(const KStringPtr& page) {
 }
 KOALA_INTEROP_V1(RestartWith, KStringPtr)
 
-KInt impl_ReadByte(const KNativePointer data, KInt index, KLong length) {
-    if (index >= length) INTEROP_FATAL("impl_ReadByte: index %d is equal or greater than length %lld", index, (long long) length);
-    KByte* ptr = reinterpret_cast<KByte*>(data);
+KNativePointer impl_Malloc(KLong length) {
+    return malloc(length);
+}
+KOALA_INTEROP_DIRECT_1(Malloc, KNativePointer, KLong)
+
+void impl_Free(KNativePointer data) {
+    return free(data);
+}
+KOALA_INTEROP_DIRECT_V1(Free, KNativePointer)
+
+KInt impl_ReadByte(KNativePointer data, KLong index, KLong length) {
+    if (index >= length) INTEROP_FATAL("impl_ReadByte: index %lld is equal or greater than length %lld", (long long)index, (long long) length);
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(data);
     return ptr[index];
 }
-KOALA_INTEROP_3(ReadByte, KInt, KNativePointer, KInt, KLong)
+KOALA_INTEROP_DIRECT_3(ReadByte, KInt, KNativePointer, KLong, KLong)
 
-void impl_WriteByte(const KNativePointer data, KInt index, KLong length, KInt value) {
-    if (index >= length) INTEROP_FATAL("impl_WriteByte: index %d is equal or greater than length %lld", index, (long long) length);
-    KByte* ptr = reinterpret_cast<KByte*>(data);
+void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
+    if (index >= length) INTEROP_FATAL("impl_WriteByte: index %lld is equal or greater than length %lld", (long long)index, (long long) length);
+    uint8_t* ptr = reinterpret_cast<uint8_t*>(data);
     ptr[index] = value;
 }
-KOALA_INTEROP_V4(WriteByte, KNativePointer, KInt, KLong, KInt)
+KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
+
+void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
+    memcpy(data, array, length);
+}
+KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
 static Callback_Caller_t g_callbackCaller = nullptr;
 void setCallbackCaller(Callback_Caller_t callbackCaller) {
     g_callbackCaller = callbackCaller;
 }
 
-void impl_CallCallback(KInt callbackKind, KByte* args, KInt argsSize) {
+void impl_CallCallback(KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
     if (g_callbackCaller) {
         g_callbackCaller(callbackKind, args, argsSize);
     }
 }
-KOALA_INTEROP_V3(CallCallback, KInt, KByte*, KInt)
+KOALA_INTEROP_V3(CallCallback, KInt, KSerializerBuffer, KInt)
 
 static Callback_Caller_Sync_t g_callbackCallerSync = nullptr;
 void setCallbackCallerSync(Callback_Caller_Sync_t callbackCallerSync) {
     g_callbackCallerSync = callbackCallerSync;
 }
 
-void impl_CallCallbackSync(KVMContext vmContext, KInt callbackKind, KByte* args, KInt argsSize) {
+void impl_CallCallbackSync(KVMContext vmContext, KInt callbackKind, KSerializerBuffer args, KInt argsSize) {
     if (g_callbackCallerSync) {
         g_callbackCallerSync(vmContext, callbackKind, args, argsSize);
     }
 }
-KOALA_INTEROP_CTX_V3(CallCallbackSync, KInt, KByte*, KInt)
+KOALA_INTEROP_CTX_V3(CallCallbackSync, KInt, KSerializerBuffer, KInt)
 
 void impl_CallCallbackResourceHolder(KNativePointer holder, KInt resourceId) {
     reinterpret_cast<void(*)(KInt)>(holder)(resourceId);
@@ -617,14 +632,23 @@ void KoalaWork::Complete() {
 }
 #endif
 
-#if defined(KOALA_ETS_NAPI) || defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ)
+
+#if defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
+KStringPtr impl_Utf8ToString(KVMContext vmContext, KNativePointer data, KInt offset, KInt length) {
+    KStringPtr result((const char*)data + offset, length, false);
+    return result;
+}
+KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KNativePointer, KInt, KInt)
+#elif defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ)
 // Allocate, so CTX versions.
 KStringPtr impl_Utf8ToString(KVMContext vmContext, KByte* data, KInt offset, KInt length) {
     KStringPtr result((const char*)(data + offset), length, false);
     return result;
 }
 KOALA_INTEROP_CTX_3(Utf8ToString, KStringPtr, KByte*, KInt, KInt)
+#endif
 
+#if defined(KOALA_NAPI) || defined(KOALA_JNI) || defined(KOALA_CJ) || defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
 KStringPtr impl_StdStringToString(KVMContext vmContext, KNativePointer stringPtr) {
     std::string* string = reinterpret_cast<std::string*>(stringPtr);
     KStringPtr result(string->c_str(), string->size(), false);

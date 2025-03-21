@@ -39,7 +39,7 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         const retval  = ArkUIGeneratedNativeModule._MutableStyledString_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = MutableStyledString.ctor_mutablestyledstring()
         this.peer = new Finalizable(ctorPtr, MutableStyledString.getFinalizer())
@@ -123,17 +123,17 @@ export class MutableStyledString extends StyledString implements MaterializedBas
     private replaceStyle_serialize(spanStyle: SpanStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSpanStyle(spanStyle)
-        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._MutableStyledString_replaceStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setStyle_serialize(spanStyle: SpanStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSpanStyle(spanStyle)
-        ArkUIGeneratedNativeModule._MutableStyledString_setStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._MutableStyledString_setStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private removeStyle_serialize(start: number, length: number, styledKey: StyledStringKey): void {
-        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, ((styledKey as StyledStringKey) as int32))
+        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, styledKey.valueOf())
     }
     private removeStyles_serialize(start: number, length: number): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyles(this.peer!.ptr, start, length)

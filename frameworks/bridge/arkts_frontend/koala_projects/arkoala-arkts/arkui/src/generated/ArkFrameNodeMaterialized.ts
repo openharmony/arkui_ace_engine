@@ -40,11 +40,11 @@ export class FrameNode implements MaterializedBase {
     static ctor_framenode(uiContext: UIContext): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeUIContext(uiContext)
-        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(uiContext?: UIContext) {
+    constructor(uiContext?: UIContext) {
         if ((uiContext) !== (undefined))
         {
             const ctorPtr : KPointer = FrameNode.ctor_framenode((uiContext)!)

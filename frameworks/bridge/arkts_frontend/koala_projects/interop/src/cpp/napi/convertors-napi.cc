@@ -166,7 +166,7 @@ KULong getUInt64(napi_env env, napi_value value) {
         napi_throw_error(env, nullptr, "cannot be coerced to uint64, value is too large");
         return -1;
     }
-    return static_cast<KLong>(ptr64);
+    return static_cast<KULong>(ptr64);
 }
 
 napi_value makeString(napi_env env, const KStringPtr& value) {

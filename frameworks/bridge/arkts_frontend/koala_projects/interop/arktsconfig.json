@@ -9,7 +9,7 @@
               "#common/wrappers/*": ["./../../src/napi/wrappers/*"]
           }
       },
-      "include": ["src/arkts/*.sts", "src/arkts/ResourceManager.ts", "./index.ts"],
+      "include": ["src/arkts/*.ts", "src/arkts/ResourceManager.ts", "./index.ts"],
       "references": [
         { "path": "../incremental/common" },
         { "path": "../incremental/compat" }

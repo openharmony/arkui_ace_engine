@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkStack")
-export declare function ArkStack(
+@BuildLambda("Stack")
+export declare function Stack(
     options?: StackOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkStackComponent
 
 @memo
-export declare function ArkStackImpl(
+export declare function StackImpl(
     @memo
     _style: ((attributes: ArkStackComponent) => void) | undefined,
     options?: StackOptions | undefined, 

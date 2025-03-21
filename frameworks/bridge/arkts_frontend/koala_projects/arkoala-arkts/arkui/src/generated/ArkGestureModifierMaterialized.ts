@@ -36,7 +36,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         const retval  = ArkUIGeneratedNativeModule._GestureModifier_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = GestureModifierInternal.ctor_gesturemodifier()
         this.peer = new Finalizable(ctorPtr, GestureModifierInternal.getFinalizer())
     }
@@ -51,7 +51,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
     private applyGesture_serialize(event: UIGestureEvent): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeUIGestureEvent(event)
-        ArkUIGeneratedNativeModule._GestureModifier_applyGesture(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GestureModifier_applyGesture(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): GestureModifierInternal {

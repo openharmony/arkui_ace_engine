@@ -44,7 +44,7 @@ export class GlobalScope_ohos_arkui_componentSnapshot {
             const options_value  = options!
             thisSerializer.writeSnapshotOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_get(id, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_componentSnapshot_get(id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

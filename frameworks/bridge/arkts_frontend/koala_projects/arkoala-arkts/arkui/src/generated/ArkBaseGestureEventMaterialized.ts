@@ -40,7 +40,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = BaseGestureEventInternal.ctor_basegestureevent()
         this.peer = new Finalizable(ctorPtr, BaseGestureEventInternal.getFinalizer())
@@ -74,7 +74,7 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
             const fingerList_element : FingerInfo = fingerList[i]
             thisSerializer.writeFingerInfo(fingerList_element)
         }
-        ArkUIGeneratedNativeModule._BaseGestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._BaseGestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): BaseGestureEventInternal {

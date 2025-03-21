@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSecurityComponentMethod")
-export declare function ArkSecurityComponentMethod(
+@BuildLambda("SecurityComponentMethod")
+export declare function SecurityComponentMethod(
     
     @memo
     _content?: () => void,
 ): ArkSecurityComponentMethodComponent
 
 @memo
-export declare function ArkSecurityComponentMethodImpl(
+export declare function SecurityComponentMethodImpl(
     @memo
     _style: ((attributes: ArkSecurityComponentMethodComponent) => void) | undefined,
     

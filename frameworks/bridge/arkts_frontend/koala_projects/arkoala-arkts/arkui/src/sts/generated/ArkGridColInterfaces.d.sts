@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkGridCol")
-export declare function ArkGridCol(
+@BuildLambda("GridCol")
+export declare function GridCol(
     option?: GridColOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkGridColComponent
 
 @memo
-export declare function ArkGridColImpl(
+export declare function GridColImpl(
     @memo
     _style: ((attributes: ArkGridColComponent) => void) | undefined,
     option?: GridColOptions | undefined, 

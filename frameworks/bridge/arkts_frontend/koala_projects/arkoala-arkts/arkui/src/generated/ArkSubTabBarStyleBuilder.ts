@@ -12,7 +12,7 @@ export class SubTabBarStyle {
     _labelStyle?: LabelStyle | undefined
     _padding?: Padding | Dimension | LocalizedPadding | undefined
     _id?: string | undefined
-     constructor(content: ResourceStr | ResourceStr | ComponentContent) {
+    constructor(content: ResourceStr | ResourceStr | ComponentContent) {
         this._content = content
     }
     public static of(content: ResourceStr | ResourceStr | ComponentContent): SubTabBarStyle {

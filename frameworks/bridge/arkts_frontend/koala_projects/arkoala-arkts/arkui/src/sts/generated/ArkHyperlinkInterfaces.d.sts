@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkHyperlink")
-export declare function ArkHyperlink(
+@BuildLambda("Hyperlink")
+export declare function Hyperlink(
     address: string | Resource, content?: string | Resource | undefined, 
     @memo
     _content?: () => void,
 ): ArkHyperlinkComponent
 
 @memo
-export declare function ArkHyperlinkImpl(
+export declare function HyperlinkImpl(
     @memo
     _style: ((attributes: ArkHyperlinkComponent) => void) | undefined,
     address: string | Resource, content?: string | Resource | undefined, 

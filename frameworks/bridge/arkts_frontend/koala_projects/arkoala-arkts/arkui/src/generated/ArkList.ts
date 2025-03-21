@@ -49,7 +49,6 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
 import { ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, OnScrollVisibleContentChangeCallback, ScrollState, ListAttribute, ListOptions } from "./ArkListInterfaces"
 import { ChildrenMainSize } from "./ArkChildrenMainSizeMaterialized"
 /** @memo:stable */

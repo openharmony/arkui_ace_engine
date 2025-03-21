@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -60,8 +59,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -92,10 +89,10 @@ export class ArkNavigatorPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(value_value_type_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_value_type_type)) {
                 const value_value_type_value  = (value_value_type as NavigationType)
-                thisSerializer.writeInt32(((value_value_type_value as NavigationType) as int32))
+                thisSerializer.writeInt32(value_value_type_value.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._NavigatorInterface_setNavigatorOptions0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigatorInterface_setNavigatorOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNavigatorOptions1Attribute(): void {
@@ -105,7 +102,7 @@ export class ArkNavigatorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._NavigatorAttribute_active(this.peer.ptr, value ? 1 : 0)
     }
     typeAttribute(value: NavigationType): void {
-        ArkUIGeneratedNativeModule._NavigatorAttribute_type(this.peer.ptr, ((value as NavigationType) as int32))
+        ArkUIGeneratedNativeModule._NavigatorAttribute_type(this.peer.ptr, value.valueOf())
     }
     targetAttribute(value: string): void {
         ArkUIGeneratedNativeModule._NavigatorAttribute_target(this.peer.ptr, value)
@@ -113,7 +110,7 @@ export class ArkNavigatorPeer extends ArkCommonMethodPeer {
     paramsAttribute(value: Object): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("Object", value)
-        ArkUIGeneratedNativeModule._NavigatorAttribute_params(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigatorAttribute_params(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

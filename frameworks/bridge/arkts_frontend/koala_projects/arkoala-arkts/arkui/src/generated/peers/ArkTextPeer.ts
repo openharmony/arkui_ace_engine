@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Font, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -64,8 +63,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -108,13 +105,13 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeTextOptions(value_value)
         }
-        ArkUIGeneratedNativeModule._TextInterface_setTextOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextInterface_setTextOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     font0Attribute(value: Font): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFont(value)
-        ArkUIGeneratedNativeModule._TextAttribute_font0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_font0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     font1Attribute(fontValue: Font, options?: FontSettingOptions): void {
@@ -127,7 +124,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeFontSettingOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_font1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_font1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontColorAttribute(value: ResourceColor): void {
@@ -137,7 +134,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -154,7 +151,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_fontColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_fontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontSizeAttribute(value: number | string | Resource): void {
@@ -176,7 +173,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_fontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_fontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     minFontSizeAttribute(value: number | string | Resource): void {
@@ -198,7 +195,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_minFontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_minFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     maxFontSizeAttribute(value: number | string | Resource): void {
@@ -220,7 +217,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_maxFontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_maxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     minFontScaleAttribute(value: number | Resource): void {
@@ -237,7 +234,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_minFontScale(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_minFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     maxFontScaleAttribute(value: number | Resource): void {
@@ -254,11 +251,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_maxFontScale(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_maxFontScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontStyleAttribute(value: FontStyle): void {
-        ArkUIGeneratedNativeModule._TextAttribute_fontStyle(this.peer.ptr, ((value as FontStyle) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_fontStyle(this.peer.ptr, value.valueOf())
     }
     fontWeight0Attribute(value: number | FontWeight | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -272,14 +269,14 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isFontWeight(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FontWeight
-            thisSerializer.writeInt32(((value_1 as FontWeight) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(2 as int32)
             const value_2  = value as string
             thisSerializer.writeString(value_2)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_fontWeight0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_fontWeight0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontWeight1Attribute(weight: number | FontWeight | string, options?: FontSettingOptions): void {
@@ -294,7 +291,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isFontWeight(weight)) {
             thisSerializer.writeInt8(1 as int32)
             const weight_1  = weight as FontWeight
-            thisSerializer.writeInt32(((weight_1 as FontWeight) as int32))
+            thisSerializer.writeInt32(weight_1.valueOf())
         }
         else if (RuntimeType.STRING == weight_type) {
             thisSerializer.writeInt8(2 as int32)
@@ -308,14 +305,14 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeFontSettingOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_fontWeight1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_fontWeight1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     lineSpacingAttribute(value: LengthMetrics): void {
         ArkUIGeneratedNativeModule._TextAttribute_lineSpacing(this.peer.ptr, toPeerPtr(value))
     }
     textAlignAttribute(value: TextAlign): void {
-        ArkUIGeneratedNativeModule._TextAttribute_textAlign(this.peer.ptr, ((value as TextAlign) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_textAlign(this.peer.ptr, value.valueOf())
     }
     lineHeightAttribute(value: number | string | Resource): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -336,13 +333,13 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_lineHeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_lineHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     textOverflowAttribute(value: TextOverflowOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextOverflowOptions(value)
-        ArkUIGeneratedNativeModule._TextAttribute_textOverflow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_textOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontFamilyAttribute(value: string | Resource): void {
@@ -359,7 +356,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_fontFamily(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_fontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     maxLinesAttribute(value: number): void {
@@ -368,7 +365,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     decorationAttribute(value: DecorationStyleInterface): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDecorationStyleInterface(value)
-        ArkUIGeneratedNativeModule._TextAttribute_decoration(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_decoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     letterSpacingAttribute(value: number | string): void {
@@ -385,11 +382,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_letterSpacing(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_letterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     textCaseAttribute(value: TextCase): void {
-        ArkUIGeneratedNativeModule._TextAttribute_textCase(this.peer.ptr, ((value as TextCase) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_textCase(this.peer.ptr, value.valueOf())
     }
     baselineOffsetAttribute(value: number | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -405,11 +402,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_baselineOffset(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_baselineOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._TextAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_copyOption(this.peer.ptr, value.valueOf())
     }
     draggableAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAttribute_draggable(this.peer.ptr, value ? 1 : 0)
@@ -432,25 +429,25 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeShadowOptions(value_1_element)
             }
         }
-        ArkUIGeneratedNativeModule._TextAttribute_textShadow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_textShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     heightAdaptivePolicyAttribute(value: TextHeightAdaptivePolicy): void {
-        ArkUIGeneratedNativeModule._TextAttribute_heightAdaptivePolicy(this.peer.ptr, ((value as TextHeightAdaptivePolicy) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_heightAdaptivePolicy(this.peer.ptr, value.valueOf())
     }
     textIndentAttribute(value: Length): void {
         ArkUIGeneratedNativeModule._TextAttribute_textIndent(this.peer.ptr, value)
     }
     wordBreakAttribute(value: WordBreak): void {
-        ArkUIGeneratedNativeModule._TextAttribute_wordBreak(this.peer.ptr, ((value as WordBreak) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_wordBreak(this.peer.ptr, value.valueOf())
     }
     lineBreakStrategyAttribute(value: LineBreakStrategy): void {
-        ArkUIGeneratedNativeModule._TextAttribute_lineBreakStrategy(this.peer.ptr, ((value as LineBreakStrategy) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_lineBreakStrategy(this.peer.ptr, value.valueOf())
     }
     onCopyAttribute(value: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._TextAttribute_onCopy(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_onCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     caretColorAttribute(value: ResourceColor): void {
@@ -460,7 +457,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -477,7 +474,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_caretColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_caretColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     selectedBackgroundColorAttribute(value: ResourceColor): void {
@@ -487,7 +484,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -504,11 +501,11 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_selectedBackgroundColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_selectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     ellipsisModeAttribute(value: EllipsisMode): void {
-        ArkUIGeneratedNativeModule._TextAttribute_ellipsisMode(this.peer.ptr, ((value as EllipsisMode) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_ellipsisMode(this.peer.ptr, value.valueOf())
     }
     enableDataDetectorAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._TextAttribute_enableDataDetector(this.peer.ptr, value ? 1 : 0)
@@ -516,13 +513,13 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
     dataDetectorConfigAttribute(value: TextDataDetectorConfig): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextDataDetectorConfig(value)
-        ArkUIGeneratedNativeModule._TextAttribute_dataDetectorConfig(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_dataDetectorConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onTextSelectionChangeAttribute(value: ((first: number,last: number) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._TextAttribute_onTextSelectionChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAttribute_onTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontFeatureAttribute(value: string): void {
@@ -532,7 +529,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_privacySensitive(this.peer.ptr, value ? 1 : 0)
     }
     textSelectableAttribute(value: TextSelectableMode): void {
-        ArkUIGeneratedNativeModule._TextAttribute_textSelectable(this.peer.ptr, ((value as TextSelectableMode) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_textSelectable(this.peer.ptr, value.valueOf())
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
         ArkUIGeneratedNativeModule._TextAttribute_editMenuOptions(this.peer.ptr, toPeerPtr(value))
@@ -556,7 +553,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeSelectionMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._TextAttribute_bindSelectionMenu(this.peer.ptr, ((spanType as TextSpanType) as int32), thisSerializer.asArray(), thisSerializer.length(), ((responseType as TextResponseType) as int32))
+        ArkUIGeneratedNativeModule._TextAttribute_bindSelectionMenu(this.peer.ptr, spanType.valueOf(), thisSerializer.asBuffer(), thisSerializer.length(), responseType.valueOf())
         thisSerializer.release()
     }
 }

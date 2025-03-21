@@ -38,7 +38,7 @@ export class TimePickerDialog {
             const options_value  = options!
             thisSerializer.writeTimePickerDialogOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._TimePickerDialog_show(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TimePickerDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

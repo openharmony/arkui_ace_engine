@@ -1,8 +1,26 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
 import { KBoolean, KStringPtr, NativeBuffer, MaterializedBase } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { BusinessError } from "./../ArkBaseInterfaces"
 import { DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish } from "./../ArkAnimationExtenderInterfaces"
-import { Curve, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, DialogButtonStyle, WordBreak, AnimationStatus, FillMode, PlayMode, FontWeight, TextOverflow, TextHeightAdaptivePolicy, FontStyle, CheckBoxShape, LineCapStyle, LineJoinStyle, HorizontalAlign, FlexAlign, TextDecorationType, TextDecorationStyle, SharedTransitionEffectType, VerticalAlign, TransitionType, MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType, EmbeddedType, ImageFit, Edge, Week, RelateType, FlexDirection, FlexWrap, TextAlign, TextCase, CopyOptions, TitleHeight, ImageSpanAlignment, TextContentStyle, XComponentType, ScrollSource, LineBreakStrategy, EllipsisMode, OptionWidthMode, FoldStatus, AppRotation, MarqueeUpdateStrategy, TextSelectableMode, WidthBreakpoint, HeightBreakpoint } from "./../ArkEnumsInterfaces"
+import { Curve, FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, DialogButtonStyle, AnimationStatus, FillMode, PlayMode, TextHeightAdaptivePolicy, CheckBoxShape, LineCapStyle, LineJoinStyle, HorizontalAlign, FlexAlign, TextDecorationType, TextDecorationStyle, SharedTransitionEffectType, VerticalAlign, TransitionType, MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType, EmbeddedType, ImageFit, Edge, Week, RelateType, FlexDirection, FlexWrap, CopyOptions, TitleHeight, ImageSpanAlignment, TextContentStyle, XComponentType, ScrollSource, LineBreakStrategy, EllipsisMode, OptionWidthMode, FoldStatus, AppRotation, MarqueeUpdateStrategy, TextSelectableMode, WidthBreakpoint, HeightBreakpoint } from "./../ArkEnumsInterfaces"
 import { ICurve } from "./../ArkICurveMaterialized"
 import { AnimationExtender } from "./../ArkAnimationExtenderMaterialized"
 import { AnimateParam, TranslateOptions, UIContext, CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, TransitionOptions, MotionBlurOptions, InvertOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, DismissReason, HoverModeAreaType, CommonConfiguration, ContentModifier, PickerTextStyle, PickerDialogButtonStyle, CommonShapeMethod, PointLightStyle, ComponentOptions, InputCounterOptions, TextDecorationOptions, ProvideOptions, AnimatableArithmetic, Context, Configuration, ExpectedFrameRateRange, FinishCallbackType, TouchTestStrategy, TransitionHierarchyStrategy, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, TransitionEdge, TransitionEffects, DrawContext, PreviewParams, ItemDragInfo, EventTarget, SourceType, SourceTool, RepeatMode, BlurStyleActivePolicy, ThemeColorMode, AdaptiveColor, BlurStyleOptions, ShadowType, MultiShadowOptions, LayoutSafeAreaType, LayoutSafeAreaEdge, SheetSize, LinearGradient_common, TouchObject, HistoricalPoint, DragBehavior, Summary, DragResult, IntentionCode, BindOptions, DismissContentCoverAction, SheetTitleOptions, SheetType, SheetMode, ScrollSizeMode, SheetKeyboardAvoidMode, SheetDismiss, DismissSheetAction, SpringBackAction, PopupMessageOptions, DismissPopupAction, MenuPreviewMode, ContextMenuAnimationOptions, RectResult, FadingEdgeOptions, NestedScrollOptions, SymbolGlyphModifier, DragPreviewMode, MenuPolicy, ImageModifier, CommonAttribute, CommonInterface, OverlayOffset, FractionStop, MotionBlurAnchor, LayoutBorderInfo, LayoutInfo, LayoutChild, GeometryInfo, SizeResult, Layoutable, MeasureResult, NavDestinationInfo, NavigationInfo, RouterPageInfo, Theme, CaretOffset, ContentClipMode, ScrollableCommonMethod, EdgeEffectOptions, ScrollResult, OnWillScrollCallback, DynamicNode, OnMoveHandler, LightSource, KeyframeAnimateParam, KeyframeState, Callback, VisibleAreaEventOptions, HoverCallback, UIGestureEvent, SelectionOptions, KeyboardAvoidMode } from "./../ArkCommonInterfaces"
@@ -10,13 +28,19 @@ import { PointerStyle, Callback_RangeUpdate } from "./../ArkArkuiCustomInterface
 import { UnifiedData } from "./../ArkUnifiedDataMaterialized"
 import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
-import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
+import { FocusController } from "./../ArkFocusControllerMaterialized"
+import { DrawableDescriptor } from "./../ArkDrawableDescriptorMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback, Affinity } from "./../ArkArkuiExternalInterfaces"
+import { LayeredDrawableDescriptor } from "./../ArkLayeredDrawableDescriptorMaterialized"
+import { PixelMapDrawableDescriptor } from "./../ArkPixelMapDrawableDescriptorMaterialized"
+import { AnimationOptions } from "./../ArkArkuiDrawabledescriptorInterfaces"
+import { AnimatedDrawableDescriptor } from "./../ArkAnimatedDrawableDescriptorMaterialized"
+import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, FontInfo, MeasureOptions, EffectDirection, EffectScope, TouchPoint, ErrorCallback, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { Resource } from "./../ArkResourceInterfaces"
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
-import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../ArkUnitsInterfaces"
+import { ResourceColor, Position, Length, SizeOptions, Dimension, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, LengthConstrain, DividerStyleOptions, VP, PX, LPX } from "./../ArkUnitsInterfaces"
 import { WebviewController } from "./../ArkWebviewControllerMaterialized"
 import { GlobalScope_ohos_arkui_componentSnapshot } from "./../ArkGlobalScopeOhosArkuiComponentSnapshotMaterialized"
 import { AsyncCallback_image_PixelMap_Void, Literal_Want_want, Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_DismissDialogAction_Void, Callback_Number_Void, Literal_Number_day_month_year, Type_CalendarInterface_value, Callback_CalendarSelectedDate_Void, Callback_CalendarRequestedData_Void, Callback_Date_Void, Callback_Boolean_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Literal_TransitionEffect_appear_disappear, Tuple_Number_Number, Callback_DismissContentCoverAction_Void, Type_SheetOptions_detents, Callback_SheetDismiss_Void, Callback_DismissSheetAction_Void, Callback_SpringBackAction_Void, Callback_SheetType_Void, Literal_String_value_Callback_Void_action, Literal_Boolean_isVisible, Literal_ResourceColor_color, Callback_Literal_Boolean_isVisible_Void, Callback_DismissPopupAction_Void, AnimationRange_Number, Literal_Empty, Callback_Number_Number_Void, Literal_String_key_Any_defaultValue, Callback_DatePickerResult_Void, Callback_TerminationInfo_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_Literal_Number_errcode_String_msg_Void, Callback_Any_Void, Tuple_Union_ResourceColor_LinearGradient_Number, Callback_GestureEvent_Void, Literal_Number_duration_fingers_Boolean_repeat, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_angle_fingers, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Literal_Number_offsetRemain, Callback_Number_Number_ComputedBarAttribute, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Callback_String_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Literal_Boolean_next_Axis_direction, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_SwipeActionState_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_PopInfo_Void, Tuple_Dimension_Dimension, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_String_Unknown_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_NavigationTransitionProxy_Void, Literal_String_target_NavigationType_type, Callback_Number_Number_PanelMode_Void, Callback_PanelMode_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Array_Number_Void, Callback_RefreshStatus_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_Number_String_Void, Callback_Union_Number_Resource_Void, Callback_ResourceStr_Void, Callback_Number_SliderChangeMode_Void, Literal_Number_index, Callback_SwiperContentTransitionProxy_Void, Callback_TabContentTransitionProxy_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_StyledStringChangeValue_Boolean, Callback_String_Number_Void, Type_TextPickerAttribute_onChange_callback, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, Callback_TextPickerResult_Void, Callback_TimePickerResult_Void, Callback_FullscreenInfo_Void, Callback_PreparedInfo_Void, Callback_PlaybackInfo_Void, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Literal_Union_String_WebResourceRequest_data, Literal_Function_handler_Object_error, Literal_Object_detail, Literal_Function_callback__Object_fileSelector, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Callback_Literal_Function_handler_Object_error_Void, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Type_WebAttribute_onFileSelectorShow_callback, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Literal_String_plainText, Callback_Literal_String_plainText_Void, Literal_Number_surfaceHeight_surfaceWidth, Type_XComponentInterface_value, Callback_UIExtensionProxy_Void, Literal_Number_code_Want_want, Callback_Literal_Number_code_Want_want_Void } from "./../SyntheticDeclarations"
@@ -28,6 +52,8 @@ import { CircleShape } from "./../ArkCircleShapeMaterialized"
 import { EllipseShape } from "./../ArkEllipseShapeMaterialized"
 import { PathShape } from "./../ArkPathShapeMaterialized"
 import { GlobalScope_ohos_font } from "./../ArkGlobalScopeOhosFontMaterialized"
+import { GlobalScope_ohos_measure_utils } from "./../ArkGlobalScopeOhosMeasureUtilsMaterialized"
+import { SymbolEffect } from "./../ArkSymbolEffectMaterialized"
 import { ScaleSymbolEffect } from "./../ArkScaleSymbolEffectMaterialized"
 import { ReplaceSymbolEffect } from "./../ArkReplaceSymbolEffectMaterialized"
 import { FrameNode } from "./../ArkFrameNodeMaterialized"
@@ -40,7 +66,7 @@ import { EventEmulator } from "./../ArkEventEmulatorMaterialized"
 import { ClickEvent } from "./../ArkClickEventMaterialized"
 import { AbilityComponentInterface, AbilityComponentAttribute } from "./../ArkAbilityComponentInterfaces"
 import { DrawModifier } from "./../ArkDrawModifierMaterialized"
-import { ResizableOptions, DrawableDescriptor, DrawingColorFilter, ResolutionQuality, DrawingLattice, ImageRenderMode, ImageContent, DynamicRangeMode, ImageInterpolation, ImageInterface, ImageAttribute, ImageSourceSize, ImageErrorCallback, ImageError } from "./../ArkImageInterfaces"
+import { ResizableOptions, DrawingColorFilter, ResolutionQuality, DrawingLattice, ImageRenderMode, ImageContent, DynamicRangeMode, ImageInterpolation, ImageInterface, ImageAttribute, ImageSourceSize, ImageErrorCallback, ImageError } from "./../ArkImageInterfaces"
 import { HoverEvent } from "./../ArkHoverEventMaterialized"
 import { MouseEvent } from "./../ArkMouseEventMaterialized"
 import { TouchEvent } from "./../ArkTouchEventMaterialized"
@@ -96,7 +122,6 @@ import { PixelMapMock } from "./../ArkPixelMapMockMaterialized"
 import { Measurable } from "./../ArkMeasurableMaterialized"
 import { View } from "./../ArkViewMaterialized"
 import { TextContentControllerBase } from "./../ArkTextContentControllerBaseMaterialized"
-import { ScrollOnWillScrollCallback, ScrollOnScrollCallback, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, OffsetResult, ScrollAlign, ScrollToIndexOptions, ScrollDirection, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions, ScrollInterface, ScrollAttribute, OnScrollFrameBeginHandlerResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback } from "./../ArkScrollInterfaces"
 import { ChildrenMainSize } from "./../ArkChildrenMainSizeMaterialized"
 import { UICommonEvent } from "./../ArkUICommonEventMaterialized"
 import { EnvPropsOptions, PersistPropsOptions } from "./../ArkCommonTsEtsApiInterfaces"
@@ -158,6 +183,7 @@ import { ImageSpanInterface, ImageSpanAttribute, ImageCompleteCallback, ImageLoa
 import { DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, MoveIndex, ExchangeIndex, ExchangeKey, DataMoveOperation, DataExchangeOperation, DataReloadOperation } from "./../ArkLazyForEachInterfaces"
 import { LineOptions, LineInterface, LineAttribute } from "./../ArkLineInterfaces"
 import { ListScroller } from "./../ArkListScrollerMaterialized"
+import { ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, OffsetResult, ScrollAlign, ScrollToIndexOptions, ScrollDirection, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions, ScrollInterface, ScrollAttribute, OnScrollFrameBeginHandlerResult, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback } from "./../ArkScrollInterfaces"
 import { Sticky, EditMode, SwipeEdgeEffect, SwipeActionState, SwipeActionItem, SwipeActionOptions, ListItemStyle, ListItemOptions, ListItemInterface, ListItemAttribute } from "./../ArkListItemInterfaces"
 import { ListItemGroupStyle, ListItemGroupOptions, ListItemGroupInterface, ListItemGroupAttribute } from "./../ArkListItemGroupInterfaces"
 import { LoadingProgressStyle, LoadingProgressInterface, LoadingProgressAttribute, LoadingProgressConfiguration } from "./../ArkLoadingProgressInterfaces"
@@ -196,7 +222,7 @@ import { RelativeContainerInterface, RelativeContainerAttribute, GuideLinePositi
 import { VirtualScrollOptions, TemplateOptions } from "./../ArkRepeatInterfaces"
 import { RichEditorDeleteDirection, RichEditorSpanType, RichEditorResponseType, RichEditorSpanPosition, RichEditorTextStyle, LeadingMarginPlaceholder, RichEditorParagraphStyle, PasteEvent, RichEditorTextSpan, RichEditorLayoutStyle, RichEditorImageSpanStyle, RichEditorSymbolSpanStyle, RichEditorTextStyleResult, RichEditorParagraphResult, RichEditorSymbolSpanStyleResult, RichEditorTextSpanResult, RichEditorImageSpanStyleResult, RichEditorImageSpanResult, RichEditorImageSpan, RichEditorRange, RichEditorGesture, RichEditorTextSpanOptions, KeyboardOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, PlaceholderStyle, RichEditorSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorSymbolSpanOptions, RichEditorSelection, RichEditorInsertValue, RichEditorDeleteValue, RichEditorChangeValue, RichEditorOptions, RichEditorStyledStringOptions, SelectionMenuOptions, MenuOnAppearCallback, RichEditorSpan, RichEditorAttribute, PasteEventCallback, SubmitCallback, CutEvent, CopyEvent, RichEditorInterface } from "./../ArkRichEditorInterfaces"
 import { DecorationStyleInterface, StyleOptions, StyledStringKey, SpanStyle, StyledStringValue, TextStyleInterface, GestureStyleInterface, ParagraphStyleInterface, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo, UserDataSpan } from "./../ArkStyledStringInterfaces"
-import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphInterface, SymbolGlyphAttribute, EffectFillStyle, PulseSymbolEffect } from "./../ArkSymbolglyphInterfaces"
+import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphInterface, SymbolGlyphAttribute, EffectFillStyle } from "./../ArkSymbolglyphInterfaces"
 import { DecorationStyleResult, TextRange, MenuType, PreviewText, StyledStringChangedListener, TextDataDetectorConfig, OnDidChangeCallback, CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue, FontSettingOptions, TextDataDetectorType, TextDeleteDirection, StyledStringChangeValue, PositionWithAffinity, LineMetrics, TextBox, TextMenuItem } from "./../ArkTextCommonInterfaces"
 import { RichEditorController } from "./../ArkRichEditorControllerMaterialized"
 import { RichEditorStyledStringController } from "./../ArkRichEditorStyledStringControllerMaterialized"
@@ -238,6 +264,7 @@ import { HierarchicalSymbolEffect } from "./../ArkHierarchicalSymbolEffectMateri
 import { AppearSymbolEffect } from "./../ArkAppearSymbolEffectMaterialized"
 import { DisappearSymbolEffect } from "./../ArkDisappearSymbolEffectMaterialized"
 import { BounceSymbolEffect } from "./../ArkBounceSymbolEffectMaterialized"
+import { PulseSymbolEffect } from "./../ArkPulseSymbolEffectMaterialized"
 import { SymbolSpanInterface, SymbolSpanAttribute } from "./../ArkSymbolSpanInterfaces"
 import { BarMode, AnimationMode, BarPosition, LayoutStyle, TabsOptions, TabsInterface, TabsAttribute, DividerStyle, TabsAnimationEvent, BarGridColumnOptions, ScrollableBarModeOptions, OnTabsAnimationStartCallback, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabContentAnimatedTransition } from "./../ArkTabsInterfaces"
 import { TabsController } from "./../ArkTabsControllerMaterialized"
@@ -840,6 +867,9 @@ export class TypeChecker {
     static isAnimatableArithmetic(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof AnimatableArithmetic")
     }
+    static isAnimatedDrawableDescriptor(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof AnimatedDrawableDescriptor")
+    }
     static isAnimateParam(value: object|string|number|undefined|null|boolean, duplicated_duration: boolean, duplicated_tempo: boolean, duplicated_curve: boolean, duplicated_delay: boolean, duplicated_iterations: boolean, duplicated_playMode: boolean, duplicated_onFinish: boolean, duplicated_finishCallbackType: boolean, duplicated_expectedFrameRateRange: boolean): boolean {
         if ((!duplicated_duration) && (value?.hasOwnProperty("duration"))) {
             return true
@@ -887,6 +917,17 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof AnimationMode")
+        }
+    }
+    static isAnimationOptions(value: object|string|number|undefined|null|boolean, duplicated_duration: boolean, duplicated_iterations: boolean): boolean {
+        if ((!duplicated_duration) && (value?.hasOwnProperty("duration"))) {
+            return true
+        }
+        else if ((!duplicated_iterations) && (value?.hasOwnProperty("iterations"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof AnimationOptions")
         }
     }
     static isAnimationStatus(value: object|string|number|undefined|null|boolean): boolean {
@@ -4831,13 +4872,8 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof DragResult")
         }
     }
-    static isDrawableDescriptor(value: object|string|number|undefined|null|boolean, duplicated__DrawableDescriptorStub: boolean): boolean {
-        if ((!duplicated__DrawableDescriptorStub) && (value?.hasOwnProperty("_DrawableDescriptorStub"))) {
-            return true
-        }
-        else {
-            throw new Error("Can not discriminate value typeof DrawableDescriptor")
-        }
+    static isDrawableDescriptor(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof DrawableDescriptor")
     }
     static isDrawContext(value: object|string|number|undefined|null|boolean, duplicated__DrawContextStub: boolean): boolean {
         if ((!duplicated__DrawContextStub) && (value?.hasOwnProperty("_DrawContextStub"))) {
@@ -5528,6 +5564,9 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof FocusBoxStyle")
         }
     }
+    static isFocusController(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof FocusController")
+    }
     static isFocusPriority(value: object|string|number|undefined|null|boolean): boolean {
         if ((value) === (FocusPriority.AUTO)) {
             return true
@@ -5605,6 +5644,41 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof Font")
+        }
+    }
+    static isFontInfo(value: object|string|number|undefined|null|boolean, duplicated_path: boolean, duplicated_postScriptName: boolean, duplicated_fullName: boolean, duplicated_family: boolean, duplicated_subfamily: boolean, duplicated_weight: boolean, duplicated_width: boolean, duplicated_italic: boolean, duplicated_monoSpace: boolean, duplicated_symbolic: boolean): boolean {
+        if ((!duplicated_path) && (value?.hasOwnProperty("path"))) {
+            return true
+        }
+        else if ((!duplicated_postScriptName) && (value?.hasOwnProperty("postScriptName"))) {
+            return true
+        }
+        else if ((!duplicated_fullName) && (value?.hasOwnProperty("fullName"))) {
+            return true
+        }
+        else if ((!duplicated_family) && (value?.hasOwnProperty("family"))) {
+            return true
+        }
+        else if ((!duplicated_subfamily) && (value?.hasOwnProperty("subfamily"))) {
+            return true
+        }
+        else if ((!duplicated_weight) && (value?.hasOwnProperty("weight"))) {
+            return true
+        }
+        else if ((!duplicated_width) && (value?.hasOwnProperty("width"))) {
+            return true
+        }
+        else if ((!duplicated_italic) && (value?.hasOwnProperty("italic"))) {
+            return true
+        }
+        else if ((!duplicated_monoSpace) && (value?.hasOwnProperty("monoSpace"))) {
+            return true
+        }
+        else if ((!duplicated_symbolic) && (value?.hasOwnProperty("symbolic"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof FontInfo")
         }
     }
     static isFontOptions(value: object|string|number|undefined|null|boolean, duplicated_familyName: boolean, duplicated_familySrc: boolean): boolean {
@@ -6226,6 +6300,9 @@ export class TypeChecker {
     }
     static isGlobalScope_ohos_font(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof GlobalScope_ohos_font")
+    }
+    static isGlobalScope_ohos_measure_utils(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof GlobalScope_ohos_measure_utils")
     }
     static isGradientDirection(value: object|string|number|undefined|null|boolean): boolean {
         if ((value) === (GradientDirection.Left)) {
@@ -7833,6 +7910,9 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof LaunchMode")
         }
     }
+    static isLayeredDrawableDescriptor(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof LayeredDrawableDescriptor")
+    }
     static isLayoutable(value: object|string|number|undefined|null|boolean, duplicated_stub: boolean): boolean {
         if ((!duplicated_stub) && (value?.hasOwnProperty("stub"))) {
             return true
@@ -9306,6 +9386,56 @@ export class TypeChecker {
     }
     static isMeasurable(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof Measurable")
+    }
+    static isMeasureOptions(value: object|string|number|undefined|null|boolean, duplicated_textContent: boolean, duplicated_constraintWidth: boolean, duplicated_fontSize: boolean, duplicated_fontStyle: boolean, duplicated_fontWeight: boolean, duplicated_fontFamily: boolean, duplicated_letterSpacing: boolean, duplicated_textAlign: boolean, duplicated_overflow: boolean, duplicated_maxLines: boolean, duplicated_lineHeight: boolean, duplicated_baselineOffset: boolean, duplicated_textCase: boolean, duplicated_textIndent: boolean, duplicated_wordBreak: boolean): boolean {
+        if ((!duplicated_textContent) && (value?.hasOwnProperty("textContent"))) {
+            return true
+        }
+        else if ((!duplicated_constraintWidth) && (value?.hasOwnProperty("constraintWidth"))) {
+            return true
+        }
+        else if ((!duplicated_fontSize) && (value?.hasOwnProperty("fontSize"))) {
+            return true
+        }
+        else if ((!duplicated_fontStyle) && (value?.hasOwnProperty("fontStyle"))) {
+            return true
+        }
+        else if ((!duplicated_fontWeight) && (value?.hasOwnProperty("fontWeight"))) {
+            return true
+        }
+        else if ((!duplicated_fontFamily) && (value?.hasOwnProperty("fontFamily"))) {
+            return true
+        }
+        else if ((!duplicated_letterSpacing) && (value?.hasOwnProperty("letterSpacing"))) {
+            return true
+        }
+        else if ((!duplicated_textAlign) && (value?.hasOwnProperty("textAlign"))) {
+            return true
+        }
+        else if ((!duplicated_overflow) && (value?.hasOwnProperty("overflow"))) {
+            return true
+        }
+        else if ((!duplicated_maxLines) && (value?.hasOwnProperty("maxLines"))) {
+            return true
+        }
+        else if ((!duplicated_lineHeight) && (value?.hasOwnProperty("lineHeight"))) {
+            return true
+        }
+        else if ((!duplicated_baselineOffset) && (value?.hasOwnProperty("baselineOffset"))) {
+            return true
+        }
+        else if ((!duplicated_textCase) && (value?.hasOwnProperty("textCase"))) {
+            return true
+        }
+        else if ((!duplicated_textIndent) && (value?.hasOwnProperty("textIndent"))) {
+            return true
+        }
+        else if ((!duplicated_wordBreak) && (value?.hasOwnProperty("wordBreak"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof MeasureOptions")
+        }
     }
     static isMeasureResult(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof MeasureResult")
@@ -11659,6 +11789,9 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof PixelMap")
         }
+    }
+    static isPixelMapDrawableDescriptor(value: object|string|number|undefined|null|boolean): boolean {
+        throw new Error("Can not discriminate value typeof PixelMapDrawableDescriptor")
     }
     static isPixelMapMock(value: object|string|number|undefined|null|boolean): boolean {
         throw new Error("Can not discriminate value typeof PixelMapMock")
@@ -14056,7 +14189,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ScrollableBarModeOptions")
         }
     }
-    static isScrollableCommonMethod(value: object|string|number|undefined|null|boolean, duplicated_scrollBar: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBarWidth: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_onScroll: boolean, duplicated_onWillScroll: boolean, duplicated_onDidScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_flingSpeedLimit: boolean, duplicated_clipContent: boolean): boolean {
+    static isScrollableCommonMethod(value: object|string|number|undefined|null|boolean, duplicated_scrollBar: boolean, duplicated_scrollBarColor: boolean, duplicated_scrollBarWidth: boolean, duplicated_nestedScroll: boolean, duplicated_enableScrollInteraction: boolean, duplicated_friction: boolean, duplicated_onScroll: boolean, duplicated_onReachStart: boolean, duplicated_onReachEnd: boolean, duplicated_onScrollStart: boolean, duplicated_onScrollStop: boolean, duplicated_flingSpeedLimit: boolean, duplicated_clipContent: boolean): boolean {
         if ((!duplicated_scrollBar) && (value?.hasOwnProperty("scrollBar"))) {
             return true
         }
@@ -14076,12 +14209,6 @@ export class TypeChecker {
             return true
         }
         else if ((!duplicated_onScroll) && (value?.hasOwnProperty("onScroll"))) {
-            return true
-        }
-        else if ((!duplicated_onWillScroll) && (value?.hasOwnProperty("onWillScroll"))) {
-            return true
-        }
-        else if ((!duplicated_onDidScroll) && (value?.hasOwnProperty("onDidScroll"))) {
             return true
         }
         else if ((!duplicated_onReachStart) && (value?.hasOwnProperty("onReachStart"))) {
@@ -21347,6 +21474,9 @@ export class TypeChecker {
         return ordinal as StyledStringKey
     }
     static isArray_String(value: object|string|number|undefined|null): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_PixelMap(value: object|string|number|undefined|null): boolean {
         return Array.isArray(value)
     }
     static isArray_WebHeader(value: object|string|number|undefined|null): boolean {

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTextInput")
-export declare function ArkTextInput(
+@BuildLambda("TextInput")
+export declare function TextInput(
     value?: TextInputOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTextInputComponent
 
 @memo
-export declare function ArkTextInputImpl(
+export declare function TextInputImpl(
     @memo
     _style: ((attributes: ArkTextInputComponent) => void) | undefined,
     value?: TextInputOptions | undefined, 

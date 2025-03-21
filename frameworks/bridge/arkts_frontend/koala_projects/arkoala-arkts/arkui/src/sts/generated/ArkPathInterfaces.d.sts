@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPath")
-export declare function ArkPath(
+@BuildLambda("Path")
+export declare function Path(
     options?: PathOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkPathComponent
 
 @memo
-export declare function ArkPathImpl(
+export declare function PathImpl(
     @memo
     _style: ((attributes: ArkPathComponent) => void) | undefined,
     options?: PathOptions | undefined, 

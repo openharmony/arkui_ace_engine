@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, ContentModifier } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, MarkStyle, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -60,8 +59,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -86,7 +83,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeCheckboxOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CheckboxInterface_setCheckboxOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxInterface_setCheckboxOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     selectAttribute(value: boolean): void {
@@ -99,7 +96,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -116,11 +113,11 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._CheckboxAttribute_selectedColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute_selectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     shapeAttribute(value: CheckBoxShape): void {
-        ArkUIGeneratedNativeModule._CheckboxAttribute_shape(this.peer.ptr, ((value as CheckBoxShape) as int32))
+        ArkUIGeneratedNativeModule._CheckboxAttribute_shape(this.peer.ptr, value.valueOf())
     }
     unselectedColorAttribute(value: ResourceColor): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -129,7 +126,7 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -146,31 +143,31 @@ export class ArkCheckboxPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._CheckboxAttribute_unselectedColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute_unselectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     markAttribute(value: MarkStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeMarkStyle(value)
-        ArkUIGeneratedNativeModule._CheckboxAttribute_mark(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute_mark(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onChangeAttribute(value: OnCheckboxChangeCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CheckboxAttribute_onChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     contentModifierAttribute(value: ContentModifier<object>): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("ContentModifier", value)
-        ArkUIGeneratedNativeModule._CheckboxAttribute_contentModifier(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     _onChangeEvent_selectAttribute(callback: ((parameter: boolean) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._CheckboxAttribute__onChangeEvent_select(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CheckboxAttribute__onChangeEvent_select(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

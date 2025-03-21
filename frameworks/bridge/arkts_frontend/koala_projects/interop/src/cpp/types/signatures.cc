@@ -48,6 +48,7 @@
   KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int32", "I", "int") \
   KOALA_INTEROP_TYPEDEF(func, lang, "Ark_Int64", "J", "long") \
   KOALA_INTEROP_TYPEDEF(func, lang, "KNativePointer", "J", "long") \
+  KOALA_INTEROP_TYPEDEF(func, lang, "KSerializerBuffer", "J", "long") \
   KOALA_INTEROP_TYPEDEF(func, lang, "Ark_NativePointer", "J", "long") \
   KOALA_INTEROP_TYPEDEF(func, lang, "OH_NativePointer", "J", "long") \
   KOALA_INTEROP_TYPEDEF(func, lang, "float", "F", "float") \

@@ -82,7 +82,7 @@ export class Matrix2D implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._Matrix2D_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = Matrix2D.ctor_matrix2d()
         this.peer = new Finalizable(ctorPtr, Matrix2D.getFinalizer())
     }
@@ -193,7 +193,7 @@ export class Matrix2D implements MaterializedBase {
             const other_value  = other!
             thisSerializer.writeMatrix2D(other_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_multiply(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_multiply(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
@@ -214,7 +214,7 @@ export class Matrix2D implements MaterializedBase {
             const ry_value  = ry!
             thisSerializer.writeNumber(ry_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_rotate0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_rotate0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
@@ -235,7 +235,7 @@ export class Matrix2D implements MaterializedBase {
             const ry_value  = ry!
             thisSerializer.writeNumber(ry_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_rotate1(this.peer!.ptr, degree, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_rotate1(this.peer!.ptr, degree, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
@@ -256,7 +256,7 @@ export class Matrix2D implements MaterializedBase {
             const ty_value  = ty!
             thisSerializer.writeNumber(ty_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_translate(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_translate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj
@@ -277,7 +277,7 @@ export class Matrix2D implements MaterializedBase {
             const sy_value  = sy!
             thisSerializer.writeNumber(sy_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Matrix2D_scale(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Matrix2D_scale(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : Matrix2D = Matrix2DInternal.fromPtr(retval)
         return obj

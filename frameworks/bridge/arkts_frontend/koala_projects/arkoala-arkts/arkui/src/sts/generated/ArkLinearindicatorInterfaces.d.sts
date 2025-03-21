@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkLinearIndicator")
-export declare function ArkLinearIndicator(
+@BuildLambda("LinearIndicator")
+export declare function LinearIndicator(
     count?: number | undefined, controller?: LinearIndicatorController | undefined, 
     @memo
     _content?: () => void,
 ): ArkLinearIndicatorComponent
 
 @memo
-export declare function ArkLinearIndicatorImpl(
+export declare function LinearIndicatorImpl(
     @memo
     _style: ((attributes: ArkLinearIndicatorComponent) => void) | undefined,
     count?: number | undefined, controller?: LinearIndicatorController | undefined, 

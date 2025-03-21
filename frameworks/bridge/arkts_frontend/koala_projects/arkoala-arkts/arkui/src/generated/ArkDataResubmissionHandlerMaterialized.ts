@@ -39,7 +39,7 @@ export class DataResubmissionHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._DataResubmissionHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = DataResubmissionHandler.ctor_dataresubmissionhandler()
         this.peer = new Finalizable(ctorPtr, DataResubmissionHandler.getFinalizer())
     }

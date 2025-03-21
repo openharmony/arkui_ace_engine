@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
 import { DrawModifier } from "./../ArkDrawModifierMaterialized"
 import { Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, CommonMethod, CommonAttribute, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions } from "./../ArkCommonInterfaces"
@@ -56,11 +55,8 @@ import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized
 import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
 import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
-import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./../ArkScrollInterfaces"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -95,7 +91,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeDrawModifier(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_drawModifier(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_drawModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     responseRegionAttribute(value: Array<Rectangle> | Rectangle): void {
@@ -116,7 +112,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as Rectangle
             thisSerializer.writeRectangle(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_responseRegion(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_responseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     mouseResponseRegionAttribute(value: Array<Rectangle> | Rectangle): void {
@@ -137,31 +133,31 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as Rectangle
             thisSerializer.writeRectangle(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_mouseResponseRegion(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_mouseResponseRegion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     sizeAttribute(value: SizeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_size(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_size(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     constraintSizeAttribute(value: ConstraintSizeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeConstraintSizeOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_constraintSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_constraintSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     touchableAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._CommonMethod_touchable(this.peer.ptr, value ? 1 : 0)
     }
     hitTestBehaviorAttribute(value: HitTestMode): void {
-        ArkUIGeneratedNativeModule._CommonMethod_hitTestBehavior(this.peer.ptr, ((value as HitTestMode) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_hitTestBehavior(this.peer.ptr, value.valueOf())
     }
     onChildTouchTestAttribute(value: ((value: Array<TouchTestInfo>) => TouchResult)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onChildTouchTest(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onChildTouchTest(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     layoutWeightAttribute(value: number | string): void {
@@ -178,13 +174,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_layoutWeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_layoutWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     chainWeightAttribute(value: ChainWeightOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeChainWeightOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_chainWeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_chainWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     paddingAttribute(value: Padding | Length | LocalizedPadding): void {
@@ -237,7 +233,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedPadding
             thisSerializer.writeLocalizedPadding(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_padding(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_padding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     safeAreaPaddingAttribute(value: Padding | LengthMetrics | LocalizedPadding): void {
@@ -290,7 +286,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedPadding
             thisSerializer.writeLocalizedPadding(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_safeAreaPadding(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_safeAreaPadding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     marginAttribute(value: Margin | Length | LocalizedMargin): void {
@@ -343,7 +339,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedMargin
             thisSerializer.writeLocalizedPadding(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundColorAttribute(value: ResourceColor): void {
@@ -353,7 +349,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -370,13 +366,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     pixelRoundAttribute(value: PixelRoundPolicy): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePixelRoundPolicy(value)
-        ArkUIGeneratedNativeModule._CommonMethod_pixelRound(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_pixelRound(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundImageSizeAttribute(value: SizeOptions | ImageSize): void {
@@ -391,9 +387,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         else if (TypeChecker.isImageSize(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as ImageSize
-            thisSerializer.writeInt32(((value_1 as ImageSize) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundImagePositionAttribute(value: Position | Alignment): void {
@@ -408,51 +404,51 @@ export class ArkCommonMethodPeer extends PeerNode {
         else if (TypeChecker.isAlignment(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as Alignment
-            thisSerializer.writeInt32(((value_1 as Alignment) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundImagePosition(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImagePosition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundEffectAttribute(value: BackgroundEffectOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBackgroundEffectOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundEffect(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundImageResizableAttribute(value: ResizableOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResizableOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageResizable(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImageResizable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     foregroundEffectAttribute(value: ForegroundEffectOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeForegroundEffectOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundEffect(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     visualEffectAttribute(value: VisualEffect): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeVisualEffect(value)
-        ArkUIGeneratedNativeModule._CommonMethod_visualEffect(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_visualEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundFilterAttribute(value: Filter): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFilter(value)
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundFilter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     foregroundFilterAttribute(value: Filter): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFilter(value)
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundFilter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     compositingFilterAttribute(value: Filter): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFilter(value)
-        ArkUIGeneratedNativeModule._CommonMethod_compositingFilter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_compositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     opacityAttribute(value: number | Resource): void {
@@ -469,13 +465,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_opacity(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_opacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderAttribute(value: BorderOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBorderOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_border(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_border(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderStyleAttribute(value: BorderStyle | EdgeStyles): void {
@@ -485,7 +481,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (TypeChecker.isBorderStyle(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as BorderStyle
-            thisSerializer.writeInt32(((value_0 as BorderStyle) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.OBJECT == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -496,7 +492,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_top_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_top_type)) {
                 const value_1_top_value  = (value_1_top as BorderStyle)
-                thisSerializer.writeInt32(((value_1_top_value as BorderStyle) as int32))
+                thisSerializer.writeInt32(value_1_top_value.valueOf())
             }
             const value_1_right  = value_1.right
             let value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -504,7 +500,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_right_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_right_type)) {
                 const value_1_right_value  = (value_1_right as BorderStyle)
-                thisSerializer.writeInt32(((value_1_right_value as BorderStyle) as int32))
+                thisSerializer.writeInt32(value_1_right_value.valueOf())
             }
             const value_1_bottom  = value_1.bottom
             let value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -512,7 +508,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_bottom_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_bottom_type)) {
                 const value_1_bottom_value  = (value_1_bottom as BorderStyle)
-                thisSerializer.writeInt32(((value_1_bottom_value as BorderStyle) as int32))
+                thisSerializer.writeInt32(value_1_bottom_value.valueOf())
             }
             const value_1_left  = value_1.left
             let value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -520,10 +516,10 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_left_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_left_type)) {
                 const value_1_left_value  = (value_1_left as BorderStyle)
-                thisSerializer.writeInt32(((value_1_left_value as BorderStyle) as int32))
+                thisSerializer.writeInt32(value_1_left_value.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_borderStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_borderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderWidthAttribute(value: Length | EdgeWidths | LocalizedEdgeWidths): void {
@@ -576,7 +572,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdgeWidths
             thisSerializer.writeLocalizedEdgeWidths(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_borderWidth(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_borderWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderColorAttribute(value: ResourceColor | EdgeColors | LocalizedEdgeColors): void {
@@ -591,7 +587,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_0_0  = value_0 as Color
-                thisSerializer.writeInt32(((value_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -623,7 +619,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_top_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_top_value_0  = value_1_top_value as Color
-                    thisSerializer.writeInt32(((value_1_top_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_top_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_top_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -652,7 +648,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_right_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_right_value_0  = value_1_right_value as Color
-                    thisSerializer.writeInt32(((value_1_right_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_right_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_right_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -681,7 +677,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_bottom_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_bottom_value_0  = value_1_bottom_value as Color
-                    thisSerializer.writeInt32(((value_1_bottom_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_bottom_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_bottom_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -710,7 +706,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_left_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_left_value_0  = value_1_left_value as Color
-                    thisSerializer.writeInt32(((value_1_left_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_left_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_left_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -734,7 +730,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdgeColors
             thisSerializer.writeLocalizedEdgeColors(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_borderColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_borderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderRadiusAttribute(value: Length | BorderRadiuses | LocalizedBorderRadiuses): void {
@@ -787,19 +783,19 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedBorderRadiuses
             thisSerializer.writeLocalizedBorderRadiuses(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_borderRadius(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_borderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderImageAttribute(value: BorderImageOption): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBorderImageOption(value)
-        ArkUIGeneratedNativeModule._CommonMethod_borderImage(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_borderImage(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     outlineAttribute(value: OutlineOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeOutlineOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_outline(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_outline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     outlineStyleAttribute(value: OutlineStyle | EdgeOutlineStyles): void {
@@ -809,7 +805,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (TypeChecker.isOutlineStyle(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as OutlineStyle
-            thisSerializer.writeInt32(((value_0 as OutlineStyle) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.OBJECT == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -820,7 +816,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_top_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_top_type)) {
                 const value_1_top_value  = (value_1_top as OutlineStyle)
-                thisSerializer.writeInt32(((value_1_top_value as OutlineStyle) as int32))
+                thisSerializer.writeInt32(value_1_top_value.valueOf())
             }
             const value_1_right  = value_1.right
             let value_1_right_type : int32 = RuntimeType.UNDEFINED
@@ -828,7 +824,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_right_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_right_type)) {
                 const value_1_right_value  = (value_1_right as OutlineStyle)
-                thisSerializer.writeInt32(((value_1_right_value as OutlineStyle) as int32))
+                thisSerializer.writeInt32(value_1_right_value.valueOf())
             }
             const value_1_bottom  = value_1.bottom
             let value_1_bottom_type : int32 = RuntimeType.UNDEFINED
@@ -836,7 +832,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_bottom_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_bottom_type)) {
                 const value_1_bottom_value  = (value_1_bottom as OutlineStyle)
-                thisSerializer.writeInt32(((value_1_bottom_value as OutlineStyle) as int32))
+                thisSerializer.writeInt32(value_1_bottom_value.valueOf())
             }
             const value_1_left  = value_1.left
             let value_1_left_type : int32 = RuntimeType.UNDEFINED
@@ -844,10 +840,10 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(value_1_left_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_1_left_type)) {
                 const value_1_left_value  = (value_1_left as OutlineStyle)
-                thisSerializer.writeInt32(((value_1_left_value as OutlineStyle) as int32))
+                thisSerializer.writeInt32(value_1_left_value.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_outlineStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_outlineStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     outlineWidthAttribute(value: Dimension | EdgeOutlineWidths): void {
@@ -895,7 +891,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeLength(value_1_left_value)
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_outlineWidth(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_outlineWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     outlineColorAttribute(value: ResourceColor | EdgeColors | LocalizedEdgeColors): void {
@@ -910,7 +906,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_0_0  = value_0 as Color
-                thisSerializer.writeInt32(((value_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -942,7 +938,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_top_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_top_value_0  = value_1_top_value as Color
-                    thisSerializer.writeInt32(((value_1_top_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_top_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_top_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -971,7 +967,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_right_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_right_value_0  = value_1_right_value as Color
-                    thisSerializer.writeInt32(((value_1_right_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_right_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_right_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -1000,7 +996,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_bottom_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_bottom_value_0  = value_1_bottom_value as Color
-                    thisSerializer.writeInt32(((value_1_bottom_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_bottom_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_bottom_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -1029,7 +1025,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 if (TypeChecker.isColor(value_1_left_value)) {
                     thisSerializer.writeInt8(0 as int32)
                     const value_1_left_value_0  = value_1_left_value as Color
-                    thisSerializer.writeInt32(((value_1_left_value_0 as Color) as int32))
+                    thisSerializer.writeInt32(value_1_left_value_0.valueOf())
                 }
                 else if (RuntimeType.NUMBER == value_1_left_value_type) {
                     thisSerializer.writeInt8(1 as int32)
@@ -1053,7 +1049,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdgeColors
             thisSerializer.writeLocalizedEdgeColors(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_outlineColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_outlineColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     outlineRadiusAttribute(value: Dimension | OutlineRadiuses): void {
@@ -1101,7 +1097,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeLength(value_1_bottomRight_value)
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_outlineRadius(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_outlineRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     foregroundColorAttribute(value: ResourceColor | ColoringStrategy): void {
@@ -1116,7 +1112,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_0_0  = value_0 as Color
-                thisSerializer.writeInt32(((value_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -1139,58 +1135,58 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as ColoringStrategy
             thisSerializer.writeInt32(TypeChecker.ColoringStrategy_ToOrdinal(value_1))
         }
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onClick0Attribute(value: ((event: ClickEvent) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onClick0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onClick0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onClick1Attribute(event: ((event: ClickEvent) => void), distanceThreshold: number): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._CommonMethod_onClick1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length(), distanceThreshold)
+        ArkUIGeneratedNativeModule._CommonMethod_onClick1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), distanceThreshold)
         thisSerializer.release()
     }
     onHoverAttribute(value: ((isHover: boolean,event: HoverEvent) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onHover(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAccessibilityHoverAttribute(value: AccessibilityCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onAccessibilityHover(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hoverEffectAttribute(value: HoverEffect): void {
-        ArkUIGeneratedNativeModule._CommonMethod_hoverEffect(this.peer.ptr, ((value as HoverEffect) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_hoverEffect(this.peer.ptr, value.valueOf())
     }
     onMouseAttribute(value: ((event: MouseEvent) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onMouse(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onMouse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onTouchAttribute(value: ((event: TouchEvent) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onTouch(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onTouch(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onKeyEventAttribute(value: ((event: KeyEvent) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onKeyEvent(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onKeyPreImeAttribute(value: ((parameter: KeyEvent) => boolean)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onKeyPreIme(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onKeyPreIme(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     focusableAttribute(value: boolean): void {
@@ -1199,13 +1195,13 @@ export class ArkCommonMethodPeer extends PeerNode {
     onFocusAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onFocus(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onFocus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onBlurAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onBlur(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     tabIndexAttribute(value: number): void {
@@ -1223,13 +1219,13 @@ export class ArkCommonMethodPeer extends PeerNode {
     focusBoxAttribute(value: FocusBoxStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFocusBoxStyle(value)
-        ArkUIGeneratedNativeModule._CommonMethod_focusBox(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_focusBox(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     animationAttribute(value: AnimateParam): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAnimateParam(value)
-        ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     transition0Attribute(value: TransitionOptions | TransitionEffect): void {
@@ -1246,7 +1242,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as TransitionEffect
             thisSerializer.writeTransitionEffect(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_transition0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_transition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     transition1Attribute(effect: TransitionEffect, onFinish?: TransitionFinishCallback): void {
@@ -1258,13 +1254,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const onFinish_value  = onFinish!
             thisSerializer.holdAndWriteCallback(onFinish_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_transition1(this.peer.ptr, toPeerPtr(effect), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_transition1(this.peer.ptr, toPeerPtr(effect), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     motionBlurAttribute(value: MotionBlurOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeMotionBlurOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_motionBlur(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_motionBlur(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     brightnessAttribute(value: number): void {
@@ -1283,7 +1279,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -1295,7 +1291,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_colorBlend(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_colorBlend(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     saturateAttribute(value: number): void {
@@ -1318,7 +1314,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as InvertOptions
             thisSerializer.writeInvertOptions(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_invert(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_invert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hueRotateAttribute(value: number | string): void {
@@ -1335,7 +1331,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_hueRotate(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_hueRotate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     useShadowBatchingAttribute(value: boolean): void {
@@ -1345,7 +1341,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_useEffect0(this.peer.ptr, value ? 1 : 0)
     }
     useEffect1Attribute(useEffect: boolean, effectType: EffectType): void {
-        ArkUIGeneratedNativeModule._CommonMethod_useEffect1(this.peer.ptr, useEffect ? 1 : 0, ((effectType as EffectType) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_useEffect1(this.peer.ptr, useEffect ? 1 : 0, effectType.valueOf())
     }
     renderGroupAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._CommonMethod_renderGroup(this.peer.ptr, value ? 1 : 0)
@@ -1356,13 +1352,13 @@ export class ArkCommonMethodPeer extends PeerNode {
     translateAttribute(value: TranslateOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTranslateOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_translate(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_translate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     scaleAttribute(value: ScaleOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeScaleOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_scale(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_scale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     gridSpanAttribute(value: number): void {
@@ -1374,47 +1370,47 @@ export class ArkCommonMethodPeer extends PeerNode {
     rotateAttribute(value: RotateOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeRotateOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_rotate(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_rotate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     transformAttribute(value: Object): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("Object", value)
-        ArkUIGeneratedNativeModule._CommonMethod_transform(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_transform(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAppearAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onAppear(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDisAppearAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDisAppear(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDisAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAttachAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onAttach(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDetachAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDetach(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAreaChangeAttribute(value: ((oldValue: Area,newValue: Area) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onAreaChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     visibilityAttribute(value: Visibility): void {
-        ArkUIGeneratedNativeModule._CommonMethod_visibility(this.peer.ptr, ((value as Visibility) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_visibility(this.peer.ptr, value.valueOf())
     }
     flexGrowAttribute(value: number): void {
         ArkUIGeneratedNativeModule._CommonMethod_flexGrow(this.peer.ptr, value)
@@ -1436,11 +1432,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_flexBasis(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_flexBasis(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     alignSelfAttribute(value: ItemAlign): void {
-        ArkUIGeneratedNativeModule._CommonMethod_alignSelf(this.peer.ptr, ((value as ItemAlign) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_alignSelf(this.peer.ptr, value.valueOf())
     }
     displayPriorityAttribute(value: number): void {
         ArkUIGeneratedNativeModule._CommonMethod_displayPriority(this.peer.ptr, value)
@@ -1449,10 +1445,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_zIndex(this.peer.ptr, value)
     }
     directionAttribute(value: Direction): void {
-        ArkUIGeneratedNativeModule._CommonMethod_direction(this.peer.ptr, ((value as Direction) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_direction(this.peer.ptr, value.valueOf())
     }
     alignAttribute(value: Alignment): void {
-        ArkUIGeneratedNativeModule._CommonMethod_align(this.peer.ptr, ((value as Alignment) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_align(this.peer.ptr, value.valueOf())
     }
     positionAttribute(value: Position | Edges | LocalizedEdges): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -1473,7 +1469,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdges
             thisSerializer.writeLocalizedEdges(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_position(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_position(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     markAnchorAttribute(value: Position | LocalizedPosition): void {
@@ -1490,7 +1486,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_1  = value as LocalizedPosition
             thisSerializer.writeLocalizedPosition(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_markAnchor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_markAnchor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     offsetAttribute(value: Position | Edges | LocalizedEdges): void {
@@ -1512,7 +1508,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdges
             thisSerializer.writeLocalizedEdges(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_offset(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_offset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     enabledAttribute(value: boolean): void {
@@ -1608,19 +1604,19 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeNumber(value_lg_value_1_offset)
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_useSizeType(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_useSizeType(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     alignRules0Attribute(value: AlignRuleOption): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAlignRuleOption(value)
-        ArkUIGeneratedNativeModule._CommonMethod_alignRules0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_alignRules0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     alignRules1Attribute(value: LocalizedAlignRuleOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeLocalizedAlignRuleOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_alignRules1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_alignRules1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     aspectRatioAttribute(value: number): void {
@@ -1635,43 +1631,43 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeClickEffect(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_clickEffect(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_clickEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDragStart(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDragStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragEnterAttribute(value: ((event: DragEvent,extraParams?: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDragEnter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDragEnter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragMoveAttribute(value: ((event: DragEvent,extraParams?: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDragMove(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDragMove(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragLeaveAttribute(value: ((event: DragEvent,extraParams?: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDragLeave(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDragLeave(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDropAttribute(value: ((event: DragEvent,extraParams?: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDrop(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDragEndAttribute(value: ((event: DragEvent,extraParams?: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onDragEnd(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onDragEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     allowDropAttribute(value?: Array<UniformDataType>): void {
@@ -1687,7 +1683,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeUniformDataType(value_value_element)
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_allowDrop(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_allowDrop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     draggableAttribute(value: boolean): void {
@@ -1712,13 +1708,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_2  = value as string
             thisSerializer.writeString(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_dragPreview(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_dragPreview(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onPreDragAttribute(value: ((parameter: PreDragStatus) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onPreDrag(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onPreDrag(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     linearGradientAttribute(value: Type_CommonMethod_linearGradient_value): void {
@@ -1748,7 +1744,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as GradientDirection)
-            thisSerializer.writeInt32(((value_direction_value as GradientDirection) as int32))
+            thisSerializer.writeInt32(value_direction_value.valueOf())
         }
         const value_colors  = value.colors
         thisSerializer.writeInt32(value_colors.length as int32)
@@ -1760,7 +1756,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_colors_element_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_colors_element_0_0  = value_colors_element_0 as Color
-                thisSerializer.writeInt32(((value_colors_element_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_colors_element_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_colors_element_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -1788,7 +1784,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_repeating_value  = value_repeating!
             thisSerializer.writeBoolean(value_repeating_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_linearGradient(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradient(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     sweepGradientAttribute(value: Type_CommonMethod_sweepGradient_value): void {
@@ -1865,7 +1861,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_colors_element_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_colors_element_0_0  = value_colors_element_0 as Color
-                thisSerializer.writeInt32(((value_colors_element_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_colors_element_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_colors_element_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -1893,7 +1889,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_repeating_value  = value_repeating!
             thisSerializer.writeBoolean(value_repeating_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_sweepGradient(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_sweepGradient(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     radialGradientAttribute(value: Type_CommonMethod_radialGradient_value): void {
@@ -1926,7 +1922,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             if (TypeChecker.isColor(value_colors_element_0)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_colors_element_0_0  = value_colors_element_0 as Color
-                thisSerializer.writeInt32(((value_colors_element_0_0 as Color) as int32))
+                thisSerializer.writeInt32(value_colors_element_0_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_colors_element_0_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -1954,13 +1950,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_repeating_value  = value_repeating!
             thisSerializer.writeBoolean(value_repeating_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_radialGradient(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_radialGradient(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     motionPathAttribute(value: MotionPathOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeMotionPathOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_motionPath(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_motionPath(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     shadowAttribute(value: ShadowOptions | ShadowStyle): void {
@@ -1975,9 +1971,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         else if (TypeChecker.isShadowStyle(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as ShadowStyle
-            thisSerializer.writeInt32(((value_1 as ShadowStyle) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_shadow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_shadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     clip0Attribute(value?: boolean): void {
@@ -1989,7 +1985,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_clip0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_clip0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     clip1Attribute(value?: boolean): void {
@@ -2001,7 +1997,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_clip1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_clip1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     clipShapeAttribute(value: CircleShape | EllipseShape | PathShape | RectShape): void {
@@ -2028,7 +2024,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_3  = value as RectShape
             thisSerializer.writeRectShape(value_3)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_clipShape(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_clipShape(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     mask0Attribute(value?: ProgressMask): void {
@@ -2040,7 +2036,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeProgressMask(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_mask0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_mask0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     mask1Attribute(value?: ProgressMask): void {
@@ -2052,7 +2048,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeProgressMask(value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_mask1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_mask1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     maskShapeAttribute(value: CircleShape | EllipseShape | PathShape | RectShape): void {
@@ -2079,7 +2075,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_3  = value as RectShape
             thisSerializer.writeRectShape(value_3)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_maskShape(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_maskShape(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     keyAttribute(value: string): void {
@@ -2100,13 +2096,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeGeometryTransitionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_geometryTransition1(this.peer.ptr, id, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_geometryTransition1(this.peer.ptr, id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     stateStylesAttribute(value: StateStyles): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeStateStyles(value)
-        ArkUIGeneratedNativeModule._CommonMethod_stateStyles(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_stateStyles(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     restoreIdAttribute(value: number): void {
@@ -2121,7 +2117,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     pixelStretchEffectAttribute(value: PixelStretchEffectOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePixelStretchEffectOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_pixelStretchEffect(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_pixelStretchEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     accessibilityGroup0Attribute(value: boolean): void {
@@ -2130,7 +2126,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     accessibilityGroup1Attribute(isGroup: boolean, accessibilityOptions: AccessibilityOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeAccessibilityOptions(accessibilityOptions)
-        ArkUIGeneratedNativeModule._CommonMethod_accessibilityGroup1(this.peer.ptr, isGroup ? 1 : 0, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityGroup1(this.peer.ptr, isGroup ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     accessibilityText0Attribute(value: string): void {
@@ -2139,7 +2135,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     accessibilityText1Attribute(value: Resource): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResource(value)
-        ArkUIGeneratedNativeModule._CommonMethod_accessibilityText1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityText1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     accessibilityTextHintAttribute(value: string): void {
@@ -2151,7 +2147,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     accessibilityDescription1Attribute(value: Resource): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResource(value)
-        ArkUIGeneratedNativeModule._CommonMethod_accessibilityDescription1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityDescription1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     accessibilityLevelAttribute(value: string): void {
@@ -2160,7 +2156,7 @@ export class ArkCommonMethodPeer extends PeerNode {
     accessibilityVirtualNodeAttribute(value: CustomBuilder): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value))
-        ArkUIGeneratedNativeModule._CommonMethod_accessibilityVirtualNode(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_accessibilityVirtualNode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     accessibilityCheckedAttribute(value: boolean): void {
@@ -2174,16 +2170,16 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt32(value.length as int32)
         for (let i = 0; i < value.length; i++) {
             const value_element : ObscuredReasons = value[i]
-            thisSerializer.writeInt32(((value_element as ObscuredReasons) as int32))
+            thisSerializer.writeInt32(value_element.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_obscured(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_obscured(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     reuseIdAttribute(value: string): void {
         ArkUIGeneratedNativeModule._CommonMethod_reuseId(this.peer.ptr, value)
     }
     renderFitAttribute(value: RenderFit): void {
-        ArkUIGeneratedNativeModule._CommonMethod_renderFit(this.peer.ptr, ((value as RenderFit) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_renderFit(this.peer.ptr, value.valueOf())
     }
     gestureModifierAttribute(value: GestureModifier): void {
         ArkUIGeneratedNativeModule._CommonMethod_gestureModifier(this.peer.ptr, toPeerPtr(value))
@@ -2191,31 +2187,31 @@ export class ArkCommonMethodPeer extends PeerNode {
     backgroundBrightnessAttribute(value: BackgroundBrightnessOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBackgroundBrightnessOptions(value)
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundBrightness(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBrightness(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onGestureJudgeBeginAttribute(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onGestureJudgeBegin(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureJudgeBegin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onGestureRecognizerJudgeBegin0Attribute(value: GestureRecognizerJudgeBeginCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onGestureRecognizerJudgeBegin1Attribute(callback_: GestureRecognizerJudgeBeginCallback, exposeInnerGesture: boolean): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length(), exposeInnerGesture ? 1 : 0)
+        ArkUIGeneratedNativeModule._CommonMethod_onGestureRecognizerJudgeBegin1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), exposeInnerGesture ? 1 : 0)
         thisSerializer.release()
     }
     shouldBuiltInRecognizerParallelWithAttribute(value: ShouldBuiltInRecognizerParallelWithCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_shouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_shouldBuiltInRecognizerParallelWith(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     monopolizeEventsAttribute(value: boolean): void {
@@ -2224,13 +2220,13 @@ export class ArkCommonMethodPeer extends PeerNode {
     onTouchInterceptAttribute(value: ((parameter: TouchEvent) => HitTestMode)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onTouchIntercept(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onTouchIntercept(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onSizeChangeAttribute(value: SizeChangeCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CommonMethod_onSizeChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onSizeChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     customPropertyAttribute(name: string, value?: Object): void {
@@ -2242,7 +2238,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             thisSerializer.writeCustomObject("Object", value_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, name, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, name, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
@@ -2255,7 +2251,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt32(types_value.length as int32)
             for (let i = 0; i < types_value.length; i++) {
                 const types_value_element : SafeAreaType = types_value[i]
-                thisSerializer.writeInt32(((types_value_element as SafeAreaType) as int32))
+                thisSerializer.writeInt32(types_value_element.valueOf())
             }
         }
         let edges_type : int32 = RuntimeType.UNDEFINED
@@ -2266,10 +2262,10 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt32(edges_value.length as int32)
             for (let i = 0; i < edges_value.length; i++) {
                 const edges_value_element : SafeAreaEdge = edges_value[i]
-                thisSerializer.writeInt32(((edges_value_element as SafeAreaEdge) as int32))
+                thisSerializer.writeInt32(edges_value_element.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundAttribute(builder: CustomBuilder, options?: Literal_Alignment_align): void {
@@ -2286,10 +2282,10 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(options_value_align_type as int32)
             if ((RuntimeType.UNDEFINED) != (options_value_align_type)) {
                 const options_value_align_value  = (options_value_align as Alignment)
-                thisSerializer.writeInt32(((options_value_align_value as Alignment) as int32))
+                thisSerializer.writeInt32(options_value_align_value.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._CommonMethod_background(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_background(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundImageAttribute(src: ResourceStr | PixelMap, repeat?: ImageRepeat): void {
@@ -2322,9 +2318,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(repeat_type as int32)
         if ((RuntimeType.UNDEFINED) != (repeat_type)) {
             const repeat_value  = (repeat as ImageRepeat)
-            thisSerializer.writeInt32(((repeat_value as ImageRepeat) as int32))
+            thisSerializer.writeInt32(repeat_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundImage(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundImage(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundBlurStyleAttribute(value: BlurStyle, options?: BackgroundBlurStyleOptions): void {
@@ -2336,7 +2332,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeBackgroundBlurStyleOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle(this.peer.ptr, ((value as BlurStyle) as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backgroundBlurStyle(this.peer.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     foregroundBlurStyleAttribute(value: BlurStyle, options?: ForegroundBlurStyleOptions): void {
@@ -2348,7 +2344,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeForegroundBlurStyleOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle(this.peer.ptr, ((value as BlurStyle) as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_foregroundBlurStyle(this.peer.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     focusScopeId0Attribute(id: string, isGroup?: boolean): void {
@@ -2360,7 +2356,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const isGroup_value  = isGroup!
             thisSerializer.writeBoolean(isGroup_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId0(this.peer.ptr, id, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId0(this.peer.ptr, id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     focusScopeId1Attribute(id: string, isGroup?: boolean, arrowStepOut?: boolean): void {
@@ -2379,7 +2375,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const arrowStepOut_value  = arrowStepOut!
             thisSerializer.writeBoolean(arrowStepOut_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId1(this.peer.ptr, id, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopeId1(this.peer.ptr, id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     focusScopePriorityAttribute(scopeId: string, priority?: FocusPriority): void {
@@ -2389,9 +2385,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(priority_type as int32)
         if ((RuntimeType.UNDEFINED) != (priority_type)) {
             const priority_value  = (priority as FocusPriority)
-            thisSerializer.writeInt32(((priority_value as FocusPriority) as int32))
+            thisSerializer.writeInt32(priority_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, scopeId, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_focusScopePriority(this.peer.ptr, scopeId, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     gestureAttribute(gesture: GestureType, mask?: GestureMask): void {
@@ -2438,9 +2434,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(mask_type as int32)
         if ((RuntimeType.UNDEFINED) != (mask_type)) {
             const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(((mask_value as GestureMask) as int32))
+            thisSerializer.writeInt32(mask_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_gesture(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_gesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     priorityGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
@@ -2487,9 +2483,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(mask_type as int32)
         if ((RuntimeType.UNDEFINED) != (mask_type)) {
             const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(((mask_value as GestureMask) as int32))
+            thisSerializer.writeInt32(mask_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_priorityGesture(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_priorityGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     parallelGestureAttribute(gesture: GestureType, mask?: GestureMask): void {
@@ -2536,9 +2532,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(mask_type as int32)
         if ((RuntimeType.UNDEFINED) != (mask_type)) {
             const mask_value  = (mask as GestureMask)
-            thisSerializer.writeInt32(((mask_value as GestureMask) as int32))
+            thisSerializer.writeInt32(mask_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_parallelGesture(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_parallelGesture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     blurAttribute(value: number, options?: BlurOptions): void {
@@ -2550,13 +2546,13 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeBlurOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_blur(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_blur(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     linearGradientBlurAttribute(value: number, options: LinearGradientBlurOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeLinearGradientBlurOptions(options)
-        ArkUIGeneratedNativeModule._CommonMethod_linearGradientBlur(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_linearGradientBlur(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     systemBarEffectAttribute(): void {
@@ -2571,7 +2567,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeBlurOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_backdropBlur(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_backdropBlur(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     sharedTransitionAttribute(id: string, options?: sharedTransitionOptions): void {
@@ -2583,11 +2579,11 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writesharedTransitionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_sharedTransition(this.peer.ptr, id, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_sharedTransition(this.peer.ptr, id, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     chainModeAttribute(direction: Axis, style: ChainStyle): void {
-        ArkUIGeneratedNativeModule._CommonMethod_chainMode(this.peer.ptr, ((direction as Axis) as int32), ((style as ChainStyle) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_chainMode(this.peer.ptr, direction.valueOf(), style.valueOf())
     }
     dragPreviewOptionsAttribute(value: DragPreviewOptions, options?: DragInteractionOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -2599,7 +2595,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeDragInteractionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     overlayAttribute(value: string | CustomBuilder | ComponentContent, options?: OverlayOptions): void {
@@ -2628,7 +2624,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeOverlayOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     blendModeAttribute(value: BlendMode, type?: BlendApplyType): void {
@@ -2638,9 +2634,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(type_type as int32)
         if ((RuntimeType.UNDEFINED) != (type_type)) {
             const type_value  = (type as BlendApplyType)
-            thisSerializer.writeInt32(((type_value as BlendApplyType) as int32))
+            thisSerializer.writeInt32(type_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_blendMode(this.peer.ptr, ((value as BlendMode) as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_blendMode(this.peer.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     advancedBlendModeAttribute(effect: BlendMode | Blender, type?: BlendApplyType): void {
@@ -2650,7 +2646,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (TypeChecker.isBlendMode(effect)) {
             thisSerializer.writeInt8(0 as int32)
             const effect_0  = effect as BlendMode
-            thisSerializer.writeInt32(((effect_0 as BlendMode) as int32))
+            thisSerializer.writeInt32(effect_0.valueOf())
         }
         else if (RuntimeType.OBJECT == effect_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -2662,9 +2658,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(type_type as int32)
         if ((RuntimeType.UNDEFINED) != (type_type)) {
             const type_value  = (type as BlendApplyType)
-            thisSerializer.writeInt32(((type_value as BlendApplyType) as int32))
+            thisSerializer.writeInt32(type_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_advancedBlendMode(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_advancedBlendMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindPopupAttribute(show: boolean, popup: PopupOptions | CustomPopupOptions): void {
@@ -2681,7 +2677,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const popup_1  = popup as CustomPopupOptions
             thisSerializer.writeCustomPopupOptions(popup_1)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindPopup(this.peer.ptr, show ? 1 : 0, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindPopup(this.peer.ptr, show ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindMenu0Attribute(content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): void {
@@ -2709,7 +2705,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindMenu0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindMenu1Attribute(isShow: boolean, content: Array<MenuElement> | CustomBuilder, options?: MenuOptions): void {
@@ -2737,7 +2733,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindMenu1(this.peer.ptr, isShow ? 1 : 0, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindMenu1(this.peer.ptr, isShow ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindContextMenu0Attribute(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): void {
@@ -2750,7 +2746,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeContextMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length(), ((responseType as ResponseType) as int32))
+        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length(), responseType.valueOf())
         thisSerializer.release()
     }
     bindContextMenu1Attribute(isShown: boolean, content: CustomBuilder, options?: ContextMenuOptions): void {
@@ -2763,7 +2759,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeContextMenuOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu1(this.peer.ptr, isShown ? 1 : 0, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindContextMenu1(this.peer.ptr, isShown ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindContentCover0Attribute(isShow: boolean | undefined, builder: CustomBuilder, type?: ModalTransition): void {
@@ -2781,9 +2777,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         thisSerializer.writeInt8(type_type as int32)
         if ((RuntimeType.UNDEFINED) != (type_type)) {
             const type_value  = (type as ModalTransition)
-            thisSerializer.writeInt32(((type_value as ModalTransition) as int32))
+            thisSerializer.writeInt32(type_value.valueOf())
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindContentCover1Attribute(isShow: boolean | undefined, builder: CustomBuilder, options?: ContentCoverOptions): void {
@@ -2803,7 +2799,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeContentCoverOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindContentCover1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     bindSheetAttribute(isShow: boolean | undefined, builder: CustomBuilder, options?: SheetOptions): void {
@@ -2823,7 +2819,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const options_value  = options!
             thisSerializer.writeSheetOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_bindSheet(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_bindSheet(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onVisibleAreaChangeAttribute(ratios: Array<number>, event: VisibleAreaChangeCallback): void {
@@ -2834,7 +2830,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeNumber(ratios_element)
         }
         thisSerializer.holdAndWriteCallback(event)
-        ArkUIGeneratedNativeModule._CommonMethod_onVisibleAreaChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_onVisibleAreaChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     keyboardShortcutAttribute(value: string | FunctionKey, keys: Array<ModifierKey>, action?: (() => void)): void {
@@ -2849,12 +2845,12 @@ export class ArkCommonMethodPeer extends PeerNode {
         else if (TypeChecker.isFunctionKey(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FunctionKey
-            thisSerializer.writeInt32(((value_1 as FunctionKey) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
         thisSerializer.writeInt32(keys.length as int32)
         for (let i = 0; i < keys.length; i++) {
             const keys_element : ModifierKey = keys[i]
-            thisSerializer.writeInt32(((keys_element as ModifierKey) as int32))
+            thisSerializer.writeInt32(keys_element.valueOf())
         }
         let action_type : int32 = RuntimeType.UNDEFINED
         action_type = runtimeType(action)
@@ -2863,7 +2859,7 @@ export class ArkCommonMethodPeer extends PeerNode {
             const action_value  = action!
             thisSerializer.holdAndWriteCallback(action_value)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_keyboardShortcut(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_keyboardShortcut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     getCurrentState():number {
@@ -3038,7 +3034,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -3055,7 +3051,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_stroke(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_stroke(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fillAttribute(value: ResourceColor): void {
@@ -3065,7 +3061,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -3082,7 +3078,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_fill(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_fill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     strokeDashOffsetAttribute(value: number | string): void {
@@ -3099,14 +3095,14 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashOffset(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     strokeLineCapAttribute(value: LineCapStyle): void {
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineCap(this.peer.ptr, ((value as LineCapStyle) as int32))
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineCap(this.peer.ptr, value.valueOf())
     }
     strokeLineJoinAttribute(value: LineJoinStyle): void {
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineJoin(this.peer.ptr, ((value as LineJoinStyle) as int32))
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeLineJoin(this.peer.ptr, value.valueOf())
     }
     strokeMiterLimitAttribute(value: number | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -3122,7 +3118,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeMiterLimit(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeMiterLimit(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     strokeOpacityAttribute(value: number | string | Resource): void {
@@ -3144,7 +3140,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeOpacity(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fillOpacityAttribute(value: number | string | Resource): void {
@@ -3166,7 +3162,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_fillOpacity(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_fillOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     strokeWidthAttribute(value: Length): void {
@@ -3182,7 +3178,7 @@ export class ArkCommonShapeMethodPeer extends ArkCommonMethodPeer {
             const value_element : Length = value[i]
             thisSerializer.writeLength(value_element)
         }
-        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashArray(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonShapeMethod_strokeDashArray(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -3228,7 +3224,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         return _peer
     }
     scrollBarAttribute(value: BarState): void {
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBar(this.peer.ptr, ((value as BarState) as int32))
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBar(this.peer.ptr, value.valueOf())
     }
     scrollBarColorAttribute(value: Color | number | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -3237,7 +3233,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -3249,7 +3245,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             const value_2  = value as string
             thisSerializer.writeString(value_2)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     scrollBarWidthAttribute(value: number | string): void {
@@ -3266,13 +3262,13 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarWidth(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_scrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     nestedScrollAttribute(value: NestedScrollOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeNestedScrollOptions(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_nestedScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_nestedScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     enableScrollInteractionAttribute(value: boolean): void {
@@ -3292,55 +3288,37 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_friction(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_friction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onScrollAttribute(value: ((first: number,last: number) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onWillScrollAttribute(value?: ScrollOnWillScrollCallback): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteCallback(value_value)
-        }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onWillScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    onDidScrollAttribute(value: ScrollOnScrollCallback): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onDidScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onReachStartAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachStart(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onReachEndAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachEnd(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onReachEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onScrollStartAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStart(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onScrollStopAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStop(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     flingSpeedLimitAttribute(value: number): void {
@@ -3353,14 +3331,14 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isContentClipMode(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as ContentClipMode
-            thisSerializer.writeInt32(((value_0 as ContentClipMode) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.OBJECT == value_type) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as RectShape
             thisSerializer.writeRectShape(value_1)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_clipContent(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_clipContent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     edgeEffectAttribute(edgeEffect: EdgeEffect, options?: EdgeEffectOptions): void {
@@ -3372,7 +3350,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeEdgeEffectOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, ((edgeEffect as EdgeEffect) as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, edgeEffect.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fadingEdgeAttribute(enabled?: boolean, options?: FadingEdgeOptions): void {
@@ -3391,7 +3369,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeFadingEdgeOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_fadingEdge(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_fadingEdge(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

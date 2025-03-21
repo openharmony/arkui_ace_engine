@@ -42,7 +42,7 @@ export class CommonShape implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CommonShape_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CommonShape.ctor_commonshape()
         this.peer = new Finalizable(ctorPtr, CommonShape.getFinalizer())
     }
@@ -64,7 +64,7 @@ export class CommonShape implements MaterializedBase {
     private offset_serialize(offset: Position): CommonShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(offset)
-        const retval  = ArkUIGeneratedNativeModule._CommonShape_offset(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_offset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
         return obj
@@ -76,7 +76,7 @@ export class CommonShape implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -93,7 +93,7 @@ export class CommonShape implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._CommonShape_fill(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
         return obj
@@ -101,7 +101,7 @@ export class CommonShape implements MaterializedBase {
     private position_serialize(position: Position): CommonShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(position)
-        const retval  = ArkUIGeneratedNativeModule._CommonShape_position(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CommonShape_position(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : CommonShape = CommonShapeInternal.fromPtr(retval)
         return obj

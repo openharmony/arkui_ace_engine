@@ -16,7 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SymbolEffect, EffectScope } from "./ArkArkuiExternalInterfaces"
+import { SymbolEffect, SymbolEffectInternal } from "./ArkSymbolEffectMaterialized"
+import { EffectScope } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
@@ -31,11 +32,7 @@ export class ReplaceSymbolEffectInternal {
         return obj
     }
 }
-export class ReplaceSymbolEffect implements MaterializedBase,SymbolEffect {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
+export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBase {
     get scope(): EffectScope | undefined {
         return this.getScope()
     }
@@ -50,13 +47,14 @@ export class ReplaceSymbolEffect implements MaterializedBase,SymbolEffect {
         thisSerializer.writeInt8(scope_type as int32)
         if ((RuntimeType.UNDEFINED) != (scope_type)) {
             const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(((scope_value as EffectScope) as int32))
+            thisSerializer.writeInt32(scope_value.valueOf())
         }
-        const retval  = ArkUIGeneratedNativeModule._ReplaceSymbolEffect_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ReplaceSymbolEffect_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(scope?: EffectScope) {
+    constructor(scope?: EffectScope) {
+        super()
         const ctorPtr : KPointer = ReplaceSymbolEffect.ctor_replacesymboleffect((scope)!)
         this.peer = new Finalizable(ctorPtr, ReplaceSymbolEffect.getFinalizer())
     }
@@ -76,6 +74,6 @@ export class ReplaceSymbolEffect implements MaterializedBase,SymbolEffect {
         throw new Error("Object deserialization is not implemented.")
     }
     private setScope_serialize(scope: EffectScope): void {
-        ArkUIGeneratedNativeModule._ReplaceSymbolEffect_setScope(this.peer!.ptr, ((scope as EffectScope) as int32))
+        ArkUIGeneratedNativeModule._ReplaceSymbolEffect_setScope(this.peer!.ptr, scope.valueOf())
     }
 }

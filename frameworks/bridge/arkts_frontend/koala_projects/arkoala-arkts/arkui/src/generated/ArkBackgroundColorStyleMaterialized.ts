@@ -42,11 +42,11 @@ export class BackgroundColorStyle implements MaterializedBase {
     static ctor_backgroundcolorstyle(textBackgroundStyle: TextBackgroundStyle): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextBackgroundStyle(textBackgroundStyle)
-        const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(textBackgroundStyle?: TextBackgroundStyle) {
+    constructor(textBackgroundStyle?: TextBackgroundStyle) {
         if ((textBackgroundStyle) !== (undefined))
         {
             const ctorPtr : KPointer = BackgroundColorStyle.ctor_backgroundcolorstyle((textBackgroundStyle)!)
@@ -55,5 +55,14 @@ export class BackgroundColorStyle implements MaterializedBase {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._BackgroundColorStyle_getFinalizer()
+    }
+    private getTextBackgroundStyle(): TextBackgroundStyle {
+        return this.getTextBackgroundStyle_serialize()
+    }
+    private getTextBackgroundStyle_serialize(): TextBackgroundStyle {
+        const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : TextBackgroundStyle = retvalDeserializer.readTextBackgroundStyle()
+        return returnResult
     }
 }

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkGridItem")
-export declare function ArkGridItem(
+@BuildLambda("GridItem")
+export declare function GridItem(
     value?: GridItemOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkGridItemComponent
 
 @memo
-export declare function ArkGridItemImpl(
+export declare function GridItemImpl(
     @memo
     _style: ((attributes: ArkGridItemComponent) => void) | undefined,
     value?: GridItemOptions | undefined, 

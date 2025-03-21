@@ -47,7 +47,7 @@ export class ImageBitmap implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ImageBitmap_ctor(src)
         return retval
     }
-     constructor(src?: string) {
+    constructor(src?: string) {
         if ((src) !== (undefined))
         {
             const ctorPtr : KPointer = ImageBitmap.ctor_imagebitmap((src)!)

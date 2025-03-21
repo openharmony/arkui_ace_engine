@@ -41,7 +41,7 @@ export class LongPressGestureInterfaceInternal implements MaterializedBase,Gestu
         const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = LongPressGestureInterfaceInternal.ctor_longpressgestureinterface()
         this.peer = new Finalizable(ctorPtr, LongPressGestureInterfaceInternal.getFinalizer())
     }
@@ -63,7 +63,7 @@ export class LongPressGestureInterfaceInternal implements MaterializedBase,Gestu
     private onAction_serialize(event: ((event: GestureEvent) => void)): LongPressGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onAction(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onAction(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : LongPressGestureInterface = LongPressGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -71,7 +71,7 @@ export class LongPressGestureInterfaceInternal implements MaterializedBase,Gestu
     private onActionEnd_serialize(event: ((event: GestureEvent) => void)): LongPressGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : LongPressGestureInterface = LongPressGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -79,7 +79,7 @@ export class LongPressGestureInterfaceInternal implements MaterializedBase,Gestu
     private onActionCancel_serialize(event: (() => void)): LongPressGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._LongPressGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : LongPressGestureInterface = LongPressGestureInterfaceInternal.fromPtr(retval)
         return obj

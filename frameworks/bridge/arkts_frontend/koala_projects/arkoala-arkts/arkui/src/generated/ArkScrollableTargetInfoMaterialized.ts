@@ -36,7 +36,7 @@ export class ScrollableTargetInfo extends EventTargetInfo implements Materialize
         const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = ScrollableTargetInfo.ctor_scrollabletargetinfo()
         this.peer = new Finalizable(ctorPtr, ScrollableTargetInfo.getFinalizer())

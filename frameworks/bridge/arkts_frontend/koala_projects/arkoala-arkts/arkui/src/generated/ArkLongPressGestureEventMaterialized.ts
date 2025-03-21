@@ -41,7 +41,7 @@ export class LongPressGestureEventInternal extends BaseGestureEventInternal impl
         const retval  = ArkUIGeneratedNativeModule._LongPressGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = LongPressGestureEventInternal.ctor_longpressgestureevent()
         this.peer = new Finalizable(ctorPtr, LongPressGestureEventInternal.getFinalizer())

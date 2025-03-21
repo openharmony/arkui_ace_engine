@@ -45,7 +45,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -62,11 +62,11 @@ export class ProgressMask implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._ProgressMask_ctor(value, total, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ProgressMask_ctor(value, total, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: number, total?: number, color?: ResourceColor) {
+    constructor(value?: number, total?: number, color?: ResourceColor) {
         if (((value) !== (undefined)) || ((total) !== (undefined)) || ((color) !== (undefined)))
         {
             const ctorPtr : KPointer = ProgressMask.ctor_progressmask((value)!, (total)!, (color)!)
@@ -101,7 +101,7 @@ export class ProgressMask implements MaterializedBase {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -118,7 +118,7 @@ export class ProgressMask implements MaterializedBase {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._ProgressMask_updateColor(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ProgressMask_updateColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private enableBreathingAnimation_serialize(value: boolean): void {

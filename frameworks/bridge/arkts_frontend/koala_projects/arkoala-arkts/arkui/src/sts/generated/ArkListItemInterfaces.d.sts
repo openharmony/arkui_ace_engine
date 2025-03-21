@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkListItem")
-export declare function ArkListItem(
+@BuildLambda("ListItem")
+export declare function ListItem(
     value?: ListItemOptions | undefined | string | undefined | undefined, 
     @memo
     _content?: () => void,
 ): ArkListItemComponent
 
 @memo
-export declare function ArkListItemImpl(
+export declare function ListItemImpl(
     @memo
     _style: ((attributes: ArkListItemComponent) => void) | undefined,
     value?: ListItemOptions | undefined | string | undefined | undefined, 

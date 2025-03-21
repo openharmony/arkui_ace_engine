@@ -39,7 +39,7 @@ export class WebKeyboardController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebKeyboardController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebKeyboardController.ctor_webkeyboardcontroller()
         this.peer = new Finalizable(ctorPtr, WebKeyboardController.getFinalizer())
     }

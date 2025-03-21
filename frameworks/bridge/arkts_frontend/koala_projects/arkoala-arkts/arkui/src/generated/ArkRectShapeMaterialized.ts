@@ -59,11 +59,11 @@ export class RectShape implements MaterializedBase {
                 thisSerializer.writeRoundRectShapeOptions(options_value_1)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._RectShape_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(options?: RectShapeOptions | RoundRectShapeOptions) {
+    constructor(options?: RectShapeOptions | RoundRectShapeOptions) {
         const ctorPtr : KPointer = RectShape.ctor_rectshape((options)!)
         this.peer = new Finalizable(ctorPtr, RectShape.getFinalizer())
     }
@@ -109,7 +109,7 @@ export class RectShape implements MaterializedBase {
     private offset_serialize(offset: Position): RectShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(offset)
-        const retval  = ArkUIGeneratedNativeModule._RectShape_offset(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_offset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -121,7 +121,7 @@ export class RectShape implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -138,7 +138,7 @@ export class RectShape implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._RectShape_fill(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -146,7 +146,7 @@ export class RectShape implements MaterializedBase {
     private position_serialize(position: Position): RectShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(position)
-        const retval  = ArkUIGeneratedNativeModule._RectShape_position(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_position(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -164,7 +164,7 @@ export class RectShape implements MaterializedBase {
     private size_serialize(size: SizeOptions): RectShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(size)
-        const retval  = ArkUIGeneratedNativeModule._RectShape_size(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_size(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -183,7 +183,7 @@ export class RectShape implements MaterializedBase {
             const rWidth_1  = rWidth as string
             thisSerializer.writeString(rWidth_1)
         }
-        const retval  = ArkUIGeneratedNativeModule._RectShape_radiusWidth(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_radiusWidth(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -202,7 +202,7 @@ export class RectShape implements MaterializedBase {
             const rHeight_1  = rHeight as string
             thisSerializer.writeString(rHeight_1)
         }
-        const retval  = ArkUIGeneratedNativeModule._RectShape_radiusHeight(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_radiusHeight(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj
@@ -241,7 +241,7 @@ export class RectShape implements MaterializedBase {
                 }
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._RectShape_radius(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RectShape_radius(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : RectShape = RectShapeInternal.fromPtr(retval)
         return obj

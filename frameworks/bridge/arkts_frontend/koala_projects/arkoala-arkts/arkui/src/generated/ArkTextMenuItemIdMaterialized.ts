@@ -62,7 +62,7 @@ export class TextMenuItemId implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
@@ -115,7 +115,7 @@ export class TextMenuItemId implements MaterializedBase {
             const id_1  = id as Resource
             thisSerializer.writeResource(id_1)
         }
-        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_of(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TextMenuItemId_of(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj

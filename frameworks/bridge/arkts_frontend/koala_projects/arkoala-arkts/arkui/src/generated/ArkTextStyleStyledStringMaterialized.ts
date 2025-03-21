@@ -63,16 +63,19 @@ export class TextStyle_styled_string implements MaterializedBase {
             const value_value  = value!
             thisSerializer.writeTextStyleInterface(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: TextStyleInterface) {
+    constructor(value?: TextStyleInterface) {
         const ctorPtr : KPointer = TextStyle_styled_string.ctor_textstyle_styled_string((value)!)
         this.peer = new Finalizable(ctorPtr, TextStyle_styled_string.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextStyle_styled_string_getFinalizer()
+    }
+    private getFontColor(): ResourceColor {
+        return this.getFontColor_serialize()
     }
     private getFontFamily(): string {
         return this.getFontFamily_serialize()
@@ -85,6 +88,10 @@ export class TextStyle_styled_string implements MaterializedBase {
     }
     private getFontStyle(): FontStyle {
         return this.getFontStyle_serialize()
+    }
+    private getFontColor_serialize(): ResourceColor {
+        const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontColor(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
     }
     private getFontFamily_serialize(): string {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontFamily(this.peer!.ptr)

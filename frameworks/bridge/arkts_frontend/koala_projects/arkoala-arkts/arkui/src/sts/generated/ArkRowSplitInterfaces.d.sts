@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRowSplit")
-export declare function ArkRowSplit(
+@BuildLambda("RowSplit")
+export declare function RowSplit(
     
     @memo
     _content?: () => void,
 ): ArkRowSplitComponent
 
 @memo
-export declare function ArkRowSplitImpl(
+export declare function RowSplitImpl(
     @memo
     _style: ((attributes: ArkRowSplitComponent) => void) | undefined,
     

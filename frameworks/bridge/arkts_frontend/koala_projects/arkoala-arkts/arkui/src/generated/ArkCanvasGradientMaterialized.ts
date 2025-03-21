@@ -39,7 +39,7 @@ export class CanvasGradient implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CanvasGradient_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CanvasGradient.ctor_canvasgradient()
         this.peer = new Finalizable(ctorPtr, CanvasGradient.getFinalizer())
     }

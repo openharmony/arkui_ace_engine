@@ -40,7 +40,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         const retval  = ArkUIGeneratedNativeModule._LayoutManager_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = LayoutManagerInternal.ctor_layoutmanager()
         this.peer = new Finalizable(ctorPtr, LayoutManagerInternal.getFinalizer())
     }
@@ -84,7 +84,7 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
     private getRectsForRange_serialize(range: TextRange, widthStyle: RectWidthStyle, heightStyle: RectHeightStyle): Array<TextBox> {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextRange(range)
-        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), ((widthStyle as RectWidthStyle) as int32), ((heightStyle as RectHeightStyle) as int32))
+        const retval  = ArkUIGeneratedNativeModule._LayoutManager_getRectsForRange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), widthStyle.valueOf(), heightStyle.valueOf())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_length : int32 = retvalDeserializer.readInt32()

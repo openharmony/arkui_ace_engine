@@ -45,7 +45,7 @@ export class Scroller implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._Scroller_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = Scroller.ctor_scroller()
         this.peer = new Finalizable(ctorPtr, Scroller.getFinalizer())
     }
@@ -108,7 +108,7 @@ export class Scroller implements MaterializedBase {
     private scrollTo_serialize(options: ScrollOptions): undefined {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeScrollOptions(options)
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollTo(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -121,7 +121,7 @@ export class Scroller implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeScrollEdgeOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, ((value as Edge) as int32), thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollEdge(this.peer!.ptr, value.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -131,7 +131,7 @@ export class Scroller implements MaterializedBase {
     private scrollPage0_serialize(value: ScrollPageOptions): undefined {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeScrollPageOptions(value)
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -145,9 +145,9 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(value_direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
             const value_direction_value  = (value_direction as Axis)
-            thisSerializer.writeInt32(((value_direction_value as Axis) as int32))
+            thisSerializer.writeInt32(value_direction_value.valueOf())
         }
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollPage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -171,7 +171,7 @@ export class Scroller implements MaterializedBase {
         thisSerializer.writeInt8(align_type as int32)
         if ((RuntimeType.UNDEFINED) != (align_type)) {
             const align_value  = (align as ScrollAlign)
-            thisSerializer.writeInt32(((align_value as ScrollAlign) as int32))
+            thisSerializer.writeInt32(align_value.valueOf())
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -180,7 +180,7 @@ export class Scroller implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeScrollToIndexOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollToIndex(this.peer!.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Scroller_scrollToIndex(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

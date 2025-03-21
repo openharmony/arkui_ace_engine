@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, SymbolGlyphModifier, TextDecorationOptions } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Font, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -64,8 +63,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -90,7 +87,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeSearchOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._SearchInterface_setSearchOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchInterface_setSearchOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontColorAttribute(value: ResourceColor): void {
@@ -100,7 +97,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -117,7 +114,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_fontColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_fontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     searchIconAttribute(value: IconOptions | SymbolGlyphModifier): void {
@@ -134,7 +131,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_1  = value as SymbolGlyphModifier
             thisSerializer.writeSymbolGlyphModifier(value_1)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_searchIcon(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_searchIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     cancelButtonAttribute(value: CancelButtonOptions | CancelButtonSymbolOptions): void {
@@ -151,7 +148,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_1  = value as CancelButtonSymbolOptions
             thisSerializer.writeCancelButtonSymbolOptions(value_1)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_cancelButton(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_cancelButton(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     textIndentAttribute(value: Dimension): void {
@@ -160,7 +157,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
     onEditChangeAttribute(value: ((parameter: boolean) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onEditChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onEditChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     selectedBackgroundColorAttribute(value: ResourceColor): void {
@@ -170,7 +167,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -187,13 +184,13 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_selectedBackgroundColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_selectedBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     caretStyleAttribute(value: CaretStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCaretStyle(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_caretStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_caretStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     placeholderColorAttribute(value: ResourceColor): void {
@@ -203,7 +200,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -220,7 +217,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_placeholderColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_placeholderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     placeholderFontAttribute(value?: Font): void {
@@ -232,7 +229,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeFont(value_value)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_placeholderFont(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_placeholderFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     textFontAttribute(value?: Font): void {
@@ -244,68 +241,68 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeFont(value_value)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_textFont(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_textFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     enterKeyTypeAttribute(value: EnterKeyType): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_enterKeyType(this.peer.ptr, ((value as EnterKeyType) as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_enterKeyType(this.peer.ptr, value.valueOf())
     }
     onSubmit0Attribute(value: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onSubmit0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onSubmit0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onSubmit1Attribute(value: SearchSubmitCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onSubmit1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onSubmit1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onChangeAttribute(value: EditableTextOnChangeCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onTextSelectionChangeAttribute(value: OnTextSelectionChangeCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onTextSelectionChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onTextSelectionChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onContentScrollAttribute(value: OnContentScrollCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onContentScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onContentScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onCopyAttribute(value: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onCopy(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onCopy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onCutAttribute(value: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onCut(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onCut(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onPasteAttribute(value: OnPasteCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onPaste(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onPaste(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_copyOption(this.peer.ptr, value.valueOf())
     }
     maxLengthAttribute(value: number): void {
         ArkUIGeneratedNativeModule._SearchAttribute_maxLength(this.peer.ptr, value)
     }
     textAlignAttribute(value: TextAlign): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_textAlign(this.peer.ptr, ((value as TextAlign) as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_textAlign(this.peer.ptr, value.valueOf())
     }
     enableKeyboardOnFocusAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._SearchAttribute_enableKeyboardOnFocus(this.peer.ptr, value ? 1 : 0)
@@ -332,7 +329,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_minFontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_minFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     maxFontSizeAttribute(value: number | string | Resource): void {
@@ -354,13 +351,13 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_maxFontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_maxFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     decorationAttribute(value: TextDecorationOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextDecorationOptions(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_decoration(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_decoration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     letterSpacingAttribute(value: number | string | Resource): void {
@@ -382,7 +379,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_letterSpacing(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_letterSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     lineHeightAttribute(value: number | string | Resource): void {
@@ -404,11 +401,11 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_lineHeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_lineHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     typeAttribute(value: SearchType): void {
-        ArkUIGeneratedNativeModule._SearchAttribute_type(this.peer.ptr, ((value as SearchType) as int32))
+        ArkUIGeneratedNativeModule._SearchAttribute_type(this.peer.ptr, value.valueOf())
     }
     fontFeatureAttribute(value: string): void {
         ArkUIGeneratedNativeModule._SearchAttribute_fontFeature(this.peer.ptr, value)
@@ -416,25 +413,25 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
     onWillInsertAttribute(value: ((parameter: InsertValue) => boolean)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onWillInsert(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onWillInsert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDidInsertAttribute(value: ((parameter: InsertValue) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onDidInsert(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onDidInsert(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillDeleteAttribute(value: ((parameter: DeleteValue) => boolean)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onWillDelete(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onWillDelete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDidDeleteAttribute(value: ((parameter: DeleteValue) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SearchAttribute_onDidDelete(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_onDidDelete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     editMenuOptionsAttribute(value: EditMenuOptions): void {
@@ -455,7 +452,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const option_value  = option!
             thisSerializer.writeSearchButtonOptions(option_value)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_searchButton(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_searchButton(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     inputFilterAttribute(value: ResourceStr, error?: ((breakpoints: string) => void)): void {
@@ -479,7 +476,7 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const error_value  = error!
             thisSerializer.holdAndWriteCallback(error_value)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_inputFilter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_inputFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     customKeyboardAttribute(value: CustomBuilder, options?: KeyboardOptions): void {
@@ -492,13 +489,13 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeKeyboardOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._SearchAttribute_customKeyboard(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute_customKeyboard(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     _onChangeEvent_valueAttribute(callback: ((breakpoints: string) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._SearchAttribute__onChangeEvent_value(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchAttribute__onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

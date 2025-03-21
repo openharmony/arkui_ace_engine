@@ -64,11 +64,11 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
             const settings_value  = settings!
             thisSerializer.writeRenderingContextSettings(settings_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(settings?: RenderingContextSettings) {
+    constructor(settings?: RenderingContextSettings) {
         super()
         const ctorPtr : KPointer = CanvasRenderingContext2D.ctor_canvasrenderingcontext2d((settings)!)
         this.peer = new Finalizable(ctorPtr, CanvasRenderingContext2D.getFinalizer())
@@ -140,7 +140,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
             const quality_value  = quality!
             thisSerializer.writeFloat32(quality_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_toDataURL(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -148,7 +148,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeImageAnalyzerConfig(config)
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_startImageAnalyzer(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_startImageAnalyzer(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -158,7 +158,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     private onOnAttach_serialize(callback_: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private offOnAttach_serialize(callback_?: (() => void)): void {
@@ -170,13 +170,13 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private onOnDetach_serialize(callback_: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private offOnDetach_serialize(callback_?: (() => void)): void {
@@ -188,7 +188,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnDetach(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getHeight_serialize(): number {

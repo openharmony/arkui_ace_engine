@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkDataPanel")
-export declare function ArkDataPanel(
+@BuildLambda("DataPanel")
+export declare function DataPanel(
     options: DataPanelOptions, 
     @memo
     _content?: () => void,
 ): ArkDataPanelComponent
 
 @memo
-export declare function ArkDataPanelImpl(
+export declare function DataPanelImpl(
     @memo
     _style: ((attributes: ArkDataPanelComponent) => void) | undefined,
     options: DataPanelOptions, 

@@ -185,10 +185,6 @@ export interface MarkStyle {
     size?: Length;
     strokeWidth?: Length;
 }
-export interface TouchPoint {
-    x: Dimension;
-    y: Dimension;
-}
 export interface DirectionalEdgesT {
     start: number;
     end: number;

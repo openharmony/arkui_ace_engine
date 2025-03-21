@@ -41,7 +41,8 @@ void releaseManagedCallbackResource(InteropInt32 resourceId) {
     callbackResourceSubqueue.push_back(resourceId);
 }
 
-KInt impl_CheckCallbackEvent(KByte* result, KInt size) {
+KInt impl_CheckCallbackEvent(KSerializerBuffer buffer, KInt size) {
+    KByte* result = (KByte*)buffer;
     if (needReleaseFront)
     {
         switch (callbackEventsQueue.front())
@@ -82,7 +83,7 @@ KInt impl_CheckCallbackEvent(KByte* result, KInt size) {
     needReleaseFront = true;
     return 1;
 }
-KOALA_INTEROP_2(CheckCallbackEvent, KInt, KByte*, KInt)
+KOALA_INTEROP_DIRECT_2(CheckCallbackEvent, KInt, KSerializerBuffer, KInt)
 
 void impl_ReleaseCallbackResource(InteropInt32 resourceId) {
     releaseManagedCallbackResource(resourceId);

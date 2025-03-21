@@ -39,7 +39,7 @@ export class JsGeolocation implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._JsGeolocation_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = JsGeolocation.ctor_jsgeolocation()
         this.peer = new Finalizable(ctorPtr, JsGeolocation.getFinalizer())
     }

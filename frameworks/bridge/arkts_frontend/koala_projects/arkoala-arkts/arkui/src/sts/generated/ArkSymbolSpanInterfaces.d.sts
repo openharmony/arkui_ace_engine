@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSymbolSpan")
-export declare function ArkSymbolSpan(
+@BuildLambda("SymbolSpan")
+export declare function SymbolSpan(
     value: Resource, 
     @memo
     _content?: () => void,
 ): ArkSymbolSpanComponent
 
 @memo
-export declare function ArkSymbolSpanImpl(
+export declare function SymbolSpanImpl(
     @memo
     _style: ((attributes: ArkSymbolSpanComponent) => void) | undefined,
     value: Resource, 

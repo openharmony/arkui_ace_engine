@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRow")
-export declare function ArkRow(
+@BuildLambda("Row")
+export declare function Row(
     options?: RowOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkRowComponent
 
 @memo
-export declare function ArkRowImpl(
+export declare function RowImpl(
     @memo
     _style: ((attributes: ArkRowComponent) => void) | undefined,
     options?: RowOptions | undefined, 

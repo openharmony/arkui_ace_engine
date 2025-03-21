@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRadio")
-export declare function ArkRadio(
+@BuildLambda("Radio")
+export declare function Radio(
     options: RadioOptions, 
     @memo
     _content?: () => void,
 ): ArkRadioComponent
 
 @memo
-export declare function ArkRadioImpl(
+export declare function RadioImpl(
     @memo
     _style: ((attributes: ArkRadioComponent) => void) | undefined,
     options: RadioOptions, 

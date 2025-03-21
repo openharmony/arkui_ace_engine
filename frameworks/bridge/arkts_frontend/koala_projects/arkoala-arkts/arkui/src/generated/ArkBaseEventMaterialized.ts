@@ -28,13 +28,13 @@ export interface BaseEvent {
     target: EventTarget
     timestamp: number
     source: SourceType
-    axisHorizontal?: number
-    axisVertical?: number
+    axisHorizontal?: number | undefined
+    axisVertical?: number | undefined
     pressure: number
     tiltX: number
     tiltY: number
     sourceTool: SourceTool
-    deviceId?: number
+    deviceId?: number | undefined
     getModifierKeyState(keys: Array<string>): boolean
 }
 export class BaseEventInternal implements MaterializedBase,BaseEvent {
@@ -109,7 +109,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = BaseEventInternal.ctor_baseevent()
         this.peer = new Finalizable(ctorPtr, BaseEventInternal.getFinalizer())
     }
@@ -119,6 +119,9 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
     public getModifierKeyState(keys: Array<string>): boolean {
         const keys_casted = keys as (Array<string>)
         return this.getModifierKeyState_serialize(keys_casted)
+    }
+    private getTarget(): EventTarget {
+        return this.getTarget_serialize()
     }
     private setTarget(target: EventTarget): void {
         const target_casted = target as (EventTarget)
@@ -204,14 +207,20 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
             const keys_element : string = keys[i]
             thisSerializer.writeString(keys_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
+    }
+    private getTarget_serialize(): EventTarget {
+        const retval  = ArkUIGeneratedNativeModule._BaseEvent_getTarget(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : EventTarget = retvalDeserializer.readEventTarget()
+        return returnResult
     }
     private setTarget_serialize(target: EventTarget): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeEventTarget(target)
-        ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._BaseEvent_setTarget(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getTimestamp_serialize(): number {
@@ -226,7 +235,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setSource_serialize(source: SourceType): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, ((source as SourceType) as int32))
+        ArkUIGeneratedNativeModule._BaseEvent_setSource(this.peer!.ptr, source.valueOf())
     }
     private getAxisHorizontal_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getAxisHorizontal(this.peer!.ptr)
@@ -268,7 +277,7 @@ export class BaseEventInternal implements MaterializedBase,BaseEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setSourceTool_serialize(sourceTool: SourceTool): void {
-        ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, ((sourceTool as SourceTool) as int32))
+        ArkUIGeneratedNativeModule._BaseEvent_setSourceTool(this.peer!.ptr, sourceTool.valueOf())
     }
     private getDeviceId_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._BaseEvent_getDeviceId(this.peer!.ptr)

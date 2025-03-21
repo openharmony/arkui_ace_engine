@@ -27,7 +27,7 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface NavigationTransitionProxy {
     from: NavContentInfo
     to: NavContentInfo
-    isInteractive?: boolean
+    isInteractive?: boolean | undefined
     finishTransition(): void
     cancelTransition(): void
     updateTransition(progress: number): void
@@ -60,7 +60,7 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = NavigationTransitionProxyInternal.ctor_navigationtransitionproxy()
         this.peer = new Finalizable(ctorPtr, NavigationTransitionProxyInternal.getFinalizer())
     }
@@ -80,10 +80,16 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
         this.updateTransition_serialize(progress_casted)
         return
     }
+    private getFrom(): NavContentInfo {
+        return this.getFrom_serialize()
+    }
     private setFrom(from: NavContentInfo): void {
         const from_casted = from as (NavContentInfo)
         this.setFrom_serialize(from_casted)
         return
+    }
+    private getTo(): NavContentInfo {
+        return this.getTo_serialize()
     }
     private setTo(to: NavContentInfo): void {
         const to_casted = to as (NavContentInfo)
@@ -107,16 +113,28 @@ export class NavigationTransitionProxyInternal implements MaterializedBase,Navig
     private updateTransition_serialize(progress: number): void {
         ArkUIGeneratedNativeModule._NavigationTransitionProxy_updateTransition(this.peer!.ptr, progress)
     }
+    private getFrom_serialize(): NavContentInfo {
+        const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getFrom(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
+        return returnResult
+    }
     private setFrom_serialize(from: NavContentInfo): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeNavContentInfo(from)
-        ArkUIGeneratedNativeModule._NavigationTransitionProxy_setFrom(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationTransitionProxy_setFrom(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private getTo_serialize(): NavContentInfo {
+        const retval  = ArkUIGeneratedNativeModule._NavigationTransitionProxy_getTo(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : NavContentInfo = retvalDeserializer.readNavContentInfo()
+        return returnResult
     }
     private setTo_serialize(to: NavContentInfo): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeNavContentInfo(to)
-        ArkUIGeneratedNativeModule._NavigationTransitionProxy_setTo(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavigationTransitionProxy_setTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getIsInteractive_serialize(): boolean {

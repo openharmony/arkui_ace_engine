@@ -29,8 +29,8 @@ export interface UIExtensionProxy {
     sendSync(data: Map<string, Object>): Map<string, Object>
     onAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
     onSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
-    offAsyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
-    offSyncReceiverRegister(callback_: ((parameter: UIExtensionProxy) => void)): void
+    offAsyncReceiverRegister(callback_?: ((parameter: UIExtensionProxy) => void)): void
+    offSyncReceiverRegister(callback_?: ((parameter: UIExtensionProxy) => void)): void
 }
 export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionProxy {
     peer?: Finalizable | undefined = undefined
@@ -41,7 +41,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = UIExtensionProxyInternal.ctor_uiextensionproxy()
         this.peer = new Finalizable(ctorPtr, UIExtensionProxyInternal.getFinalizer())
     }
@@ -92,7 +92,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             thisSerializer.writeString(data_key)
             thisSerializer.writeCustomObject("Object", data_value)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_send(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private sendSync_serialize(data: Map<string, Object>): Map<string, Object> {
@@ -104,7 +104,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             thisSerializer.writeString(data_key)
             thisSerializer.writeCustomObject("Object", data_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._UIExtensionProxy_sendSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_size : int32 = retvalDeserializer.readInt32()
@@ -121,13 +121,13 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     private onAsyncReceiverRegister_serialize(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private onSyncReceiverRegister_serialize(callback_: ((parameter: UIExtensionProxy) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_onSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private offAsyncReceiverRegister_serialize(callback_?: ((parameter: UIExtensionProxy) => void)): void {
@@ -139,7 +139,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offAsyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private offSyncReceiverRegister_serialize(callback_?: ((parameter: UIExtensionProxy) => void)): void {
@@ -151,7 +151,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegister(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UIExtensionProxy_offSyncReceiverRegister(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): UIExtensionProxyInternal {

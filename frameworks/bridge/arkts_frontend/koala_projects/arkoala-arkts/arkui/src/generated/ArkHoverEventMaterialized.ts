@@ -40,7 +40,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         const retval  = ArkUIGeneratedNativeModule._HoverEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = HoverEventInternal.ctor_hoverevent()
         this.peer = new Finalizable(ctorPtr, HoverEventInternal.getFinalizer())
@@ -63,7 +63,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._HoverEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._HoverEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): HoverEventInternal {

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkWaterFlow")
-export declare function ArkWaterFlow(
+@BuildLambda("WaterFlow")
+export declare function WaterFlow(
     options?: WaterFlowOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkWaterFlowComponent
 
 @memo
-export declare function ArkWaterFlowImpl(
+export declare function WaterFlowImpl(
     @memo
     _style: ((attributes: ArkWaterFlowComponent) => void) | undefined,
     options?: WaterFlowOptions | undefined, 

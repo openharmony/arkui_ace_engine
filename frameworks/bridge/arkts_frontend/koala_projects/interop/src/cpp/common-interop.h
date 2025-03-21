@@ -40,8 +40,8 @@
 #define KOALA_MAYBE_LOG(name)
 #endif
 
-typedef void (*Callback_Caller_t)(KInt callbackKind, KByte* argsData, KInt argsLength);
-typedef void (*Callback_Caller_Sync_t)(KVMContext vmContext, KInt callbackKind, KByte* argsData, KInt argsLength);
+typedef void (*Callback_Caller_t)(KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
+typedef void (*Callback_Caller_Sync_t)(KVMContext vmContext, KInt callbackKind, KSerializerBuffer argsData, KInt argsLength);
 void setCallbackCaller(Callback_Caller_t caller);
 void setCallbackCallerSync(Callback_Caller_Sync_t callerSync);
 

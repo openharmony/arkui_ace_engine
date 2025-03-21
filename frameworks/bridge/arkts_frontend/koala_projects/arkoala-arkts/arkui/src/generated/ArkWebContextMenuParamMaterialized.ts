@@ -40,7 +40,7 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebContextMenuParam.ctor_webcontextmenuparam()
         this.peer = new Finalizable(ctorPtr, WebContextMenuParam.getFinalizer())
     }

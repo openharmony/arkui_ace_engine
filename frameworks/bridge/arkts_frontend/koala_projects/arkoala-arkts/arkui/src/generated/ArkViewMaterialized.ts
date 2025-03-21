@@ -39,7 +39,7 @@ export class View implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._View_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = View.ctor_view()
         this.peer = new Finalizable(ctorPtr, View.getFinalizer())
     }
@@ -53,7 +53,7 @@ export class View implements MaterializedBase {
     private create_serialize(value: object): object {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomObject("Any", value)
-        const retval  = ArkUIGeneratedNativeModule._View_create(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._View_create(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

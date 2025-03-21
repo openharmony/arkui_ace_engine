@@ -48,11 +48,11 @@ export class PathShape implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writePathShapeOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._PathShape_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PathShape_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(options?: PathShapeOptions) {
+    constructor(options?: PathShapeOptions) {
         const ctorPtr : KPointer = PathShape.ctor_pathshape((options)!)
         this.peer = new Finalizable(ctorPtr, PathShape.getFinalizer())
     }
@@ -78,7 +78,7 @@ export class PathShape implements MaterializedBase {
     private offset_serialize(offset: Position): PathShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(offset)
-        const retval  = ArkUIGeneratedNativeModule._PathShape_offset(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PathShape_offset(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PathShape = PathShapeInternal.fromPtr(retval)
         return obj
@@ -90,7 +90,7 @@ export class PathShape implements MaterializedBase {
         if (TypeChecker.isColor(color)) {
             thisSerializer.writeInt8(0 as int32)
             const color_0  = color as Color
-            thisSerializer.writeInt32(((color_0 as Color) as int32))
+            thisSerializer.writeInt32(color_0.valueOf())
         }
         else if (RuntimeType.NUMBER == color_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -107,7 +107,7 @@ export class PathShape implements MaterializedBase {
             const color_3  = color as Resource
             thisSerializer.writeResource(color_3)
         }
-        const retval  = ArkUIGeneratedNativeModule._PathShape_fill(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PathShape_fill(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PathShape = PathShapeInternal.fromPtr(retval)
         return obj
@@ -115,7 +115,7 @@ export class PathShape implements MaterializedBase {
     private position_serialize(position: Position): PathShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(position)
-        const retval  = ArkUIGeneratedNativeModule._PathShape_position(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PathShape_position(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PathShape = PathShapeInternal.fromPtr(retval)
         return obj

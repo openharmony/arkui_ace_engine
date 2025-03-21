@@ -16,7 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SymbolEffect, EffectScope, EffectDirection } from "./ArkArkuiExternalInterfaces"
+import { SymbolEffect, SymbolEffectInternal } from "./ArkSymbolEffectMaterialized"
+import { EffectScope, EffectDirection } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
@@ -31,11 +32,7 @@ export class BounceSymbolEffectInternal {
         return obj
     }
 }
-export class BounceSymbolEffect implements MaterializedBase,SymbolEffect {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
+export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase {
     get scope(): EffectScope | undefined {
         return this.getScope()
     }
@@ -57,20 +54,21 @@ export class BounceSymbolEffect implements MaterializedBase,SymbolEffect {
         thisSerializer.writeInt8(scope_type as int32)
         if ((RuntimeType.UNDEFINED) != (scope_type)) {
             const scope_value  = (scope as EffectScope)
-            thisSerializer.writeInt32(((scope_value as EffectScope) as int32))
+            thisSerializer.writeInt32(scope_value.valueOf())
         }
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8(direction_type as int32)
         if ((RuntimeType.UNDEFINED) != (direction_type)) {
             const direction_value  = (direction as EffectDirection)
-            thisSerializer.writeInt32(((direction_value as EffectDirection) as int32))
+            thisSerializer.writeInt32(direction_value.valueOf())
         }
-        const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(scope?: EffectScope, direction?: EffectDirection) {
+    constructor(scope?: EffectScope, direction?: EffectDirection) {
+        super()
         const ctorPtr : KPointer = BounceSymbolEffect.ctor_bouncesymboleffect((scope)!, (direction)!)
         this.peer = new Finalizable(ctorPtr, BounceSymbolEffect.getFinalizer())
     }
@@ -98,13 +96,13 @@ export class BounceSymbolEffect implements MaterializedBase,SymbolEffect {
         throw new Error("Object deserialization is not implemented.")
     }
     private setScope_serialize(scope: EffectScope): void {
-        ArkUIGeneratedNativeModule._BounceSymbolEffect_setScope(this.peer!.ptr, ((scope as EffectScope) as int32))
+        ArkUIGeneratedNativeModule._BounceSymbolEffect_setScope(this.peer!.ptr, scope.valueOf())
     }
     private getDirection_serialize(): EffectDirection {
         const retval  = ArkUIGeneratedNativeModule._BounceSymbolEffect_getDirection(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private setDirection_serialize(direction: EffectDirection): void {
-        ArkUIGeneratedNativeModule._BounceSymbolEffect_setDirection(this.peer!.ptr, ((direction as EffectDirection) as int32))
+        ArkUIGeneratedNativeModule._BounceSymbolEffect_setDirection(this.peer!.ptr, direction.valueOf())
     }
 }

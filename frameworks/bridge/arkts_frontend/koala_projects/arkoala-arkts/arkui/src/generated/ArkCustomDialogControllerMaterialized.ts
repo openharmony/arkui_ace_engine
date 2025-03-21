@@ -39,11 +39,11 @@ export class CustomDialogController implements MaterializedBase {
     static ctor_customdialogcontroller(value: CustomDialogControllerOptions): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomDialogControllerOptions(value)
-        const retval  = ArkUIGeneratedNativeModule._CustomDialogController_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CustomDialogController_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: CustomDialogControllerOptions) {
+    constructor(value?: CustomDialogControllerOptions) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)

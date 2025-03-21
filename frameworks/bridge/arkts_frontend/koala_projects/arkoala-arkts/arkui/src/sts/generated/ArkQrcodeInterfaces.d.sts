@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkQRCode")
-export declare function ArkQRCode(
+@BuildLambda("QRCode")
+export declare function QRCode(
     value: string, 
     @memo
     _content?: () => void,
 ): ArkQRCodeComponent
 
 @memo
-export declare function ArkQRCodeImpl(
+export declare function QRCodeImpl(
     @memo
     _style: ((attributes: ArkQRCodeComponent) => void) | undefined,
     value: string, 

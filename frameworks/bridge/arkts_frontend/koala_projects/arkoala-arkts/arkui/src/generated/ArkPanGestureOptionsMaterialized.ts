@@ -58,7 +58,7 @@ export class PanGestureOptions implements MaterializedBase {
             thisSerializer.writeInt8(value_value_direction_type as int32)
             if ((RuntimeType.UNDEFINED) != (value_value_direction_type)) {
                 const value_value_direction_value  = (value_value_direction as PanDirection)
-                thisSerializer.writeInt32(((value_value_direction_value as PanDirection) as int32))
+                thisSerializer.writeInt32(value_value_direction_value.valueOf())
             }
             const value_value_distance  = value_value.distance
             let value_value_distance_type : int32 = RuntimeType.UNDEFINED
@@ -69,11 +69,11 @@ export class PanGestureOptions implements MaterializedBase {
                 thisSerializer.writeNumber(value_value_distance_value)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: Literal_Number_distance_fingers_PanDirection_direction) {
+    constructor(value?: Literal_Number_distance_fingers_PanDirection_direction) {
         const ctorPtr : KPointer = PanGestureOptions.ctor_pangestureoptions((value)!)
         this.peer = new Finalizable(ctorPtr, PanGestureOptions.getFinalizer())
     }
@@ -96,7 +96,7 @@ export class PanGestureOptions implements MaterializedBase {
         return this.getDirection_serialize()
     }
     private setDirection_serialize(value: PanDirection): undefined {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, ((value as PanDirection) as int32))
+        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, value.valueOf())
         return retval
     }
     private setDistance_serialize(value: number): undefined {

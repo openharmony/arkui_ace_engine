@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkMarquee")
-export declare function ArkMarquee(
+@BuildLambda("Marquee")
+export declare function Marquee(
     options: MarqueeOptions, 
     @memo
     _content?: () => void,
 ): ArkMarqueeComponent
 
 @memo
-export declare function ArkMarqueeImpl(
+export declare function MarqueeImpl(
     @memo
     _style: ((attributes: ArkMarqueeComponent) => void) | undefined,
     options: MarqueeOptions, 

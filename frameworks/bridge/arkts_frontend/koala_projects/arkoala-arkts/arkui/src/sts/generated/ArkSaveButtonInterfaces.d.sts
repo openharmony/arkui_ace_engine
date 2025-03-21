@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSaveButton")
-export declare function ArkSaveButton(
+@BuildLambda("SaveButton")
+export declare function SaveButton(
     options?: SaveButtonOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkSaveButtonComponent
 
 @memo
-export declare function ArkSaveButtonImpl(
+export declare function SaveButtonImpl(
     @memo
     _style: ((attributes: ArkSaveButtonComponent) => void) | undefined,
     options?: SaveButtonOptions | undefined, 

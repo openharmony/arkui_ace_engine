@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import { float32, int32, int64, float32FromBits } from "@koalaui/common"
-import { pointer, KUint8ArrayPtr } from "./InteropTypes"
-import { KBuffer } from "./buffer"
+import { float32, int32, int64, float32FromBits, uint8 } from "@koalaui/common"
+import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { Tags, CallbackResource } from "./SerializerBase";
+import { ResourceHolder } from "./ResourceManager"
 
 export class DeserializerBase {
     private position = 0
-    private readonly buffer: KBuffer
-    private readonly length: int32
+    private readonly _buffer: KSerializerBuffer
+    private readonly _length: int32
     private static customDeserializers: CustomDeserializer | undefined = new DateDeserializer()
 
     static registerCustomDeserializer(deserializer: CustomDeserializer) {
@@ -38,61 +38,69 @@ export class DeserializerBase {
         }
     }
 
-    constructor(buffer: KUint8ArrayPtr, length: int32) {
-        this.buffer = new KBuffer(buffer)
-        this.length = length
+    constructor(buffer: KUint8ArrayPtr|KSerializerBuffer, length: int32) {
+        if (buffer instanceof KUint8ArrayPtr) {
+            this._buffer = InteropNativeModule._Malloc(length)
+            for (let i = 0; i < length; i++) {
+                DeserializerBase.writeu8(this._buffer, i, length, buffer[i])
+            }
+        } else {
+            this._buffer = buffer
+        }
+        this._length = length
     }
 
-    static get<T extends DeserializerBase>(
-        factory: (args: Uint8Array, length: int32) => T,
-        args: Uint8Array, length: int32): T {
-
-        // TBD: Use cache
-        return factory(args, length);
+    // TODO: get rid of length.
+    private static writeu8(buffer: KSerializerBuffer, offset: int32, length: int32, value: int32): void {
+        InteropNativeModule._WriteByte(buffer, offset as int64, length as int64, value as uint8)
+    }
+    // TODO: get rid of length.
+    private static readu8(buffer: KSerializerBuffer, offset: int32, length: int32): int32 {
+        return (InteropNativeModule._ReadByte(buffer, offset as int64, length as int64) as byte) & 0xff
     }
 
-    asArray(): KUint8ArrayPtr {
-        return this.buffer.buffer
+    final asBuffer(): KSerializerBuffer {
+        return this._buffer
     }
 
-    currentPosition(): int32 {
+    final currentPosition(): int32 {
         return this.position
     }
 
-    resetCurrentPosition(): void {
+    final resetCurrentPosition(): void {
         this.position = 0
     }
 
     private checkCapacity(value: int32) {
-        if (value > this.length) {
+        if (value > this._length) {
             throw new Error(`${value} is less than remaining buffer length`)
         }
     }
 
-    readInt8(): int32 {
+    final readInt8(): int32 {
         this.checkCapacity(1)
-        const value = this.buffer.get(this.position)
+        const value = DeserializerBase.readu8(this._buffer, this.position, this._length)
         this.position += 1
         return value
     }
 
-    readInt32(): int32 {
+    final readInt32(): int32 {
         this.checkCapacity(4)
         let res: int32 = 0;
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.buffer.get(this.position + i) as int32;
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int32
             byteVal &= 0xff
-            res = (res | byteVal << (8 * i)) as int32;
+            res = (res | byteVal << (8 * i)) as int32
         }
         this.position += 4
         return res
     }
 
-    readPointer(): pointer {
+    final readPointer(): pointer {
         this.checkCapacity(8)
         let res: int64 = 0;
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.buffer.get(this.position + i) as int64;
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int64;
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as int64;
         }
@@ -100,11 +108,11 @@ export class DeserializerBase {
         return res
     }
 
-    readInt64(): int64 {
+    final readInt64(): int64 {
         this.checkCapacity(8)
         let res: int64 = 0;
         for (let i = 0; i < 8; i++) {
-            let byteVal = this.buffer.get(this.position + i) as int64;
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int64;
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as int64;
         }
@@ -112,11 +120,11 @@ export class DeserializerBase {
         return res
     }
 
-    readFloat32(): float32 {
+    final readFloat32(): float32 {
         this.checkCapacity(4)
         let res: int32 = 0;
         for (let i = 0; i < 4; i++) {
-            let byteVal = this.buffer.get(this.position + i) as int32;
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int32;
             byteVal &= 0xff
             res = (res | byteVal << (8 * i)) as int32;
         }
@@ -124,9 +132,9 @@ export class DeserializerBase {
         return float32FromBits(res)
     }
 
-    readBoolean(): boolean {
+    final readBoolean(): boolean {
         this.checkCapacity(1)
-        const value = this.buffer.get(this.position)
+        const value = DeserializerBase.readu8(this._buffer, this.position, this._length)
         this.position += 1
         return value == 1
     }
@@ -142,7 +150,7 @@ export class DeserializerBase {
     //     return { ptr: ptr }
     // }
 
-    readCallbackResource(): CallbackResource {
+    final readCallbackResource(): CallbackResource {
         return ({
             resourceId: this.readInt32(),
             hold: this.readPointer(),
@@ -150,16 +158,16 @@ export class DeserializerBase {
         } as CallbackResource)
     }
 
-    readString(): string {
+    final readString(): string {
         const length = this.readInt32()
         this.checkCapacity(length)
         // read without null-terminated byte
-        const value = InteropNativeModule._Utf8ToString(this.buffer.buffer, this.position, length)
+        const value = InteropNativeModule._Utf8ToString(this._buffer, this.position, length)
         this.position += length
         return value
     }
 
-    readCustomObject(kind: string): object {
+    final readCustomObject(kind: string): object {
         let current = DeserializerBase.customDeserializers
         while (current) {
             if (current!.supports(kind)) {
@@ -172,7 +180,7 @@ export class DeserializerBase {
         throw Error(`${kind} is not supported`)
     }
 
-    readNumber(): number | undefined {
+    final readNumber(): number | undefined {
         const tag = this.readInt8()
         if (tag == Tags.UNDEFINED) {
             return undefined
@@ -183,6 +191,11 @@ export class DeserializerBase {
         } else {
             throw new Error(`Unknown number tag: ${tag}`)
         }
+    }
+
+    readObject():object {
+        const resource = this.readCallbackResource()
+        return ResourceHolder.instance().get(resource.resourceId)
     }
 
     static lengthUnitFromInt(unit: int32): string {
@@ -206,16 +219,12 @@ export class DeserializerBase {
         return suffix
     }
 
-    readBuffer(): NativeBuffer {
+    final readBuffer(): NativeBuffer {
         /* not implemented */
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
         return NativeBuffer.wrap(data, length, resource.resourceId, resource.hold, resource.release)
-    }
-
-    readUint8ClampedArray(): Uint8ClampedArray {
-        throw new Error("Not implemented")
     }
 }
 

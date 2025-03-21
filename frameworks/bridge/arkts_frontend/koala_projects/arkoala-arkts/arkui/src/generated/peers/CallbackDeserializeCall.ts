@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
 import { CallbackKind } from "./CallbackKind"
 import { Deserializer } from "./Deserializer"
 import { int32, float32, int64 } from "@koalaui/common"
-import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, KPointer, RuntimeType } from "@koalaui/interop"
+import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, KPointer, RuntimeType, KSerializerBuffer } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, TouchTestInfo, TouchResult, CustomBuilder, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragItemInfo, ItemDragInfo, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { AccessibilityHoverEvent } from "./../ArkAccessibilityHoverEventMaterialized"
@@ -95,7 +98,6 @@ import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
 import { BottomTabBarStyle } from "./../ArkBottomTabBarStyleBuilder"
-
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -1473,7 +1475,8 @@ export function deserializeAndCallMenuOnAppearCallback(thisDeserializer: Deseria
 export function deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as NavExtender_OnUpdateStack)
-    _call()
+    let name : string = (thisDeserializer.readString() as string)
+    _call(name)
 }
 export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()

@@ -40,7 +40,7 @@ export class FileSelectorParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorParam_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = FileSelectorParam.ctor_fileselectorparam()
         this.peer = new Finalizable(ctorPtr, FileSelectorParam.getFinalizer())
     }

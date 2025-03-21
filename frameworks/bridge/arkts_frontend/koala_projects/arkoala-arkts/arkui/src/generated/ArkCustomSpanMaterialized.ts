@@ -41,7 +41,7 @@ export class CustomSpan implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CustomSpan_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CustomSpan.ctor_customspan()
         this.peer = new Finalizable(ctorPtr, CustomSpan.getFinalizer())
     }
@@ -65,7 +65,7 @@ export class CustomSpan implements MaterializedBase {
     private onMeasure_serialize(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
@@ -75,7 +75,7 @@ export class CustomSpan implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDrawContext(context)
         thisSerializer.writeCustomSpanDrawInfo(drawInfo)
-        ArkUIGeneratedNativeModule._CustomSpan_onDraw(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CustomSpan_onDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private invalidate_serialize(): void {

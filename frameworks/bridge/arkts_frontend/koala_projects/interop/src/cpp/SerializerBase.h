@@ -90,6 +90,10 @@ public:
         data(data), dataLength(dataLength), position(0), ownData(false), resourceHolder(resourceHolder) {
     }
 
+    SerializerBase(KSerializerBuffer data, uint32_t dataLength, CallbackResourceHolder* resourceHolder = nullptr):
+        data(reinterpret_cast<uint8_t*>(data)), dataLength(dataLength), position(0), ownData(false), resourceHolder(resourceHolder) {
+    }
+
     virtual ~SerializerBase() {
         if (ownData) {
             free(data);
@@ -239,6 +243,10 @@ public:
         if (this->resourceHolder != nullptr) {
             this->resourceHolder->holdCallbackResource(&resource);
         }
+    }
+
+    void writeObject(InteropObject any) {
+        writeCallbackResource(any.resource);
     }
 
     void writeCustomObject(std::string type, InteropCustomObject value) {

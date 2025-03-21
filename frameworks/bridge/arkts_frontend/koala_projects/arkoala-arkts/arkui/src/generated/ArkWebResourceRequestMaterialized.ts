@@ -40,7 +40,7 @@ export class WebResourceRequest implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceRequest_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebResourceRequest.ctor_webresourcerequest()
         this.peer = new Finalizable(ctorPtr, WebResourceRequest.getFinalizer())
     }

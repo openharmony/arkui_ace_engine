@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSideBarContainer")
-export declare function ArkSideBarContainer(
+@BuildLambda("SideBarContainer")
+export declare function SideBarContainer(
     type?: SideBarContainerType | undefined, 
     @memo
     _content?: () => void,
 ): ArkSideBarContainerComponent
 
 @memo
-export declare function ArkSideBarContainerImpl(
+export declare function SideBarContainerImpl(
     @memo
     _style: ((attributes: ArkSideBarContainerComponent) => void) | undefined,
     type?: SideBarContainerType | undefined, 

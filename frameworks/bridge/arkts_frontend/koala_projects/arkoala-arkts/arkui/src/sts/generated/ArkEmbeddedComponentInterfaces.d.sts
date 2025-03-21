@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkEmbeddedComponent")
-export declare function ArkEmbeddedComponent(
+@BuildLambda("EmbeddedComponent")
+export declare function EmbeddedComponent(
     loader: Want, type: EmbeddedType, 
     @memo
     _content?: () => void,
 ): ArkEmbeddedComponentComponent
 
 @memo
-export declare function ArkEmbeddedComponentImpl(
+export declare function EmbeddedComponentImpl(
     @memo
     _style: ((attributes: ArkEmbeddedComponentComponent) => void) | undefined,
     loader: Want, type: EmbeddedType, 

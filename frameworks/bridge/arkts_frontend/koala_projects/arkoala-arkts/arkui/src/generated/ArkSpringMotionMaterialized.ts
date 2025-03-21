@@ -40,7 +40,7 @@ export class SpringMotion implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._SpringMotion_ctor(start, end, velocity, toPeerPtr(prop))
         return retval
     }
-     constructor(start?: number, end?: number, velocity?: number, prop?: SpringProp) {
+    constructor(start?: number, end?: number, velocity?: number, prop?: SpringProp) {
         if (((start) !== (undefined)) || ((end) !== (undefined)) || ((velocity) !== (undefined)) || ((prop) !== (undefined)))
         {
             const ctorPtr : KPointer = SpringMotion.ctor_springmotion((start)!, (end)!, (velocity)!, (prop)!)

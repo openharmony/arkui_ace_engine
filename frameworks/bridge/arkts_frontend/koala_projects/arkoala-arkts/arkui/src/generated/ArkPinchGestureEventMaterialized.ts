@@ -55,7 +55,7 @@ export class PinchGestureEventInternal extends BaseGestureEventInternal implemen
         const retval  = ArkUIGeneratedNativeModule._PinchGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = PinchGestureEventInternal.ctor_pinchgestureevent()
         this.peer = new Finalizable(ctorPtr, PinchGestureEventInternal.getFinalizer())

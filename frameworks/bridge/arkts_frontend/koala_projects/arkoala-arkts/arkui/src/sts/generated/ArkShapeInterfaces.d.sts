@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkShape")
-export declare function ArkShape(
+@BuildLambda("Shape")
+export declare function Shape(
     value?: PixelMap | undefined, 
     @memo
     _content?: () => void,
 ): ArkShapeComponent
 
 @memo
-export declare function ArkShapeImpl(
+export declare function ShapeImpl(
     @memo
     _style: ((attributes: ArkShapeComponent) => void) | undefined,
     value?: PixelMap | undefined, 

@@ -45,11 +45,11 @@ export class GestureStyle implements MaterializedBase {
             const value_value  = value!
             thisSerializer.writeGestureStyleInterface(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._GestureStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._GestureStyle_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: GestureStyleInterface) {
+    constructor(value?: GestureStyleInterface) {
         const ctorPtr : KPointer = GestureStyle.ctor_gesturestyle((value)!)
         this.peer = new Finalizable(ctorPtr, GestureStyle.getFinalizer())
     }

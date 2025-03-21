@@ -15,7 +15,7 @@
 
 import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, scheduleCallback } from "@koalaui/runtime"
 import { int32, int64, scheduleCoroutine } from "@koalaui/common"
-import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName } from "@koalaui/interop"
+import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "./generated/ArkEventEmulatorMaterialized"
@@ -136,7 +136,7 @@ function drawCurrentCrash(crash: Object) {
 }
 
 function registerSyncCallbackProcessor() {
-    wrapSystemCallback(1, (buff:KUint8ArrayPtr, len:int32) => {
+    wrapSystemCallback(1, (buff:KSerializerBuffer, len:int32) => {
         deserializeAndCallCallback(new Deserializer(buff, len))
         return 0
     })

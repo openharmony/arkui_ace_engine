@@ -50,7 +50,7 @@ import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./Ark
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute } from "./ArkSymbolglyphInterfaces"
-import { SymbolEffect } from "./ArkArkuiExternalInterfaces"
+import { SymbolEffect } from "./ArkSymbolEffectMaterialized"
 import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
 import { ArkSymbolGlyphNode } from "../handwritten/modifiers/ArkSymbolGlyphNode"
 import { ArkSymbolGlyphAttributeSet, SymbolGlyphModifier } from "../handwritten/modifiers/ArkSymbolGlyphModifier"

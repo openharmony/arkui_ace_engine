@@ -40,7 +40,7 @@ export class PatternLockController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._PatternLockController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PatternLockController.ctor_patternlockcontroller()
         this.peer = new Finalizable(ctorPtr, PatternLockController.getFinalizer())
     }
@@ -60,6 +60,6 @@ export class PatternLockController implements MaterializedBase {
         return retval
     }
     private setChallengeResult_serialize(result: PatternLockChallengeResult): void {
-        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, ((result as PatternLockChallengeResult) as int32))
+        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, result.valueOf())
     }
 }

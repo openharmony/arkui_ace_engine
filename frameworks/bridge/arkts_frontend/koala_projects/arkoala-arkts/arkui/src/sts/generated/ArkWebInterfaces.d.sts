@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkWeb")
-export declare function ArkWeb(
+@BuildLambda("Web")
+export declare function Web(
     value: WebOptions, 
     @memo
     _content?: () => void,
 ): ArkWebComponent
 
 @memo
-export declare function ArkWebImpl(
+export declare function WebImpl(
     @memo
     _style: ((attributes: ArkWebComponent) => void) | undefined,
     value: WebOptions, 

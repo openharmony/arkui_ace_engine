@@ -17,20 +17,17 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Axis } from "./../ArkEnumsInterfaces"
 import { CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle, CalendarSelectedDate, CalendarRequestedData, MonthData, CalendarAttribute } from "./../ArkCalendarInterfaces"
 import { Callback_CalendarSelectedDate_Void, Callback_CalendarRequestedData_Void, Type_CalendarInterface_value, Literal_Number_day_month_year } from "./../SyntheticDeclarations"
 import { CalendarController } from "./../ArkCalendarControllerMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -69,7 +66,7 @@ export class ArkCalendarPeer extends PeerNode {
             const value_controller_value  = value_controller!
             thisSerializer.writeCalendarController(value_controller_value)
         }
-        ArkUIGeneratedNativeModule._CalendarInterface_setCalendarOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarInterface_setCalendarOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     showLunarAttribute(value: boolean): void {
@@ -88,48 +85,48 @@ export class ArkCalendarPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CalendarAttribute_offDays(this.peer.ptr, value)
     }
     directionAttribute(value: Axis): void {
-        ArkUIGeneratedNativeModule._CalendarAttribute_direction(this.peer.ptr, ((value as Axis) as int32))
+        ArkUIGeneratedNativeModule._CalendarAttribute_direction(this.peer.ptr, value.valueOf())
     }
     currentDayStyleAttribute(value: CurrentDayStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeCurrentDayStyle(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_currentDayStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_currentDayStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     nonCurrentDayStyleAttribute(value: NonCurrentDayStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeNonCurrentDayStyle(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_nonCurrentDayStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_nonCurrentDayStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     todayStyleAttribute(value: TodayStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTodayStyle(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_todayStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_todayStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     weekStyleAttribute(value: WeekStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeWeekStyle(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_weekStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_weekStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     workStateStyleAttribute(value: WorkStateStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeWorkStateStyle(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_workStateStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_workStateStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onSelectChangeAttribute(value: ((event: CalendarSelectedDate) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_onSelectChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_onSelectChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onRequestDataAttribute(value: ((event: CalendarRequestedData) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._CalendarAttribute_onRequestData(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CalendarAttribute_onRequestData(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

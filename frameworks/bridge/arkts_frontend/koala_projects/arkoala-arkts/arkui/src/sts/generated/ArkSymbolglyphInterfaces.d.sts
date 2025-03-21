@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSymbolGlyph")
-export declare function ArkSymbolGlyph(
+@BuildLambda("SymbolGlyph")
+export declare function SymbolGlyph(
     value?: Resource | undefined, 
     @memo
     _content?: () => void,
 ): ArkSymbolGlyphComponent
 
 @memo
-export declare function ArkSymbolGlyphImpl(
+export declare function SymbolGlyphImpl(
     @memo
     _style: ((attributes: ArkSymbolGlyphComponent) => void) | undefined,
     value?: Resource | undefined, 

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCalendar")
-export declare function ArkCalendar(
+@BuildLambda("Calendar")
+export declare function Calendar(
     value: Type_CalendarInterface_value, 
     @memo
     _content?: () => void,
 ): ArkCalendarComponent
 
 @memo
-export declare function ArkCalendarImpl(
+export declare function CalendarImpl(
     @memo
     _style: ((attributes: ArkCalendarComponent) => void) | undefined,
     value: Type_CalendarInterface_value, 

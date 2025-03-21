@@ -41,7 +41,7 @@ export class BaseShape implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._BaseShape_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = BaseShape.ctor_baseshape()
         this.peer = new Finalizable(ctorPtr, BaseShape.getFinalizer())
     }
@@ -73,7 +73,7 @@ export class BaseShape implements MaterializedBase {
     private size_serialize(size: SizeOptions): BaseShape {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(size)
-        const retval  = ArkUIGeneratedNativeModule._BaseShape_size(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._BaseShape_size(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : BaseShape = BaseShapeInternal.fromPtr(retval)
         return obj

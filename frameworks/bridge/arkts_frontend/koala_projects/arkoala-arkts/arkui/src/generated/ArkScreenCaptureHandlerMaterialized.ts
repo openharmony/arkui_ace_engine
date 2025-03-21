@@ -40,7 +40,7 @@ export class ScreenCaptureHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ScreenCaptureHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = ScreenCaptureHandler.ctor_screencapturehandler()
         this.peer = new Finalizable(ctorPtr, ScreenCaptureHandler.getFinalizer())
     }
@@ -66,7 +66,7 @@ export class ScreenCaptureHandler implements MaterializedBase {
     private grant_serialize(config: ScreenCaptureConfig): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeScreenCaptureConfig(config)
-        ArkUIGeneratedNativeModule._ScreenCaptureHandler_grant(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ScreenCaptureHandler_grant(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private deny_serialize(): void {

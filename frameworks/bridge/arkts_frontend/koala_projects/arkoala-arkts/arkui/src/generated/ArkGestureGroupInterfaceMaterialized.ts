@@ -43,7 +43,7 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
         const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = GestureGroupInterfaceInternal.ctor_gesturegroupinterface()
         this.peer = new Finalizable(ctorPtr, GestureGroupInterfaceInternal.getFinalizer())
     }
@@ -57,7 +57,7 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
     private onCancel_serialize(event: (() => void)): GestureGroupInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_onCancel(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._GestureGroupInterface_onCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : GestureGroupInterface = GestureGroupInterfaceInternal.fromPtr(retval)
         return obj

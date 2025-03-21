@@ -147,6 +147,16 @@ struct InteropTypeConverter<KInteropBuffer> {
 };
 
 template<>
+struct InteropTypeConverter<KSerializerBuffer> {
+    using InteropType = ani_long;
+    static KSerializerBuffer convertFrom(ani_env* env, InteropType value) {
+      return reinterpret_cast<KSerializerBuffer>(static_cast<intptr_t>(value));
+    }
+    static InteropType convertTo(ani_env* env, KSerializerBuffer value) = delete;
+    static inline void release(ani_env* env, InteropType value, KSerializerBuffer converted) {}
+};
+
+template<>
 struct InteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = ani_array_byte;
     static inline KInteropReturnBuffer convertFrom(ani_env* env, InteropType value) = delete;
@@ -179,7 +189,7 @@ struct InteropTypeConverter<KStringPtr> {
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
-      env->String_NewUTF8(value.c_str(), value.length(), &result);
+      env->String_NewUTF8(value.c_str(), value.length() - 1 /* drop zero terminator */, &result);
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}
@@ -208,10 +218,15 @@ struct InteropTypeConverter<KInt*> {
       env->Array_GetLength(value, &length);
       KInt* data = new KInt[length];
       env->Array_GetRegion_Int(value, 0, length, (ani_int*)data);
-      return result;
+      return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
+      if (converted) {
+        ani_size length = 0;
+        env->Array_GetLength(value, &length);
+        env->Array_SetRegion_Int(value, 0, length, (ani_int*)converted);
+      }
       //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
     }
@@ -232,6 +247,11 @@ struct InteropTypeConverter<KFloat*> {
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
+      if (converted) {
+        ani_size length = 0;
+        env->Array_GetLength(value, &length);
+        env->Array_SetRegion_Float(value, 0, length, (ani_float*)converted);
+      }
       //if (converted) env->Array_Unpin(value, converted);
       delete [] converted;
     }
@@ -252,6 +272,11 @@ struct InteropTypeConverter<KByte*> {
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
+      if (converted) {
+        ani_size length = 0;
+        env->Array_GetLength(value, &length);
+        env->Array_SetRegion_Byte(value, 0, length, (ani_byte*)converted);
+      }
       // if (converted) env->Array_Unpin(value, converted);
       delete[] converted;
     }
@@ -273,7 +298,63 @@ template<>
 struct InteropTypeConverter<KLength> {
   using InteropType = ani_ref;
   static KLength convertFrom(ani_env* env, InteropType value) {
-    // TODO: implement me
+    static ani_class double_class = nullptr;
+    static ani_class int_class = nullptr;
+    static ani_class string_class = nullptr;
+    static ani_class resource_class = nullptr;
+    if (!double_class) {
+      env->FindClass("Lstd/core/Double;", &double_class);
+    }
+    if (!int_class) {
+      env->FindClass("Lstd/core/Int;", &int_class);
+    }
+    if (!string_class) {
+      env->FindClass("Lstd/core/String;", &string_class);
+    }
+    if (!resource_class) {
+      env->FindClass("L@koalaui/arkts-arkui/generated/ArkResourceInterfaces/Resource;", &resource_class);
+    }
+
+    const ani_object valueObj = reinterpret_cast<ani_object>(value);
+
+    ani_boolean isInstanceOf;
+    env->Object_InstanceOf(valueObj, double_class, &isInstanceOf);
+    if (isInstanceOf) {
+      static ani_method double_p = nullptr;
+      if (!double_p) env->Class_FindMethod(double_class, "unboxed", ":D", &double_p);
+      ani_double result;
+      env->Object_CallMethod_Double(valueObj, double_p, &result);
+      return KLength{ 1, (KFloat) result, 1, 0 };
+    }
+
+    env->Object_InstanceOf(valueObj, int_class, &isInstanceOf);
+    if (isInstanceOf) {
+      static ani_method int_p = nullptr;
+      if (!int_p) env->Class_FindMethod(int_class, "unboxed", ":I", &int_p);
+      ani_int result;
+      env->Object_CallMethod_Int(valueObj, int_p, &result);
+      return KLength{ 1, (KFloat) result, 1, 0 };
+    }
+
+    env->Object_InstanceOf(valueObj, string_class, &isInstanceOf);
+    if (isInstanceOf) {
+      KStringPtr ptr = InteropTypeConverter<KStringPtr>::convertFrom(env, reinterpret_cast<ani_string>(value));
+      KLength length { 0 };
+      parseKLength(ptr, &length);
+      length.type = 2;
+      length.resource = 0;
+      return length;
+    }
+
+    env->Object_InstanceOf(valueObj, resource_class, &isInstanceOf);
+    if (isInstanceOf) {
+      static ani_method resource_p = nullptr;
+      if (!resource_p) env->Class_FindMethod(resource_class, "<get>id",":D", &resource_p);
+      ani_double result;
+      env->Object_CallMethod_Double(valueObj, resource_p, &result);
+      return KLength{ 3, 0, 1, (KInt) result };
+    }
+
     return KLength( { 0, 0, 0, 0});
   }
   static InteropType convertTo(ani_env* env, KLength value) = delete;
@@ -294,6 +375,44 @@ template <typename Type>
 inline void releaseArgument(ani_env* env, typename InteropTypeConverter<Type>::InteropType arg, Type& data) {
   InteropTypeConverter<Type>::release(env, arg, data);
 }
+
+template<class T>
+struct DirectInteropTypeConverter {
+    using InteropType = T;
+    static T convertFrom(InteropType value) { return value; }
+    static InteropType convertTo(T value) { return value; }
+};
+
+template<>
+struct DirectInteropTypeConverter<KNativePointer> {
+    using InteropType = ani_long;
+    static KNativePointer convertFrom(InteropType value) {
+      return reinterpret_cast<KNativePointer>(value);
+    }
+    static InteropType convertTo(KNativePointer value) {
+      return reinterpret_cast<ani_long>(value);
+    }
+};
+
+template<>
+struct DirectInteropTypeConverter<KSerializerBuffer> {
+    using InteropType = ani_long;
+    static KSerializerBuffer convertFrom(InteropType value) {
+      return reinterpret_cast<KSerializerBuffer>(static_cast<intptr_t>(value));
+    }
+    static InteropType convertTo(KSerializerBuffer value) = delete;
+};
+
+template <>
+struct DirectInteropTypeConverter<KInteropNumber> {
+  using InteropType = ani_double;
+  static KInteropNumber convertFrom(InteropType value) {
+    return KInteropNumber::fromDouble(value);
+  }
+  static InteropType convertTo(KInteropNumber value) {
+    return value.asDouble();
+  }
+};
 
 #define ANI_SLOW_NATIVE_FLAG 1
 
@@ -328,7 +447,7 @@ public:
     }
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     static void __init_classpath_##module() {                                                 \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
     }                                                                                         \
     namespace {                                                                               \
       struct __Init_classpath_##module {                                                      \
@@ -344,7 +463,7 @@ public:
 #define KOALA_ANI_INTEROP_MODULE_CLASSPATH(module, classpath)                                 \
     __attribute__((constructor))                                                              \
     static void __init_ani_classpath_##module() {                                             \
-        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), classpath); \
+        AniExports::getInstance()->setClasspath(KOALA_QUOTE(module), "L" classpath ";"); \
     }
 #endif
 
@@ -1446,6 +1565,307 @@ MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3,
   } \
 MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, ANI_SLOW_NATIVE_FLAG)
 
+#define KOALA_INTEROP_DIRECT_0(name, Ret) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name()); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret, 0)
+#define KOALA_INTEROP_DIRECT_1(name, Ret, P0) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0, 0)
+#define KOALA_INTEROP_DIRECT_2(name, Ret, P0, P1) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1, 0)
+#define KOALA_INTEROP_DIRECT_3(name, Ret, P0, P1, P2) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2, 0)
+#define KOALA_INTEROP_DIRECT_4(name, Ret, P0, P1, P2, P3) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3, 0)
+#define KOALA_INTEROP_DIRECT_5(name, Ret, P0, P1, P2, P3, P4) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, 0)
+#define KOALA_INTEROP_DIRECT_6(name, Ret, P0, P1, P2, P3, P4, P5) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5, 0)
+#define KOALA_INTEROP_DIRECT_7(name, Ret, P0, P1, P2, P3, P4, P5, P6) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
+#define KOALA_INTEROP_DIRECT_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7, 0)
+#define KOALA_INTEROP_DIRECT_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8, 0)
+#define KOALA_INTEROP_DIRECT_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9, 0)
+#define KOALA_INTEROP_DIRECT_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    inline InteropTypeConverter<Ret>::InteropType Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9, \
+        InteropTypeConverter<P10>::InteropType p10 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        return DirectInteropTypeConverter<Ret>::convertTo(impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9), DirectInteropTypeConverter<P10>::convertFrom(p10))); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, #Ret "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10, 0)
+#define KOALA_INTEROP_DIRECT_V0(name) \
+    inline void Ani_##name( \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void", 0)
+#define KOALA_INTEROP_DIRECT_V1(name, P0) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0, 0)
+#define KOALA_INTEROP_DIRECT_V2(name, P0, P1) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1, 0)
+#define KOALA_INTEROP_DIRECT_V3(name, P0, P1, P2) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2, 0)
+#define KOALA_INTEROP_DIRECT_V4(name, P0, P1, P2, P3) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3, 0)
+#define KOALA_INTEROP_DIRECT_V5(name, P0, P1, P2, P3, P4) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4, 0)
+#define KOALA_INTEROP_DIRECT_V6(name, P0, P1, P2, P3, P4, P5) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5, 0)
+#define KOALA_INTEROP_DIRECT_V7(name, P0, P1, P2, P3, P4, P5, P6) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6, 0)
+#define KOALA_INTEROP_DIRECT_V8(name, P0, P1, P2, P3, P4, P5, P6, P7) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7, 0)
+#define KOALA_INTEROP_DIRECT_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8, 0)
+#define KOALA_INTEROP_DIRECT_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9, 0)
+#define KOALA_INTEROP_DIRECT_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    inline void Ani_##name( \
+        InteropTypeConverter<P0>::InteropType p0, \
+        InteropTypeConverter<P1>::InteropType p1, \
+        InteropTypeConverter<P2>::InteropType p2, \
+        InteropTypeConverter<P3>::InteropType p3, \
+        InteropTypeConverter<P4>::InteropType p4, \
+        InteropTypeConverter<P5>::InteropType p5, \
+        InteropTypeConverter<P6>::InteropType p6, \
+        InteropTypeConverter<P7>::InteropType p7, \
+        InteropTypeConverter<P8>::InteropType p8, \
+        InteropTypeConverter<P9>::InteropType p9, \
+        InteropTypeConverter<P10>::InteropType p10 \
+    ) { \
+        KOALA_MAYBE_LOG(name) \
+        impl_##name(DirectInteropTypeConverter<P0>::convertFrom(p0), DirectInteropTypeConverter<P1>::convertFrom(p1), DirectInteropTypeConverter<P2>::convertFrom(p2), DirectInteropTypeConverter<P3>::convertFrom(p3), DirectInteropTypeConverter<P4>::convertFrom(p4), DirectInteropTypeConverter<P5>::convertFrom(p5), DirectInteropTypeConverter<P6>::convertFrom(p6), DirectInteropTypeConverter<P7>::convertFrom(p7), DirectInteropTypeConverter<P8>::convertFrom(p8), DirectInteropTypeConverter<P9>::convertFrom(p9), DirectInteropTypeConverter<P10>::convertFrom(p10)); \
+    } \
+    MAKE_ANI_EXPORT(KOALA_INTEROP_MODULE, name, "void" "|" #P0 "|" #P1 "|" #P2 "|" #P3 "|" #P4 "|" #P5 "|" #P6 "|" #P7 "|" #P8 "|" #P9 "|" #P10, 0)
+
 bool setKoalaANICallbackDispatcher(
     ani_env* ani_env,
     ani_class clazz,
@@ -1461,15 +1881,20 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   ani_static_method method = nullptr;                                                  \
   getKoalaANICallbackDispatcher(&clazz, &method);                                      \
   ani_env* env = reinterpret_cast<ani_env*>(venv);                            \
-  ani_array_byte args_managed = nullptr;                                          \
-  env->Array_New_Byte(length, &args_managed);                                 \
-  env->Array_SetRegion_Byte(args_managed, 0, length, reinterpret_cast<ani_byte*>(args)); \
   ani_int result = 0;                                                                  \
-  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_managed, length); \
-  env->Array_GetRegion_Byte(args_managed, 0, length, reinterpret_cast<ani_byte*>(args)); \
+  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args, length); \
 }
 
-#define KOALA_INTEROP_CALL_INT(venv, id, length, args) KOALA_INTEROP_CALL_VOID(venv, id, length, args)
+#define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                       \
+{                                                                                            \
+    ani_class clazz = nullptr;                                                               \
+    ani_static_method method = nullptr;                                                      \
+    getKoalaANICallbackDispatcher(&clazz, &method);                                          \
+    ani_env* env = reinterpret_cast<ani_env*>(venv);                                         \
+    ani_int result = 0;                                                                      \
+    env->Class_CallStaticMethod_Int(clazz, method, &result, id, args, length);       \
+    return result;                                                                           \
+}
 
 #define KOALA_INTEROP_CALL_VOID_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_VOID(venv, id, (argc) * sizeof(int32_t), args)
 #define KOALA_INTEROP_CALL_INT_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_INT(venv, id, (argc) * sizeof(int32_t), args)

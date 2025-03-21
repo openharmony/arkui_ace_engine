@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkToggle")
-export declare function ArkToggle(
+@BuildLambda("Toggle")
+export declare function Toggle(
     options: ToggleOptions, 
     @memo
     _content?: () => void,
 ): ArkToggleComponent
 
 @memo
-export declare function ArkToggleImpl(
+export declare function ToggleImpl(
     @memo
     _style: ((attributes: ArkToggleComponent) => void) | undefined,
     options: ToggleOptions, 

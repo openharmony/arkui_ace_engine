@@ -39,7 +39,7 @@ export class FileSelectorResult implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FileSelectorResult_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = FileSelectorResult.ctor_fileselectorresult()
         this.peer = new Finalizable(ctorPtr, FileSelectorResult.getFinalizer())
     }
@@ -58,7 +58,7 @@ export class FileSelectorResult implements MaterializedBase {
             const fileList_element : string = fileList[i]
             thisSerializer.writeString(fileList_element)
         }
-        ArkUIGeneratedNativeModule._FileSelectorResult_handleFileList(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._FileSelectorResult_handleFileList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

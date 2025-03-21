@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTabs")
-export declare function ArkTabs(
+@BuildLambda("Tabs")
+export declare function Tabs(
     options?: TabsOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTabsComponent
 
 @memo
-export declare function ArkTabsImpl(
+export declare function TabsImpl(
     @memo
     _style: ((attributes: ArkTabsComponent) => void) | undefined,
     options?: TabsOptions | undefined, 

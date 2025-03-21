@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkEffectComponent")
-export declare function ArkEffectComponent(
+@BuildLambda("EffectComponent")
+export declare function EffectComponent(
     
     @memo
     _content?: () => void,
 ): ArkEffectComponentComponent
 
 @memo
-export declare function ArkEffectComponentImpl(
+export declare function EffectComponentImpl(
     @memo
     _style: ((attributes: ArkEffectComponentComponent) => void) | undefined,
     

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkWindowScene")
-export declare function ArkWindowScene(
+@BuildLambda("WindowScene")
+export declare function WindowScene(
     persistentId: number, 
     @memo
     _content?: () => void,
 ): ArkWindowSceneComponent
 
 @memo
-export declare function ArkWindowSceneImpl(
+export declare function WindowSceneImpl(
     @memo
     _style: ((attributes: ArkWindowSceneComponent) => void) | undefined,
     persistentId: number, 

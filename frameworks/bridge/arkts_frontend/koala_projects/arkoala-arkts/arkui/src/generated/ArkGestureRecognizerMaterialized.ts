@@ -42,7 +42,7 @@ export class GestureRecognizer implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = GestureRecognizer.ctor_gesturerecognizer()
         this.peer = new Finalizable(ctorPtr, GestureRecognizer.getFinalizer())
     }

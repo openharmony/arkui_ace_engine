@@ -4629,26 +4629,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_ScrollOnWillScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("onWillScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const ScrollOnScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("onDidScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -12668,7 +12648,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SymbolEffect0Impl(Ark_NativePointer node,
-                           const Ark_SymbolEffect* symbolEffect,
+                           Ark_SymbolEffect symbolEffect,
                            const Opt_Boolean* isActive)
     {
         if (!needGroupedLog(1))
@@ -12681,7 +12661,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SymbolEffect1Impl(Ark_NativePointer node,
-                           const Ark_SymbolEffect* symbolEffect,
+                           Ark_SymbolEffect symbolEffect,
                            const Opt_Number* triggerValue)
     {
         if (!needGroupedLog(1))
@@ -18145,8 +18125,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::FrictionImpl,
             ScrollableCommonMethodModifier::OnScrollImpl,
-            ScrollableCommonMethodModifier::OnWillScrollImpl,
-            ScrollableCommonMethodModifier::OnDidScrollImpl,
             ScrollableCommonMethodModifier::OnReachStartImpl,
             ScrollableCommonMethodModifier::OnReachEndImpl,
             ScrollableCommonMethodModifier::OnScrollStartImpl,
@@ -20288,7 +20266,217 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
+                                const Ark_String* moduleName,
+                                const Array_String* params)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("getResourceId(");
+        WriteToString(&out, bundleName);
+        out.append(", ");
+        WriteToString(&out, moduleName);
+        out.append(", ");
+        WriteToString(&out, params);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // SystemOpsAccessor
+    namespace FocusControllerAccessor {
+    void RequestFocusImpl(const Ark_String* key)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("requestFocus(");
+        WriteToString(&out, key);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // FocusControllerAccessor
+    namespace DrawableDescriptorAccessor {
+    void DestroyPeerImpl(Ark_DrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DrawableDescriptor CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_DrawableDescriptor) 100;
+        string out("new DrawableDescriptor(");
+        out.append(") \n");
+        out.append("[return (Ark_DrawableDescriptor) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_DrawableDescriptor) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_PixelMap GetPixelMapImpl(Ark_DrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_PixelMap) 300;
+        string out("getPixelMap(");
+        out.append(") \n");
+        out.append("[return (Ark_PixelMap) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_PixelMap) 300;
+    }
+    } // DrawableDescriptorAccessor
+    namespace LayeredDrawableDescriptorAccessor {
+    void DestroyPeerImpl(Ark_LayeredDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_LayeredDrawableDescriptor CtorImpl(const Opt_DrawableDescriptor* foreground,
+                                           const Opt_DrawableDescriptor* background,
+                                           const Opt_DrawableDescriptor* mask)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_LayeredDrawableDescriptor) 100;
+        string out("new LayeredDrawableDescriptor(");
+        WriteToString(&out, foreground);
+        out.append(", ");
+        WriteToString(&out, background);
+        out.append(", ");
+        WriteToString(&out, mask);
+        out.append(") \n");
+        out.append("[return (Ark_LayeredDrawableDescriptor) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_LayeredDrawableDescriptor) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_DrawableDescriptor GetForegroundImpl(Ark_LayeredDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_DrawableDescriptor) 300;
+        string out("getForeground(");
+        out.append(") \n");
+        out.append("[return (Ark_DrawableDescriptor) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_DrawableDescriptor) 300;
+    }
+    Ark_DrawableDescriptor GetBackgroundImpl(Ark_LayeredDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_DrawableDescriptor) 300;
+        string out("getBackground(");
+        out.append(") \n");
+        out.append("[return (Ark_DrawableDescriptor) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_DrawableDescriptor) 300;
+    }
+    Ark_DrawableDescriptor GetMaskImpl(Ark_LayeredDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_DrawableDescriptor) 300;
+        string out("getMask(");
+        out.append(") \n");
+        out.append("[return (Ark_DrawableDescriptor) 300] \n");
+        appendGroupedLog(1, out);
+        return (Ark_DrawableDescriptor) 300;
+    }
+    Ark_String GetMaskClipPathImpl()
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getMaskClipPath(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    } // LayeredDrawableDescriptorAccessor
+    namespace PixelMapDrawableDescriptorAccessor {
+    void DestroyPeerImpl(Ark_PixelMapDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_PixelMapDrawableDescriptor CtorImpl(const Opt_PixelMap* src)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_PixelMapDrawableDescriptor) 100;
+        string out("new PixelMapDrawableDescriptor(");
+        WriteToString(&out, src);
+        out.append(") \n");
+        out.append("[return (Ark_PixelMapDrawableDescriptor) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_PixelMapDrawableDescriptor) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    } // PixelMapDrawableDescriptorAccessor
+    namespace AnimatedDrawableDescriptorAccessor {
+    void DestroyPeerImpl(Ark_AnimatedDrawableDescriptor peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_AnimatedDrawableDescriptor CtorImpl(const Array_PixelMap* pixelMaps,
+                                            const Opt_AnimationOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return (Ark_AnimatedDrawableDescriptor) 100;
+        string out("new AnimatedDrawableDescriptor(");
+        WriteToString(&out, pixelMaps);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return (Ark_AnimatedDrawableDescriptor) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_AnimatedDrawableDescriptor) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    } // AnimatedDrawableDescriptorAccessor
     namespace DrawingCanvasAccessor {
     void DestroyPeerImpl(Ark_DrawingCanvas peer)
     {
@@ -21294,7 +21482,80 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
+    Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getFontByName(");
+        WriteToString(&out, fontName);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // GlobalScope_ohos_fontAccessor
+    namespace GlobalScope_ohos_measure_utilsAccessor {
+    Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return {42};
+        string out("measureText(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("measureTextSize(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    } // GlobalScope_ohos_measure_utilsAccessor
+    namespace SymbolEffectAccessor {
+    void DestroyPeerImpl(Ark_SymbolEffect peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_SymbolEffect CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_SymbolEffect) 100;
+        string out("new SymbolEffect(");
+        out.append(") \n");
+        out.append("[return (Ark_SymbolEffect) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_SymbolEffect) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DummyForAccessorGenerateImpl(Ark_SymbolEffect peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("dummyForAccessorGenerate(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // SymbolEffectAccessor
     namespace ScaleSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
     {
@@ -21688,9 +21949,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SyncStackImpl(Ark_NavPathStack peer)
     {
-        if (!needGroupedLog(1)) {
+        if (!needGroupedLog(1))
             return;
-        }
         string out("syncStack(");
         WriteToString(&out, peer);
         out.append(") \n");
@@ -21699,9 +21959,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                     Ark_Int32 index)
     {
-        if (!needGroupedLog(1)) {
+        if (!needGroupedLog(1))
             return 0;
-        }
         string out("checkNeedCreate(");
         WriteToString(&out, navigation);
         out.append(", ");
@@ -21714,9 +21973,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
                                            Ark_Int32 flag)
     {
-        if (!needGroupedLog(1)) {
+        if (!needGroupedLog(1))
             return nullptr;
-        }
         string out("navigationCreate(");
         WriteToString(&out, peer);
         out.append(", ");
@@ -21729,9 +21987,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void SetNavigationOptionsImpl(Ark_NativePointer navigation,
                                   Ark_NavPathStack stack)
     {
-        if (!needGroupedLog(1)) {
+        if (!needGroupedLog(1))
             return;
-        }
         string out("setNavigationOptions(");
         WriteToString(&out, navigation);
         out.append(", ");
@@ -21743,9 +22000,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                    Ark_Int32 index,
                                    Ark_NativePointer node)
     {
-        if (!needGroupedLog(1)) {
+        if (!needGroupedLog(1))
             return;
-        }
         string out("setNavDestinationNode(");
         WriteToString(&out, peer);
         out.append(", ");
@@ -22433,6 +22689,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_Buffer GetDataImpl(Ark_ImageData peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getData(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     Ark_Number GetHeightImpl(Ark_ImageData peer)
     {
@@ -23214,6 +23480,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Union_String_Number_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getFillStyle(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void SetFillStyleImpl(Ark_CanvasRenderer peer,
                           const Ark_Union_String_Number_CanvasGradient_CanvasPattern* fillStyle)
     {
@@ -23223,6 +23499,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, fillStyle);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_Union_String_Number_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getStrokeStyle(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
                             const Ark_Union_String_Number_CanvasGradient_CanvasPattern* strokeStyle)
@@ -23894,6 +24180,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getSize(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
     {
         if (!needGroupedLog(1))
@@ -24223,6 +24519,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
+    }
+    Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getTarget(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     void SetTargetImpl(Ark_BaseEvent peer,
                        const Ark_EventTarget* target)
@@ -25708,6 +26014,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, stopPropagation);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getIntentionCode(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     void SetIntentionCodeImpl(Ark_KeyEvent peer,
                               const Ark_IntentionCode* intentionCode)
@@ -28359,6 +28675,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_CustomObject GetParamImpl(Ark_NavPathInfo peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getParam(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void SetParamImpl(Ark_NavPathInfo peer,
                       const Ark_CustomObject* param)
     {
@@ -28946,6 +29272,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    Ark_NavContentInfo GetFromImpl(Ark_NavigationTransitionProxy peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getFrom(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     void SetFromImpl(Ark_NavigationTransitionProxy peer,
                      const Ark_NavContentInfo* from)
     {
@@ -28955,6 +29291,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, from);
         out.append(") \n");
         appendGroupedLog(1, out);
+    }
+    Ark_NavContentInfo GetToImpl(Ark_NavigationTransitionProxy peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getTo(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     void SetToImpl(Ark_NavigationTransitionProxy peer,
                    const Ark_NavContentInfo* to)
@@ -30121,6 +30467,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // BounceSymbolEffectAccessor
+    namespace PulseSymbolEffectAccessor {
+    void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_PulseSymbolEffect CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_PulseSymbolEffect) 100;
+        string out("new PulseSymbolEffect(");
+        out.append(") \n");
+        out.append("[return (Ark_PulseSymbolEffect) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_PulseSymbolEffect) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    } // PulseSymbolEffectAccessor
     namespace TabsControllerAccessor {
     void DestroyPeerImpl(Ark_TabsController peer)
     {
@@ -33417,6 +33793,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
+    Ark_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getFontColor(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
     {
         if (!needGroupedLog(1))
@@ -33493,6 +33879,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return {};
         string out("getType(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getColor(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -33662,6 +34058,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
+    Ark_TextBackgroundStyle GetTextBackgroundStyleImpl(Ark_BackgroundColorStyle peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getTextBackgroundStyle(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     } // BackgroundColorStyleAccessor
     namespace GestureStyleAccessor {
     void DestroyPeerImpl(Ark_GestureStyle peer)
@@ -33769,6 +34175,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return {};
         string out("getWordBreak(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getLeadingMargin(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -34074,6 +34490,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return (Ark_PixelMap) 300;
     }
+    Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getSize(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
     Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
     {
         if (!needGroupedLog(1))
@@ -34089,6 +34515,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return {};
         string out("getObjectFit(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
+    {
+        if (!needGroupedLog(1))
+            return {};
+        string out("getLayoutStyle(");
         out.append(") \n");
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
@@ -34396,7 +34832,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void Profiler_registerVsyncCallbackImpl(const Callback_String_Void* callback_)
+    void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
     {
         if (!needGroupedLog(1))
             return;
@@ -34488,10 +34924,76 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SystemOpsAccessor::EndFrameImpl,
             SystemOpsAccessor::SyncInstanceIdImpl,
             SystemOpsAccessor::RestoreInstanceIdImpl,
+            SystemOpsAccessor::GetResourceIdImpl,
         };
         return &SystemOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIFocusControllerAccessor* GetFocusControllerAccessor()
+    {
+        static const GENERATED_ArkUIFocusControllerAccessor FocusControllerAccessorImpl {
+            FocusControllerAccessor::RequestFocusImpl,
+        };
+        return &FocusControllerAccessorImpl;
+    }
+
+    const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor()
+    {
+        static const GENERATED_ArkUIDrawableDescriptorAccessor DrawableDescriptorAccessorImpl {
+            DrawableDescriptorAccessor::DestroyPeerImpl,
+            DrawableDescriptorAccessor::CtorImpl,
+            DrawableDescriptorAccessor::GetFinalizerImpl,
+            DrawableDescriptorAccessor::GetPixelMapImpl,
+        };
+        return &DrawableDescriptorAccessorImpl;
+    }
+
+    struct DrawableDescriptorPeer {
+        virtual ~DrawableDescriptorPeer() = default;
+    };
+    const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescriptorAccessor()
+    {
+        static const GENERATED_ArkUILayeredDrawableDescriptorAccessor LayeredDrawableDescriptorAccessorImpl {
+            LayeredDrawableDescriptorAccessor::DestroyPeerImpl,
+            LayeredDrawableDescriptorAccessor::CtorImpl,
+            LayeredDrawableDescriptorAccessor::GetFinalizerImpl,
+            LayeredDrawableDescriptorAccessor::GetForegroundImpl,
+            LayeredDrawableDescriptorAccessor::GetBackgroundImpl,
+            LayeredDrawableDescriptorAccessor::GetMaskImpl,
+            LayeredDrawableDescriptorAccessor::GetMaskClipPathImpl,
+        };
+        return &LayeredDrawableDescriptorAccessorImpl;
+    }
+
+    struct LayeredDrawableDescriptorPeer {
+        virtual ~LayeredDrawableDescriptorPeer() = default;
+    };
+    const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor()
+    {
+        static const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor PixelMapDrawableDescriptorAccessorImpl {
+            PixelMapDrawableDescriptorAccessor::DestroyPeerImpl,
+            PixelMapDrawableDescriptorAccessor::CtorImpl,
+            PixelMapDrawableDescriptorAccessor::GetFinalizerImpl,
+        };
+        return &PixelMapDrawableDescriptorAccessorImpl;
+    }
+
+    struct PixelMapDrawableDescriptorPeer {
+        virtual ~PixelMapDrawableDescriptorPeer() = default;
+    };
+    const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* GetAnimatedDrawableDescriptorAccessor()
+    {
+        static const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor AnimatedDrawableDescriptorAccessorImpl {
+            AnimatedDrawableDescriptorAccessor::DestroyPeerImpl,
+            AnimatedDrawableDescriptorAccessor::CtorImpl,
+            AnimatedDrawableDescriptorAccessor::GetFinalizerImpl,
+        };
+        return &AnimatedDrawableDescriptorAccessorImpl;
+    }
+
+    struct AnimatedDrawableDescriptorPeer {
+        virtual ~AnimatedDrawableDescriptorPeer() = default;
+    };
     const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor()
     {
         static const GENERATED_ArkUIDrawingCanvasAccessor DrawingCanvasAccessorImpl {
@@ -34698,10 +35200,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIGlobalScope_ohos_fontAccessor GlobalScope_ohos_fontAccessorImpl {
             GlobalScope_ohos_fontAccessor::RegisterFontImpl,
             GlobalScope_ohos_fontAccessor::GetSystemFontListImpl,
+            GlobalScope_ohos_fontAccessor::GetFontByNameImpl,
         };
         return &GlobalScope_ohos_fontAccessorImpl;
     }
 
+    const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor()
+    {
+        static const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor GlobalScope_ohos_measure_utilsAccessorImpl {
+            GlobalScope_ohos_measure_utilsAccessor::MeasureTextImpl,
+            GlobalScope_ohos_measure_utilsAccessor::MeasureTextSizeImpl,
+        };
+        return &GlobalScope_ohos_measure_utilsAccessorImpl;
+    }
+
+    const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor()
+    {
+        static const GENERATED_ArkUISymbolEffectAccessor SymbolEffectAccessorImpl {
+            SymbolEffectAccessor::DestroyPeerImpl,
+            SymbolEffectAccessor::CtorImpl,
+            SymbolEffectAccessor::GetFinalizerImpl,
+            SymbolEffectAccessor::DummyForAccessorGenerateImpl,
+        };
+        return &SymbolEffectAccessorImpl;
+    }
+
+    struct SymbolEffectPeer {
+        virtual ~SymbolEffectPeer() = default;
+    };
     const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIScaleSymbolEffectAccessor ScaleSymbolEffectAccessorImpl {
@@ -34978,6 +35504,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageDataAccessor::DestroyPeerImpl,
             ImageDataAccessor::CtorImpl,
             ImageDataAccessor::GetFinalizerImpl,
+            ImageDataAccessor::GetDataImpl,
             ImageDataAccessor::GetHeightImpl,
             ImageDataAccessor::GetWidthImpl,
         };
@@ -35055,7 +35582,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasRendererAccessor::SetGlobalAlphaImpl,
             CanvasRendererAccessor::GetGlobalCompositeOperationImpl,
             CanvasRendererAccessor::SetGlobalCompositeOperationImpl,
+            CanvasRendererAccessor::GetFillStyleImpl,
             CanvasRendererAccessor::SetFillStyleImpl,
+            CanvasRendererAccessor::GetStrokeStyleImpl,
             CanvasRendererAccessor::SetStrokeStyleImpl,
             CanvasRendererAccessor::GetFilterImpl,
             CanvasRendererAccessor::SetFilterImpl,
@@ -35160,6 +35689,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DrawingRenderingContextAccessor::CtorImpl,
             DrawingRenderingContextAccessor::GetFinalizerImpl,
             DrawingRenderingContextAccessor::InvalidateImpl,
+            DrawingRenderingContextAccessor::GetSizeImpl,
             DrawingRenderingContextAccessor::GetCanvasImpl,
         };
         return &DrawingRenderingContextAccessorImpl;
@@ -35231,6 +35761,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BaseEventAccessor::CtorImpl,
             BaseEventAccessor::GetFinalizerImpl,
             BaseEventAccessor::GetModifierKeyStateImpl,
+            BaseEventAccessor::GetTargetImpl,
             BaseEventAccessor::SetTargetImpl,
             BaseEventAccessor::GetTimestampImpl,
             BaseEventAccessor::SetTimestampImpl,
@@ -35459,6 +35990,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetTimestampImpl,
             KeyEventAccessor::GetStopPropagationImpl,
             KeyEventAccessor::SetStopPropagationImpl,
+            KeyEventAccessor::GetIntentionCodeImpl,
             KeyEventAccessor::SetIntentionCodeImpl,
             KeyEventAccessor::GetUnicodeImpl,
             KeyEventAccessor::SetUnicodeImpl,
@@ -36066,6 +36598,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavPathInfoAccessor::GetFinalizerImpl,
             NavPathInfoAccessor::GetNameImpl,
             NavPathInfoAccessor::SetNameImpl,
+            NavPathInfoAccessor::GetParamImpl,
             NavPathInfoAccessor::SetParamImpl,
             NavPathInfoAccessor::GetOnPopImpl,
             NavPathInfoAccessor::SetOnPopImpl,
@@ -36132,7 +36665,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             NavigationTransitionProxyAccessor::FinishTransitionImpl,
             NavigationTransitionProxyAccessor::CancelTransitionImpl,
             NavigationTransitionProxyAccessor::UpdateTransitionImpl,
+            NavigationTransitionProxyAccessor::GetFromImpl,
             NavigationTransitionProxyAccessor::SetFromImpl,
+            NavigationTransitionProxyAccessor::GetToImpl,
             NavigationTransitionProxyAccessor::SetToImpl,
             NavigationTransitionProxyAccessor::GetIsInteractiveImpl,
             NavigationTransitionProxyAccessor::SetIsInteractiveImpl,
@@ -36379,6 +36914,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct BounceSymbolEffectPeer {
         virtual ~BounceSymbolEffectPeer() = default;
+    };
+    const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
+    {
+        static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
+            PulseSymbolEffectAccessor::DestroyPeerImpl,
+            PulseSymbolEffectAccessor::CtorImpl,
+            PulseSymbolEffectAccessor::GetFinalizerImpl,
+        };
+        return &PulseSymbolEffectAccessorImpl;
+    }
+
+    struct PulseSymbolEffectPeer {
+        virtual ~PulseSymbolEffectPeer() = default;
     };
     const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
     {
@@ -37142,6 +37690,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TextStyle_styled_stringAccessor::DestroyPeerImpl,
             TextStyle_styled_stringAccessor::CtorImpl,
             TextStyle_styled_stringAccessor::GetFinalizerImpl,
+            TextStyle_styled_stringAccessor::GetFontColorImpl,
             TextStyle_styled_stringAccessor::GetFontFamilyImpl,
             TextStyle_styled_stringAccessor::GetFontSizeImpl,
             TextStyle_styled_stringAccessor::GetFontWeightImpl,
@@ -37160,6 +37709,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DecorationStyleAccessor::CtorImpl,
             DecorationStyleAccessor::GetFinalizerImpl,
             DecorationStyleAccessor::GetTypeImpl,
+            DecorationStyleAccessor::GetColorImpl,
             DecorationStyleAccessor::GetStyleImpl,
         };
         return &DecorationStyleAccessorImpl;
@@ -37216,6 +37766,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             BackgroundColorStyleAccessor::DestroyPeerImpl,
             BackgroundColorStyleAccessor::CtorImpl,
             BackgroundColorStyleAccessor::GetFinalizerImpl,
+            BackgroundColorStyleAccessor::GetTextBackgroundStyleImpl,
         };
         return &BackgroundColorStyleAccessorImpl;
     }
@@ -37247,6 +37798,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ParagraphStyleAccessor::GetMaxLinesImpl,
             ParagraphStyleAccessor::GetOverflowImpl,
             ParagraphStyleAccessor::GetWordBreakImpl,
+            ParagraphStyleAccessor::GetLeadingMarginImpl,
         };
         return &ParagraphStyleAccessorImpl;
     }
@@ -37313,8 +37865,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttachmentAccessor::CtorImpl,
             ImageAttachmentAccessor::GetFinalizerImpl,
             ImageAttachmentAccessor::GetValueImpl,
+            ImageAttachmentAccessor::GetSizeImpl,
             ImageAttachmentAccessor::GetVerticalAlignImpl,
             ImageAttachmentAccessor::GetObjectFitImpl,
+            ImageAttachmentAccessor::GetLayoutStyleImpl,
         };
         return &ImageAttachmentAccessorImpl;
     }
@@ -37392,6 +37946,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUnifiedDataAccessor,
             GetLazyForEachOpsAccessor,
             GetSystemOpsAccessor,
+            GetFocusControllerAccessor,
+            GetDrawableDescriptorAccessor,
+            GetLayeredDrawableDescriptorAccessor,
+            GetPixelMapDrawableDescriptorAccessor,
+            GetAnimatedDrawableDescriptorAccessor,
             GetDrawingCanvasAccessor,
             GetLengthMetricsAccessor,
             GetColorMetricsAccessor,
@@ -37405,6 +37964,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetEllipseShapeAccessor,
             GetPathShapeAccessor,
             GetGlobalScope_ohos_fontAccessor,
+            GetGlobalScope_ohos_measure_utilsAccessor,
+            GetSymbolEffectAccessor,
             GetScaleSymbolEffectAccessor,
             GetReplaceSymbolEffectAccessor,
             GetFrameNodeAccessor,
@@ -37494,6 +38055,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAppearSymbolEffectAccessor,
             GetDisappearSymbolEffectAccessor,
             GetBounceSymbolEffectAccessor,
+            GetPulseSymbolEffectAccessor,
             GetTabsControllerAccessor,
             GetTabContentTransitionProxyAccessor,
             GetTextControllerAccessor,
