@@ -51,9 +51,14 @@ public:
         resetRangeOnJump_ = true;
     }
 
-    ItemRange GetRange() const override
+    int32_t GetMarkIndex() override
     {
-        return { info_.startIndex_, info_.endIndex_ };
+        return info_.startIndex_;
+    }
+
+    std::pair<int32_t, int32_t> GetRange() const override
+    {
+        return { range_.startIdx, range_.endIdx };
     }
 
 private:

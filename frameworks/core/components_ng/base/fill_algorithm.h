@@ -24,12 +24,6 @@ class FrameNode;
 
 enum class FillDirection { START, END, INITIAL };
 
-struct ItemRange {
-    /* item indices */
-    int32_t start = -1;
-    int32_t end = -1;
-};
-
 class FillAlgorithm : public virtual AceType {
     DECLARE_ACE_TYPE(FillAlgorithm, AceType);
 
@@ -71,7 +65,12 @@ public:
      */
     virtual bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) = 0;
 
-    virtual ItemRange GetRange() const = 0;
+    virtual int32_t GetMarkIndex() = 0;
+
+    virtual std::pair<int32_t, int32_t> GetRange() const
+    {
+        return {};
+    }
 };
 } // namespace OHOS::Ace::NG
 
