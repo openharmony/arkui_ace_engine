@@ -113,7 +113,7 @@ void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interf
                 option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "%{public}s iteration is infinite, remember to stop it. duration:%{public}d, curve:%{public}s",
+                "%{public}s iteration is infinite. duration:%{public}d, curve:%{public}s",
                 animationInterfaceName, option.GetDuration(), option.GetCurve()->ToString().c_str());
         }
         return;
@@ -777,7 +777,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         if (usingSharedRuntime) {
             if (GetAnyContextIsLayouting(pipelineContext)) {
                 TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                    "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                    "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                     option.GetDuration(), option.GetCurve() ? option.GetCurve()->ToString().c_str() : "");
                 pipelineContext->GetTaskExecutor()->PostTask(
                     [id = Container::CurrentIdSafely(), option, func = JSRef<JSFunc>::Cast(info[1]), count,
