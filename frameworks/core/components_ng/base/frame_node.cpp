@@ -2124,6 +2124,14 @@ void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
     geometryNode_ = node;
 }
 
+void FrameNode::SetNodeFreeze(bool isFreeze)
+{
+    CHECK_NULL_VOID(renderContext_);
+    if (SystemProperties::IsPageTransitionFreeze()) {
+        renderContext_->UpdateFreeze(isFreeze);
+    }
+}
+
 void FrameNode::CreateLayoutTask(bool forceUseMainThread)
 {
     if (!isLayoutDirtyMarked_) {

@@ -881,6 +881,9 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
             pushAnimations_.emplace_back(backButtonAnimation);
         }
     }
+    if (preNode) {
+        preNode->SetNodeFreeze(true);
+    }
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
 
@@ -936,6 +939,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             CHECK_NULL_VOID(navigation);
             auto preNode = weakPreNode.Upgrade();
             while (preNode) {
+                preNode->SetNodeFreeze(false);
                 if (!navigation->CheckAnimationIdValid(preNode, preAnimationId)) {
                     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "pre node is doing another animation, skip handling.");
                     break;
