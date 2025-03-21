@@ -113,12 +113,13 @@ HWTEST_F(TextEditControllerExAccessorTest, StopEditingTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextEditControllerExAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
+HWTEST_F(TextEditControllerExAccessorTest, GetPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
     PreviewTextInfo previewText = {.offset = OFFSET, .value = "info"};
     EXPECT_CALL(*peer_, GetPreviewText()).Times(1).WillOnce(Return(previewText));
-    accessor_->getPreviewText(peer_); // fix after updating a return value
-    // check a return value
+    auto checkValue = accessor_->getPreviewText(peer_);
+    EXPECT_EQ(Converter::Convert<std::string>(checkValue.value), "info");
+    EXPECT_EQ(Converter::Convert<int32_t>(checkValue.offset), OFFSET);
 }
 } // namespace OHOS::Ace::NG
