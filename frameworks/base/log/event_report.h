@@ -21,6 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
+#include "core/componets_ng/pattern/scrollable.h"
 
 namespace OHOS::Ace {
 
@@ -244,6 +245,7 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
+    static void ReportPageSlidInfo(OHOS::Ace::NG::SlidInfo &slidInfo);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
