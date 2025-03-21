@@ -25,6 +25,9 @@ struct PolylineOptions {
     std::optional<Dimension> width;
     std::optional<Dimension> height;
 };
+namespace {
+    constexpr int POINTS_NUMBER_MIN = 2;
+}
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -71,8 +74,11 @@ void PointsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //PolylineModelNG::SetPoints(frameNode, convValue);
+    std::optional<ShapePoints> points = Converter::Convert<std::vector<ShapePoint>>(*value);
+    if (points->size() < POINTS_NUMBER_MIN) {
+        points.reset();
+    }
+    PolygonModelNG::SetPoints(frameNode, points);
 }
 } // PolylineAttributeModifier
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier()

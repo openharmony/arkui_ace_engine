@@ -1201,6 +1201,12 @@ Rect Convert(const Ark_RectResult& src)
 }
 
 template<>
+ShapePoint Convert(const Ark_Point& src)
+{
+    return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
+}
+
+template<>
 NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
 {
     NestedScrollOptions nestedScrollOptions = {
