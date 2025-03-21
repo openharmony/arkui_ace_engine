@@ -94,6 +94,7 @@ public:
     void BackgroundColor(const Color& color) override;
     void ResetBackgroundColor() override;
     void ResetFontColor() override;
+    void SetMenuOutline(const MenuParam& menuParam) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
@@ -130,6 +131,7 @@ public:
     static void SetMenuBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& blurStyle);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
+    static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H
