@@ -304,7 +304,7 @@ void RichEditorLayoutAlgorithm::ReLayoutParagraphBySpan(LayoutWrapper* layoutWra
         }
         needReLayout |= child->needReLayout;
         needReLayoutParagraph |= child->needReLayoutParagraph;
-        ACE_SCOPED_TRACE("RichEditorReLayoutParagraphBySpan[needReLayout: %d][needReLayoutParagraph:%d]",
+        ACE_SCOPED_TRACE("RichEditorReLayoutParagraphBySpan[needReLayout:%d][needReLayoutParagraph:%d]",
             needReLayout, needReLayoutParagraph);
         child->ResetReLayout();
         CHECK_NULL_CONTINUE(!needReLayout);
