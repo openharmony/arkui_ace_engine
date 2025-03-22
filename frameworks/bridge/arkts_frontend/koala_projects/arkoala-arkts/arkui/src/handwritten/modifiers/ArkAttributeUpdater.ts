@@ -38,7 +38,7 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     }
 
     private value: T | undefined = undefined;
-    private constructorParams: C | undefined = undefined;
+    public updateConstructorParams: C | undefined = undefined;
 
     public set attribute(value: T) {
         this.value = value
@@ -46,13 +46,5 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
 
     public get attribute(): T {
         return this.value!
-    }
-
-    public set updateConstructorParams(value: C) {
-        this.constructorParams = value
-    }
-
-    public get updateConstructorParams() : C {
-        return this.constructorParams!;
     }
 }
