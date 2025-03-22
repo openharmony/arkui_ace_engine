@@ -6,6 +6,10 @@ export enum RectWidthStyle {
     TIGHT,
     MAX = 1,
 }
+export enum Affinity {
+    UPSTREAM = 0,
+    DOWNSTREAM = 1
+}
 export enum RectHeightStyle {
     TIGHT,
     MAX = 1,

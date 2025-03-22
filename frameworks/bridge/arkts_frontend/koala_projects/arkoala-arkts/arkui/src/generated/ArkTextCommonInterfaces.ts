@@ -23,6 +23,7 @@ import { Callback_String_Void, Callback_StyledStringChangeValue_Boolean } from "
 import { ResourceColor, Length, ResourceStr } from "./ArkUnitsInterfaces"
 import { DecorationStyleInterface } from "./ArkStyledStringInterfaces"
 import { StyledString } from "./ArkStyledStringMaterialized"
+import { Affinity } from "./ArkArkuiExternalInterfaces"
 import { TextMenuItemId } from "./ArkTextMenuItemIdMaterialized"
 import { TextDecorationType, TextDecorationStyle } from "./ArkEnumsInterfaces"
 export enum TextDataDetectorType {
@@ -73,9 +74,6 @@ export interface StyledStringChangeValue {
 export interface PositionWithAffinity {
     position: number;
     affinity: Affinity;
-}
-export interface Affinity {
-    _AffinityStub: string;
 }
 export interface LineMetrics {
     _LineMetricsStub: string;

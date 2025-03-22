@@ -298,6 +298,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src);
+    void AssignArkValue(Ark_Affinity& dst, const TextAffinity& src);
+    void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src);
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);

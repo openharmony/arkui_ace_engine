@@ -427,4 +427,10 @@ void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src
     dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
+
+void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src)
+{
+    dst.affinity = ArkValue<Ark_Affinity>(src.affinity_);
+    dst.position = ArkValue<Ark_Number>(static_cast<int32_t>(src.position_));
+}
 } // namespace OHOS::Ace::NG::Converter

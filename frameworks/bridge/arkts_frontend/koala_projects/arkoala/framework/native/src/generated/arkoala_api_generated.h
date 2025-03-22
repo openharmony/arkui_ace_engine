@@ -523,8 +523,6 @@ typedef struct Opt_Type_TextPickerOptions_range Opt_Type_TextPickerOptions_range
 typedef struct TextMenuItemIdPeer TextMenuItemIdPeer;
 typedef struct TextMenuItemIdPeer* Ark_TextMenuItemId;
 typedef struct Opt_TextMenuItemId Opt_TextMenuItemId;
-typedef struct Ark_Affinity Ark_Affinity;
-typedef struct Opt_Affinity Opt_Affinity;
 typedef struct MenuOnAppearCallback MenuOnAppearCallback;
 typedef struct Opt_MenuOnAppearCallback Opt_MenuOnAppearCallback;
 typedef struct Ark_TabBarIconStyle Ark_TabBarIconStyle;
@@ -3169,6 +3167,14 @@ typedef struct Opt_MenuPolicy {
     Ark_Tag tag;
     Ark_MenuPolicy value;
 } Opt_MenuPolicy;
+typedef enum Ark_Affinity {
+    ARK_AFFINITY_UPSTREAM = 0,
+    ARK_AFFINITY_DOWNSTREAM = 1,
+} Ark_Affinity;
+typedef struct Opt_Affinity {
+    Ark_Tag tag;
+    Ark_Affinity value;
+} Opt_Affinity;
 typedef enum Ark_VerticalAlign {
     ARK_VERTICAL_ALIGN_TOP = 0,
     ARK_VERTICAL_ALIGN_CENTER = 1,
@@ -6628,13 +6634,6 @@ typedef struct Opt_TextMenuItemId {
     Ark_Tag tag;
     Ark_TextMenuItemId value;
 } Opt_TextMenuItemId;
-typedef struct Ark_Affinity {
-    Ark_String _AffinityStub;
-} Ark_Affinity;
-typedef struct Opt_Affinity {
-    Ark_Tag tag;
-    Ark_Affinity value;
-} Opt_Affinity;
 typedef struct MenuOnAppearCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end);

@@ -28,8 +28,8 @@ import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimati
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, Affinity, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowOptions } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { ImageErrorCallback, ResizableOptions, DrawableDescriptor, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
@@ -1844,12 +1844,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextMenuItemIdInternal.fromPtr(ptr)
-    }
-    readAffinity(): Affinity {
-        let valueDeserializer : Deserializer = this
-        const _AffinityStub_result : string = (valueDeserializer.readString() as string)
-        let value : Affinity = ({_AffinityStub: _AffinityStub_result} as Affinity)
-        return value
     }
     readMenuOnAppearCallback(isSync: boolean = false): MenuOnAppearCallback {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -5520,7 +5514,7 @@ export class Deserializer extends DeserializerBase {
     readPositionWithAffinity(): PositionWithAffinity {
         let valueDeserializer : Deserializer = this
         const position_result : number = (valueDeserializer.readNumber() as number)
-        const affinity_result : Affinity = valueDeserializer.readAffinity()
+        const affinity_result : Affinity = (valueDeserializer.readInt32() as Affinity)
         let value : PositionWithAffinity = ({position: position_result, affinity: affinity_result} as PositionWithAffinity)
         return value
     }

@@ -12,7 +12,7 @@ import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { Resource } from "./../ArkResourceInterfaces"
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
@@ -197,7 +197,7 @@ import { VirtualScrollOptions, TemplateOptions } from "./../ArkRepeatInterfaces"
 import { RichEditorDeleteDirection, RichEditorSpanType, RichEditorResponseType, RichEditorSpanPosition, RichEditorTextStyle, LeadingMarginPlaceholder, RichEditorParagraphStyle, PasteEvent, RichEditorTextSpan, RichEditorLayoutStyle, RichEditorImageSpanStyle, RichEditorSymbolSpanStyle, RichEditorTextStyleResult, RichEditorParagraphResult, RichEditorSymbolSpanStyleResult, RichEditorTextSpanResult, RichEditorImageSpanStyleResult, RichEditorImageSpanResult, RichEditorImageSpan, RichEditorRange, RichEditorGesture, RichEditorTextSpanOptions, KeyboardOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, PlaceholderStyle, RichEditorSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorSymbolSpanOptions, RichEditorSelection, RichEditorInsertValue, RichEditorDeleteValue, RichEditorChangeValue, RichEditorOptions, RichEditorStyledStringOptions, SelectionMenuOptions, MenuOnAppearCallback, RichEditorSpan, RichEditorAttribute, PasteEventCallback, SubmitCallback, CutEvent, CopyEvent, RichEditorInterface } from "./../ArkRichEditorInterfaces"
 import { DecorationStyleInterface, StyleOptions, StyledStringKey, SpanStyle, StyledStringValue, TextStyleInterface, GestureStyleInterface, ParagraphStyleInterface, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo, UserDataSpan } from "./../ArkStyledStringInterfaces"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphInterface, SymbolGlyphAttribute, EffectFillStyle, PulseSymbolEffect } from "./../ArkSymbolglyphInterfaces"
-import { DecorationStyleResult, TextRange, MenuType, PreviewText, StyledStringChangedListener, TextDataDetectorConfig, OnDidChangeCallback, CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue, FontSettingOptions, TextDataDetectorType, TextDeleteDirection, StyledStringChangeValue, PositionWithAffinity, LineMetrics, TextBox, Affinity, TextMenuItem } from "./../ArkTextCommonInterfaces"
+import { DecorationStyleResult, TextRange, MenuType, PreviewText, StyledStringChangedListener, TextDataDetectorConfig, OnDidChangeCallback, CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue, FontSettingOptions, TextDataDetectorType, TextDeleteDirection, StyledStringChangeValue, PositionWithAffinity, LineMetrics, TextBox, TextMenuItem } from "./../ArkTextCommonInterfaces"
 import { RichEditorController } from "./../ArkRichEditorControllerMaterialized"
 import { RichEditorStyledStringController } from "./../ArkRichEditorStyledStringControllerMaterialized"
 import { RichEditorBaseController } from "./../ArkRichEditorBaseControllerMaterialized"
@@ -356,7 +356,7 @@ export class TypeChecker {
     static isAdsBlockedDetails(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
         return value instanceof AdsBlockedDetails
     }
-    static isAffinity(value: object|string|number|undefined|null, arg0: boolean): boolean {
+    static isAffinity(value: object|string|number|undefined|null): boolean {
         return value instanceof Affinity
     }
     static isAlertDialog(value: object|string|number|undefined|null): boolean {
@@ -4227,6 +4227,12 @@ export class TypeChecker {
         return value as int32
     }
     static RectWidthStyle_FromOrdinal(ordinal: int32): RectWidthStyle {
+        throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
+    }
+    static Affinity_ToOrdinal(value: Affinity): int32 {
+        return value as int32
+    }
+    static Affinity_FromOrdinal(ordinal: int32): Affinity {
         throw new Error("Waiting for possibility to convert ordinal to enum from Panda team")
     }
     static RectHeightStyle_ToOrdinal(value: RectHeightStyle): int32 {
