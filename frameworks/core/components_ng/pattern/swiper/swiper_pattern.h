@@ -1167,6 +1167,7 @@ private:
     bool nextMarginIgnoreBlank_ = false;
     bool prevMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
+    int32_t swiperId_ = -1;
 
     std::optional<int32_t> cachedCount_;
 
