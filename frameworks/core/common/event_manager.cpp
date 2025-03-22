@@ -759,6 +759,9 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastDownFingerNumber_ = static_cast<int32_t>(downFingerIds_.size());
     lastSourceTool_ = event.sourceTool;
+    if (refereeNG_->IsScopesEmpty()) {
+        responseCtrl_->Reset();
+    }
     return true;
 }
 
