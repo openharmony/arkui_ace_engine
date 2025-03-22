@@ -26,6 +26,6 @@ DisplayManager& DisplayManager::GetInstance()
 bool MockDisplayManager::ConvertScreenIdToRsScreenId(uint64_t screenId, uint64_t& rsScreenId)
 {
     rsScreenId = screenId;
-    return true;
+    return rsScreenId != 0;
 }
 } // namespace OHOS::Ace
