@@ -485,7 +485,7 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
  */
 HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
 {
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     ASSERT_NE(spanItem, nullptr);
     TextStyle textStyle;
     ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
@@ -504,15 +504,20 @@ HWTEST_F(SpanTestNg, SpanItemUpdateParagraph005, TestSize.Level1)
     placeholderStyle.width = 9.0;
     placeholderStyle.height = 10.0;
     placeholderStyle.verticalAlign = VerticalAlign::TOP;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::CENTER;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BOTTOM;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
     placeholderStyle.verticalAlign = VerticalAlign::NONE;
-    index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    index = spanItem->UpdateParagraph(nullptr, paragraph, false);
 
     MockParagraph::TearDown();
 }

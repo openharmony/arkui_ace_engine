@@ -21,12 +21,12 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_layout_info.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/common/properties/text_layout_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -149,6 +149,7 @@ struct ParagraphStyle {
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
+    int32_t textStyleUid = 0;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -247,6 +248,8 @@ public:
 
     // interfaces for layout
     virtual void Layout(float width) = 0;
+    // interfaces for reLayout
+    virtual void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) = 0;
     virtual float GetHeight() = 0;
     virtual float GetTextWidth() = 0;
     virtual size_t GetLineCount() = 0;

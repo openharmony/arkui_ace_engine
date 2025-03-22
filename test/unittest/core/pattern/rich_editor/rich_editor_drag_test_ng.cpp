@@ -733,7 +733,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestResetDragSpanItems001, TestS
     richEditorPattern->ResetDragSpanItems();
 
     auto firstItem = AceType::MakeRefPtr<ImageSpanItem>();
-    firstItem->imageNodeId = testFrameNodeId;
+    firstItem->nodeId_ = testFrameNodeId;
     richEditorPattern->dragSpanItems_.emplace_back(firstItem);
     richEditorPattern->ResetDragSpanItems();
     ASSERT_EQ(richEditorPattern->dragSpanItems_.size(), 0);
