@@ -39,8 +39,7 @@ public:
         }
     }
 
-    void SetCanvasRenderer(
-        const OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl>& canvasRenderer)
+    void SetCanvasRenderer(OHOS::Ace::WeakPtr<OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl> canvasRenderer)
     {
         canvasRenderWeak_ = canvasRenderer;
     }

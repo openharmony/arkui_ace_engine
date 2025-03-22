@@ -39,21 +39,16 @@ const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(Ark_CanvasRenderer peer)
 {
-    if (peer) {
-        Ark_NativePointer finalizerPtr = GetCanvasRenderingContext2DAccessor()->getFinalizer();
-        CHECK_NULL_VOID(finalizerPtr);
-        auto finalizer = reinterpret_cast<void (*)(CanvasRenderingContext2DPeer*)>(finalizerPtr);
-        CHECK_NULL_VOID(finalizer);
-        auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeer*>(peer);
-        CHECK_NULL_VOID(peerImpl);
-        finalizer(peerImpl);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
     }
 }
 Ark_CanvasRenderer CtorImpl()
 {
-    auto settings = Converter::ArkValue<Opt_RenderingContextSettings>(Ark_RenderingContextSettings{nullptr});
-    auto peer = reinterpret_cast<Ark_CanvasRenderer>(GetCanvasRenderingContext2DAccessor()->ctor(&settings));
-    return peer;
+    auto peerImpl = Referenced::MakeRefPtr<CanvasRendererPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<CanvasRendererPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -370,9 +365,9 @@ Ark_ImageData CreateImageData1Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(imagedata, {});
     std::vector<uint8_t> vbuffer(0);
-    uint32_t width = imagedata->value.dirtyWidth;
-    uint32_t height = imagedata->value.dirtyHeight;
-    peerImpl->CreateImageData(vbuffer, width, height);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    peerImpl->CreateImageData(vbuffer, imagedata->value, width, height);
     InteropBuffer interOpBuffer = {
         .data = vbuffer.data(),
         .length = vbuffer.size()
