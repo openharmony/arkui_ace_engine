@@ -116,9 +116,20 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
     mainLen_ = frameSize.MainSize(axis_);
+
     // omit footer from children count
+    CHECK_NULL_VOID(wrapper_);
+    auto host = wrapper_->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    info_->repeatDifference_ = 0;
+    info_->firstRepeatCount_ = 0;
+    info_->childrenCount_ = 0;
+    pattern->GetRepeatCountInfo(
+        host, info_->repeatDifference_, info_->firstRepeatCount_, info_->childrenCount_);
     itemCnt_ = info_->ItemCnt(info_->GetChildrenCount());
-    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    sections_ = pattern->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();
         if (info_->segmentTails_.empty()) {

@@ -16,8 +16,9 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
-#include "core/components_ng/property/templates_parser.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,6 +86,10 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
 
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
@@ -107,6 +112,11 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutInfo_->Reset(updateIdx);
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
+    layoutInfo_->repeatDifference_ = 0;
+    layoutInfo_->firstRepeatCount_ = 0;
+    layoutInfo_->childrenCount_ = 0;
+    pattern->GetRepeatCountInfo(
+        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
 
     InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->GetChildrenCount());
     mainSize_ = GetMainAxisSize(idealSize, axis);

@@ -656,16 +656,6 @@ void ListPattern::SetLayoutAlgorithmParams(
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     listLayoutAlgorithm->SetPrevContentStartOffset(contentStartOffset_);
     listLayoutAlgorithm->SetPrevContentEndOffset(contentEndOffset_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    repeatDifference_ = 0;
-    maxListItemIndex_ = 0;
-    auto firstRepeatCount = 0;
-    auto totalChildCount = 0;
-    GetRepeatCountInfo(host, repeatDifference_, firstRepeatCount, totalChildCount);
-    listLayoutAlgorithm->SetTotalItemCount(repeatDifference_ > 0 ? firstRepeatCount : totalChildCount);
-    listLayoutAlgorithm->SetFirstRepeatCount(firstRepeatCount);
-    maxListItemIndex_ = totalChildCount - 1;
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }

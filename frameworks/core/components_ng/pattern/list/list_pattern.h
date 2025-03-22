@@ -403,6 +403,11 @@ public:
         return isStackFromEnd_;
     }
 
+    void SetRepeatDifference(int32_t repeatDifference)
+    {
+        repeatDifference_ = repeatDifference;
+    }
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void StartVibrator(bool bEdge);
 #endif
