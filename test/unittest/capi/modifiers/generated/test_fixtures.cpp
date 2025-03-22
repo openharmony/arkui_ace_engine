@@ -547,12 +547,12 @@ std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20EnumInva
 
 // Fixture 'VariableFontWeightEnum' for type 'Ark_FontWeight'
 std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues = {
-    { "ARK_FONT_WEIGHT_LIGHTER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER), "400" },
-    { "ARK_FONT_WEIGHT_NORMAL", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL), "400" },
-    { "ARK_FONT_WEIGHT_REGULAR", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "400" },
-    { "ARK_FONT_WEIGHT_MEDIUM", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM), "400" },
-    { "ARK_FONT_WEIGHT_BOLD", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "400" },
-    { "ARK_FONT_WEIGHT_BOLDER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER), "400" },
+    { "ARK_FONT_WEIGHT_LIGHTER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_LIGHTER), "0" },
+    { "ARK_FONT_WEIGHT_NORMAL", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_NORMAL), "1" },
+    { "ARK_FONT_WEIGHT_REGULAR", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_REGULAR), "2" },
+    { "ARK_FONT_WEIGHT_MEDIUM", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_MEDIUM), "3" },
+    { "ARK_FONT_WEIGHT_BOLD", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD), "4" },
+    { "ARK_FONT_WEIGHT_BOLDER", Converter::ArkValue<Ark_FontWeight>(ARK_FONT_WEIGHT_BOLDER), "5" },
 };
 
 std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeightEnumInvalidValues = {
