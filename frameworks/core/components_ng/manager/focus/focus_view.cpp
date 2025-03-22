@@ -287,7 +287,7 @@ std::pair<bool, bool> FocusView::HandleDefaultFocusNode(
     std::pair<bool, bool> pair = {false, false};
     if (neverShown_ && !isViewRootScopeHasChildFocused) {
         if (!defaultFocusNode) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus view has no default focus.");
         } else if (!defaultFocusNode->IsFocusableWholePath()) {
             TAG_LOGI(AceLogTag::ACE_FOCUS, "Default focus node: %{public}s/%{public}d is not focusable",
                 defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId());
@@ -295,7 +295,7 @@ std::pair<bool, bool> FocusView::HandleDefaultFocusNode(
             SetIsViewRootScopeFocused(false);
             auto ret = defaultFocusNode->RequestFocusImmediatelyInner();
             FocusViewDidShow(defaultFocusNode);
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on default focus: %{public}s/%{public}d return: %{public}d.",
                 defaultFocusNode->GetFrameName().c_str(), defaultFocusNode->GetFrameId(), ret);
             pair = {true, ret};
         }
@@ -339,7 +339,7 @@ bool FocusView::RequestDefaultFocus()
         auto ret = viewRootScope->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
         // set neverShown_ false when request focus on focus view success
         neverShown_ &= !ret;
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
     }

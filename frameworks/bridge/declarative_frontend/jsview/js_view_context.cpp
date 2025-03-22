@@ -197,7 +197,7 @@ void FlushDirtyNodesWhenExist(const RefPtr<PipelineBase>& pipelineContext,
     bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
     while (!isDirtyNodesEmpty || (!isDirtyLayoutNodesEmpty && !pipelineContext->IsLayouting())) {
         if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "%{public}s, option:%{public}s, finish cnt:%{public}d,"
                 "dirtyNodes is empty:%{public}d, dirtyLayoutNodes is empty:%{public}d",
                 animationInterfaceName, option.ToString().c_str(), count.value_or(-1),
                 isDirtyNodesEmpty, isDirtyLayoutNodesEmpty);

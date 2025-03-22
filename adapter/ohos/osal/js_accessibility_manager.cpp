@@ -3021,7 +3021,7 @@ void JsAccessibilityManager::RegisterGetParentRectHandler()
                 parentRectInfo.scaleY = windowScale;
             }
         }
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Get host rect [scaleX:%{public}f, scaleY:%{public}f].", parentRectInfo.scaleX, parentRectInfo.scaleY);
     };
     SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);

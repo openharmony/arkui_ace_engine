@@ -2526,7 +2526,7 @@ void ImagePattern::ResetAltImage()
 
 void ImagePattern::ResetImageAndAlt()
 {
-    TAG_LOGI(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetImageAlt", imageDfxConfig_.ToStringWithoutSrc().c_str(),
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s-%{private}s ResetImageAlt", imageDfxConfig_.ToStringWithoutSrc().c_str(),
         imageDfxConfig_.imageSrc_.c_str());
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);

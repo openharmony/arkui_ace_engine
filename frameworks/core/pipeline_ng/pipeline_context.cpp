@@ -1025,7 +1025,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
     if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
         auto unfocusableParentFocusNode = focusNodeHub->GetUnfocusableParentFocusNode().Upgrade();
         if (unfocusableParentFocusNode) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
+            TAG_LOGD(AceLogTag::ACE_FOCUS,
                 "Request focus on %{public}s: %{public}s/%{public}d return false, unfocusable node: "
                 "%{public}s/%{public}d, focusable = %{public}d, shown = %{public}d, enabled = %{public}d",
                 isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId(),
@@ -1034,7 +1034,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
                 unfocusableParentFocusNode->IsEnabled());
             unfocusableParentFocusNode = nullptr;
         } else {
-            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Request focus on %{public}s: %{public}s/%{public}d return false",
                 isScope ? "scope" : "node", focusNode->GetTag().c_str(), focusNode->GetId());
         }
     }

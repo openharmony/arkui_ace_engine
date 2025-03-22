@@ -561,7 +561,7 @@ public:
     {
         ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
             avoidArea.ToString().c_str(), instanceId_, type);
-        TAG_LOGI(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+        TAG_LOGD(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
             avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -3037,7 +3037,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
-    TAG_LOGI(ACE_LAYOUT,
+    TAG_LOGD(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
         "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -3061,7 +3061,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
-    TAG_LOGI(
+    TAG_LOGD(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -3178,7 +3178,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
