@@ -367,7 +367,7 @@ public:
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
-    void FinishTextPreviewOperation();
+    void FinishTextPreviewOperation(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
