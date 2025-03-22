@@ -1028,7 +1028,7 @@ float WaterFlowLayoutInfoSW::GetCachedHeightInLanes(int32_t idx) const
     return 0.0f;
 }
 
-void WaterFlowLayoutInfoSW::SetHeightInLanes(int32_t idx, int32_t mainHeight)
+void WaterFlowLayoutInfoSW::SetHeightInLanes(int32_t idx, float mainHeight)
 {
     auto* lane = GetMutableLane(idx);
     CHECK_NULL_VOID(lane);

@@ -894,19 +894,21 @@ void WaterFlowLayoutSW::MeasureLazyChild(
     child->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
         { itemsCrossSize_[info_->GetSegment(idx)][lane], mainLen_, axis_ }, ref, props_, child));
 
+    auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
     if (!info_->HaveRecordIdx(idx)) {
         // if this node is measured for the first time, don't need to adjust position.
         return;
     }
-    auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
+
+    auto allAdjustOffset = adjustOffset.start + adjustOffset.end;
+    const float cacheHeight = info_->GetCachedHeightInLanes(idx);
     const float measureHeight = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    if (!NearEqual(allAdjustOffset, measureHeight - cacheHeight)) {
+        TAG_LOGW(ACE_WATERFLOW, "AdjustOffset %{public}f is not equal to HeightChange %{public}f", allAdjustOffset,
+            measureHeight - cacheHeight);
+        return;
+    }
     info_->lanes_[seg][0].startPos -= adjustOffset.start;
     info_->lanes_[seg][0].endPos += adjustOffset.end;
-    auto allAdjust = std::abs(adjustOffset.start) + std::abs(adjustOffset.end);
-    const float cacheHeight = info_->GetCachedHeightInLanes(idx);
-    if (!NearEqual(allAdjust, std::abs(cacheHeight - measureHeight))) {
-        TAG_LOGI(ACE_WATERFLOW, "AdjustOffset %{public}f is not equal to HeightChange %{public}f", allAdjust,
-            std::abs(cacheHeight - measureHeight));
-    }
 }
 } // namespace OHOS::Ace::NG
