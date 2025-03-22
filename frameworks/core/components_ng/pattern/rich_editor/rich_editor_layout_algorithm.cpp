@@ -263,7 +263,6 @@ bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPt
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "paragraph size mismatch, %{public}zu vs. %{public}zu",
             paragraphInfo.size(), spans_.size());
     }
-    ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::LayoutParagraphs");
     auto pIter = paragraphInfo.begin();
     auto groupIter = spans_.begin();
     while (pIter != paragraphInfo.end() && groupIter != spans_.end()) {
