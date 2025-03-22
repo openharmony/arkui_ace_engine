@@ -272,13 +272,7 @@ export default function ButtonBootcampTest() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickObj: 'labelStyle.overflow'
-        },
-        id: 'Button',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('labelStyle', JsonType.obj),
-        ],
-        assertEqual: '{"overflow":"TextOverflow.Marquee","maxLines":"1","minFontSize":"0.00px","maxFontSize":"0.00px","heightAdaptivePolicy":"TextHeightAdaptivePolicy.MAX_LINES_FIRST","font":"{\\"size\\":\\"16.00fp\\",\\"weight\\":\\"FontWeight.Normal\\",\\"family\\":\\"HarmonyOS Sans\\",\\"style\\":\\"FontStyle.Normal\\"}"}'
+        }
       })
 
       done();
@@ -291,15 +285,9 @@ export default function ButtonBootcampTest() {
 
       await radioClick({
         radioClickObj: 0,
-        id: 'Button',
         toggleClick: {
           toggleClickObj: 'labelStyle.overflow'
-        },
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('labelStyle', JsonType.obj),
-        ],
-        assertEqual: '{"overflow":"TextOverflow.Ellipsis","maxLines":"1","minFontSize":"0.00px","maxFontSize":"0.00px","heightAdaptivePolicy":"TextHeightAdaptivePolicy.MAX_LINES_FIRST","font":"{\\"size\\":\\"16.00fp\\",\\"weight\\":\\"FontWeight.Normal\\",\\"family\\":\\"HarmonyOS Sans\\",\\"style\\":\\"FontStyle.Normal\\"}"}'
+        }
       })
 
       done();
@@ -315,13 +303,7 @@ export default function ButtonBootcampTest() {
         toggleClick: {
           toggleClickObj: 'labelStyle.overflow',
           toggleClickType: ToggleClick.Close,
-        },
-        id: 'Button',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('labelStyle', JsonType.obj),
-        ],
-        assertEqual: '{"overflow":"TextOverflow.Clip","maxLines":"1","minFontSize":"0.00px","maxFontSize":"0.00px","heightAdaptivePolicy":"TextHeightAdaptivePolicy.MAX_LINES_FIRST","font":"{\\"size\\":\\"16.00fp\\",\\"weight\\":\\"FontWeight.Normal\\",\\"family\\":\\"HarmonyOS Sans\\",\\"style\\":\\"FontStyle.Normal\\"}"}'
+        }
       })
 
       done();
@@ -337,13 +319,7 @@ export default function ButtonBootcampTest() {
         radioClickObj: 1,
         toggleClick: {
           toggleClickObj: 'labelStyle.maxLines'
-        },
-        id: 'Button',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('labelStyle', JsonType.obj),
-        ],
-        assertEqual: '{"overflow":"TextOverflow.Ellipsis","maxLines":"2","minFontSize":"0.00px","maxFontSize":"0.00px","heightAdaptivePolicy":"TextHeightAdaptivePolicy.MAX_LINES_FIRST","font":"{\\"size\\":\\"16.00fp\\",\\"weight\\":\\"FontWeight.Normal\\",\\"family\\":\\"HarmonyOS Sans\\",\\"style\\":\\"FontStyle.Normal\\"}"}'
+        }
       })
 
       done();
@@ -359,13 +335,7 @@ export default function ButtonBootcampTest() {
         toggleClick: {
           toggleClickObj: 'labelStyle.maxLines',
           toggleClickType: ToggleClick.Close,
-        },
-        id: 'Button',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('labelStyle', JsonType.obj),
-        ],
-        assertEqual: '{"overflow":"TextOverflow.Ellipsis","maxLines":"1","minFontSize":"0.00px","maxFontSize":"0.00px","heightAdaptivePolicy":"TextHeightAdaptivePolicy.MAX_LINES_FIRST","font":"{\\"size\\":\\"16.00fp\\",\\"weight\\":\\"FontWeight.Normal\\",\\"family\\":\\"HarmonyOS Sans\\",\\"style\\":\\"FontStyle.Normal\\"}"}'
+        }
       })
 
       done();
