@@ -1281,15 +1281,26 @@ void SubwindowManager::HideToastSubWindowNG()
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID ?
-        GetDialogSubwindow(parentContainerId) : GetToastSubwindow(containerId);
-    if (!subwindow) {
+    std::vector<RefPtr<Subwindow>> serviceToastSubwindows;
+    auto subwindow = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
+                         ? GetDialogSubwindow(parentContainerId)
+                         : GetToastSubwindow(containerId);
+    if (subwindow) {
+        serviceToastSubwindows.push_back(subwindow);
+    }
+    auto systemToastWindow = GetSystemToastWindow(parentContainerId);
+    if (systemToastWindow) {
+        serviceToastSubwindows.push_back(systemToastWindow);
+    }
+    if (serviceToastSubwindows.empty()) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
             "Get Subwindow error, containerId = %{public}d, parentContainerId = %{public}d", containerId,
             parentContainerId);
         return;
     }
-    subwindow->ResizeWindowForFoldStatus(parentContainerId);
+    for (const auto& window : serviceToastSubwindows) {
+        window->ResizeWindowForFoldStatus(parentContainerId);
+    }
 }
 
 void MarkSubwindowSafeAreaDirtyByType(std::shared_ptr<SubwindowManager> manager,
