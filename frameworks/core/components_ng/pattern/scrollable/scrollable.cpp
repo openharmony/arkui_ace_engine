@@ -1447,10 +1447,10 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
             mainDelta = finalPosition_ - currentPos_;
             StopSnapAnimation();
         } else if (nextStep_.has_value()) {
-            mainDelta = nextStep_.Value();
-        } else if (LessOrEqualstd::abs(mainDelta, SCROLL_SNAP_MIN_STEP)) {
+            mainDelta = nextStep_.value();
+        } else if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
             nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
-            mainDelta = nextStep_.Value();
+            mainDelta = nextStep_.value();
         }
     }
 #endif
