@@ -759,7 +759,7 @@ void WebModelNG::SetOnDragMove(
 void WebModelNG::SetOnDragLeave(
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
 {
-    ViewAbstract::SetOnDrop(std::move(onDragLeave));
+    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
 }
 
 void WebModelNG::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId)
