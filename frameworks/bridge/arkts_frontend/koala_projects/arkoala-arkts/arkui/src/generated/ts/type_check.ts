@@ -12,7 +12,7 @@ import { LazyForEachOps } from "./../ArkLazyForEachOpsMaterialized"
 import { SystemOps } from "./../ArkSystemOpsMaterialized"
 import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
-import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
+import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { Resource } from "./../ArkResourceInterfaces"
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
@@ -197,7 +197,7 @@ import { VirtualScrollOptions, TemplateOptions } from "./../ArkRepeatInterfaces"
 import { RichEditorDeleteDirection, RichEditorSpanType, RichEditorResponseType, RichEditorSpanPosition, RichEditorTextStyle, LeadingMarginPlaceholder, RichEditorParagraphStyle, PasteEvent, RichEditorTextSpan, RichEditorLayoutStyle, RichEditorImageSpanStyle, RichEditorSymbolSpanStyle, RichEditorTextStyleResult, RichEditorParagraphResult, RichEditorSymbolSpanStyleResult, RichEditorTextSpanResult, RichEditorImageSpanStyleResult, RichEditorImageSpanResult, RichEditorImageSpan, RichEditorRange, RichEditorGesture, RichEditorTextSpanOptions, KeyboardOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, PlaceholderStyle, RichEditorSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorSymbolSpanOptions, RichEditorSelection, RichEditorInsertValue, RichEditorDeleteValue, RichEditorChangeValue, RichEditorOptions, RichEditorStyledStringOptions, SelectionMenuOptions, MenuOnAppearCallback, RichEditorSpan, RichEditorAttribute, PasteEventCallback, SubmitCallback, CutEvent, CopyEvent, RichEditorInterface } from "./../ArkRichEditorInterfaces"
 import { DecorationStyleInterface, StyleOptions, StyledStringKey, SpanStyle, StyledStringValue, TextStyleInterface, GestureStyleInterface, ParagraphStyleInterface, ImageAttachmentLayoutStyle, ImageAttachmentInterface, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanMeasureInfo, UserDataSpan } from "./../ArkStyledStringInterfaces"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphInterface, SymbolGlyphAttribute, EffectFillStyle, PulseSymbolEffect } from "./../ArkSymbolglyphInterfaces"
-import { DecorationStyleResult, TextRange, MenuType, PreviewText, StyledStringChangedListener, TextDataDetectorConfig, OnDidChangeCallback, CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue, FontSettingOptions, TextDataDetectorType, TextDeleteDirection, StyledStringChangeValue, PositionWithAffinity, LineMetrics, TextBox, Affinity, TextMenuItem } from "./../ArkTextCommonInterfaces"
+import { DecorationStyleResult, TextRange, MenuType, PreviewText, StyledStringChangedListener, TextDataDetectorConfig, OnDidChangeCallback, CaretStyle, EditableTextOnChangeCallback, InsertValue, DeleteValue, FontSettingOptions, TextDataDetectorType, TextDeleteDirection, StyledStringChangeValue, PositionWithAffinity, LineMetrics, TextBox, TextMenuItem } from "./../ArkTextCommonInterfaces"
 import { RichEditorController } from "./../ArkRichEditorControllerMaterialized"
 import { RichEditorStyledStringController } from "./../ArkRichEditorStyledStringControllerMaterialized"
 import { RichEditorBaseController } from "./../ArkRichEditorBaseControllerMaterialized"
@@ -524,8 +524,11 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof AdsBlockedDetails")
         }
     }
-    static isAffinity(value: object|string|number|undefined|null|boolean, duplicated__AffinityStub: boolean): boolean {
-        if ((!duplicated__AffinityStub) && (value?.hasOwnProperty("_AffinityStub"))) {
+    static isAffinity(value: object|string|number|undefined|null|boolean): boolean {
+        if ((value) === (Affinity.UPSTREAM)) {
+            return true
+        }
+        else if ((value) === (Affinity.DOWNSTREAM)) {
             return true
         }
         else {
@@ -19650,6 +19653,12 @@ export class TypeChecker {
     }
     static RectWidthStyle_FromOrdinal(ordinal: int32): RectWidthStyle {
         return ordinal as RectWidthStyle
+    }
+    static Affinity_ToOrdinal(value: Affinity): int32 {
+        return value as int32
+    }
+    static Affinity_FromOrdinal(ordinal: int32): Affinity {
+        return ordinal as Affinity
     }
     static RectHeightStyle_ToOrdinal(value: RectHeightStyle): int32 {
         return value as int32

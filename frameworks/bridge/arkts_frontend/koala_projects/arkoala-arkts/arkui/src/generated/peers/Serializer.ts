@@ -24,8 +24,8 @@ import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimati
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, Affinity, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowOptions } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
 import { ImageErrorCallback, ResizableOptions, DrawableDescriptor, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
@@ -1750,11 +1750,6 @@ export class Serializer extends SerializerBase {
     writeTextMenuItemId(value: TextMenuItemId): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writeAffinity(value: Affinity): void {
-        let valueSerializer : Serializer = this
-        const value__AffinityStub  = value._AffinityStub
-        valueSerializer.writeString(value__AffinityStub)
     }
     writeTabBarIconStyle(value: TabBarIconStyle): void {
         let valueSerializer : Serializer = this
@@ -5251,7 +5246,7 @@ export class Serializer extends SerializerBase {
         const value_position  = value.position
         valueSerializer.writeNumber(value_position)
         const value_affinity  = value.affinity
-        valueSerializer.writeAffinity(value_affinity)
+        valueSerializer.writeInt32(value_affinity.valueOf())
     }
     writeMutableStyledString(value: MutableStyledString): void {
         let valueSerializer : Serializer = this

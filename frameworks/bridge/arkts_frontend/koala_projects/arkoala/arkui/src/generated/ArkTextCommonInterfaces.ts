@@ -30,6 +30,7 @@ import { DrawContext } from "./ArkCommonInterfaces"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
 import { LengthUnit } from "./ArkArkuiExternalInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
+import { Affinity } from "./ArkArkuiExternalInterfaces"
 import { TextMenuItemId } from "./ArkTextMenuItemIdMaterialized"
 export enum TextDataDetectorType {
     PHONE_NUMBER,
@@ -79,9 +80,6 @@ export interface StyledStringChangeValue {
 export interface PositionWithAffinity {
     position: number;
     affinity: Affinity;
-}
-export interface Affinity {
-    _AffinityStub: string;
 }
 export interface LineMetrics {
     _LineMetricsStub: string;

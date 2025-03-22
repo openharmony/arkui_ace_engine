@@ -55,8 +55,7 @@ Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer
         Converter::Convert<int32_t>(*x),
         Converter::Convert<int32_t>(*y)
     );
-    LOGE("LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl Incorrect return value type.");
-    return {};
+    return Converter::ArkValue<Ark_PositionWithAffinity>(result);
 }
 Ark_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                    const Ark_Number* lineNumber)

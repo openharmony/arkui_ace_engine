@@ -261,6 +261,10 @@ declare enum RectWidthStyle {
     TIGHT = 0,
     MAX = 1,
 }
+declare enum Affinity {
+    UPSTREAM = 0,
+    DOWNSTREAM = 1
+}
 declare enum RectHeightStyle {
     TIGHT = 0,
     MAX = 1,
@@ -6997,9 +7001,6 @@ declare interface LayoutManager {
 declare interface PositionWithAffinity {
     position: number;
     affinity: Affinity;
-}
-declare interface Affinity {
-    _AffinityStub: string;
 }
 declare interface LineMetrics {
     _LineMetricsStub: string;

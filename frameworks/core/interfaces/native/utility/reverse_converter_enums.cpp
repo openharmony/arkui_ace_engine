@@ -913,4 +913,12 @@ void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src)
         default: LOGE("Unexpected enum value in WordBreak: %{public}d", src);
     }
 }
+void AssignArkValue(Ark_Affinity& dst, const TextAffinity& src)
+{
+    switch (src) {
+        case TextAffinity::UPSTREAM: dst = Ark_Affinity::ARK_AFFINITY_UPSTREAM; break;
+        case TextAffinity::DOWNSTREAM: dst = Ark_Affinity::ARK_AFFINITY_DOWNSTREAM; break;
+        default: LOGE("Unexpected enum value in TextAffinity: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
