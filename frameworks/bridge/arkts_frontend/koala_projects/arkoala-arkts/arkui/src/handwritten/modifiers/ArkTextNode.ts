@@ -13,10 +13,20 @@
  * limitations under the License.
  */
 
-export { AttributeUpdater } from './handwritten/modifiers/ArkAttributeUpdater'
+import { TextAttribute, TextAlign } from "../../generated";
+import { ArkTextPeer } from "../../generated/peers/ArkTextPeer";
+import { ArkBaseNode } from "./ArkBaseNode";
 
-export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
-
-export { CommonModifier } from './handwritten/modifiers/ArkCommonModifier'
-
-export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
+export class ArkTextNode extends ArkBaseNode implements TextAttribute {
+    textAlign(value : TextAlign | undefined) : this {
+        if (value) {
+            this.getPeer().textAlignAttribute(value);
+        } else {
+            // this.getPeer().resetAlignItemsAttribute(value);
+        }
+        return this;
+    }
+    getPeer() : ArkTextPeer {
+        return this.peer as ArkTextPeer
+    }
+}

@@ -21,7 +21,7 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TextOverflow, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, FontStyle, FontWeight, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode } from "./ArkEnumsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
-import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./ArkCommonInterfaces"
+import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, CommonAttribute } from "./ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Font } from "./ArkUnitsInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_String_Void, Callback_Number_Number_Void } from "./SyntheticDeclarations"
@@ -54,48 +54,8 @@ export interface TextOverflowOptions {
     overflow: TextOverflow;
 }
 export type TextInterface = (content?: string | Resource, value?: TextOptions) => TextAttribute;
-export interface TextAttribute extends CommonMethod<TextAttribute> {
-    font: Font;
-    fontColor: ResourceColor;
-    fontSize: number | string | Resource;
-    minFontSize: number | string | Resource;
-    maxFontSize: number | string | Resource;
-    minFontScale: number | Resource;
-    maxFontScale: number | Resource;
-    fontStyle: FontStyle;
-    fontWeight: number | FontWeight | string;
-    lineSpacing: LengthMetrics;
-    textAlign: TextAlign;
-    lineHeight: number | string | Resource;
-    textOverflow: TextOverflowOptions;
-    fontFamily: string | Resource;
-    maxLines: number;
-    decoration: DecorationStyleInterface;
-    letterSpacing: number | string;
-    textCase: TextCase;
-    baselineOffset: number | string;
-    copyOption: CopyOptions;
-    draggable: boolean;
-    textShadow: ShadowOptions | Array<ShadowOptions>;
-    heightAdaptivePolicy: TextHeightAdaptivePolicy;
-    textIndent: Length;
-    wordBreak: WordBreak;
-    lineBreakStrategy: LineBreakStrategy;
-    onCopy: ((breakpoints: string) => void);
-    caretColor: ResourceColor;
-    selectedBackgroundColor: ResourceColor;
-    ellipsisMode: EllipsisMode;
-    enableDataDetector: boolean;
-    dataDetectorConfig: TextDataDetectorConfig;
-    onTextSelectionChange: ((first: number,last: number) => void);
-    fontFeature: string;
-    privacySensitive: boolean;
-    textSelectable: TextSelectableMode;
-    editMenuOptions: EditMenuOptions;
-    halfLeading: boolean;
-    enableHapticFeedback: boolean;
-
-
+export interface TextAttribute extends CommonAttribute {
+    textAlign(value : TextAlign | undefined) : this;
 }
 export enum TextSpanType {
     TEXT = 0,

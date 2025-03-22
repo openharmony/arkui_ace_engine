@@ -434,11 +434,8 @@ export enum FontWeight {
     Bolder = 5
 }
 export enum TextAlign {
-    CENTER = 0,
     Center = 0,
-    START = 1,
     Start = 1,
-    END = 2,
     End = 2,
     JUSTIFY = 3
 }

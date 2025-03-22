@@ -54,11 +54,25 @@ import { DecorationStyleInterface } from "./ArkStyledStringInterfaces"
 import { TextDataDetectorConfig, FontSettingOptions } from "./ArkTextCommonInterfaces"
 import { EditMenuOptions } from "./ArkEditMenuOptionsMaterialized"
 import { SelectionMenuOptions } from "./ArkRichEditorInterfaces"
+import { TextInterface } from "./ArkTextInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkTextNode } from "../handwritten/modifiers/ArkTextNode"
+import { ArkTextAttributeSet, TextModifier } from "../handwritten/modifiers/ArkTextModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkTextComponent extends ArkCommonMethodComponent {
     getPeer(): ArkTextPeer {
         return (this.peer as ArkTextPeer)
     }
+
+    getModifierHost(): ArkTextNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkTextNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkTextNode
+    }
+
     /** @memo */
     public setTextOptions(content?: string | Resource, value?: TextOptions): this {
         if (this.checkPriority("setTextOptions")) {
@@ -461,6 +475,32 @@ export class ArkTextComponent extends ArkCommonMethodComponent {
             const options_casted = options as (SelectionMenuOptions | undefined)
             this.getPeer()?.bindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
             return this
+        }
+        return this
+    }
+    attributeModifier(modifier: AttributeModifier<TextAttribute>): this {
+        let peerNode = this.getPeer()
+        if (!peerNode._attributeSet) {
+            peerNode._attributeSet = new ArkTextAttributeSet()
+        }
+        applyUIAttributes(modifier, peerNode);
+        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<TextAttribute, (content?: string | Resource, value?: TextOptions) => TextAttribute>
+            attributeUpdater.initializeModifier(peerNode._attributeSet as object as TextAttribute);
+            attributeUpdater.attribute = this.getModifierHost()
+            attributeUpdater.updateConstructorParams = (content?: string | Resource, value?: TextOptions) : TextAttribute => {
+                const content_casted = content as (string | Resource | undefined)
+                const value_casted = value as (TextOptions | undefined)
+                this.getPeer()?.setTextOptionsAttribute(content_casted, value_casted)
+                return this.getModifierHost()! as TextAttribute
+            };
+            peerNode._attributeSet!.applyModifierPatch(peerNode);
+        }
+        let isAttributeset = (modifier instanceof ArkTextAttributeSet);
+        if (isAttributeset) {
+            let attributeSet: ArkTextAttributeSet = (modifier as object) as ArkTextAttributeSet;
+            attributeSet.applyModifierPatch(peerNode);
         }
         return this
     }
