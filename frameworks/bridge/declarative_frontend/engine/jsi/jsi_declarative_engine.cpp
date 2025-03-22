@@ -342,11 +342,11 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             ohmUrlValid = true;
         } else {
-            TAG_LOGE(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 

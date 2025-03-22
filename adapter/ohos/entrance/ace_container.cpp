@@ -2785,7 +2785,7 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(
     }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+        TAG_LOGD(ACE_LAYOUT, "SafeArea get success, type :%{public}d, insets :%{public}s",
             static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }

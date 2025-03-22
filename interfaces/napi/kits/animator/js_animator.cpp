@@ -481,7 +481,7 @@ static napi_value JSCancel(napi_env env, napi_callback_info info)
     if (!animator) {
         return nullptr;
     }
-    TAG_LOGI(AceLogTag::ACE_ANIMATION, "jsAnimator cancel, id:%{public}d", animator->GetId());
+    TAG_LOGD(AceLogTag::ACE_ANIMATION, "jsAnimator cancel, id:%{public}d", animator->GetId());
     animator->Cancel();
     napi_value result;
     napi_get_null(env, &result);

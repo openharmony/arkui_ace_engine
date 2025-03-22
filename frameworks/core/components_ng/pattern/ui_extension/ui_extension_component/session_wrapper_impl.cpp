@@ -875,7 +875,7 @@ bool SessionWrapperImpl::NotifyBackPressedAsync()
 bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     if (session_ && pointerEvent) {
-        UIEXT_LOGI("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d,"
+        UIEXT_LOGD("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d,"
             " componentId=%{public}d.", pointerEvent->GetId(), GetSessionId(), GetFrameNodeId());
         session_->TransferPointerEvent(pointerEvent);
     }
@@ -1186,7 +1186,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     }
     ACE_SCOPED_TRACE("NotifyDisplayArea displayArea[%s], curWindow[%s], reason[%d], duration[%d], componentId[%d]",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(), reason, duration, GetFrameNodeId());
-    UIEXT_LOGI("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
+    UIEXT_LOGD("NotifyDisplayArea displayArea=%{public}s, curWindow=%{public}s, "
         "reason=%{public}d, duration=%{public}d, persistentId=%{public}d, componentId=%{public}d.",
         displayArea_.ToString().c_str(), displayAreaWindow_.ToString().c_str(),
         reason, duration, persistentId, GetFrameNodeId());
@@ -1321,7 +1321,7 @@ void SessionWrapperImpl::UpdateSessionViewportConfig()
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
-    UIEXT_LOGI("The data is asynchronously send and the session is %{public}s, componentId=%{public}d.",
+    UIEXT_LOGD("The data is asynchronously send and the session is %{public}s, componentId=%{public}d.",
         session_ ? "valid" : "invalid", GetFrameNodeId());
     CHECK_NULL_VOID(session_);
     session_->TransferComponentData(params);
