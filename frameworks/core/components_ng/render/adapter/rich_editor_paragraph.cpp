@@ -39,6 +39,16 @@ void RichEditorParagraph::Layout(float width)
     height_ = paragraph_->GetHeight();
 }
 
+void RichEditorParagraph::ReLayout(float width, const ParagraphStyle& paraStyle,
+    const std::vector<TextStyle>& textStyles)
+{
+    ACE_SCOPED_TRACE("RichEditorParagraph::ReLayout");
+    TxtParagraph::ReLayout(width, paraStyle, textStyles);
+    CHECK_NULL_VOID(paragraph_);
+    layoutWidth_ = width;
+    height_ = paragraph_->GetHeight();
+}
+
 float RichEditorParagraph::GetHeight()
 {
     return height_;

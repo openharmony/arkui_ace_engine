@@ -2807,7 +2807,8 @@ void RichEditorPattern::UpdateParagraphStyle(RefPtr<SpanNode> spanNode, const st
     } else {
         spanNode->ResetParagraphSpacing();
     }
-    if (style.leadingMargin.has_value()) {
+    auto leadingMarginValue = spanNode->GetLeadingMarginValue({});
+    if (style.leadingMargin.has_value() && !leadingMarginValue.CheckLeadingMargin(style.leadingMargin.value())) {
         spanNode->GetSpanItem()->leadingMargin = *style.leadingMargin;
         spanNode->UpdateLeadingMargin(*style.leadingMargin);
     }

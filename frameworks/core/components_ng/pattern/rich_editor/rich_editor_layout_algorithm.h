@@ -168,7 +168,8 @@ private:
     LayoutConstraintF ReMeasureContent(
         SizeF& textSize, const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     void HandleParagraphCache();
-    void LayoutParagraphs(const std::vector<ParagraphManager::ParagraphInfo>& paragraphInfo, SizeF& maxSize);
+    void ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, std::vector<TextStyle>& textStyles,
+        std::list<RefPtr<SpanItem>>& group, bool& needReLayout, bool& needReLayoutParagraph);
     std::uintptr_t Hash(const std::list<RefPtr<SpanItem>>& spanGroup);
     RefPtr<Paragraph> GetOrCreateParagraph(const std::list<RefPtr<SpanItem>>& group,
         const ParagraphStyle& paraStyle, const std::map<int32_t, AISpan>& aiSpanMap) override;
