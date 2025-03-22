@@ -780,7 +780,7 @@ void EventReport::ReportReusedNodeSkipMeasureApp()
 void EventRport::ReportPageSlidInfo(OHOS::Ace::NG::SlidInfo &slidInfo) 
 {
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_PAGE_SLID_INFO,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHJAVIOR,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
         EVENT_KEY_GESTURE_VELOCITY, slidInfo.gestureVelocity,
         EVENT_KEY_VELOCITY_SCALE, slidInfo.velocityScale, EVENT_KEY_DRAG_GAIN,
         slidInfo.gain, EVENT_KEY_MAX_FLING_VELOCITY, slidInfo.maxFlingVelocity,
