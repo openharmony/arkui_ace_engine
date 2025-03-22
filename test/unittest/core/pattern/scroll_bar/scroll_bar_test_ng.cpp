@@ -15,6 +15,7 @@
 
 #include "scroll_bar_test_ng.h"
 
+#include "gtest/gtest.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -387,5 +388,121 @@ HWTEST_F(ScrollBarTestNg, HandleDragUpdate002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
     EXPECT_EQ(scrollPattern_->currentOffset_, -10.f);
+}
+
+/**
+ * @tc.name: ValidateOffset001
+ * @tc.desc: Test ScrollBarPattern ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ValidateOffset001, TestSize.Level1)
+{
+    ScrollBarPattern scrollBarPattern;
+    scrollBarPattern.scrollableDistance_ = -2.0f;
+    scrollBarPattern.currentOffset_ = 0.0f;
+    scrollBarPattern.ValidateOffset();
+    EXPECT_EQ(scrollBarPattern.currentOffset_, 0.0f);
+}
+/**
+ * @tc.name: ValidateOffset002
+ * @tc.desc: Test ScrollBarPattern ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ValidateOffset002, TestSize.Level1)
+{
+    ScrollBarPattern scrollBarPattern;
+    scrollBarPattern.scrollableDistance_ = 2.0f;
+    scrollBarPattern.currentOffset_ = 3.0f;
+    scrollBarPattern.ValidateOffset();
+    EXPECT_NE(scrollBarPattern.currentOffset_, 3.0f);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset001
+ * @tc.desc: Test ScrollBarPattern UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateCurrentOffset001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    scrollBarPattern->scrollableDistance_ = -2.0f;
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto result = scrollBarPattern->UpdateCurrentOffset(2.0f, SCROLL_FROM_BAR, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test ScrollBarPattern UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    scrollBarPattern->scrollableDistance_ = 2.0f;
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto result = scrollBarPattern->UpdateCurrentOffset(2.0f, SCROLL_FROM_BAR, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test ScrollBarPattern UpdateCurrentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    scrollBarPattern->scrollableDistance_ = 2.0f;
+    scrollBarPattern->currentOffset_ = 2.0f;
+    scrollBarPattern->lastOffset_ = 2.0f;
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto result = scrollBarPattern->UpdateCurrentOffset(2.0f, SCROLL_FROM_BAR, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AddScrollBarLayoutInfo001
+ * @tc.desc: Test ScrollBarPattern AddScrollBarLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, AddScrollBarLayoutInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    scrollBarPattern->scrollableDistance_ = 2.0f;
+    scrollBarPattern->currentOffset_ = 2.0f;
+    scrollBarPattern->lastOffset_ = 2.0f;
+    RefPtr<ScrollBarProxy> scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    scrollBarPattern->scrollBarProxy_ = scrollBarProxy;
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollBarPattern->outerScrollBarLayoutInfos_.resize(120);
+    for (int i = 0; i < 120; ++i) {
+        scrollBarPattern->outerScrollBarLayoutInfos_.emplace_back(OuterScrollBarLayoutInfo());
+    }
+    scrollBarPattern->AddScrollBarLayoutInfo();
+    EXPECT_EQ(scrollBarPattern->outerScrollBarLayoutInfos_.back().currentOffset_, 2);
+}
+
+/**
+ * @tc.name: ProcessFrictionMotionStop001
+ * @tc.desc: Test ScrollBarPattern ProcessFrictionMotionStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ProcessFrictionMotionStop001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    RefPtr<ScrollBarProxy> scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    scrollBarPattern->scrollBarProxy_ = scrollBarProxy;
+    scrollBarPattern->scrollBarProxy_->scrollSnapTrigger_ = true;
+    scrollBarPattern->ProcessFrictionMotionStop();
+    EXPECT_FALSE(scrollBarPattern->scrollBarProxy_->scrollSnapTrigger_);
 }
 } // namespace OHOS::Ace::NG
