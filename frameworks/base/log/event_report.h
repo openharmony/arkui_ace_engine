@@ -21,7 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
-#include "core/componets_ng/pattern/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace {
 
