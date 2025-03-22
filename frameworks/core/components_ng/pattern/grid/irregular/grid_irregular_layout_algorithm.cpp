@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (info_.childrenCount_ <= 0) {
+    if (info_.GetChildrenCount() <= 0) {
         return;
     }
     wrapper_ = layoutWrapper;
@@ -121,7 +121,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
     }
 
     const float crossSize = contentSize.CrossSize(info_.axis_);
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info_.childrenCount_);
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info_.GetChildrenCount());
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
     if (crossLens_.empty()) {
@@ -247,7 +247,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
         return;
     }
     // adjust offset
-    if (!canOverScrollEnd_ && info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (!canOverScrollEnd_ && info_.endIndex_ == info_.GetChildrenCount() - 1) {
         float overDis =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
@@ -320,12 +320,12 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize)
 {
     if (info_.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
         GridIrregularFiller filler(&info_, wrapper_);
-        filler.FillMatrixOnly(info_.childrenCount_ - 1);
+        filler.FillMatrixOnly(info_.GetChildrenCount() - 1);
         info_.PrepareJumpToBottom();
     }
 
     if (info_.jumpIndex_ == LAST_ITEM) {
-        info_.jumpIndex_ = info_.childrenCount_ - 1;
+        info_.jumpIndex_ = info_.GetChildrenCount() - 1;
     }
 
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
@@ -356,7 +356,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
     info_.reachStart_ = info_.startIndex_ == 0 && NonNegative(info_.currentOffset_);
     // GridLayoutInfo::reachEnd_ has a different meaning
-    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
+    info_.reachEnd_ = info_.endIndex_ == info_.GetChildrenCount() - 1;
 
     float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
 
@@ -629,7 +629,7 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 void GridIrregularLayoutAlgorithm::SyncPreloadItems(int32_t cacheCnt)
 {
     const int32_t start = std::max(info_.startIndex_ - cacheCnt, 0);
-    const int32_t end = std::min(info_.endIndex_ + cacheCnt, info_.childrenCount_ - 1);
+    const int32_t end = std::min(info_.endIndex_ + cacheCnt, info_.GetChildrenCount() - 1);
     GridIrregularFiller filler(&info_, wrapper_);
     FillParams param { crossLens_, crossGap_, mainGap_ };
     auto it = info_.FindInMatrix(start);
@@ -646,13 +646,13 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
+        if (r < info_.GetChildrenCount() && !wrapper_->GetChildByIndex(r, true)) {
             itemsToPreload.emplace_back(r);
         }
     }
 
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillMatrixOnly(std::min(info_.childrenCount_, info_.endIndex_ + cacheCnt));
+    filler.FillMatrixOnly(std::min(info_.GetChildrenCount(), info_.endIndex_ + cacheCnt));
 
     GridLayoutUtils::PreloadGridItems(wrapper_->GetHostNode()->GetPattern<GridPattern>(), std::move(itemsToPreload),
         [crossLens = crossLens_, crossGap = crossGap_, mainGap = mainGap_](

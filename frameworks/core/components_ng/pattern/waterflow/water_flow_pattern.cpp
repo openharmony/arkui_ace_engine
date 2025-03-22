@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,6 +150,13 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
     }
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    layoutInfo_->repeatDifference_ = 0;
+    layoutInfo_->firstRepeatCount_ = 0;
+    layoutInfo_->childrenCount_ = 0;
+    GetRepeatCountInfo(
+        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }
@@ -294,7 +301,7 @@ void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+    if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
         CHECK_NULL_VOID(onReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
@@ -383,7 +390,12 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childCount = host->GetTotalChildCount();
+    layoutInfo_->repeatDifference_ = 0;
+    layoutInfo_->firstRepeatCount_ = 0;
+    layoutInfo_->childrenCount_ = 0;
+    GetRepeatCountInfo(
+        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
+    auto childCount = layoutInfo_->GetChildrenCount();
     layoutInfo_->jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
     // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {

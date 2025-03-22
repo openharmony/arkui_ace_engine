@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,7 @@ void WaterFlowLayoutSW::Init(const SizeF& frameSize)
 {
     mainLen_ = frameSize.MainSize(axis_);
     // omit footer from children count
-    itemCnt_ = info_->ItemCnt(wrapper_->GetTotalChildCount());
+    itemCnt_ = info_->ItemCnt(info_->GetChildrenCount());
     sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
     if (sections_) {
         const auto& sections = sections_->GetSectionInfo();

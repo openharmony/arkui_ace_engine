@@ -108,11 +108,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     }
 
-    layoutInfo_->childrenCount_ = layoutWrapper->GetTotalChildCount();
-
-    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->childrenCount_);
+    InitialItemsCrossSize(layoutProperty, idealSize, layoutInfo_->GetChildrenCount());
     mainSize_ = GetMainAxisSize(idealSize, axis);
-    if (layoutInfo_->jumpIndex_ >= 0 && layoutInfo_->jumpIndex_ < layoutInfo_->childrenCount_) {
+    if (layoutInfo_->jumpIndex_ >= 0 && layoutInfo_->jumpIndex_ < layoutInfo_->GetChildrenCount()) {
         auto crossIndex = layoutInfo_->GetCrossIndex(layoutInfo_->jumpIndex_);
         if (crossIndex == -1) {
             // jump to out of cache
@@ -147,7 +145,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 bool WaterFlowLayoutAlgorithm::MeasureToTarget(
     LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline)
 {
-    if (layoutInfo_->targetIndex_.value() > layoutInfo_->childrenCount_) {
+    if (layoutInfo_->targetIndex_.value() > layoutInfo_->GetChildrenCount()) {
         layoutInfo_->targetIndex_.reset();
         return false;
     }
@@ -156,7 +154,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
     auto position = GetItemPosition(currentIndex);
     const float expandMainSize = mainSize_ + layoutInfo_->expandHeight_;
     if (layoutInfo_->targetIndex_.value() == LAST_ITEM) {
-        layoutInfo_->targetIndex_ = layoutInfo_->childrenCount_ - 1;
+        layoutInfo_->targetIndex_ = layoutInfo_->GetChildrenCount() - 1;
     }
     while (layoutInfo_->targetIndex_.has_value() && (startFrom < layoutInfo_->targetIndex_.value())) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(
@@ -411,7 +409,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     }
     layoutInfo_->endIndex_ = !fill ? currentIndex : currentIndex - 1;
 
-    layoutInfo_->itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_->childrenCount_;
+    layoutInfo_->itemEnd_ = GetChildIndexWithFooter(currentIndex) == layoutInfo_->GetChildrenCount();
     if (layoutInfo_->itemEnd_) {
         ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
     } else {

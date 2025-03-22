@@ -105,7 +105,7 @@ public:
 
     RefPtr<FrameNode> CreateNode(const std::string& tag, int32_t elmtId);
 
-    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtualNode(int32_t elmtId, uint32_t totalCount);
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtualNode(int32_t elmtId, uint32_t arrLen, uint32_t totalCount);
 
     /**
      * create ListItemNode with 2 Text Node inside
@@ -123,10 +123,10 @@ RefPtr<FrameNode> RepeatNodeCache2SyntaxTest::CreateNode(const std::string& tag,
 }
 
 RefPtr<RepeatVirtualScroll2Node> RepeatNodeCache2SyntaxTest::CreateRepeatVirtualNode(
-    int32_t elmtId, uint32_t totalCount)
+    int32_t elmtId, uint32_t arrLen, uint32_t totalCount)
 {
     return RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        elmtId, totalCount, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
+        elmtId, arrLen, totalCount, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
 }
 
 RefPtr<FrameNode> RepeatNodeCache2SyntaxTest::CreateListItemNode(int32_t elmtId)
@@ -168,7 +168,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test000, TestSize.Level1)
      * @tc.expected: Object is not nullptr.
      */
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, 10, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
+        nodeId, 10, 10, ON_GET_RID_4_INDEX, ON_RECYCLE_ITEMS, ON_ACTIVE_RANGE, ON_MOVE_FROM_TO, ON_PURGE);
 
     EXPECT_NE(repeatNode, nullptr);
 }
@@ -180,7 +180,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test000, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test001, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1001, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1001, 10, 10);
 
     /**
      * @tc.steps: step2. Get frame count
@@ -209,7 +209,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test002, TestSize.Level1)
      * @tc.steps: step1. Test node.GetChildren when repeat is empty
      * @tc.expected: children size shoule be 0
      */
-    auto repeatNode = CreateRepeatVirtualNode(1002, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1002, 10, 10);
     auto children = repeatNode->GetChildren();
     EXPECT_EQ(children.size(), 0);
 
@@ -259,7 +259,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test003, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test004, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1004, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1004, 10, 10);
     repeatNode->caches_.l1Rid4Index_ = {
         {0, 1}, {1, 2}, {2, 3}, {3, 4}
     };
@@ -286,7 +286,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test004, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test005, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1005, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1005, 10, 10);
     ActiveRangeType activeRange;
 
     /**
@@ -321,7 +321,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test005, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test006, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1006, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1006, 10, 10);
     ActiveRangeType activeRange;
 
     /**
@@ -356,7 +356,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test006, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1007, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1007, 10, 10);
     repeatNode->SetIsLoop(true);
     ActiveRangeType activeRange;
 
@@ -388,7 +388,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
      * @tc.steps: step4. check active range for: 2 [3 0] 1
      * @tc.expected: active range is {3,2} (overlapped)
      */
-    auto repeatNode2 = CreateRepeatVirtualNode(10071, 4);
+    auto repeatNode2 = CreateRepeatVirtualNode(10071, 4, 4);
     repeatNode2->SetIsLoop(true);
     activeRange = repeatNode2->CheckActiveRange(3, 0, 2, 2);
     std::pair<IndexType, IndexType> expect_result4(3, 2);
@@ -398,7 +398,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
      * @tc.steps: step5. check active range for: [0 1] 2 3..
      * @tc.expected: active range is {-2,3}
      */
-    auto repeatNode3 = CreateRepeatVirtualNode(10072, 10);
+    auto repeatNode3 = CreateRepeatVirtualNode(10072, 10, 10);
     repeatNode3->SetIsLoop(true);
     activeRange = repeatNode3->CheckActiveRange(0, 1, 2, 2);
     std::pair<IndexType, IndexType> expect_result5(-2, 3);
@@ -413,7 +413,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test007, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test008, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1008, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1008, 10, 10);
     ActiveRangeType activeRange;
 
     /**
@@ -472,7 +472,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test008, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test009, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1009, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1009, 10, 10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2009, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
     bool remainInL1;
@@ -506,7 +506,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test009, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test010, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1010, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1010, 10, 10);
 
     /**
      * @tc.steps: step1. check normal active range
@@ -544,7 +544,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test010, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test011, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1011, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1011, 10, 10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2011, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
     repeatNode->caches_.l1Rid4Index_ = {
@@ -569,7 +569,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test011, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test012, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1012, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1012, 10, 10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2012, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
 
@@ -594,7 +594,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test012, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test013, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1013, 10);
+    auto repeatNode = CreateRepeatVirtualNode(1013, 10, 10);
     RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>("node", 2013, AceType::MakeRefPtr<Pattern>());
     CacheItem cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(uiNode, true);
 
@@ -619,7 +619,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test013, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test014, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1014, 6);
+    auto repeatNode = CreateRepeatVirtualNode(1014, 6, 6);
     repeatNode->MoveData(0, 1);
     repeatNode->MoveData(1, 2);
     repeatNode->MoveData(2, 3);
@@ -671,7 +671,7 @@ HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test014, TestSize.Level1)
  */
 HWTEST_F(RepeatNodeCache2SyntaxTest, RepeatNodeCache2Test015, TestSize.Level1)
 {
-    auto repeatNode = CreateRepeatVirtualNode(1015, 6);
+    auto repeatNode = CreateRepeatVirtualNode(1015, 6, 6);
     repeatNode->MoveData(0, 1);
     repeatNode->MoveData(1, 2);
     repeatNode->MoveData(2, 3);
