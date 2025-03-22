@@ -137,6 +137,8 @@ public:
             theme->textButtonFontSize_ = buttonPattern->GetAttr<Dimension>("text_button_font_size", 0.0_fp);
             theme->isApplyFontSize_ =
                 static_cast<bool>(buttonPattern->GetAttr<double>("apply_text_font_size", 0.0));
+            theme->cancelText_ = buttonPattern->GetAttr<std::string>("common_cancel_text", "");
+            theme->pasteText_ = buttonPattern->GetAttr<std::string>("textoverlay_paste", "");
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -186,8 +188,6 @@ public:
                 ControlSize::NORMAL, buttonPattern->GetAttr<Dimension>("button_border_radius_normal", 20.0_vp)));
             theme->borderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
                 ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("button_border_radius_small", 14.0_vp)));
-            theme->cancelText_ = pattern->GetAttr<std::string>("common_cancel_text", "");
-            theme->pasteText_ = pattern->GetAttr<std::string>("textoverlay_paste", "");
         }
     };
 
