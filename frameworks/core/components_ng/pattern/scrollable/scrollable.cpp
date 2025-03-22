@@ -886,7 +886,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     }
     float friction = frictionTmp;
     slidInfo_.friction = friction;
-    EventReport::ReportPageSlidInfo(slidInfo);
+    EventReport::ReportPageSlidInfo(slidInfo_);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
     if (fixScrollParamCallback_) {
