@@ -36,22 +36,21 @@ public:
     virtual ~RepeatVirtualScroll2Model() = default;
 
     static RepeatVirtualScroll2Model* GetInstance();
-    virtual void Create(uint32_t totalCount,
+    virtual void Create(uint32_t arrLen, uint32_t totalCount,
         const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
-        const std::function<void(int32_t, int32_t)>& onMoveFromTo,
-        const std::function<void()>& onPurge) = 0;
+        const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge) = 0;
 
     virtual void RemoveNode(uint32_t rid) = 0;
     virtual void SetInvalid(int32_t repeatElmtId, uint32_t rid) = 0;
 
-    virtual void RequestContainerReLayout(
-        int32_t repeatElmtId, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex = INT_MIN) = 0;
-    virtual void NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t totalCount,
-        int32_t index, int32_t count, NG::UINode::NotificationType notificationType) = 0;
+    virtual void RequestContainerReLayout(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
+        int32_t invalidateContainerLayoutFromChildIndex = INT_MIN) = 0;
+    virtual void NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount, int32_t index,
+        int32_t count, NG::UINode::NotificationType notificationType) = 0;
 
-    virtual void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount,
+    virtual void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
         uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index) = 0;
     virtual void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) = 0;
     virtual void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,

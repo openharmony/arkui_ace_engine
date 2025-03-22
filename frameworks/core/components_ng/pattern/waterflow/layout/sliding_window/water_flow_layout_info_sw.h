@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -211,6 +211,8 @@ public:
     void EstimateTotalOffset(int32_t prevStart, int32_t startIdx);
 
     float EstimateTotalHeight() const override;
+
+    bool EstimateVirtualTotalHeight(float average, float& virtualTotalHeight) const;
 
     /**
      * @brief If delta is large enough, convert it to a jump to improve layout performance.
