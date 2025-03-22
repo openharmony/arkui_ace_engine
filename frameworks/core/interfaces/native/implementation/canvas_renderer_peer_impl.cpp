@@ -247,7 +247,6 @@ void CanvasRendererPeerImpl::Fill(const std::optional<std::string>& ruleStr, con
         renderingContext2DModel_->SetFillRuleForPath2D(fillRule, path);
     }
 }
-
 void CanvasRendererPeerImpl::Stroke()
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
@@ -356,10 +355,11 @@ void CanvasRendererPeerImpl::CreateImageData(
     width = finalWidth;
     height = finalHeight;
 }
-void CanvasRendererPeerImpl::CreateImageData(std::vector<uint8_t>& vbuffer, uint32_t& width, uint32_t& height)
+void CanvasRendererPeerImpl::CreateImageData(
+    std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height)
 {
-    uint32_t finalWidth = width;
-    uint32_t finalHeight = height;
+    uint32_t finalWidth = std::abs(imageData.dirtyWidth);
+    uint32_t finalHeight = std::abs(imageData.dirtyHeight);
     vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
     uint32_t* buffer = (uint32_t*)vbuffer.data();
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
@@ -423,14 +423,11 @@ RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
 void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDataParam& params)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    CHECK_NULL_VOID(src.data.data());
-    int32_t imgWidth = static_cast<int32_t>(src.dirtyWidth);
-    int32_t imgHeight = static_cast<int32_t>(src.dirtyHeight);
-
+    int32_t imgWidth = src.dirtyWidth;
+    int32_t imgHeight = src.dirtyHeight;
     // Parse other parameters
     Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
     ParseImageData(imageData, params);
-
     imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
                                                 : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
     imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
@@ -865,6 +862,7 @@ void CanvasRendererPeerImpl::SetTextDirection(const std::string& directionStr)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "auto", TextDirection::AUTO },
         { "inherit", TextDirection::INHERIT },
         { "ltr", TextDirection::LTR },
         { "rtl", TextDirection::RTL },
@@ -920,6 +918,7 @@ void CanvasRendererPeerImpl::SetTextAlign(const std::string& alignStr)
     static const LinearMapNode<TextAlign> textAlignTable[] = {
         { "center", TextAlign::CENTER },
         { "end", TextAlign::END },
+        { "justify", TextAlign::JUSTIFY },
         { "left", TextAlign::LEFT },
         { "right", TextAlign::RIGHT },
         { "start", TextAlign::START },
