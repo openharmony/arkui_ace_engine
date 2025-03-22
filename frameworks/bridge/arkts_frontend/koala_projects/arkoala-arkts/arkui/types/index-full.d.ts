@@ -8837,6 +8837,13 @@ declare interface RawFileDescriptor {
     offset: number;
     length: number;
 }
+declare class ComponentObserver {
+    on(type: string, callback: ()=>void) : void;
+    off(type: string, callback?: ()=>void) : void;
+}
+declare class UIInspector {
+    createComponentObserver(id: string): ComponentObserver;
+}
 declare const AbilityComponent: AbilityComponentInterface
 declare const AbilityComponentInstance: AbilityComponentAttribute
 declare const AlphabetIndexer: AlphabetIndexerInterface

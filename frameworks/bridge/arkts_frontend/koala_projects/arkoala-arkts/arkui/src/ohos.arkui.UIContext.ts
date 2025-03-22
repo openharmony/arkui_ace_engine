@@ -17,9 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterialized"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule, Inspector, ComponentObserver } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
+
+export class UIInspector {
+    instanceId_: int32 = 100000;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public createComponentObserver(id: string): ComponentObserver {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let componentObserver = Inspector.createComponentObserver(id);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return componentObserver;
+    }
+}
 
 export class UIContext {
     instanceId_: int32 = 10001;
@@ -38,6 +51,10 @@ export class UIContext {
         }
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return null;
+    }
+    public getUIInspector(): UIInspector {
+        let uiInspector = new UIInspector(this.instanceId_);
+        return uiInspector;
     }
 }
 export abstract class FrameCallback {
