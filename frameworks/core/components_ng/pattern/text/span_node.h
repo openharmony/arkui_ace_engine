@@ -229,8 +229,8 @@ struct CustomSpanPlaceholderInfo {
 
 enum class ChangeFlag {
     RE_CREATE = 0,
-    RE_LAYOUT = 1
-}
+    RE_LAYOUT = 1,
+};
 
 struct SpanItem : public AceType {
     DECLARE_ACE_TYPE(SpanItem, AceType);
