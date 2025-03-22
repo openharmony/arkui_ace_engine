@@ -33,6 +33,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
@@ -100,8 +102,36 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     textStyle.SetSymbolType(symbolType);
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
+    // Update Symbol TextStyle
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        textStyle.SetSymbolUid(frameNode->GetId());
+        UpdateSymbolStyle(textStyle);
+    }
     UpdateTextColorIfForeground(frameNode, textStyle);
     inheritTextStyle_ = textStyle;
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle)
+{
+    textStyle.isSymbolGlyph_ = true;
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
+    auto symbolType = textStyle.GetSymbolType();
+    textStyle.SetSymbolType(symbolType);
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        textStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        textStyle.SetFontFamilies(fontFamilies);
+    }
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

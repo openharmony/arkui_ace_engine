@@ -28,8 +28,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
-const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
 {
@@ -243,7 +241,7 @@ bool TextLayoutAlgorithm::AlwaysReCreateParagraph(LayoutWrapper* layoutWrapper)
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, false);
     return textPattern->GetExternalParagraph() || textPattern->NeedShowAIDetect() || isSpanStringMode_ ||
-           frameNode->GetTag() == V2::SYMBOL_ETS_TAG || textPattern->IsDragging() ||
+           textPattern->IsDragging() ||
            textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE ||
            textPattern->IsSensitiveEnable() ||
            textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM) == SymbolType::CUSTOM;
@@ -387,37 +385,12 @@ bool TextLayoutAlgorithm::UpdateSymbolTextStyle(const TextStyle& textStyle, cons
     CHECK_NULL_RETURN(layoutProperty, false);
     auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
     CHECK_NULL_RETURN(symbolSourceInfo, false);
-    TextStyle symbolTextStyle = textStyle;
-    symbolTextStyle.isSymbolGlyph_ = true;
-    symbolTextStyle.SetRenderStrategy(
-        symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
-    symbolTextStyle.SetEffectStrategy(
-        symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
     auto symbolType = textStyle.GetSymbolType();
-    symbolTextStyle.SetSymbolType(symbolType);
-    std::vector<std::string> fontFamilies;
-    if (symbolType == SymbolType::CUSTOM) {
-        auto symbolFontFamily = textStyle.GetFontFamilies();
-        for (auto& name : symbolFontFamily) {
-            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
-                fontFamilies.push_back(name);
-                break;
-            }
-        }
-        if (fontFamilies.empty()) {
-            return false;
-        }
-        symbolTextStyle.SetFontFamilies(fontFamilies);
-    } else {
-        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
-        symbolTextStyle.SetFontFamilies(fontFamilies);
+    std::vector<std::string> fontFamilies = textStyle.GetFontFamilies();
+    if (symbolType == SymbolType::CUSTOM && fontFamilies.empty()) {
+        return false;
     }
-    paragraph->PushStyle(symbolTextStyle);
-    if (symbolTextStyle.GetSymbolEffectOptions().has_value()) {
-        auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
-        symbolEffectOptions.Reset();
-        layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
-    }
+    paragraph->PushStyle(textStyle);
     paragraph->AddSymbol(symbolSourceInfo->GetUnicode());
     paragraph->PopStyle();
     paragraph->Build();
