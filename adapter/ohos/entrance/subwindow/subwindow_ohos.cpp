@@ -217,9 +217,10 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
         size = Size(display->GetWidth(), display->GetHeight());
     }
 
+    auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s", isScenceBoard,
-        isCrossWindow, size.ToString().c_str());
+        "parentWindow windowId: %{public}d isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
+        parentWindowId, isScenceBoard, isCrossWindow, size.ToString().c_str());
     return size;
 }
 
