@@ -584,10 +584,11 @@ public:
     
     static bool IsBigFoldProduct();
 
+    static int32_t GetTouchAccelarate();
+
     static bool GetWebDebugMaximizeResizeOptimize();
 
     static bool IsNeedResampleTouchPoints();
-
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -659,6 +660,7 @@ private:
     static FoldScreenType foldScreenType_;
     static float fontScale_;
     static float fontWeightScale_;
+    static int32_t touchAccelarate_;
 };
 
 } // namespace OHOS::Ace

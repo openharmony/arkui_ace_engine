@@ -722,12 +722,6 @@ public:
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
-    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
-    {
-        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
-    }
-
-
     void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
     {
         singleHandTransform_ = singleHandTransform;
@@ -843,7 +837,6 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
-    std::optional<bool> isTouchEventsPassThrough_;
 
     // for single hand mode
     SingleHandTransform singleHandTransform_;

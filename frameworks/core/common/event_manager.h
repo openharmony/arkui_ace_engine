@@ -94,6 +94,7 @@ public:
     bool HasDifferentDirectionGesture();
 
     bool OnNonPointerEvent(const NonPointerEvent& event);
+
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
     void DispatchTouchCancelToRecognizer(
@@ -182,6 +183,9 @@ public:
         CHECK_NULL_VOID(mouseStyleManager_);
         mouseStyleManager_->VsyncMouseFormat();
     }
+
+    bool TryResampleTouchEvent(std::vector<TouchEvent>& history,
+        const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& resample);
 
     bool GetResampleTouchEvent(const std::vector<TouchEvent>& history,
         const std::vector<TouchEvent>& current, uint64_t nanoTimeStamp, TouchEvent& newTouchEvent);
@@ -286,7 +290,7 @@ public:
         idToTouchPoints_ = std::move(idToTouchPoint);
     }
 
-    inline const std::unordered_map<int32_t, uint64_t>& GetLastDispatchTime() const
+    inline std::unordered_map<int32_t, uint64_t>& GetLastDispatchTime()
     {
         return lastDispatchTime_;
     }

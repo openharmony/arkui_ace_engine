@@ -105,6 +105,7 @@ float SystemProperties::pageCount_ = 1.0f;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
+int32_t SystemProperties::touchAccelarate_ = 0;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -340,6 +341,11 @@ bool SystemProperties::IsSmallFoldProduct()
 bool SystemProperties::IsBigFoldProduct()
 {
     return false;
+}
+
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
 }
 
 bool SystemProperties::IsNeedResampleTouchPoints()
