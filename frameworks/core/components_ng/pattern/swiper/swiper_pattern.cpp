@@ -377,8 +377,9 @@ void SwiperPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     swiperId_ = host->GetId();
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(hub);
+    hub->SetSwiperId(swiperId_);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -1531,9 +1532,6 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
-    TAG_LOGI(AceLogTag::ACE_SWIPER,
-        "FireAnimationStartEvent, currentIndex: %{public}d, nextIndex: %{public}d, id:%{public}d", currentIndex,
-        nextIndex, swiperId_);
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
@@ -1545,10 +1543,6 @@ void SwiperPattern::FireAnimationStartEvent(
 void SwiperPattern::FireAnimationEndEvent(
     int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt) const
 {
-    TAG_LOGI(AceLogTag::ACE_SWIPER,
-        "FireAnimationEndEvent currentIndex: %{public}d, currentOffset: has_value %{public}d, value %{public}fvp, "
-        "isForce: %{public}d, id:%{public}d",
-        currentIndex, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop, swiperId_);
     if (currentIndex == -1) {
         return;
     }
