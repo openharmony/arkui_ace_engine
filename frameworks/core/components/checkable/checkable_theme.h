@@ -439,6 +439,16 @@ public:
         return focusPadding_;
     }
 
+    const std::string& GetSwitchOnText() const
+    {
+        return switchOnText_;
+    }
+
+    const std::string& GetSwitchOffText() const
+    {
+        return switchOffText_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
@@ -451,6 +461,8 @@ private:
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;
     Dimension focusPadding_;
+    std::string switchOnText_;
+    std::string switchOffText_;
 };
 
 class RadioTheme : public CheckableTheme {

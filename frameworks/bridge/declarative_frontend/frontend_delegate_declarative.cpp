@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -2212,14 +2211,18 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
+            { .text = dialogTheme->GetOkText(), .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }

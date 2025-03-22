@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "core/components/toast/toast_component.h"
@@ -1075,6 +1074,10 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
 
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -1083,7 +1086,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         .callbacks = std::move(callbackMarkers),
     };
     ButtonInfo buttonInfo = {
-        .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        .text = dialogTheme->GetCancelText(),
         .textColor = "#000000"
     };
     dialogProperties.buttons.emplace_back(buttonInfo);
@@ -1138,13 +1141,17 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
+            { .text = dialogTheme->GetOkText(), .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }

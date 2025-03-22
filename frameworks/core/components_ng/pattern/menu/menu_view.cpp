@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
-#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -42,6 +41,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1633,8 +1633,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (params[index].value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -1654,8 +1657,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (value.value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);

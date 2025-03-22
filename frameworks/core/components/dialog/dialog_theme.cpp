@@ -221,5 +221,7 @@ void DialogTheme::Builder::ParseNewPattern(
     theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
     theme->dialogBackgroundBlurStyle_ =
         dialogPattern->GetAttr<int>("dialog_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+    theme->cancelText_ = dialogPattern->GetAttr<std::string>("common_cancel_text", "");
+    theme->okText_ = dialogPattern->GetAttr<std::string>("common_ok_text", "");
 }
 } // namespace OHOS::Ace
