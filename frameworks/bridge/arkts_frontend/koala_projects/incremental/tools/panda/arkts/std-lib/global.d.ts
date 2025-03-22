@@ -58,10 +58,11 @@ declare const console: {
 
 }
 
-declare function setTimeout(func: () => void, delayMs: int32): int32
+declare function setTimeout(func: () => void, delayMs?: int32): int32
 
-declare function setInterval(func: () => void, delayMs: int32): int32
+declare function setInterval(func: () => void, delayMs?: int32): int32
 
 declare function clearInterval(timerId: int32): void
 
 declare function clearTimeout(timerId: int32): void
+    

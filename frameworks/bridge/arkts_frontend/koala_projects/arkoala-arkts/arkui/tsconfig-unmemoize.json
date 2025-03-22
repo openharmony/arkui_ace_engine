@@ -33,7 +33,8 @@
             ],
             "#components": [
                 "./src/generated/ts"
-            ]
+            ],
+            "@ohos/global/resource":["../../arkoala/arkui-common/interface_sdk-js/api/global/resource"]
         },
         "rootDir": "."
     },

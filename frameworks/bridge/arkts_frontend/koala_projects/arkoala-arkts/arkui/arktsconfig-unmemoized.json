@@ -14,7 +14,8 @@
             "@koalaui/common": ["../../../../../incremental/common/src"],
             "@koalaui/compat": ["../../../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["../../../../../incremental/runtime/build/unmemoized/src"],
-            "#helpindexarkui": ["index.ts"]
+            "#helpindexarkui": ["index.ts"],
+            "@ohos/global/resource":["../../../../../arkoala/arkui-common/interface_sdk-js/api/global/resource"]
         }
     },
     "include": [

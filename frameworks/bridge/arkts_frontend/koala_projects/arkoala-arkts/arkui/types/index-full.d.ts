@@ -16,6 +16,16 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
+declare type int = number;
+declare function $$ (value: T): T
+declare class WrappedBuilder<Args extends Object[]> {}
+declare function wrapBuilder<Args extends Object[]>(builder: (...args: Args) => void): WrappedBuilder;
+declare function canIUse(syscap: string): boolean;
+declare const GestureGroup: GestureGroupInterface;
+declare const TapGesture: TapGestureInterface;
+declare const PanGesture: PanGestureInterface;
+declare const PinchGesture: PinchGestureInterface;
+
 declare const Component: ClassDecorator & ((options: ComponentOptions) => ClassDecorator);
 
 declare const ComponentV2: ClassDecorator & ((options: ComponentOptions) => ClassDecorator);
@@ -106,7 +116,7 @@ declare const LocalStorageProp: (value: string) => PropertyDecorator;
 
 declare const Reusable: ClassDecorator;
 
-declare interface IDataSource<T> {
+declare interface IDataSource<T = Object> {
     totalCount(): number;
 
     getData(index: number): T;
@@ -291,6 +301,7 @@ declare enum LengthUnit {
 declare class LengthMetrics {
     unit: LengthUnit;
     value: number;
+    static vp(value: number): LengthMetrics;
 }
 declare class ColorMetrics {
     get color(): string;
@@ -1353,6 +1364,11 @@ declare class DrawModifier {
     invalidate(): void;
 }
 declare class TransitionEffect {
+    static opacity(alpha: number): TransitionEffect;
+    static readonly OPACITY: TransitionEffect;
+    static asymmetric(appear: TransitionEffect, disappear: TransitionEffect): TransitionEffect;
+    static readonly IDENTITY: TransitionEffect;
+    static scale(options: ScaleOptions): TransitionEffect;
     constructor(type: string, effect: TransitionEffects);
     animation(value: AnimateParam): TransitionEffect;
     combine(transitionEffect: TransitionEffect): TransitionEffect;
@@ -2526,6 +2542,34 @@ declare enum HoverModeAreaType {
     BOTTOM_SCREEN = 1,
 }
 declare class AppStorage {
+    static ref(propName: string): AbstractProperty | undefined;
+    static setAndRef(propName: string, defaultValue: T): AbstractProperty;
+    static Link(propName: string): any;
+    static link(propName: string): SubscribedAbstractProperty;
+    static SetAndLink(propName: string, defaultValue: T): SubscribedAbstractProperty;
+    static setAndLink(propName: string, defaultValue: T): SubscribedAbstractProperty;
+    static Prop(propName: string): any;
+    static prop(propName: string): SubscribedAbstractProperty;
+    static SetAndProp(propName: string, defaultValue: S): SubscribedAbstractProperty;
+    static setAndProp(propName: string, defaultValue: T): SubscribedAbstractProperty;
+    static Has(propName: string): boolean;
+    static has(propName: string): boolean;
+    static Get(propName: string): T | undefined;
+    static get(propName: string): T | undefined;
+    static Set(propName: string, newValue: T): boolean;
+    static set(propName: string, newValue: T): boolean;
+    static SetOrCreate(propName: string, newValue: T): void;
+    static setOrCreate(propName: string, newValue: T): void;
+    static Delete(propName: string): boolean;
+    static delete(propName: string): boolean;
+    static Keys(): IterableIterator;
+    static keys(): IterableIterator;
+    static staticClear(): boolean;
+    static Clear(): boolean;
+    static clear(): boolean;
+    static IsMutable(propName: string): boolean;
+    static Size(): number;
+    static size(): number;
 }
 declare interface AbstractProperty<T> {
     get(): T;
@@ -2592,6 +2636,7 @@ declare class PersistentStorage {
 }
 declare class LocalStorage {
     constructor(initializingProperties?: Object);
+    static getShared(): LocalStorage;
     ref<T>(propName: string): AbstractProperty<T> | undefined;
     setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T>;
     has(propName: string): boolean;
