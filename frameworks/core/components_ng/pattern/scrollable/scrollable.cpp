@@ -768,7 +768,7 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
     slidInfo_.velocityScale = velocityScale;
     slidInfo_.gain = gain;
     slidInfo_.maxFlingVelocity = maxFlingVelocity_;
-    slidInfo_.SlipFactor = slipFactor_;
+    slidInfo_.slipFactor = slipFactor_;
 }
 
 void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
