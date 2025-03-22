@@ -689,6 +689,7 @@ public:
     void AdjustSelectedBlankLineWidth(RectF& rect);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
