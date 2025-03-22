@@ -43,6 +43,9 @@
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
@@ -1296,10 +1299,10 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindTips(const RefPtr<PopupParam>& param) override
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& spanString) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        ViewAbstract::BindTips(param, AceType::Claim(targetNode));
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
     }
 
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override

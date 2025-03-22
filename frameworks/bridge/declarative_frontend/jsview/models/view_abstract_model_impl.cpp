@@ -1441,7 +1441,7 @@ void ViewAbstractModelImpl::BindPopup(const RefPtr<PopupParam>& param, const Ref
     }
 }
 
-void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param)
+void ViewAbstractModelImpl::BindTips(const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto tipsComponent = ViewStackProcessor::GetInstance()->GetPopupComponent(true);

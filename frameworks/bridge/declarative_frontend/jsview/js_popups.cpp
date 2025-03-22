@@ -25,6 +25,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 #include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
@@ -1295,16 +1296,19 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     }
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(tipsParam);
+    // Set message to tipsParam
     std::string value;
+    RefPtr<SpanString> styledString;
     if (info[0]->IsString()) {
         value = info[0]->ToString();
     } else {
         auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
         if (!spanString) {
             JSViewAbstract::ParseJsString(info[0], value);
+        } else {
+            styledString = spanString->GetController();
         }
     }
-    // Set message to tipsParam
     tipsParam->SetMessage(value);
     // Set bindTipsOptions to tipsParam
     JSRef<JSObject> tipsObj;
@@ -1319,7 +1323,7 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
         ParseTipsArrowPositionParam(tipsObj, tipsParam);
         ParseTipsArrowSizeParam(tipsObj, tipsParam);
     }
-    ViewAbstractModel::GetInstance()->BindTips(tipsParam);
+    ViewAbstractModel::GetInstance()->BindTips(tipsParam, styledString);
 }
 
 void JSViewAbstract::SetPopupDismiss(

@@ -1364,6 +1364,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
     const RefPtr<FrameNode> targetNode2 = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
     auto param = AceType::MakeRefPtr<PopupParam>();
     auto param2 = AceType::MakeRefPtr<PopupParam>();
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"tipTest");
 
     /**
      * @tc.steps: step2. get tipsInfo  and change some params.
@@ -1393,7 +1394,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
      * @tc.steps: step3. Call BindTips many times.
      * @tc.expected: popupNode in overlayManager of targetNode not null
      */
-    ViewAbstract::BindTips(param, targetNode);
+    ViewAbstract::BindTips(param, targetNode, spanString);
     overlayManager->HideTips(targetNode->GetId(), info, 300);
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     auto popupNode = popupInfo.popupNode;
@@ -1403,7 +1404,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
     ASSERT_NE(context1, nullptr);
     auto subwindow = Subwindow::CreateSubwindow(context1->GetInstanceId());
     SubwindowManager::GetInstance()->AddSubwindow(context1->GetInstanceId(), subwindow);
-    ViewAbstract::BindTips(param, targetNode);
+    ViewAbstract::BindTips(param, targetNode, spanString);
     EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 
     /**
@@ -1411,7 +1412,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
      * @tc.expected: popupNode in overlayManager of targetNode not null
      */
     param2->SetUseCustomComponent(true);
-    ViewAbstract::BindTips(param2, targetNode2);
+    ViewAbstract::BindTips(param2, targetNode2, spanString);
     EXPECT_NE(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
 
@@ -1511,6 +1512,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Le
      */
     const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
     auto param = AceType::MakeRefPtr<PopupParam>();
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"tipTest");
     auto container = Container::Current();
     ASSERT_NE(container, nullptr);
     auto pipelineContext = container->GetPipelineContext();
@@ -1522,13 +1524,13 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Le
 
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
     popupInfo.isTips = true;
-    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, false, 1);
+    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, false, spanString);
     for (const auto& destroyCallback : targetNode->destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
         }
     }
-    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, true, 1);
+    ViewAbstract::HandleHoverTipsInfo(param, targetNode, popupInfo, true, spanString);
     for (const auto& destroyCallback : targetNode->destroyCallbacksMap_) {
         if (destroyCallback.second) {
             destroyCallback.second();
