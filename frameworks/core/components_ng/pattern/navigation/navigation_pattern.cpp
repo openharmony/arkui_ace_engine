@@ -796,8 +796,10 @@ void NavigationPattern::UpdateNavPathList()
         if (index == pathListSize - 1 && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
-        } else if (isPageForceSet && navDestinationId != -1) {
-            uiNode = FindNavDestinationNodeInPreList(navDestinationId);
+        } else if (isCurForceSetList) {
+            if (navDestinationId != -1) {
+                uiNode = FindNavDestinationNodeInPreList(navDestinationId);
+            }
         } else {
             uiNode = navigationStack_->Get(pathIndex);
         }
@@ -3672,16 +3674,16 @@ bool NavigationPattern::IsStandardPage(const RefPtr<UINode>& uiNode) const
 RefPtr<UINode> NavigationPattern::FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const
 {
     CHECK_NULL_RETURN(navigationStack_, nullptr);
-    auto preNavDestinationList = navigationStack_->GetAllNavDestinationNodesPrev();
+    auto preNavDestinationList = navigationStack_->GetPreNavPathList();
     for (auto preNavDestinationInfo : preNavDestinationList) {
         auto preNavDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(preNavDestinationInfo.second.Upgrade()));
+            NavigationGroupNode::GetNavDestinationNode(preNavDestinationInfo.second));
         CHECK_NULL_CONTINUE(preNavDestinationNode);
         auto pattern = preNavDestinationNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_CONTINUE(pattern);
         auto preId = pattern->GetNavDestinationId();
         if (preId == navDestinationId) {
-            return preNavDestinationInfo.second.Upgrade();
+            return preNavDestinationInfo.second;
         }
     }
     return nullptr;
