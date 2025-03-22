@@ -255,7 +255,7 @@ public:
     float GetDistanceToTop(int32_t itemIdx, int32_t laneIdx, float mainGap) const;
     float GetDistanceToBottom(int32_t itemIdx, int32_t laneIdx, float mainSize, float mainGap) const;
     float GetCachedHeightInLanes(int32_t idx) const;
-    void SetHeightInLanes(int32_t idx, int32_t mainHeight);
+    void SetHeightInLanes(int32_t idx, float mainHeight);
     bool HaveRecordIdx(int32_t idx) const;
 
     /**
