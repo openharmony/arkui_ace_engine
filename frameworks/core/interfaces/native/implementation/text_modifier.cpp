@@ -139,6 +139,32 @@ TextResponseType Convert(const Ark_TextResponseType& src)
     }
     return responseType;
 }
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_Number& src)
+{
+    auto intVal = src.tag == Ark_Tag::INTEROP_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
+    if (intVal >= WeightNum::W100 && intVal <= WeightNum::W900) {
+        dst = intVal;
+    }
+}
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_String& src)
+{
+    auto intVal = Converter::Convert<int32_t>(src);
+    if (intVal >= WeightNum::W100 && intVal <= WeightNum::W900) {
+        dst = intVal;
+    }
+}
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_FontWeight& src)
+{
+    if (src >= ARK_FONT_WEIGHT_LIGHTER && src <= ARK_FONT_WEIGHT_BOLDER) {
+        dst = static_cast<int32_t>(src);
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -290,8 +316,8 @@ void FontWeight0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto weight = Converter::OptConvert<FontWeight>(*value);
+    auto variableWeight = Converter::OptConvert<int32_t>(*value);
     TextModelNG::SetFontWeight(frameNode, weight);
-    auto variableWeight = weight ? Converter::FontWeightToInt(weight.value()) : std::nullopt;
     TextModelNG::SetVariableFontWeight(frameNode, variableWeight);
 }
 void FontWeight1Impl(Ark_NativePointer node,
