@@ -211,13 +211,12 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 }
 
 // NG ImageLoader entrance
-bool NetworkImageLoader::DownloadImage(
-    DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
+bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
     return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId)
+                      std::move(downloadCallback), src, Container::CurrentId())
                 : DownloadManager::GetInstance()->DownloadAsyncWithPreload(
-                      std::move(downloadCallback), src, Container::CurrentId(), nodeId);
+                      std::move(downloadCallback), src, Container::CurrentId());
 }
 
 std::shared_ptr<RSData> FileImageLoader::LoadImageData(
@@ -320,17 +319,17 @@ std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         TAG_LOGW(
-            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+            AceLogTag::ACE_IMAGE, "invalid pipeline context. %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetManager = pipelineContext->GetAssetManager();
     if (!assetManager) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset manager! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetManager! %{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     auto assetData = assetManager->GetAsset(assetSrc);
     if (!assetData) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "No asset data! %{public}s.", imageDfxConfig.ToStringWithoutSrc().c_str());
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "NoAssetData-%{public}s", imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
     const uint8_t* data = assetData->GetData();

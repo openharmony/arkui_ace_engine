@@ -31,29 +31,35 @@ using ChangeSurfaceCallbackModeFunc = XComponentControllerErrorCode (*)(void*, c
 } // namespace
 void GetController(void* jsController, void* controller)
 {
-    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
-    if (handle == nullptr) {
-        return;
-    }
-    auto entry = reinterpret_cast<GetControllerFunc>(LOADSYM(handle, XCOMPONENT_GET_CONTROLLER_FUNC));
+    static GetControllerFunc entry = nullptr;
     if (entry == nullptr) {
-        FREELIB(handle);
-        return;
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        if (handle == nullptr) {
+            return;
+        }
+        entry = reinterpret_cast<GetControllerFunc>(LOADSYM(handle, XCOMPONENT_GET_CONTROLLER_FUNC));
+        if (entry == nullptr) {
+            FREELIB(handle);
+            return;
+        }
     }
     entry(jsController, controller);
 }
 
 XComponentControllerErrorCode ChangeSurfaceCallbackMode(void* frameNode, char mode)
 {
-    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
-    if (handle == nullptr) {
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
-    auto entry =
-        reinterpret_cast<ChangeSurfaceCallbackModeFunc>(LOADSYM(handle, XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC));
+    static ChangeSurfaceCallbackModeFunc entry = nullptr;
     if (entry == nullptr) {
-        FREELIB(handle);
-        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+        LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+        if (handle == nullptr) {
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+        }
+        entry = reinterpret_cast<ChangeSurfaceCallbackModeFunc>(
+            LOADSYM(handle, XCOMPONENT_CHANGE_SURFACE_CALLBACKMODE_FUNC));
+        if (entry == nullptr) {
+            FREELIB(handle);
+            return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+        }
     }
     return entry(frameNode, mode);
 }

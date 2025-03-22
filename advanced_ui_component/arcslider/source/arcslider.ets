@@ -106,6 +106,7 @@ export interface ArcSliderOptionsConstructorOptions {
   digitalCrownSensitivity?: CrownSensitivity;
   onTouch?: Callback<TouchEvent>;
   onChange?: Callback<number>;
+  onEnlarge?: Callback<boolean>;
 }
 
 @ObservedV2
@@ -157,6 +158,7 @@ export class ArcSliderOptions {
   @Trace public digitalCrownSensitivity: CrownSensitivity;
   @Trace public onTouch: Callback<TouchEvent>;
   @Trace public onChange: Callback<number>;
+  @Trace public onEnlarge: Callback<boolean>;
 
   constructor(options?: ArcSliderOptionsConstructorOptions) {
     this.valueOptions = options?.valueOptions ?? new ArcSliderValueOptions();
@@ -166,6 +168,8 @@ export class ArcSliderOptions {
     this.onTouch = options?.onTouch ?? ((event: TouchEvent) => {
     });
     this.onChange = options?.onChange ?? ((progress: number) => {
+    });
+    this.onEnlarge = options?.onEnlarge ?? ((isEnlarged: boolean) => {
     });
   }
 }
@@ -374,6 +378,7 @@ export struct ArcSlider {
 
   startTouchAnimator() {
     if (this.touchAnimator) {
+      this.options.onEnlarge?.(true);
       this.touchAnimator.play();
     }
   }
@@ -461,6 +466,7 @@ export struct ArcSlider {
 
   startRestoreAnimator() {
     if (this.restoreAnimator) {
+      this.options.onEnlarge?.(false);
       this.restoreAnimator.play();
     }
   }
@@ -1177,7 +1183,7 @@ export struct ArcSlider {
         .width(this.diameter)
         .height(this.diameter)
         .fill(BLUR_COLOR_DEFAULT)
-        .backdropBlur(this.options.styleOptions.trackBlur)
+        .backdropBlur(this.options.styleOptions.trackBlur, undefined, { disableSystemAdaptation: true })
 
       Button()
         .stateEffect(false)

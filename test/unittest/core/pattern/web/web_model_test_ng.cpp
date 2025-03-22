@@ -823,6 +823,28 @@ HWTEST_F(WebModelTestNg, SetJsEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetJsEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetJsEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetJsEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckJsEnabled(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetTextZoomRatio001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -867,6 +889,28 @@ HWTEST_F(WebModelTestNg, SetFileAccessEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetFileAccessEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFileAccessEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetFileAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckFileAccessEnabled(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetOnLineImageAccessEnabled001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -906,6 +950,28 @@ HWTEST_F(WebModelTestNg, SetDomStorageAccessEnabled001, TestSize.Level1)
 
     WebModelNG webModelNG;
     webModelNG.SetDomStorageAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDomStorageAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetDomStorageAccessEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDomStorageAccessEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDomStorageAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckDomStorageAccessEnabled(true), true);
 #endif
 }
@@ -956,6 +1022,28 @@ HWTEST_F(WebModelTestNg, SetMixedMode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMixedMode002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetMixedMode002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetMixedMode(AccessibilityManager::RawPtr(frameNode), MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetMixedMode(), MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
+#endif
+}
+
+/**
  * @tc.name: SetZoomAccessEnabled001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -973,6 +1061,28 @@ HWTEST_F(WebModelTestNg, SetZoomAccessEnabled001, TestSize.Level1)
 
     WebModelNG webModelNG;
     webModelNG.SetZoomAccessEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckZoomAccessEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetZoomAccessEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetZoomAccessEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetZoomAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckZoomAccessEnabled(true), true);
 #endif
 }
@@ -2258,4 +2368,93 @@ HWTEST_F(WebModelTestNg, SetEnableFollowSystemFontWeight001, TestSize.Level1)
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckEnableFollowSystemFontWeight(true), true);
 #endif
 }
+
+/**
+ * @tc.name: SetCacheMode001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetCacheMode001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetCacheMode(AccessibilityManager::RawPtr(frameNode), WebCacheMode::DEFAULT);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetCacheMode(), WebCacheMode::DEFAULT);
+#endif
+}
+
+/**
+ * @tc.name: SetDarkMode001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetDarkMode001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetDarkMode(AccessibilityManager::RawPtr(frameNode), WebDarkMode::Auto);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->GetDarkMode(), WebDarkMode::Auto);
+#endif
+}
+
+/**
+ * @tc.name: SetAllowWindowOpenMethod001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetAllowWindowOpenMethod001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetAllowWindowOpenMethod(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckAllowWindowOpenMethod(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetMultiWindowAccessEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetMultiWindowAccessEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetMultiWindowAccessEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckMultiWindowAccessEnabled(true), true);
+#endif
+}
+
 } // namespace OHOS::Ace::NG

@@ -595,7 +595,8 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
     const auto& children = host->GetChildren();
     int32_t index = 0;
     for (auto child : children) {
-        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        auto tag = child->GetTag();
+        if (tag == V2::MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemNode);
             auto itemProperty = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
@@ -615,7 +616,7 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
             isNeedDivider_ = true;
             itemPattern->SetIndex(index);
             previousNode = child;
-        } else if (child->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        } else if (tag == V2::MENU_ITEM_GROUP_ETS_TAG) {
             auto childItemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(childItemNode);
             auto pattern = childItemNode->GetPattern<MenuItemGroupPattern>();
@@ -630,8 +631,8 @@ void MenuPattern::UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINo
                 childItemNode->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(accessibilityProperty);
             accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        } else if (child->GetTag() == V2::JS_FOR_EACH_ETS_TAG || child->GetTag() == V2::JS_SYNTAX_ITEM_ETS_TAG
-            ||  child->GetTag() == V2::JS_IF_ELSE_ETS_TAG || child->GetTag() == V2::JS_REPEAT_ETS_TAG) {
+        } else if (tag == V2::JS_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG
+            ||  tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_REPEAT_ETS_TAG) {
             UpdateMenuItemChildren(child, previousNode);
         }
         index++;
@@ -1131,6 +1132,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
     }
     renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateOuterBorderRadius(borderRadius);
 }
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
@@ -1224,6 +1226,66 @@ Offset MenuPattern::GetTransformCenter() const
             return Offset(0.0f, size.Height() / 2);
         default:
             return Offset();
+    }
+}
+
+RefPtr<FrameNode> MenuPattern::DuplicateMenuNode(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto duplicateMenuNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(menuNode, duplicateMenuNode);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, duplicateMenuNode);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
+    CHECK_NULL_RETURN(scrollNode, duplicateMenuNode);
+    auto menuUINode = scrollNode->GetParent();
+    CHECK_NULL_RETURN(menuUINode, duplicateMenuNode);
+    menuUINode->RemoveChild(scrollNode);
+    menuUINode->RebuildRenderContextTree();
+    menuUINode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    duplicateMenuNode->AddChild(scrollNode);
+    if (menuLayoutProperty->GetBorderRadius().has_value()) {
+        BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
+        UpdateBorderRadius(duplicateMenuNode, borderRadius);
+    }
+    SetMenuBackGroundStyle(duplicateMenuNode, menuParam);
+    return duplicateMenuNode;
+}
+
+void MenuPattern::SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto renderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BlurStyleOption styleOption;
+    if (menuParam.backgroundColor.has_value()) {
+        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+        renderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    } else {
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    renderContext->UpdateBackBlurStyle(styleOption);
+    if (menuParam.backgroundBlurStyleOption.has_value()) {
+        BlurStyleOption backgroundBlurStyleOption = menuParam.backgroundBlurStyleOption.value();
+        if (renderContext->GetBackgroundEffect().has_value()) {
+            renderContext->UpdateBackgroundEffect(std::nullopt);
+        }
+        renderContext->UpdateBackBlurStyle(backgroundBlurStyleOption);
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+    }
+    if (menuParam.backgroundEffectOption.has_value()) {
+        EffectOption backgroundEffectOption = menuParam.backgroundEffectOption.value();
+        if (renderContext->GetBackBlurRadius().has_value()) {
+            renderContext->UpdateBackBlurRadius(Dimension());
+        }
+        if (renderContext->GetBackBlurStyle().has_value()) {
+            renderContext->UpdateBackBlurStyle(std::nullopt);
+        }
+        renderContext->UpdateBackgroundEffect(backgroundEffectOption);
     }
 }
 

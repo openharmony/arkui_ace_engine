@@ -110,6 +110,7 @@ public:
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
 
     void NotifyHostWindowMode(int32_t mode) override;
+    void ReDispatchWantParams() override;
 
 private:
     int32_t GetFrameNodeId() const;

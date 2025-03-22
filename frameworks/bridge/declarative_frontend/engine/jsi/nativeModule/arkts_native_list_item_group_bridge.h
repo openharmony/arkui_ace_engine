@@ -27,6 +27,8 @@ public:
     static ArkUINativeModuleValue ResetChildrenMainSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetListItemGroupInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetListItemGroupInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetHeaderComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info);
+    static void SetFooterComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info);
 };
 } // namespace OHOS::Ace::NG
 

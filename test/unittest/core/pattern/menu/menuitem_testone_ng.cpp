@@ -494,7 +494,7 @@ HWTEST_F(MenuItemTestOneNg, CheckUserHeight001, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =
@@ -526,7 +526,7 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight001, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =
@@ -558,7 +558,7 @@ HWTEST_F(MenuItemTestOneNg, CalcItemHeight002, TestSize.Level1)
 HWTEST_F(MenuItemTestOneNg, CalcItemHeight003, TestSize.Level1)
 {
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(18);
+    MockContainer::Current()->SetApiTargetVersion(20);
     ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
 
     auto menuItemNode =

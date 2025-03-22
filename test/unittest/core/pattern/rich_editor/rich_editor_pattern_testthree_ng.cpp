@@ -28,7 +28,6 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint32_t RECORD_MAX_LENGTH = 20;
 const std::u16string TEST_INSERT_LINE_SPACE = u" ";
 constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
@@ -197,71 +196,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnEscape001, TestSize.Level1)
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_FALSE(richEditorPattern->HandleOnEscape());
-}
-
-/**
- * @tc.name: HandleOnUndoAction001
- * @tc.desc: test HandleOnUndoAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleOnUndoAction001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteText = u"helloWorld";
-    richEditorPattern->operationRecords_.emplace_back(firstRecord);
-    richEditorPattern->redoOperationRecords_.clear();
-    for (uint32_t count = 0; count < RECORD_MAX_LENGTH; ++count) {
-        RichEditorPattern::OperationRecord emptyRecord;
-        richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
-    }
-    richEditorPattern->HandleOnUndoAction();
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
-
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPostion = 3;
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->operationRecords_.emplace_back(secondRecord);
-    richEditorPattern->HandleOnUndoAction();
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
-}
-
-/**
- * @tc.name: HandleOnRedoAction001
- * @tc.desc: test HandleOnRedoAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleOnRedoAction001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HandleOnRedoAction();
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteCaretPostion = 3;
-    richEditorPattern->redoOperationRecords_.emplace_back(firstRecord);
-    richEditorPattern->HandleOnRedoAction();
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
-
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteText = u"helloWorld";
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->redoOperationRecords_.emplace_back(secondRecord);
-    richEditorPattern->HandleOnRedoAction();
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
-
-    RichEditorPattern::OperationRecord thridRecord;
-    thridRecord.deleteText = u"helloWorld";
-    thridRecord.beforeCaretPosition = 10;
-    thridRecord.afterCaretPosition = 15;
-    richEditorPattern->redoOperationRecords_.clear();
-    richEditorPattern->redoOperationRecords_.emplace_back(thridRecord);
-    richEditorPattern->HandleOnRedoAction();
-    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
 }
 
 /**
@@ -1266,40 +1200,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, IsResponseRegionExpandingNeededForStylus0
 }
 
 /**
- * @tc.name: InsertValueOperation
- * @tc.desc: test InsertValueOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertValueOperation, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorPattern::OperationRecord firstRecord;
-    firstRecord.addText = u"first Record helloWorld";
-    firstRecord.deleteText = u"helloWorld";
-    richEditorPattern->operationRecords_.emplace_back(firstRecord);
-    richEditorPattern->redoOperationRecords_.clear();
-    for (uint32_t count = 0; count < RECORD_MAX_LENGTH; ++count) {
-        RichEditorPattern::OperationRecord emptyRecord;
-        richEditorPattern->redoOperationRecords_.emplace_back(emptyRecord);
-    }
-    richEditorPattern->HandleOnUndoAction();
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
-
-    struct UpdateSpanStyle typingStyle;
-    TextStyle textStyle(5);
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-
-    RichEditorPattern::OperationRecord secondRecord;
-    secondRecord.addText = u"second Record helloWorld";
-    secondRecord.deleteCaretPostion = 3;
-    richEditorPattern->operationRecords_.clear();
-    richEditorPattern->operationRecords_.emplace_back(secondRecord);
-    richEditorPattern->HandleOnUndoAction();
-    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
-}
-
-/**
  * @tc.name: CursorMoveUp001
  * @tc.desc: test CursorMoveUp
  * @tc.type: FUNC
@@ -1416,25 +1316,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, FireOnSelectionChange003, TestSize.Level0
     auto range = richEditorPattern->lastSelectionRange_;
     richEditorPattern->FireOnSelectionChange(start, end, isForced);
     EXPECT_TRUE(richEditorPattern->lastSelectionRange_ == range);
-}
-
-/**
- * @tc.name: SetTypingStyle001
- * @tc.desc: test SetTypingStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, SetTypingStyle001, TestSize.Level0)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle typingStyle;
-    TextStyle textStyle;
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    auto layout = richEditorNode_->layoutProperty_;
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
 }
 
 /**

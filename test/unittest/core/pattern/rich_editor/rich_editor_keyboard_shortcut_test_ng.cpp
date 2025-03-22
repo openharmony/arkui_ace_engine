@@ -539,46 +539,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectWrapper101, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleSelectFontStyleWrapper101
- * @tc.desc: test HandleSelectFontStyleWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectFontStyleWrapper101, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    KeyCode code;
-    TextStyle spanStyle;
-    /**
-     * @tc.steps: step2. change parameters and call function.
-     */
-    code = KeyCode::KEY_B;
-    spanStyle.SetFontWeight(Ace::FontWeight::BOLD);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontWeight(), Ace::FontWeight::NORMAL);
-    /**
-     * @tc.steps: step3. change parameters and call function.
-     */
-    spanStyle.SetFontWeight(Ace::FontWeight::NORMAL);
-    code = KeyCode::KEY_I;
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::ITALIC);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-    /**
-     * @tc.steps: step4. change parameters and call function.
-     */
-    spanStyle.SetFontStyle(OHOS::Ace::FontStyle::NORMAL);
-    code = KeyCode::KEY_U;
-    spanStyle.SetTextDecoration(TextDecoration::UNDERLINE);
-    richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
-    EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
-}
-
-/**
  * @tc.name: HandleTripleClickEvent
  * @tc.desc: test HandleTripleClickEvent001
  * @tc.type: FUNC
@@ -732,43 +692,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, CheckTripClickEvent001, TestSize.Leve
     info.SetTimeStamp(timeStamp4);
     richEditorPattern->CheckTripClickEvent(info);
     EXPECT_NE(richEditorPattern->clickInfo_.size(), 4);
-}
-
-/**
- * @tc.name: HandleOnDragDrop001
- * @tc.desc: test HandleOnDragDrop
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleOnDragDrop001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-    focusHub->currentFocus_ = true;
-
-    richEditorPattern->HandleOnDragDrop(event);
-    EXPECT_NE(event->GetData(), nullptr);
 }
 
 /**

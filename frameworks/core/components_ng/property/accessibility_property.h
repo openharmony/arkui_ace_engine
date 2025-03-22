@@ -467,6 +467,8 @@ public:
 
     void NotifyComponentChangeEvent(AccessibilityEventType eventType);
 
+    void UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey);
+
     int32_t GetChildTreeId() const;
 
     int32_t GetChildWindowId() const;

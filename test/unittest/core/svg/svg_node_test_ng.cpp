@@ -59,10 +59,12 @@
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_path.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
 #include "core/components_ng/svg/parse/svg_polygon.h"
+#include "core/components_ng/svg/parse/svg_radial_gradient.h"
 #include "core/components_ng/svg/parse/svg_rect.h"
 #include "core/components_ng/svg/parse/svg_stop.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
@@ -89,16 +91,6 @@ public:
     {
         MockContainer::TearDown();
     }
-};
-
-class MockSvgGraphic : public SvgGraphic {
-public:
-    MockSvgGraphic() = default;
-    ~MockSvgGraphic() = default;
-
-    MOCK_METHOD2(SetLinearGradient, void(const Size& viewPort, OHOS::Ace::Gradient& gradient));
-    MOCK_METHOD2(SetRadialGradient, void(const Size& viewPort, OHOS::Ace::Gradient& gradient));
-    MOCK_METHOD3(RectifyTargetSize, void(const Rect& bounds, double& width, double& height));
 };
 
 /**
@@ -1159,7 +1151,7 @@ HWTEST_F(SvgNodeTestNg, SvgStopParseTest001, TestSize.Level1)
     svgStop->ParseAndSetSpecializedAttr("stop-color", "#3344546");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
 
-    //invalid color-->default color black
+    // invalid color-->default color black
     svgStop->ParseAndSetSpecializedAttr("stop-color", "#MF");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
 
@@ -1218,7 +1210,7 @@ HWTEST_F(SvgNodeTestNg, SvgStopParseTest002, TestSize.Level1)
     svgStop->ParseAndSetSpecializedAttr("stopColor", "#3344546");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
 
-    //invalid color-->default color black
+    // invalid color-->default color black
     svgStop->ParseAndSetSpecializedAttr("stopColor", "#MF");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
 
@@ -1259,11 +1251,1093 @@ HWTEST_F(SvgNodeTestNg, SvgStopParseTest003, TestSize.Level1)
     svgStop->ParseAndSetSpecializedAttr("stop-color", "#3344546");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff344546);
 
-    //invalid color-->default color black
+    // invalid color-->default color black
     svgStop->ParseAndSetSpecializedAttr("stop-color", "#MF");
     EXPECT_EQ(svgStop->stopAttr_.gradientColor.GetColor().GetValue(), 0xff000000);
 
     container->SetApiTargetVersion(backupApiVersion);
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest006, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    svgGraphic->fillState_.SetHref("href");
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "href");
+    svgContext->Push("href", svgGraphic);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "href");
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Testing::MockCanvas rSCanvas;
+    Size size(20, 10);
+    std::optional<Color> color = Color::BLACK;
+    svgGraphic->OnDraw(rSCanvas, size, color);
+    MockContainer::Current()->TearDown();
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "");
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest007, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    svgGraphic->fillState_.SetHref("href");
+    svgContext->Push("href", svgGraphic);
+
+    Testing::MockCanvas rSCanvas;
+    Size size(50, 70);
+    std::optional<Color> color = Color::TRANSPARENT;
+    svgGraphic->OnDraw(rSCanvas, size, color);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "");
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test CheckHrefPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest008, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    EXPECT_FALSE(svgGraphic->CheckHrefPattern());
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    EXPECT_FALSE(svgGraphic->CheckHrefPattern());
+    svgGraphic->fillState_.SetHref("href1");
+    auto svgGraphic1 = AceType::MakeRefPtr<SvgGraphic>();
+    svgContext->Push("href1", svgGraphic1);
+    EXPECT_FALSE(svgGraphic->CheckHrefPattern());
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    svgGraphic->fillState_.SetHref("href");
+    svgContext->Push("href", svgPattern);
+    EXPECT_TRUE(svgGraphic->CheckHrefPattern());
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest009, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    svgGraphic->fillState_.SetHref("href");
+    Testing::MockCanvas rSCanvas;
+    Size size(50, 70);
+    std::optional<Color> color = Color::TRANSPARENT;
+    svgGraphic->OnDraw(rSCanvas, size, color);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "");
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test GetHrefType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest010, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto paintType = svgGraphic->GetHrefType("href");
+    EXPECT_EQ(paintType, PaintType::NONE);
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    paintType = svgGraphic->GetHrefType("href");
+    EXPECT_EQ(paintType, PaintType::NONE);
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("href", svgPattern);
+    paintType = svgGraphic->GetHrefType("href");
+    EXPECT_EQ(paintType, PaintType::PATTERN);
+
+    auto linearGradient = SvgLinearGradient::Create();
+    EXPECT_NE(linearGradient, nullptr);
+    svgContext->Push("gradient", linearGradient);
+    paintType = svgGraphic->GetHrefType("gradient");
+    EXPECT_EQ(paintType, PaintType::LINEAR_GRADIENT);
+
+    auto radialGradient = SvgRadialGradient::Create();
+    EXPECT_NE(radialGradient, nullptr);
+    svgContext->Push("radial", radialGradient);
+    paintType = svgGraphic->GetHrefType("radial");
+    EXPECT_EQ(paintType, PaintType::RADIAL_GRADIENT);
+
+    auto graphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(graphic, nullptr);
+    svgContext->Push("graphic1", graphic);
+    paintType = svgGraphic->GetHrefType("graphic1");
+    EXPECT_EQ(paintType, PaintType::NONE);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test OnDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest011, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    SvgLengthScaleRule rule;
+    Testing::MockCanvas rSCanvas;
+    svgGraphic->OnDraw(rSCanvas, rule);
+    Rect rect(10, 10, 50, 50);
+    Size size(80, 80);
+    SvgLengthScaleRule rule1(rect, size, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    EXPECT_NE(svgPattern, nullptr);
+    svgContext->Push("svgPattern", svgPattern);
+    svgGraphic->attributes_.fillState.SetHref("svgPattern");
+    svgGraphic->attributes_.strokeState.SetHref("svgPattern");
+    svgGraphic->attributes_.strokeState.lineWidth_ = AnimatableDimension(1.0);
+    svgGraphic->OnDraw(rSCanvas, rule1);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "");
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest012, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+
+    svgGraphic->attributes_.fillState.SetIsFillNone(true);
+    auto fillType = svgGraphic->GetFillType();
+    EXPECT_EQ(fillType, PaintType::NONE);
+
+    svgGraphic->attributes_.fillState.SetIsFillNone(false);
+    svgGraphic->attributes_.fillState.SetHref("href");
+    fillType = svgGraphic->GetFillType();
+    EXPECT_EQ(fillType, PaintType::NONE);
+
+    svgGraphic->attributes_.fillState.SetColor(Color::BLACK);
+    svgGraphic->attributes_.fillState.SetHref("");
+    fillType = svgGraphic->GetFillType();
+    EXPECT_EQ(fillType, PaintType::COLOR);
+
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    svgGraphic->attributes_.fillState.SetColor(Color::BLACK, false);
+    EXPECT_EQ(fillType, PaintType::COLOR);
+
+    gradient.SetHref("href");
+    EXPECT_EQ(fillType, PaintType::COLOR);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest013, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Size size(50, 50);
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::LinearGradient linearGradient;
+    linearGradient.x1 = 10.0_vp;
+    linearGradient.x2 = 15.0_vp;
+    linearGradient.y1 = 10.0_vp;
+    linearGradient.y2 = 16.0_vp;
+    gradient.SetLinearGradient(linearGradient);
+    svgGraphic->SetLinearGradient(size, gradient);
+    EXPECT_TRUE(gradient.linearGradient_.x1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.x2.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y2.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearX.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearY.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.angle.has_value());
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Size size1(0, 0);
+    svgGraphic->SetLinearGradient(size1, gradient);
+    MockContainer::Current()->TearDown();
+    EXPECT_TRUE(gradient.linearGradient_.x1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.x2.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y2.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearX.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearY.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.angle.has_value());
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest014, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Size size(50, 50);
+    OHOS::Ace::Gradient gradient;
+
+    OHOS::Ace::RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+
+    svgGraphic->SetRadialGradient(size, gradient);
+    EXPECT_EQ(gradient.radialGradientInfo_.r, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.cx, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.cy, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.fx, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 1);
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Size size1(0, 0);
+    svgGraphic->SetRadialGradient(size1, gradient);
+    MockContainer::Current()->TearDown();
+    EXPECT_EQ(gradient.radialGradientInfo_.r, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.cx, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.cy, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.fx, 1);
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 1);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest015, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Size size(50, 50);
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    OHOS::Ace::RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+
+    svgGraphic->UpdateFillGradient(size);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.r, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cy, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fy, 0);
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Size size1(0, 0);
+    svgGraphic->UpdateFillGradient(size1);
+    MockContainer::Current()->TearDown();
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.r, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cy, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fy, 0);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest016, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Size size(50, 50);
+    OHOS::Ace::Gradient gradient;
+    gradient.type_ = OHOS::Ace::GradientType::RADIAL;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    OHOS::Ace::RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+
+    svgGraphic->UpdateFillGradient(size);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.r, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cy, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fy, 0);
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    Size size1(0, 0);
+    svgGraphic->UpdateFillGradient(size1);
+    MockContainer::Current()->TearDown();
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.r, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cy, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fy, 0);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest017, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    EXPECT_FALSE(svgGraphic->GradientHasColors());
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    EXPECT_FALSE(svgGraphic->GradientHasColors());
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    EXPECT_FALSE(svgGraphic->GradientHasColors());
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    EXPECT_TRUE(svgGraphic->GradientHasColors());
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest018, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Testing::MockCanvas canvas;
+    RSBrush brush;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto result = svgGraphic->InitBrush(canvas, brush, context, PaintType::NONE);
+    EXPECT_TRUE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::LINEAR_GRADIENT);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::RADIAL_GRADIENT);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::PATTERN);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::NONE);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest019, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Testing::MockCanvas canvas;
+    RSBrush brush;
+
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto result = svgGraphic->InitBrush(canvas, brush, context, PaintType::COLOR);
+    EXPECT_TRUE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::LINEAR_GRADIENT);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::RADIAL_GRADIENT);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::PATTERN);
+    EXPECT_FALSE(result);
+    result = svgGraphic->InitBrush(canvas, brush, context, PaintType::NONE);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest020, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSBrush brush;
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 2.0f;
+    svgGraphic->SetBrushColor(brush, false);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "");
+    auto svgPattern = AceType::DynamicCast<SvgPattern>(SvgPattern::Create());
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->Push("myPattern", svgPattern);
+    svgGraphic->fillState_.href_ = "myPattern";
+    svgGraphic->SetContext(svgContext);
+    svgContext->fillColor_ = Color::BLACK;
+    svgGraphic->SetBrushColor(brush, false);
+    svgGraphic->attributes_.fillState.isFillNone_ = true;
+    svgGraphic->SetBrushColor(brush, true);
+    EXPECT_EQ(svgGraphic->fillState_.GetHref(), "myPattern");
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest021, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSBrush brush;
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 2.0f;
+    SvgLinearGradientInfo info;
+    info.x1 = 10.0f;
+    info.x2 = 10.0f;
+    info.y1 = 10.0f;
+    info.y2 = 10.0f;
+
+    info.spreadMethod = 10;
+    info.gradientTransform = "gradientTransform";
+
+    info.colors.emplace_back(GradientColor(Color::BLACK));
+    info.colors.emplace_back(GradientColor(Color::BLUE));
+    info.colors.emplace_back(GradientColor(Color::WHITE));
+    info.colors.emplace_back(GradientColor(Color::RED));
+    info.colors.emplace_back(GradientColor(Color::TRANSPARENT));
+
+    auto linearGradient = svgGraphic->ConvertToRsLinearGradient(info);
+    EXPECT_EQ(linearGradient.startPoint_.GetX(), 10.0f);
+    EXPECT_EQ(linearGradient.startPoint_.GetY(), 10.0f);
+    EXPECT_EQ(linearGradient.endPoint_.GetX(), 10.0f);
+    EXPECT_EQ(linearGradient.endPoint_.GetY(), 10.0f);
+    EXPECT_EQ(static_cast<int32_t>(linearGradient.spreadMethod_), 10);
+    EXPECT_EQ(static_cast<int32_t>(linearGradient.pos_.size()), 6);
+    EXPECT_EQ(static_cast<int32_t>(linearGradient.colors_.size()), 6);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest022, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::LinearGradient linearGradient;
+    linearGradient.x1 = 13.0_vp;
+    linearGradient.x2 = 15.0_vp;
+    linearGradient.y1 = 11.0_vp;
+    linearGradient.y2 = 10.0_vp;
+    gradient.SetLinearGradient(linearGradient);
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    Size size(50, 60);
+    svgGraphic->UpdateStrokeGradient(size);
+    EXPECT_TRUE(gradient.linearGradient_.x1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.x2.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y1.has_value());
+    EXPECT_TRUE(gradient.linearGradient_.y2.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearX.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.linearY.has_value());
+    EXPECT_FALSE(gradient.linearGradient_.angle.has_value());
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest023, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    OHOS::Ace::Gradient gradient;
+
+    gradient.type_ = OHOS::Ace::GradientType::RADIAL;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    OHOS::Ace::RadialGradient radialGradientLocal;
+    radialGradientLocal.radialHorizontalSize = AnimatableDimension(1);
+    radialGradientLocal.radialCenterX = AnimatableDimension(1);
+    radialGradientLocal.radialCenterY = AnimatableDimension(1);
+    radialGradientLocal.fRadialCenterX = Dimension(1);
+    radialGradientLocal.fRadialCenterY = Dimension(1);
+    gradient.SetRadialGradient(radialGradientLocal);
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    Size size(50, 60);
+    svgGraphic->UpdateStrokeGradient(size);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.r, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.cy, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fx, 0);
+    EXPECT_EQ(svgGraphic->attributes_.fillState.gradient_->radialGradientInfo_.fy, 0);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest024, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    OHOS::Ace::Gradient gradient;
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    svgGraphic->fillState_.href_ = "myPattern";
+    svgGraphic->fillState_.SetColor(Color::BLACK);
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    svgGraphic->fillState_.SetHref("href");
+    svgContext->Push("href", svgPattern);
+    EXPECT_TRUE(svgGraphic->CheckHrefPattern());
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    auto result = svgGraphic->UpdateFillStyle(Color::BLACK, true);
+    MockContainer::Current()->TearDown();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetGradientFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest025, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    OHOS::Ace::Gradient gradient;
+    std::vector<RSScalar> pos;
+    std::vector<RSColorQuad> colors;
+
+    OHOS::Ace::RadialGradientInfo info;
+    info.cx = 10.0f;
+    info.cy = 30.0f;
+    info.r = 5.0f;
+    info.fx = 11.0f;
+    info.fy = 16.0f;
+    gradient.SetRadialGradientInfo(info);
+    svgGraphic->SetGradientFillStyle(gradient, pos, colors);
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 16.0f);
+    info.cx = 10.0f;
+    info.cy = 30.0f;
+    info.fx = 10.0f;
+    info.fy = 30.0f;
+    gradient.SetRadialGradientInfo(info);
+    svgGraphic->SetGradientFillStyle(gradient, pos, colors);
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 30.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetGradientFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest026, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    OHOS::Ace::Gradient gradient;
+    std::vector<RSScalar> pos;
+    std::vector<RSColorQuad> colors;
+
+    OHOS::Ace::RadialGradientInfo info;
+    info.cx = 10.0f;
+    info.cy = 30.0f;
+    info.r = 5.0f;
+    info.fx = 11.0f;
+    info.fy = 16.0f;
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    svgGraphic->SetGradientFillStyle(gradient, pos, colors);
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 0.0f);
+    info.cx = 10.0f;
+    info.cy = 30.0f;
+    info.fx = 10.0f;
+    info.fy = 30.0f;
+    svgGraphic->SetGradientFillStyle(gradient, pos, colors);
+    MockContainer::Current()->TearDown();
+    EXPECT_EQ(gradient.radialGradientInfo_.fy, 0.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetGradientFillStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest027, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    SvgLengthScaleUnit unit = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto matrix = svgGraphic->GetLocalMatrix(unit, context);
+    auto result = matrix.Get(2);
+    EXPECT_EQ(result, 1.0f);
+
+    unit = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    Rect rect1(10, 12, 13, 15);
+    Size size1(10, 10);
+    SvgCoordinateSystemContext context1(rect1, size1);
+    matrix = svgGraphic->GetLocalMatrix(unit, context1);
+    result = matrix.Get(2);
+    EXPECT_EQ(result, 1.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetBrushLinearGradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest028, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    RSBrush brush;
+
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto result = svgGraphic->SetBrushLinearGradient(brush, context);
+    EXPECT_FALSE(result);
+
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    auto linearGradient = SvgLinearGradient::Create();
+
+    svgGraphic->attributes_.fillState.SetHref("href");
+    svgContext->Push("href", linearGradient);
+    result = svgGraphic->SetBrushLinearGradient(brush, context);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetBrushLinearGradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest029, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    SvgRadialGradientInfo info;
+    info.cx = 12.0f;
+    info.cy = 13.0f;
+    info.r = 14.0f;
+    info.fx = 15.0f;
+    info.fy = 160.0f;
+    info.spreadMethod = 20;
+    info.gradientTransform = "gradientTransform";
+
+    info.colors.emplace_back(GradientColor(Color::BLACK));
+    info.colors.emplace_back(GradientColor(Color::BLUE));
+    info.colors.emplace_back(GradientColor(Color::WHITE));
+    info.colors.emplace_back(GradientColor(Color::RED));
+    info.colors.emplace_back(GradientColor(Color::TRANSPARENT));
+    auto gradient = svgGraphic->ConvertToRsRadialGradient(info);
+    EXPECT_EQ(gradient.center_.GetX(), 12.0f);
+    EXPECT_EQ(gradient.center_.GetY(), 13.0f);
+    EXPECT_EQ(gradient.focal_.GetX(), 15.0f);
+    EXPECT_EQ(gradient.focal_.GetY(), 160.0f);
+    EXPECT_EQ(static_cast<int32_t>(gradient.spreadMethod_), 20);
+    EXPECT_EQ(gradient.r_, 14.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetBrushRadialGradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest030, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    RSBrush brush;
+    auto result = svgGraphic->SetBrushRadialGradient(brush, context);
+    EXPECT_FALSE(result);
+
+    OHOS::Ace::Gradient gradient;
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+
+    auto radialGradient = SvgRadialGradient::Create();
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgContext->Push("href", radialGradient);
+    svgGraphic->SetContext(svgContext);
+    svgGraphic->attributes_.fillState.SetHref("href");
+    result = svgGraphic->SetBrushRadialGradient(brush, context);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetBrushPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest031, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+
+    Testing::MockCanvas canvas;
+    RSBrush brush;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto result = svgGraphic->SetBrushPattern(canvas, brush, context);
+    EXPECT_FALSE(result);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    result = svgGraphic->SetBrushPattern(canvas, brush, context);
+    EXPECT_FALSE(result);
+    svgGraphic->attributes_.fillState.SetHref("href");
+    svgContext->Push("href", svgGraphic);
+
+    result = svgGraphic->SetBrushPattern(canvas, brush, context);
+    EXPECT_FALSE(result);
+    auto pattern = AceType::MakeRefPtr<SvgPattern>();
+    svgGraphic->attributes_.fillState.SetHref("href1");
+    svgContext->Push("href1", pattern);
+    result = svgGraphic->SetBrushPattern(canvas, brush, context);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test GetFillOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest032, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 63.0f;
+    svgGraphic->attributes_.fillState.SetOpacity(2.0f);
+    auto result = svgGraphic->GetFillOpacity();
+    EXPECT_EQ(result, 2.0f);
+
+    svgGraphic->attributes_.hasOpacity = false;
+    svgGraphic->attributes_.fillState.SetOpacity(25.0f);
+    result = svgGraphic->GetFillOpacity();
+    EXPECT_EQ(result, 25.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test GetStrokeOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest033, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 63.0f;
+    svgGraphic->attributes_.strokeState.SetOpacity(2.0f);
+    auto result = svgGraphic->GetStrokeOpacity();
+    EXPECT_EQ(result, 2.0f);
+
+    svgGraphic->attributes_.hasOpacity = false;
+    svgGraphic->attributes_.strokeState.SetOpacity(25.0f);
+    result = svgGraphic->GetStrokeOpacity();
+    EXPECT_EQ(result, 25.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetBrushOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest034, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    RSBrush brush;
+    EXPECT_NE(svgGraphic, nullptr);
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 126.0f;
+    svgGraphic->attributes_.fillState.SetOpacity(2.0f);
+    auto result = svgGraphic->GetFillOpacity();
+    svgGraphic->SetBrushOpacity(brush); //
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetPenOpacity
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest035, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 63.0f;
+    svgGraphic->attributes_.strokeState.SetOpacity(2.0f);
+    auto result = svgGraphic->GetStrokeOpacity();
+    svgGraphic->SetPenOpacity(pen);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetGradientStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest036, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto result = svgGraphic->SetGradientStyle(2.0f);
+    EXPECT_FALSE(result);
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->fillState_.SetGradient(gradient);
+    result = svgGraphic->SetGradientStyle(2.0f);
+    EXPECT_FALSE(result);
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    svgGraphic->fillState_.SetGradient(gradient);
+    result = svgGraphic->SetGradientStyle(2.0f);
+    EXPECT_TRUE(result);
+
+    OHOS::Ace::Gradient gradient1;
+    gradient1.type_ = OHOS::Ace::GradientType::RADIAL;
+    OHOS::Ace::GradientColor gradientColor2;
+    gradientColor2.SetColor(Color::RED);
+    OHOS::Ace::GradientColor gradientColor3;
+    gradientColor3.SetColor(Color::BLACK);
+    gradient1.colors_.emplace_back(gradientColor2);
+    gradient1.colors_.emplace_back(gradientColor3);
+    result = svgGraphic->SetGradientStyle(2.0f);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetStrokeGradientStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest037, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    svgGraphic->SetStrokeGradientStyle(2.0f);
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    svgGraphic->SetStrokeGradientStyle(2.0f);
+
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    svgGraphic->SetStrokeGradientStyle(2.0f);
+
+    OHOS::Ace::Gradient gradient1;
+    gradient1.type_ = OHOS::Ace::GradientType::RADIAL;
+    OHOS::Ace::GradientColor gradientColor2;
+    gradientColor2.SetColor(Color::RED);
+    OHOS::Ace::GradientColor gradientColor3;
+    gradientColor3.SetColor(Color::BLACK);
+    gradient1.colors_.emplace_back(gradientColor2);
+    gradient1.colors_.emplace_back(gradientColor3);
+    svgGraphic->attributes_.strokeState.SetGradient(gradient1);
+    svgGraphic->SetStrokeGradientStyle(2.0f);
+    EXPECT_EQ(static_cast<int32_t>(gradient1.colors_.size()), 2);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test GetStrokeType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest038, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::NONE);
+
+    svgGraphic->attributes_.strokeState.SetColor(Color::BLACK);
+    type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::COLOR);
+
+    svgGraphic->attributes_.strokeState.SetColor(Color::RED, false);
+    svgGraphic->attributes_.strokeState.SetHref("href");
+    type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::NONE);
+
+    svgGraphic->attributes_.strokeState.SetHref("");
+    type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::COLOR);
+
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::COLOR);
+
+    gradient.SetHref("href");
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+    type = svgGraphic->GetStrokeType();
+    EXPECT_EQ(type, PaintType::NONE);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test InitPenFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest039, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    auto type = PaintType::COLOR;
+    auto result = svgGraphic->InitPenFill(pen, context, type);
+    EXPECT_TRUE(result);
+
+    type = PaintType::LINEAR_GRADIENT;
+    result = svgGraphic->InitPenFill(pen, context, type);
+    EXPECT_FALSE(result);
+
+    type = PaintType::RADIAL_GRADIENT;
+    result = svgGraphic->InitPenFill(pen, context, type);
+    EXPECT_FALSE(result);
+
+    type = PaintType::PATTERN;
+    result = svgGraphic->InitPenFill(pen, context, type);
+    EXPECT_TRUE(result);
+
+    type = PaintType::NONE;
+    result = svgGraphic->InitPenFill(pen, context, type);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetPenStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest040, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::ROUND);
+    svgGraphic->SetPenStyle(pen);
+    EXPECT_EQ(svgGraphic->attributes_.strokeState.GetLineCap(), LineCapStyle::ROUND);
+
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::SQUARE);
+    svgGraphic->SetPenStyle(pen);
+    EXPECT_EQ(svgGraphic->attributes_.strokeState.GetLineCap(), LineCapStyle::SQUARE);
+
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::BUTT);
+    svgGraphic->SetPenStyle(pen);
+    EXPECT_EQ(svgGraphic->attributes_.strokeState.GetLineCap(), LineCapStyle::BUTT);
+
+    svgGraphic->attributes_.strokeState.SetLineJoin(LineJoinStyle::ROUND);
+    svgGraphic->SetPenStyle(pen);
+    EXPECT_EQ(svgGraphic->attributes_.strokeState.GetLineJoin(), LineJoinStyle::ROUND);
+
+    svgGraphic->attributes_.strokeState.SetLineJoin(LineJoinStyle::BEVEL);
+    svgGraphic->SetPenStyle(pen);
+    EXPECT_EQ(svgGraphic->attributes_.strokeState.GetLineJoin(), LineJoinStyle::BEVEL);
+
+    auto lineDashState = svgGraphic->attributes_.strokeState.GetLineDash().lineDash;
+    lineDashState.emplace_back(1.3f);
+    EXPECT_EQ(static_cast<int32_t>(lineDashState.size()), 1);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateStrokeStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest041, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_FALSE(result);
+
+    svgGraphic->attributes_.strokeState.SetColor(Color::BLACK);
+    svgGraphic->attributes_.strokeState.SetLineWidth(0.0_vp);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_FALSE(result); // 实际为true
+
+    svgGraphic->attributes_.strokeState.SetLineWidth(20.0_vp);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.strokeState.SetGradient(gradient);
+
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::ROUND);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
+
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::SQUARE);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
+
+    svgGraphic->attributes_.strokeState.SetLineCap(LineCapStyle::BUTT);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
+
+    svgGraphic->attributes_.strokeState.SetLineJoin(LineJoinStyle::ROUND);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
+
+    svgGraphic->attributes_.strokeState.SetLineJoin(LineJoinStyle::BEVEL);
+    result = svgGraphic->UpdateStrokeStyle(false);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

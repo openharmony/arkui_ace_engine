@@ -26,6 +26,11 @@ const char* ERR_CODE = "-1";
 const int32_t SIZE_OF_FONT_INFO = 3;
 const int32_t SIZE_OF_TWO = 2;
 const int32_t DEFAULT_SELECT = 0;
+constexpr int32_t OFFSET_OF_VALUE = 1;
+constexpr int32_t OFFSET_OF_UNIT = 2;
+constexpr int32_t OFFSET_OF_NEXT = 3;
+constexpr int32_t SIZE_OF_COLOR_ARRAY = 8;
+constexpr int32_t SIZE_OF_WIDTH_ARRAY = 12;
 constexpr TextDirection DEFAULT_SELECT_DIRECTION = TextDirection::AUTO;
 
 void SetSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -672,6 +677,71 @@ void ResetSelectDividerStyle(ArkUINodeHandle node)
     SelectModelNG::ResetDividerStyle(frameNode);
 }
 
+void SetOnSelectExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node,
+    int32_t index, ArkUI_CharPtr text))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onSelect = [node, eventReceiver](int32_t index, const std::string& text) {
+        eventReceiver(node, index, text.c_str());
+    };
+    SelectModelNG::SetOnSelect(reinterpret_cast<FrameNode*>(node), std::move(onSelect));
+}
+
+void SetOptionalBorder(std::optional<Dimension>& optionalDimension, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
+    ArkUI_Int32& offset)
+{
+    bool hasValue = static_cast<bool>(values[offset]);
+    if (hasValue) {
+        optionalDimension = Dimension(
+            values[offset + OFFSET_OF_VALUE], static_cast<OHOS::Ace::DimensionUnit>(values[offset + OFFSET_OF_UNIT]));
+    }
+    offset = offset + OFFSET_OF_NEXT;
+}
+
+void SetOptionalBorderColor(
+    std::optional<Color>& optionalColor, const uint32_t* values, ArkUI_Int32 valuesSize, ArkUI_Int32& offset)
+{
+    optionalColor = Color(values[offset + OFFSET_OF_VALUE]);
+    offset = offset + OFFSET_OF_UNIT;
+}
+
+void SetMenuOutline(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize, const ArkUI_Uint32* color,
+    ArkUI_Int32 colorSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((width == nullptr) || (widthSize != SIZE_OF_WIDTH_ARRAY) || (color == nullptr) ||
+        colorSize != SIZE_OF_COLOR_ARRAY) {
+        return;
+    }
+    MenuParam menuParam;
+    int32_t widthoffset = 0;
+    NG::BorderWidthProperty borderWidth;
+    SetOptionalBorder(borderWidth.leftDimen, width, widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.rightDimen, width, widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.topDimen, width, widthSize, widthoffset);
+    SetOptionalBorder(borderWidth.bottomDimen, width, widthSize, widthoffset);
+    menuParam.outlineWidth = borderWidth;
+
+    int32_t colorOffset = 0;
+    NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.leftColor, color, colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, color, colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.topColor, color, colorSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, color, colorSize, colorOffset);
+    menuParam.outlineColor = borderColors;
+    SelectModelNG::SetMenuOutline(frameNode, menuParam);
+}
+
+void ResetMenuOutline(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuParam menuParam;
+    SelectModelNG::SetMenuOutline(frameNode, menuParam);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -731,6 +801,9 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectDirection = ResetSelectDirection,
         .setSelectDividerStyle = SetSelectDividerStyle,
         .resetSelectDividerStyle = ResetSelectDividerStyle,
+        .setOnSelect = SetOnSelectExt,
+        .setMenuOutline = SetMenuOutline,
+        .resetMenuOutline = ResetMenuOutline,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -793,6 +866,8 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .resetSelectDividerNull = ResetSelectDividerNull,
         .setSelectDirection = SetSelectDirection,
         .resetSelectDirection = ResetSelectDirection,
+        .setMenuOutline = SetMenuOutline,
+        .resetMenuOutline = ResetMenuOutline,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

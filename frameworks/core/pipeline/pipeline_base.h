@@ -1084,6 +1084,16 @@ public:
         return false;
     }
 
+    void SetPixelRoundMode(PixelRoundMode pixelRoundMode)
+    {
+        pixelRoundMode_ = pixelRoundMode;
+    }
+
+    PixelRoundMode GetPixelRoundMode() const
+    {
+        return pixelRoundMode_;
+    }
+
     virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
@@ -1599,6 +1609,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;

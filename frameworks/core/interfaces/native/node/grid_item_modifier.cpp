@@ -113,6 +113,24 @@ void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
     GridItemModelNG::SetGridItemStyle(frameNode, static_cast<GridItemStyle>(style));
 }
 
+void SetGridItemOnSelect(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSelectEvent = reinterpret_cast<std::function<void(bool)>*>(callback);
+        GridItemModelNG::SetOnSelect(frameNode, std::move(*onSelectEvent));
+    } else {
+        GridItemModelNG::SetOnSelect(frameNode, nullptr);
+    }
+}
+
+void ResetGridItemOnSelect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetOnSelect(frameNode, nullptr);
+}
 namespace NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
@@ -131,6 +149,8 @@ const ArkUIGridItemModifier* GetGridItemModifier()
         .setGridItemColumnEnd = SetGridItemColumnEnd,
         .resetGridItemColumnEnd = ResetGridItemColumnEnd,
         .setGridItemOptions = SetGridItemOptions,
+        .setGridItemOnSelect = SetGridItemOnSelect,
+        .resetGridItemOnSelect = ResetGridItemOnSelect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
+
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -360,7 +362,7 @@ int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateStartCachedCount(
 int32_t GridScrollWithOptionsLayoutAlgorithm::CalculateEndCachedCount(
     const GridLayoutOptions& options, int32_t cachedCount)
 {
-    if (info_.startIndex_ + cachedCount >= info_.childrenCount_ - 1) {
+    if (info_.startIndex_ + cachedCount >= info_.GetChildrenCount() - 1) {
         return info_.startIndex_;
     }
 

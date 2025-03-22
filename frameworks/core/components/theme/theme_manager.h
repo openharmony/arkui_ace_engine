@@ -37,6 +37,8 @@ public:
 
     virtual void LoadSystemTheme(int32_t themeId) {}
 
+    virtual void SetSystemThemeId(int32_t themeId) {}
+
     virtual int32_t GetSystemTheme()
     {
         return -1;

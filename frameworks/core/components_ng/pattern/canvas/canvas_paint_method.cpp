@@ -415,6 +415,20 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
 }
+
+TextDirection CanvasPaintMethod::GetSystemDirection()
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::AUTO) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    return direction;
+}
+
 #ifndef ACE_UNITTEST
 void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {

@@ -106,6 +106,7 @@ public:
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
     bool SendBusinessData(UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT) override;
+    void ReDispatchWantParams() override;
 
 private:
     void InitAllCallback();

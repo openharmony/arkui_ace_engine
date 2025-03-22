@@ -413,8 +413,8 @@ void DynamicPattern::DumpInfo()
 void DynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("dynamicId", platformId_);
-    json->Put("entryPoint", curDynamicInfo_.resourcePath.c_str());
-    json->Put("resourcePath", curDynamicInfo_.entryPoint.c_str());
+    json->Put("resourcePath", curDynamicInfo_.resourcePath.c_str());
+    json->Put("entryPoint", curDynamicInfo_.entryPoint.c_str());
     json->Put("createLimitedWorkerTime", std::to_string(dynamicDumpInfo_.createLimitedWorkerTime).c_str());
 
     CHECK_NULL_VOID(dynamicComponentRenderer_);

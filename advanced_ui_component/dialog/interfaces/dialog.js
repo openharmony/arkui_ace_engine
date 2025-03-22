@@ -60,14 +60,30 @@ const d2 = 2;
 const e2 = 32;
 const f2 = 'true';
 const g2 = m(125831042, 400);
-const h2 = m(125831054, 16);
 const i2 = m(125830927, 16);
-const j2 = m(125831051, 8);
 const l2 = m(125830970, 16);
 const m2 = m(125830971, 14);
 const n2 = m(125830972, 12);
 const o2 = m(125830966, 20);
 const q2 = m(125830927, 16);
+const h2 = o(() => {
+    return t({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.alert_right_padding_horizontal'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }, 16);
+});
+const j2 = o(() => {
+    return t({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.alert_button_horizontal_space'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }, 8);
+});
 const s2 = o(() => {
     return t({
         'id': -1,
@@ -3007,7 +3023,8 @@ class u3 extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
-            Column.backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE);
+            Column.backgroundBlurStyle(this.customStyle ?
+                BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Column.borderRadius(this.customStyle ? {
                 'id': -1,
                 'type': 10002,
@@ -3188,7 +3205,7 @@ class u3 extends ViewPU {
         let maxHeight = Number(constraint.maxHeight);
         this.fontSizeScale = this.updateFontScale();
         this.updateFontSize();
-        this.isButtonVertical = this.isVerticalAlignButton(maxWidth - h2 * 2);
+        this.isButtonVertical = this.isVerticalAlignButton(maxWidth - h2() * 2);
         this.titleMinHeight = this.getTitleAreaMinHeight();
         let height = 0;
         children.forEach((child) => {
@@ -3206,9 +3223,16 @@ class u3 extends ViewPU {
     }
 
     aboutToAppear() {
-        let uiContext = this.getUIContext();
-        this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-        this.appMaxFontScale = uiContext.getMaxFontScale();
+        try {
+            let uiContext = this.getUIContext();
+            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+            this.appMaxFontScale = uiContext?.getMaxFontScale();
+        }
+        catch (err) {
+            let code = err?.code;
+            let message = err?.message;
+            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+        }
         this.fontSizeScale = this.updateFontScale();
         if (this.controller && this.customStyle === undefined) {
             let a8 = this.controller;
@@ -3739,7 +3763,7 @@ class u3 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
-                                    Row.width(j2 * 2);
+                                    Row.width(j2() * 2);
                                     Row.justifyContent(FlexAlign.Center);
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3893,7 +3917,7 @@ class u3 extends ViewPU {
                 return true;
             }
             let isVertical = false;
-            let s7 = vp2px(width / d1 - h2 - j2 - 2 * i2);
+            let s7 = vp2px(width / d1 - h2() - j2() - 2 * i2);
             this.buttons.forEach((button) => {
                 let t7 = measure.measureTextSize({
                     textContent: button.value,
@@ -4398,7 +4422,7 @@ export class PopoverDialog extends ViewPU {
                 try {
                     let t6 = display.getDefaultDisplaySync();
                     let u6 = px2vp(t6.width);
-                    if (u6 - h2 - h2 > g2) {
+                    if (u6 - h2() - h2() > g2) {
                         this.popover.width = this.popover?.width ?? g2;
                     } else {
                         this.popover.width = this.dialogWidth;

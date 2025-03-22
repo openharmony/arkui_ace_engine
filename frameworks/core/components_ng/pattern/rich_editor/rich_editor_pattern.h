@@ -303,6 +303,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
+    bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
 
     const PreviewTextInfo GetPreviewTextInfo() const;
@@ -814,7 +815,7 @@ public:
         if (!customKeyboardBuilder_ && keyboardBuilder) {
             // close system keyboard and request custom keyboard
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-            if (imeShown_) {
+            if (isEditing_) {
                 CloseKeyboard(true);
                 customKeyboardBuilder_ = keyboardBuilder; // refresh current keyboard
                 RequestKeyboard(false, true, true);
@@ -1220,6 +1221,14 @@ public:
             lastAISpanMap_ = aiSpanMap;
         }
         return aiSpanMap;
+    }
+
+    void SetTextDetectEnable(bool enable) override
+    {
+        auto currentEnable = textDetectEnable_;
+        TextPattern::SetTextDetectEnable(enable);
+        CHECK_NULL_VOID(enable && !currentEnable && CanStartAITask());
+        IF_TRUE(!dataDetectorAdapter_->aiDetectInitialized_, dataDetectorAdapter_->StartAITask());
     }
 
 protected:
@@ -1669,6 +1678,7 @@ private:
     SelectionRangeInfo lastSelectionRange_{-1, -1};
     bool isDragSponsor_ = false;
     std::pair<int32_t, int32_t> dragRange_ { 0, 0 };
+    bool isInterceptMouseRightRelease_ = false;
     bool isEditing_ = false;
     int32_t dragPosition_ = 0;
     // Action when "enter" pressed.

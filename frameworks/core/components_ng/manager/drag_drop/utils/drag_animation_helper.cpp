@@ -18,7 +18,9 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
+#include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -267,6 +269,17 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
             DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
         option.GetOnFinishEvent());
+}
+
+void DragAnimationHelper::ShowMenuHideAnimation(const RefPtr<FrameNode>& imageNode, const PreparedInfoForDrag& data)
+{
+    CHECK_NULL_VOID(imageNode);
+    if (imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || data.hasTransition) {
+        return;
+    }
+    auto menuNode = data.menuNode;
+    CHECK_NULL_VOID(menuNode);
+    MenuView::ExcuteMenuDisappearAnimation(menuNode, data);
 }
 
 void DragAnimationHelper::ShowBadgeAnimation(const RefPtr<FrameNode>& textNode)
@@ -804,6 +817,26 @@ RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_RETURN(textNode, nullptr);
+
+    auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+
+    auto textRowProperty = textRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(textRowProperty, nullptr);
+    auto textNodeProperty = textNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(textNodeProperty, nullptr);
+    auto textRowRenderContext = textRow->GetRenderContext();
+    CHECK_NULL_RETURN(textRowRenderContext, nullptr);
+    textNodeProperty->UpdateUserDefinedIdealSize(
+        { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    textNodeProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    textRowRenderContext->UpdateOffset(OffsetT<Dimension>(
+        Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx()), Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx())));
+    textRowProperty->UpdateAlignRules(
+        { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
+            { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
+    textNode->MountToParent(textRow);
+
     auto badgeLength = std::to_string(childSize).size();
     DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
 
@@ -811,7 +844,7 @@ RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
     textNode->MarkModifyDone();
     textNode->SetLayoutDirtyMarked(true);
     textNode->SetActive(true);
-    return textNode;
+    return textRow;
 }
 
 void DragAnimationHelper::ShowPreviewBadgeAnimation(
@@ -929,19 +962,9 @@ void DragAnimationHelper::DragStartAnimation(const Offset& newOffset, const RefP
         option.GetOnFinishEvent());
 }
 
-void DragAnimationHelper::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode,
-    float dragPreviewScale, const PreparedInfoForDrag& data)
+void DragAnimationHelper::InitImageNodeProperties(const RefPtr<FrameNode>& imageNode, const RefPtr<PixelMap>& pixelMap)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pixelMap = frameNode->GetDragPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto center = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
-    auto frameOffset = OffsetF(0, 0);
-    imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(imageNode);
-    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-
     auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(renderProps);
     renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
@@ -954,12 +977,57 @@ void DragAnimationHelper::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, 
     auto imagePattern = imageNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetSyncLoad(true);
+}
+
+void DragAnimationHelper::CreateRelativeContainerNode(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& imageNode, PreparedInfoForDrag& data, const OffsetF& frameOffset,
+    const RefPtr<PixelMap>& pixelMap)
+{
+    auto relativeContainerNode =
+        FrameNode::GetOrCreateFrameNode(V2::RELATIVE_CONTAINER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<OHOS::Ace::NG::RelativeContainerPattern>(); });
+    CHECK_NULL_VOID(relativeContainerNode);
+    data.relativeContainerNode = relativeContainerNode;
+    auto relativeContainerLayoutProperty = relativeContainerNode->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    auto targetSize = CalcSize(NG::CalcLength(pixelMap->GetWidth()), NG::CalcLength(pixelMap->GetHeight()));
+    relativeContainerLayoutProperty->UpdateUserDefinedIdealSize(targetSize);
+    auto relativeContainerRenderContext = relativeContainerNode->GetRenderContext();
+    CHECK_NULL_VOID(relativeContainerRenderContext);
+    relativeContainerRenderContext->UpdateTransformTranslate({ 0, 0, 0.0f });
+    relativeContainerRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(frameOffset.GetX()), Dimension(frameOffset.GetY())));
+    CHECK_NULL_VOID(imageNode);
+    auto imageNodeLayoutProperty = imageNode->GetLayoutProperty();
+    CHECK_NULL_VOID(imageNodeLayoutProperty);
+    imageNodeLayoutProperty->UpdateAlignRules(
+        { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
+            { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
+}
+
+void DragAnimationHelper::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode,
+    float dragPreviewScale, PreparedInfoForDrag& data)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pixelMap = frameNode->GetDragPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto center = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
+    auto frameOffset = OffsetF(0, 0);
+    imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_VOID(imageNode);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
+
+    InitImageNodeProperties(imageNode, pixelMap);
 
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || !data.isMenuShow) {
         frameOffset =
-            OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f), center.GetY() - (pixelMap->GetHeight() / 2.0f));
-        DragEventActuator::UpdatePreviewPositionAndScale(imageNode, frameOffset, dragPreviewScale);
-        UpdatePreview(frameNode, imageNode, imageNode);
+                OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f), center.GetY() - (pixelMap->GetHeight() / 2.0f));
+        if (data.badgeNumber > 1) {
+            CreateRelativeContainerNode(frameNode, imageNode, data, frameOffset, pixelMap);
+        } else {
+            DragEventActuator::UpdatePreviewPositionAndScale(imageNode, frameOffset, dragPreviewScale);
+        }
     }
     if ((frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
             frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) &&
@@ -972,17 +1040,21 @@ void DragAnimationHelper::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, 
         relativeContainerRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(frameOffset.GetX()), Dimension(frameOffset.GetY())));
         data.relativeContainerNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-        UpdatePreview(frameNode, imageNode, data.relativeContainerNode);
     }
+    DragEventActuator::UpdatePreviewAttr(frameNode, imageNode);
 }
 
-void DragAnimationHelper::UpdatePreview(
-    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& dragNode)
+void DragAnimationHelper::MountPixelMapWithBadge(const PreparedInfoForDrag& data, const RefPtr<FrameNode>& columnNode)
 {
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(imageNode);
-    CHECK_NULL_VOID(dragNode);
-    DragEventActuator::UpdatePreviewAttr(frameNode, imageNode);
+    if (!data.textRowNode) {
+        columnNode->AddChild(data.imageNode);
+        return;
+    }
+
+    CHECK_NULL_VOID(data.relativeContainerNode);
+    data.relativeContainerNode->AddChild(data.imageNode);
+    data.relativeContainerNode->AddChild(data.textRowNode);
+    columnNode->AddChild(data.relativeContainerNode);
 }
 
 void DragAnimationHelper::MountPixelMap(const RefPtr<OverlayManager>& manager,
@@ -996,10 +1068,7 @@ void DragAnimationHelper::MountPixelMap(const RefPtr<OverlayManager>& manager,
     CHECK_NULL_VOID(columnNode);
     if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
         !data.isMenuShow) {
-        columnNode->AddChild(data.imageNode);
-        if (data.textNode) {
-            columnNode->AddChild(data.textNode);
-        }
+        MountPixelMapWithBadge(data, columnNode);
     }
     if ((data.imageNode->GetDragPreviewOption().sizeChangeEffect ==
             DraggingSizeChangeEffect::SIZE_TRANSITION ||
@@ -1067,27 +1136,21 @@ void DragAnimationHelper::MountPixelMapSizeContentTransition(
         { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
     dragPreviewLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateAndMountMenuPreviewNode(data, stackFrameNode);
-    if (data.textNode) {
-        auto textRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        textRow->AddChild(data.textNode);
-        auto textRowLayoutProperty = textRow->GetLayoutProperty();
-        CHECK_NULL_VOID(textRowLayoutProperty);
-        auto textRowRenderContext = textRow->GetRenderContext();
-        CHECK_NULL_VOID(textRowRenderContext);
-        textRowRenderContext->UpdateOffset(OffsetT<Dimension>(
-            Dimension(BADGE_RELATIVE_OFFSET.ConvertToPx()), Dimension(-BADGE_RELATIVE_OFFSET.ConvertToPx())));
-        textRowLayoutProperty->UpdateAlignRules(
-            { { AlignDirection::TOP, { .anchor = "__container__", .vertical = VerticalAlign::TOP } },
-                { AlignDirection::RIGHT, { .anchor = "__container__", .horizontal = HorizontalAlign::END } } });
-
-        data.relativeContainerNode->AddChild(textRow);
+    if (data.textRowNode) {
+        data.relativeContainerNode->AddChild(data.textRowNode);
+    }
+    if (data.menuNode) {
+        auto menuNode = data.menuNode;
+        MenuView::UpdateMenuNodePosition(data);
+        data.relativeContainerNode->AddChild(data.menuNode);
     }
 }
 
 void DragAnimationHelper::CreateAndMountMenuPreviewNode(
     const PreparedInfoForDrag& data, const RefPtr<FrameNode>& stackFrameNode)
 {
+    CHECK_NULL_VOID(data.imageNode);
+    CHECK_NULL_VOID(data.menuPreviewNode);
     if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) {
         auto menuPreviewImageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });

@@ -409,7 +409,8 @@ bool SvgNode::ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
     std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute*>>& initStyleTaskSt)
 {
     auto currentSvgNode = currentSvgNodeInfo.svgNode;
-    if (currentSvgNode->passStyle_ && currentSvgNodeInfo.childIndex < currentSvgNode->children_.size()) {
+    if (currentSvgNode->passStyle_ &&
+        currentSvgNodeInfo.childIndex < static_cast<int32_t>(currentSvgNode->children_.size())) {
         auto child = currentSvgNode->children_[currentSvgNodeInfo.childIndex];
         if (child) {
             // pass down style only if child inheritStyle_ is true
@@ -517,7 +518,7 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         OnTransform(canvas, lengthRule);
     }
     if (!hrefMaskId_.empty()) {
-        OnMask(canvas, svgCoordinateSystemContext);
+        OnMask(canvas, svgCoordinateSystemContext.GetViewPort());
     }
     if (!hrefFilterId_.empty()) {
         OnFilter(canvas, svgCoordinateSystemContext);
@@ -1016,31 +1017,39 @@ Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transform
     return Offset(x, y);
 }
 
-SvgLengthScaleRule SvgNode::TransformForCurrentOBB(RSCanvas& canvas,
-    const SvgCoordinateSystemContext& context, SvgLengthScaleUnit contentUnits, float offsetX, float offsetY)
+SvgLengthScaleRule SvgNode::BuildContentScaleRule(const SvgCoordinateSystemContext& parentContext,
+    SvgLengthScaleUnit contentUnits)
 {
     if (contentUnits == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
-        return context.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+        return parentContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    }
+    // create default rect to draw graphic
+    auto squareWH = std::min(parentContext.GetContainerRect().Width(), parentContext.GetContainerRect().Height());
+    Rect defaultRect(0, 0, squareWH, squareWH);
+    SvgLengthScaleRule ContentRule (defaultRect,
+        parentContext.GetViewPort(), SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    return ContentRule;
+}
+
+void SvgNode::TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule& contentRule,
+    const Size& ContainerSize, const Offset& offset)
+{
+    if (contentRule.GetLengthScaleUnit() == SvgLengthScaleUnit::USER_SPACE_ON_USE) {
+        return;
     }
     float scaleX = 0.0f;
     float scaleY = 0.0f;
     float translateX = 0.0f;
     float translateY = 0.0f;
-    // create default rect to draw graphic
-    auto squareWH = std::min(context.GetContainerRect().Width(), context.GetContainerRect().Height());
-    Rect defaultRect(0, 0, squareWH, squareWH);
-    SvgLengthScaleRule ContentRule = SvgLengthScaleRule(defaultRect, context.GetViewPort(),
-        SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
-    
     SvgPreserveAspectRatio preserveAspectRatio;
     preserveAspectRatio.svgAlign = SvgAlign::ALIGN_NONE;
-    SvgAttributesParser::ComputeScale(defaultRect.GetSize(), context.GetContainerRect().GetSize(),
+    SvgAttributesParser::ComputeScale(contentRule.GetContainerRect().GetSize(), ContainerSize,
         preserveAspectRatio, scaleX, scaleY);
-    SvgAttributesParser::ComputeTranslate(defaultRect.GetSize(), context.GetContainerRect().GetSize(), scaleX, scaleY,
-        preserveAspectRatio.svgAlign, translateX, translateY);
+    SvgAttributesParser::ComputeTranslate(contentRule.GetContainerRect().GetSize(),
+        ContainerSize, scaleX, scaleY, preserveAspectRatio.svgAlign,
+        translateX, translateY);
     // scale the graphic content of the given element non-uniformly
-    canvas.Translate(translateX  + offsetX, translateY + offsetY);
+    canvas.Translate(translateX  + offset.GetX(), translateY + offset.GetY());
     canvas.Scale(scaleX, scaleY);
-    return ContentRule;
 }
 } // namespace OHOS::Ace::NG

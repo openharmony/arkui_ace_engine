@@ -1517,4 +1517,183 @@ HWTEST_F(SelectOverlayTestTwoNg, ComputeExtensionMenuPosition, TestSize.Level1)
     offset = overlayLayoutAlgorithm->ComputeExtensionMenuPosition(AceType::RawPtr(frameNode), menuOffset);
     EXPECT_EQ(offset.GetY(), 2.0f);
 }
+
+/**
+ * @tc.name: CreateExtensionMenuOptionCallback
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::CreateExtensionMenuOptionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, CreateExtensionMenuOptionCallback, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode.
+     */
+    SelectOverlayInfo selectInfo;
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto childNode = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto childNode1 = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto childNode2 = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    childNode->MountToParent(frameNode);
+    childNode1->MountToParent(frameNode);
+    childNode2->MountToParent(frameNode);
+    frameNode->GetAllChildrenWithBuild();
+    auto customMenuLayoutWrapper = frameNode->GetChildByIndex(0);
+    ASSERT_NE(customMenuLayoutWrapper, nullptr);
+    auto customNode = AceType::DynamicCast<FrameNode>(customMenuLayoutWrapper);
+    ASSERT_NE(customNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF constraint = { .selfIdealSize = OptionalSizeF(100.0f, 100.0f) };
+    layoutProperty->layoutConstraint_ = constraint;
+    auto menu = frameNode->GetChildByIndex(0);
+    ASSERT_NE(menu, nullptr);
+    /**
+     * @tc.steps: step2. call CreateExtensionMenuOptionCallback.
+     */
+    OnMenuItemCallback onCreateCallback = { .onMenuItemClick = [](const NG::MenuItemParam& param) {
+        return false;
+    } };
+    std::function<void()> systemEvent = nullptr;
+    MenuOptionsParam item;
+    auto callback = selectOverlayNode->CreateExtensionMenuOptionCallback(0, onCreateCallback, systemEvent, item);
+    callback();
+
+    onCreateCallback.onMenuItemClick = [](const NG::MenuItemParam& param) { return true; };
+    int32_t retStart = 0;
+    int32_t retEnd = 0;
+    onCreateCallback.textRangeCallback = [&](int32_t start, int32_t end) {
+        retStart = start;
+        retEnd = end;
+    };
+    callback = selectOverlayNode->CreateExtensionMenuOptionCallback(0, onCreateCallback, systemEvent, item);
+    callback();
+    EXPECT_EQ(retStart, -1);
+    EXPECT_EQ(retEnd, -1);
+
+    bool isSystemEventCalled = false;
+    systemEvent = [&]() { isSystemEventCalled = true; };
+    callback = selectOverlayNode->CreateExtensionMenuOptionCallback(0, onCreateCallback, systemEvent, item);
+    callback();
+    EXPECT_FALSE(isSystemEventCalled);
+
+    onCreateCallback.onMenuItemClick = nullptr;
+    callback = selectOverlayNode->CreateExtensionMenuOptionCallback(0, onCreateCallback, systemEvent, item);
+    callback();
+    EXPECT_TRUE(isSystemEventCalled);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::AddCreateMenuExtensionMenuParams
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuExtensionMenuParams, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuCallback.onSearch = []() {};
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto childNode = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    /**
+     * @tc.steps: step2. call AddCreateMenuExtensionMenuParams.
+     */
+    std::vector<MenuOptionsParam> params = {
+        { .id = "OH_DEFAULT_SEARCH", .content = "Search" },
+        { .id = "OH_DEFAULT_PASTE", .content = "Paste" },
+        { .id = "NONE", .content = "NONE" },
+    };
+    std::vector<OptionParam> optParams;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(params, infoPtr, -1, optParams);
+    ASSERT_EQ(static_cast<int32_t>(optParams.size()), 3);
+    auto it = optParams.begin();
+    EXPECT_NE((*(it)).action, nullptr);
+    it++;
+    EXPECT_TRUE((*(it)).isPasteOption);
+    it++;
+    EXPECT_EQ((*(it)).value, "NONE");
+}
+
+/**
+ * @tc.name: UpdateToolBarExtensionMenu
+ * @tc.desc: Test SelectOverlayLayoutAlgorithm::UpdateToolBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestTwoNg, UpdateToolBarExtensionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuCallback.onSearch = []() {};
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    infoPtr->menuInfo.menuBuilder = []() {};
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto childNode = FrameNode::GetOrCreateFrameNode(
+        "Text", ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    /**
+     * @tc.steps: step2. call AddCreateMenuExtensionMenuParams.
+     */
+    selectOverlayNode->isExtensionMenu_ = true;
+    selectOverlayNode->extensionMenu_ = childNode;
+    selectOverlayNode->backButton_ = childNode;
+    selectOverlayNode->extensionMenuStatus_ = FrameNodeStatus::GONE;
+    selectOverlayNode->backButtonStatus_ = FrameNodeStatus::GONE;
+    infoPtr->menuInfo.menuIsShow = true;
+    infoPtr->menuInfo.menuDisable = false;
+    selectOverlayNode->UpdateToolBar(false, false);
+    EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::VISIBLE);
+    EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::VISIBLE);
+
+    infoPtr->menuInfo.menuIsShow = false;
+    selectOverlayNode->UpdateToolBar(false, false);
+    EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::GONE);
+    EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::GONE);
+
+    infoPtr->menuInfo.menuDisable = true;
+    selectOverlayNode->backButton_ = nullptr;
+    selectOverlayNode->backButtonStatus_ = FrameNodeStatus::GONE;
+    selectOverlayNode->UpdateToolBar(false, false);
+    EXPECT_EQ(selectOverlayNode->extensionMenuStatus_, FrameNodeStatus::GONE);
+    EXPECT_EQ(selectOverlayNode->backButtonStatus_, FrameNodeStatus::GONE);
+}  
 } // namespace OHOS::Ace::NG

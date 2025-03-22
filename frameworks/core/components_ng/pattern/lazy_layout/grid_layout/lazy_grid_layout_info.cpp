@@ -24,7 +24,7 @@ void LazyGridLayoutInfo::EstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
-        int32_t totalCount = (posMap_.rbegin()->first + 1 - posMap_.begin()->first) / lanes_;
+        int32_t totalCount = (posMap_.size() + lanes_ - 1) / lanes_;
         estimateItemSize_ = totalSize / totalCount - spaceWidth_;
     }
 }
@@ -101,6 +101,22 @@ void LazyGridLayoutInfo::UpdatePosMapEnd(int32_t updatedEnd)
     }
 }
 
+void LazyGridLayoutInfo::UpdateTotalMainSize()
+{
+    if (posMap_.empty()) {
+        return;
+    }
+    auto last = posMap_.rbegin();
+    float prevPos = last->second.endPos + spaceWidth_;
+    int32_t prevIndex = last->first;
+    if (prevIndex >= totalItemCount_ - 1) {
+        totalMainSize_ = prevPos - spaceWidth_;
+    } else {
+        float estSize = LineCount(prevIndex, totalItemCount_ - 1) * (estimateItemSize_ + spaceWidth_);
+        totalMainSize_ = prevPos + estSize - spaceWidth_;
+    }
+}
+
 float LazyGridLayoutInfo::UpdatePosWithIter(
     std::map<int, GridItemMainPos>::iterator &it, int32_t& prevIndex, float& prevPos) const
 {
@@ -128,25 +144,33 @@ void LazyGridLayoutInfo::UpdatePosMap()
     if (!Positive(estimateItemSize_)) {
         EstimateItemSize();
     }
-    if (updatedStart_ < INT_MAX || cachedUpdatedStart_ < INT_MAX) {
-        int32_t updatedEnd = updatedEnd_ < 0 ? cachedUpdatedEnd_ : updatedEnd_;
+    if (updatedStart_ < INT_MAX) {
         if (cachedUpdatedStart_ < updatedStart_) {
-            adjustOffset_.start =
-                UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), std::min(updatedEnd, updatedStart_ - 1));
+            UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), updatedStart_ - 1);
         }
-        if (updatedStart_ < INT_MAX) {
-            adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd);
+        adjustOffset_.start = UpdatePosMapStart(updatedStart_, updatedEnd_);
+        if (cachedUpdatedEnd_ > updatedEnd_) {
+            UpdatePosMapStart(updatedEnd_ + 1, LanesCeil(cachedUpdatedEnd_));
+            UpdatePosMapEnd(LanesCeil(cachedUpdatedEnd_));
+        } else {
+            UpdatePosMapEnd(updatedEnd_);
         }
-        UpdatePosMapEnd(updatedEnd);
-        adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
-        updatedStart_ = INT_MAX;
-        updatedEnd_ = -1;
-        cachedUpdatedStart_ = INT_MAX;
-        cachedUpdatedEnd_ = -1;
+    } else if (cachedUpdatedStart_ < INT_MAX) {
+        UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), LanesCeil(cachedUpdatedEnd_));
+        UpdatePosMapEnd(LanesCeil(cachedUpdatedEnd_));
+        adjustOffset_.start = endIndex_ < 0 ? 0.0f : totalMainSize_ - prevTotalMainSize_;
+    } else if (spaceUpdated_) {
+        UpdateTotalMainSize();
+        adjustOffset_.start = endIndex_ < 0 ? 0.0f : totalMainSize_ - prevTotalMainSize_;
     } else {
         adjustOffset_.start = 0.0f;
-        adjustOffset_.end = 0.0f;
     }
+    adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
+    updatedStart_ = INT_MAX;
+    updatedEnd_ = -1;
+    cachedUpdatedStart_ = INT_MAX;
+    cachedUpdatedEnd_ = -1;
+    spaceUpdated_ = false;
 }
 
 void LazyGridLayoutInfo::SetSpace(float space)
@@ -162,6 +186,7 @@ void LazyGridLayoutInfo::SetSpace(float space)
         updatedEnd_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
+        spaceUpdated_ = true;
     }
 }
 

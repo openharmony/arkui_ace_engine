@@ -1937,6 +1937,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayMa
     CHECK_NULL_RETURN(imageNode, false);
     auto badgeNode = overlayManager->GetDragPixelMapBadgeNode();
     if (badgeNode) {
+        dragPreviewInfo.relativeContainerNode = data.relativeContainerNode;
         dragPreviewInfo.textNode = badgeNode;
     }
     CHECK_NULL_RETURN(gestureHub, false);
@@ -2041,6 +2042,17 @@ Offset DragDropManager::CalcDragMoveOffset(
     return newOffset;
 }
 
+Offset DragDropManager::CalcDragMoveOffsetWithTextNode(
+    const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
+{
+    auto originPoint = info.originOffset;
+    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + (1 - info.scale) * info.dragPreviewRect.Width());
+    originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY());
+    auto touchOffset = DragDropManager::GetTouchOffsetRelativeToSubwindow(Container::CurrentId(), x, y);
+    Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };
+    return newOffset;
+}
+
 Offset DragDropManager::CalcContentTrationOffset(
     const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info)
 {
@@ -2059,11 +2071,22 @@ Offset DragDropManager::CalculateNewOffset(
     Offset newOffset = { 0, 0 };
     CHECK_NULL_RETURN(frameNode, newOffset);
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || !info_.isMenuShow) {
-        newOffset = isDragStartPending
-                        ? CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
-                                             static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
-                        : CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
-                                             static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
+        if (info_.textNode) {
+            newOffset =
+                isDragStartPending
+                    ? CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
+                        static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
+                    : CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT,
+                        static_cast<int32_t>(event.GetGlobalLocation().GetX()),
+                            static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
+        } else {
+            newOffset =
+                isDragStartPending
+                    ? CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
+                        static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
+                    : CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
+                        static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
+        }
     }
     if ((frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
             frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION) &&
@@ -2136,7 +2159,11 @@ void DragDropManager::DoDragMoveAnimate(const DragPointerEvent& pointerEvent)
     Offset newOffset = { 0, 0 };
     if (info_.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
         !info_.isMenuShow) {
-        newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, point.GetX(), point.GetY(), info_);
+        if (info_.textNode) {
+            newOffset = CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT, point.GetX(), point.GetY(), info_);
+        } else {
+            newOffset = CalcDragMoveOffset(PRESERVE_HEIGHT, point.GetX(), point.GetY(), info_);
+        }
     }
     if ((info_.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::SIZE_TRANSITION ||
             info_.imageNode->GetDragPreviewOption().sizeChangeEffect ==
@@ -2177,7 +2204,8 @@ void DragDropManager::DragMoveAnimation(
             dragDropManager->TransDragWindowToDragFwk(containerId);
         }
     });
-    auto renderContext = info_.imageNode->GetRenderContext();
+    auto renderContext = info_.textNode && info_.relativeContainerNode ? info_.relativeContainerNode->GetRenderContext()
+                                                                       : info_.imageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto offset = OffsetF(point.GetX(), point.GetY());
     auto menuWrapperNode = GetMenuWrapperNodeFromDrag();
@@ -2186,14 +2214,13 @@ void DragDropManager::DragMoveAnimation(
     AnimationUtils::Animate(
         option,
         [renderContext, localPoint = newOffset, info = info_, overlayManager, menuRenderContext, menuPosition]() {
-            if (menuRenderContext && !menuPosition.NonOffset()) {
-                menuRenderContext->UpdatePosition(
-                    OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
-            }
             if (info.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
                 !info.isMenuShow) {
+                if (menuRenderContext && !menuPosition.NonOffset()) {
+                    menuRenderContext->UpdatePosition(
+                        OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
+                }
                 renderContext->UpdateTransformTranslate({ localPoint.GetX(), localPoint.GetY(), 0.0f });
-                UpdateTextNodePosition(info.textNode, localPoint);
                 UpdateGatherNodePosition(overlayManager, info.imageNode);
             }
         },
@@ -2296,31 +2323,60 @@ void DragDropManager::DragStartAnimation(const Offset& newOffset, const RefPtr<O
     renderContext->AttachNodeAnimatableProperty(animateProperty);
     animateProperty->Set(0.0f);
     dragStartAnimationRate_ = 0.0f;
-    AnimationUtils::Animate(
-        option,
-        [data, renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter, menuRenderContext,
-            menuPosition, animateProperty]() {
-            CHECK_NULL_VOID(renderContext);
+    auto animateCallback = [data, renderContext, info = info_, newOffset, overlayManager, gatherNodeCenter,
+                               menuRenderContext, menuPosition, animateProperty]() {
+        CHECK_NULL_VOID(renderContext);
+        if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
+            !info.isMenuShow) {
             if (menuRenderContext && !menuPosition.NonOffset()) {
                 menuRenderContext->UpdatePosition(
                     OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
             }
-            if (data.imageNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
-                !info.isMenuShow) {
-                renderContext->UpdateTransformScale({ info.scale, info.scale });
-                renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-                UpdateGatherNodePosition(overlayManager, info.imageNode);
-                UpdateTextNodePosition(info.textNode, newOffset);
-            }
-            GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height, gatherNodeCenter,
-                renderContext->GetBorderRadius() };
-            UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
-            if (animateProperty) {
-                animateProperty->Set(1.0f);
-            }
-        },
-        option.GetOnFinishEvent());
+            HandleDragPreviewUpdate(renderContext, info, newOffset, overlayManager);
+        }
+        GatherAnimationInfo gatherAnimationInfo = { info.scale, info.width, info.height, gatherNodeCenter,
+            renderContext->GetBorderRadius() };
+        UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
+        if (animateProperty) {
+            animateProperty->Set(1.0f);
+        }
+    };
+    if (info_.textNode) {
+        option.SetCurve(DRAG_TRANSITION_ANIMATION_CURVE);
+        auto pipeline = data.relativeContainerNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->Animate(option, option.GetCurve(), animateCallback, option.GetOnFinishEvent());
+    } else {
+        AnimationUtils::Animate(option, animateCallback, option.GetOnFinishEvent());
+    }
     DragStartTransitionAnimation(data, newOffset, info_, option);
+}
+
+void DragDropManager::HandleDragPreviewUpdate(const RefPtr<RenderContext>& renderContext, const DragPreviewInfo& info,
+    const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager)
+{
+    if (!info.textNode) {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTransformScale({ info.scale, info.scale });
+        renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+        UpdateGatherNodePosition(overlayManager, info.imageNode);
+        return;
+    }
+    
+    CHECK_NULL_VOID(info.relativeContainerNode);
+    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
+    CHECK_NULL_VOID(relativeContainerRenderContext);
+    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
+    
+    auto imageNode = DynamicCast<FrameNode>(info.relativeContainerNode->GetFirstChild());
+    CHECK_NULL_VOID(imageNode);
+    
+    auto imageLayoutProperty = imageNode->GetLayoutProperty();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    
+    imageLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(info.width * info.scale, DimensionUnit::PX),
+        CalcLength(info.height * info.scale, DimensionUnit::PX) });
+    info.relativeContainerNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32_t containerId)
@@ -2401,8 +2457,6 @@ void DragDropManager::DragStartTransitionAnimation(
                     CHECK_NULL_VOID(dragPreviewRenderContext);
                     dragPreviewRenderContext->UpdateOpacity(data.imageNode->GetDragPreviewOption().options.opacity);
                 }
-                auto stackContext = stack->GetContext();
-                CHECK_NULL_VOID(stackContext);
                 stack->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
             };
             auto pipeline = data.relativeContainerNode->GetContext();
@@ -2610,6 +2664,7 @@ void DragDropManager::GetGatherPixelMap(
             pixelMapDuplicated = gatherPixelMap;
         }
 #endif
+        CHECK_NULL_VOID(pixelMapDuplicated);
         auto width = pixelMapDuplicated->GetWidth() * scale;
         auto height = pixelMapDuplicated->GetHeight() * scale;
         auto updateScale = scale;

@@ -43,6 +43,8 @@ public:
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const KeyEvent& event,
         Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+    static bool InitButtonInfoValue(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+        const Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool InitButtonInfo(std::string& componentInfo,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
@@ -103,7 +105,14 @@ private:
         std::string& message);
     static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
-    static bool CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message);
+    static bool CheckForegroundEffect(const RefPtr<FrameNode>& node, std::string& message,
+        const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckOverlayText(const RefPtr<FrameNode>& node, std::string& message,
+        const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckOverlayNode(RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
+        std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         std::string& message);

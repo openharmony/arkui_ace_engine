@@ -63,6 +63,9 @@ const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 380.0f, 34.0f);
 const std::string HOVER_IMAGE_CLIP_PROPERTY_NAME = "hoverImageClip";
 constexpr float MIN_HOVER_SCALE_DIFF = 0.0001f;
+constexpr int32_t HALF_NUMBER = 2;
+constexpr int32_t HALF_NUMBER_NEGATIVE = -2;
+constexpr int32_t MENU_ANIMATION_DURATION = 300;
 
 void MountTextNode(const RefPtr<FrameNode>& wrapperNode, const RefPtr<UINode>& previewCustomNode = nullptr)
 {
@@ -1021,6 +1024,22 @@ void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const Me
 }
 } // namespace
 
+void MenuView::SetHasCustomOutline(
+    const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuParam.outlineWidth.has_value() || menuParam.outlineWidth->leftDimen->IsNegative() ||
+        menuParam.outlineWidth->rightDimen->IsNegative() || menuParam.outlineWidth->topDimen->IsNegative() ||
+        menuParam.outlineWidth->bottomDimen->IsNegative()) {
+        return;
+    }
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    menuWrapperPattern->SetHasCustomOutlineColor(true);
+}
+
 void MenuView::CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1120,13 +1139,18 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
     MountOptionToColumn(params, menuNode, menuParam, column);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
@@ -1244,6 +1268,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
 
     SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
@@ -1282,8 +1307,16 @@ void MenuView::UpdateMenuParam(
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     menuNode->MarkModifyDone();
 
@@ -1363,7 +1396,8 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MountToParent(column);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        UpdateMenuBorderEffect(menuNode);
+        MenuParam menuParam;
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -1407,31 +1441,40 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
     }
 }
 
-void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
+void MenuView::UpdateMenuBorderEffect(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     CHECK_NULL_VOID(menuNode);
     auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetDoubleBorderEnable()) {
+    if (menuTheme->GetDoubleBorderEnable() || menuWrapperPattern->GetHasCustomOutlineWidth()) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         BorderStyleProperty styleProp;
         styleProp.SetBorderStyle(BorderStyle::SOLID);
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
         outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
             theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
+            renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
+        } else {
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+            renderContext->SetOuterBorderWidth(outerWidthProp);
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
+            renderContext->SetOuterBorderColor(outerColorProp);
+        }
         renderContext->SetOuterBorderStyle(styleProp);
-        renderContext->SetOuterBorderColor(outerColorProp);
         renderContext->UpdateOuterBorderRadius(outerRadiusProp);
-        renderContext->SetOuterBorderWidth(outerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;
@@ -1843,6 +1886,69 @@ RefPtr<FrameNode> MenuView::CreateSelectOption(const SelectParam& param, int32_t
     return option;
 }
 
+void MenuView::ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data)
+{
+    CHECK_NULL_VOID(menuNode);
+    RefPtr<Curve> menuOpacityCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
+    RefPtr<Curve> menuScaleCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.4f, 0.0f, 1.0f, 1.0f);
+    AnimationOption optionOpacity;
+    AnimationOption optionScale;
+    optionOpacity.SetCurve(menuOpacityCurve);
+    optionOpacity.SetDuration(MENU_ANIMATION_DURATION);
+    optionScale.SetCurve(menuScaleCurve);
+    optionScale.SetDuration(MENU_ANIMATION_DURATION);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuNodeRenderContext);
+    menuNodeRenderContext->UpdateOpacity(1.0f);
+    menuNodeRenderContext->UpdateTransformScale({ 0.95f, 0.95f });
+    AnimationUtils::Animate(
+        optionOpacity, [menuNodeRenderContext]() { menuNodeRenderContext->UpdateOpacity(0.0f); },
+        optionOpacity.GetOnFinishEvent());
+    AnimationUtils::Animate(
+        optionScale, [menuNode, data]() { UpdateMenuNodeByAnimation(menuNode, data); }, optionScale.GetOnFinishEvent());
+}
+
+// update the alignment rules according to the positional relationship between the menu and the menu preview.
+void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
+{
+    auto relativeContainerNode = data.relativeContainerNode;
+    CHECK_NULL_VOID(relativeContainerNode);
+    auto stackNode = AceType::DynamicCast<FrameNode>(relativeContainerNode->GetChildByIndex(0));
+    CHECK_NULL_VOID(stackNode);
+    stackNode->UpdateInspectorId("__stack__");
+    auto menuNode = data.menuNode;
+    CHECK_NULL_VOID(menuNode);
+    auto menuNodeLayoutProperty = menuNode->GetLayoutProperty();
+    CHECK_NULL_VOID(menuNodeLayoutProperty);
+    auto biasMenuLeft = (data.menuPositionLeft - data.menuPositionRight) / HALF_NUMBER;
+    auto biasMenuTop = (data.menuPositionTop - data.menuPositionBottom) / HALF_NUMBER;
+    MarginProperty menuNodeMargin;
+    std::map<AlignDirection, AlignRule> menuNodeAlignRules;
+    std::map<std::string, AlignRule> alignMap = { { "top", { .anchor = "__stack__", .vertical = VerticalAlign::TOP } },
+        { "center", { .anchor = "__stack__", .vertical = VerticalAlign::CENTER } },
+        { "bottom", { .anchor = "__stack__", .vertical = VerticalAlign::BOTTOM } },
+        { "start", { .anchor = "__stack__", .horizontal = HorizontalAlign::START } },
+        { "middle", { .anchor = "__stack__", .horizontal = HorizontalAlign::CENTER } },
+        { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
+    if (data.menuPosition == Placement::TOP_LEFT || data.menuPosition == Placement::BOTTOM_LEFT ||
+        data.menuPosition == Placement::TOP || data.menuPosition == Placement::BOTTOM ||
+        data.menuPosition == Placement::TOP_RIGHT || data.menuPosition == Placement::BOTTOM_RIGHT) {
+        // when the menu appears at the top or bottom of the menu preview, the top or bottom of the menu needs to be
+        // anchored to the bottom or top of the menu preview.
+        UpdateMenuNodePositionTop(menuNodeMargin, menuNodeAlignRules, data, biasMenuLeft, alignMap);
+        menuNodeLayoutProperty->UpdateAlignRules(menuNodeAlignRules);
+    } else if (data.menuPosition == Placement::LEFT_TOP || data.menuPosition == Placement::RIGHT_TOP ||
+               data.menuPosition == Placement::LEFT || data.menuPosition == Placement::RIGHT ||
+               data.menuPosition == Placement::LEFT_BOTTOM || data.menuPosition == Placement::RIGHT_BOTTOM) {
+        // when the menu appears on the left or right side of the menu preview, the left or right side of the menu needs
+        // to be anchored to the left or right side of the menu preview.
+        UpdateMenuNodePositionLeft(menuNodeMargin, menuNodeAlignRules, data, biasMenuTop, alignMap);
+        menuNodeLayoutProperty->UpdateAlignRules(menuNodeAlignRules);
+    }
+    menuNodeLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    menuNodeLayoutProperty->UpdateMargin(menuNodeMargin);
+}
+
 RefPtr<FrameNode> MenuView::Create(int32_t index)
 {
     auto Id = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1878,5 +1984,153 @@ RefPtr<FrameNode> MenuView::Create(int32_t index)
     margin.SetEdges(leftRightMargin, leftRightMargin, verticalMargin, verticalMargin);
     layoutProp->UpdateMargin(margin);
     return node;
+}
+
+// if the menu is at the top of the menu preview, then both the top and the bottom of the menu will be aligned with the
+// top of the menu preview. Conversely, if it is in other situations, they will be aligned with the bottom.
+void MenuView::UpdateMenuPositionTop(MarginProperty& menuNodeMargin,
+    std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuTop,
+    float biasMenuBottom)
+{
+    menuNodeAlignRules[AlignDirection::TOP] = alignMap;
+    menuNodeAlignRules[AlignDirection::BOTTOM] = alignMap;
+    menuNodeMargin.top = CalcLength(Dimension(biasMenuTop));
+    menuNodeMargin.bottom = CalcLength(Dimension(biasMenuBottom));
+}
+
+// if the menu is on the left side of the menu preview, then both the left and the right sides of the menu will be
+// aligned with the left side of the menu preview. Conversely, they will be aligned with the right side.
+void MenuView::UpdateMenuPositionLeft(MarginProperty& menuNodeMargin,
+    std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuLeft,
+    float biasMenuRight)
+{
+    menuNodeAlignRules[AlignDirection::LEFT] = alignMap;
+    menuNodeAlignRules[AlignDirection::RIGHT] = alignMap;
+    menuNodeMargin.left = CalcLength(Dimension(biasMenuLeft));
+    menuNodeMargin.right = CalcLength(Dimension(biasMenuRight));
+}
+
+// if the menu is at the top or bottom of the menu preview, then the left and right sides of the menu will adjust the
+// anchoring rules according to the position where the menu appears.
+void MenuView::UpdateMenuNodePositionTop(MarginProperty& menuNodeMargin,
+    std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
+    std::map<std::string, AlignRule>& alignMap)
+{
+    if (data.menuPosition == Placement::BOTTOM_LEFT || data.menuPosition == Placement::BOTTOM ||
+        data.menuPosition == Placement::BOTTOM_RIGHT) {
+        UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["bottom"],
+            data.menuPositionTop - data.frameNodeRect.Height(), data.menuPositionBottom);
+    } else {
+        UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["top"], data.menuPositionTop,
+            data.menuPositionBottom - data.frameNodeRect.Height());
+    }
+    switch (data.menuPosition) {
+        case Placement::BOTTOM_LEFT:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], data.menuPositionLeft,
+                (-1) * data.menuPositionLeft - data.menuRect.Width());
+            break;
+        case Placement::BOTTOM:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["middle"],
+                (data.menuRect.Width() / HALF_NUMBER_NEGATIVE) + biasMenuLeft,
+                (data.menuRect.Width() / HALF_NUMBER_NEGATIVE) - biasMenuLeft);
+            break;
+        case Placement::BOTTOM_RIGHT:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["end"],
+                (-1) * data.menuPositionRight - data.menuRect.Width(), data.menuPositionRight);
+            break;
+        case Placement::TOP_LEFT:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], data.menuPositionLeft,
+                (-1) * data.menuPositionLeft - data.menuRect.Width());
+            break;
+        case Placement::TOP:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["middle"],
+                (data.menuRect.Width() / HALF_NUMBER_NEGATIVE) + biasMenuLeft,
+                (data.menuRect.Width() / HALF_NUMBER_NEGATIVE) - biasMenuLeft);
+            break;
+        case Placement::TOP_RIGHT:
+            UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["end"],
+                (-1) * data.menuPositionRight - data.menuRect.Width(), data.menuPositionRight);
+            break;
+        default:
+            break;
+    }
+}
+
+// if the menu is on the left or right side of the menu preview, then the top and bottom of the menu will adjust the
+// anchoring rules according to the position where the menu appears.
+void MenuView::UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
+    std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuTop,
+    std::map<std::string, AlignRule>& alignMap)
+{
+    if (data.menuPosition == Placement::LEFT_TOP || data.menuPosition == Placement::LEFT ||
+        data.menuPosition == Placement::LEFT_BOTTOM) {
+        UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], data.menuPositionLeft,
+            data.menuPositionRight - data.frameNodeRect.Width());
+    } else {
+        UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["end"],
+            data.menuPositionLeft - data.frameNodeRect.Width(), data.menuPositionRight);
+    }
+    switch (data.menuPosition) {
+        case Placement::LEFT_TOP:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["top"], data.menuPositionTop,
+                (-1) * data.menuPositionTop - data.menuRect.Height());
+            break;
+        case Placement::LEFT:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["center"],
+                (data.menuRect.Height() / HALF_NUMBER_NEGATIVE) + biasMenuTop,
+                (data.menuRect.Height() / HALF_NUMBER_NEGATIVE) - biasMenuTop);
+            break;
+        case Placement::LEFT_BOTTOM:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["bottom"],
+                (-1) * data.menuPositionBottom - data.menuRect.Height(), data.menuPositionBottom);
+            break;
+        case Placement::RIGHT_TOP:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["top"], data.menuPositionTop,
+                (-1) * data.menuPositionTop - data.menuRect.Height());
+            break;
+        case Placement::RIGHT:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["center"],
+                (data.menuRect.Height() / HALF_NUMBER_NEGATIVE) + biasMenuTop,
+                (data.menuRect.Height() / HALF_NUMBER_NEGATIVE) - biasMenuTop);
+            break;
+        case Placement::RIGHT_BOTTOM:
+            UpdateMenuPositionTop(menuNodeMargin, menuNodeAlignRules, alignMap["bottom"],
+                (-1) * data.menuPositionBottom - data.menuRect.Height(), data.menuPositionBottom);
+            break;
+        default:
+            break;
+    }
+}
+
+// Update the animation indentation point according to the position where the menu appears.
+void MenuView::UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    CHECK_NULL_VOID(menuNodeRenderContext);
+    auto menuRect = data.menuRect;
+    auto menuWidth = menuRect.Width();
+    auto menuHeight = menuRect.Height();
+    auto biasMenuLeft = (data.menuPositionLeft - data.menuPositionRight) / HALF_NUMBER;
+    auto biasMenuTop = (data.menuPositionTop - data.menuPositionBottom) / HALF_NUMBER;
+    double x = 0.0;
+    double y = 0.0;
+    Placement placement = data.menuPosition;
+    if (placement == Placement::LEFT_TOP || placement == Placement::LEFT || placement == Placement::LEFT_BOTTOM) {
+        x = menuWidth;
+    } else if (placement == Placement::BOTTOM || placement == Placement::TOP) {
+        x = (menuWidth / HALF_NUMBER) - biasMenuLeft;
+    } else if (placement == Placement::BOTTOM_RIGHT || placement == Placement::TOP_RIGHT) {
+        x = menuWidth;
+    }
+    if (placement == Placement::TOP_LEFT || placement == Placement::TOP || placement == Placement::TOP_RIGHT) {
+        y = menuHeight;
+    } else if (placement == Placement::LEFT || placement == Placement::RIGHT) {
+        y = (menuHeight / HALF_NUMBER) - biasMenuTop;
+    } else if (placement == Placement::LEFT_BOTTOM || placement == Placement::RIGHT_BOTTOM) {
+        y = menuHeight;
+    }
+    menuNodeRenderContext->UpdateTransformCenter(DimensionOffset(Offset(x, y)));
+    menuNodeRenderContext->UpdateTransformScale({ 0.4f, 0.4f });
 }
 } // namespace OHOS::Ace::NG

@@ -139,13 +139,17 @@ export class FullScreenLaunchComponent extends ViewPU {
     async checkAbility() {
         this.resetOptions();
         try {
-            const i = await abilityManager.isEmbeddedOpenAllowed(this.context, this.appId);
-            if (i) {
-                this.isShow = true;
-                hilog.info(0x3900, 'FullScreenLaunchComponent', ' EmbeddedOpen is Allowed!');
-            }
-            else {
-                this.popUp();
+            const i = await abilityManager.queryAtomicServiceStartupRule(this.context, this.appId);
+            if (i.isOpenAllowed) {
+                if (i.isEmbeddedAllowed) {
+                  this.isShow = true;
+                  hilog.info(0x3900, 'FullScreenLaunchComponent', 'EmbeddedOpen is Allowed!');
+                } else {
+                  this.popUp();
+                  hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!');
+                 }
+            } else {
+                hilog.info(0x3900, 'FullScreenLaunchComponent', 'is not allowed open!')
             }
         }
         catch (e) {

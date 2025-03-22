@@ -74,7 +74,7 @@ public:
     /*
      * Notify scroll bar to update state, called by scrollable node.
      */
-    void NotifyScrollBar(int32_t scrollSource) const;
+    void NotifyScrollBar(int32_t scrollSource);
 
     /*
      * Start animation of ScrollBar.
@@ -129,6 +129,8 @@ private:
     ScrollableNodeInfo scorllableNode_; // Scrollable node, like list, grid, scroll, etc.
     std::list<ScrollableNodeInfo> nestScrollableNodes_; // Scrollable nodes, like scroll.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
+    float lastControlDistance_ = 0.f;
+    float lastScrollableNodeOffset_ = 0.f;
 };
 
 } // namespace OHOS::Ace::NG

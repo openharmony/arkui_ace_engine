@@ -465,6 +465,7 @@ public:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
     void HandleTouchUp();
+    void ClearRecoveryList();
 
     void SetEnableDragBar(bool enabled)
     {
@@ -489,6 +490,10 @@ public:
     {
         return isInDividerDrag_;
     }
+
+    bool IsPageLevelConfigEnabled(bool considerSize = true);
+    void OnStartOneTransitionAnimation();
+    void OnFinishOneTransitionAnimation();
 
 private:
     void FireOnNewParam(const RefPtr<UINode>& uiNode);
@@ -594,6 +599,20 @@ private:
     bool IsStandardPage(const RefPtr<UINode>& uiNode) const;
     void UpdateDividerBackgroundColor();
 
+    void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
+    void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& topDestination);
+    std::optional<int32_t> CalcRotateAngleWithDisplayOrientation(
+        DisplayOrientation curOri, DisplayOrientation targetOri);
+    void GetAllNodes(
+        std::vector<RefPtr<NavDestinationNodeBase>>& invisibleNodes,
+        std::vector<RefPtr<NavDestinationNodeBase>>& visibleNodes);
+    void OnAllTransitionAnimationFinish();
+    void UpdateSystemBarConfigForSizeChanged();
+    RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
+    void ShowOrHideSystemBarIfNeeded(bool isShow);
+    bool IsEquivalentToStackMode();
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -650,6 +669,10 @@ private:
     SizeF navigationSize_;
     std::optional<NavBarPosition> preNavBarPosition_;
     bool topFromSingletonMoved_ = false;
+
+    std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
+    int32_t runningTransitionCount_ = 0;
+    bool isTransitionRunning_ = false;
 };
 
 } // namespace OHOS::Ace::NG

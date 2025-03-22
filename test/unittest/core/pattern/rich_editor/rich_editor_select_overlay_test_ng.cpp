@@ -83,20 +83,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnMenuItemAction
- * @tc.desc: test OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnMenuItemAction, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::MOUSE_MENU);
-    EXPECT_NE(richEditorPattern->aiWriteAdapter_, nullptr);
-}
-
-/**
  * @tc.name: OnHandleMoveStart001
  * @tc.desc: test OnHandleMoveStart
  * @tc.type: FUNC

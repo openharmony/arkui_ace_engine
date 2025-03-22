@@ -51,8 +51,7 @@ public:
         if (!hasPosyRange) {
             CalPosyRange();
         }
-        auto& lastParagraph = paragraphs_.back();
-        return lastParagraph.bottomPos - lastParagraph.paragraphStyle.paragraphSpacing.ConvertToPx();
+        return paragraphs_.back().bottomPos;
     }
 
     void CalPosyRange()

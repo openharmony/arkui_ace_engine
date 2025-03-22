@@ -68,7 +68,6 @@ public:
     void FireOnResult(const std::string& result)
     {
         if (onResult_) {
-            TAG_LOGD(AceLogTag::ACE_TEXT, "Data detect result: %{public}s.", result.c_str());
             onResult_(result);
         }
     }

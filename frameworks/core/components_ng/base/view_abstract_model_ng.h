@@ -37,6 +37,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
@@ -1414,9 +1415,9 @@ public:
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
 
-    void SetForegroundEffect(float radius, const SysOptions& sysOptions) override
+    void SetForegroundEffect(float radius) override
     {
-        ViewAbstract::SetForegroundEffect(radius, sysOptions);
+        ViewAbstract::SetForegroundEffect(radius);
     }
 
     void DisableOnClick() override

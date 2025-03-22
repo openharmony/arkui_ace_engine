@@ -241,7 +241,7 @@ void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenu
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    menuItemPattern->SetIsSubMenuShowed (false);
+    menuItemPattern->SetIsSubMenuShowed(false);
 }
 
 void MenuWrapperPattern::HideSubMenu()
@@ -909,9 +909,9 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("MenuPreviewMode", std::to_string(dumpInfo_.menuPreviewMode).c_str());
     json->Put("MenuType", std::to_string(dumpInfo_.menuType).c_str());
     json->Put("EnableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("Offset", dumpInfo_.offset.ToString().c_str());
     json->Put("TargetNode", dumpInfo_.targetNode.c_str());
     json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
-
     json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
     json->Put("MenuWindowRect", dumpInfo_.menuWindowRect.ToString().c_str());
     json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());

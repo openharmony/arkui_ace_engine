@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {

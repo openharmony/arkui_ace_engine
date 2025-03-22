@@ -516,6 +516,12 @@ UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want
     return UIExtensionUsage::EMBEDDED;
 }
 
+void UIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
+}
+
 void UIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -563,10 +569,10 @@ void UIExtensionPattern::OnConnect()
     if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
-    RegisterReplyPageModeCallback();
     NotifyHostWindowMode();
 }
 
@@ -574,6 +580,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
+    RegisterReplyPageModeCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()

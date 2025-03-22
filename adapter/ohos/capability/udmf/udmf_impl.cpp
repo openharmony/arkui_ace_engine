@@ -439,4 +439,150 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringRecord(const RefPtr<UnifiedDat
     }
     return arr;
 }
+
+void UdmfClientImpl::SetTagProperty(const RefPtr<UnifiedData>& unifiedData, const std::string& tag)
+{
+    auto properties = std::make_shared<UDMF::UnifiedDataProperties>();
+    properties->tag = tag;
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    udData->GetUnifiedData()->SetProperties(properties);
+}
+
+std::string UdmfClientImpl::GetPlainTextEntry(const RefPtr<UnifiedData>& unifiedData)
+{
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, std::string());
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), std::string());
+    auto utdId = UDMF::UtdUtils::GetUtdIdFromUtdEnum(UDMF::PLAIN_TEXT);
+    CHECK_NULL_RETURN(udData->GetUnifiedData()->HasType(utdId), std::string());
+    std::string plainTextSum;
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (const auto& record : records) {
+        std::string plainText;
+        auto value = record->GetEntry(utdId);
+        if (std::holds_alternative<std::shared_ptr<UDMF::Object>>(value)) {
+            auto object = std::get<std::shared_ptr<UDMF::Object>>(value);
+            object->GetValue(UDMF::CONTENT, plainText);
+        } else if (std::holds_alternative<std::string>(value)) {
+            plainText = std::get<std::string>(value);
+        }
+        plainTextSum += plainText;
+    }
+
+    if (plainTextSum.empty()) {
+        std::vector<std::string> plains = GetPlainTextRecords(unifiedData);
+        if (!plains.empty()) {
+            plainTextSum = plains[0];
+        }
+    }
+    return plainTextSum;
+}
+
+void UdmfClientImpl::GetHtmlEntry(
+    const RefPtr<UnifiedData>& unifiedData, std::string& htmlContent, std::string& plainContent)
+{
+    CHECK_NULL_VOID(htmlContent.empty() && plainContent.empty());
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto utdId = UDMF::UtdUtils::GetUtdIdFromUtdEnum(UDMF::HTML);
+    CHECK_NULL_VOID(udData->GetUnifiedData()->HasType(utdId));
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        std::string htmlText;
+        std::string plainText;
+        auto value = record->GetEntry(utdId);
+        if (std::holds_alternative<std::shared_ptr<UDMF::Object>>(value)) {
+            auto object = std::get<std::shared_ptr<UDMF::Object>>(value);
+            object->GetValue(UDMF::HTML_CONTENT, htmlText);
+            object->GetValue(UDMF::PLAIN_CONTENT, plainText);
+        }
+        htmlContent += htmlText;
+        plainContent += plainText;
+    }
+
+    if (htmlContent.empty() && plainContent.empty()) {
+        GetHtmlRecord(unifiedData, htmlContent, plainContent);
+    }
+}
+
+void UdmfClientImpl::GetLinkEntry(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description)
+{
+    CHECK_NULL_VOID(url.empty() && description.empty());
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_VOID(udData);
+    CHECK_NULL_VOID(udData->GetUnifiedData());
+    auto utdId = UDMF::UtdUtils::GetUtdIdFromUtdEnum(UDMF::HYPERLINK);
+    CHECK_NULL_VOID(udData->GetUnifiedData()->HasType(utdId));
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        std::string currentUrl;
+        std::string currentDes;
+        auto value = record->GetEntry(utdId);
+        if (std::holds_alternative<std::shared_ptr<UDMF::Object>>(value)) {
+            auto object = std::get<std::shared_ptr<UDMF::Object>>(value);
+            object->GetValue(UDMF::URL, currentUrl);
+            object->GetValue(UDMF::DESCRIPTION, currentDes);
+        }
+        url += currentUrl;
+        description += currentDes;
+    }
+
+    if (url.empty() && description.empty()) {
+        GetLinkRecord(unifiedData, url, description);
+    }
+}
+
+bool UdmfClientImpl::GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri)
+{
+    CHECK_NULL_RETURN(uri.empty(), false);
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, false);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), false);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    auto typeList = { UDMF::UDType::IMAGE, UDMF::UDType::AUDIO, UDMF::UDType::VIDEO, UDMF::UDType::FILE,
+        UDMF::UDType::FILE_URI };
+    for (auto record : records) {
+        std::string currentUri;
+        for (auto type : typeList) {
+            auto value = record->GetEntry(UDMF::UtdUtils::GetUtdIdFromUtdEnum(type));
+            if (std::holds_alternative<std::shared_ptr<UDMF::Object>>(value)) {
+                auto object = std::get<std::shared_ptr<UDMF::Object>>(value);
+                std::string currentEntryUri;
+                object->GetValue(UDMF::ORI_URI, currentEntryUri);
+                uri.emplace_back(currentEntryUri);
+            }
+        }
+    }
+
+    if (uri.empty()) {
+        GetFileUriRecord(unifiedData, uri);
+    }
+    return true;
+}
+
+std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData)
+{
+    std::vector<uint8_t> arr;
+    auto udData = AceType::DynamicCast<UnifiedDataImpl>(unifiedData);
+    CHECK_NULL_RETURN(udData, arr);
+    CHECK_NULL_RETURN(udData->GetUnifiedData(), arr);
+    auto utdId = UDMF::UtdUtils::GetUtdIdFromUtdEnum(UDMF::APPLICATION_DEFINED_RECORD);
+    CHECK_NULL_RETURN(udData->GetUnifiedData()->HasType(utdId), arr);
+    auto records = udData->GetUnifiedData()->GetRecords();
+    for (auto record : records) {
+        auto value = record->GetEntry(utdId);
+        if (std::holds_alternative<std::shared_ptr<UDMF::Object>>(value)) {
+            auto object = std::get<std::shared_ptr<UDMF::Object>>(value);
+            UDMF::ApplicationDefinedRecord* app = reinterpret_cast<UDMF::ApplicationDefinedRecord*>(object.get());
+            if (app && app->GetApplicationDefinedType() == "OPENHARMONY_STYLED_STRING_UDMF") {
+                arr = app->GetRawData();
+                return arr;
+            }
+        }
+    }
+    return GetSpanStringRecord(unifiedData);
+}
 } // namespace OHOS::Ace

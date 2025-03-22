@@ -43,6 +43,7 @@
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/render/adapter/background_modifier.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
@@ -64,6 +65,7 @@
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -269,6 +271,24 @@ void RosenRenderContext::DetachModifiers()
     }
     if (scaleXYUserModifier_) {
         rsNode_->RemoveModifier(scaleXYUserModifier_);
+    }
+    if (rotationXUserModifier_) {
+        rsNode_->RemoveModifier(rotationXUserModifier_);
+    }
+    if (rotationYUserModifier_) {
+        rsNode_->RemoveModifier(rotationYUserModifier_);
+    }
+    if (rotationZUserModifier_) {
+        rsNode_->RemoveModifier(rotationZUserModifier_);
+    }
+    if (cameraDistanceUserModifier_) {
+        rsNode_->RemoveModifier(cameraDistanceUserModifier_);
+    }
+    if (baseTranslateInXY_) {
+        rsNode_->RemoveModifier(baseTranslateInXY_);
+    }
+    if (baseRotateInZ_) {
+        rsNode_->RemoveModifier(baseRotateInZ_);
     }
     if (pipeline) {
         pipeline->RequestFrame();
@@ -1093,17 +1113,6 @@ void RosenRenderContext::UpdateFrontBlurStyle(
     SetFrontBlurFilter();
 }
 
-void RosenRenderContext::UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions)
-{
-    CHECK_NULL_VOID(rsNode_);
-    const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckSysOptionsForEffectSame(sysOptions)) {
-        return;
-    }
-    groupProperty->propSysOptionsForForeEffect = sysOptions;
-    rsNode_->SetForegroundEffectDisableSystemAdaptation(sysOptions.disableSystemAdaptation);
-}
-
 void RosenRenderContext::ResetBackBlurStyle()
 {
     const auto& groupProperty = GetOrCreateBackground();
@@ -1704,7 +1713,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(parentRenderContext);
@@ -1713,7 +1722,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
             scale[0] *= parentScale.value().x;
             scale[1] *= parentScale.value().y;
         }
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     scaleX = scale[0];
     scaleY = scale[1];
@@ -1825,10 +1834,10 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
     if (NearZero(norm)) {
         norm = 1.0f;
     }
-    // for rosen backend, the rotation angles in the x and y directions should be set to opposite angles
-    rsNode_->SetRotation(-rotate.w * rotate.x / norm, -rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
-    // set camera distance
-    rsNode_->SetCameraDistance(rotate.v);
+    SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -rotate.w * rotate.x / norm);
+    SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, -rotate.w * rotate.y / norm);
+    SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, rotate.w * rotate.z / norm);
+    SetAnimatableProperty<Rosen::RSCameraDistanceModifier, float>(cameraDistanceUserModifier_, rotate.v);
     NotifyHostTransformUpdated();
     RequestNextFrame();
 }
@@ -5197,6 +5206,14 @@ void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
     rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
 }
 
+void RosenRenderContext::SetScreenId(uint64_t screenId)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSourceVirtualDisplayId(screenId);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -5397,11 +5414,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(
                 std::string("blurDisable:")
                     .append(std::to_string(foregroundProperty->propSysOptionsForBlur->disableSystemAdaptation)));
-        }
-        if (foregroundProperty->propSysOptionsForForeEffect.has_value()) {
-            DumpLog::GetInstance().AddDesc(
-                std::string("foreEffectDisable:")
-                    .append(std::to_string(foregroundProperty->propSysOptionsForForeEffect->disableSystemAdaptation)));
         }
         auto&& graphicProps = GetOrCreateGraphics();
         if (graphicProps->propFgDynamicBrightnessOption.has_value()) {
@@ -6215,7 +6227,9 @@ bool RosenRenderContext::IsUniRenderEnabled()
 void RosenRenderContext::SetRotation(float rotationX, float rotationY, float rotationZ)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetRotation(rotationX, rotationY, rotationZ);
+    SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, rotationX);
+    SetAnimatableProperty<Rosen::RSRotationYModifier, float>(rotationYUserModifier_, rotationY);
+    SetAnimatableProperty<Rosen::RSRotationModifier, float>(rotationZUserModifier_, rotationZ);
     NotifyHostTransformUpdated();
 }
 
@@ -6314,6 +6328,44 @@ void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callba
 void RosenRenderContext::SetTransitionUserCallback(TransitionFinishCallback&& callback)
 {
     transitionUserCallback_ = std::move(callback);
+}
+
+OffsetF RosenRenderContext::GetBaseTransalteInXY() const
+{
+    OffsetF offset{ 0.0f, 0.0f };
+    CHECK_NULL_RETURN(baseTranslateInXY_, offset);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<Rosen::Vector2f>>(baseTranslateInXY_->GetProperty());
+    CHECK_NULL_RETURN(property, offset);
+    auto vec2 = property->Get();
+    offset = OffsetF{ vec2[0], vec2[1] };
+    return offset;
+}
+
+void RosenRenderContext::SetBaseTranslateInXY(const OffsetF& offset)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
+        baseTranslateInXY_, { offset.GetX(), offset.GetY() });
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
+}
+
+float RosenRenderContext::GetBaseRotateInZ() const
+{
+    float rotate = 0.0f;
+    CHECK_NULL_RETURN(baseRotateInZ_, rotate);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<float>>(baseRotateInZ_->GetProperty());
+    CHECK_NULL_RETURN(property, rotate);
+    rotate = property->Get();
+    return rotate;
+}
+
+void RosenRenderContext::SetBaseRotateInZ(float degree)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SetAnimatableProperty<Rosen::RSRotationModifier, float>(baseRotateInZ_, degree);
+    ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
+    NotifyHostTransformUpdated();
 }
 
 void RosenRenderContext::SetRectMask(const RectF& rect, const ShapeMaskProperty& property)
@@ -6424,12 +6476,12 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
     CHECK_NULL_VOID(geometryNode);
     AdjustPaintRect();
     if (!SystemProperties::GetPixelRoundEnabled()) {
-        //isRound is the switch of pixelRound of lower version
+        // isRound is the switch of pixelRound of lower version
         isRound = false;
-        //flag is the switch of pixelRound of upper version
+        // flag is the switch of pixelRound of upper version
         flag = NO_FORCE_ROUND;
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         OnePixelRounding(flag);
     } else {
         if (isRound && flag == 0) {

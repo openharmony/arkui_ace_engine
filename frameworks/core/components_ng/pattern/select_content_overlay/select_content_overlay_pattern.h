@@ -41,6 +41,7 @@ public:
     void UpdateSelectArea(const RectF& selectArea) override;
     void SetHandleCircleIsShow(bool isFirst, bool isShow);
     void SetIsHandleLineShow(bool isShow);
+    void UpdateMenuAccessibility(bool menuIsShow);
 
 protected:
     void CheckHandleReverse() override;

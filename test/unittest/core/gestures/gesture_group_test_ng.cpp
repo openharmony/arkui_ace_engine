@@ -46,7 +46,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -54,38 +54,38 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest001, TestSize.Level1)
      * @tc.steps: case1: needUpdateChild is false
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.OnBeginGestureReferee(0, false);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->OnBeginGestureReferee(0, false);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call OnBeginGestureReferee function and compare result.
      * @tc.steps: case2: needUpdateChild is true, recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.OnBeginGestureReferee(0, true);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call OnBeginGestureReferee function and compare result.
      * @tc.steps: case3: needUpdateChild is true, recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.OnBeginGestureReferee(0, true);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call OnBeginGestureReferee function and compare result.
      * @tc.steps: case4: needUpdateChild is true, recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnBeginGestureReferee(0, true);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnBeginGestureReferee(0, true);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -99,7 +99,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest001, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -107,28 +107,28 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest001, TestSize.Level1)
      * @tc.steps: case1: recognizers_ is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -142,7 +142,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest002, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     TouchEvent touchEventStart;
     touchEventStart.id = 0;
@@ -161,38 +161,38 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest002, TestSize.Level1)
      * @tc.steps: case1: recognizers_ is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(exclusiveRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(exclusiveRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -206,7 +206,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest003, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     TouchEvent touchEventStart;
     touchEventStart.id = 0;
@@ -220,73 +220,73 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest003, TestSize.Level1)
      * @tc.steps: case1: recognizers_ is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::READY;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::DETECTING;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -300,7 +300,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest005, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     TouchEvent touchEventStart;
     touchEventStart.id = 0;
@@ -327,38 +327,38 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupCheckStatesTest005, TestSize.Level1)
      * @tc.steps: case1: recognizers_ is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call CheckStates function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(exclusiveRecognizerPtr);
-    exclusiveRecognizer.CheckStates(0);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(exclusiveRecognizerPtr);
+    exclusiveRecognizer->CheckStates(0);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -372,7 +372,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupOnResetStatusTest001, TestSize.Level
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -380,32 +380,32 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupOnResetStatusTest001, TestSize.Level
      * @tc.steps: case1: recognizers_ is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.remainChildOnResetStatus_ = true;
-    exclusiveRecognizer.OnResetStatus();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->remainChildOnResetStatus_ = true;
+    exclusiveRecognizer->OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call OnResetStatus function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.remainChildOnResetStatus_ = false;
-    exclusiveRecognizer.OnResetStatus();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    exclusiveRecognizer->remainChildOnResetStatus_ = false;
+    exclusiveRecognizer->OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call OnResetStatus function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.remainChildOnResetStatus_ = false;
-    exclusiveRecognizer.OnResetStatus();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->remainChildOnResetStatus_ = false;
+    exclusiveRecognizer->OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 }
 
 /**
@@ -419,7 +419,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::list<RefPtr<NGGestureRecognizer>> recognizersInput = {};
 
@@ -428,8 +428,8 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.AddChildren(recognizersInput);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->AddChildren(recognizersInput);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call OnFinishGestureReferee function and compare result.
@@ -437,8 +437,8 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest003, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     recognizersInput = { nullptr, clickRecognizerPtr, clickRecognizerPtr };
-    exclusiveRecognizer.AddChildren(recognizersInput);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->AddChildren(recognizersInput);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -452,7 +452,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest004, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -460,17 +460,17 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest004, TestSize.Level1)
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.Existed(clickRecognizerPtr);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->Existed(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call Existed function and compare result.
      * @tc.steps: case2: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.Existed(clickRecognizerPtr);
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->Existed(clickRecognizerPtr);
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -484,7 +484,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest005, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -492,38 +492,38 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest005, TestSize.Level1)
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case3: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case4: recognizers has ptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.remainChildOnResetStatus_ = true;
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->remainChildOnResetStatus_ = true;
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -537,17 +537,17 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest006, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.GetGroupRecognizer();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->GetGroupRecognizer();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 }
 
 /**
@@ -561,7 +561,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest007, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -569,23 +569,23 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest007, TestSize.Level1)
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -599,7 +599,7 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupForceRejectTest001, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers2 = {};
     RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers2);
@@ -609,64 +609,64 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupForceRejectTest001, TestSize.Level1)
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(exclusiveRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(exclusiveRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::DETECTING;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    exclusiveRecognizer.ForceReject();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    exclusiveRecognizer->ForceReject();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 1);
 }
 
 /**
@@ -680,17 +680,17 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest008, TestSize.Level1)
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.OnFlushTouchEventsBegin();
-    exclusiveRecognizer.OnFlushTouchEventsEnd();
-    bool result = exclusiveRecognizer.CheckAllFailed();
-    EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 0);
+    exclusiveRecognizer->OnFlushTouchEventsBegin();
+    exclusiveRecognizer->OnFlushTouchEventsEnd();
+    bool result = exclusiveRecognizer->CheckAllFailed();
+    EXPECT_EQ(exclusiveRecognizer->recognizers_.size(), 0);
     EXPECT_TRUE(result);
 }
 

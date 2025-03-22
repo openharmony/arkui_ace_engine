@@ -856,4 +856,19 @@ void SelectModelNG::ResetBackgroundColor()
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SelectPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
     ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
 }
+
+void SelectModelNG::SetMenuOutline(const MenuParam& menuParam)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
+}
+
+void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam);
+}
 } // namespace OHOS::Ace::NG

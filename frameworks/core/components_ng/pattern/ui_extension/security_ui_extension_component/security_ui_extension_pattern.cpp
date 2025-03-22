@@ -253,6 +253,12 @@ void SecurityUIExtensionPattern::RemovePlaceholderNode()
     }
 }
 
+void SecurityUIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
+}
+
 void SecurityUIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -296,6 +302,7 @@ void SecurityUIExtensionPattern::OnConnect()
         uiExtensionManager->RegisterSecurityUIExtensionInFocus(
             WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     InitBusinessDataHandleCallback();
 }

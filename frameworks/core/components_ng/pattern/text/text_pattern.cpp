@@ -1715,7 +1715,8 @@ void TextPattern::RecoverCopyOption()
         CloseSelectOverlay();
         ResetSelection();
     }
-    if (children.empty() && CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
+    if ((children.empty() || isSpanStringMode_) &&
+        CanStartAITask() && !dataDetectorAdapter_->aiDetectInitialized_) {
         dataDetectorAdapter_->textForAI_ = textForDisplay_;
         dataDetectorAdapter_->StartAITask();
     }
@@ -2951,7 +2952,7 @@ void TextPattern::LogForFormRender(const std::string& logTag)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->IsFormRender() && !IsSetObscured()) {
+    if (pipeline->IsFormRender() && !IsSetObscured() && !IsSensitiveEnalbe()) {
         auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         auto content = textLayoutProperty->GetContent().value_or(u"");
@@ -3924,7 +3925,7 @@ void TextPattern::DumpInfo()
     auto nowTime = GetSystemTimestamp();
     dumpLog.AddDesc(std::string("frameRecord: ").append(frameRecord_));
     dumpLog.AddDesc(std::string("time: ").append(std::to_string(nowTime)));
-    if (!IsSetObscured()) {
+    if (!IsSetObscured() && !IsSensitiveEnalbe()) {
         dumpLog.AddDesc(std::string("Content: ").append(
             UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "))));
     }
@@ -4156,7 +4157,7 @@ void TextPattern::DumpTextEngineInfo()
                             .append(std::to_string(pManager_->GetLongestLineWithIndent())));
     }
     dumpLog.AddDesc(std::string("spans size :").append(std::to_string(spans_.size())));
-    if (!IsSetObscured()) {
+    if (!IsSetObscured() && !IsSensitiveEnalbe()) {
         DumpParagraphsInfo();
     }
 }
@@ -5370,7 +5371,7 @@ void TextPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(textLayoutProp);
     auto nowTime = GetSystemTimestamp();
     json->Put("time", std::to_string(nowTime).c_str());
-    if (!IsSetObscured()) {
+    if (!IsSetObscured() && !IsSensitiveEnalbe()) {
         json->Put("Content", UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str());
     }
     json->Put("ConteFontColornt",

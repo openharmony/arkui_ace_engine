@@ -178,7 +178,7 @@ void NativeRichEditorController::ParseTextStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = textStyle.lineHeight;
     nativeTextStyle.letterSpacing = textStyle.letterSpacing;
@@ -225,7 +225,7 @@ void NativeRichEditorController::ParseTypingStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = typingStyle.updateLineHeight.value().ConvertToVp();
     nativeTextStyle.letterSpacing = typingStyle.updateLetterSpacing.value().ConvertToVp();
@@ -474,7 +474,7 @@ void NativeRichEditorController::ParseRichEditorAbstractTextStyleResult(
         index++;
     }
     nativeTextStyle.textShadow = nativbeTextShadow;
-    nativeTextStyle.textShadowSize = textShadows.size();
+    nativeTextStyle.textShadowSize = static_cast<int64_t>(textShadows.size());
     nativeTextStyle.free = NativeShaowOptionsFree;
     nativeTextStyle.lineHeight = spanObject.GetTextStyle().lineHeight;
     nativeTextStyle.letterSpacing = spanObject.GetTextStyle().letterSpacing;

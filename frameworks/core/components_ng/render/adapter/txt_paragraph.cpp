@@ -67,7 +67,7 @@ void TxtParagraph::CreateBuilder()
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.isEndAddParagraphSpacing = IsEndAddParagraphSpacing() || paraStyle_.isEndAddParagraphSpacing;
+    style.isEndAddParagraphSpacing = paraStyle_.isEndAddParagraphSpacing;
     style.paragraphSpacing = paraStyle_.paragraphSpacing.ConvertToPx();
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin

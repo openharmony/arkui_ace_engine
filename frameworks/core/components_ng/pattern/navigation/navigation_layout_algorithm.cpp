@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -544,7 +545,7 @@ void NavigationLayoutAlgorithm::SizeCalculationStack(const RefPtr<NavigationGrou
 void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize)
 {
-    auto navBarNode = hostNode->GetNavBarNode();
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     auto index = hostNode->GetChildIndexById(navBarNode->GetId());
     auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
@@ -557,7 +558,8 @@ void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, cons
     } else {
         constraint.selfIdealSize = OptionalSizeF(navBarSize.Width(), navBarSize.Height());
     }
-    navBarWrapper->Measure(constraint);
+    auto adjustConstraint = navBarNode->AdjustLayoutConstarintIfNeeded(constraint);
+    navBarWrapper->Measure(adjustConstraint);
     realNavBarHeight_ = navBarWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 

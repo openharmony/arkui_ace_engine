@@ -152,6 +152,7 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
+constexpr int32_t TIPS_TIME_MAX = 1000;    // ms
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -599,6 +600,7 @@ OverlayManager::~OverlayManager()
     popupMap_.clear();
     tipsInfoList_.clear();
     tipsEnterAndLeaveInfoMap_.clear();
+    tipsStatusList_.clear();
 }
 
 void OverlayManager::UpdateContextMenuDisappearPosition(
@@ -1640,13 +1642,17 @@ void OverlayManager::ShowTips(
     int32_t targetId, const PopupInfo& popupInfo, int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
 {
     UpdateTipsEnterAndLeaveInfoBool(targetId);
-
     auto duration = appearingTime;
     if (tipsInfoList_.empty()) {
+        UpdateTipsStatus(targetId, false);
         duration = appearingTime;
     } else {
+        UpdateTipsStatus(targetId, true);
         UpdatePreviousDisappearingTime(targetId);
         duration = appearingTimeWithContinuousOperation;
+    }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
     }
 
     auto tipsId = targetId;
@@ -1659,6 +1665,9 @@ void OverlayManager::ShowTips(
         auto isExecuteTask = overlayManager->GetBoolFromTipsEnterAndLeaveInfo(tipsId, times);
         if (!isExecuteTask) {
             overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
+            return;
+        }
+        if (!overlayManager->GetPopupInfo(tipsId).isTips && overlayManager->GetPopupInfo(tipsId).popupNode) {
             return;
         }
         overlayManager->UpdateTipsInfo(tipsId, popupInfo);
@@ -1675,6 +1684,13 @@ void OverlayManager::ShowTips(
 void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int32_t disappearingTime)
 {
     auto duration = disappearingTime;
+    auto isInContinus = GetTipsStatus(targetId);
+    if (isInContinus) {
+        duration = popupInfo.disappearingTimeWithContinuousOperation;
+    }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
+    }
     UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto tipsId = targetId;
     UpdateTipsEnterAndLeaveInfo(tipsId);
@@ -1689,7 +1705,10 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
             return;
         }
         overlayManager->EraseTipsInfo(tipsId);
-        overlayManager->HidePopup(tipsId, popupInfo);
+        overlayManager->EraseTipsStatus(tipsId);
+        if (popupInfo.isTips) {
+            overlayManager->HidePopup(tipsId, popupInfo);
+        }
         overlayManager->EraseTipsEnterAndLeaveInfo(tipsId, times);
     };
     auto context = PipelineContext::GetCurrentContext();
@@ -1771,10 +1790,12 @@ void OverlayManager::EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times)
 void OverlayManager::UpdatePreviousDisappearingTime(int32_t targetId)
 {
     auto previousTargetId = tipsInfoList_.back().first;
-    if (previousTargetId != targetId) {
+    auto previousIsInContinus = GetTipsStatus(previousTargetId);
+    if (previousTargetId != targetId && !previousIsInContinus) {
         auto previousTipsInfo = GetTipsInfo(previousTargetId);
         auto previousDisappearingTime = previousTipsInfo.disappearingTimeWithContinuousOperation;
         UpdateTipsEnterAndLeaveInfoBool(previousTargetId);
+        UpdateTipsStatus(previousTargetId, true);
         HideTips(previousTargetId, previousTipsInfo, previousDisappearingTime);
     }
 }
@@ -1815,6 +1836,44 @@ PopupInfo OverlayManager::GetTipsInfo(int32_t targetId)
         }
     }
     return {};
+}
+
+void OverlayManager::UpdateTipsStatus(int32_t targetId, bool isInContinus)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            it = tipsStatusList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    tipsStatusList_.emplace_back(targetId, isInContinus);
+}
+
+void OverlayManager::EraseTipsStatus(int32_t targetId)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            it = tipsStatusList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+bool OverlayManager::GetTipsStatus(int32_t targetId)
+{
+    auto it = tipsStatusList_.begin();
+    while (it != tipsStatusList_.end()) {
+        if (it->first == targetId) {
+            return it->second;
+        } else {
+            ++it;
+        }
+    }
+    return false;
 }
 
 bool OverlayManager::UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo)
@@ -2650,6 +2709,7 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     Maskarg.onDidAppear = dialogProps.onDidAppear;
     Maskarg.onWillDisappear = dialogProps.onWillDisappear;
     Maskarg.onDidDisappear = dialogProps.onDidDisappear;
+    Maskarg.focusable = dialogProps.focusable;
     return ShowDialog(Maskarg, nullptr, false);
 }
 
@@ -7493,13 +7553,13 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapBadgeNode() const
     CHECK_NULL_RETURN(column, nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(column->GetLastChild());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    if (frameNode->GetTag() == V2::TEXT_ETS_TAG) {
-        return frameNode;
-    }
     auto textRowNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
     CHECK_NULL_RETURN(textRowNode, nullptr);
     auto textNode = AceType::DynamicCast<FrameNode>(textRowNode->GetLastChild());
     CHECK_NULL_RETURN(textNode, nullptr);
+    if (textNode->GetTag() != V2::TEXT_ETS_TAG) {
+        return nullptr;
+    }
     return textNode;
 }
 

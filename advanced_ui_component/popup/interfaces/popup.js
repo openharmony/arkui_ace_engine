@@ -23,12 +23,10 @@ const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
 const componentUtils = requireNapi('arkui.componentUtils');
 const Configuration = requireNapi('configuration');
-
-const o = 10003;
-const t = 10002;
-const u = 10007;
-
-export const a1 = {
+const a1 = 10003;
+const b1 = 10002;
+const c1 = 10007;
+export const l1 = {
     icon: {
         size: { width: 32, height: 32 },
         margin: {
@@ -62,7 +60,7 @@ export const a1 = {
         },
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        d2: {
+        s2: {
             top: LengthMetrics.vp(8),
             bottom: LengthMetrics.vp(8),
             start: LengthMetrics.vp(8),
@@ -70,16 +68,16 @@ export const a1 = {
         },
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
-        e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        t2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontWeight: FontWeight.Regular,
-        f2: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        u2: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
-    g2: {
+    z2: {
         padding: {
             top: LengthMetrics.vp(12),
             bottom: LengthMetrics.vp(12),
@@ -87,7 +85,7 @@ export const a1 = {
             end: LengthMetrics.vp(12)
         },
     },
-    h2: {
+    a3: {
         size: { width: 22, height: 22 },
         padding: {
             top: LengthMetrics.vp(2),
@@ -103,21 +101,21 @@ export const a1 = {
         },
         symbolStyle: new SymbolGlyphModifier({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        e2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        t2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        i2: '18vp',
-        e1: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        v2: '18vp',
+        w2: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
 };
-const b1 = () => {
+const m1 = () => {
 };
-const c1 = 400;
+const n1 = 400;
 export function Popup(options, parent = null) {
-    const c2 = options;
+    const r2 = options;
     {
-        (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, options = c2) => {
+        (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, options = r2) => {
             if (isInitialRender) {
-                let componentCall = new d1(parent ? parent : this, {
+                let componentCall = new o1(parent ? parent : this, {
                     icon: options.icon,
                     title: options.title,
                     message: options.message,
@@ -126,7 +124,7 @@ export function Popup(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 209, j2: 3 });
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/Popup.ets", line: 209, b3: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -156,27 +154,27 @@ export function Popup(options, parent = null) {
         }, { name: "PopupComponent" });
     }
 }
-function i(dimension, b2) {
-    const matches = dimension.match(b2);
+function m(o2, q2) {
+    const matches = o2.match(q2);
     if (!matches || matches.length < 3) {
         return false;
     }
     const value = Number.parseFloat(matches[1]);
     return value >= 0;
 }
-function j(dimension) {
-    return i(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+function o(n2) {
+    return m(n2, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
 }
-function m(context, value) {
+function t(context, value) {
     const resourceManager = context?.resourceManager;
     if (value === void (0) || value === null || resourceManager === void (0)) {
         return false;
     }
-    if (value.type !== o && value.type !== u &&
-        value.type !== t) {
+    if (value.type !== a1 && value.type !== c1 &&
+        value.type !== b1) {
         return false;
     }
-    if (value.type === u || value.type === t) {
+    if (value.type === c1 || value.type === b1) {
         if (resourceManager.getNumber(value.id) >= 0) {
             return true;
         }
@@ -184,21 +182,21 @@ function m(context, value) {
             return false;
         }
     }
-    if (value.type === o && !j(resourceManager.getStringSync(value.id))) {
+    if (value.type === a1 && !o(resourceManager.getStringSync(value.id))) {
         return false;
     }
     else {
         return true;
     }
 }
-export class d1 extends ViewPU {
+export class o1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.onClose = b1;
-        this.theme = a1;
+        this.onClose = m1;
+        this.theme = l1;
         this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
         this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, "maxWidth");
         this.__messageMaxWidth = new SynchedPropertySimpleOneWayPU(params.messageMaxWidth, this, "messageMaxWidth");
@@ -486,7 +484,7 @@ export class d1 extends ViewPU {
     getTitlePadding() {
         return {
             start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
-            end: this.theme.h2.margin.end
+            end: this.theme.a3.margin.end
         };
     }
     getTitleMargin() {
@@ -505,25 +503,25 @@ export class d1 extends ViewPU {
         return this.title?.fontColor ?? this.theme.title.fontColor;
     }
     getCloseButtonWidth() {
-        return this.theme.h2.size.width;
+        return this.theme.a3.size.width;
     }
     getCloseButtonHeight() {
-        return this.theme.h2.size.height;
+        return this.theme.a3.size.height;
     }
     getCloseButtonFillColor() {
         return this.closeButtonFillColorWithTheme;
     }
     getCloseButtonHoverColor() {
-        return this.theme.h2.e2;
+        return this.theme.a3.t2;
     }
     getCloseButtonBackgroundColor() {
-        return this.theme.h2.backgroundColor;
+        return this.theme.a3.backgroundColor;
     }
     getCloseButtonPadding() {
-        return this.theme.h2.padding;
+        return this.theme.a3.padding;
     }
     getCloseButtonSymbolSize() {
-        return this.theme.h2.i2;
+        return this.theme.a3.v2;
     }
     getMessageText() {
         return this.message.text;
@@ -541,7 +539,7 @@ export class d1 extends ViewPU {
                 fontColor = this.theme.message.fontColor;
             }
             else {
-                fontColor = this.theme.message.f2;
+                fontColor = this.theme.message.u2;
             }
         }
         return fontColor;
@@ -554,64 +552,65 @@ export class d1 extends ViewPU {
         else {
             padding = {
                 start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
-                end: LengthMetrics.vp(this.theme.h2.margin.end.value)
+                end: LengthMetrics.vp(this.theme.a3.margin.end.value)
             };
         }
         return padding;
     }
     getMessageMaxWeight() {
-        let z1 = undefined;
-        let a2 = undefined;
+        let l2 = undefined;
+        let m2 = undefined;
         try {
-            a2 = display.getDefaultDisplaySync();
+            m2 = display.getDefaultDisplaySync();
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
-            return z1 = 400;
+            return l2 = 400;
         }
         if (this.showClose || this.showClose === void (0)) {
             if (this.messageMaxWidth != undefined) {
-                if (this.maxWidth != undefined && this.maxWidth > px2vp(a2.width)) {
-                    z1 = px2vp(a2.width);
+                if (this.maxWidth != undefined && this.maxWidth > px2vp(m2.width)) {
+                    l2 = px2vp(m2.width);
                 }
                 else {
-                    z1 = this.messageMaxWidth;
+                    l2 = this.messageMaxWidth;
                 }
             }
             else {
-                if (a2.width != 0) {
-                    z1 = px2vp(a2.width);
+                if (m2.width != 0) {
+                    l2 = px2vp(m2.width);
                 }
                 else {
-                    z1 = -1;
+                    l2 = -1;
                 }
             }
-            z1 -= (this.theme.g2.padding.start.value - (this.theme.button.margin.end.value / 2));
-            z1 -= this.theme.g2.padding.end.value;
-            z1 -= this.theme.button.margin.start.value / 2;
-            z1 -= this.getCloseButtonWidth();
+            l2 -= (this.theme.z2.padding.start.value - (this.theme.button.margin.end.value / 2));
+            l2 -= this.theme.z2.padding.end.value;
+            l2 -= this.theme.button.margin.start.value / 2;
+            l2 -= this.theme.a3.margin.end.value;
+            l2 -= this.getCloseButtonWidth();
         }
-        return z1;
+        return l2;
     }
     getMessageFontWeight() {
         return this.theme.message.fontWeight;
     }
     getButtonMargin() {
         return {
-            top: LengthMetrics.vp(this.theme.button.d2.top.value / 2 - 4),
-            bottom: LengthMetrics.vp(this.theme.button.d2.bottom.value / 2 - 4),
+            top: LengthMetrics.vp(this.theme.button.s2.top.value / 2 - 4),
+            bottom: LengthMetrics.vp(this.theme.button.s2.bottom.value / 2 - 4),
             start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
             end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
         };
     }
     getButtonTextMargin() {
-        return { top: LengthMetrics.vp(this.theme.button.d2.bottom.value) };
+        return { top: LengthMetrics.vp(this.theme.button.s2.bottom.value) };
     }
     getButtonTextPadding() {
         return this.theme.button.padding;
     }
     getButtonHoverColor() {
-        return this.theme.button.e2;
+        return this.theme.button.t2;
     }
     getButtonBackgroundColor() {
         return this.theme.button.backgroundColor;
@@ -641,12 +640,12 @@ export class d1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getWindowsPadding() {
-        let top = this.theme.g2.padding.top;
-        let bottom = LengthMetrics.vp(this.theme.g2.padding.bottom.value - (this.theme.button.d2.bottom.value / 2));
-        let start = LengthMetrics.vp(this.theme.g2.padding.start.value - (this.theme.button.margin.end.value / 2));
-        let end = this.theme.g2.padding.end;
-        let w1 = this.toVp(this.maxWidth);
-        if (w1 === 0) {
+        let top = this.theme.z2.padding.top;
+        let bottom = LengthMetrics.vp(this.theme.z2.padding.bottom.value - (this.theme.button.s2.bottom.value / 2));
+        let start = LengthMetrics.vp(this.theme.z2.padding.start.value - (this.theme.button.margin.end.value / 2));
+        let end = this.theme.z2.padding.end;
+        let k2 = this.toVp(this.maxWidth);
+        if (k2 === 0) {
             start = LengthMetrics.vp(0);
             end = LengthMetrics.vp(0);
         }
@@ -661,38 +660,38 @@ export class d1 extends ViewPU {
         this.theme.title.fontColor = theme.colors.fontPrimary;
         this.theme.button.fontColor = theme.colors.fontEmphasize;
         this.theme.message.fontColor = theme.colors.fontSecondary;
-        this.theme.message.f2 = theme.colors.fontPrimary;
+        this.theme.message.u2 = theme.colors.fontPrimary;
         this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
     }
     aboutToAppear() {
-        this.listener.on("change", (v1) => {
-            this.currentScreenStatus = v1.matches;
+        this.listener.on("change", (j2) => {
+            this.currentScreenStatus = j2.matches;
         });
     }
     aboutToDisappear() {
         this.listener.off("change");
     }
     getScrollMaxHeight() {
-        let u1 = undefined;
+        let i2 = undefined;
         if (this.currentScreenStatus !== this.beforeScreenStatus) {
             this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
-            return u1;
+            return i2;
         }
-        u1 = px2vp(componentUtils.getRectangleById('applyContent').size?.height);
-        u1 -= this.titleHeight;
-        u1 -= this.buttonHeight;
-        u1 -= this.theme.g2.padding.top.value;
-        u1 -= (this.theme.button.d2.bottom.value / 2);
-        u1 -= this.theme.title.margin.bottom.value;
-        u1 -= (this.theme.g2.padding.bottom.value -
-            (this.theme.button.d2.bottom.value / 2));
-        if (Math.floor(this.textHeight) > Math.floor(u1 + 1)) {
-            return u1;
+        i2 = px2vp(componentUtils.getRectangleById('applyContent').size?.height);
+        i2 -= this.titleHeight;
+        i2 -= this.buttonHeight;
+        i2 -= this.theme.z2.padding.top.value;
+        i2 -= (this.theme.button.s2.bottom.value / 2);
+        i2 -= this.theme.title.margin.bottom.value;
+        i2 -= (this.theme.z2.padding.bottom.value -
+            (this.theme.button.s2.bottom.value / 2));
+        if (Math.floor(this.textHeight) > Math.floor(i2 + 1)) {
+            return i2;
         }
         else {
-            u1 = undefined;
-            return u1;
+            i2 = undefined;
+            return i2;
         }
     }
     getLayoutWeight() {
@@ -720,13 +719,13 @@ export class d1 extends ViewPU {
             }
         }
         catch (error) {
-            return c1;
+            return n1;
         }
     }
     toVp(value) {
-        let q1 = undefined;
+        let f2 = undefined;
         try {
-            q1 = display.getDefaultDisplaySync();
+            f2 = display.getDefaultDisplaySync();
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
@@ -740,19 +739,19 @@ export class d1 extends ViewPU {
                 return value;
             case 'object':
                 try {
-                    let t1 = this.resourceToVp(value);
-                    if (t1 === 0 &&
-                        !m(getContext(this), value)) {
+                    let h2 = this.resourceToVp(value);
+                    if (h2 === 0 &&
+                        !t(getContext(this), value)) {
                         return Number.NEGATIVE_INFINITY;
                     }
-                    return t1;
+                    return h2;
                 }
                 catch (error) {
                     return Number.NEGATIVE_INFINITY;
                 }
             case 'string':
-                let s1 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
-                let matches = value.match(s1);
+                let g2 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+                let matches = value.match(g2);
                 if (!matches) {
                     return Number.NEGATIVE_INFINITY;
                 }
@@ -769,7 +768,7 @@ export class d1 extends ViewPU {
                         length = px2vp(lpx2px(length));
                         break;
                     case '%':
-                        length = length / 100 * px2vp(q1.width);
+                        length = length / 100 * px2vp(f2.width);
                         break;
                     case 'vp':
                         break;
@@ -782,58 +781,58 @@ export class d1 extends ViewPU {
         }
     }
     getApplyMaxSize() {
-        let l1 = undefined;
-        let m1 = undefined;
-        let n1 = undefined;
-        let o1 = undefined;
-        let p1 = 400;
+        let a2 = undefined;
+        let b2 = undefined;
+        let c2 = undefined;
+        let d2 = undefined;
+        let e2 = 400;
         try {
-            o1 = display.getDefaultDisplaySync();
+            d2 = display.getDefaultDisplaySync();
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
             this.messageMaxWeight = 400;
-            return n1 = { maxWidth: 400, maxHeight: 480 };
+            return c2 = { maxWidth: 400, maxHeight: 480 };
         }
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-                p1 = this.maxWidth;
+                e2 = this.maxWidth;
             }
             else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
-                p1 = c1;
+                e2 = n1;
             }
             else {
-                p1 = this.toVp(this.maxWidth);
+                e2 = this.toVp(this.maxWidth);
             }
         }
-        if (px2vp(o1.width) > p1) {
-            l1 = p1;
+        if (px2vp(d2.width) > e2) {
+            a2 = e2;
         }
         else {
-            if (o1.width != 0) {
-                l1 = px2vp(o1.width);
+            if (d2.width != 0) {
+                a2 = px2vp(d2.width);
             }
             else {
-                l1 = -1;
+                a2 = -1;
             }
         }
-        if (px2vp(o1.height) > 480) {
-            m1 = 480;
+        if (px2vp(d2.height) > 480) {
+            b2 = 480;
         }
         else {
-            m1 = px2vp(o1.height) - 40 - 40;
+            b2 = px2vp(d2.height) - 40 - 40;
         }
-        n1 = { maxWidth: l1, maxHeight: m1 };
-        this.messageMaxWidth = l1;
+        c2 = { maxWidth: a2, maxHeight: b2 };
+        this.messageMaxWidth = a2;
         this.messageMaxWeight = this.getMessageMaxWeight();
-        return n1;
+        return c2;
     }
     getTitleTextAlign() {
-        let k2 = TextAlign.Start;
+        let z1 = TextAlign.Start;
         if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
-            k2 = TextAlign.End;
+            z1 = TextAlign.End;
         }
-        return k2;
+        return z1;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -844,7 +843,7 @@ export class d1 extends ViewPU {
             Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
             Row.constraintSize(this.getApplyMaxSize());
             Row.key('applyContent');
-            Row.onAreaChange((k1, rect) => {
+            Row.onAreaChange((w1, rect) => {
                 this.applyHeight = rect.height;
             });
         }, Row);
@@ -884,7 +883,7 @@ export class d1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.width("100%");
                         Flex.margin(this.getTitleMargin());
-                        Flex.onAreaChange((j1, rect) => {
+                        Flex.onAreaChange((v1, rect) => {
                             this.titleHeight = rect.height;
                         });
                     }, Flex);
@@ -916,7 +915,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
-                                    Button.accessibilityText(this.theme.h2.e1);
+                                    Button.accessibilityText(this.theme.a3.w2);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -936,7 +935,7 @@ export class d1 extends ViewPU {
                                     SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
                                     SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
                                     SymbolGlyph.direction(this.popupDirection);
-                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.h2.symbolStyle);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.a3.symbolStyle);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -968,7 +967,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((i1, rect) => {
+                        Text.onAreaChange((u1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -979,7 +978,7 @@ export class d1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((h1, rect) => {
+                        Flex.onAreaChange((t1, rect) => {
                             if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
                                 (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
                                 this.buttonHeight = rect.height;
@@ -1097,7 +1096,7 @@ export class d1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Flex.create();
                         Flex.height(0);
-                        Flex.onAreaChange((g1, rect) => {
+                        Flex.onAreaChange((s1, rect) => {
                             this.titleHeight = rect.height;
                         });
                     }, Flex);
@@ -1125,7 +1124,7 @@ export class d1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((f1, rect) => {
+                        Text.onAreaChange((q1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -1143,7 +1142,7 @@ export class d1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
-                                    Button.accessibilityText(this.theme.h2.e1);
+                                    Button.accessibilityText(this.theme.a3.w2);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1163,7 +1162,7 @@ export class d1 extends ViewPU {
                                     SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
                                     SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
                                     SymbolGlyph.direction(this.popupDirection);
-                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.h2.symbolStyle);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.a3.symbolStyle);
                                     SymbolGlyph.focusable(true);
                                     SymbolGlyph.draggable(false);
                                 }, SymbolGlyph);
@@ -1182,7 +1181,7 @@ export class d1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((e1, rect) => {
+                        Flex.onAreaChange((p1, rect) => {
                             if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
                                 (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
                                 this.buttonHeight = rect.height;

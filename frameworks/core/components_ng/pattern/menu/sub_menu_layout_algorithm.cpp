@@ -45,30 +45,36 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         expandingMode == SubMenuExpandingMode::STACK);
     geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
-        auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(parentPattern);
-        auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
-        auto pipelineContext = parentMenuItem->GetContextWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
-                                windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-        OffsetF wrapperOffset;
-        if ((!canExpandCurrentWindow_) && isContainerModal) {
-            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-                newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
-            }
-            auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
-                                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-            wrapperOffset = OffsetF(newOffsetX, newOffsetY);
-        }
-        parentPattern->AddHoverRegions(position + wrapperOffset, bottomRightPoint + wrapperOffset);
+        UpdateHoverRegion(parentMenuItem, position, size);
     }
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
     ClipMenuPath(layoutWrapper);
+}
+
+void SubMenuLayoutAlgorithm::UpdateHoverRegion(
+    RefPtr<FrameNode>& parentMenuItem, const OffsetF& position, const SizeF& size)
+{
+    auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(parentPattern);
+    auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
+    auto pipelineContext = parentMenuItem->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    OffsetF wrapperOffset;
+    if ((!canExpandCurrentWindow_) && isContainerModal) {
+        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
+        }
+        auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
+                          static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        wrapperOffset = OffsetF(newOffsetX, newOffsetY);
+    }
+    parentPattern->AddHoverRegions(position + wrapperOffset, bottomRightPoint + wrapperOffset);
 }
 
 OffsetF SubMenuLayoutAlgorithm::GetSubMenuLayoutOffset(LayoutWrapper* layoutWrapper,

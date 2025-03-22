@@ -878,12 +878,13 @@ void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTr
 
 void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType type)
 {
+    auto outPage = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(outPage);
+    outPage->SetNodeFreeze(false);
     if (animationId_ != animationId) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id is different");
         return;
     }
-    auto outPage = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(outPage);
     outPage->GetEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::EXIT_PUSH && type != PageTransitionType::EXIT_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "current transition type is invalid");
@@ -918,12 +919,13 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
 
 void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType type)
 {
+    auto inPage = AceType::DynamicCast<FrameNode>(GetHost());
+    CHECK_NULL_VOID(inPage);
+    inPage->SetNodeFreeze(false);
     if (animationId_ != animationId) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "animation id in inPage is invalid");
         return;
     }
-    auto inPage = AceType::DynamicCast<FrameNode>(GetHost());
-    CHECK_NULL_VOID(inPage);
     inPage->GetEventHub<EventHub>()->SetEnabled(true);
     if (type != PageTransitionType::ENTER_PUSH && type != PageTransitionType::ENTER_POP) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "inPage transition type is invalid");

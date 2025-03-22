@@ -350,6 +350,9 @@ public:
     void UpdateWindowInfo(AccessibilityWindowInfo& window, const RefPtr<PipelineBase>& context) override;
 
     AccessibilityWorkMode GenerateAccessibilityWorkMode() override;
+    void UpdateAccessibilityNextFocusIdMap(int32_t containerId,
+                                           const std::string& nextFocusInspectorKey,
+                                           int64_t preAccessibilityId) override;
 
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
@@ -714,6 +717,9 @@ private:
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<AccessibilityEvent>> pageIdEventMap_;
+    std::map<int32_t, std::map<std::string, int64_t>> nextFocusMapWithSubWindow_;
+    mutable std::mutex nextFocusMapWithSubWindowMutex_;
+
     AccessibilityParentRectInfo uecRectInfo_;
 };
 

@@ -54,6 +54,9 @@ public:
     static void BindToNestedScrollable(const JSCallbackInfo& info);
     static void SetCustomTransition(const JSCallbackInfo& info);
     static void SetOnNewParam(const JSCallbackInfo& info);
+    static void SetPreferredOrientation(const JSCallbackInfo& info);
+    static void EnableStatusBar(const JSCallbackInfo& info);
+    static void EnableNavigationIndicator(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

@@ -897,6 +897,7 @@ declare class ArkRefreshComponent extends ArkComponent implements RefreshAttribu
     onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this;
     onStateChange(callback: (state: RefreshStatus) => void): this;
     onRefreshing(callback: () => void): this;
+    onOffsetChange(callback: Callback<number>): this;
 }
 declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -961,6 +962,7 @@ declare class ArkSelectComponent extends ArkComponent implements SelectAttribute
     arrowPosition(value: ArrowPosition): this;
     menuAlign(alignType: MenuAlignType, offset?: Offset): this;
     avoidance(mode: AvoidanceMode): this;
+    menuOutline(outline: MenuOutlineOptions): this;
 }
 declare class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

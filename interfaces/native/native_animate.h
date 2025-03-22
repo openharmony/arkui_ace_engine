@@ -262,7 +262,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_RegisterOnFinishCallback(
  * @return Returns the error code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 16
+ * @since 18
  */
 int32_t OH_ArkUI_KeyframeAnimateOption_SetExpectedFrameRate(
     ArkUI_KeyframeAnimateOption* option, ArkUI_ExpectedFrameRateRange* frameRate);
@@ -280,7 +280,7 @@ int32_t OH_ArkUI_KeyframeAnimateOption_GetIterations(ArkUI_KeyframeAnimateOption
  *
  * @param option Indicates the pointer to a keyframe animation configuration.
  * @return Returns the expected frame rate range of the keyframe animation.
- * @since 16
+ * @since 18
  */
 ArkUI_ExpectedFrameRateRange* OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate(ArkUI_KeyframeAnimateOption* option);
 

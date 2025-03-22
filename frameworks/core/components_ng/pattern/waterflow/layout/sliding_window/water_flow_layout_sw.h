@@ -196,7 +196,8 @@ private:
     // convert FlowItem's index to children node index.
     inline int32_t nodeIdx(int32_t idx) const;
 
-    void MeasureLazyChild(int32_t startIdx, int32_t endIdx) const override;
+    void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) const override;
+    void MeasureLazyChild(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const;
 
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;

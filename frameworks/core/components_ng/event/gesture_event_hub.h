@@ -37,6 +37,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/event/pointer_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components/common/properties/placement.h"
 
 namespace OHOS::Ace {
 struct DragNotifyMsg;
@@ -93,8 +94,19 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> imageNode;
     RefPtr<FrameNode> relativeContainerNode { nullptr };
     RefPtr<FrameNode> menuPreviewNode { nullptr };
-    RefPtr<FrameNode> textNode { nullptr };
+    RefPtr<FrameNode> textRowNode { nullptr };
     RefPtr<FrameNode> gatherNode { nullptr };
+    RefPtr<FrameNode> menuNode { nullptr };
+    bool hasTransition = false;
+    // for menu follow animation
+    float menuPositionLeft = 0.0f;
+    float menuPositionTop = 0.0f;
+    float menuPositionRight = 0.0f;
+    float menuPositionBottom = 0.0f;
+    // for menu follow animations
+    Placement menuPosition = Placement::NONE;
+    RectF menuRect;
+    RectF frameNodeRect;
     RectF menuPreviewRect;
     RectF dragPreviewRect;
     BorderRadiusProperty borderRadius = BorderRadiusProperty(0.0_vp);
@@ -172,6 +184,7 @@ public:
     void RemoveTouchEvent(const RefPtr<TouchEventImpl>& touchEvent);
     void SetFocusClickEvent(GestureEventFunc&& clickEvent);
     bool IsClickable() const;
+    bool IsComponentClickable() const;
     bool IsUserClickable() const;
     bool IsAccessibilityClickable();
     bool IsAccessibilityLongClickable();
@@ -381,7 +394,9 @@ private:
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void PrepareDragStartInfo(
-        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data);
+        RefPtr<PipelineContext>& pipeline, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
+    void UpdateMenuNode(
+        const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
         const PreparedInfoForDrag& dragInfoData);
@@ -405,7 +420,7 @@ private:
         int32_t& exclusiveIndex);
 
     void UpdateNodePositionBeforeStartAnimation(const RefPtr<FrameNode>& frameNode,
-        PreparedInfoForDrag& data, const OffsetF& subWindowOffset);
+        PreparedInfoForDrag& data);
 
     WeakPtr<EventHub> eventHub_;
     RefPtr<ScrollableActuator> scrollableActuator_;

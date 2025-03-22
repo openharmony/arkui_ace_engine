@@ -68,6 +68,9 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 class ModalUIExtensionProxy;
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Rosen {
@@ -370,6 +373,7 @@ private:
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
     AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
+    void ReDispatchWantParams();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
