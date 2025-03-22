@@ -9265,7 +9265,7 @@ void TextFieldPattern::FinishTextPreview()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::FinishTextPreviewOperation()
+void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
 {
     if (!hasPreviewText_) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
@@ -9306,7 +9306,10 @@ void TextFieldPattern::FinishTextPreviewOperation()
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
-    bool isWillChange = FireOnWillChange(changeValueInfo);
+    bool isWillChange = true;
+    if (triggerOnWillChange) {
+        isWillChange = FireOnWillChange(changeValueInfo);
+    }
     if (!isWillChange) {
         RecoverTextValueAndCaret(oldValue, originCaretIndex);
         return;
