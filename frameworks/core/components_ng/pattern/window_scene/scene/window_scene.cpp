@@ -860,8 +860,6 @@ void WindowScene::CleanSnapshot()
         ACE_SCOPED_TRACE("WindowScene::CleanSnapshotWindow");
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
         if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
         }
