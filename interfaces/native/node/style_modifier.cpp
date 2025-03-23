@@ -3820,6 +3820,20 @@ const ArkUI_AttributeItem* GetTabStop(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetClickDistance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setClickDistance(
+        node->uiNodeHandle, item->value[0].f32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetClickDistance(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetClickDistance(node->uiNodeHandle);
+}
+
 const ArkUI_AttributeItem* GetTransition(ArkUI_NodeHandle node)
 {
     g_attributeItem.object = node->transitionOption;
@@ -13546,7 +13560,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetTransition,
         nullptr,
         SetFocusBox,
-        nullptr,
+        SetClickDistance,
         SetTabStop,
         SetBackdropBlur,
     };
@@ -13772,7 +13786,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         nullptr,
         nullptr,
         ResetFocusBox,
-        nullptr,
+        ResetClickDistance,
         ResetTabStop,
         ResetBackdropBlur,
     };

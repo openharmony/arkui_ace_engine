@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 
+#include <limits>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -340,9 +341,10 @@ public:
         surfacePositionChangedCallbackId_ = id;
     }
 
-    void SetOnClickEvent(GestureEventFunc&& onClick)
+    void SetOnClickEvent(GestureEventFunc&& onClick, double distanceThreshold = std::numeric_limits<double>::infinity())
     {
         onClick_ = std::move(onClick);
+        distanceThreshold_ = distanceThreshold;
     }
     virtual void OnColorConfigurationUpdate() override;
 
@@ -959,6 +961,7 @@ private:
 
     OffsetF contentOffset_;
     GestureEventFunc onClick_;
+    double distanceThreshold_ = std::numeric_limits<double>::infinity();
     RefPtr<DragWindow> dragWindow_;
     RefPtr<DragDropProxy> dragDropProxy_;
     std::optional<int32_t> surfaceChangedCallbackId_;

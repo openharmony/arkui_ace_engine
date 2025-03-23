@@ -1395,11 +1395,27 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
         SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     } else {
         clickEventActuator_->SetUserCallback(std::move(clickEvent));
         SetFocusClickEvent(clickEventActuator_->GetClickEvent());
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
         clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    }
+}
+
+void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
+{
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+    } else {
+        auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(distanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
     }
 }
 
@@ -1456,11 +1472,10 @@ void GestureEventHub::SetOnGestureJudgeNativeBegin(GestureJudgeFunc&& gestureJud
     gestureJudgeNativeFunc_ = std::move(gestureJudgeFunc);
 }
 
-void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent, double distanceThreshold)
+void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
 {
     CheckClickActuator();
     clickEventActuator_->AddClickEvent(clickEvent);
-    clickEventActuator_->AddDistanceThreshold(distanceThreshold);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
 }

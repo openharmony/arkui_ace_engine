@@ -1291,6 +1291,14 @@ void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
     focusHub->GetFocusBox().SetStyle(style);
 }
 
+void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetNodeClickDistance(clickDistance);
+}
+
 void ViewAbstract::SetDefaultFocus(bool isSet)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();

@@ -6232,6 +6232,21 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     return frameNode->GetId();
 }
 
+void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double clickDistance = static_cast<double>(valueMargin);
+    ViewAbstract::SetClickDistance(frameNode, clickDistance);
+}
+
+void ResetClickDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClickDistance(frameNode, std::numeric_limits<double>::infinity());
+}
+
 void SetBlendModeByBlender(ArkUINodeHandle node, ArkUINodeHandle blender, ArkUI_Int32 blendApplyTypeValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6562,8 +6577,8 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
         GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
         SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetDisAllowDrop,
-        SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetOnHoverMoveExt, PostTouchEvent,
+        ResetDragPreview, SetFocusBoxStyle, ResetFocusBoxStyle, GetNodeUniqueId, SetClickDistance, ResetClickDistance,
+        SetDisAllowDrop, SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop, SetOnHoverMoveExt, PostTouchEvent,
         CreateClonedTouchEvent, DestroyTouchEvent, SetNodeBackdropBlur, GetNodeBackdropBlur, SetDisableDataPrefetch,
         DispatchKeyEvent };
 

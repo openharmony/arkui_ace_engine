@@ -305,7 +305,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
-
+    void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
 
@@ -342,9 +342,7 @@ public:
 
     void ClearJSFrameNodeOnClick();
     void ClearJSFrameNodeOnTouch();
-
-    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent,
-        double distanceThreshold = std::numeric_limits<double>::infinity());
+    void AddClickEvent(const RefPtr<ClickEvent>& clickEvent);
     void AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent);
 
     void RemoveClickEvent(const RefPtr<ClickEvent>& clickEvent)
