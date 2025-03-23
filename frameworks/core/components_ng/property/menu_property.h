@@ -85,6 +85,8 @@ struct MenuParam {
     std::optional<EffectOption> effectOption;
     HapticFeedbackMode hapticFeedbackMode = HapticFeedbackMode::DISABLED;
     bool disappearScaleToTarget = false;
+    std::optional<NG::BorderWidthProperty> outlineWidth;
+    std::optional<NG::BorderColorProperty> outlineColor;
 };
 
 } // namespace OHOS::Ace::NG

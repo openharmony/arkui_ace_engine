@@ -439,6 +439,7 @@ private:
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
+    void RegisterTransformHintCallback(PipelineContext* context);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -500,6 +501,7 @@ private:
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
     bool needRecoverDisplaySync_ = false;
     bool isNativeImageAnalyzing_ = false;
+    WeakPtr<PipelineContext> initialContext_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

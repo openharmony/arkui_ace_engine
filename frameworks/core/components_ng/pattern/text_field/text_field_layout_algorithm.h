@@ -55,7 +55,7 @@ public:
 
     RefPtr<Paragraph> GetParagraph() const override;
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override;
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+    bool CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
 
     const RectF& GetTextRect() const
@@ -101,7 +101,6 @@ public:
     bool DidExceedMaxLines(const SizeF& maxSize) override;
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
-
 protected:
     static void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const std::vector<std::string>& fontFamilies);
     void CreateParagraph(const TextStyle& textStyle, std::u16string content, bool needObscureText,
@@ -124,16 +123,14 @@ protected:
         const TextStyle& textStyle, const std::u16string& content, const float fontSize) const;
     void GetInlineMeasureItem(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float& inlineIdealHeight);
-    float ConstraintWithMinWidth(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+    float ConstraintWithMinWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
     SizeF GetConstraintSize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper);
+    std::optional<SizeF> InlineMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     SizeF PlaceHolderMeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth = 0.0f);
-    SizeF TextInputMeasureContent(const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper, float imageWidth);
+    SizeF TextInputMeasureContent(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float imageWidth);
     SizeF TextAreaMeasureContent(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     bool AddAdaptFontSizeAndAnimations(TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& layoutProperty,
@@ -167,9 +164,10 @@ protected:
     bool isFontSizeNonPositive_ = false;
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
+
 private:
-    void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
-        LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
+    void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        double& safeBoundary, float& contentWidth);
     static void UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& textStyle, bool isDisabled, bool isTextColorByUser = true);

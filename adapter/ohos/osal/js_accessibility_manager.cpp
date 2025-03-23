@@ -1254,7 +1254,7 @@ void FillElementInfo(int64_t elementId, AccessibilityElementInfo& elementInfo, c
         uiextensionId = unWrapIdPair.first;
     }
 #endif
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
         "start to search elementId: %{public}" PRId64, elementIdUnwrap);
     jsAccessibilityManager->SearchElementInfoByAccessibilityIdNG(
         elementIdUnwrap, mode, elementInfos, context, NG::UI_EXTENSION_OFFSET_MAX);
@@ -1506,6 +1506,10 @@ bool ScrollByOffset(const RefPtr<NG::FrameNode>& curFrameNode)
     auto parentFrameNode = curFrameNode->GetParentFrameNode();
 
     while (parentFrameNode) {
+        auto accessibilityProperty = parentFrameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && !accessibilityProperty->IsUserScrollTriggerable()) {
+            return false;
+        }
         if (ScrollByOffsetToParent(curFrameNode, parentFrameNode)) {
             ret = true;
         }
@@ -2910,7 +2914,7 @@ bool JsAccessibilityManager::SubscribeStateObserver(uint32_t eventType)
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
     Accessibility::RetError ret = instance->SubscribeStateObserver(stateObserver_[eventType], eventType);
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, " the result of SubscribeStateObserver:%{public}d, eventType:%{public}u",
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, " the result of SubscribeStateObserver:%{public}d, eventType:%{public}u",
         ret, eventType);
     return ret == RET_OK;
 }
@@ -3017,7 +3021,7 @@ void JsAccessibilityManager::RegisterGetParentRectHandler()
                 parentRectInfo.scaleY = windowScale;
             }
         }
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Get host rect [scaleX:%{public}f, scaleY:%{public}f].", parentRectInfo.scaleX, parentRectInfo.scaleY);
     };
     SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
@@ -3418,7 +3422,7 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     UpdateElementInfoTreeId(info);
     eventInfo.SetElementInfo(info);
     eventInfo.SetPageId(info.GetPageId());
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
         "send accessibility componentType:%{public}s event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
     return client->SendEvent(eventInfo);
@@ -6238,7 +6242,7 @@ int JsAccessibilityManager::RegisterInteractionOperation(int windowId)
         return 0;
     }
 
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "RegisterInteractionOperation windowId: %{public}u", windowId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "RegisterInteractionOperation windowId: %{public}u", windowId);
     std::shared_ptr<AccessibilitySystemAbilityClient> instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, -1);
     auto interactionOperation = std::make_shared<JsInteractionOperation>(windowId);
@@ -6349,7 +6353,7 @@ void JsAccessibilityManager::NotifyAccessibilitySAStateChange(bool state)
 
 void JsAccessibilityManager::NotifyChildTreeOnRegister(int32_t treeId)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnRegister size: %{public}zu", childTreeCallbackMap_.size());
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "NotifyChildTreeOnRegister size: %{public}zu", childTreeCallbackMap_.size());
     std::lock_guard<std::mutex> lock(childTreeCallbackMapMutex_);
     for (auto &item : childTreeCallbackMap_) {
         if (item.second == nullptr) {
@@ -6475,7 +6479,7 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
         .parentTreeId = parentTreeId,
         .elementId = parentElementId,
     };
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "windowId: %{public}u, parentWindowId: %{public}u, "
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "windowId: %{public}u, parentWindowId: %{public}u, "
                                            "parentTreeId: %{public}d, %{public}" PRId64,
                                            windowId, parentWindowId, parentTreeId, parentElementId);
     Accessibility::RetError retReg = instance->RegisterElementOperator(registration, interactionOperation);
@@ -6658,7 +6662,7 @@ void JsAccessibilityManager::SetPipelineContext(const RefPtr<PipelineBase>& cont
 
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
-    TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d, event type:%{public}u", state,
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d, event type:%{public}u", state,
         eventType_);
 
     // Do not upgrade jsAccessibilityManager on async thread, destructor will cause freeze

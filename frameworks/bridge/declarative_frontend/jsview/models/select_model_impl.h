@@ -75,6 +75,7 @@ public:
     void ResetFontColor() override {};
     void BackgroundColor(const Color& color) override {};
     void ResetBackgroundColor() override {};
+    void SetMenuOutline(const NG::MenuParam& menuParam) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

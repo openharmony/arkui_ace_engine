@@ -574,7 +574,7 @@ export class ArcButton extends ViewV2 {
             Button.rotate({ angle: !this.isUp ? 0 : 180 });
             Button.clipShape(new Path({ commands: this.pathString }));
             Button.backgroundColor(this.btnColor.color);
-            Button.backgroundBlurStyle(this.options.backgroundBlurStyle);
+            Button.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
             Button.shadow(this.getShadow());
         }, Button);
         Button.pop();

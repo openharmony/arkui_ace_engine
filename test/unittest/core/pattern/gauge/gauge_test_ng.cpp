@@ -2016,9 +2016,9 @@ HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest001, TestSize.Level1)
      * @tc.steps: step2. change privacy sensitive and check status.
      */
     pattern_->OnSensitiveStyleChange(false);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), false);
     pattern_->OnSensitiveStyleChange(true);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), true);
 }
 
 /**
@@ -2045,11 +2045,11 @@ HWTEST_F(GaugeTestNg, GaugePrivacySensitiveTest002, TestSize.Level1)
      * @tc.steps: step2. change privacy sensitive false and check status.
      */
     pattern_->OnSensitiveStyleChange(false);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), false);
     /**
      * @tc.steps: step3. change privacy sensitive true and check status.
      */
     pattern_->OnSensitiveStyleChange(true);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), true);
 }
 } // namespace OHOS::Ace::NG

@@ -117,6 +117,7 @@ double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -398,4 +399,10 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     return false;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
 } // namespace OHOS::Ace

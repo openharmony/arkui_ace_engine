@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/syntax/for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ARKUI_CIRCLE_FEATURE
@@ -4111,6 +4115,30 @@ void ScrollablePattern::StopScrollableAndAnimate()
     if (animator_ && !animator_->IsStopped()) {
         scrollAbort_ = true;
         animator_->Stop();
+    }
+}
+
+void ScrollablePattern::GetRepeatCountInfo(
+    RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
+{
+    CHECK_NULL_VOID(node);
+    auto& children = node->GetChildren();
+    for (const auto& child : children) {
+        if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+            auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
+            auto repeatRealCount = repeat2->FrameCount();
+            auto repeatVirtualCount = repeat2->GetTotalCount();
+            if (repeatVirtualCount > static_cast<uint32_t>(repeatRealCount) && firstRepeatCount == 0) {
+                firstRepeatCount = totalChildCount + repeatRealCount;
+            }
+            repeatDifference += repeatVirtualCount - repeatRealCount;
+            totalChildCount += repeatRealCount;
+        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child)) {
+            totalChildCount += child->FrameCount();
+        } else {
+            GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);
+        }
     }
 }
 

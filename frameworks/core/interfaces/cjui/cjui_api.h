@@ -238,7 +238,7 @@ struct CJUICommonModifier {
     void (*setResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetResponseRegion)(ArkUINodeHandle node);
-    void (*setForegroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Bool disableSystemAdaptation);
+    void (*setForegroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius);
     void (*resetForegroundEffect)(ArkUINodeHandle node);
     void (*setBackgroundEffect)(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Float32 saturation,
         ArkUI_Float32 brightness, ArkUI_Uint32 color, ArkUI_Int32 adaptiveColor, const ArkUI_Float32* blurValues,
@@ -2792,6 +2792,9 @@ struct CJUISelectModifier {
     void (*resetSelectDirection)(ArkUINodeHandle node);
     void (*setAvoidance)(ArkUINodeHandle node, ArkUI_Int32 mode);
     void (*resetAvoidance)(ArkUINodeHandle node);
+    void (*setMenuOutline)(ArkUINodeHandle node, const ArkUI_Float32* width, ArkUI_Int32 widthSize,
+        const ArkUI_Uint32* color, ArkUI_Int32 colorSize);
+    void (*resetMenuOutline)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

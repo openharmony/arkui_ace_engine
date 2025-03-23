@@ -6400,8 +6400,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest113, TestSize.Level1)
 HWTEST_F(NativeNodeTest, NativeNodeTest114, TestSize.Level1)
 {
     ArkUI_NodeCustomEvent* event = new ArkUI_NodeCustomEvent;
+    event->node = nullptr;
     auto node = OH_ArkUI_NodeCustomEvent_GetNodeHandle(event);
-    EXPECT_TRUE(node);
+    EXPECT_EQ(node, nullptr);
     delete event;
 }
 

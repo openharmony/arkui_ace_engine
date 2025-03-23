@@ -841,7 +841,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     return true;
 }
 
-bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+bool InitSCImageIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& iconNode)
 {
     if (iconNode != nullptr) {
@@ -855,6 +855,26 @@ bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         auto fillColor = iconProp->GetImageSourceInfo()->GetFillColor();
         CHECK_EQUAL_RETURN(fillColor.has_value(), false, false);
         buttonInfo.iconColor_.value = fillColor->GetValue();
+    }
+    return true;
+}
+
+bool InitSCSymbolIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& iconNode)
+{
+    if (iconNode != nullptr) {
+        CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
+        auto iconProp = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(iconProp, false);
+        auto fontSize = iconProp->GetFontSize();
+        CHECK_NULL_RETURN(fontSize, false);
+        buttonInfo.iconSize_ = fontSize->ConvertToVp();
+        auto colorList = iconProp->GetSymbolColorList();
+        if (colorList.has_value()) {
+            if (!colorList.value().empty()) {
+                buttonInfo.iconColor_.value = colorList.value()[0].GetValue();
+            }
+        }
     }
     return true;
 }
@@ -907,15 +927,13 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     RefPtr<FrameNode>& node)
 {
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
-    if (!InitSCIconInfo(buttonInfo, iconNode)) {
+    if (!InitSCImageIconInfo(buttonInfo, iconNode)) {
         return false;
     }
 
     RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
-    if (symbolIconNode != nullptr) {
-        CHECK_NULL_RETURN(symbolIconNode->GetGeometryNode(), false);
-        auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(iconProp, false);
+    if (!InitSCSymbolIconInfo(buttonInfo, symbolIconNode)) {
+        return false;
     }
 
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);

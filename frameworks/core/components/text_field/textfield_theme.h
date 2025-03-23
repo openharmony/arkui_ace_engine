@@ -845,6 +845,11 @@ public:
         return errorTextAlign_;
     }
 
+    const Dimension& GetContentHoverPadding() const
+    {
+        return contentHoverPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
     TextStyle textStyle_;
@@ -925,6 +930,7 @@ private:
     Dimension passwordIconSize_ = 20.0_vp;
     Dimension cancelIconPadding_ = 14.0_vp;
     Dimension passwordIconPadding_ = 10.0_vp;
+    Dimension contentHoverPadding_ = 8.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;

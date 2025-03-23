@@ -2273,4 +2273,121 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
     ASSERT_NE(scaleLarge, nullptr);
     EXPECT_NE(scaleLarge->scale, 1);
 }
+
+/**
+ * @tc.name: IsAnyDraggableHit001
+ * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ Is False
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest077, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    dragDropManager->SetIsAnyDraggableHit(false);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit002
+ * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ is True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest078, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    dragDropManager->SetIsAnyDraggableHit(true);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit003
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is False AND iter->second.empty() Is
+ * Fasle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest079, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(AceType::MakeRefPtr<OHOS::Ace::NG::Scrollable>());
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit004
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is False AND iter->second.empty() Is
+ * True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest080, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit005
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is True AND iter->second.empty() Is
+ * True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest081, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, -1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit006
+ * @tc.desc: Test IsAnyDraggableHit Funcition When recognizer Is Not NULL
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest082, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(AceType::MakeRefPtr<OHOS::Ace::NG::Scrollable>());
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

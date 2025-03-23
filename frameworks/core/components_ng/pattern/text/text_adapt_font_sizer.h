@@ -29,13 +29,9 @@ class PipelineContext;
 
 class TextAdaptFontSizer : public virtual AceType {
     DECLARE_ACE_TYPE(TextAdaptFontSizer, AceType);
+
 public:
-    virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
-    {
-        return false;
-    }
-    virtual bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
+    virtual bool CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true)
     {
         return false;

@@ -1113,17 +1113,6 @@ void RosenRenderContext::UpdateFrontBlurStyle(
     SetFrontBlurFilter();
 }
 
-void RosenRenderContext::UpdateForegroundEffectDisableSystemAdaptation(const SysOptions& sysOptions)
-{
-    CHECK_NULL_VOID(rsNode_);
-    const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckSysOptionsForEffectSame(sysOptions)) {
-        return;
-    }
-    groupProperty->propSysOptionsForForeEffect = sysOptions;
-    rsNode_->SetForegroundEffectDisableSystemAdaptation(sysOptions.disableSystemAdaptation);
-}
-
 void RosenRenderContext::ResetBackBlurStyle()
 {
     const auto& groupProperty = GetOrCreateBackground();
@@ -1724,7 +1713,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(parentRenderContext);
@@ -1733,7 +1722,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
             scale[0] *= parentScale.value().x;
             scale[1] *= parentScale.value().y;
         }
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     scaleX = scale[0];
     scaleY = scale[1];
@@ -5425,11 +5414,6 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(
                 std::string("blurDisable:")
                     .append(std::to_string(foregroundProperty->propSysOptionsForBlur->disableSystemAdaptation)));
-        }
-        if (foregroundProperty->propSysOptionsForForeEffect.has_value()) {
-            DumpLog::GetInstance().AddDesc(
-                std::string("foreEffectDisable:")
-                    .append(std::to_string(foregroundProperty->propSysOptionsForForeEffect->disableSystemAdaptation)));
         }
         auto&& graphicProps = GetOrCreateGraphics();
         if (graphicProps->propFgDynamicBrightnessOption.has_value()) {

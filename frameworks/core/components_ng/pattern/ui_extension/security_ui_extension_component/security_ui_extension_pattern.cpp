@@ -253,6 +253,12 @@ void SecurityUIExtensionPattern::RemovePlaceholderNode()
     }
 }
 
+void SecurityUIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
+}
+
 void SecurityUIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -296,6 +302,7 @@ void SecurityUIExtensionPattern::OnConnect()
         uiExtensionManager->RegisterSecurityUIExtensionInFocus(
             WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     InitBusinessDataHandleCallback();
 }
@@ -981,7 +988,7 @@ bool SecurityUIExtensionPattern::SendBusinessData(
     UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
+    UIEXT_LOGD("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
     return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 

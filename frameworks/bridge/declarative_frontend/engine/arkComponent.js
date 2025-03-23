@@ -1702,11 +1702,11 @@ class ForegroundEffectModifier extends ModifierWithKey {
       getUINativeModule().common.resetForegroundEffect(node);
     }
     else {
-      getUINativeModule().common.setForegroundEffect(node, this.value.radius, this.value.disableSystemAdaptation);
+      getUINativeModule().common.setForegroundEffect(node, this.value.radius);
     }
   }
   checkObjectDiff() {
-    return !(this.value.radius === this.stageValue.radius && this.value.disableSystemAdaptation === this.stageValue.disableSystemAdaptation);
+    return !(this.value.radius === this.stageValue.radius);
   }
 }
 ForegroundEffectModifier.identity = Symbol('foregroundEffect');
@@ -3971,15 +3971,8 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BorderImageModifier.identity, BorderImageModifier, value);
     return this;
   }
-  foregroundEffect(value, sysOptions) {
-    let arkForegroundEffect = new ArkForegroundEffect();
-    if (typeof value === 'object') {
-      arkForegroundEffect.radius = value.radius;
-    }
-    if (typeof sysOptions === 'object') {
-      arkForegroundEffect.disableSystemAdaptation = sysOptions.disableSystemAdaptation;
-    }
-    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, arkForegroundEffect);
+  foregroundEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, ForegroundEffectModifier.identity, ForegroundEffectModifier, value);
     return this;
   }
   foregroundColor(value) {
@@ -17420,12 +17413,6 @@ class ArkBlurOptions {
     this.disableSystemAdaptation = undefined;
   }
 }
-class ArkForegroundEffect {
-  constructor() {
-    this.radius = undefined;
-    this.disableSystemAdaptation = undefined;
-  }
-}
 class ArkBackgroundEffect {
   constructor() {
     this.radius = undefined;
@@ -20248,6 +20235,11 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
     return this;
   }
+  menuOutline(outline) {
+    modifierWithKey(
+      this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -20317,6 +20309,61 @@ class MenuBackgroundBlurStyleModifier extends ModifierWithKey {
   }
 }
 MenuBackgroundBlurStyleModifier.identity = Symbol('selectMenuBackgroundBlurStyle');
+class MenuOutlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetMenuOutline(node);
+    }
+    else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        }
+        else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        }
+        else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      getUINativeModule().select.setMenuOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+  }
+}
+MenuOutlineModifier.identity = Symbol('selectMenuOutline');
 class FontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30593,7 +30640,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
-      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style);
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style, this.value?.headerComponent, this.value?.footerComponent);
     }
   }
 }

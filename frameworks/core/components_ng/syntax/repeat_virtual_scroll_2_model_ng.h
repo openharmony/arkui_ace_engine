@@ -29,22 +29,22 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RepeatVirtualScroll2ModelNG : public RepeatVirtualScroll2Model {
 public:
-    void Create(uint32_t totalCount, const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
+    void Create(uint32_t arrLen, uint32_t totalCount,
+        const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
         const std::function<void(int32_t, int32_t)>& onRecycleItems,
         const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
-        const std::function<void(int32_t, int32_t)>& onMoveFromTo,
-        const std::function<void()>& onPurge) override;
+        const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge) override;
 
     void RemoveNode(uint32_t rid) override;
     void SetInvalid(int32_t repeatElmtId, uint32_t rid) override;
 
-    void RequestContainerReLayout(
-        int32_t repeatElmtId, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex = INT_MIN) override;
-    void NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t totalCount,
-        int32_t index, int32_t count, NG::UINode::NotificationType notificationType) override;
+    void RequestContainerReLayout(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
+        int32_t invalidateContainerLayoutFromChildIndex = INT_MIN) override;
+    void NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount, int32_t index,
+        int32_t count, NG::UINode::NotificationType notificationType) override;
 
-    void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount, uint32_t invalidateContainerLayoutFromChildIndex,
-        std::map<int32_t, uint32_t>& l1Rd4Index) override;
+    void UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
+        uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index) override;
     void OnMove(int32_t repeatElmtId, std::function<void(int32_t, int32_t)>&& onMove) override;
     void SetItemDragHandler(int32_t repeatElmtId, std::function<void(int32_t)>&& onLongPress,
         std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,

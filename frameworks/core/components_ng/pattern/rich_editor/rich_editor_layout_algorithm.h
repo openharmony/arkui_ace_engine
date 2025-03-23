@@ -133,16 +133,15 @@ protected:
     void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) override;
     RefPtr<SpanItem> GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup) override;
     void SetAdaptFontSizeStepToTextStyle(
-        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep) override {}
-    void AddImageToParagraph(RefPtr<ImageSpanItem>&, const RefPtr<LayoutWrapper>& iterItem,
-        const LayoutConstraintF& layoutConstrain, const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-        const TextStyle& textStyle) override;
-    void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
-        const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain,
+        TextStyle& textStyle, const std::optional<Dimension>& adaptFontSizeStep) override
+    {}
+    void AddImageToParagraph(RefPtr<ImageSpanItem>& imageSpanItem, const RefPtr<LayoutWrapper>& iterItem,
         const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength) override;
-    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper,
-        const RefPtr<Paragraph>& paragraph, int32_t& spanTextLength,
-        CustomSpanPlaceholderInfo& customSpanPlaceholder) override;
+    void AddPlaceHolderToParagraph(RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
+        const RefPtr<LayoutWrapper>& layoutWrapper, const RefPtr<Paragraph>& paragraph,
+        int32_t& spanTextLength) override;
+    void UpdateParagraphByCustomSpan(RefPtr<CustomSpanItem>& customSpanItem, const RefPtr<Paragraph>& paragraph,
+        int32_t& spanTextLength, CustomSpanPlaceholderInfo& customSpanPlaceholder) override;
     void AddSymbolSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph) override;
     void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
@@ -154,8 +153,8 @@ private:
         double maxWidth = 0.0) override;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    ParagraphStyle GetParagraphStyle(
-        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const override;
+    ParagraphStyle GetEditorParagraphStyle(
+        const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const;
     float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group) override;
     void UpdateRichTextRect(const SizeF& textSize, LayoutWrapper* layoutWrapper);
     RefPtr<RichEditorPattern> GetRichEditorPattern(LayoutWrapper* layoutWrapper);

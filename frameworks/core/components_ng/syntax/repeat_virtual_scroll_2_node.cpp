@@ -31,34 +31,34 @@ namespace OHOS::Ace::NG {
 using CacheItem = RepeatVirtualScroll2Caches::CacheItem;
 
 // REPEAT
-RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t totalCount,
-    const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
+RefPtr<RepeatVirtualScroll2Node> RepeatVirtualScroll2Node::GetOrCreateRepeatNode(int32_t nodeId, uint32_t arrLen,
+    uint32_t totalCount, const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
-    const std::function<void(IndexType, IndexType)>& onMoveFromTo,
-    const std::function<void()>& onPurge)
+    const std::function<void(IndexType, IndexType)>& onMoveFromTo, const std::function<void()>& onPurge)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(nodeId);
     if (node) {
         TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).GetOrCreateRepeatNode Found RepeatVirtualScroll2Node",
             static_cast<int32_t>(node->GetId()));
+        node->UpdateArrLen(arrLen);
         node->UpdateTotalCount(totalCount);
         return node;
     }
-    node = MakeRefPtr<RepeatVirtualScroll2Node>(nodeId, totalCount,
-        onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+    node = MakeRefPtr<RepeatVirtualScroll2Node>(
+        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
 
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
 }
 
-RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, int32_t totalCount,
+RepeatVirtualScroll2Node::RepeatVirtualScroll2Node(int32_t nodeId, uint32_t arrLen, int32_t totalCount,
     const std::function<std::pair<RIDType, uint32_t>(IndexType)>& onGetRid4Index,
     const std::function<void(IndexType, IndexType)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
     const std::function<void(IndexType, IndexType)>& onMoveFromTo,
     const std::function<void()>& onPurge)
-    : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount), caches_(onGetRid4Index),
+    : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), arrLen_(arrLen), totalCount_(totalCount), caches_(onGetRid4Index),
       onRecycleItems_(onRecycleItems), onActiveRange_(onActiveRange), onMoveFromTo_(onMoveFromTo),
       onPurge_(onPurge), postUpdateTaskHasBeenScheduled_(false)
 {}
@@ -626,12 +626,14 @@ void RepeatVirtualScroll2Node::SetNodeIndexOffset(int32_t start, int32_t /*count
     startIndex_ = start;
 }
 
-// called by components, returns app-defined totalCount
-// rerender updated app-defined totalCount to totalCount_
+// called by components, returns min(array length, app-defined totalCount)
+// rerender updated app-defined totalCount to totalCount_, array length to arrLen_
+// if use onLazyLoading, the value of arrLen transferred from TS side is always equal to totalCount
 int32_t RepeatVirtualScroll2Node::FrameCount() const
 {
-    TAG_LOGD(AceLogTag::ACE_REPEAT, "FrameCount returns %{public}d", static_cast<int32_t>(totalCount_));
-    return totalCount_;
+    auto frameCount = std::min(arrLen_, totalCount_);
+    TAG_LOGD(AceLogTag::ACE_REPEAT, "FrameCount returns %{public}d", static_cast<int32_t>(frameCount));
+    return frameCount;
 }
 
 void RepeatVirtualScroll2Node::PostIdleTask()

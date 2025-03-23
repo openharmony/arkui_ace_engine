@@ -215,6 +215,7 @@ public:
         return MakeRefPtr<SelectPaintProperty>();
     }
     void ResetFontColor();
+    void SetMenuOutline(const MenuParam& menuParam);
 
 private:
     void OnAttachToFrameNode() override;
