@@ -16,6 +16,8 @@
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 
 #include <dirent.h>
+#include <queue>
+#include <unordered_set>
 
 #include "drawable_descriptor.h"
 #include "resource_adapter_impl_v2.h"
@@ -38,28 +40,24 @@ void CheckThemeId(int32_t& themeId)
     themeId = OHOS_THEME_ID;
 }
 
-const char* PATTERN_MAP[] = {
-    THEME_PATTERN_BUTTON,
-    THEME_PATTERN_CAMERA,
-    THEME_PATTERN_LIST_ITEM,
-    THEME_PATTERN_ARC_LIST,
-    THEME_PATTERN_ARC_LIST_ITEM,
-    THEME_PATTERN_PICKER,
-    THEME_PATTERN_PROGRESS,
-    THEME_PATTERN_SELECT,
-    THEME_PATTERN_STEPPER,
-    THEME_PATTERN_TEXT,
-    THEME_PATTERN_TEXTFIELD,
-    THEME_PATTERN_TEXT_OVERLAY,
-    THEME_PATTERN_CONTAINER_MODAL
-};
 
-// PRELOAD_LIST contain themes that should be preloaded asynchronously
-const char* PRELOAD_LIST[] = {
-    THEME_BLUR_STYLE_COMMON,
-    THEME_PATTERN_ICON,
-    THEME_PATTERN_SHADOW
-};
+const std::unordered_set<std::string> PATTERN_SET = { THEME_PATTERN_BUTTON, THEME_PATTERN_CHECKBOX,
+    THEME_PATTERN_DATA_PANEL, THEME_PATTERN_RADIO, THEME_PATTERN_SWIPER, THEME_PATTERN_SWITCH, THEME_PATTERN_TOOLBAR,
+    THEME_PATTERN_TOGGLE, THEME_PATTERN_TOAST, THEME_PATTERN_DIALOG, THEME_PATTERN_DRAG_BAR, THEME_PATTERN_CLOSE_ICON,
+    THEME_PATTERN_SEMI_MODAL, THEME_PATTERN_BADGE, THEME_PATTERN_CALENDAR, THEME_PATTERN_CAMERA, THEME_PATTERN_CARD,
+    THEME_PATTERN_CLOCK, THEME_PATTERN_COUNTER, THEME_PATTERN_DIVIDER, THEME_PATTERN_FOCUS_ANIMATION,
+    THEME_PATTERN_GRID, THEME_PATTERN_HYPERLINK, THEME_PATTERN_ICON, THEME_PATTERN_IMAGE, THEME_PATTERN_LIST,
+    THEME_PATTERN_LIST_ITEM, THEME_PATTERN_ARC_LIST, THEME_PATTERN_ARC_LIST_ITEM, THEME_PATTERN_MARQUEE,
+    THEME_PATTERN_NAVIGATION_BAR, THEME_PATTERN_PICKER, THEME_PATTERN_PIECE, THEME_PATTERN_POPUP,
+    THEME_PATTERN_PROGRESS, THEME_PATTERN_QRCODE, THEME_PATTERN_RATING, THEME_PATTERN_REFRESH, THEME_PATTERN_SCROLL_BAR,
+    THEME_PATTERN_SEARCH, THEME_PATTERN_STEPPER, THEME_PATTERN_TAB, THEME_PATTERN_SELECT, THEME_PATTERN_SLIDER,
+    THEME_PATTERN_TEXT, THEME_PATTERN_TEXTFIELD, THEME_PATTERN_RICH_EDITOR, THEME_PATTERN_TEXT_OVERLAY,
+    THEME_PATTERN_VIDEO, THEME_PATTERN_INDEXER, THEME_PATTERN_APP_BAR, THEME_PATTERN_ADVANCED_PATTERN,
+    THEME_PATTERN_SECURITY_COMPONENT, THEME_PATTERN_FORM, THEME_PATTERN_SIDE_BAR, THEME_PATTERN_PATTERN_LOCK,
+    THEME_PATTERN_GAUGE, THEME_PATTERN_SHEET, THEME_PATTERN_AGING_ADAPATION_DIALOG, THEME_PATTERN_LINEAR_INDICATOR,
+    THEME_BLUR_STYLE_COMMON, THEME_PATTERN_SHADOW, THEME_PATTERN_CONTAINER_MODAL, THEME_PATTERN_SCROLLABLE,
+    THEME_PATTERN_APP };
+
 
 constexpr char RESOURCE_TOKEN_PATTERN[] = "\\[.+?\\]\\.(\\S+?\\.\\S+)";
 
@@ -233,74 +231,79 @@ void ResourceAdapterImplV2::UpdateConfig(const ResourceConfiguration& config, bo
     }
     resConfig_ = resConfig;
 }
-
+using ResType = OHOS::Global::Resource::ResType;
+using ResData = OHOS::Global::Resource::ResourceManager::ResData;
+using ThemeResTuple = std::tuple<std::string, ResType, std::string>;
 RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
 {
     CheckThemeId(themeId);
     auto theme = AceType::MakeRefPtr<ResourceThemeStyle>(AceType::Claim(this));
-    
-    constexpr char flag[] = "ohos_"; // fit with resource/base/theme.json and pattern.json
-    {
-        auto manager = GetResourceManager();
-        if (manager) {
-            auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
-            for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
-                ResourceThemeStyle::RawAttrMap attrMap;
-                std::string patternTag = PATTERN_MAP[i];
-                std::string patternName = std::string(flag) + PATTERN_MAP[i];
-                ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                if (attrMap.empty()) {
-                    continue;
-                }
-                theme->patternAttrs_[patternTag] = attrMap;
+    auto resourceManager = GetResourceManager();
+    std::map<std::string, ResData> themeOutValue;
+    if (resourceManager) {
+        Global::Resource::RState getThemeRet = resourceManager->GetThemeDataById(themeId, themeOutValue);
+        if (getThemeRet != Global::Resource::RState::SUCCESS) {
+            LOGW("GetThemeDataById failed, error code=%{public}d, now load ohos_theme.", getThemeRet);
+            getThemeRet = resourceManager->GetThemeDataById(OHOS_THEME_ID, themeOutValue);
+            if (getThemeRet != Global::Resource::RState::SUCCESS) {
+                LOGW("load ohos_theme failed, error code=%{public}d", getThemeRet);
+                return nullptr;
             }
         }
     }
-
+    std::queue<ThemeResTuple> themeQueue;
+    for (auto eachTheme : themeOutValue) {
+        std::string patternTag = eachTheme.first;         // e.g. advanced_pattern
+        ResType patternType = eachTheme.second.resType;   // e.g. 22
+        std::string patternData = eachTheme.second.value; // e.g. 125830098
+        themeQueue.push(std::make_tuple(patternTag, patternType, patternData));
+    }
+    while (!themeQueue.empty()) {
+        ThemeResTuple themeQueueFront = themeQueue.front();
+        themeQueue.pop();
+        std::string patternTag = std::get<0>(themeQueueFront);  // e.g. advanced_pattern
+        ResType patternType = std::get<1>(themeQueueFront);     // e.g. 22
+        std::string patternData = std::get<2>(themeQueueFront); // e.g. 125830098
+        if (patternType == ResType::PATTERN && PATTERN_SET.find(patternTag) != PATTERN_SET.end()) {
+            // is theme pattern
+            ResourceThemeStyle::RawAttrMap attrMap;
+            std::map<std::string, ResData> patternOutValue;
+            resourceManager->GetPatternDataById(std::stoi(patternData), patternOutValue);
+            for (auto eachPattern : patternOutValue) {
+                auto patternKey = eachPattern.first;
+                auto patternValue = eachPattern.second.value;
+                attrMap[patternKey] = patternValue;
+            }
+            if (attrMap.empty()) {
+                continue;
+            }
+            theme->patternAttrs_[patternTag] = attrMap;
+        } else if (patternType == ResType::PATTERN) {
+            // is nested pattern
+            std::map<std::string, ResData> patternOutValue;
+            resourceManager->GetPatternDataById(std::stoi(patternData), patternOutValue);
+            for (auto eachPattern : patternOutValue) {
+                auto sonPatternKey = eachPattern.first;           // e.g. advanced_pattern
+                auto sonPatternType = eachPattern.second.resType; // e.g. 22
+                auto sonPatternValue = eachPattern.second.value;  // e.g. 125830098
+                themeQueue.push(std::make_tuple(sonPatternKey, sonPatternType, sonPatternValue));
+            }
+        } else if (patternType == ResType::COLOR || patternType == ResType::FLOAT || patternType == ResType::STRING ||
+                   patternType == ResType::SYMBOL) {
+            theme->rawAttrs_[patternTag] = patternData;
+        } else {
+            LOGW("GetTheme found unknown ResType:%{public}d", patternType);
+        }
+    }
     if (theme->patternAttrs_.empty() && theme->rawAttrs_.empty()) {
         return nullptr;
     }
-
     theme->ParseContent();
     theme->patternAttrs_.clear();
-
-    PreloadTheme(themeId, theme);
+    auto resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme);
+    auto themeStyle = resourceThemeStyle.Upgrade();
+    themeStyle->SetPromiseValue();
     return theme;
-}
-
-void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme)
-{
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto manager = GetResourceManager();
-    CHECK_NULL_VOID(manager);
-    auto taskExecutor = GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-
-    // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
-        weak = WeakClaim(this)]() -> void {
-        auto themeStyle = resourceThemeStyle.Upgrade();
-        CHECK_NULL_VOID(themeStyle);
-        auto adapter = weak.Upgrade();
-        CHECK_NULL_VOID(adapter);
-        for (size_t i = 0; i < sizeof(PRELOAD_LIST) / sizeof(PRELOAD_LIST[0]); ++i) {
-            std::string patternName = PRELOAD_LIST[i];
-            themeStyle->PushBackCheckThemeStyleVector(patternName);
-            auto style = adapter->GetPatternByName(patternName);
-            if (style) {
-                ResValueWrapper value = { .type = ThemeConstantsType::PATTERN, .value = style };
-                themeStyle->SetAttr(patternName, value);
-            }
-        }
-
-        themeStyle->SetPromiseValue();
-    };
-
-    // isolation of loading card themes
-    if (!container->IsFormRender()) {
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::BACKGROUND, "ArkUILoadTheme");
-    }
 }
 
 RefPtr<TaskExecutor> ResourceAdapterImplV2::GetTaskExecutor()

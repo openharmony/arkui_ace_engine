@@ -2605,13 +2605,7 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
         }
     }
     radius = std::max(radius, 0.0f);
-    SysOptions sysOptions;
-    sysOptions.disableSystemAdaptation = false;
-    if (info.Length() > NUM1 && info[NUM1]->IsObject()) {
-        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM1]);
-        ParseSysOptions(jsSysOptions, sysOptions);
-    }
-    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius, sysOptions);
+    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)
@@ -7135,6 +7129,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("foregroundFilter", &JSViewAbstract::JsForegroundFilter);
     JSClass<JSViewAbstract>::StaticMethod("compositingFilter", &JSViewAbstract::JsCompositingFilter);
 
+    JSClass<JSViewAbstract>::StaticMethod("setPixelRoundMode", &JSViewAbstract::SetPixelRoundMode);
+    JSClass<JSViewAbstract>::StaticMethod("getPixelRoundMode", &JSViewAbstract::GetPixelRoundMode);
+
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 
@@ -9823,5 +9820,31 @@ void JSViewAbstract::SetTextStyleApply(const JSCallbackInfo& info,
         func->ExecuteJS(2, params);
     };
     textStyleApply = onApply;
+}
+
+void JSViewAbstract::SetPixelRoundMode(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        return;
+    }
+    auto index = info[0]->ToNumber<uint8_t>();
+    auto size = sizeof(PixelRoundMode) / sizeof(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
+    if (index < 0 || index > size) {
+        return;
+    }
+    PixelRoundMode pixelRoundMode = static_cast<PixelRoundMode>(index);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetPixelRoundMode(pixelRoundMode);
+}
+
+uint8_t JSViewAbstract::GetPixelRoundMode()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    return pipeline ? static_cast<uint8_t>(pipeline->GetPixelRoundMode())
+                    : static_cast<uint8_t>(PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH);
 }
 } // namespace OHOS::Ace::Framework

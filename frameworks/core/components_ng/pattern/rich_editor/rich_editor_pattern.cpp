@@ -140,7 +140,8 @@ RichEditorPattern::RichEditorPattern() :
     isAPI14Plus(true),
 #endif
     isAPI16Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)),
-    isAPI18Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN))
+    isAPI18Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)),
+    isAPI20Plus(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY))
 {
     selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(WeakClaim(this));
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
@@ -254,7 +255,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageNode->MountToParent(host, index);
     HandleImageDrag(imageNode);
     SetImageLayoutProperty(imageNode, options);
-    imageItem->imageNodeId = imageNode->GetId();
+    imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
 }
 
@@ -1304,9 +1305,13 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
         auto theme = GetTheme<RichEditorTheme>();
         CHECK_NULL_VOID(theme);
         const auto& themeTextStyle = theme->GetTextStyle();
-        spanNode->UpdateTextColor(themeTextStyle.GetTextColor());
+        const auto& textColor = themeTextStyle.GetTextColor();
+        spanNode->UpdateTextColor(textColor);
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(textColor));
     } else {
-        spanNode->UpdateTextColor(GetUrlSpanColor());
+        const auto& urlSpanColor = GetUrlSpanColor();
+        spanNode->UpdateTextColor(urlSpanColor);
+        IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(urlSpanColor));
     }
 }
 
@@ -2449,7 +2454,7 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
 SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
 {
     auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
-    CHECK_NULL_RETURN(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN), selectionInfo);
+    CHECK_NULL_RETURN(isAPI20Plus, selectionInfo);
     auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
     for (auto& resObj : resultObjects) {
         CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
@@ -4628,7 +4633,7 @@ void RichEditorPattern::ResetDragSpanItems()
         item->EndDrag();
         auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
         if (imageSpanItem) {
-            nodeIds.emplace(imageSpanItem->imageNodeId);
+            nodeIds.emplace(imageSpanItem->nodeId_);
             return;
         }
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(item);
@@ -5022,8 +5027,8 @@ void RichEditorPattern::UpdateCaretInfoToController()
     for (auto iter = spans_.begin(); iter != spans_.end(); iter++) {
         text += (*iter)->content;
     }
-    auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
-    auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
+    auto start = textSelector_.IsValid() ? textSelector_.GetTextStart() : caretPosition_;
+    auto end = textSelector_.IsValid() ? textSelector_.GetTextEnd() : caretPosition_;
 #if defined(ENABLE_STANDARD_INPUT)
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_VOID(miscTextConfig.has_value());
@@ -5204,6 +5209,21 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
     }
 }
 
+bool RichEditorPattern::NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record)
+{
+    CHECK_NULL_RETURN(record.IsValid(), false);
+    bool caretInSecondPos = caret == record.startOffset + 1;
+    bool caretNotInEndPos = caret != record.endOffset;
+
+    auto& curContent = record.previewContent;
+    auto& newContent = record.newPreviewContent;
+    auto enFilter = [](char c) { return isalpha(c) || c == '\''; };
+    bool curAllEn = std::all_of(curContent.begin(), curContent.end(), enFilter);
+    bool newAllEn = std::all_of(newContent.begin(), newContent.end(), enFilter);
+
+    return caretInSecondPos && caretNotInEndPos && curAllEn && newAllEn;
+}
+
 bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range)
 {
     auto& record = previewTextRecord_;
@@ -5211,7 +5231,7 @@ bool RichEditorPattern::UpdatePreviewText(const std::u16string& previewTextValue
         record.replacedRange.Set(record.startOffset, record.endOffset);
         record.newPreviewContent = previewTextValue;
         record.needReplacePreviewText = true;
-        record.needUpdateCaret = caretPosition_ == record.endOffset;
+        record.needUpdateCaret = !NotUpdateCaretInPreview(caretPosition_, record);
         ProcessInsertValue(previewTextValue, OperationType::IME, false);
         record.previewContent = record.newPreviewContent;
         record.newPreviewContent.clear();
@@ -5502,7 +5522,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
-    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI18Plus);
+    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI20Plus);
     CHECK_NULL_VOID((allowContentChange && allowImeInput) || allowPreviewText);
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord);
 }
@@ -5980,7 +6000,7 @@ std::u16string RichEditorPattern::DeleteForwardOperation(int32_t length)
     int32_t currentPosition = caretPosition_;
     if (currentPosition == GetTextContentLength()) {
         info.SetLength(0);
-        DoDeleteActions(currentPosition, 0, info);
+        IF_TRUE(isAPI20Plus, DoDeleteActions(currentPosition, 0, info));
         return deleteText;
     }
     info.SetLength(length);
@@ -6853,7 +6873,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         return eraseLength;
     }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
-    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
+    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().ConvertToFp());
     spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
     spanResult.SetFontWeight((int32_t)(spanItem->GetTextStyle()->GetFontWeight()));
     if (!spanItem->GetTextStyle()->GetFontFamilies().empty()) {
@@ -7415,7 +7435,7 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
     }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
     auto position = paragraphs_.GetIndex(textOffset);
-    IF_TRUE(isAPI18Plus && (GetTextContentLength() == 0), position = 0);
+    IF_TRUE(isAPI20Plus && (GetTextContentLength() == 0), position = 0);
     UpdateSelector(textSelector_.baseOffset, position);
     if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
@@ -7545,9 +7565,13 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 void RichEditorPattern::HandleMouseRightButton(const MouseInfo& info)
 {
     CHECK_NULL_VOID(!IsPreviewTextInputting());
+    IF_TRUE(IsDragging(), isInterceptMouseRightRelease_ = true);
     auto focusHub = GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    if (!focusHub->IsFocusable()) {
+    CHECK_NULL_VOID(focusHub && focusHub->IsFocusable());
+    if (info.GetAction() == MouseAction::RELEASE && isInterceptMouseRightRelease_) {
+        usingMouseRightButton_ = false;
+        isMousePressed_ = false;
+        isInterceptMouseRightRelease_ = false;
         return;
     }
     if (info.GetAction() == MouseAction::PRESS) {
@@ -7870,15 +7894,8 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     if (copyResultObjects.empty()) {
         return;
     }
-    // If the API version is greater or equal than 18, add records to clipboard in forward order
-    if (isAPI18Plus) {
-        for (auto resultObj = copyResultObjects.begin(); resultObj != copyResultObjects.end(); ++resultObj) {
-            ProcessResultObject(pasteData, *resultObj);
-        }
-    } else {
-        for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
-            ProcessResultObject(pasteData, *resultObj);
-        }
+    for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+        ProcessResultObject(pasteData, *resultObj);
     }
     clipboard_->SetData(pasteData, copyOption_);
 }
@@ -9747,7 +9764,7 @@ std::string RichEditorPattern::GetPlaceHolderInJson() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     bool hasPlaceHolder = layoutProperty && layoutProperty->HasPlaceholder()
         && !layoutProperty->GetPlaceholder().value().empty();
     CHECK_NULL_RETURN(hasPlaceHolder, "");
@@ -9906,7 +9923,7 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
         isShowPlaceholder_ = false;
@@ -9950,7 +9967,7 @@ std::string RichEditorPattern::GetPlaceHolder() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     return UtfUtils::Str16ToStr8(layoutProperty->GetPlaceholderValue(u""));
 }

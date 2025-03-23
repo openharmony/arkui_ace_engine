@@ -61,6 +61,7 @@ struct PopupInfo {
     OffsetF targetOffset;
     bool focusable = false;
     bool isAvoidKeyboard = false;
+    bool isTips = false;
     int32_t disappearingTimeWithContinuousOperation = 700;
 };
 
@@ -839,6 +840,9 @@ private:
         const RefPtr<UINode>& rootNode);
     bool UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo);
     void UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo);
+    void UpdateTipsStatus(int32_t targetId, bool isInContinus);
+    void EraseTipsStatus(int32_t targetId);
+    bool GetTipsStatus(int32_t targetId);
     void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
@@ -906,6 +910,7 @@ private:
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
     std::unordered_map<int32_t, std::list<std::pair<int32_t, bool>>> tipsEnterAndLeaveInfoMap_;
     std::list<std::pair<int32_t, NG::PopupInfo>> tipsInfoList_;
+    std::list<std::pair<int32_t, bool>> tipsStatusList_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;

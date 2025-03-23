@@ -1954,7 +1954,8 @@ class CustomDialogContentComponent extends ViewV2 {
     this.observeComponentCreation2((v15, w15) => {
       Column.create();
       Column.constraintSize({ maxHeight: this.contentMaxHeight });
-      Column.backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE);
+      Column.backgroundBlurStyle(this.customStyle ?
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
       Column.borderRadius(this.customStyle ? { "id": -1, "type": 10002, params: ['sys.float.ohos_id_corner_radius_dialog'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" } : 0);
       Column.margin(this.customStyle ? {
         start: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_dialog_margin_start'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
@@ -2089,9 +2090,16 @@ class CustomDialogContentComponent extends ViewV2 {
     this.secondaryTitleFontColorWithTheme = n14.colors.fontSecondary;
   }
   aboutToAppear() {
-    let m14 = this.getUIContext();
-    this.isFollowingSystemFontScale = m14.isFollowingSystemFontScale();
-    this.appMaxFontScale = m14.getMaxFontScale();
+    try {
+      let m14 = this.getUIContext();
+      this.isFollowingSystemFontScale = m14?.isFollowingSystemFontScale();
+      this.appMaxFontScale = m14?.getMaxFontScale();
+    }
+    catch (err) {
+      let code = err?.code;
+      let message = err?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
     this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }

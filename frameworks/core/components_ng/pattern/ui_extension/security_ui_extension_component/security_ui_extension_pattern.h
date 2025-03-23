@@ -154,6 +154,7 @@ private:
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
     AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
+    void ReDispatchWantParams();
 
     enum class AbilityState {
         NONE = 0,

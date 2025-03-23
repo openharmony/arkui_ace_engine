@@ -411,10 +411,6 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
     }
     if (value.textColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
-
-        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->UpdateUserSetSelectColor();
     } else {
         ResetTextPickerTextStyleColor(frameNode, &TextPickerLayoutProperty::GetSelectedTextStyle);
     }
@@ -965,7 +961,7 @@ void TextPickerModelNG::SetColumnKind(FrameNode* frameNode, uint32_t columnKind)
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    columnkind_ = columnKind;
+    columnKind_ = columnKind;
     textPickerPattern->SetColumnsKind(columnKind);
 }
 
@@ -1010,11 +1006,6 @@ void TextPickerModelNG::SetSelectedTextStyle(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedColor,
         value.textColor.value_or(selectedStyle.GetTextColor()), frameNode);
-    if (value.textColor.has_value()) {
-        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(textPickerPattern);
-        textPickerPattern->UpdateUserSetSelectColor();
-    }
 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         TextPickerLayoutProperty, SelectedWeight,
@@ -1083,9 +1074,9 @@ void TextPickerModelNG::SetRange(FrameNode* frameNode, const std::vector<NG::Ran
     if (frameNode->GetChildren().empty()) {
         std::lock_guard<std::shared_mutex> lock(showCountMutex_);
         RefPtr<FrameNode> columnNode = nullptr;
-        if (columnkind_ == TEXT) {
+        if (columnKind_ == TEXT) {
             columnNode = CreateColumnNode(TEXT, showCount_);
-        } else if (columnkind_ == MIXTURE) {
+        } else if (columnKind_ == MIXTURE) {
             columnNode = CreateColumnNode(MIXTURE, showCount_);
         }
         auto stackNode = CreateStackNode();
@@ -1502,5 +1493,14 @@ void TextPickerModelNG::SetSingleRange(bool isSingleRange)
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
     textPickerPattern->SetSingleRange(isSingleRange);
+}
+
+void TextPickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->UpdateUserSetSelectColor();
 }
 } // namespace OHOS::Ace::NG

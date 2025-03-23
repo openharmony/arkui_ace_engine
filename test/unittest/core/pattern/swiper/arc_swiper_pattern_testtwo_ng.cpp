@@ -498,4 +498,259 @@ HWTEST_F(ArcSwiperPatternTestNg, VerticalScrollAnimation006, TestSize.Level1)
     arcSwiperPattern.VerticalScrollAnimation(20.0f);
     EXPECT_EQ(arcSwiperPattern.horizontalExitNodeOpacity_, 0);
 }
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation001
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation001, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(0.0f, 20.0f, frameNode);
+    EXPECT_EQ(arcSwiperPattern.verticalEntryNodeScale_, 0);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation002
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation002, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(100.0f, -20.0f, frameNode);
+    EXPECT_NE(arcSwiperPattern.verticalEntryNodeScale_, 1);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation003
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation003
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation003, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(100.0f, 50.0f, frameNode);
+    EXPECT_EQ(arcSwiperPattern.verticalEntryNodeScale_, 0);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation004
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation004
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation004, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(100.0f, -20.0f, frameNode);
+    EXPECT_NE(arcSwiperPattern.verticalEntryNodeBlur_, 0);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation005
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation005
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation005, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(100.0f, -20.0f, frameNode);
+    EXPECT_NE(arcSwiperPattern.verticalEntryNodeOpacity_, 1);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation006
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation006
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation006, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(-10.0f, 5.0f, frameNode);
+    EXPECT_EQ(arcSwiperPattern.verticalEntryNodeScale_, 1);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation007
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation007
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation007, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(-10.0f, 5.0f, frameNode);
+    EXPECT_EQ(arcSwiperPattern.verticalEntryNodeBlur_, 0);
+}
+
+/**
+ * @tc.name: PlayVerticalScrollEntryAnimation008
+ * @tc.desc: Test ArcSwiperPattern PlayVerticalScrollEntryAnimation008
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayVerticalScrollEntryAnimation008, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    RefPtr<ArcSwiperPattern> swiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, swiperPattern);
+    ASSERT_NE(frameNode, nullptr);
+    arcSwiperPattern.PlayVerticalScrollEntryAnimation(-10.0f, 5.0f, frameNode);
+    EXPECT_EQ(arcSwiperPattern.verticalEntryNodeOpacity_, 1);
+}
+
+/**
+ * @tc.name: ArcSwiperPattern_PlayScrollAnimation001
+ * @tc.desc: Test ArcSwiperPattern PlayScrollAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, ArcSwiperPattern_PlayScrollAnimation001, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    arcSwiperPattern.disableTransitionAnimation_ = true;
+    arcSwiperPattern.canChangeDirectionFlag_ = true;
+    arcSwiperPattern.PlayScrollAnimation(10.0f, 5.0f);
+    EXPECT_TRUE(arcSwiperPattern.canChangeDirectionFlag_);
+}
+
+/**
+ * @tc.name: ArcSwiperPattern_PlayScrollAnimation002
+ * @tc.desc: Test ArcSwiperPattern PlayScrollAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, ArcSwiperPattern_PlayScrollAnimation002, TestSize.Level1)
+{
+    ArcSwiperPattern arcSwiperPattern;
+    arcSwiperPattern.PlayScrollAnimation(10.0f, 5.0f);
+    EXPECT_FALSE(arcSwiperPattern.canChangeDirectionFlag_);
+}
+
+/**
+ * @tc.name: PlayPropertyTranslateFlipAnimation001
+ * @tc.desc: Test ArcSwiperPattern PlayPropertyTranslateFlipAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation001, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = true;
+    OffsetF offset(20.0f, 30.0f);
+    arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
+    EXPECT_TRUE(arcSwiperPattern->itemPositionInAnimation_.empty());
+}
+
+/**
+ * @tc.name: PlayPropertyTranslateFlipAnimation002
+ * @tc.desc: Test ArcSwiperPattern PlayPropertyTranslateFlipAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation002, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = true;
+    OffsetF offset(20.0f, 30.0f);
+    arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
+    EXPECT_TRUE(arcSwiperPattern->itemPositionInAnimation_.empty());
+}
+
+/**
+ * @tc.name: PlayPropertyTranslateFlipAnimation003
+ * @tc.desc: Test ArcSwiperPattern PlayPropertyTranslateFlipAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation003, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = true;
+    OffsetF offset(20.0f, 30.0f);
+    arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
+    EXPECT_TRUE(arcSwiperPattern->itemPositionInAnimation_.empty());
+}
+
+/**
+ * @tc.name: PlayPropertyTranslateFlipAnimation004
+ * @tc.desc: Test ArcSwiperPattern PlayPropertyTranslateFlipAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation004, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    OffsetF offset(20.0f, 30.0f);
+    arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
+    EXPECT_TRUE(arcSwiperPattern->itemPositionInAnimation_.empty());
+}
+
+/**
+ * @tc.name: PlayPropertyTranslateFlipAnimation005
+ * @tc.desc: Test ArcSwiperPattern PlayPropertyTranslateFlipAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcSwiperPatternTestNg, PlayPropertyTranslateFlipAnimation005, TestSize.Level1)
+{
+    RefPtr<ArcSwiperPattern> arcSwiperPattern = AceType::MakeRefPtr<ArcSwiperPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, -1, arcSwiperPattern);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<SwiperLayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    arcSwiperPattern->frameNode_ = frameNode;
+    arcSwiperPattern->hasTabsAncestor_ = false;
+    OffsetF offset(20.0f, 30.0f);
+    std::map<int32_t, SwiperItemInfo> itemPosition;
+    SwiperItemInfo info;
+    info.startPos = -200.0f;
+    info.endPos = 0.0f;
+    info.node = frameNode;
+    itemPosition[1] = info;
+    arcSwiperPattern->itemPosition_ = itemPosition;
+    arcSwiperPattern->PlayPropertyTranslateFlipAnimation(offset);
+    EXPECT_FALSE(arcSwiperPattern->itemPositionInAnimation_.empty());
+}
 } // namespace OHOS::Ace::NG

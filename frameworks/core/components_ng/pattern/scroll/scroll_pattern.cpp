@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -607,6 +608,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
 #endif
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    MarkScrollBarProxyDirty();
     return true;
 }
 

@@ -17,8 +17,6 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -28,6 +26,8 @@
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/syntax/repeat_model_ng.h"
+#include "core/components_ng/syntax/repeat_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
@@ -48,10 +48,19 @@ public:
     int32_t FindFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     std::vector<RefPtr<FrameNode>> GetFlatListItems();
     void CreateForEachList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    void CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove);
+    void MapEventInForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+        int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
+    void MapEventInRepeatForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+        int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
+    void MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+        int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo);
     AssertionResult VerifyForEachItemsOrder(std::list<std::string> expectKeys);
     AssertionResult VerifyLazyForEachItemsOrder(std::list<std::string> expectKeys);
+    AssertionResult VerifyRepeatItemsOrder(std::list<std::string> expectKeys);
     RefPtr<ListItemDragManager> GetForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
+    RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
 };
 
 void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
@@ -60,7 +69,10 @@ void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
         CreateListItem();
         {
             ButtonModelNG buttonModelNG;
-            buttonModelNG.CreateWithLabel("label");
+            CreateWithPara para;
+            para.label = "label";
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel(para, buttonChildren);
             ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }
@@ -173,6 +185,34 @@ void ListCommonTestNg::CreateForEachList(
     }
 }
 
+void ListCommonTestNg::CreateRepeatList(int32_t itemNumber, int32_t lanes, std::function<void(int32_t, int32_t)> onMove)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(lanes);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    RepeatModelNG repeatModelNG;
+    repeatModelNG.StartRender();
+    auto repeatNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    repeatNode->SetParent(weakList); // for InitAllChildrenDragManager
+    std::list<std::string> newIds;
+    for (int32_t index = 0; index < itemNumber; index++) {
+        newIds.emplace_back(std::to_string(index));
+    }
+    auto node = AceType::DynamicCast<RepeatNode>(repeatNode);
+    node->SetIds(std::move(newIds));
+    for (int32_t index = 0; index < itemNumber; index++) {
+        // key is 0,1,2,3...
+        repeatModelNG.CreateNewChildStart(std::to_string(index));
+        CreateListItems(1);
+        repeatModelNG.CreateNewChildFinish(std::to_string(index));
+    }
+    repeatModelNG.OnMove(std::move(onMove));
+    std::list<int32_t> removedElmtId;
+    repeatModelNG.FinishRender(removedElmtId);
+}
+
 AssertionResult ListCommonTestNg::VerifyForEachItemsOrder(std::list<std::string> expectKeys)
 {
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
@@ -205,6 +245,23 @@ AssertionResult ListCommonTestNg::VerifyLazyForEachItemsOrder(std::list<std::str
     return IsEqual(childrenKeysStr, expectKeysStr);
 }
 
+AssertionResult ListCommonTestNg::VerifyRepeatItemsOrder(std::list<std::string> expectKeys)
+{
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(frameNode_->GetChildAtIndex(0));
+    auto& children = repeatNode->ModifyChildren();
+    std::string childrenKeysStr;
+    std::string expectKeysStr;
+    auto childIter = children.begin();
+    for (auto keyIter = expectKeys.begin(); keyIter != expectKeys.end(); keyIter++) {
+        expectKeysStr += *keyIter + ", ";
+        auto& child = *childIter;
+        auto syntaxItem = AceType::DynamicCast<SyntaxItem>(child);
+        childrenKeysStr += syntaxItem->GetKey() + ", ";
+        childIter++;
+    }
+    return IsEqual(childrenKeysStr, expectKeysStr);
+}
+
 RefPtr<ListItemDragManager> ListCommonTestNg::GetForEachItemDragManager(int32_t itemIndex)
 {
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
@@ -218,6 +275,15 @@ RefPtr<ListItemDragManager> ListCommonTestNg::GetLazyForEachItemDragManager(int3
 {
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
     auto listItem = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetChildAtIndex(itemIndex));
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    return listItemPattern->dragManager_;
+}
+
+RefPtr<ListItemDragManager> ListCommonTestNg::GetRepeatItemDragManager(int32_t itemIndex)
+{
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(frameNode_->GetChildAtIndex(0));
+    auto syntaxItem = AceType::DynamicCast<SyntaxItem>(repeatNode->GetChildAtIndex(itemIndex));
+    auto listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     auto listItemPattern = listItem->GetPattern<ListItemPattern>();
     return listItemPattern->dragManager_;
 }
@@ -1917,4 +1983,644 @@ HWTEST_F(ListCommonTestNg, SetDigitalCrownSensitivity002, TestSize.Level1)
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
 }
 #endif
+
+/**
+ * @tc.name: ItemDragEventHandler001
+ * @tc.desc: Drag big delta to change order from index 0 to index 2 then trigger ItemDragEvent with lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler001, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInLazyForEachForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 0);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+    EXPECT_EQ(actualOnDropIndex, 2);
+}
+
+/**
+ * @tc.name: ItemDragEventHandler002
+ * @tc.desc: Drag big delta to change order from index 2 to index 0 then trigger ItemDragEvent with lazyforeach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler002, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInLazyForEachForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:2)
+     */
+    dragManager = GetLazyForEachItemDragManager(2);
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 2);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 2);
+    EXPECT_EQ(actualDragStartIndex, 2);
+
+    /**
+     * @tc.steps: step2. Drag up delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0, 149.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "0", "2", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag up delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-151.0);
+    info.SetGlobalPoint(Point(0, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "2", "0", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+    EXPECT_EQ(actualOnDropIndex, 0);
+}
+
+/**
+ * @tc.name: ItemDragEventHandler003
+ * @tc.desc: Drag a big delta to change order from index 2 to index 0 then trigger ItemDragEvent which is created by
+ * lazyforeach and itemDragEvents are null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler003, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    ListModelNG model = CreateList();
+    auto lazyForEachModelNG = CreateItemsInForLazyEachForItemDragEvent(3, 100.0f);
+    lazyForEachModelNG.OnMove(std::move(onMoveEvent));
+    lazyForEachModelNG.SetItemDragHandler(nullptr, nullptr, nullptr, nullptr);
+    CreateDone();
+
+    auto dragManager = GetLazyForEachItemDragManager(0);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, -1);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, -1);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+    EXPECT_EQ(actualOnDropIndex, -1);
+}
+
+/**
+ * @tc.name: ItemDragEventHandler004
+ * @tc.desc: Drag big delta to change order from index 0 to index 2 then trigger ItemDragEvent with foreach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler004, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInForEachForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 0);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+    EXPECT_EQ(actualOnDropIndex, 2);
+}
+
+/**
+ * @tc.name: ItemDragEventHandler005
+ * @tc.desc: Drag big delta to change order from index 2 to index 0 then trigger ItemDragEvent with foreach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler005, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInForEachForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+
+    auto dragManager = GetForEachItemDragManager(2);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:2)
+     */
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 2);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 2);
+    EXPECT_EQ(actualDragStartIndex, 2);
+
+    /**
+     * @tc.steps: step2. Drag up delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0, 149.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "0", "2", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag up delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-151.0);
+    info.SetGlobalPoint(Point(0, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "2", "0", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+    EXPECT_EQ(actualOnDropIndex, 0);
+}
+
+/**
+ * @tc.name: ItemDragEventHandler006
+ * @tc.desc: Drag a big delta to change order from index 0 to index 2 then trigger ItemDragEvent which is created by
+ * foreach and itemDragEvents are null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ItemDragEventHandler006, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    ListModelNG model = CreateList();
+
+    auto forEachModelNG = CreateForEachListForItemDragEvent(3, 1);
+    forEachModelNG.OnMove(std::move(onMoveEvent));
+    forEachModelNG.SetItemDragHandler(nullptr, nullptr, nullptr, nullptr);
+    CreateDone();
+
+    auto dragManager = GetForEachItemDragManager(0);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, -1);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, -1);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+    EXPECT_EQ(actualOnDropIndex, -1);
+}
+
+/**
+ * @tc.name: RepeatNodeItemDragEventHandler001
+ * @tc.desc: Drag big delta to change order from index 0 to index 2 then trigger ItemDragEvent with repeat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, RepeatNodeItemDragEventHandler001, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInRepeatForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    auto dragManager = GetRepeatItemDragManager(0);
+    GestureEvent info;
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 0);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, 0);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 0);
+    EXPECT_EQ(actualonMoveThroughTo, 2);
+    EXPECT_EQ(actualOnDropIndex, 2);
+}
+
+/**
+ * @tc.name: RepeatNodeItemDragEventHandler002
+ * @tc.desc: Drag big delta to change order from index 2 to index 0 then trigger ItemDragEvent with repeat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, RepeatNodeItemDragEventHandler002, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+    MapEventInRepeatForItemDragEvent(&actualDragStartIndex, &actualOnDropIndex, &actualOnLongPressIndex,
+        &actualonMoveThroughFrom, &actualonMoveThroughTo);
+    auto dragManager = GetRepeatItemDragManager(2);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:2)
+     */
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, 2);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 2);
+    EXPECT_EQ(actualDragStartIndex, 2);
+
+    /**
+     * @tc.steps: step2. Drag up delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.0);
+    info.SetGlobalPoint(Point(0, 149.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "0", "2", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 1);
+
+    /**
+     * @tc.steps: step3. Drag up delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-151.0);
+    info.SetGlobalPoint(Point(0, 49.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "2", "0", "1" }));
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, 2);
+    EXPECT_EQ(actualonMoveThroughTo, 0);
+    EXPECT_EQ(actualOnDropIndex, 0);
+}
+
+/**
+ * @tc.name: RepeatNodeItemDragEventHandler003
+ * @tc.desc: Drag a big delta to change order from index 0 to index 2 then trigger ItemDragEvent which is created by
+ * repeat and itemDragEvents are null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, RepeatNodeItemDragEventHandler003, TestSize.Level1)
+{
+    int32_t actualDragStartIndex = -1;
+    int32_t actualOnDropIndex = -1;
+    int32_t actualOnLongPressIndex = -1;
+    int32_t actualonMoveThroughFrom = -1;
+    int32_t actualonMoveThroughTo = -1;
+
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    CreateRepeatList(3, 1, onMoveEvent); // 1 lanes but 3 items
+    CreateDone();
+
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(frameNode_->GetChildAtIndex(0));
+
+    repeatNode->SetItemDragHandler(nullptr, nullptr, nullptr, nullptr);
+    auto dragManager = GetRepeatItemDragManager(0);
+    GestureEvent info;
+
+    /**
+     * @tc.steps: step1. Drag item(index:0)
+     */
+    dragManager->HandleOnItemLongPress(info);
+    EXPECT_EQ(actualOnLongPressIndex, -1);
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 0);
+    EXPECT_EQ(actualDragStartIndex, -1);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: Change of order
+     */
+
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(51.0);
+    info.SetGlobalPoint(Point(0, 51.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step3. Drag down delta > ITEM_MAIN_SIZE
+     * @tc.expected: Continue change of order
+     */
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(151.0);
+    info.SetGlobalPoint(Point(0, 151.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyRepeatItemsOrder({ "1", "2", "0" }));
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+
+    /**
+     * @tc.steps: step4. Drag end
+     * @tc.expected: Trigger onMoveEvent
+     */
+    dragManager->HandleOnItemDragEnd(info);
+    EXPECT_EQ(actualonMoveThroughFrom, -1);
+    EXPECT_EQ(actualonMoveThroughTo, -1);
+    EXPECT_EQ(actualOnDropIndex, -1);
+}
+
+void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+    int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    auto onLongPressEvent = [actualOnLongPressIndex](int32_t index) { *actualOnLongPressIndex = index; };
+    auto onDragStartEvent = [actualDragStartIndex](int32_t index) { *actualDragStartIndex = index; };
+    auto onMoveThroughEvent = [actualonMoveThroughFrom, actualonMoveThroughTo](int32_t from, int32_t to) {
+        *actualonMoveThroughFrom = from;
+        *actualonMoveThroughTo = to;
+    };
+    auto onDropEvent = [actualOnDropIndex](int32_t index) { *actualOnDropIndex = index; };
+    ListModelNG model = CreateList();
+    auto lazyForEachModelNG = CreateItemsInForLazyEachForItemDragEvent(3, 100.0f);
+    lazyForEachModelNG.OnMove(std::move(onMoveEvent));
+    lazyForEachModelNG.SetItemDragHandler(std::move(onLongPressEvent), std::move(onDragStartEvent),
+        std::move(onMoveThroughEvent), std::move(onDropEvent));
+    CreateDone();
+}
+
+void ListCommonTestNg::MapEventInForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+    int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    auto onLongPressEvent = [actualOnLongPressIndex](int32_t index) { *actualOnLongPressIndex = index; };
+    auto onDragStartEvent = [actualDragStartIndex](int32_t index) { *actualDragStartIndex = index; };
+    auto onMoveThroughEvent = [actualonMoveThroughFrom, actualonMoveThroughTo](int32_t from, int32_t to) {
+        *actualonMoveThroughFrom = from;
+        *actualonMoveThroughTo = to;
+    };
+    auto onDropEvent = [actualOnDropIndex](int32_t index) { *actualOnDropIndex = index; };
+    ListModelNG model = CreateList();
+    auto forEachModelNG = CreateForEachListForItemDragEvent(3, 1);
+    forEachModelNG.OnMove(std::move(onMoveEvent));
+    forEachModelNG.SetItemDragHandler(std::move(onLongPressEvent), std::move(onDragStartEvent),
+        std::move(onMoveThroughEvent), std::move(onDropEvent));
+    CreateDone();
+}
+
+void ListCommonTestNg::MapEventInRepeatForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
+    int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
+{
+    auto onMoveEvent = [](int32_t from, int32_t to) {};
+    auto onLongPressEvent = [actualOnLongPressIndex](int32_t index) { *actualOnLongPressIndex = index; };
+    auto onDragStartEvent = [actualDragStartIndex](int32_t index) { *actualDragStartIndex = index; };
+    auto onMoveThroughEvent = [actualonMoveThroughFrom, actualonMoveThroughTo](int32_t from, int32_t to) {
+        *actualonMoveThroughFrom = from;
+        *actualonMoveThroughTo = to;
+    };
+    auto onDropEvent = [actualOnDropIndex](int32_t index) { *actualOnDropIndex = index; };
+    ListModelNG model = CreateList();
+    CreateRepeatList(3, 1, onMoveEvent); // 1 lanes but 3 items
+    CreateDone();
+    auto repeatNode = AceType::DynamicCast<RepeatNode>(frameNode_->GetChildAtIndex(0));
+    repeatNode->SetItemDragHandler(std::move(onLongPressEvent), std::move(onDragStartEvent),
+        std::move(onMoveThroughEvent), std::move(onDropEvent));
+}
 } // namespace OHOS::Ace::NG

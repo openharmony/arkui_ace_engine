@@ -1047,6 +1047,11 @@ bool GestureEventHub::IsClickable() const
     return clickEventActuator_ != nullptr;
 }
 
+bool GestureEventHub::IsComponentClickable() const
+{
+    return clickEventActuator_ && clickEventActuator_->IsComponentClickable();
+}
+
 bool GestureEventHub::IsUserClickable() const
 {
     return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();

@@ -309,6 +309,7 @@
       OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
+      "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
 
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
@@ -425,7 +426,7 @@
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
-      OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::Ace::LifeCycleCheckable::*;
       OHOS::Ace::Kit::ViewStackProcessor::*;
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;

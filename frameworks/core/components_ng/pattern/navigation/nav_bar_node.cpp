@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 namespace OHOS::Ace::NG {
-constexpr float CONTENT_OFFSET_PERCENT  = 0.2f;
 constexpr float TITLE_OFFSET_PERCENT  = 0.02f;
 
 RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
@@ -62,13 +61,18 @@ void NavBarNode::InitSystemTransitionPop()
     // navabr do enter pop initialization
     float isRTL = GetLanguageDirection();
     SetTransitionType(PageTransitionType::ENTER_POP);
-    auto curFrameSize = GetGeometryNode()->GetFrameSize();
-    GetRenderContext()->RemoveClipWithRRect();
-    GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    renderContext->RemoveClipWithRRect();
+    auto translate = CalcTranslateForTransitionPopStart(frameSize, true);
+    renderContext->UpdateTranslateInXY(translate);
     auto curTitleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(curTitleBarNode);
     curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
-        { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
 void NavBarNode::SystemTransitionPushAction(bool isStart)
@@ -89,9 +93,14 @@ void NavBarNode::StartSystemTransitionPush()
 {
     // start EXIT_PUSH transition animation
     float isRTL = GetLanguageDirection();
-    auto frameSize = GetGeometryNode()->GetFrameSize();
-    GetRenderContext()->UpdateTranslateInXY(
-        { -frameSize.Width() * CONTENT_OFFSET_PERCENT * isRTL, 0.0f });
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto translate = CalcTranslateForTransitionPushEnd(frameSize, false);
+    renderContext->UpdateTranslateInXY(translate);
+
     auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
     titleNode->GetRenderContext()->UpdateTranslateInXY(

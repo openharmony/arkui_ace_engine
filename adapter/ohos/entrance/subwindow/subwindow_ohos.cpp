@@ -217,9 +217,10 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
         size = Size(display->GetWidth(), display->GetHeight());
     }
 
+    auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s", isScenceBoard,
-        isCrossWindow, size.ToString().c_str());
+        "parentWindow windowId: %{public}d isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
+        parentWindowId, isScenceBoard, isCrossWindow, size.ToString().c_str());
     return size;
 }
 
@@ -936,7 +937,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -1223,7 +1224,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
-    ShowWindow();
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);

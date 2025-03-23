@@ -94,6 +94,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void UpdateUserSetSelectColor() override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
@@ -165,7 +166,7 @@ private:
     static inline uint32_t showCount_ = 0;
     static inline std::shared_mutex showCountMutex_;
     static inline std::shared_mutex isSingleMutex_;
-    static inline uint32_t columnkind_ = TEXT;
+    static inline uint32_t columnKind_ = TEXT;
 };
 
 class ACE_EXPORT TextPickerDialogModelNG : public TextPickerDialogModel {

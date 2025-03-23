@@ -303,6 +303,7 @@ protected:
     void BarAnimationFinishCallback(bool needRunTitleBarAnimation, bool needRunToolBarAnimation, int32_t animationId);
     void UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
+    bool CustomizeExpandSafeArea() override;
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;

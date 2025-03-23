@@ -275,29 +275,29 @@ public:
     }
 
     bool DownloadAsyncWithPreload(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId) override
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {
         auto innerCallback = std::make_unique<Request::PreloadCallback>();
         innerCallback->OnSuccess = [this, successCallback = downloadCallback.successCallback,
-                                       failCallback = downloadCallback.failCallback, instanceId, url,
-                                       nodeId](const std::shared_ptr<Request::Data>&& data, const std::string& taskId) {
+                                       failCallback = downloadCallback.failCallback, instanceId,
+                                       url](const std::shared_ptr<Request::Data>&& data, const std::string& taskId) {
             LOGI("Async http task of url [%{private}s-%{public}s] success", url.c_str(), taskId.c_str());
             successCallback(std::move(std::string(data->bytes().data(), data->bytes().data() + data->bytes().length())),
                 true, instanceId);
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, url, nodeId]() {
+        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, url]() {
             LOGI("Async Http task of url [%{private}s] cancelled", url.c_str());
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnFail = [this, failCallback = downloadCallback.failCallback, instanceId, url, nodeId](
+        innerCallback->OnFail = [this, failCallback = downloadCallback.failCallback, instanceId, url](
                                     const Request::PreloadError& error, const std::string& taskId) {
             LOGI("ASync http task of url [%{private}s-%{public}s] failed, reason [%{private}s]", url.c_str(),
                 taskId.c_str(), error.GetMessage().c_str());
             std::string errorMsg = "Http task of url " + url + " failed, response code " +
                                    std::to_string(error.GetCode()) + ", msg from netStack: " + error.GetMessage();
             failCallback(errorMsg, true, instanceId);
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
 
         if (downloadCallback.onProgressCallback) {
@@ -309,7 +309,7 @@ public:
         auto handle = Request::Preload::GetInstance()->load(url, std::move(innerCallback));
         bool isSuccess = (handle != nullptr);
         if (isSuccess) {
-            AddDownloadTaskForPreload(url, handle, nodeId);
+            AddDownloadTaskForPreload(url, handle);
         }
         LOGI("Async http download src [%{private}s] [%{public}s]", url.c_str(),
             isSuccess ? " successfully" : " failed to download, please check netStack log");
@@ -327,11 +327,11 @@ public:
     }
 
     bool DownloadSyncWithPreload(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId) override
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId) override
     {
         auto innerCallback = std::make_unique<Request::PreloadCallback>();
         auto downloadCondition = std::make_shared<DownloadCondition>();
-        innerCallback->OnSuccess = [this, downloadCondition, url, nodeId](
+        innerCallback->OnSuccess = [this, downloadCondition, url](
                                        const std::shared_ptr<Request::Data>&& data, const std::string& taskId) {
             LOGI("Sync http task of url [%{private}s-%{public}s] success", url.c_str(), taskId.c_str());
             {
@@ -341,9 +341,9 @@ public:
                     std::string(data->bytes().data(), data->bytes().data() + data->bytes().length());
             }
             downloadCondition->cv.notify_all();
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnCancel = [this, downloadCondition, url, nodeId]() {
+        innerCallback->OnCancel = [this, downloadCondition, url]() {
             LOGI("Sync Http task of url [%{private}s] cancelled", url.c_str());
             {
                 std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
@@ -353,9 +353,9 @@ public:
                 downloadCondition->downloadSuccess = false;
             }
             downloadCondition->cv.notify_all();
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnFail = [this, downloadCondition, url, nodeId](
+        innerCallback->OnFail = [this, downloadCondition, url](
                                     const Request::PreloadError& error, const std::string& taskId) {
             LOGI("Sync http task of url [%{private}s-%{public}s] failed, reason [%{private}s]", url.c_str(),
                 taskId.c_str(), error.GetMessage().c_str());
@@ -366,7 +366,7 @@ public:
                 downloadCondition->downloadSuccess = false;
             }
             downloadCondition->cv.notify_all();
-            RemoveDownloadTaskWithPreload(url, nodeId, false);
+            RemoveDownloadTaskWithPreload(url, false);
         };
 
         if (downloadCallback.onProgressCallback) {
@@ -378,7 +378,7 @@ public:
         auto handle = Request::Preload::GetInstance()->load(url, std::move(innerCallback));
         bool isSuccess = (handle != nullptr);
         if (isSuccess) {
-            AddDownloadTaskForPreload(url, handle, nodeId);
+            AddDownloadTaskForPreload(url, handle);
         }
         return HandleDownloadResult(isSuccess, std::move(downloadCallback), downloadCondition, instanceId, url);
     }
@@ -419,11 +419,10 @@ public:
         return false;
     }
 
-    bool RemoveDownloadTaskWithPreload(const std::string& url, int32_t nodeId, bool isCancel = true) override
+    bool RemoveDownloadTaskWithPreload(const std::string& url, bool isCancel = true) override
     {
         std::scoped_lock lock(httpHandleMutexForPreload_);
-        auto urlKey = url + std::to_string(nodeId);
-        auto iter = httpHandleMapForPreload_.find(urlKey);
+        auto iter = httpHandleMapForPreload_.find(url);
         if (iter != httpHandleMapForPreload_.end()) {
             auto task = iter->second;
             if (task->GetState() == Request::PreloadState::RUNNING && isCancel) {
@@ -503,10 +502,10 @@ private:
 
     // use preload module to download the url
     void AddDownloadTaskForPreload(
-        const std::string& url, const std::shared_ptr<Request::PreloadHandle>& handle, int32_t nodeId)
+        const std::string& url, const std::shared_ptr<Request::PreloadHandle>& handle)
     {
         std::scoped_lock lock(httpHandleMutexForPreload_);
-        httpHandleMapForPreload_.emplace(url + std::to_string(nodeId), handle);
+        httpHandleMapForPreload_.emplace(url, handle);
     }
 
     bool Initialize()

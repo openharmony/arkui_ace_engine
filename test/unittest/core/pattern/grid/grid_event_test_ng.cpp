@@ -210,7 +210,7 @@ HWTEST_F(GridEventTestNg, HandleDragOverScroll004, TestSize.Level1)
 
     float dragDelta = 10.0f;
     DragAction(frameNode_, Offset(), dragDelta, DRAG_VELOCITY);
-    EXPECT_LT(-(pattern_->GetTotalOffset()), dragDelta);
+    EXPECT_EQ(-(pattern_->GetTotalOffset()), dragDelta);
     EXPECT_GT(-(pattern_->GetTotalOffset()), 0);
     float currentOffset = -(pattern_->GetTotalOffset());
     EXPECT_TRUE(TickPosition(DRAG_VELOCITY, currentOffset + DRAG_VELOCITY));

@@ -22,6 +22,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -38,9 +39,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifdef SUPPORT_DIGITAL_CROWN
-#include "core/common/vibrator/vibrator_utils.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -108,7 +106,7 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         HandleEnabled();
     }
     SetAccessibilityAction();
@@ -125,35 +123,19 @@ void SliderPattern::OnModifyDone()
 
 void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
 {
-    if (!hapticController_ || !isEnableHaptic_) {
+    if (!isEnableHaptic_ || !hapticApiEnabled) {
         return;
     }
     if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
-        hapticController_->PlayOnce();
+        VibratorUtils::StartViratorDirectly(SLIDER_EFFECT_ID_NAME);
     }
 }
-
 void SliderPattern::InitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (GetEnableHapticFeedback()) {
-        if (!hapticController_) {
-            auto context = host->GetContext();
-            CHECK_NULL_VOID(context);
-            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
-            });
-        }
-    } else {
-        if (hapticController_) {
-            hapticController_->Stop();
-        }
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        hapticApiEnabled = true;
     }
 }
 
@@ -1964,9 +1946,6 @@ void SliderPattern::StartAnimation()
 
 void SliderPattern::StopAnimation()
 {
-    if (hapticController_) {
-        hapticController_->Stop();
-    }
     CHECK_NULL_VOID(sliderContentModifier_);
     if (!sliderContentModifier_->GetVisible()) {
         return;
@@ -2129,9 +2108,6 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    if (hapticController_) {
-        hapticController_->Stop();
-    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());

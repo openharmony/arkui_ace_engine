@@ -220,7 +220,7 @@ public:
         return contentMod_;
     }
 
-    void SetTextDetectEnable(bool enable);
+    virtual void SetTextDetectEnable(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
@@ -624,7 +624,7 @@ public:
     void OnSensitiveStyleChange(bool isSensitive) override;
 
     bool IsSetObscured();
-    bool IsSensitiveEnalbe();
+    bool IsSensitiveEnable();
 
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
     {

@@ -170,7 +170,6 @@ ohos_unittest("image_cache_test") {
     "$ace_root/frameworks/core/components/stack/render_stack.cpp",
     "$ace_root/frameworks/core/components/stage/render_stage.cpp",
     "$ace_root/frameworks/core/components/stage/stage_element.cpp",
-    "$ace_root/frameworks/core/components/test/json/json_frontend.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_render_common.cpp",
     "$ace_root/frameworks/core/components/tween/tween_component.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",

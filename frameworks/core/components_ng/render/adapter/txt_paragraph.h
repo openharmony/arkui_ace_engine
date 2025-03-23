@@ -86,6 +86,8 @@ public:
 
     // interfaces for layout
     void Layout(float width) override;
+    // interfaces for reLayout
+    void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
     float GetHeight() override;
     float GetTextWidth() override;
     size_t GetLineCount() override;
@@ -138,10 +140,6 @@ public:
     void TxtGetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
-    virtual bool IsEndAddParagraphSpacing()
-    {
-        return false;
-    }
 
 protected:
     virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
@@ -172,6 +170,7 @@ private:
     int32_t GetIndexWithoutPlaceHolder(int32_t index);
     bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
     bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
+    void ConvertTypographyStyle(Rosen::TypographyStyle& style, const ParagraphStyle& paraStyle);
 
     std::u16string text_;
     int32_t placeholderCnt_ = 0;

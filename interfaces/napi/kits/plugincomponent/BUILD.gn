@@ -13,6 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import(
+    "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/uiservicems.gni")
 
 ohos_shared_library("plugincomponent") {
   include_dirs = [
@@ -38,6 +40,10 @@ ohos_shared_library("plugincomponent") {
   sources += [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
 
   deps = [ "$ace_root/build:libace_compatible" ]
+
+  if (ace_engine_enable_uiservice_idl) {
+    public_deps = [ "$ace_root/interfaces/inner_api/ui_service_manager:uiservice_manager_interface_set" ]
+  }
 
   external_deps = [
     "ability_base:base",

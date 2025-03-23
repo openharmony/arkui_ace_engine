@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDICATOR_TYPE_INDEX = 0;
-constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 constexpr int32_t DIGIT_INDICATOR_LEFT = 7;
 constexpr int32_t DIGIT_INDICATOR_TOP = 8;
 constexpr int32_t DIGIT_INDICATOR_RIGHT = 9;
@@ -48,6 +47,7 @@ constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
 constexpr int32_t DOT_INDICATOR_SPACE = 13;
+constexpr int32_t DEFAULT_INDICATOR_COUNT = 2;
 namespace {
 
 std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
@@ -239,7 +239,7 @@ void SetCount(ArkUINodeHandle node, ArkUI_Int32 count)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (count < 0) {
-        count = DEFAULT_CACHED_COUNT;
+        count = DEFAULT_INDICATOR_COUNT;
     }
     IndicatorModelNG::SetCount(frameNode, count);
 }
@@ -248,7 +248,7 @@ void ResetCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndicatorModelNG::SetCount(frameNode, DEFAULT_DISPLAY_COUNT);
+    IndicatorModelNG::SetCount(frameNode, DEFAULT_INDICATOR_COUNT);
 }
 
 void SetOnChange(ArkUINodeHandle node, void* callback)

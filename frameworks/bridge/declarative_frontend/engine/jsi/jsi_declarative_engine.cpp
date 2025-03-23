@@ -342,11 +342,11 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             ohmUrlValid = true;
         } else {
-            LOGE("add named router record with invalid ohmUrl!");
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
-        LOGI("build ohmUrl for forward compatibility");
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
@@ -1358,7 +1358,7 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
 {
     auto weakDelegate = WeakPtr(engineInstance_->GetDelegate());
     auto&& assetFunc = [weakDelegate](const std::string& uri, uint8_t** buff, size_t* buffSize,
-        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, bool isRestricted) {
+        std::vector<uint8_t>& content, std::string& ami, bool& useSecureMem, void** mapper, bool isRestricted) {
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
             return;

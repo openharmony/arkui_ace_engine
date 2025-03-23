@@ -1916,6 +1916,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
     JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
+    JSClass<JSWeb>::StaticMethod("nativeEmbedOptions", &JSWeb::NativeEmbedOptions);
     JSClass<JSWeb>::StaticMethod("registerNativeEmbedRule", &JSWeb::RegisterNativeEmbedRule);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
@@ -3506,6 +3507,20 @@ void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
 {
     WebModel::GetInstance()->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    std::optional<bool> enable;
+    JSRef<JSVal> enableJsValue = paramObject->GetProperty("supportDefaultIntrinsicSize");
+    if (enableJsValue->IsBoolean()) {
+        enable = enableJsValue->ToBoolean();
+        WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
+    }
 }
 
 void JSWeb::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

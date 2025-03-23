@@ -603,9 +603,9 @@ void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorC
         nativeParams.replacedSpans = nativeReplacedSpans;
         nativeParams.replacedImageSpans = nativeReplacedImageSpans;
         nativeParams.replacedSymbolSpans = nativeReplacedSymbolSpans;
-        nativeParams.replacedSpansSize = replacedSpans.size();
-        nativeParams.replacedImageSpansSize = replacedImageSpans.size();
-        nativeParams.replacedSymbolSpansSize = replacedSymbolSpans.size();
+        nativeParams.replacedSpansSize = static_cast<int64_t>(replacedSpans.size());
+        nativeParams.replacedImageSpansSize = static_cast<int64_t>(replacedImageSpans.size());
+        nativeParams.replacedSymbolSpansSize = static_cast<int64_t>(replacedSymbolSpans.size());
         bool res = cjCallback(nativeParams);
         delete[] nativeReplacedSpans;
         delete[] nativeReplacedImageSpans;

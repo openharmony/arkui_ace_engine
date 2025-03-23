@@ -41,6 +41,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/property/measure_utils.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -1837,4 +1837,14 @@ void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateMenuItemDivider();
 }
+
+void SelectPattern::SetMenuOutline(const MenuParam& menuParam)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
+    renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
+}
 } // namespace OHOS::Ace::NG

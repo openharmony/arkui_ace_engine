@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
     if (info->startIndex_ > info->endIndex_) {
         return preloadList;
     }
-    const int32_t endBound = std::min(info->ItemCnt(host->GetTotalChildCount()) - 1, info->endIndex_ + cacheCount);
+    const int32_t endBound = std::min(info->ItemCnt(info->GetChildrenCount()) - 1, info->endIndex_ + cacheCount);
     for (int32_t i = info->endIndex_ + 1; i <= endBound; ++i) {
         if (force || !host->GetChildByIndex(info->NodeIdx(i), true)) {
             preloadList.emplace_back(i);

@@ -74,6 +74,8 @@ public:
     static ArkUINativeModuleValue SetOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSelectDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSelectDirection(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static Local<panda::ObjectRef> ConstructSelect(EcmaVM* vm, FrameNode* frameNode, MenuItemConfiguration& config);
 };

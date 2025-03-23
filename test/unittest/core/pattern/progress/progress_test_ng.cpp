@@ -1154,10 +1154,10 @@ HWTEST_F(ProgressTestNg, ProgressPrivacySensitiveTest001, TestSize.Level1)
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
     pattern->OnSensitiveStyleChange(false);
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), false);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), false);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), false);
     pattern->OnSensitiveStyleChange(true);
     EXPECT_EQ(progressPaintProperty->GetIsSensitive().value_or(false), true);
-    EXPECT_EQ(textPattern->IsSensitiveEnalbe(), true);
+    EXPECT_EQ(textPattern->IsSensitiveEnable(), true);
 }
 
 /**

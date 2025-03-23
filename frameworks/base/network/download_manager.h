@@ -59,13 +59,13 @@ public:
     virtual bool DownloadSync(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId, bool isCancel = true);
-    virtual bool RemoveDownloadTaskWithPreload(const std::string& url, int32_t nodeId, bool isCancel = true);
+    virtual bool RemoveDownloadTaskWithPreload(const std::string& url, bool isCancel = true);
 
     // use preload module to download the url
     virtual bool DownloadAsyncWithPreload(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
     virtual bool DownloadSyncWithPreload(
-        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
+        DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId);
     virtual bool IsContains(const std::string& url);
     // Synchronously queries the cache in the preDownLoad module and assigns the result if found.
     virtual bool fetchCachedResult(const std::string& url, std::string& result);

@@ -151,7 +151,6 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
 constexpr int32_t LAND_DURATION = 100;
-constexpr float TOUCH_OPACITY = 0.1f;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -2613,9 +2612,12 @@ void TextFieldPattern::HandleOnDragStatusCallback(
 {
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnDragStatusCallback dragEventType=%{public}d", dragEventType);
-    if (dragEventType == DragEventType::DROP && dragRecipientStatus_ == DragStatus::DRAGGING) {
-        StopContentScroll();
-        StopTwinkling();
+    if (dragEventType == DragEventType::DROP) {
+        if (dragRecipientStatus_ == DragStatus::DRAGGING) {
+            StopContentScroll();
+            StopTwinkling();
+        }
+        dragRecipientStatus_ = DragStatus::NONE;
     }
 }
 
@@ -7588,6 +7590,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     ToJsonValueForOption(json, filter);
+    ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }
 
@@ -7596,6 +7599,30 @@ void TextFieldPattern::ToTreeJson(std::unique_ptr<JsonValue>& json, const Inspec
     Pattern::ToTreeJson(json, config);
     json->Put(TreeKey::CONTENT, contentController_->GetTextValue().c_str());
     json->Put(TreeKey::PLACEHOLDER, GetPlaceHolder().c_str());
+}
+
+void TextFieldPattern::ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->HasFontFeature()) {
+        json->PutExtAttr("fontFeature", "", filter);
+        return;
+    }
+    auto fontFeature = layoutProperty->GetFontFeature().value();
+    std::string fontFeatureString = "";
+    for (const auto& fontFeatureItem : fontFeature) {
+        fontFeatureString += fontFeatureItem.first;
+        fontFeatureString += " ";
+        fontFeatureString += fontFeatureItem.second ? "on" : "off";
+        fontFeatureString += ",";
+    }
+    if (!fontFeatureString.empty()) {
+        fontFeatureString.pop_back();
+    }
+    json->PutExtAttr("fontFeature", fontFeatureString.c_str(), filter);
 }
 
 void TextFieldPattern::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -9266,7 +9293,7 @@ void TextFieldPattern::FinishTextPreview()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
-void TextFieldPattern::FinishTextPreviewOperation()
+void TextFieldPattern::FinishTextPreviewOperation(bool triggerOnWillChange)
 {
     if (!hasPreviewText_) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "input state now is not at previewing text");
@@ -9307,7 +9334,10 @@ void TextFieldPattern::FinishTextPreviewOperation()
     changeValueInfo.value = GetBodyTextValue();
     changeValueInfo.previewText.offset = hasPreviewText_ ? GetPreviewTextStart() : -1;
     changeValueInfo.previewText.value = GetPreviewTextValue();
-    bool isWillChange = FireOnWillChange(changeValueInfo);
+    bool isWillChange = true;
+    if (triggerOnWillChange) {
+        isWillChange = FireOnWillChange(changeValueInfo);
+    }
     if (!isWillChange) {
         RecoverTextValueAndCaret(oldValue, originCaretIndex);
         return;
@@ -10764,7 +10794,9 @@ void TextFieldPattern::HandleCancelButtonTouchDown(const RefPtr<TextInputRespons
     responseArea->CreateIconRect(mouseRect, false);
     float cornerRadius = mouseRect.GetRect().Width() / 2;
     mouseRect.SetCornerRadius(cornerRadius);
-    Color touchColor = Color::FromRGBO(0, 0, 0, TOUCH_OPACITY);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto touchColor = textFieldTheme->GetPressColor();
     std::vector<RoundRect> roundRectVector;
     roundRectVector.push_back(mouseRect);
     CHECK_NULL_VOID(textFieldOverlayModifier_);

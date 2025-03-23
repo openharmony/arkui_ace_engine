@@ -172,6 +172,7 @@ template("ace_osal_ohos_source_set") {
     }
     sources += [
       "background_task_helper_ohos.cpp",
+      "display_manager_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
       "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
@@ -181,6 +182,7 @@ template("ace_osal_ohos_source_set") {
       "mouse_style_ohos.cpp",
       "navigation_route_ohos.cpp",
       "page_url_checker_ohos.cpp",
+      "page_viewport_config_ohos.cpp",
       "pixel_map_ohos.cpp",
       "system_bar_style_ohos.cpp",
     ]

@@ -1599,4 +1599,110 @@ HWTEST_F(CustomTestNg, CustomTest039, TestSize.Level1)
     bool result = customNode->Render();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: CustomTest040
+ * @tc.desc: CustomMeasureLayoutNode::GetJsActive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Call DoSetActiveChildRange.
+     * @tc.expected: Returns the expected result.
+     */
+    int32_t start = 0;
+    int32_t end = 0;
+    int32_t cacheStart = 0;
+    int32_t cacheEnd = 0;
+    bool showCache = true;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_TRUE(customNode->GetJsActive());
+
+    showCache = false;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_TRUE(customNode->GetJsActive());
+
+    start = -1;
+    end = -1;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_FALSE(customNode->GetJsActive());
+
+    start = 1;
+    end = 1;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_FALSE(customNode->GetJsActive());
+
+    end = 0;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_TRUE(customNode->GetJsActive());
+
+    end = -1;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_FALSE(customNode->GetJsActive());
+
+    start = -1;
+    end = -2;
+    customNode->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
+    EXPECT_TRUE(customNode->GetJsActive());
+}
+
+/**
+ * @tc.name: CustomTest041
+ * @tc.desc: GetFrameChildByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Set isCache is false and call GetFrameChildByIndex.
+     * @tc.expected: Create successful and prevJsActive_ is false.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    uint32_t index = 0;
+    customNode->AddChild(node);
+    customNode->SetJSViewActive(false);
+    RefPtr<UINode> UINode = customNode->GetFrameChildByIndex(index, true, true);
+    EXPECT_NE(UINode, nullptr);
+    EXPECT_FALSE(customNode->GetJsActive());
+}
+
+/**
+ * @tc.name: CustomTest042
+ * @tc.desc: FireCustomDisappear.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Set customNode->executeFireOnAppear_ is true and call FireCustomDisappear.
+     * @tc.expected: customNode->executeFireOnAppear_ is true.
+     */
+    customNode->executeFireOnAppear_ = true;
+    customNode->FireCustomDisappear();
+    EXPECT_TRUE(customNode->executeFireOnAppear_);
+
+    /**
+     * @tc.steps: step2. Set customNode->executeFireOnAppear_ is false and call FireCustomDisappear.
+     * @tc.expected: customNode->executeFireOnAppear_ is true.
+     */
+    customNode->executeFireOnAppear_ = false;
+    customNode->FireCustomDisappear();
+    EXPECT_TRUE(customNode->executeFireOnAppear_);
+}
 } // namespace OHOS::Ace::NG

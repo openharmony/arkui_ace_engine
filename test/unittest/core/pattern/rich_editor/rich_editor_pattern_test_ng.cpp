@@ -38,10 +38,8 @@ int32_t testFrameNodeId = 1;
 int32_t testNumber0 = 0;
 int32_t testNumber1 = 1;
 int32_t testNumber2 = 2;
-int32_t testNumber3 = 3;
 int32_t testNumber4 = 4;
 int32_t testNumber5 = 5;
-int32_t callBack1 = 0;
 } // namespace
 
 class RichEditorPatternTestNg : public RichEditorCommonTestNg {
@@ -83,111 +81,6 @@ void RichEditorPatternTestNg::TearDown()
 void RichEditorPatternTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RichEditorPatternTestClearDragDropEvent001
- * @tc.desc: test RichEditorPattern
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestClearDragDropEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->ClearDragDropEvent();
-
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto eventHub = host->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    ASSERT_EQ(eventHub->onDragStart_, nullptr);
-}
-
-/**
- * @tc.name: RichEditorPatternTestOnDragMove001
- * @tc.desc: test OnDragMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnDragMove001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-
-    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
-    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
-
-    auto overlayMod = richEditorPattern->overlayMod_;
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->OnDragMove(event);
-    richEditorPattern->overlayMod_ = overlayMod;
-
-    auto isShowPlaceholder = richEditorPattern->isShowPlaceholder_;
-    richEditorPattern->isShowPlaceholder_ = !isShowPlaceholder;
-    richEditorPattern->OnDragMove(event);
-    richEditorPattern->isShowPlaceholder_ = isShowPlaceholder;
-
-    richEditorPattern->prevAutoScrollOffset_.SetX(testNumber1);
-    richEditorPattern->prevAutoScrollOffset_.SetY(testNumber1);
-    richEditorPattern->richTextRect_.SetRect(testNumber0, testNumber0, testNumber5, testNumber5);
-
-    event->SetX(testNumber3);
-    event->SetY(testNumber3);
-    richEditorPattern->OnDragMove(event);
-    EXPECT_EQ(richEditorPattern->prevAutoScrollOffset_.GetX(), testNumber3);
-
-    event->SetX(testNumber4);
-    event->SetY(testNumber4);
-    richEditorPattern->OnDragMove(event);
-    EXPECT_EQ(richEditorPattern->prevAutoScrollOffset_.GetX(), testNumber4);
-
-    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
- * @tc.name: RichEditorPatternTestResetDragSpanItems001
- * @tc.desc: test ResetDragSpanItems
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestResetDragSpanItems001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->dragSpanItems_.clear();
-    richEditorPattern->ResetDragSpanItems();
-
-    auto firstItem = AceType::MakeRefPtr<ImageSpanItem>();
-    firstItem->imageNodeId = testFrameNodeId;
-    richEditorPattern->dragSpanItems_.emplace_back(firstItem);
-    richEditorPattern->ResetDragSpanItems();
-    ASSERT_EQ(richEditorPattern->dragSpanItems_.size(), 0);
-
-    auto secondItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    secondItem->placeholderSpanNodeId = testFrameNodeId;
-    richEditorPattern->dragSpanItems_.emplace_back(secondItem);
-    richEditorPattern->ResetDragSpanItems();
-    ASSERT_EQ(richEditorPattern->dragSpanItems_.size(), 0);
-
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto childFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, testFrameNodeId, richEditorPattern);
-    ASSERT_NE(childFrameNode, nullptr);
-    host->children_.emplace_back(childFrameNode);
-    auto thirdItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    thirdItem->placeholderSpanNodeId = testFrameNodeId;
-    richEditorPattern->dragSpanItems_.clear();
-    richEditorPattern->dragSpanItems_.emplace_back(thirdItem);
-    richEditorPattern->ResetDragSpanItems();
-    ASSERT_EQ(richEditorPattern->dragSpanItems_.size(), 0);
 }
 
 /**
@@ -577,78 +470,6 @@ HWTEST_F(RichEditorPatternTestNg, AdjustPlaceholderSelection001, TestSize.Level1
 }
 
 /**
- * @tc.name: OnAutoScroll001
- * @tc.desc: test OnAutoScroll
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, OnAutoScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AutoScrollParam param;
-    param.showScrollbar = true;
-    param.offset = 0.0f;
-    richEditorPattern->contentChange_ = false;
-    richEditorPattern->contentRect_.SetRect(0, 0, 1, 1);
-    richEditorPattern->richTextRect_.SetRect(0, 0, 1, 1);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    param.isFirstHandle = true;
-    param.autoScrollEvent = AutoScrollEvent::HANDLE;
-    richEditorPattern->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    param.autoScrollEvent = AutoScrollEvent::DRAG;
-    richEditorPattern->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    param.autoScrollEvent = AutoScrollEvent::MOUSE;
-    richEditorPattern->OnAutoScroll(param);
-    EXPECT_TRUE(param.showScrollbar);
-}
-
-/**
- * @tc.name: ScheduleAutoScroll001
- * @tc.desc: test ScheduleAutoScroll
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, ScheduleAutoScroll001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AutoScrollParam param;
-    param.isFirstRun_ = true;
-    param.offset = 0.0f;
-    richEditorPattern->contentRect_.SetRect(0, 1, 1, 1);
-    richEditorPattern->richTextRect_.SetRect(0, 2, 1, 1);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->isAutoScrollRunning_ = true;
-    richEditorPattern->ScheduleAutoScroll(param);
-    EXPECT_TRUE(param.isFirstRun_);
-}
-
-/**
  * @tc.name: UpdateChildrenOffset001
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
@@ -758,36 +579,6 @@ HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnScrollEndCallback001
- * @tc.desc: test OnScrollEndCallback
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, OnScrollEndCallback001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 6;
-    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->OnScrollEndCallback();
-    auto res = richEditorPattern->IsSelectAreaVisible();
-    EXPECT_TRUE(res);
-}
-
-/**
  * @tc.name: IsCaretInContentArea001
  * @tc.desc: test IsCaretInContentArea
  * @tc.type: FUNC
@@ -808,86 +599,6 @@ HWTEST_F(RichEditorPatternTestNg, IsCaretInContentArea001, TestSize.Level1)
      */
     auto ret = richEditorPattern->IsCaretInContentArea();
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: UpdateScrollBarOffset001
- * @tc.desc: test UpdateScrollBarOffset
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, UpdateScrollBarOffset001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto tmpHost = richEditorPattern->GetHost();
-    ASSERT_NE(tmpHost, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->scrollBar_ = nullptr;
-    richEditorPattern->scrollBarProxy_ = nullptr;
-    richEditorPattern->UpdateScrollBarOffset();
-    EXPECT_FALSE(tmpHost->isPropertyDiffMarked_);
-}
-
-/**
- * @tc.name: GetChangeSpanStyle002
- * @tc.desc: test GetChangeSpanStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, GetChangeSpanStyle002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    struct UpdateParagraphStyle paragraphStyle;
-    paragraphStyle.textAlign = TextAlign::END;
-    paragraphStyle.leadingMargin = std::make_optional<NG::LeadingMargin>();
-    paragraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
-    richEditorPattern->UpdateParagraphStyle(0, 6, paragraphStyle);
-    std::optional<struct UpdateParagraphStyle> spanParaStyle = paragraphStyle;
-
-    RichEditorChangeValue changeValue;
-    RichEditorAbstractSpanResult span1;
-    changeValue.originalSpans_.emplace_back(span1);
-    RichEditorAbstractSpanResult span2;
-    changeValue.originalSpans_.emplace_back(span2);
-
-    RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
-    firstInfo.SetEraseLength(firstLength);
-    RichEditorAbstractSpanResult& lastInfo = changeValue.originalSpans_.back();
-    int32_t lastLength = static_cast<int32_t>(lastInfo.GetValue().length());
-    lastInfo.SetEraseLength(lastLength);
-
-    std::optional<TextStyle> spanTextStyle;
-    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
-    int32_t spanIndex = 0;
-    richEditorPattern->spans_.clear();
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem2);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem3);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    lastInfo.SetSpanIndex(richEditorPattern->spans_.size() - 2);
-    std::optional<std::u16string> urlAddress;
-    richEditorPattern->GetChangeSpanStyle(changeValue, spanTextStyle, spanParaStyle, urlAddress, spanNode, spanIndex);
-    EXPECT_FALSE(spanTextStyle.has_value());
 }
 
 /**
@@ -966,27 +677,6 @@ HWTEST_F(RichEditorPatternTestNg, GetReplacedSpanFission001, TestSize.Level1)
     richEditorPattern->GetReplacedSpanFission(
         changeValue, innerPosition, content, startSpanIndex, offsetInSpan, textStyle, spanParaStyle, urlAddress);
     EXPECT_NE(innerPosition, 0);
-}
-/**
- * @tc.name: SetTextStyleToRet001
- * @tc.desc: test SetTextStyleToRet
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, SetTextStyleToRet001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorAbstractSpanResult retInfo;
-    TextStyle textStyle;
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    richEditorPattern->SetTextStyleToRet(retInfo, textStyle);
-    EXPECT_EQ(retInfo.GetFontSize(), textStyle.GetFontSize().ConvertToVp());
 }
 
 /**
@@ -1254,51 +944,6 @@ HWTEST_F(RichEditorPatternTestNg, GetThumbnailCallback003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->GetThumbnailCallback()(Offset(1.0f, 10.0f));
     EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
-}
-
-/**
- * @tc.name: InitScrollablePattern002
- * @tc.desc: test InitScrollablePattern and more.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, InitScrollablePattern002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    PipelineBase::GetCurrentContext()->SetThemeManager(theme);
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    Offset Offset = { 1, 4 };
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->isTextChange_ = false;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    int32_t scroll_from_update = 1;
-    richEditorPattern->scrollBar_ = nullptr;
-    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 61);
-    richEditorPattern->contentRect_ = RectF(0, 7, 100, 60);
-    richEditorPattern->UpdateScrollStateAfterLayout(true);
-    EXPECT_TRUE(richEditorPattern->OnScrollCallback(10, scroll_from_update));
-
-    auto offsetF = OffsetF(5.0f, 30.0f);
-    richEditorPattern->isShowPlaceholder_ = false;
-    richEditorPattern->MoveCaretToContentRect(offsetF, 40.0f);
-    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
-
-    auto offsetFtemp = OffsetF(5.0f, 6.0f);
-    richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
-    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 }
 
 /**
@@ -1654,28 +1299,6 @@ HWTEST_F(RichEditorPatternTestNg, GetRichEditorController001, TestSize.Level1)
     richEditorModel.Create();
     auto controller = richEditorModel.GetRichEditorController();
     ASSERT_NE(controller, nullptr);
-}
-
-/**
- * @tc.name: BindSelectionMenu001
- * @tc.desc: test BindSelectionMenu
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, BindSelectionMenu001, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::function<void()> buildFunc = []() {
-        callBack1 = 1;
-        return;
-    };
-    TextSpanType textSpanType = TextSpanType::TEXT;
-    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
-    SelectMenuParam menuParam { .onAppear = [](int32_t, int32_t) {}, .onDisappear = []() {} };
-    richEditorModel.BindSelectionMenu(textSpanType, textResponseType, buildFunc, menuParam);
-    EXPECT_TRUE(richEditorPattern->selectionMenuMap_.empty());
 }
 
 /**

@@ -23,18 +23,17 @@
 
 namespace OHOS::Ace::NG {
 
-void RepeatVirtualScroll2ModelNG::Create(uint32_t totalCount,
+void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
     const std::function<std::pair<uint32_t, uint32_t>(int32_t)>& onGetRid4Index,
     const std::function<void(int32_t, int32_t)>& onRecycleItems,
     const std::function<void(int32_t, int32_t, bool)>& onActiveRange,
-    const std::function<void(int32_t, int32_t)>& onMoveFromTo,
-    const std::function<void()>& onPurge)
+    const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge)
 {
     ACE_SCOPED_TRACE("RepeatVirtualScroll2ModelNG::Create");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto repeatNode = RepeatVirtualScroll2Node::GetOrCreateRepeatNode(
-        nodeId, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
+        nodeId, arrLen, totalCount, onGetRid4Index, onRecycleItems, onActiveRange, onMoveFromTo, onPurge);
 
     stack->Push(repeatNode);
     stack->PopContainer();
@@ -60,7 +59,7 @@ void RepeatVirtualScroll2ModelNG::SetInvalid(int32_t repeatElmtId, uint32_t rid)
 }
 
 void RepeatVirtualScroll2ModelNG::RequestContainerReLayout(
-    int32_t repeatElmtId, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex)
+    int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount, int32_t invalidateContainerLayoutFromChildIndex)
 {
     // called as part of Repeat re-render, call chain starts on TS side
     // therefore, can not put RepeatVirtualScroll2Node to the ViewStackProcessor
@@ -68,19 +67,21 @@ void RepeatVirtualScroll2ModelNG::RequestContainerReLayout(
     auto repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
     CHECK_NULL_VOID(repeatNode);
     repeatNode->UpdateTotalCount(totalCount);
+    repeatNode->UpdateArrLen(arrLen);
     repeatNode->RequestContainerReLayout(invalidateContainerLayoutFromChildIndex);
 }
 
-void RepeatVirtualScroll2ModelNG::NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t totalCount,
-    int32_t index, int32_t count, NG::UINode::NotificationType notificationType)
+void RepeatVirtualScroll2ModelNG::NotifyContainerLayoutChange(int32_t repeatElmtId, uint32_t arrLen,
+    uint32_t totalCount, int32_t index, int32_t count, NG::UINode::NotificationType notificationType)
 {
     auto repeatNode = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScroll2Node>(repeatElmtId);
     CHECK_NULL_VOID(repeatNode);
     repeatNode->UpdateTotalCount(totalCount);
+    repeatNode->UpdateArrLen(arrLen);
     repeatNode->NotifyContainerLayoutChange(index, count, notificationType);
 }
 
-void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t totalCount,
+void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32_t arrLen, uint32_t totalCount,
     uint32_t invalidateContainerLayoutFromChildIndex, std::map<int32_t, uint32_t>& l1Rd4Index)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -90,6 +91,7 @@ void RepeatVirtualScroll2ModelNG::UpdateL1Rid4Index(int32_t repeatElmtId, uint32
     }
     CHECK_NULL_VOID(repeatNode);
     repeatNode->UpdateTotalCount(totalCount);
+    repeatNode->UpdateArrLen(arrLen);
     repeatNode->UpdateL1Rid4Index(l1Rd4Index);
     repeatNode->RequestContainerReLayout(invalidateContainerLayoutFromChildIndex);
 }

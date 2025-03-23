@@ -88,7 +88,8 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
         context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto ret = pattern->HandleTextureExport(false);
+            auto host = pattern->GetHost();
+            auto ret = pattern->HandleTextureExport(false, Referenced::RawPtr(host));
             if (!ret) {
                 TAG_LOGW(AceLogTag::ACE_NODE_CONTAINER, "DoTextureExport fail");
             }
@@ -97,15 +98,14 @@ bool NodeContainerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return false;
 }
 
-bool NodeContainerPattern::HandleTextureExport(bool isStop)
+bool NodeContainerPattern::HandleTextureExport(bool isStop, FrameNode* frameNode)
 {
     auto exportTextureNode = GetExportTextureNode();
     CHECK_NULL_RETURN(exportTextureNode, false);
     auto exportTextureRenderContext = exportTextureNode->GetRenderContext();
     CHECK_NULL_RETURN(exportTextureRenderContext, false);
-    auto host = GetHost();
-    if (host) {
-        auto renderContext = host->GetRenderContext();
+    if (frameNode) {
+        auto renderContext = frameNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         renderContext->SetIsNeedRebuildRSTree(isStop);
     }
@@ -115,9 +115,9 @@ bool NodeContainerPattern::HandleTextureExport(bool isStop)
     return exportTextureRenderContext->DoTextureExport(surfaceId_);
 }
 
-void NodeContainerPattern::OnDetachFromFrameNode(FrameNode* /* frameNode */)
+void NodeContainerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    HandleTextureExport(true);
+    HandleTextureExport(true, frameNode);
 }
 
 RefPtr<FrameNode> NodeContainerPattern::GetExportTextureNode() const
@@ -168,7 +168,8 @@ void NodeContainerPattern::SetExportTextureInfoIfNeeded()
 
 void NodeContainerPattern::OnAddBaseNode()
 {
-    HandleTextureExport(true);
+    auto host = GetHost();
+    HandleTextureExport(true, Referenced::RawPtr(host));
     SetExportTextureInfoIfNeeded();
 }
 

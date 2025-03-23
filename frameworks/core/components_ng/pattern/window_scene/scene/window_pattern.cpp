@@ -146,6 +146,20 @@ private:
     WeakPtr<WindowPattern> windowPattern_;
 };
 
+void WindowPattern::CheckAndMeasureStartingWindow(const SizeF& currentParentSize)
+{
+    CHECK_NULL_VOID(startingWindow_);
+    const auto& sessionInfo = session_->GetSessionInfo();
+#ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
+    CHECK_EQUAL_VOID(sessionInfo.isAtomicService_, true);
+#endif
+    bool parentSizeChanged = !NearEqual(currentParentSize.Width(), lastParentSize_.Width(), 1.0f) ||
+                             !NearEqual(currentParentSize.Height(), lastParentSize_.Height(), 1.0f);
+    lastParentSize_ = currentParentSize;
+    CHECK_EQUAL_VOID(parentSizeChanged, false);
+    startingWindowLayoutHelper_->MeasureChildNode(currentParentSize);
+}
+
 void WindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
@@ -457,22 +471,26 @@ void WindowPattern::CreateStartingWindow()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     ACE_SCOPED_TRACE("CreateStartingWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
+    Rosen::StartingWindowInfo startingWindowInfo;
+    startingWindowInfo.backgroundColorEarlyVersion_ =
+        context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+    Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startingWindowInfo);
+    if (startingWindowInfo.configFileEnabled_) {
+        CHECK_NULL_VOID(startingWindowLayoutHelper_);
+        startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
+            startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
+        return;
+    }
     startingWindow_ = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
 
-    std::string startupPagePath;
-    auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
-    Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
-    startingWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
-    imageLayoutProperty->UpdateImageSourceInfo(
-        ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_));
-    auto sourceInfo = ImageSourceInfo(startupPagePath, sessionInfo.bundleName_, sessionInfo.moduleName_);
-    auto color = Color(backgroundColor);
+    auto sourceInfo = ImageSourceInfo(
+        startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
+    auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
-
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
@@ -543,7 +561,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
-    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
 
     if (snapshot) {
@@ -642,6 +660,12 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
 sptr<Rosen::Session> WindowPattern::GetSession()
 {
     return session_;
+}
+
+bool WindowPattern::BorderUnoccupied() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetBorderUnoccupied();
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

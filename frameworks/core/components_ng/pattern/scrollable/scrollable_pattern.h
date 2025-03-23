@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -462,14 +462,6 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
-            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisappearDelayTask();
-            }
-            StopScrollBarAnimatorByProxy();
-            StartScrollBarAnimatorByProxy();
-        }
         if (scrollSource == SCROLL_FROM_NONE) {
             if (lastScrollSource_ != scrollSource_) {
                 AddScrollableFrameInfo(scrollSource_);
@@ -505,9 +497,7 @@ public:
 
     float CalculateFriction(float gamma)
     {
-        if (GreatOrEqual(gamma, 1.0)) {
-            gamma = 1.0f;
-        }
+        gamma = std::clamp(gamma, 0.0f, 1.0f);
         return exp(-ratio_.value_or(1.848f) * gamma);
     }
     virtual float GetMainContentSize() const;
@@ -804,12 +794,22 @@ public:
 
     void SetBackToTop(bool backToTop);
 
+    void ResetBackToTop();
+
     bool GetBackToTop() const
     {
         return backToTop_;
     }
 
+    void UseDefaultBackToTop(bool useDefaultBackToTop)
+    {
+        useDefaultBackToTop_ = useDefaultBackToTop;
+    }
+
     void OnStatusBarClick() override;
+
+    void GetRepeatCountInfo(
+        RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
@@ -822,6 +822,8 @@ public:
     {
         return DisplayMode::AUTO;
     }
+
+    void MarkScrollBarProxyDirty();
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -1146,6 +1148,7 @@ private:
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
 
     bool backToTop_ = false;
+    bool useDefaultBackToTop_ = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -288,7 +288,7 @@ void JSTextEditableController::GetText(const JSCallbackInfo& info)
                 std::swap(startIndex, endIndex);
             }
         }
-        std::u16string result = content.substr(startIndex, endIndex);
+        std::u16string result = content.substr(startIndex, endIndex - startIndex);
         auto returnValue = JSVal(ToJSValue(result));
         info.SetReturnValue(JSRef<JSVal>::Make(returnValue));
     } else {

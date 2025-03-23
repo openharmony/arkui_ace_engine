@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *     http:www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,12 +22,12 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
-#include "core/components_ng/pattern/symbol/constants.h"
 
 namespace OHOS::Ace::NG {
 #define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
@@ -56,19 +56,6 @@ public:                                                                     \
         prop##name##_ = value;                                              \
         UpdatePropertyChangeFlag(changeFlag);                               \
         propNeedReCreateParagraph_ = true;                                  \
-    }
-
-#define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(group, groupItem, name, type, changeFlag) \
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM_GET(group, groupItem, name, type)                  \
-    void Update##name(const type& value)                                                        \
-    {                                                                                           \
-        auto& groupProperty = GetOrCreate##group();                                             \
-        if (groupProperty->Check##groupItem(value)) {                                           \
-            return;                                                                             \
-        }                                                                                       \
-        groupProperty->Update##groupItem(value);                                                \
-        UpdatePropertyChangeFlag(changeFlag);                                                   \
-        propNeedReCreateParagraph_ = true;                                                      \
     }
 
 class InspectorFilter;
@@ -111,6 +98,7 @@ public:
         ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
+        propNeedReCreateParagraph_ = true;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -120,40 +108,38 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextShadow, std::vector<Shadow>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, VariableFontWeight, int32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecoration, TextDecoration, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
-        FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextCase, TextCase, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableVariableFontWeight, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextShadow, std::vector<Shadow>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, ItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, VariableFontWeight, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontFeature, FONT_FEATURES_LIST, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecoration, TextDecoration, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextDecorationStyle, TextDecorationStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, TextCase, TextCase, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, AdaptMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, LetterSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, EnableVariableFontWeight, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(TextLineStyle, TextLineStyle);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, AllowScale, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineHeight, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineSpacing, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextBaseline, TextBaseline, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, BaselineOffset, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextAlign, TextAlign, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, EllipsisMode, EllipsisMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, MaxLines, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, AllowScale, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, HeightAdaptivePolicy, TextHeightAdaptivePolicy, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
-        TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, TextIndent, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, WordBreak, WordBreak, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, ParagraphSpacing, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
@@ -174,7 +160,7 @@ public:
         UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextSelectableMode, TextSelectableMode, PROPERTY_UPDATE_MEASURE_SELF);
@@ -183,34 +169,20 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlHoverColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UrlPressedColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
 
-    // placeholder
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
-        PlaceholderFontStyle, FontSize, PlaceholderFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
-        PlaceholderFontStyle, TextColor, PlaceholderTextColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
-        PlaceholderFontStyle, ItalicFontStyle, PlaceholderItalicFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
-        PlaceholderFontStyle, FontWeight, PlaceholderFontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
-        PlaceholderFontStyle, FontFamily, PlaceholderFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
-
     // symbol
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolType, SymbolType, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         FontStyle, SymbolEffectOptions, SymbolEffectOptions, PROPERTY_UPDATE_MEASURE_SELF);
     // fontscale
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MinFontScale, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
 
     // for XTS inspector
     std::string InspectorGetTextFont() const
@@ -240,7 +212,6 @@ public:
         }
         groupProperty->UpdateTextColor(value);
         UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
-        propNeedReCreateParagraph_ = true;
     }
 
     void OnPropertyChangeMeasure() override
@@ -276,6 +247,7 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propNeedReCreateParagraph_ = true;
     }
 
 private:

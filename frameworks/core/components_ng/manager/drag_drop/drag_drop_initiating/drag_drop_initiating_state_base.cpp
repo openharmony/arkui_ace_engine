@@ -364,4 +364,46 @@ void DragDropInitiatingStateBase::HandleTextDragCallback()
         gestureHub->SetPixelMap(nullptr);
     }
 }
+
+void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextBase>();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->IsSelected()) {
+            dragDropManager->ResetDragging();
+            gestureHub->SetIsTextDraggable(false);
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
+            DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+            return;
+        }
+        if (gestureHub->GetIsTextDraggable()) {
+            SetTextPixelMap();
+        } else {
+            gestureHub->SetPixelMap(nullptr);
+        }
+    } else {
+        if (gestureHub->GetTextDraggable() && pattern) {
+            if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
+                dragDropManager->ResetDragging();
+                gestureHub->SetIsTextDraggable(false);
+                TAG_LOGW(AceLogTag::ACE_DRAG, "Text isSelected: %{public}d, stop dragging.", pattern->IsSelected());
+                DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+                DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+                return;
+            }
+            HandleTextDragCallback();
+        }
+    }
+    auto gestureEventInfo = info;
+    gestureHub->HandleOnDragStart(gestureEventInfo);
+}
 } // namespace OHOS::Ace::NG

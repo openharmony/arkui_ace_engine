@@ -703,4 +703,4 @@ bool CalendarPaintMethod::IsOffDay(const CalendarDay& dayInfo) const
     }
     return false;
 }
-} // namespace OHOS::Ace::NGunifdef
+} // namespace OHOS::Ace::NG

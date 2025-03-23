@@ -2360,39 +2360,40 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
     tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
-    if (arrowOptions.arrowPointPosition) {
-        CalcDimension offset;
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
-                offset = ARROW_ZERO_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ZERO_PERCENT);
             }
             if (std::strcmp(pEnd, "Center") == 0) {
-                offset = ARROW_HALF_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_HALF_PERCENT);
             }
             if (std::strcmp(pEnd, "End") == 0) {
-                offset = ARROW_ONE_HUNDRED_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ONE_HUNDRED_PERCENT);
             }
-            tipsParam->SetArrowOffset(offset);
         }
     }
-    CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
-    bool setArrowWidthError = true;
-    if (arrowOptions.arrowWidthValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowWidth(arrowWidth);
-        setArrowWidthError = false;
+    if (arrowOptions.enableArrow) {
+        CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+        bool setArrowWidthError = true;
+        if (arrowOptions.arrowWidthValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowWidth(arrowWidth);
+            setArrowWidthError = false;
+        }
+        tipsParam->SetErrorArrowWidth(setArrowWidthError);
+        CalcDimension arrowHeight(
+            arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+        bool setArrowHeightError = true;
+        if (arrowOptions.arrowHeightValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowHeight(arrowHeight);
+            setArrowHeightError = false;
+        }
+        tipsParam->SetErrorArrowHeight(setArrowHeightError);
     }
-    tipsParam->SetErrorArrowWidth(setArrowWidthError);
-    CalcDimension arrowHeight(arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
-    bool setArrowHeightError = true;
-    if (arrowOptions.arrowHeightValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowHeight(arrowHeight);
-        setArrowHeightError = false;
-    }
-    tipsParam->SetErrorArrowHeight(setArrowHeightError);
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
     ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
@@ -3607,14 +3608,12 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Bool disableSystemAdaptation)
+void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     radius = std::max(radius, 0.0f);
-    SysOptions sysOptions;
-    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
-    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius), sysOptions);
+    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius));
 }
 
 void ResetForegroundEffect(ArkUINodeHandle node)

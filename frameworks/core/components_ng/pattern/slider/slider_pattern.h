@@ -19,7 +19,6 @@
 #include <cstddef>
 #include <optional>
 
-#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
@@ -427,7 +426,7 @@ private:
     uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     bool isEnableHaptic_ = true;
-    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
+    bool hapticApiEnabled = false;
     double slipfactor_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };

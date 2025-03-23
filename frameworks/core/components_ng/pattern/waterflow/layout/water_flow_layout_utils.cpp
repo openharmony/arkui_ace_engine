@@ -15,6 +15,7 @@
 #include "frameworks/core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 namespace {
 const std::string UNIT_AUTO = "auto";
@@ -200,7 +201,7 @@ AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& 
         }
         auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
         if (pattern) {
-            return pattern->GetAdjustOffset();
+            return pattern->GetAndResetAdjustOffset();
         }
         child = child->GetFirstChild();
     } while (child);

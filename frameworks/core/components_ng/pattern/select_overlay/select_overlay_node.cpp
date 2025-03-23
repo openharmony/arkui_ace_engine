@@ -1321,6 +1321,14 @@ void SelectOverlayNode::MoreOrBackAnimation(bool isMore, bool noAnimation)
     CHECK_NULL_VOID(backButton_);
     if (isMore && !isExtensionMenu_) {
         MoreAnimation(noAnimation);
+        auto context = GetContext();
+        if (context) {
+            context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(extensionMenu_))]() {
+                auto menuNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(menuNode);
+                menuNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
+            });
+        }
     } else if (!isMore && isExtensionMenu_) {
         BackAnimation(noAnimation);
     }
@@ -2992,5 +3000,21 @@ void SelectOverlayNode::OnDetachFromMainTree(bool recursive, PipelineContext* co
     FireCustomMenuChangeEvent(false);
     isCustomMenuAppear_ = false;
     FrameNode::OnDetachFromMainTree(recursive, context);
+}
+
+void SelectOverlayNode::UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation)
+{
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->GetIsMenuShowInSubWindow()) {
+        auto containerId = pattern->GetContainerId();
+        if (containerId != -1) {
+            ContainerScope scope(containerId);
+            UpdateToolBar(menuItemChanged, noAnimation);
+            return;
+        }
+    }
+
+    UpdateToolBar(menuItemChanged, noAnimation);
 }
 } // namespace OHOS::Ace::NG

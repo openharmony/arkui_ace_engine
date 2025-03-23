@@ -26,6 +26,51 @@ constexpr int32_t JS_EMUN_TRANSITIONTYPE_NONE = 1;
 constexpr int32_t JS_EMUN_TRANSITIONTYPE_TITLE = 2;
 constexpr int32_t JS_EMUN_TRANSITIONTYPE_CONTENT = 3;
 
+// sources in js_window_utils.h
+enum class ApiOrientation : uint32_t {
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
+    PORTRAIT = 1,
+    LANDSCAPE = 2,
+    PORTRAIT_INVERTED = 3,
+    LANDSCAPE_INVERTED = 4,
+    AUTO_ROTATION = 5,
+    AUTO_ROTATION_PORTRAIT = 6,
+    AUTO_ROTATION_LANDSCAPE = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+    AUTO_ROTATION_UNSPECIFIED = 12,
+    USER_ROTATION_PORTRAIT = 13,
+    USER_ROTATION_LANDSCAPE = 14,
+    USER_ROTATION_PORTRAIT_INVERTED = 15,
+    USER_ROTATION_LANDSCAPE_INVERTED = 16,
+    FOLLOW_DESKTOP = 17,
+    END = FOLLOW_DESKTOP,
+};
+
+const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
+    {ApiOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {ApiOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {ApiOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {ApiOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {ApiOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {ApiOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {ApiOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
+    {ApiOrientation::AUTO_ROTATION_UNSPECIFIED,             Orientation::AUTO_ROTATION_UNSPECIFIED          },
+    {ApiOrientation::USER_ROTATION_PORTRAIT,                Orientation::USER_ROTATION_PORTRAIT             },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE,               Orientation::USER_ROTATION_LANDSCAPE            },
+    {ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED,       Orientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED,      Orientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {ApiOrientation::FOLLOW_DESKTOP,                        Orientation::FOLLOW_DESKTOP                     },
+};
+
 NavigationSystemTransitionType ParseTransitionType(int32_t value)
 {
     switch (value) {
@@ -315,7 +360,7 @@ ArkUINativeModuleValue NavDestinationBridge::ResetMenus(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getNavDestinationModifier()->resetHideTitleBar(nativeNode);
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetMenus(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -372,6 +417,99 @@ ArkUINativeModuleValue NavDestinationBridge::ResetNavDestinationSystemTransition
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getNavDestinationModifier()->resetNavDestinationSystemTransition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetPreferredOrientation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsNumber()) {
+        GetArkUINodeModifiers()->getNavDestinationModifier()->resetPreferredOrientation(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto ori = info[1]->ToNumber<int32_t>();
+    if (ori < static_cast<int32_t>(ApiOrientation::BEGIN) || ori > static_cast<int32_t>(ApiOrientation::END)) {
+        GetArkUINodeModifiers()->getNavDestinationModifier()->resetPreferredOrientation(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ori = static_cast<int32_t>(JS_TO_NATIVE_ORIENTATION_MAP.at(static_cast<ApiOrientation>(ori)));
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setPreferredOrientation(nativeNode, ori);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetPreferredOrientation(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetPreferredOrientation(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetEnableStatusBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    ArkUIOptionalBool enable;
+    enable.isSet = false;
+    ArkUIOptionalBool animated;
+    animated.isSet = false;
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info[1]->IsBoolean()) {
+        enable.isSet = true;
+        enable.value = info[1]->ToBoolean();
+    }
+    if (info[2]->IsBoolean()) {
+        animated.isSet = true;
+        animated.value = info[2]->ToBoolean();
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setEnableStatusBar(nativeNode, enable, animated);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetEnableStatusBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetEnableStatusBar(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::SetEnableNavigationIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUIOptionalBool enable;
+    enable.isSet = false;
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info[1]->IsBoolean()) {
+        enable.isSet = true;
+        enable.value = info[1]->ToBoolean();
+    }
+    GetArkUINodeModifiers()->getNavDestinationModifier()->setEnableNavigationIndicator(nativeNode, enable);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavDestinationBridge::ResetEnableNavigationIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getNavDestinationModifier()->resetEnableNavigationIndicator(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

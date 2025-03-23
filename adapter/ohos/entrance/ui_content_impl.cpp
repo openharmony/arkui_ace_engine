@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,7 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "screen_session_manager_client.h"
+#include "pointer_event.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -560,7 +561,7 @@ public:
     {
         ACE_SCOPED_TRACE("OnAvoidAreaChanged: incoming avoidArea: %s, instanceId %d, type %d",
             avoidArea.ToString().c_str(), instanceId_, type);
-        TAG_LOGI(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
+        TAG_LOGD(ACE_LAYOUT, "Avoid area changed, type:%{public}d, value:%{public}s; instanceId %{public}d", type,
             avoidArea.ToString().c_str(), instanceId_);
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
@@ -669,6 +670,30 @@ public:
                 break;
         }
         CHECK_NULL_VOID(static_cast<int>(action));
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
+class WaterfallModeChangeListener : public OHOS::Rosen::IWaterfallModeChangeListener {
+public:
+    explicit WaterfallModeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    ~WaterfallModeChangeListener() = default;
+
+    void OnWaterfallModeChange(bool enable) override
+    {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "waterfall mode is changed, waterfallMode: %{public}d", enable);
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        ContainerScope scope(instanceId_);
+        taskExecutor->PostTask(
+            [instanceId = instanceId_, enable] {
+                SubwindowManager::GetInstance()->OnWaterfallModeChanged(instanceId, enable);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIWaterfallModeChanged");
     }
 
 private:
@@ -1177,7 +1202,6 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
             ImageFileCache::GetInstance().SetCacheFileInfo();
-            ImageFileCache::GetInstance().ClearAllCacheFiles();
         });
     }
 
@@ -1518,6 +1542,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
         container->UpdateFormSharedImage(formImageDataMap_);
         container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
+        TAG_LOGI(AceLogTag::ACE_FORM, "isFormRenderInit_ true");
     }
 
     if (isFormRender_) {
@@ -1701,7 +1726,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
-        ImageFileCache::GetInstance().ClearAllCacheFiles();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
 
         auto task = [] {
@@ -2070,6 +2094,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
+    window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_);
@@ -2430,6 +2456,10 @@ void UIContentImpl::Destroy()
     ContainerScope::RemoveAndCheck(instanceId_);
     UnregisterDisplayManagerCallback();
     SubwindowManager::GetInstance()->OnDestroyContainer(instanceId_);
+
+    if (window_) {
+        window_->UnregisterWaterfallModeChangeListener(waterfallModeChangeListener_);
+    }
 }
 
 void UIContentImpl::UnregisterDisplayManagerCallback()
@@ -3007,11 +3037,15 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
-    TAG_LOGI(ACE_LAYOUT,
+    TAG_LOGD(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
         "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
         rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+    if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
+        reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
+    }
     if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
         lastReason_ = reason;
     }
@@ -3027,11 +3061,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
 
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
     SystemProperties::SetDeviceOrientation(config.Orientation());
-    TAG_LOGI(
+    TAG_LOGD(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    container->SetCurrentDisplayOrientation(static_cast<DisplayOrientation>(config.Orientation()));
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     if (container->IsSubContainer()) {
@@ -3045,9 +3080,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (instanceId_ >= MIN_SUBCONTAINER_ID) {
         auto parentContainer = Platform::AceContainer::GetContainer(container->GetParentId());
         CHECK_NULL_VOID(parentContainer);
-        auto parentPipeline = parentContainer->GetPipelineContext();
-        CHECK_NULL_VOID(parentPipeline);
-        modifyConfig.SetDensity(parentPipeline->GetDensity());
+        if (parentContainer->IsScenceBoardWindow()) {
+            auto parentPipeline = parentContainer->GetPipelineContext();
+            CHECK_NULL_VOID(parentPipeline);
+            modifyConfig.SetDensity(parentPipeline->GetDensity());
+        }
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -3141,7 +3178,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
@@ -3505,14 +3542,14 @@ void UIContentImpl::UpdateDialogResourceConfiguration(RefPtr<Container>& contain
 bool UIContentImpl::IfNeedTouchOutsideListener(const std::string& windowName)
 {
     return !StringUtils::StartWith(windowName, SUBWINDOW_TOAST_PREFIX) ||
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
 {
     window_ = window;
-    LOGI("InitSubwindow: %{public}s", window->GetWindowName().c_str());
     CHECK_NULL_VOID(window_);
+    LOGI("InitSubwindow: %{public}s", window->GetWindowName().c_str());
     RefPtr<Container> container;
     instanceId_ = Container::GenerateId<COMPONENT_SUBWINDOW_CONTAINER>();
     int32_t deviceWidth = 0;
@@ -3607,6 +3644,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
     window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     foldStatusListener_ = new FoldScreenListener(instanceId_);
+    waterfallModeChangeListener_ = new WaterfallModeChangeListener(instanceId_);
+    window_->RegisterWaterfallModeChangeListener(waterfallModeChangeListener_);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
@@ -3844,7 +3883,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
 
 void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
 {
-    LOGI("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
+    LOGD("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
     fontScaleFollowSystem_ = fontScaleFollowSystem;
 }
 
@@ -4889,6 +4928,13 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
+    SetupGetPixelMapCallback(pipeline);
+    RegisterGetCurrentPageName(pipeline);
+    InitSendCommandFunctionsCallbacks(pipeline);
+}
+
+void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)
+{
     auto getPixelMapCallback = [weakContext = WeakPtr(pipeline)]() {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         CHECK_NULL_VOID(pipeline);
@@ -4903,10 +4949,9 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
-    RegisterGetCurrentPageName(pipeline);
 }
 
-void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
+void UIContentImpl::RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline)
 {
     auto getPageNameCallback = [weakContext = WeakPtr(pipeline)]() -> std::string {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
@@ -4914,6 +4959,53 @@ void UIContentImpl::RegisterGetCurrentPageName(RefPtr<PipelineBase> pipeline)
         return pipeline->GetCurrentPageNameCallback();
     };
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
+}
+
+void UIContentImpl::InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline)
+{
+    auto sendCommandAsync = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        if (!pipeline) {
+            LOGI("Pipeline context is null");
+            return 10;
+        }
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (!taskExecutor) {
+            LOGI("Task executor is null");
+            return 11;
+        }
+        int32_t result = 12;
+        taskExecutor->PostSyncTask(
+            [id, command, &result]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGI("UiSessionSendCommandAsyncPattern: Node is null for id: %{public}d", id);
+                    result = 13;
+                    return;
+                }
+                result = node->OnRecvCommand(command);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandAsyncPattern");
+        return result;
+    };
+    UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
+    auto sendCommand = [weakContext = WeakPtr(pipeline)](int32_t id, const std::string& command) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [id, command]() {
+                auto node = AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(id));
+                if (!node) {
+                    LOGI("UiSessionSendCommandPattern: Node is null for id: %{public}d", id);
+                    return;
+                }
+                node->OnRecvCommand(command);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSendCommandPattern");
+    };
+    UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)

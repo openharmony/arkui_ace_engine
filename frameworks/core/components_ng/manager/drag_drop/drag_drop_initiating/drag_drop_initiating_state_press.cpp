@@ -29,7 +29,7 @@ void DragDropInitiatingStatePress::HandlePreviewLongPressOnAction(const GestureE
 {
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::LIFTING));
 }
 
 void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEvent& info)
@@ -44,7 +44,7 @@ void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEve
     CHECK_NULL_VOID(gestureHub);
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     if (!isMenuShow) {
-        machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+        machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
     }
 }
 
@@ -58,11 +58,15 @@ void DragDropInitiatingStatePress::HandleOnDragStart(RefPtr<FrameNode> frameNode
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
     }
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
+        return;
+    }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     HideEventColumn();
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }
@@ -127,7 +131,7 @@ void DragDropInitiatingStatePress::HandlePanOnActionEnd(const GestureEvent& info
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 
 void DragDropInitiatingStatePress::Init(int32_t currentState)

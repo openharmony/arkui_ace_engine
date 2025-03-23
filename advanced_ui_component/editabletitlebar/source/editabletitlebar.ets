@@ -242,7 +242,7 @@ export struct EditableTitleBar {
     }
     .backgroundColor(this.options.backgroundColor ?? EditableTitleBar.noneColor)
     .backgroundBlurStyle(
-      this.options.backgroundBlurStyle ?? BlurStyle.NONE)
+      this.options.backgroundBlurStyle ?? BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
     .expandSafeArea(
       this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM],
       this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP],
@@ -846,7 +846,7 @@ struct EditableTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
     } else {
@@ -873,7 +873,7 @@ struct EditableTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
       .justifyContent(FlexAlign.Center)

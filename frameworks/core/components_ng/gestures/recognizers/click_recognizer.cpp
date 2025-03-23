@@ -163,7 +163,7 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;

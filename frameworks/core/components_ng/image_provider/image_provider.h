@@ -58,6 +58,14 @@ struct ImageDecoderOptions {
     ImageDfxConfig imageDfxConfig;
 };
 
+struct UriDownLoadConfig {
+    ImageSourceInfo src;
+    ImageDfxConfig imageDfxConfig;
+    std::string taskKey;
+    bool sync;
+    bool hasProgressCallback;
+};
+
 class ImageObject;
 
 // load & decode images
@@ -97,7 +105,7 @@ public:
     static RefPtr<ImageObject> QueryImageObjectFromCache(const ImageSourceInfo& src);
 
     // cancel a scheduled background task
-    static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
+    static bool CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
     static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
@@ -128,7 +136,7 @@ private:
         const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync = false, int32_t containerId = 0);
     static void DownLoadOnProgressCallback(
         const std::string& key, bool sync, const uint32_t& dlNow, const uint32_t& dlTotal, int32_t containerId = 0);
-    static void DownLoadImage(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
+    static void DownLoadImage(const UriDownLoadConfig& downLoadConfig);
 
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
         const ImageDecoderOptions& imagedecoderOptions);

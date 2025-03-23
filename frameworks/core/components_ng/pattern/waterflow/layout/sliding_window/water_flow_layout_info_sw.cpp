@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -837,12 +837,12 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
     if (!synced_) {
         return 0.0f;
     }
-    if (knowTotalHeight_) {
+    if (knowTotalHeight_ && repeatDifference_ == 0) {
         return maxHeight_;
     }
     float height = std::max(-totalOffset_, 0.0f) // to eliminate top overScroll
                    + (endPos_ - startPos_);
-    if (itemEnd_) {
+    if (itemEnd_ && repeatDifference_ == 0) {
         float bottomOverScroll = std::max(BottomFinalPos(lastMainSize_), 0.0f);
         return height - bottomOverScroll + BotMargin() + footerHeight_;
     }
@@ -851,7 +851,22 @@ float WaterFlowLayoutInfoSW::EstimateTotalHeight() const
     for (uint32_t i = static_cast<uint32_t>(GetSegment(endIndex_ + 1)); i < lanes_.size(); ++i) {
         height += EstimateSectionHeight(i, average, endIndex_ + 1, INT_MAX);
     }
-    return std::max(height, maxHeight_);
+    float virtualTotalHeight = 0.f;
+    if (EstimateVirtualTotalHeight(average, virtualTotalHeight)) {
+        height += virtualTotalHeight;
+        return height;
+    } else {
+        return std::max(height, maxHeight_);
+    }
+}
+
+bool WaterFlowLayoutInfoSW::EstimateVirtualTotalHeight(float average, float& virtualTotalHeight) const
+{
+    CHECK_NULL_RETURN(repeatDifference_ > 0 && lanes_.size() <= mainGap_.size() && lanes_.size() >= 1, false);
+    const size_t crossCnt = std::max((lanes_.rbegin())->size(), (size_t)1);
+    virtualTotalHeight = (average + mainGap_[static_cast<int32_t>(lanes_.size() - 1)]) * repeatDifference_ /
+                         static_cast<float>(crossCnt);
+    return true;
 }
 
 void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t startIdx)
@@ -998,6 +1013,41 @@ float WaterFlowLayoutInfoSW::GetDistanceToBottom(int32_t itemIdx, int32_t laneId
         int32_t seg = GetSegment(itemIdx);
         return lanes_[seg][laneIdx].startPos;
     }
-    return DistanceToBottom(itemIdx, mainSize, mainGap);
+    return DistanceToTop(itemIdx, mainGap) + GetCachedHeightInLanes(itemIdx);
+}
+
+float WaterFlowLayoutInfoSW::GetCachedHeightInLanes(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, 0.0f);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return item.mainSize;
+        }
+    }
+    return 0.0f;
+}
+
+void WaterFlowLayoutInfoSW::SetHeightInLanes(int32_t idx, float mainHeight)
+{
+    auto* lane = GetMutableLane(idx);
+    CHECK_NULL_VOID(lane);
+    for (auto& item : lane->items_) {
+        if (item.idx == idx) {
+            item.mainSize = mainHeight;
+        }
+    }
+}
+
+bool WaterFlowLayoutInfoSW::HaveRecordIdx(int32_t idx) const
+{
+    const auto* lane = GetLane(idx);
+    CHECK_NULL_RETURN(lane, false);
+    for (const auto& item : lane->items_) {
+        if (item.idx == idx) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

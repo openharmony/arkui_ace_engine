@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -392,6 +392,7 @@ bool ListPattern::UpdateStartListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
     auto startWrapper = host->GetOrCreateChildByIndex(startIndex_);
     int32_t startArea = -1;
     int32_t startItemIndexInGroup = -1;
@@ -419,6 +420,7 @@ bool ListPattern::UpdateEndListItemIndex()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    CHECK_EQUAL_RETURN(host->GetChildTrueTotalCount(), 0, false);
     auto endWrapper = host->GetOrCreateChildByIndex(endIndex_);
     int32_t endArea = -1;
     int32_t endItemIndexInGroup = -1;
@@ -511,7 +513,7 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (endIndex_ == maxListItemIndex_) {
+    if (endIndex_ == GetMaxIndexByRepeat()) {
         float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         // deltaOffset passes through multiple items also needs to fire reachEnd
         bool scrollUpToEnd =
@@ -654,6 +656,16 @@ void ListPattern::SetLayoutAlgorithmParams(
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
     listLayoutAlgorithm->SetPrevContentStartOffset(contentStartOffset_);
     listLayoutAlgorithm->SetPrevContentEndOffset(contentEndOffset_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    repeatDifference_ = 0;
+    maxListItemIndex_ = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    GetRepeatCountInfo(host, repeatDifference_, firstRepeatCount, totalChildCount);
+    listLayoutAlgorithm->SetTotalItemCount(repeatDifference_ > 0 ? firstRepeatCount : totalChildCount);
+    listLayoutAlgorithm->SetFirstRepeatCount(firstRepeatCount);
+    maxListItemIndex_ = totalChildCount - 1;
     if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
@@ -792,7 +804,7 @@ bool ListPattern::IsAtBottom() const
     if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
-    return (endIndex == maxListItemIndex_ && groupAtEnd) &&
+    return (endIndex == GetMaxIndexByRepeat() && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
@@ -837,7 +849,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (startIndex == 0 && groupAtStart) {
         offset.start = GetStartOverScrollOffset(delta, startMainPos);
     }
-    if (endIndex == maxListItemIndex_ && groupAtEnd) {
+    if (endIndex == GetMaxIndexByRepeat() && groupAtEnd) {
         offset.end = GetEndOverScrollOffset(delta, endMainPos, startMainPos);
     }
     return offset;
@@ -961,6 +973,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 
     auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
     currentDelta_ = lastDelta + userOffset;
+    MarkScrollBarProxyDirty();
     return true;
 }
 

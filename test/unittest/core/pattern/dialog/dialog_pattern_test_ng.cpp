@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -50,6 +51,7 @@ namespace {
 const double DIMENSIONVALUE = 1.0;
 const double DIMENSIONVALUETWO = 2.0;
 const double DIMENSIONVALUENE = -1.0;
+const double DOUBLEZERO = 0.0;
 const std::string TITLE = "title";
 const std::string SUBTITLE = "subtitle";
 const std::string MESSAGE = "hello world";
@@ -57,6 +59,7 @@ const CalcDimension WIDTHDIMENSION = CalcDimension(DIMENSIONVALUE);
 const CalcDimension HEIGHTDIMENSION = CalcDimension(DIMENSIONVALUE);
 const int32_t BACKGROUNDBLURSTYLEZERO = 0;
 const int32_t BACKGROUNDBLURSTYLE = 1;
+const int32_t INTONE = 1;
 const NG::BorderWidthProperty BORDERWIDTH = { .leftDimen = Dimension(DIMENSIONVALUE) };
 const BorderColorProperty BORDERCOLOR = { .bottomColor = Color::WHITE };
 const Color COLOR = Color::WHITE;
@@ -848,5 +851,175 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgParseButton
     bgColor.reset();
     pattern->ParseButtonFontColorAndBgColor(params, textColor, bgColor);
     EXPECT_EQ(bgColor, pattern->dialogTheme_->GetButtonHighlightBgColor());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgCreateButtonText001
+ * @tc.desc: Test DialogPattern CreateButtonText
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButtonText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    string text = TITLE;
+    string colorStr = "";
+    auto buttonNode = pattern->CreateButtonText(text, colorStr);
+    ASSERT_NE(buttonNode, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgBuildMenu001
+ * @tc.desc: Test DialogPattern BuildMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgBuildMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::vector<ButtonInfo> buttons;
+    pattern->isSuitableForElderly_ = true;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    auto menuNode = pattern->BuildMenu(buttons, false);
+    ASSERT_NE(menuNode, nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgUpdatePropertyForElderly001
+ * @tc.desc: Test DialogPattern UpdatePropertyForElderly
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdatePropertyForElderly001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogTheme_->minFontScaleForElderly_ = DOUBLEZERO;
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfo = {};
+    buttons.emplace_back(buttonInfo);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto windowManager = pipeline->GetWindowManager();
+    ASSERT_NE(windowManager, nullptr);
+    pattern->dialogTheme_->dialogLandscapeHeightBoundary_.value_ = pipeline->GetRootHeight() + DIMENSIONVALUE;
+    windowManager->windowGetModeCallback_ = []() -> WindowMode { return WindowMode::WINDOW_MODE_SPLIT_PRIMARY; };
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->UpdatePropertyForElderly(buttons);
+    EXPECT_TRUE(pattern->notAdapationAging_);
+
+    windowManager->windowGetModeCallback_ = []() -> WindowMode { return WindowMode::WINDOW_MODE_UNDEFINED; };
+    pattern->UpdatePropertyForElderly(buttons);
+    EXPECT_FALSE(pattern->notAdapationAging_);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgOnWindowSizeChanged001
+ * @tc.desc: Test DialogPattern OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnWindowSizeChanged001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isFoldStatusChanged_ = true;
+    WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->OnWindowSizeChanged(INTONE, INTONE, type);
+    EXPECT_FALSE(pattern->isFoldStatusChanged_);
+
+    pattern->isFoldStatusChanged_ = true;
+    type = WindowSizeChangeReason::DRAG;
+    pattern->OnWindowSizeChanged(INTONE, INTONE, type);
+    EXPECT_FALSE(pattern->isFoldStatusChanged_);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgNeedsButtonDirectionChange001
+ * @tc.desc: Test DialogPattern NeedsButtonDirectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedsButtonDirectionChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->buttonContainer_ =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, INTONE, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(pattern->buttonContainer_, nullptr);
+    auto childNode =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, INTONE, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(childNode, nullptr);
+    std::vector<ButtonInfo> buttons;
+    ButtonInfo buttonInfoOne = { .text = TITLE };
+    ButtonInfo buttonInfoTwo = { .text = TITLE };
+    buttons.emplace_back(buttonInfoOne);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_FALSE(pattern->NeedsButtonDirectionChange(buttons));
+
+    buttons.emplace_back(buttonInfoTwo);
+    EXPECT_FALSE(pattern->NeedsButtonDirectionChange(buttons));
+
+    childNode->MountToParent(pattern->buttonContainer_);
+    EXPECT_FALSE(pattern->NeedsButtonDirectionChange(buttons));
 }
 } // namespace OHOS::Ace::NG

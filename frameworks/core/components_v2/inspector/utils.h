@@ -35,7 +35,23 @@ const char* AXIS_TYPE[] = {
     "Axis.FREE",
     "Axis.NONE",
 };
-
+const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
+    FontWeight::W100,
+    FontWeight::W200,
+    FontWeight::W300,
+    FontWeight::W400,
+    FontWeight::W500,
+    FontWeight::W600,
+    FontWeight::W700,
+    FontWeight::W800,
+    FontWeight::W900,
+    FontWeight::W700,       // FontWeight::BOLD
+    FontWeight::W400,       // FontWeight::NORMAL
+    FontWeight::W900,       // FontWeight::BOLDER,
+    FontWeight::W100,       // FontWeight::LIGHTER
+    FontWeight::W500,       // FontWeight::MEDIUM
+    FontWeight::W400,       // FontWeight::REGULAR
+};
 } // namespace
 
 inline std::string ConvertStackFitToString(StackFit stackFit)
@@ -465,6 +481,11 @@ inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 
     auto index = BinarySearchFindIndex(fontStyleTable, ArraySize(fontStyleTable), fontStyle);
     return index < 0 ? "FontStyle.Normal" : fontStyleTable[index].value;
+}
+
+inline FontWeight ConvertFontWeight(FontWeight fontWeight)
+{
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 
 inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)

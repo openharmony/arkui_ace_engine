@@ -123,7 +123,7 @@ int32_t CJNavPathStack::RemoveByIndexes(std::vector<int32_t> indexes)
     if (pathArray_.size() == 0) {
         return 0;
     }
-    int32_t originLength = pathArray_.size();
+    int32_t originLength = static_cast<int32_t>(pathArray_.size());
     std::set<size_t> filterSet(indexes.begin(), indexes.end());
     std::vector<CJNavPathInfo> tmpPathArray;
     for (size_t i = 0; i < pathArray_.size(); ++i) {
@@ -132,7 +132,7 @@ int32_t CJNavPathStack::RemoveByIndexes(std::vector<int32_t> indexes)
         }
     }
     pathArray_ = tmpPathArray;
-    int32_t cnt = originLength - pathArray_.size();
+    int32_t cnt = originLength - static_cast<int32_t>(pathArray_.size());
     if (cnt > 0) {
         isReplace_ = 0;
         OnStateChanged();
@@ -155,14 +155,14 @@ int32_t CJNavPathStack::RemoveByName(std::string name)
     if (pathArray_.size() == 0) {
         return 0;
     }
-    int32_t originLength = pathArray_.size();
+    int32_t originLength = static_cast<int32_t>(pathArray_.size());
     pathArray_.erase(
         std::remove_if(
             pathArray_.begin(),
             pathArray_.end(),
             [&](const CJNavPathInfo& cjNavPathInfo) { return name == cjNavPathInfo.name; }),
         pathArray_.end());
-    int32_t cnt = originLength - pathArray_.size();
+    int32_t cnt = originLength - static_cast<int32_t>(pathArray_.size());
     if (cnt > 0) {
         isReplace_ = 0;
         OnStateChanged();

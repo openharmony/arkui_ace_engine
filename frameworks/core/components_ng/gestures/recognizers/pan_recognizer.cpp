@@ -116,7 +116,7 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
         "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
@@ -394,6 +394,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         return;
     }
 
+    if (refereeState_ == RefereeState::FAIL) {
+        return;
+    }
     UpdateTouchEventInfo(event);
     UpdateTouchPointInVelocityTracker(event);
     if (refereeState_ == RefereeState::DETECTING) {
@@ -690,6 +693,7 @@ void PanRecognizer::OnResetStatus()
     touchPoints_.clear();
     averageDistance_.Reset();
     touchPointsDistance_.clear();
+    panVelocity_.ResetAll();
     isStartTriggered_ = false;
 }
 

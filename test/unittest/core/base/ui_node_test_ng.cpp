@@ -1569,8 +1569,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
     int32_t depth = 0;
 
     parent->GetPageNodeCountAndDepth(&count, &depth);
-    EXPECT_EQ(parent->depth_, 1);
-    EXPECT_EQ(parent->depth_, 1);
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
 
     auto child1 = FrameNode::CreateFrameNode(
         "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
@@ -2555,4 +2555,38 @@ HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
     EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
 }
 
+/**
+ * @tc.name: AddFunc_API01
+ * @tc.desc: CanAddChildWhenTopNodeIsModalUec
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API01, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+    testNode->DoAddChild(itr, ONE, true);
+    bool res = testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddFunc_API02
+ * @tc.desc: AddChildAfter
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API02, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(testNode->children_.size(), 0);
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto node2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode->AddChild(node, 1, false);
+    testNode->AddChildAfter(node, node);
+    EXPECT_EQ(testNode->children_.size(), 1);
+    testNode->AddChildAfter(node2, node);
+    EXPECT_EQ(testNode->children_.size(), 2);
+    testNode->Clean(false);
+}
 } // namespace OHOS::Ace::NG

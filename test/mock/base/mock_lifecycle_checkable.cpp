@@ -14,9 +14,15 @@
  */
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/lifecycle_checkable.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
 namespace OHOS::Ace {
-LifeCycleCheckable::~LifeCycleCheckable()
+void LifeCycleCheckable::OnDetectedObjDestroyInUse()
+{
+    return;
+}
+
+void Referenced::OnDetectedClaimDeathObj(bool isNewOrRecycle)
 {
     return;
 }

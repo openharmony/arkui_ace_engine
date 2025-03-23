@@ -209,6 +209,8 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     XComponentOptions options;
     JSRef<JSObject> controllerObj;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto aiOptions = paramObject->GetProperty("imageAIOptions");
     ExtractInfoToXComponentOptions(options, controllerObj, info);
     if (options.id == std::nullopt && options.xcomponentController == nullptr &&
         (options.xcomponentType == XComponentType::SURFACE || options.xcomponentType == XComponentType::TEXTURE)) {
@@ -231,30 +233,22 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         auto soPath = info[1]->ToString();
         XComponentModel::GetInstance()->SetSoPath(soPath);
     }
+    ParseImageAIOptions(aiOptions);
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto aiOptions = paramObject->GetProperty("imageAIOptions");
-    if (aiOptions->IsObject()) {
-        auto engine = EngineHelper::GetCurrentEngine();
-        CHECK_NULL_VOID(engine);
-        NativeEngine* nativeEngine = engine->GetNativeEngine();
-        CHECK_NULL_VOID(nativeEngine);
-        panda::Local<JsiValue> value = aiOptions.Get().GetLocalHandle();
-        JSValueWrapper valueWrapper = value;
-        ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-        napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
-        XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
+    if (options.xcomponentType == XComponentType::SURFACE && options.screenId.has_value()) {
+        XComponentModel::GetInstance()->SetScreenId(options.screenId.value());
     }
 }
 
 void JSXComponent::ExtractInfoToXComponentOptions(
-    XComponentOptions& options, JSRef<JSObject> controllerObj, const JSCallbackInfo& info)
+    XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
     auto type = paramObject->GetProperty("type");
     auto libraryNameValue = paramObject->GetProperty("libraryname");
     auto controller = paramObject->GetProperty("controller");
+    auto screenIdValue = paramObject->GetProperty("screenId");
 
     if (id->IsString()) {
         options.id = id->ToString();
@@ -271,6 +265,9 @@ void JSXComponent::ExtractInfoToXComponentOptions(
     } else if (type->IsNumber()) {
         options.xcomponentType = static_cast<XComponentType>(type->ToNumber<int32_t>());
     }
+    if (screenIdValue->IsNumber()) {
+        options.screenId = screenIdValue->ToNumber<uint64_t>();
+    }
 }
 
 void* JSXComponent::Create(const XComponentParams& params)
@@ -282,6 +279,7 @@ void* JSXComponent::Create(const XComponentParams& params)
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
         static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
         static_cast<XComponentType>(params.xcomponentType), params.libraryName, xcomponentController));
+    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->SetIsArkTsFrameNode(true);
     auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
@@ -308,6 +306,22 @@ void* JSXComponent::Create(const XComponentParams& params)
         TaskExecutor::TaskType::JS, "ArkUIXComponentCreate");
 
     return jsXComponent;
+}
+
+void JSXComponent::ParseImageAIOptions(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = jsValue.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    XComponentModel::GetInstance()->SetImageAIOptions(optionsValue);
 }
 
 bool JSXComponent::ChangeRenderType(int32_t renderType)

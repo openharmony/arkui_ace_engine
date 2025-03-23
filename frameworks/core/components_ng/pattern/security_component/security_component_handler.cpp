@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #include "ui/base/geometry/dimension.h"
+#include "ui/base/utils/utils.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
@@ -24,6 +25,9 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#ifdef SECURITY_COMPONENT_ENABLE
+#include "pointer_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 using namespace OHOS::Security;
@@ -569,7 +573,29 @@ bool SecurityComponentHandler::CheckPixelStretchEffect(const RefPtr<FrameNode>& 
     return false;
 }
 
-bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message)
+bool SecurityComponentHandler::CheckForegroundEffect(const RefPtr<FrameNode>& node, std::string& message,
+    const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    if (!NearEqual(renderContext->GetForegroundEffect().value_or(0.0f), 0.0f)) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.foregroundBlurRadius_ = renderContext->GetForegroundEffect().value();
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckOverlayText(const RefPtr<FrameNode>& node, std::string& message,
+    const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    auto overlayText = renderContext->GetOverlayText();
+    if (overlayText.has_value()) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.isOverlayTextSet_ = true;
+    }
+    return false;
+}
+
+bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     const auto& renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -584,7 +610,9 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
         CheckColorBlend(node, renderContext, message) || CheckClipMask(node, renderContext, message) ||
         CheckForegroundColor(node, renderContext, message) || CheckSphericalEffect(node, renderContext, message) ||
         CheckLightUpEffect(node, renderContext, message) || CheckPixelStretchEffect(node, renderContext, message) ||
-        CheckForegroundBlurStyle(node, renderContext, message) || CheckBlendMode(node, renderContext, message)) {
+        CheckForegroundBlurStyle(node, renderContext, message) || CheckBlendMode(node, renderContext, message) ||
+        CheckForegroundEffect(node, message, renderContext, buttonInfo) ||
+        CheckOverlayText(node, message, renderContext, buttonInfo)) {
         return true;
     }
     return false;
@@ -624,6 +652,22 @@ bool SecurityComponentHandler::IsSecComponentClipped(RefPtr<FrameNode>& parentNo
     return false;
 }
 
+bool SecurityComponentHandler::CheckOverlayNode(RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
+    std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    CHECK_NULL_RETURN(parentNode, false);
+    auto overlayNode = parentNode->GetOverlayNode();
+    CHECK_NULL_RETURN(overlayNode, false);
+    auto overlayRect = overlayNode->GetPaintRectWithTransform();
+    CHECK_NULL_RETURN(node, false);
+    auto secRect = node->GetPaintRectWithTransform();
+    if (overlayRect.IsInnerIntersectWithRound(secRect)) {
+        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.isOverlayNodeCovered_ = true;
+    }
+    return false;
+}
+
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message)
 {
@@ -644,10 +688,11 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         if (parentNode->CheckTopWindowBoundary()) {
             break;
         }
-        if (CheckRenderEffect(parentNode, message) || CheckParentBorder(parentNode, frameRect, message)) {
+        if (CheckRenderEffect(parentNode, message, buttonInfo) || CheckParentBorder(parentNode, frameRect, message)) {
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
         }
+        CheckOverlayNode(parentNode, node, message, buttonInfo);
         if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatileChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
@@ -796,7 +841,7 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
     return true;
 }
 
-bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+bool InitSCImageIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& iconNode)
 {
     if (iconNode != nullptr) {
@@ -810,6 +855,26 @@ bool InitSCIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         auto fillColor = iconProp->GetImageSourceInfo()->GetFillColor();
         CHECK_EQUAL_RETURN(fillColor.has_value(), false, false);
         buttonInfo.iconColor_.value = fillColor->GetValue();
+    }
+    return true;
+}
+
+bool InitSCSymbolIconInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+    RefPtr<FrameNode>& iconNode)
+{
+    if (iconNode != nullptr) {
+        CHECK_NULL_RETURN(iconNode->GetGeometryNode(), false);
+        auto iconProp = iconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(iconProp, false);
+        auto fontSize = iconProp->GetFontSize();
+        CHECK_NULL_RETURN(fontSize, false);
+        buttonInfo.iconSize_ = fontSize->ConvertToVp();
+        auto colorList = iconProp->GetSymbolColorList();
+        if (colorList.has_value()) {
+            if (!colorList.value().empty()) {
+                buttonInfo.iconColor_.value = colorList.value()[0].GetValue();
+            }
+        }
     }
     return true;
 }
@@ -862,15 +927,13 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     RefPtr<FrameNode>& node)
 {
     RefPtr<FrameNode> iconNode = GetSecCompChildNode(node, V2::IMAGE_ETS_TAG);
-    if (!InitSCIconInfo(buttonInfo, iconNode)) {
+    if (!InitSCImageIconInfo(buttonInfo, iconNode)) {
         return false;
     }
 
     RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
-    if (symbolIconNode != nullptr) {
-        CHECK_NULL_RETURN(symbolIconNode->GetGeometryNode(), false);
-        auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_RETURN(iconProp, false);
+    if (!InitSCSymbolIconInfo(buttonInfo, symbolIconNode)) {
+        return false;
     }
 
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
@@ -928,37 +991,46 @@ void SecurityComponentHandler::WriteButtonInfo(
     }
 }
 
+bool SecurityComponentHandler::InitButtonInfoValue(RefPtr<FrameNode>& node,
+    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, const SecCompType& scType, std::string& message)
+{
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    WriteButtonInfo(layoutProperty, node, buttonInfo, message);
+    buttonInfo.type_ = scType;
+    if (layoutProperty->GetIsIconExceeded().has_value() && layoutProperty->GetIsIconExceeded().value()) {
+        buttonInfo.isIconExceeded_ = true;
+        buttonInfo.hasNonCompatileChange_ = true;
+    }
+    if (!InitChildInfo(buttonInfo, node)) {
+        return false;
+    }
+    return true;
+}
+
 bool SecurityComponentHandler::InitButtonInfo(std::string& componentInfo, RefPtr<FrameNode>& node, SecCompType& scType,
     std::string& message)
 {
     CHECK_NULL_RETURN(node, false);
-    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, false);
     std::string type = node->GetTag();
     if (type == V2::LOCATION_BUTTON_ETS_TAG) {
         LocationButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::LOCATION_COMPONENT;
         scType = SecCompType::LOCATION_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::PASTE_BUTTON_ETS_TAG) {
         PasteButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::PASTE_COMPONENT;
         scType = SecCompType::PASTE_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();
     } else if (type == V2::SAVE_BUTTON_ETS_TAG) {
         SaveButton buttonInfo;
-        WriteButtonInfo(layoutProperty, node, buttonInfo, message);
-        buttonInfo.type_ = SecCompType::SAVE_COMPONENT;
         scType = SecCompType::SAVE_COMPONENT;
-        if (!InitChildInfo(buttonInfo, node)) {
+        if (!InitButtonInfoValue(node, buttonInfo, scType, message)) {
             return false;
         }
         componentInfo = buttonInfo.ToJsonStr();

@@ -147,6 +147,7 @@ public:
     void ForceCleanGestureReferee();
     void ForceCleanGestureRefereeState();
     void CleanGestureRefereeState(int32_t touchId);
+    bool IsScopesEmpty() const;
 private:
     void HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& recognizer);
     void HandlePendingDisposal(const RefPtr<NGGestureRecognizer>& recognizer);

@@ -20,6 +20,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -171,7 +172,7 @@ void FfiOHOSAceFrameworkViewContextAnimationTo(NativeAnimateParam animateParam, 
     if (SystemProperties::GetRosenBackendEnabled()) {
         if (pipelineContextBase->IsLayouting()) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                 animateOpt.GetDuration(), animateOpt.GetCurve() ? animateOpt.GetCurve()->ToString().c_str() : "");
             pipelineContextBase->GetTaskExecutor()->PostTask(
                 [id = Container::CurrentIdSafely(), animateOpt, callback, isImmediately]() mutable {

@@ -54,33 +54,39 @@ void TxtParagraph::CreateBuilder()
     CHECK_NULL_VOID(!hasExternalParagraph_);
     placeholderPosition_.clear();
     Rosen::TypographyStyle style;
-    style.textDirection = Constants::ConvertTxtTextDirection(paraStyle_.direction);
-    style.textAlign = Constants::ConvertTxtTextAlign(paraStyle_.align);
-    style.maxLines = paraStyle_.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle_.maxLines;
-    style.fontSize = paraStyle_.fontSize; // Rosen style.fontSize
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
-    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
+    ConvertTypographyStyle(style, paraStyle_);
+    builder_ = Rosen::TypographyCreate::Create(style, fontCollection_);
+}
+
+void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const ParagraphStyle& paraStyle)
+{
+    style.textDirection = Constants::ConvertTxtTextDirection(paraStyle.direction);
+    style.textAlign = Constants::ConvertTxtTextAlign(paraStyle.align);
+    style.maxLines = paraStyle.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle.maxLines;
+    style.fontSize = paraStyle.fontSize; // Rosen style.fontSize
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
+    style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle.ellipsisMode);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
-    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
-    style.lineStyleHalfLeading = paraStyle_.halfLeading;
-    style.locale = paraStyle_.fontLocale;
-    if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
+    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
+    style.lineStyleHalfLeading = paraStyle.halfLeading;
+    style.locale = paraStyle.fontLocale;
+    if (paraStyle.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-    style.isEndAddParagraphSpacing = IsEndAddParagraphSpacing() || paraStyle_.isEndAddParagraphSpacing;
-    style.paragraphSpacing = paraStyle_.paragraphSpacing.ConvertToPx();
+    style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
+    style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
+    style.defaultTextStyleUid = paraStyle.textStyleUid;
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle_.wordBreak);
-    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
+    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
+    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
 #endif
-    builder_ = Rosen::TypographyCreate::Create(style, fontCollection_);
 }
 
 void TxtParagraph::PushStyle(const TextStyle& style)
 {
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle");
     CHECK_NULL_VOID(!hasExternalParagraph_);
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::PushStyle id:%d", style.GetTextStyleUid());
     if (!builder_) {
         CreateBuilder();
     }
@@ -100,7 +106,7 @@ void TxtParagraph::PopStyle()
 
 void TxtParagraph::AddText(const std::u16string& text)
 {
-    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText");
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
     if (!builder_) {
         CreateBuilder();
     }
@@ -176,6 +182,30 @@ void TxtParagraph::Layout(float width)
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::Layout");
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paragraph_->Layout(width);
+}
+
+void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles)
+{
+    CHECK_NULL_VOID(paragraph_);
+    paraStyle_ = paraStyle;
+    std::stringstream nodeID;
+    nodeID << "[";
+
+    std::vector<Rosen::TextStyle> txtStyles;
+    for (auto textStyle : textStyles) {
+        Rosen::TextStyle txtStyle;
+        Constants::ConvertTxtStyle(textStyle, PipelineContext::GetCurrentContextSafelyWithCheck(), txtStyle);
+        nodeID << std::to_string(txtStyle.textStyleUid);
+        nodeID << ", ";
+        txtStyles.emplace_back(txtStyle);
+    }
+    nodeID << "]";
+    ACE_TEXT_SCOPED_TRACE("TxtParagraph::ReLayout node Size:%d nodeID:%s paraStyle id:%d",
+        static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid);
+    Rosen::TypographyStyle style;
+    ConvertTypographyStyle(style, paraStyle_);
+    style.relayoutChangeBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    paragraph_->Relayout(width, style, txtStyles);
 }
 
 float TxtParagraph::GetHeight()

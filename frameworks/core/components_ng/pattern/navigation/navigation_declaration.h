@@ -131,6 +131,10 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
 
+constexpr int32_t ROTATION_0 = 0;
+constexpr int32_t ROTATION_90 = 90;
+constexpr int32_t ROTATION_180 = 180;
+constexpr int32_t ROTATION_270 = 270;
 
 constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
 
