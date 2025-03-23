@@ -2183,14 +2183,4 @@ void NavigationGroupNode::ResetSystemAnimationProperties(const RefPtr<FrameNode>
     // update titleBar's translateXY
     titleBarRenderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
-
-void NavigationGroupNode::SetPageViewportConfig(const RefPtr<PageViewportConfig>& config)
-{
-    viewportConfig_ = config;
-    if (config) {
-        safeAreaInsets_ = config->GetSafeArea();
-    } else {
-        safeAreaInsets_ = SafeAreaInsets();
-    }
-}
 } // namespace OHOS::Ace::NG

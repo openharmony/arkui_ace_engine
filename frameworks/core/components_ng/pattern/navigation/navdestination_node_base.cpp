@@ -17,9 +17,13 @@
 
 #include "base/utils/utf_helper.h"
 #include "base/json/json_util.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/bar_item_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -98,10 +102,13 @@ bool NavDestinationNodeBase::CustomizeExpandSafeArea()
     ScopePageViewportConfig scopeConfig(viewportConfig_);
     auto geometryNode = GetGeometryNode();
     RectF backupParentAdjust;
+    auto angle = rotateAngle_.value();
     if (geometryNode) {
         backupParentAdjust = geometryNode->GetParentAdjust();
-        RectF parentAdjust{ safeAreaInsets_.left_.end, safeAreaInsets_.top_.end, 0.0f, 0.0f };
-        geometryNode->SetParentAdjust(parentAdjust);
+        if (angle == ROTATION_90 || angle == ROTATION_270) {
+            RectF parentAdjust{ safeAreaInsets_.left_.end, safeAreaInsets_.top_.end, 0.0f, 0.0f };
+            geometryNode->SetParentAdjust(parentAdjust);
+        }
     }
     FrameNode::ExpandSafeArea();
     if (geometryNode) {
@@ -113,7 +120,7 @@ bool NavDestinationNodeBase::CustomizeExpandSafeArea()
 
 void NavDestinationNodeBase::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    if (rotateAngle_.has_value() && viewportConfig_) {
+    if (rotateAngle_.has_value() && rotateAngle_.value() != ROTATION_0 && viewportConfig_) {
         ScopePageViewportConfig scopeConfig(viewportConfig_);
         FrameNode::Measure(parentConstraint);
         return;
@@ -123,7 +130,7 @@ void NavDestinationNodeBase::Measure(const std::optional<LayoutConstraintF>& par
 
 void NavDestinationNodeBase::Layout()
 {
-    if (rotateAngle_.has_value() && viewportConfig_) {
+    if (rotateAngle_.has_value() && rotateAngle_.value() != ROTATION_0 && viewportConfig_) {
         ScopePageViewportConfig scopeConfig(viewportConfig_);
         FrameNode::Layout();
         return;
@@ -251,6 +258,27 @@ void NavDestinationNodeBase::SetPageViewportConfig(const RefPtr<PageViewportConf
     } else {
         safeAreaInsets_ = SafeAreaInsets();
     }
+    do {
+        auto titleNode = AceType::DynamicCast<TitleBarNode>(titleBarNode_);
+        CHECK_NULL_BREAK(titleNode);
+        auto titleBarPattern = titleNode->GetPattern<TitleBarPattern>();
+        CHECK_NULL_BREAK(titleBarPattern);
+        titleBarPattern->SetPageViewportConfig(config ? config->Clone() : nullptr);
+    } while (false);
+    do {
+        auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(toolBarNode_);
+        CHECK_NULL_BREAK(toolbarNode);
+        auto toolBarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+        CHECK_NULL_BREAK(toolBarPattern);
+        toolBarPattern->SetPageViewportConfig(config ? config->Clone() : nullptr);
+    } while (false);
+    do {
+        auto contentNode = AceType::DynamicCast<FrameNode>(contentNode_);
+        CHECK_NULL_BREAK(contentNode);
+        auto contentPattern = contentNode->GetPattern<NavDestinationContentPattern>();
+        CHECK_NULL_BREAK(contentPattern);
+        contentPattern->SetPageViewportConfig(config ? config->Clone() : nullptr);
+    } while (false);
 }
 
 LayoutConstraintF NavDestinationNodeBase::AdjustLayoutConstarintIfNeeded(const LayoutConstraintF& originConstraint)
