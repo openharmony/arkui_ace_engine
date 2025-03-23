@@ -408,10 +408,6 @@ public:
         repeatDifference_ = repeatDifference;
     }
 
-#ifdef SUPPORT_DIGITAL_CROWN
-    void StartVibrator(bool bEdge);
-#endif
-
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -432,7 +428,7 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
-    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex);
+    virtual void OnMidIndexChanged();
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     void SetLayoutAlgorithmParams(
