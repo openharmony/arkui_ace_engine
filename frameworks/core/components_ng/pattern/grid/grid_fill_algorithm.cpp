@@ -31,9 +31,6 @@ void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalC
 }
 void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
-    if (viewport.IsNonPositive()) {
-        return;
-    }
     params_.mainGap = GridUtils::GetMainGap(props_, viewport, axis);
 
     std::string args = (axis == Axis::VERTICAL ? props_.GetColumnsTemplate() : props_.GetRowsTemplate()).value_or("");
