@@ -47,7 +47,15 @@ bool WaterFlowSegmentLayoutBase::IsSectionValid(const RefPtr<WaterFlowLayoutInfo
 void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 {
     InitEnv(wrapper);
-    sections_ = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetSections();
+    auto host = wrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    info_->repeatDifference_ = 0;
+    info_->firstRepeatCount_ = 0;
+    info_->childrenCount_ = 0;
+    pattern->GetRepeatCountInfo(host, info_->repeatDifference_, info_->firstRepeatCount_, info_->childrenCount_);
+    sections_ = pattern->GetSections();
     if (sections_ && !IsSectionValid(info_, info_->childrenCount_)) {
         info_->isDataValid_ = false;
         return;

@@ -150,13 +150,6 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
     }
 
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    layoutInfo_->repeatDifference_ = 0;
-    layoutInfo_->firstRepeatCount_ = 0;
-    layoutInfo_->childrenCount_ = 0;
-    GetRepeatCountInfo(
-        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }

@@ -459,6 +459,8 @@ public:
         return laneIdx4Divider_;
     }
 
+    void CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper);
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
