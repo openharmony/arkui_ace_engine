@@ -299,7 +299,7 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
     auto surfaceNode = session->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     if (!surfaceNode->GetParent()) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s is on ui tree but not rs tree,"
+        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s is on ui tree but not rs tree,"
             "screenId:%{public}" PRIu64, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
     }
 }

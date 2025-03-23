@@ -1209,7 +1209,7 @@ void SessionWrapperImpl::NotifySizeChangeReason(
 void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
     CHECK_NULL_VOID(session_);
-    UIEXT_LOGI("NotifyAvoidArea, type: %{public}d, topRect=(%{public}d, %{public}d)-[%{public}d, %{public}d], "
+    UIEXT_LOGD("NotifyAvoidArea, type: %{public}d, topRect=(%{public}d, %{public}d)-[%{public}d, %{public}d], "
         "bottomRect=(%{public}d,%{public}d)-[%{public}d,%{public}d],persistentId=%{public}d,componentId=%{public}d.",
         type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
         (int32_t)avoidArea.topRect_.height_, avoidArea.bottomRect_.posX_, avoidArea.bottomRect_.posY_,
@@ -1393,18 +1393,18 @@ bool SessionWrapperImpl::SendBusinessData(
     if (type == BusinessDataSendType::ASYNC) {
         dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
             static_cast<uint32_t>(code), data);
-        UIEXT_LOGI("SendBusinessData ASYNC Success, businessCode=%{public}u, compontId=%{public}d.",
+        UIEXT_LOGD("SendBusinessData ASYNC Success, businessCode=%{public}u, compontId=%{public}d.",
             code, GetFrameNodeId());
         return true;
     }
     auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
         static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
-        UIEXT_LOGW("SendBusinessData Sync Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
+        UIEXT_LOGD("SendBusinessData Sync Fail, businesCode=%{public}u, result=%{public}u, compontId=%{public}d.",
             code, result, GetFrameNodeId());
         return false;
     }
-    UIEXT_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u, componentId=%{public}d.",
+    UIEXT_LOGD("SendBusinessData SYNC Success, businessCode=%{public}u, componentId=%{public}d.",
         code, GetFrameNodeId());
     return true;
 }

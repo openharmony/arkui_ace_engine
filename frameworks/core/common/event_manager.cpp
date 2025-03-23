@@ -166,7 +166,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
 #endif
         resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
