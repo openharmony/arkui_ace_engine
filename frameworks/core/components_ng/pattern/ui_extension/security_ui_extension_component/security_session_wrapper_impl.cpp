@@ -849,18 +849,18 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
     if (type == BusinessDataSendType::ASYNC) {
         dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
             static_cast<uint32_t>(code), data);
-        PLATFORM_LOGW("SendBusinessData ASYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+        PLATFORM_LOGD("SendBusinessData ASYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
             code, subSystemId);
         return true;
     }
     auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
         static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
-        PLATFORM_LOGW("SendBusinessData SYNC Fail, businessCode=%{public}u, "
+        PLATFORM_LOGD("SendBusinessData SYNC Fail, businessCode=%{public}u, "
             "result=%{public}u, subSystemId=%{public}hhu.", code, result, subSystemId);
         return false;
     }
-    PLATFORM_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+    PLATFORM_LOGD("SendBusinessData SYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
         code, subSystemId);
     return true;
 }

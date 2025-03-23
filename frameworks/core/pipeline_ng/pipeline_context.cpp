@@ -2693,7 +2693,7 @@ void PipelineContext::OnTouchEvent(
                 scalePoint.touchEventId, scalePoint.id, (int)scalePoint.type, scalePoint.isInjected,
                 scalePoint.isPrivacyMode);
 #else
-            TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+            TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
                 "InputTracking id:%{public}d, fingerId:%{public}d, x=%{public}.3f, y=%{public}.3f type=%{public}d, "
                 "inject=%{public}d",
                 scalePoint.touchEventId, scalePoint.id, scalePoint.x, scalePoint.y, (int)scalePoint.type,
