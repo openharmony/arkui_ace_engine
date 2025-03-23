@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -298,7 +299,7 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         int32_t navBarContentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId);
         auto navBarContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_CONTENT_ETS_TAG, navBarContentNodeId,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+            []() { return AceType::MakeRefPtr<NavDestinationContentPattern>(true); });
         auto navBarContentRenderContext = navBarContentNode->GetRenderContext();
         CHECK_NULL_RETURN(navBarContentRenderContext, false);
         navBarContentRenderContext->UpdateClipEdge(true);

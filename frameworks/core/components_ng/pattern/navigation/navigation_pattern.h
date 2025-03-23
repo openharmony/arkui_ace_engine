@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/system_bar/system_bar_style.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/inner_navigation_controller.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
@@ -37,8 +38,8 @@ namespace OHOS::Ace::NG {
 using namespace Framework;
 using OnNavigationAnimation = std::function<NavigationTransition(RefPtr<NavDestinationContext>,
         RefPtr<NavDestinationContext>, NavigationOperation)>;
-class NavigationPattern : public Pattern, public IAvoidInfoListener {
-    DECLARE_ACE_TYPE(NavigationPattern, Pattern, IAvoidInfoListener);
+class NavigationPattern : public Pattern, public IAvoidInfoListener, public CustomSafeAreaExpander {
+    DECLARE_ACE_TYPE(NavigationPattern, Pattern, IAvoidInfoListener, CustomSafeAreaExpander);
 
 public:
     NavigationPattern();
@@ -491,6 +492,15 @@ public:
         return isInDividerDrag_;
     }
 
+    std::optional<std::pair<bool, bool>> GetPreStatusBarConfig() const
+    {
+        return preStatusBarConfig_;
+    }
+    std::optional<bool> GetPreNavIndicatorConfig() const
+    {
+        return preNavIndicatorConfig_;
+    }
+    void SetPageViewportConfig(const RefPtr<PageViewportConfig>& config) override;
     bool IsPageLevelConfigEnabled(bool considerSize = true);
     void OnStartOneTransitionAnimation();
     void OnFinishOneTransitionAnimation();
@@ -610,8 +620,17 @@ private:
     void OnAllTransitionAnimationFinish();
     void UpdateSystemBarConfigForSizeChanged();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
-    void ShowOrHideSystemBarIfNeeded(bool isShow);
+    void ShowOrHideSystemBarIfNeeded(bool isShow,
+        std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar,
+        std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator);
+    void ShowOrHideStatusBarIfNeeded(bool isShow, std::optional<std::pair<bool, bool>> curStatusBarConfig,
+        std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar);
+    void ShowOrHideNavIndicatorIfNeeded(bool isShow, std::optional<bool> curNavIndicatorConfig,
+        std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator);
     bool IsEquivalentToStackMode();
+    void BackupPreSystemBarConfigIfNeeded(const std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
+    void ClearPageAndNavigationConfig();
+    bool CustomizeExpandSafeArea() override;
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -672,7 +691,10 @@ private:
 
     std::vector<WeakPtr<NavDestinationNodeBase>> preVisibleNodes_;
     int32_t runningTransitionCount_ = 0;
-    bool isTransitionRunning_ = false;
+    std::optional<bool> showStatusBar_;
+    std::optional<std::pair<bool, bool>> preStatusBarConfig_;
+    std::optional<bool> showNavIndicator_;
+    std::optional<bool> preNavIndicatorConfig_;
 };
 
 } // namespace OHOS::Ace::NG

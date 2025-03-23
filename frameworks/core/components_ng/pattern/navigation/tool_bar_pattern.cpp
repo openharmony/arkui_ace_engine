@@ -314,4 +314,10 @@ bool NavToolbarPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
+bool NavToolbarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return RunCustomizeExpandIfNeeded(host);
+}
 } // namespace OHOS::Ace::NG
