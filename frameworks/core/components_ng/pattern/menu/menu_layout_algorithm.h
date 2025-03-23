@@ -72,7 +72,7 @@ public:
 
     bool canExpandCurrentWindow_ = false;
     void InitCanExpandCurrentWindow(bool isShowInSubWindow);
-    bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
+    bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
 protected:
@@ -135,6 +135,7 @@ private:
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
+    float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -289,6 +290,7 @@ private:
     OffsetF childOffset_;
     SizeF childMarginFrameSize_;
     std::string clipPath_;
+    bool holdEmbeddedMenuPosition_ = false;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

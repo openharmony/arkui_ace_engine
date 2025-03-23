@@ -424,12 +424,18 @@ public:
 
     int IncreaseEmbeddedSubMenuCount()
     {
+        ++embeddedSubMenuExpandTotalCount_;
         return ++embeddedSubMenuCount_;
     }
     
     int DecreaseEmbeddedSubMenuCount()
     {
         return --embeddedSubMenuCount_;
+    }
+
+    int GetEmbeddedSubMenuExpandTotalCount() const
+    {
+        return embeddedSubMenuExpandTotalCount_;
     }
 
     bool HasEmbeddedSubMenu();
@@ -533,6 +539,7 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    int embeddedSubMenuExpandTotalCount_ = 0;
     LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
