@@ -222,6 +222,9 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
+        if (i + col >= params.crossLens.size()) {
+            break;
+        }
         crossLen += params.crossLens[i + col];
     }
     crossLen += params.crossGap * (itemSize.columns - 1);
