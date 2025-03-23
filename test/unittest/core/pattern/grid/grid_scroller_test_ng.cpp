@@ -777,7 +777,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToEdge002, TestSize.Level1)
      * @tc.expected: Scroll to bottom with animation
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 200.0f);
-    EXPECT_TRUE(Position(-492.0f));
+    EXPECT_TRUE(Position(-592.0f));
 
     /**
      * @tc.steps: step2. SCROLL_TOP
