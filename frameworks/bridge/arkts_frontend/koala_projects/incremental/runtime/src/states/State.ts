@@ -896,8 +896,8 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
 
-        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) as ScopeImpl<Value> : undefined
-        const scope = reused ?? new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
+        let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) : undefined
+        const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
             scope.recomputeNeeded = true
