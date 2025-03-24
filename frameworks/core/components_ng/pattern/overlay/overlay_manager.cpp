@@ -1614,6 +1614,7 @@ void OverlayManager::HidePopupAnimation(const RefPtr<FrameNode>& popupNode, cons
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     const std::function<void(int32_t)>&& onWillDismiss, bool interactiveDismiss)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "show popup enter, targetId: %{public}d", targetId);
     if (!UpdatePopupMap(targetId, popupInfo)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "failed to update popup map, tag:%{public}s",
             popupInfo.target.Upgrade()->GetTag().c_str());
@@ -2019,7 +2020,7 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup enter, %{public}d", targetId);
     if (isEraseFromMap) {
         ErasePopupInfo(targetId);
     } else {
@@ -2070,11 +2071,6 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         ResetLowerNodeFocusable(popupNode);
     }
     CheckReturnFocus(popupNode);
-    auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetShowedState(0);
-    popupNode->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     auto onFinish = [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable,
@@ -2098,6 +2094,11 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, boo
         popupPattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
         popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
+        auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        accessibilityProperty->SetShowedState(0);
+        popupNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         overlayManager->RemoveChildWithService(rootNode, popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (popupNodeIsInMap) {
@@ -2257,7 +2258,7 @@ void OverlayManager::HideAllPopups()
 
 void OverlayManager::ErasePopup(int32_t targetId)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "erase popup enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "erase popup enter, targetId: %{public}d", targetId);
     auto it = popupMap_.find(targetId);
     if (it != popupMap_.end()) {
         auto rootNode = rootNodeWeak_.Upgrade();
@@ -2284,6 +2285,7 @@ void OverlayManager::ErasePopup(int32_t targetId)
 
 void OverlayManager::DismissPopup()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "dimiss popup enter, dismissPopupId: %{public}d", dismissPopupId_);
     auto iter = popupMap_.find(dismissPopupId_);
     if (iter == popupMap_.end()) {
         return;
@@ -7902,6 +7904,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         node->MountToParentBefore(rootNode, nextNode);
         return;
     }
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "%{public}s node mount to root node", node->GetTag().c_str());
     node->MountToParent(rootNode);
 }
 
@@ -7911,6 +7914,7 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(node);
     auto parent = node->GetParent();
     CHECK_NULL_VOID(parent);
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "%{public}s node remove from parent node", node->GetTag().c_str());
     parent->RemoveChild(node);
     auto pipelineContext = rootNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
