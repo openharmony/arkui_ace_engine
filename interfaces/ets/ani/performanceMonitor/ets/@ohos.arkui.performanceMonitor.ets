@@ -14,15 +14,12 @@
  */
 
 export default namespace performanceMonitor {
-    loadLibrary("performanceMonitor_ani")
-    export enum PerfActionType {
-        UNKNOWN_ACTION = -1,
+    loadLibrary("performanceMonitor_ani");
+    export enum ActionType {
         LAST_DOWN = 0,
         LAST_UP = 1,
         FIRST_MOVE = 2
     };
-    export native function performanceMonitor_begin(scene: string, startInputType: PerfActionType, note?: string): void;
-    export native function performanceMonitor_end(scene: string): void;
-
-    export class PerformanceMonitor {}
+    export native function begin(scene: string, startInputType: ActionType, note?: string): void;
+    export native function end(scene: string): void;
 }

@@ -24,8 +24,7 @@
 #include <string>
 #include "frameworks/base/perfmonitor/perf_monitor.h"
 
-static void performanceMonitor_begin([[maybe_unused]] ani_env *env, ani_string scene,
-    ani_int startInputType, ani_string note)
+static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item startInputType, ani_string note)
 {
     ani_size  strSize;
     env->String_GetUTF8Size(scene, &strSize);
@@ -46,31 +45,23 @@ static void performanceMonitor_begin([[maybe_unused]] ani_env *env, ani_string s
     std::string noteStr = std::string(utf8Buffer2);
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
         return ;
     }
 
-    ani_enum enumType;
-    if (ANI_OK != env->FindEnum("Lperf_monitor_ani/#PerfActionType;", &enumType)) {
-        std::cerr << "Find Enum Faild" << std::endl;
-    }
-    ani_enum_item enumItem;
-    if (ANI_OK != env->Enum_GetEnumItemByIndex(enumType, startInputType, &enumItem)) {
-        std::cerr << "Enum_GetEnumItemByIndex FAILD" << std::endl;
-    }
-    ani_int intValue;
-    if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &intValue)) {
+    ani_int intValue{};
+    if (ANI_OK != env->EnumItem_GetValue_Int(startInputType, &intValue)) {
         std::cerr << "Enum_GetEnumItemByIndex FAILD" << std::endl;
     }
 
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
     pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
-        pMonitor->OHOS::Ace::PerfMonitor::Start(sceneId, static_cast<OHOS::Ace::PerfActionType>(intValue), noteStr);
+        pMonitor->Start(sceneId, static_cast<OHOS::Ace::PerfActionType>(intValue), noteStr);
     }
 }
 
-static void performanceMonitor_end([[maybe_unused]] ani_env *env, ani_string scene)
+static void End([[maybe_unused]] ani_env *env, ani_string scene)
 {
     ani_size  strSize;
     env->String_GetUTF8Size(scene, &strSize);
@@ -82,14 +73,14 @@ static void performanceMonitor_end([[maybe_unused]] ani_env *env, ani_string sce
     std::string sceneId = std::string(utf8Buffer);
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
         return ;
     }
 
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
     pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
-        pMonitor->OHOS::Ace::PerfMonitor::End(sceneId, true);
+        pMonitor->End(sceneId, true);
     }
 }
 
@@ -102,12 +93,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {
-        ani_native_function {"performanceMonitor_begin", nullptr, reinterpret_cast<void *>(performanceMonitor_begin)},
-        ani_native_function {"performanceMonitor_end", nullptr, reinterpret_cast<void *>(performanceMonitor_end)},
+        ani_native_function {"begin", nullptr, reinterpret_cast<void *>(Begin)},
+        ani_native_function {"end", nullptr, reinterpret_cast<void *>(End)},
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;
