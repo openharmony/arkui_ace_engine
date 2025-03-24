@@ -101,4 +101,8 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {}
+
+void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidinfo)
+{}
+
 } // namespace OHOS::Ace
