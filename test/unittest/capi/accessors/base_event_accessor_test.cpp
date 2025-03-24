@@ -80,6 +80,43 @@ HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTargetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseEventAccessorTest, GetTargetTest, TestSize.Level1)
+{
+    const Dimension height(100.f);
+    const Dimension width(200.f);
+    const Dimension offsetX(150.f);
+    const Dimension offsetY(250.f);
+    const Dimension originX(100.f);
+    const Dimension originY(450.f);
+
+    DimensionRect area(width, height, DimensionOffset(offsetX, offsetY));
+    EventTarget target{ "", "", area, DimensionOffset(originX, originY)};
+
+    baseEvent_->SetTarget(target);
+    auto result = accessor_->getTarget(peer_);
+
+    EXPECT_EQ(Converter::Convert<Dimension>(result.area.height), height);
+    EXPECT_EQ(Converter::Convert<Dimension>(result.area.width), width);
+
+    auto optOffsetX = Converter::OptConvert<Dimension>(result.area.position.x);
+    ASSERT_TRUE(optOffsetX.has_value());
+    EXPECT_EQ(optOffsetX.value(), offsetX);
+    auto optOffsetY = Converter::OptConvert<Dimension>(result.area.position.y);
+    ASSERT_TRUE(optOffsetY.has_value());
+    EXPECT_EQ(optOffsetY.value(), offsetY);
+    auto optOriginX = Converter::OptConvert<Dimension>(result.area.globalPosition.x);
+    ASSERT_TRUE(optOriginX.has_value());
+    EXPECT_EQ(optOriginX.value(), originX);
+    auto optOriginY = Converter::OptConvert<Dimension>(result.area.globalPosition.y);
+    ASSERT_TRUE(optOriginY.has_value());
+    EXPECT_EQ(optOriginY.value(), originY);
+}
+
+/**
  * @tc.name: SetTargetTest
  * @tc.desc:
  * @tc.type: FUNC
