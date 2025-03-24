@@ -1045,6 +1045,8 @@ void MenuView::SetHasCustomOutline(
     if (!menuParam.outlineWidth.has_value() || menuParam.outlineWidth->leftDimen->IsNegative() ||
         menuParam.outlineWidth->rightDimen->IsNegative() || menuParam.outlineWidth->topDimen->IsNegative() ||
         menuParam.outlineWidth->bottomDimen->IsNegative()) {
+        menuWrapperPattern->SetHasCustomOutlineWidth(false);
+        menuWrapperPattern->SetHasCustomOutlineColor(false);
         return;
     }
     menuWrapperPattern->SetHasCustomOutlineWidth(true);

@@ -2367,14 +2367,16 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
     CalcDimension borderWidth;
     if (JSViewAbstract::ParseJsDimensionVp(outlineWidthValue, borderWidth)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
-            borderWidth.Reset();
+            outlineWidth.SetBorderWidth(Dimension { -1 });
+            menuParam.outlineWidth = outlineWidth;
+            return;
         }
         outlineWidth.SetBorderWidth(borderWidth);
         menuParam.outlineWidth = outlineWidth;
         return;
     }
     if (!outlineWidthValue->IsObject()) {
-        outlineWidth.SetBorderWidth(Dimension {});
+        outlineWidth.SetBorderWidth(Dimension { -1 });
         menuParam.outlineWidth = outlineWidth;
         return;
     }
