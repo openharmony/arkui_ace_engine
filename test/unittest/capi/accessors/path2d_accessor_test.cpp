@@ -75,7 +75,7 @@ HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
     auto arkPath = Referenced::RawPtr(peerPathImpl);
     RefPtr<CanvasPath2D> pathKeeper = mockPathKeeper_;
     peerPathImpl->SetCanvasPath2d(pathKeeper);
-    auto peerMatrix = new Matrix2DPeer();
+    auto peerMatrix = PeerUtils::CreatePeer<Matrix2DPeer>();
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peerMatrix);
     peerMatrix->SetScaleX(NUMBER_TEST_PLAN[0]);
     peerMatrix->SetScaleY(NUMBER_TEST_PLAN[1]);
