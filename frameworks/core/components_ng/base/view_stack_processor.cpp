@@ -54,6 +54,7 @@ const RefPtr<UINode>& ViewStackProcessor::GetMainElementNode() const
 
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
+    CHECK_NULL_VOID(element);
     if (ShouldPopImmediately()) {
         Pop();
     }
