@@ -3608,14 +3608,12 @@ void ResetResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
-void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius, ArkUI_Bool disableSystemAdaptation)
+void SetForegroundEffect(ArkUINodeHandle node, ArkUI_Float32 radius)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     radius = std::max(radius, 0.0f);
-    SysOptions sysOptions;
-    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
-    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius), sysOptions);
+    ViewAbstract::SetForegroundEffect(frameNode, static_cast<float>(radius));
 }
 
 void ResetForegroundEffect(ArkUINodeHandle node)

@@ -65,36 +65,38 @@ void PageViewportConfigOhos::ApplySafeArea()
 {
     auto pipeline = pipeline_.Upgrade();
     CHECK_NULL_VOID(pipeline);
-    backupRootWidth_ = static_cast<uint32_t>(pipeline->GetRootWidth());
-    backupRootHeight_ = static_cast<uint32_t>(pipeline->GetRootHeight());
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "backup rootSize, width:%{public}u, height:%{public}u",
-        backupRootWidth_, backupRootHeight_);
     auto mgr = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(mgr);
+    BackupInfo backupInfo;
+    backupInfo.rootWidth = static_cast<uint32_t>(pipeline->GetRootWidth());
+    backupInfo.rootHeight = static_cast<uint32_t>(pipeline->GetRootHeight());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "backup rootSize, width:%{public}u, height:%{public}u",
+        backupInfo.rootWidth, backupInfo.rootHeight);
     for (auto& avoidArea : avoidAreas_) {
         if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
             auto insets = mgr->GetSystemSafeArea();
-            backupSafeAreas_[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM] = insets;
+            backupInfo.safeAreas[OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM] = insets;
             auto newInsets = ConvertAvoidArea(avoidArea.second);
             mgr->UpdateSystemSafeArea(newInsets);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ApplyConfig system from %{public}s to %{public}s",
                 insets.ToString().c_str(), newInsets.ToString().c_str());
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
             auto insets = mgr->GetNavSafeArea();
-            backupSafeAreas_[OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR] = insets;
+            backupInfo.safeAreas[OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR] = insets;
             auto newInsets = ConvertAvoidArea(avoidArea.second);
             mgr->UpdateNavSafeArea(newInsets);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ApplyConfig navigationIndicator from %{public}s to %{public}s",
                 insets.ToString().c_str(), newInsets.ToString().c_str());
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && mgr->GetUseCutout()) {
             auto insets = mgr->GetCutoutSafeAreaWithoutProcess();
-            backupSafeAreas_[OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT] = insets;
+            backupInfo.safeAreas[OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT] = insets;
             auto newInsets = ConvertAvoidArea(avoidArea.second);
             mgr->UpdateCutoutSafeArea(newInsets, NG::OptionalSize<uint32_t>(config_.Width(), config_.Height()));
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ApplyConfig cutout from %{public}s to %{public}s",
                 insets.ToString().c_str(), newInsets.ToString().c_str());
         }
     }
+    backupInfos_.emplace(std::move(backupInfo));
 }
 
 void PageViewportConfigOhos::RestoreSafeArea()
@@ -103,7 +105,12 @@ void PageViewportConfigOhos::RestoreSafeArea()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(mgr);
-    for (auto& avoidArea : backupSafeAreas_) {
+    if (backupInfos_.empty()) {
+        return;
+    }
+    auto backupInfo = std::move(backupInfos_.top());
+    backupInfos_.pop();
+    for (auto& avoidArea : backupInfo.safeAreas) {
         if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM) {
             mgr->UpdateSystemSafeArea(avoidArea.second);
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "RestoreConfig system: %{public}s",
@@ -114,9 +121,9 @@ void PageViewportConfigOhos::RestoreSafeArea()
                 avoidArea.second.ToString().c_str());
         } else if (avoidArea.first == OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT && mgr->GetUseCutout()) {
             mgr->UpdateCutoutSafeArea(
-                avoidArea.second, NG::OptionalSize<uint32_t>(backupRootWidth_, backupRootHeight_));
+                avoidArea.second, NG::OptionalSize<uint32_t>(backupInfo.rootWidth, backupInfo.rootHeight));
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "RestoreConfig cutout width:%{public}u, height:%{public}u, "
-                "insets:%{public}s", backupRootWidth_, backupRootHeight_, avoidArea.second.ToString().c_str());
+                "insets:%{public}s", backupInfo.rootWidth, backupInfo.rootHeight, avoidArea.second.ToString().c_str());
         }
     }
 }

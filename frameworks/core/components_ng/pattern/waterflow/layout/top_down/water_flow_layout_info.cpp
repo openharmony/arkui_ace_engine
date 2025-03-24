@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,7 +34,7 @@ int32_t WaterFlowLayoutInfo::GetCrossIndex(int32_t itemIndex) const
 
 void WaterFlowLayoutInfo::UpdateStartIndex()
 {
-    if (childrenCount_ == 0) {
+    if (GetChildrenCount() == 0) {
         return;
     }
     if (!itemInfos_.empty()) {
@@ -434,7 +434,7 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool can
     maxHeight_ = GetMaxMainHeight();
 
     itemStart_ = GreatOrEqual(currentOffset_, 0.0f);
-    itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
+    itemEnd_ = endIndex_ >= 0 && endIndex_ == GetChildrenCount() - 1;
     offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_);
     // adjust offset when it can't overScroll at bottom
     if (offsetEnd_ && Negative(currentOffset_) && !canOverScrollEnd) {
@@ -611,7 +611,7 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (!itemInfos_.empty()) {
         // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
-    } else if (maxHeight_) {
+    } else if (maxHeight_ && repeatDifference_ == 0) {
         // in original layout, already reach end.
         return maxHeight_;
     } else {
@@ -620,10 +620,11 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
             childCount += static_cast<int32_t>(item.second.size());
         }
     }
+    auto totalChildrenCount = childrenCount_ + repeatDifference_;
     if (childCount == 0) {
         return 0;
     }
-    auto estimateHeight = GetMaxMainHeight() / childCount * childrenCount_;
+    auto estimateHeight = GetMaxMainHeight() / childCount * totalChildrenCount;
     return estimateHeight;
 }
 

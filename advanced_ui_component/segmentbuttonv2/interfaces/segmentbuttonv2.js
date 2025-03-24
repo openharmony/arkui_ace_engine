@@ -2363,7 +2363,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.observeComponentCreation2((v3, w3) => {
       Stack.create();
       Stack.backgroundColor(this.getButtonBackgroundColor());
-      Stack.backgroundEffect(this.buttonBackgroundEffect);
+      Stack.backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true });
       Stack.borderRadius(this.getButtonBorderRadius());
       Stack.clip(false);
       Stack.constraintSize({
@@ -2377,7 +2377,8 @@ class SimpleSegmentButtonV2 extends ViewV2 {
       Stack.borderRadius(this.getButtonBorderRadius());
       Stack.backgroundBlurStyle(
         this.getButtonBackgroundBlurStyle(),
-        this.getButtonBackgroundBlurStyleOptions()
+        this.getButtonBackgroundBlurStyleOptions(),
+        { disableSystemAdaptation: true }
       );
       Stack.clip(false);
       Stack.direction(this.languageDirection);
@@ -3276,7 +3277,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             );
             Button.accessibilityLevel(a2.item.accessibilityLevel);
             Button.backgroundColor(this.getItemBackgroundColor(a2));
-            Button.backgroundEffect(this.itemBackgroundEffect);
+            Button.backgroundEffect(this.itemBackgroundEffect, { disableSystemAdaptation: true });
             Button.borderRadius(this.getItemButtonBorderRadius(a2));
             Button.constraintSize({ minHeight: this.getItemMinHeight() });
             Button.direction(this.languageDirection);
@@ -3312,7 +3313,8 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             __Common__.borderRadius(this.getItemButtonBorderRadius(a2));
             __Common__.backgroundBlurStyle(
               this.getItemBackgroundBlurStyle(),
-              this.getItemBackgroundBlurStyleOptions()
+              this.getItemBackgroundBlurStyleOptions(),
+              { disableSystemAdaptation: true }
             );
             __Common__.direction(this.languageDirection);
           }, __Common__);

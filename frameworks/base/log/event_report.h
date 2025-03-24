@@ -21,6 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_scene_status.h"
 
 namespace OHOS::Ace {
 
@@ -185,6 +186,13 @@ struct RichEditorInfo {
     int32_t spanIndex = -1;
 };
 
+struct FRCSceneFpsInfo {
+    int32_t duration_120 = 0;
+    int32_t duration_90 = 0;
+    int32_t duration_72 = 0;
+    int32_t duration_60 = 0;
+};
+
 class ACE_FORCE_EXPORT EventReport {
 public:
     static void SendEvent(const EventInfo& eventInfo);
@@ -244,9 +252,15 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
+    static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
+    static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
+    static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
+    static FRCSceneFpsInfo curFRCSceneFpsInfo_;
+    static int64_t calTime_;
+    static int32_t calFrameRate_;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
         const int64_t maxFrameTime = 0);

@@ -2605,13 +2605,7 @@ void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
         }
     }
     radius = std::max(radius, 0.0f);
-    SysOptions sysOptions;
-    sysOptions.disableSystemAdaptation = false;
-    if (info.Length() > NUM1 && info[NUM1]->IsObject()) {
-        JSRef<JSObject> jsSysOptions = JSRef<JSObject>::Cast(info[NUM1]);
-        ParseSysOptions(jsSysOptions, sysOptions);
-    }
-    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius, sysOptions);
+    ViewAbstractModel::GetInstance()->SetForegroundEffect(radius);
 }
 
 void JSViewAbstract::JsBackgroundEffect(const JSCallbackInfo& info)

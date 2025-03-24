@@ -241,43 +241,45 @@ void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
     if (options.value.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value());
     }
     if (options.fontSize.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontSize, options.fontSize.value());
     }
     if (options.fontStyle.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value());
     }
     if (options.fontWeight.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontWeight, options.fontWeight.value());
     }
     if (options.fontColor.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value());
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
 }
 
 void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
 {
     if (options.value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Placeholder, options.value.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value(), frameNode);
     }
     if (options.fontSize.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontSize, options.fontSize.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RichEditorLayoutProperty, PlaceholderFontSize, options.fontSize.value(), frameNode);
     }
     if (options.fontStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value(), frameNode);
+            RichEditorLayoutProperty, PlaceholderItalicFontStyle, options.fontStyle.value(), frameNode);
     }
     if (options.fontWeight.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
-            TextLayoutProperty, PlaceholderFontWeight, options.fontWeight.value(), frameNode);
+            RichEditorLayoutProperty, PlaceholderFontWeight, options.fontWeight.value(), frameNode);
     }
     if (options.fontColor.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
     }
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
 }
 
 void RichEditorModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions)

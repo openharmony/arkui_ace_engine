@@ -85,6 +85,7 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -280,4 +281,10 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     return false;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
 } // namespace OHOS::Ace

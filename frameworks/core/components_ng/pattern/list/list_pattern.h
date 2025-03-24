@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,6 +104,11 @@ public:
     int32_t GetMaxListItemIndex() const
     {
         return maxListItemIndex_;
+    }
+
+    int32_t GetMaxIndexByRepeat() const
+    {
+        return maxListItemIndex_ + repeatDifference_;
     }
 
     int32_t GetStartIndexInItemPosition() const
@@ -398,9 +403,10 @@ public:
         return isStackFromEnd_;
     }
 
-#ifdef SUPPORT_DIGITAL_CROWN
-    void StartVibrator(bool bEdge);
-#endif
+    void SetRepeatDifference(int32_t repeatDifference)
+    {
+        repeatDifference_ = repeatDifference;
+    }
 
 protected:
     void OnModifyDone() override;
@@ -422,7 +428,7 @@ protected:
     {
         return ScrollAlign::AUTO;
     }
-    virtual void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex);
+    virtual void OnMidIndexChanged();
     virtual float GetStartOverScrollOffset(float offset, float startMainPos) const;
     virtual float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const;
     void SetLayoutAlgorithmParams(
@@ -574,6 +580,7 @@ private:
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
     bool isNeedDividerAnimation_ = true;
+    int32_t repeatDifference_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

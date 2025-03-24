@@ -1024,6 +1024,22 @@ void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const Me
 }
 } // namespace
 
+void MenuView::SetHasCustomOutline(
+    const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuParam.outlineWidth.has_value() || menuParam.outlineWidth->leftDimen->IsNegative() ||
+        menuParam.outlineWidth->rightDimen->IsNegative() || menuParam.outlineWidth->topDimen->IsNegative() ||
+        menuParam.outlineWidth->bottomDimen->IsNegative()) {
+        return;
+    }
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    menuWrapperPattern->SetHasCustomOutlineColor(true);
+}
+
 void MenuView::CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1123,13 +1139,18 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
     MountOptionToColumn(params, menuNode, menuParam, column);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
@@ -1247,6 +1268,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
 
     SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
@@ -1285,8 +1307,16 @@ void MenuView::UpdateMenuParam(
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     menuNode->MarkModifyDone();
 
@@ -1366,7 +1396,8 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MountToParent(column);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        UpdateMenuBorderEffect(menuNode);
+        MenuParam menuParam;
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -1410,31 +1441,40 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
     }
 }
 
-void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
+void MenuView::UpdateMenuBorderEffect(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     CHECK_NULL_VOID(menuNode);
     auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetDoubleBorderEnable()) {
+    if (menuTheme->GetDoubleBorderEnable() || menuWrapperPattern->GetHasCustomOutlineWidth()) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         BorderStyleProperty styleProp;
         styleProp.SetBorderStyle(BorderStyle::SOLID);
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
         outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
             theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
+            renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
+        } else {
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+            renderContext->SetOuterBorderWidth(outerWidthProp);
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
+            renderContext->SetOuterBorderColor(outerColorProp);
+        }
         renderContext->SetOuterBorderStyle(styleProp);
-        renderContext->SetOuterBorderColor(outerColorProp);
         renderContext->UpdateOuterBorderRadius(outerRadiusProp);
-        renderContext->SetOuterBorderWidth(outerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;

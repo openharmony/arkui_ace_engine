@@ -617,9 +617,7 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             info.GetDoubleArg(6, image.dy);
             info.GetDoubleArg(7, image.dWidth);
             info.GetDoubleArg(8, image.dHeight);
-            // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
-            // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
-            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (isImage) {
                 image.sx *= density;
                 image.sy *= density;
                 image.sWidth *= density;

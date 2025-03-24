@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,13 +253,14 @@ float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
     if (crossCount_ == 0 || lineHeightMap_.empty()) {
         return res;
     }
+    auto childrenCount = childrenCount_ + repeatDifference_;
     float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
-    auto lines = (childrenCount_) / crossCount_;
+    auto lines = (childrenCount) / crossCount_;
     for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);
         res += (it != lineHeightMap_.end() ? it->second : lineHeight) + mainGap;
     }
-    if (childrenCount_ % crossCount_ == 0) {
+    if (childrenCount % crossCount_ == 0) {
         return res - mainGap;
     }
     auto lastLine = lineHeightMap_.find(lines);
@@ -282,10 +283,11 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
     }
     float averageHeight = heightSum / itemCount;
 
-    if (itemCount == childrenCount_) {
+    auto childrenCount = childrenCount_ + repeatDifference_;
+    if (itemCount == childrenCount) {
         return heightSum - mainGap;
     }
-    return heightSum + (childrenCount_ - itemCount) * averageHeight;
+    return heightSum + (childrenCount - itemCount) * averageHeight;
 }
 
 float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float mainGap) const
@@ -404,8 +406,9 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
     if (lineHeightMap_.empty() || childrenCount_ == 0) {
         return 0.0f;
     }
+    auto childrenCount = childrenCount_ + repeatDifference_;
     int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
-    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount_);
+    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount);
     float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
 
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());

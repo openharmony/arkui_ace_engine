@@ -255,7 +255,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     imageNode->MountToParent(host, index);
     HandleImageDrag(imageNode);
     SetImageLayoutProperty(imageNode, options);
-    imageItem->imageNodeId = imageNode->GetId();
+    imageItem->nodeId_ = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
 }
 
@@ -4633,7 +4633,7 @@ void RichEditorPattern::ResetDragSpanItems()
         item->EndDrag();
         auto imageSpanItem = DynamicCast<ImageSpanItem>(item);
         if (imageSpanItem) {
-            nodeIds.emplace(imageSpanItem->imageNodeId);
+            nodeIds.emplace(imageSpanItem->nodeId_);
             return;
         }
         auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(item);
@@ -6873,7 +6873,7 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
         return eraseLength;
     }
     spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
-    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
+    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().ConvertToFp());
     spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
     spanResult.SetFontWeight((int32_t)(spanItem->GetTextStyle()->GetFontWeight()));
     if (!spanItem->GetTextStyle()->GetFontFamilies().empty()) {
@@ -9764,7 +9764,7 @@ std::string RichEditorPattern::GetPlaceHolderInJson() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     bool hasPlaceHolder = layoutProperty && layoutProperty->HasPlaceholder()
         && !layoutProperty->GetPlaceholder().value().empty();
     CHECK_NULL_RETURN(hasPlaceHolder, "");
@@ -9923,7 +9923,7 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     if (!layoutProperty->HasPlaceholder() || layoutProperty->GetPlaceholder().value().empty()) {
         isShowPlaceholder_ = false;
@@ -9967,7 +9967,7 @@ std::string RichEditorPattern::GetPlaceHolder() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, "");
-    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    auto layoutProperty = host->GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     return UtfUtils::Str16ToStr8(layoutProperty->GetPlaceholderValue(u""));
 }

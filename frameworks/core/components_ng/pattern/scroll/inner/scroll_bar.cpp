@@ -58,6 +58,8 @@ void ScrollBar::InitTheme()
     SetMinDynamicHeight(theme->GetMinDynamicHeight());
     SetBackgroundColor(theme->GetBackgroundColor());
     SetForegroundColor(theme->GetForegroundColor());
+    SetForegroundHoverColor(theme->GetForegroundHoverBlendColor());
+    SetForegroundPressedColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
 #ifdef ARKUI_CIRCLE_FEATURE
@@ -971,7 +973,13 @@ void ScrollBar::DumpAdvanceInfo()
 
 Color ScrollBar::GetForegroundColor() const
 {
-    return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
+    if (IsPressed()) {
+        return foregroundPressedColor_;
+    }
+    if (IsHover()) {
+        return foregroundHoverColor_;
+    }
+    return foregroundColor_;
 }
 
 void ScrollBar::SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)

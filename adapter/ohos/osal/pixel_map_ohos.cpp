@@ -176,7 +176,7 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     auto* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
     if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "pixmap pointer is nullptr when CreatePixelMap.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "invalid pixmap");
         return nullptr;
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);

@@ -24,6 +24,7 @@
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/property/measure_utils.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -491,6 +493,10 @@ bool NavigationPattern::JudgeFoldStateChangeAndUpdateState()
 
 void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host)
 {
+    if (viewportConfig_) {
+        return;
+    }
+
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -506,7 +512,8 @@ void NavigationPattern::UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host
         auto pageNodeGeometryNode = pageNode->GetGeometryNode();
         if (pageNodeGeometryNode) {
             auto pageFrame = pageNodeGeometryNode->GetFrameRect();
-            isFullPage = pageFrame.GetSize() == frame.GetSize();
+            isFullPage = pageFrame.GetSize().Width() <= frame.GetSize().Width() &&
+                pageFrame.GetSize().Height() <= frame.GetSize().Height();
         }
     }
     pageNode = nullptr;
@@ -704,6 +711,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
         hostNode->GetCurId().c_str(), hostNode->GetId(), navigationStack_->PreSize(),
         static_cast<int32_t>(navigationStack_->GetAllPathName().size()));
     GetVisibleNodes(true, preVisibleNodes_);
+    BackupPreSystemBarConfigIfNeeded(preVisibleNodes_);
     preTopNavPath_ = navigationStack_->GetPreTopNavPath();
     preStackSize_ = navigationStack_->PreSize();
     preContext_ = nullptr;
@@ -796,8 +804,10 @@ void NavigationPattern::UpdateNavPathList()
         if (index == pathListSize - 1 && addByNavRouter_) {
             addByNavRouter_ = false;
             uiNode = navigationStack_->Get();
-        } else if (isPageForceSet && navDestinationId != -1) {
-            uiNode = FindNavDestinationNodeInPreList(navDestinationId);
+        } else if (isCurForceSetList) {
+            if (navDestinationId != -1) {
+                uiNode = FindNavDestinationNodeInPreList(navDestinationId);
+            }
         } else {
             uiNode = navigationStack_->Get(pathIndex);
         }
@@ -1009,6 +1019,7 @@ void NavigationPattern::CheckTopNavPathChange(
         // back to navBar case
         auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
         CHECK_NULL_VOID(navBarNode);
+        navBarNode->SetNodeFreeze(false);
         auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
         if (!navigationLayoutProperty->GetHideNavBarValue(false)) {
             navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
@@ -2110,6 +2121,7 @@ void NavigationPattern::AddDragBarHotZoneRect()
 void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isFromStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
     int32_t lastStandardIndex = hostNode->GetLastStandardIndex();
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
@@ -2144,6 +2156,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
     hostNode->SetIsOnAnimation(true);
     if (!newTopNavDestination) {
         // pop animation with top navDestination, recover navBar visible tag
@@ -2650,6 +2663,7 @@ void NavigationPattern::FireInterceptionEvent(bool isBefore,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     RefPtr<NavDestinationContext> to;
     if (newTopPath.has_value()) {
         auto topDestination =
@@ -2799,9 +2813,20 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, true);
+        topDestination->SetNodeFreeze(false);
+    }
+    if (preDestination) {
+        preDestination->SetNodeFreeze(false);
     }
     UpdatePageViewportConfigIfNeeded(preDestination, topDestination);
-    ShowOrHideSystemBarIfNeeded(false);
+    if (runningTransitionCount_ <= 0) {
+        pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ShowOrHideSystemBarIfNeeded(false, pattern->GetPreStatusBarConfig(), std::nullopt,
+                pattern->GetPreNavIndicatorConfig(), std::nullopt);
+        });
+    }
     if (isNotNeedAnimation) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
@@ -2990,6 +3015,7 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     // don't move position hide lifecycle is from top to end
     if (preDestination) {
         NotifyDestinationLifecycle(preDestination, NavDestinationLifecycle::ON_INACTIVE);
@@ -3205,7 +3231,9 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
     proxy->SetFinishTransitionEvent(finishWrapper);
     // add timeout callback
     auto timeout = navigationTransition.timeout;
-    auto pipeline = GetHost()->GetContext();
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
@@ -3672,16 +3700,16 @@ bool NavigationPattern::IsStandardPage(const RefPtr<UINode>& uiNode) const
 RefPtr<UINode> NavigationPattern::FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const
 {
     CHECK_NULL_RETURN(navigationStack_, nullptr);
-    auto preNavDestinationList = navigationStack_->GetAllNavDestinationNodesPrev();
+    auto preNavDestinationList = navigationStack_->GetPreNavPathList();
     for (auto preNavDestinationInfo : preNavDestinationList) {
         auto preNavDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(preNavDestinationInfo.second.Upgrade()));
+            NavigationGroupNode::GetNavDestinationNode(preNavDestinationInfo.second));
         CHECK_NULL_CONTINUE(preNavDestinationNode);
         auto pattern = preNavDestinationNode->GetPattern<NavDestinationPattern>();
         CHECK_NULL_CONTINUE(pattern);
         auto preId = pattern->GetNavDestinationId();
         if (preId == navDestinationId) {
-            return preNavDestinationInfo.second.Upgrade();
+            return preNavDestinationInfo.second;
         }
     }
     return nullptr;
@@ -3818,9 +3846,15 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
         return;
     }
 
-    auto navConfig = navigationNode->GetPageViewportConfig();
-    if (!navConfig) {
-        navigationNode->SetPageViewportConfig(currConfig->Clone());
+    auto pageNode = AceType::DynamicCast<PageNode>(pageNode_.Upgrade());
+    if (pageNode) {
+        auto pageConfig = pageNode->GetPageViewportConfig();
+        if (!pageConfig) {
+            pageNode->SetPageViewportConfig(currConfig->Clone());
+        }
+    }
+    if (!viewportConfig_) {
+        SetPageViewportConfig(currConfig->Clone());
     }
 
     for (auto& weakNode : preVisibleNodes_) {
@@ -3843,6 +3877,10 @@ void NavigationPattern::UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestina
 
 bool NavigationPattern::IsPageLevelConfigEnabled(bool considerSize)
 {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return false;
+    }
+
     if (!IsEquivalentToStackMode()) {
         return false;
     }
@@ -3911,14 +3949,20 @@ void NavigationPattern::GetAllNodes(
 
 void NavigationPattern::OnAllTransitionAnimationFinish()
 {
+    auto preStatusBarConfig = preStatusBarConfig_;
+    auto preNavIndicatorConfig = preNavIndicatorConfig_;
+    auto showStatusBar = showStatusBar_;
+    auto showNavIndicator = showNavIndicator_;
+    preStatusBarConfig_ = std::nullopt;
+    preNavIndicatorConfig_ = std::nullopt;
+    showStatusBar_ = std::nullopt;
+    showNavIndicator_ = std::nullopt;
     if (!IsPageLevelConfigEnabled()) {
+        ClearPageAndNavigationConfig();
         return;
     }
 
-    ShowOrHideSystemBarIfNeeded(true);
-    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(navigationNode);
-    navigationNode->SetPageViewportConfig(nullptr);
+    ShowOrHideSystemBarIfNeeded(true, preStatusBarConfig, showStatusBar, preNavIndicatorConfig, showNavIndicator);
 
     std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
     std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
@@ -3930,9 +3974,12 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     }
 
     if (visibleNodes.empty()) {
+        ClearPageAndNavigationConfig();
         return;
     }
 
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
     auto context = navigationNode->GetContext();
     CHECK_NULL_VOID(context);
     auto mgr = context->GetNavigationManager();
@@ -3941,7 +3988,8 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
     CHECK_NULL_VOID(container);
     auto curOrientation = container->GetRequestedOrientation();
     auto targetOrientation = visibleNodes[0]->GetEffectiveOrientation();
-    auto restoreTask = [nodes = std::move(visibleNodes)](bool needMarkDirtyNode = false) {
+    auto restoreTask =
+        [nodes = std::move(visibleNodes), weakPattern = WeakClaim(this)](bool needMarkDirtyNode = false) {
         ACE_SCOPED_TRACE("NavigationPattern restoreTask");
         for (auto& node : nodes) {
             CHECK_NULL_CONTINUE(node);
@@ -3950,6 +3998,10 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
         }
+
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ClearPageAndNavigationConfig();
     };
     if (!targetOrientation.has_value()) {
         targetOrientation = mgr->GetOrientationByWindowApi();
@@ -3967,6 +4019,9 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
 void NavigationPattern::UpdateSystemBarConfigForSizeChanged()
 {
     if (!IsPageLevelConfigEnabled(false)) {
+        return;
+    }
+    if (runningTransitionCount_ > 0) {
         return;
     }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -4014,12 +4069,10 @@ RefPtr<NavDestinationNodeBase> NavigationPattern::GetLastStandardNodeOrNavBar()
     }
 }
 
-void NavigationPattern::ShowOrHideSystemBarIfNeeded(bool isShow)
+void NavigationPattern::ShowOrHideStatusBarIfNeeded(bool isShow,
+    std::optional<std::pair<bool, bool>> curStatusBarConfig,
+    std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar)
 {
-    if (!IsPageLevelConfigEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't enable/disable SystemBar");
-        return;
-    }
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(navigationNode);
     auto context = navigationNode->GetContext();
@@ -4027,48 +4080,82 @@ void NavigationPattern::ShowOrHideSystemBarIfNeeded(bool isShow)
     auto mgr = context->GetNavigationManager();
     CHECK_NULL_VOID(mgr);
     auto windowApiStatusBarConfig = mgr->GetStatusBarConfigByWindowApi();
+    auto container = Container::GetContainer(context->GetInstanceId());
+    CHECK_NULL_VOID(container);
+
+    if (preStatusBarConfig.has_value() || curStatusBarConfig.has_value()) {
+        /**
+         * If the developer use the NavDestination's interface, we will set it according to their configuration,
+         * otherwise we will follow the window configuration
+         */
+        bool needShow = curStatusBarConfig.has_value() ?
+            curStatusBarConfig.value().first : windowApiStatusBarConfig.first;
+        bool animated = curStatusBarConfig.has_value() ?
+            curStatusBarConfig.value().second : windowApiStatusBarConfig.second;
+        if (needShow == isShow) {
+            showStatusBar_ = isShow;
+            container->SetSystemBarEnabled(SystemBarType::STATUS, isShow, animated);
+        }
+    } else if (preStatusBarConfig == curStatusBarConfig && showStatusBar.has_value()) {
+        if (isShow && !showStatusBar.value()) {
+            container->SetSystemBarEnabled(SystemBarType::STATUS, isShow, false);
+        }
+    }
+}
+
+void NavigationPattern::ShowOrHideNavIndicatorIfNeeded(bool isShow, std::optional<bool> curNavIndicatorConfig,
+    std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator)
+{
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navigationNode);
+    auto context = navigationNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(mgr);
     auto windowApiNavIndicatorConfig = mgr->GetNavigationIndicatorConfigByWindowApi();
     auto container = Container::GetContainer(context->GetInstanceId());
     CHECK_NULL_VOID(container);
-    if (preVisibleNodes_.empty()) {
+
+    if (preNavIndicatorConfig.has_value() || curNavIndicatorConfig.has_value()) {
+        /**
+         * If the developer use the NavDestination's interface, we will set it according to their configuration,
+         * otherwise we will follow the window configuration
+         */
+        bool needShow = curNavIndicatorConfig.has_value() ?
+            curNavIndicatorConfig.value() : windowApiNavIndicatorConfig;
+        if (needShow == isShow) {
+            showNavIndicator_ = isShow;
+            container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, isShow, false);
+        }
+    } else if (preNavIndicatorConfig == curNavIndicatorConfig && showNavIndicator.has_value()) {
+        if (isShow && !showNavIndicator.value()) {
+            container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, isShow, false);
+        }
+    }
+}
+
+void NavigationPattern::ShowOrHideSystemBarIfNeeded(bool isShow,
+    std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar,
+    std::optional<bool> preNavIndicatorConfig, std::optional<bool> showNavIndicator)
+{
+    if (!IsPageLevelConfigEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "conditions are not met, don't enable/disable SystemBar");
         return;
     }
-    auto preNode = preVisibleNodes_[0].Upgrade();
-    if (!preNode) {
-        return;
-    }
-    auto preStatusBarConfig = preNode->GetStatusBarConfig();
-    auto preNavIndicatorConfig = preNode->GetNavigationIndicatorConfig();
+
     auto lastNode = GetLastStandardNodeOrNavBar();
     if (!lastNode) {
         return;
     }
-    auto statusBarConfig = lastNode->GetStatusBarConfig();
-    auto navigationIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
-
-    if (preStatusBarConfig.has_value() || statusBarConfig.has_value()) {
-        /**
-         * If the developer use the NavDestination's interface, we will set it according to their configuration,
-         * otherwise we will follow the window configuration
-         */
-        bool needShow = statusBarConfig.has_value() ? statusBarConfig.value().first : windowApiStatusBarConfig.first;
-        bool animated = statusBarConfig.has_value() ? statusBarConfig.value().second : windowApiStatusBarConfig.second;
-        if (needShow == isShow) {
-            container->SetSystemBarEnabled(SystemBarType::STATUS, isShow, animated);
-        }
+    std::optional<std::pair<bool, bool>> curStatusBarConfig;
+    std::optional<bool> curNavIndicatorConfig;
+    if (lastNode->IsSizeMatchNavigation()) {
+        curStatusBarConfig = lastNode->GetStatusBarConfig();
+        curNavIndicatorConfig = lastNode->GetNavigationIndicatorConfig();
     }
 
-    if (preNavIndicatorConfig.has_value() || navigationIndicatorConfig.has_value()) {
-        /**
-         * If the developer use the NavDestination's interface, we will set it according to their configuration,
-         * otherwise we will follow the window configuration
-         */
-        bool needShow = navigationIndicatorConfig.has_value() ?
-            navigationIndicatorConfig.value() : windowApiNavIndicatorConfig;
-        if (needShow == isShow) {
-            container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, isShow, false);
-        }
-    }
+    ShowOrHideStatusBarIfNeeded(isShow, curStatusBarConfig, preStatusBarConfig, showStatusBar);
+    ShowOrHideNavIndicatorIfNeeded(isShow, curNavIndicatorConfig, preNavIndicatorConfig, showNavIndicator);
 }
 
 bool NavigationPattern::IsEquivalentToStackMode()
@@ -4091,5 +4178,50 @@ bool NavigationPattern::IsEquivalentToStackMode()
     auto visibility = navBarProperty->GetVisibilityValue(VisibleType::VISIBLE);
     auto size = navBarGeometryNode->GetFrameSize();
     return visibility != VisibleType::VISIBLE || NearEqual(size.Width(), 0.0f) || NearEqual(size.Height(), 0.0f);
+}
+
+void NavigationPattern::BackupPreSystemBarConfigIfNeeded(
+    const std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes)
+{
+    if (runningTransitionCount_ > 0) {
+        return;
+    }
+    if (visibleNodes.empty()) {
+        return;
+    }
+    auto node = visibleNodes[0].Upgrade();
+    CHECK_NULL_VOID(node);
+    preStatusBarConfig_ = node->GetStatusBarConfig();
+    preNavIndicatorConfig_ = node->GetNavigationIndicatorConfig();
+}
+
+bool NavigationPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return RunCustomizeExpandIfNeeded(host);
+}
+
+void NavigationPattern::SetPageViewportConfig(const RefPtr<PageViewportConfig>& config)
+{
+    CustomSafeAreaExpander::SetPageViewportConfig(config);
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    do {
+        auto contentNode = AceType::DynamicCast<FrameNode>(host->GetContentNode());
+        CHECK_NULL_BREAK(contentNode);
+        auto contentPattern = contentNode->GetPattern<NavigationContentPattern>();
+        CHECK_NULL_BREAK(contentPattern);
+        contentPattern->SetPageViewportConfig(config ? config->Clone() : nullptr);
+    } while (false);
+}
+
+void NavigationPattern::ClearPageAndNavigationConfig()
+{
+    auto pageNode = AceType::DynamicCast<PageNode>(pageNode_.Upgrade());
+    if (pageNode) {
+        pageNode->SetPageViewportConfig(nullptr);
+    }
+    SetPageViewportConfig(nullptr);
 }
 } // namespace OHOS::Ace::NG

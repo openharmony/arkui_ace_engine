@@ -209,7 +209,7 @@ RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
 
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
+    SetTabBarPosition(ViewStackProcessor::GetInstance()->GetMainFrameNode(), tabBarPosition);
 }
 
 void TabsModelNG::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption)
@@ -840,7 +840,37 @@ void TabsModelNG::SetIsVertical(FrameNode* frameNode, bool isVertical)
 
 void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosition)
 {
+    CHECK_NULL_VOID(frameNode);
+    auto tabsLayoutProperty = frameNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto oldTabBarPosition = tabsLayoutProperty->GetTabBarPosition();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition, frameNode);
+
+    if ((!oldTabBarPosition.has_value() && tabBarPosition == BarPosition::END) ||
+        (oldTabBarPosition.has_value() && oldTabBarPosition.value() == tabBarPosition)) {
+        return;
+    }
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsFocusNode = tabsNode->GetFocusHub();
+    CHECK_NULL_VOID(tabsFocusNode);
+    if (!tabsFocusNode->IsCurrentFocus()) {
+        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+        if (tabBarPosition == BarPosition::START) {
+            auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+            CHECK_NULL_VOID(tabBarNode);
+            auto tabBarFocusNode = tabBarNode->GetFocusHub();
+            CHECK_NULL_VOID(tabBarFocusNode);
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        } else {
+            auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+            CHECK_NULL_VOID(swiperNode);
+            auto swiperFocusNode = swiperNode->GetFocusHub();
+            CHECK_NULL_VOID(swiperFocusNode);
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(swiperFocusNode)));
+        }
+    }
 }
 
 void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)

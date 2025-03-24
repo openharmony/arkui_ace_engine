@@ -566,7 +566,7 @@ public:
     void OnSensitiveStyleChange(bool isSensitive) override;
 
     bool IsSetObscured();
-    bool IsSensitiveEnalbe();
+    bool IsSensitiveEnable();
 
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo)
     {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,7 +242,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
     CheckScrollable();
     if (centerIndex_ != listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty))) {
-        OnMidIndexChanged(centerIndex_, listLayoutAlgorithm->GetMidIndex(AceType::RawPtr(dirty)));
+        OnMidIndexChanged();
     }
     bool indexChanged = false;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -513,7 +513,7 @@ void ListPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (endIndex_ == maxListItemIndex_) {
+    if (endIndex_ == GetMaxIndexByRepeat()) {
         float endOffset = endMainPos_ - contentMainSize_ + contentEndOffset_;
         // deltaOffset passes through multiple items also needs to fire reachEnd
         bool scrollUpToEnd =
@@ -794,7 +794,7 @@ bool ListPattern::IsAtBottom() const
     if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
-    return (endIndex == maxListItemIndex_ && groupAtEnd) &&
+    return (endIndex == GetMaxIndexByRepeat() && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
@@ -839,7 +839,7 @@ OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
     if (startIndex == 0 && groupAtStart) {
         offset.start = GetStartOverScrollOffset(delta, startMainPos);
     }
-    if (endIndex == maxListItemIndex_ && groupAtEnd) {
+    if (endIndex == GetMaxIndexByRepeat() && groupAtEnd) {
         offset.end = GetEndOverScrollOffset(delta, endMainPos, startMainPos);
     }
     return offset;
@@ -3127,25 +3127,14 @@ SizeF ListPattern::GetChildrenExpandedSize()
     return SizeF();
 }
 
-void ListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
+void ListPattern::OnMidIndexChanged()
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
-
-    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
-#endif
-}
-
-#ifdef SUPPORT_DIGITAL_CROWN
-void ListPattern::StartVibrator(bool bEdge)
-{
-    if (!GetCrownEventDragging() || bEdge) {
+    if (!GetCrownEventDragging()) {
         return;
     }
-    const char* effectId = HAPTIC_STRENGTH1;
-    VibratorUtils::StartVibraFeedback(effectId);
-}
+    VibratorUtils::StartVibraFeedback(HAPTIC_STRENGTH1);
 #endif
+}
+
 } // namespace OHOS::Ace::NG

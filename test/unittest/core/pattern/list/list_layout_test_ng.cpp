@@ -2491,6 +2491,41 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NullLazyForEach001
+ * @tc.desc: Test List with null LazyForEach, GetOrCreateChildByIndex will not be called during measure and layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NullLazyForEach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List-LazyForEach, no child in LazyForEach.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    auto handler = CreateItemsInLazyForEachWithHandle(0, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+
+    /**
+     * @tc.steps: step2. first layout finish, and no child layouted.
+     * @tc.expected: itemPosition_ empty.
+     */
+    EXPECT_TRUE(pattern_->itemPosition_.empty());
+
+    /**
+     * @tc.steps: step3. add children to LazyForEach and reLayout.
+     * @tc.expected: item 0-3 layouted normally.
+     */
+    handler->SetTotalCount(6);
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(pattern_->itemPosition_.size(), 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+}
+
+/**
  * @tc.name: ListAddDelChildTest001
  * @tc.desc: Test list del child in snap end mode.
  * @tc.type: FUNC

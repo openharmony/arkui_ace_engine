@@ -65,25 +65,23 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
     return false;
 }
 
-bool GetNextFocusNodeCustom(const RefPtr<FocusHub>& node, FocusReason focusReason)
+RefPtr<FocusHub> GetNextFocusNodeCustom(const RefPtr<FocusHub>& node, FocusReason focusReason)
 {
     auto onGetNextFocusNodeFunc = node->GetOnGetNextFocusNodeFunc();
-    if (onGetNextFocusNodeFunc) {
-        auto focusManager = node->GetFocusManager();
-        if (focusManager && focusManager->GetCurrentFocusEvent()) {
-            auto focusEvent = focusManager->GetCurrentFocusEvent().value();
-            auto nextFocusNode = onGetNextFocusNodeFunc(focusReason,
-                focusEvent.intension);
-            if (nextFocusNode) {
-                TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
-                    " GetNextFocusNodeCustom by node %{public}s/" SEC_PLD(%{public}d),
-                    nextFocusNode->GetFrameName().c_str(), SEC_PARAM(nextFocusNode->GetFrameId()),
-                    node->GetFrameName().c_str(), SEC_PARAM(node->GetFrameId()));
-                return nextFocusNode->RequestFocusImmediately(focusReason);
-            }
+    CHECK_NULL_RETURN(onGetNextFocusNodeFunc, nullptr);
+    auto focusManager = node->GetFocusManager();
+    if (focusManager && focusManager->GetCurrentFocusEvent()) {
+        auto focusEvent = focusManager->GetCurrentFocusEvent().value();
+        auto nextFocusNode = onGetNextFocusNodeFunc(focusReason, focusEvent.intension);
+        if (nextFocusNode) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
+                " GetNextFocusNodeCustom by node %{public}s/" SEC_PLD(%{public}d),
+                nextFocusNode->GetFrameName().c_str(), SEC_PARAM(nextFocusNode->GetFrameId()),
+                node->GetFrameName().c_str(), SEC_PARAM(node->GetFrameId()));
+            return nextFocusNode;
         }
     }
-    return false;
+    return nullptr;
 }
 }
 
@@ -1136,7 +1134,8 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
     bool canChildBeFocused = false;
     canChildBeFocused = AnyChildFocusHub(
         [isHead](const RefPtr<FocusHub>& node) {
-            if (GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL)) {
+            auto nextFocusNode = GetNextFocusNodeCustom(node, FocusReason::FOCUS_TRAVEL);
+            if (nextFocusNode && nextFocusNode->FocusToHeadOrTailChild(isHead)) {
                 return true;
             }
             return node->FocusToHeadOrTailChild(isHead);
@@ -1491,7 +1490,8 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
             return;
         }
 
-        if (GetNextFocusNodeCustom(AceType::Claim(this), focusReason_)) {
+        auto nextFocusNode = GetNextFocusNodeCustom(AceType::Claim(this), focusReason_);
+        if (nextFocusNode && nextFocusNode->RequestFocusImmediately(focusReason_)) {
             OnFocusNode(currentHasFocused);
             return;
         }
