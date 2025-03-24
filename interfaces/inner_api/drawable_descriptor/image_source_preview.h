@@ -64,6 +64,7 @@ struct InitializationOptions {
 struct SourceOptions {};
 struct DecodeOptions {
     PixelFormat desiredPixelFormat;
+    Size desiredSize;
 };
 class PixelMap;
 
