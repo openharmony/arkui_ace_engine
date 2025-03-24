@@ -3810,9 +3810,12 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
     bool isNavDestination = false;
     FindWebNode(overlay, webNode, isNavDestination);
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
+        if (isNavDestination) {
+            return OVERLAY_NOTHING;
+        }
         auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
         CHECK_NULL_RETURN(webPattern, OVERLAY_EXISTS);
-        if (webPattern->Backward() && !isNavDestination) {
+        if (webPattern->Backward()) {
             return OVERLAY_REMOVE;
         }
     }
