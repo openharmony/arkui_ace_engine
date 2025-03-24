@@ -742,6 +742,26 @@ void ResetMenuOutline(ArkUINodeHandle node)
     SelectModelNG::SetMenuOutline(frameNode, menuParam);
 }
 
+void SetSelectSymbolValue(ArkUINodeHandle node, ArkUI_CharPtr* values,
+    void** symbolFunction, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(symbolFunction);
+
+    std::vector<SelectParam> params(length);
+    for (uint32_t i = 0; i < length; i++) {
+        if (values[i] == nullptr) {
+            return;
+        }
+        params[i].text = values[i];
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction[i]);
+        params[i].symbolIcon = *symbolCallback;
+    }
+    SelectModelNG::InitSelect(frameNode, params);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -804,6 +824,7 @@ const ArkUISelectModifier* GetSelectModifier()
         .setOnSelect = SetOnSelectExt,
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
+        .setSelectSymbolValue = SetSelectSymbolValue,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
