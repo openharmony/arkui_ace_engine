@@ -1068,6 +1068,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     SetIsMenuShow(true, menu);
     ResetContextMenuDragHideFinished();
     if (wrapperPattern->HasTransitionEffect()) {
+        TAG_LOGD(AceLogTag::ACE_OVERLAY, "show menu animation with transition effect");
         UpdateMenuVisibility(menu);
         auto renderContext = menu->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
