@@ -570,7 +570,7 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData
     CHECK_NULL_RETURN(udData, arr);
     CHECK_NULL_RETURN(udData->GetUnifiedData(), arr);
     auto utdId = UDMF::UtdUtils::GetUtdIdFromUtdEnum(UDMF::APPLICATION_DEFINED_RECORD);
-    CHECK_NULL_RETURN(udData->GetUnifiedData()->HasType(utdId), arr);
+    CHECK_NULL_RETURN(udData->GetUnifiedData()->HasType(utdId), GetSpanStringRecord(unifiedData));
     auto records = udData->GetUnifiedData()->GetRecords();
     for (auto record : records) {
         auto value = record->GetEntry(utdId);
