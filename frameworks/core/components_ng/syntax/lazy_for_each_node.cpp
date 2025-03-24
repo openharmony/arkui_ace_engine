@@ -479,6 +479,11 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+{
+    return children_;
+}
+
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.IsNeedUpdate() && builder_) {

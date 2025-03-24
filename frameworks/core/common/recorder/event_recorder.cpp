@@ -22,6 +22,7 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::Recorder {
 constexpr char IGNORE_WINDOW_NAME[] = "$HA_FLOAT_WINDOW$";
@@ -147,6 +148,11 @@ EventParamsBuilder& EventParamsBuilder::SetHost(const RefPtr<NG::FrameNode>& nod
     params_->emplace(KEY_ACE_ID, std::to_string(node->GetId()));
     SetPageUrl(GetPageUrlByNode(node));
     FillExtraTextIfNeed(eventType_, *this, node);
+    auto parent = node->GetParent();
+    if (parent) {
+        auto index = parent->GetFrameNodeIndex(node);
+        params_->emplace("nodeIndex", std::to_string(index));
+    }
     return *this;
 }
 
@@ -309,11 +315,6 @@ const std::string& EventRecorder::GetNavDstName() const
     return navDstName_;
 }
 
-std::string EventRecorder::GetCacheJsCode() const
-{
-    return EventController::Get().GetCacheJsCode();
-}
-
 void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
 {
     if (!IsRecordEnable(EventCategory::CATEGORY_WEB)) {
@@ -337,42 +338,6 @@ void EventRecorder::FillWebJsCode(std::optional<WebJsItem>& scriptItems) const
     }
 }
 
-void EventRecorder::SaveJavascriptItems(const std::map<std::string, std::vector<std::string>>& scriptItems,
-    const std::vector<std::string>& orderScriptItems)
-{
-    if (scriptItems.empty()) {
-        return;
-    }
-    if (EventController::Get().HasCached() || EventController::Get().HasWebProcessed()) {
-        return;
-    }
-    cacheScriptItems_ = std::make_optional<std::map<std::string, std::vector<std::string>>>(scriptItems);
-    if (!orderScriptItems.empty()) {
-        cacheOrderScriptItems_ = std::make_optional<std::vector<std::string>>(orderScriptItems);
-    }
-}
-
-void EventRecorder::HandleJavascriptItems(
-    std::optional<WebJsItem>& scriptItems, std::optional<std::vector<std::string>>& orderScriptItems)
-{
-    if (scriptItems.has_value()) {
-        cacheScriptItems_ = std::nullopt;
-        cacheOrderScriptItems_ = std::nullopt;
-        return;
-    }
-    FillWebJsCode(cacheScriptItems_);
-    if (!cacheScriptItems_.has_value()) {
-        cacheOrderScriptItems_ = std::nullopt;
-        return;
-    }
-    scriptItems.swap(cacheScriptItems_);
-    cacheScriptItems_ = std::nullopt;
-    if (cacheOrderScriptItems_.has_value()) {
-        orderScriptItems.swap(cacheOrderScriptItems_);
-        cacheOrderScriptItems_ = std::nullopt;
-    }
-}
-
 bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::string& identifier)
 {
     auto iter = webIdentifierMap_.find(webCategory);
@@ -382,11 +347,7 @@ bool EventRecorder::IsMessageValid(const std::string& webCategory, const std::st
     return iter->second == identifier;
 }
 
-void EventRecorder::NotifyEventCacheEnd()
-{
-    cacheScriptItems_ = std::nullopt;
-    cacheOrderScriptItems_ = std::nullopt;
-}
+void EventRecorder::NotifyEventCacheEnd() {}
 
 void EventRecorder::OnPageShow(const std::string& pageUrl, const std::string& param, const std::string& name)
 {

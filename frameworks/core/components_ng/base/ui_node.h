@@ -157,6 +157,12 @@ public:
         return children_;
     }
 
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
+    {
+        return children_;
+    }
+
     RefPtr<UINode> GetLastChild() const
     {
         if (children_.empty()) {
