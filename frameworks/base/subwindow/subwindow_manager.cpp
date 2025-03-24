@@ -22,6 +22,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;
 constexpr uint64_t VIRTUAL_DISPLAY_ID = 999;
+constexpr int32_t TIPS_TIME_MAX = 4000; // ms
 } // namespace
 std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
@@ -501,7 +502,7 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
     if (containerId >= MIN_SUBCONTAINER_ID && !GetIsExpandDisplay()) {
         return;
     }
-
+    auto targetId = targetNode->GetId();
     auto manager = SubwindowManager::GetInstance();
     CHECK_NULL_VOID(manager);
     auto subwindow = manager->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
@@ -511,7 +512,33 @@ void SubwindowManager::ShowTipsNG(const RefPtr<NG::FrameNode>& targetNode, const
         CHECK_NULL_VOID(subwindow->GetIsRosenWindowCreate());
         manager->AddSubwindow(containerId, SubwindowType::TYPE_POPUP, subwindow);
     }
-    subwindow->ShowTipsNG(targetNode->GetId(), popupInfo, appearingTime, appearingTimeWithContinuousOperation);
+    auto overlayManager = subwindow->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->UpdateTipsEnterAndLeaveInfoBool(targetId);
+    auto duration = appearingTime;
+    if (overlayManager->TipsInfoListIsEmpty()) {
+        overlayManager->UpdateTipsStatus(targetId, false);
+        duration = appearingTime;
+    } else {
+        overlayManager->UpdateTipsStatus(targetId, true);
+        overlayManager->UpdatePreviousDisappearingTime(targetId);
+        duration = appearingTimeWithContinuousOperation;
+    }
+    if (duration > TIPS_TIME_MAX) {
+        duration = TIPS_TIME_MAX;
+    }
+    overlayManager->UpdateTipsEnterAndLeaveInfo(targetId);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    bool isSubwindow = true;
+    auto times = overlayManager->GetTipsEnterAndLeaveInfo(targetId);
+    taskExecutor->PostDelayedTask(
+        [subwindow, targetId, popupInfo, appearingTime, times, isSubwindow] {
+            CHECK_NULL_VOID(subwindow);
+            subwindow->ShowTipsNG(targetId, popupInfo, appearingTime, times, isSubwindow);
+        },
+        TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousTips");
 }
 
 void SubwindowManager::HideTipsNG(int32_t targetId, int32_t disappearingTime, int32_t instanceId)

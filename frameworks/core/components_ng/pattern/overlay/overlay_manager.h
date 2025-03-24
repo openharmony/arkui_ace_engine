@@ -121,7 +121,7 @@ public:
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
     void HideTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t disappearingTime);
     void ShowTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t appearingTime,
-        int32_t appearingTimeWithContinuousOperation);
+        int32_t appearingTimeWithContinuousOperation, bool isSubwindow);
     void ErasePopup(int32_t targetId);
     void EraseTipsInfo(int32_t targetId);
     PopupInfo GetTipsInfo(int32_t targetId);
@@ -132,6 +132,16 @@ public:
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
     PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
+    void UpdateTipsEnterAndLeaveInfo(int32_t targetId);
+    void UpdateTipsEnterAndLeaveInfoBool(int32_t targetId);
+    bool GetBoolFromTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
+    int32_t GetTipsEnterAndLeaveInfo(int32_t targetId);
+    void EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
+    void UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo);
+    void UpdateTipsStatus(int32_t targetId, bool isInContinus);
+    void EraseTipsStatus(int32_t targetId);
+    bool GetTipsStatus(int32_t targetId);
+    bool TipsInfoListIsEmpty();
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -179,11 +189,6 @@ public:
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
     void UpdatePreviousDisappearingTime(int32_t targetId);
-    void UpdateTipsEnterAndLeaveInfo(int32_t targetId);
-    void UpdateTipsEnterAndLeaveInfoBool(int32_t targetId);
-    bool GetBoolFromTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
-    int32_t GetTipsEnterAndLeaveInfo(int32_t targetId);
-    void EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
 
     void ClearToastInSubwindow();
     void ClearToast();
@@ -804,6 +809,7 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
+    void ShowTipsInSubwindow(int32_t targetId, const PopupInfo& popupInfo, int32_t times);
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
@@ -839,10 +845,6 @@ private:
     bool RemovePopupInSubwindow(const RefPtr<Pattern>& pattern, const RefPtr<FrameNode>& overlay,
         const RefPtr<UINode>& rootNode);
     bool UpdatePopupMap(int32_t targetId, const PopupInfo& popupInfo);
-    void UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo);
-    void UpdateTipsStatus(int32_t targetId, bool isInContinus);
-    void EraseTipsStatus(int32_t targetId);
-    bool GetTipsStatus(int32_t targetId);
     void PlayDefaultModalIn(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,
         AnimationOption option, float showHeight);
     void PlayDefaultModalOut(const RefPtr<FrameNode>& modalNode, const RefPtr<RenderContext>& context,

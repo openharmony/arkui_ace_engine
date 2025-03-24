@@ -670,6 +670,7 @@ void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& ti
     }
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
+    tipsParam->SetShowInSubWindow(true);
 }
 
 void ParseTipsArrowPositionParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& tipsParam)

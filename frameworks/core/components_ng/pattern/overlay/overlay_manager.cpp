@@ -152,7 +152,7 @@ constexpr int32_t UIEXTNODE_ANGLE_180 = 180;
 constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
-constexpr int32_t TIPS_TIME_MAX = 1000;    // ms
+constexpr int32_t TIPS_TIME_MAX = 4000; // ms
 
 const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
     V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
@@ -1638,9 +1638,14 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     }
 }
 
-void OverlayManager::ShowTips(
-    int32_t targetId, const PopupInfo& popupInfo, int32_t appearingTime, int32_t appearingTimeWithContinuousOperation)
+void OverlayManager::ShowTips(int32_t targetId, const PopupInfo& popupInfo, int32_t appearingTime,
+    int32_t appearingTimeWithContinuousOperation, bool isSubwindow)
 {
+    if (isSubwindow) {
+        auto times = appearingTimeWithContinuousOperation;
+        ShowTipsInSubwindow(targetId, popupInfo, times);
+        return;
+    }
     UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto duration = appearingTime;
     if (tipsInfoList_.empty()) {
@@ -1681,6 +1686,21 @@ void OverlayManager::ShowTips(
     taskExecutor->PostDelayedTask(showTipsTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
 }
 
+void OverlayManager::ShowTipsInSubwindow(int32_t targetId, const PopupInfo& popupInfo, int32_t times)
+{
+    auto isExecuteTask = GetBoolFromTipsEnterAndLeaveInfo(targetId, times);
+    if (!isExecuteTask) {
+        EraseTipsEnterAndLeaveInfo(targetId, times);
+        return;
+    }
+    if (!GetPopupInfo(targetId).isTips && GetPopupInfo(targetId).popupNode) {
+        return;
+    }
+    UpdateTipsInfo(targetId, popupInfo);
+    ShowPopup(targetId, popupInfo);
+    EraseTipsEnterAndLeaveInfo(targetId, times);
+}
+
 void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int32_t disappearingTime)
 {
     auto duration = disappearingTime;
@@ -1716,6 +1736,14 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(hideTipsTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
+}
+
+bool OverlayManager::TipsInfoListIsEmpty()
+{
+    if (tipsInfoList_.empty()) {
+        return true;
+    }
+    return false;
 }
 
 bool OverlayManager::GetBoolFromTipsEnterAndLeaveInfo(int32_t tipsId, int32_t times)
