@@ -310,7 +310,8 @@ void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ) {
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ &&
+        type_ != FrontendType::ARK_TS) {
         InitializeFrontend();
     }
 }
@@ -2010,7 +2011,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
     }
     ContainerScope scope(instanceId);
-    if (type_ == FrontendType::DECLARATIVE_JS || type_ >= FrontendType::DECLARATIVE_CJ) {
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::DECLARATIVE_CJ ||
+        type_ == FrontendType::ARK_TS) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         taskExecutorImpl->InitJsThread(false);
         InitializeFrontend();
