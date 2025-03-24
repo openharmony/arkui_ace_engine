@@ -51,10 +51,21 @@ import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute } from "./ArkSymbolglyphInterfaces"
 import { SymbolEffect } from "./ArkArkuiExternalInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkSymbolGlyphNode } from "../handwritten/modifiers/ArkSymbolGlyphNode"
+import { ArkSymbolGlyphAttributeSet, SymbolGlyphModifier } from "../handwritten/modifiers/ArkSymbolGlyphModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent {
     getPeer(): ArkSymbolGlyphPeer {
         return (this.peer as ArkSymbolGlyphPeer)
+    }
+    getModifierHost(): ArkSymbolGlyphNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkSymbolGlyphNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkSymbolGlyphNode
     }
     /** @memo */
     public setSymbolGlyphOptions(value?: Resource): this {
@@ -130,6 +141,31 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent {
             throw new Error("Can not select appropriate overload")
         }
         return this
+    }
+    attributeModifier(modifier: AttributeModifier<SymbolGlyphAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<SymbolGlyphAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkSymbolGlyphAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as SymbolGlyphAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<SymbolGlyphAttribute>);
+            let symbolGlyphModifier = (attributeModifier as Object) as SymbolGlyphModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkSymbolGlyphAttributeSet();
+                attributeSet._modifiersWithKeys = symbolGlyphModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
     }
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
