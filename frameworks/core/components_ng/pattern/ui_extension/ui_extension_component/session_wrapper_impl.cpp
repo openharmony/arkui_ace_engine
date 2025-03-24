@@ -874,11 +874,19 @@ bool SessionWrapperImpl::NotifyBackPressedAsync()
 }
 bool SessionWrapperImpl::NotifyPointerEventAsync(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
-    if (session_ && pointerEvent) {
-        UIEXT_LOGD("Transfer pointer event with 'id = %{public}d' to uiextension, persistentid = %{public}d,"
-            " componentId=%{public}d.", pointerEvent->GetId(), GetSessionId(), GetFrameNodeId());
-        session_->TransferPointerEvent(pointerEvent);
+    if (!pointerEvent) {
+        UIEXT_LOGE("Transfer pointer event to uiextension fail with null pointerEvent,"
+            " componentId=%{public}d.", GetFrameNodeId());
+        return false;
     }
+
+    if (!session_) {
+        UIEXT_LOGE("Transfer pointer event to uiextension fail with null session, 'id = %{public}d',"
+            " componentId=%{public}d.", pointerEvent->GetId(), GetFrameNodeId());
+        return false;
+    }
+
+    session_->TransferPointerEvent(pointerEvent);
     return false;
 }
 bool SessionWrapperImpl::NotifyKeyEventAsync(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
@@ -1321,9 +1329,11 @@ void SessionWrapperImpl::UpdateSessionViewportConfig()
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
-    UIEXT_LOGD("The data is asynchronously send and the session is %{public}s, componentId=%{public}d.",
-        session_ ? "valid" : "invalid", GetFrameNodeId());
-    CHECK_NULL_VOID(session_);
+    if (!session_) {
+        UIEXT_LOGE(
+            "The data is synchronously send and the session is invalid, componentId=%{public}d.", GetFrameNodeId());
+        return;
+    }
     session_->TransferComponentData(params);
 }
 
