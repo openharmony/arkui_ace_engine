@@ -614,7 +614,6 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     context->FlushPipelineImmediately();
     HideEventColumn();
     HidePixelMap();
-    HideFilter(false);
 }
 
 void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
@@ -651,7 +650,6 @@ void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
     context->FlushPipelineImmediately();
     HideEventColumn();
     HidePixelMap();
-    HideFilter(false);
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
