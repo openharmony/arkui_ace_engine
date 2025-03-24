@@ -28,6 +28,8 @@
 
 static constexpr auto TEST_TEXT = "test text";
 static constexpr int TEST_RESOURCE_ID = 1000;
+static constexpr int TEST_SELECTION_START = 1;
+static constexpr int TEST_SELECTION_END = 3;
 
 namespace OHOS::Ace::NG {
 
@@ -43,7 +45,6 @@ public:
     }
     ~MockRichEditorStyledStringController() override = default;
 
-private:
     RefPtr<RichEditorPattern> mockPattern_ = AceType::MakeRefPtr<RichEditorPattern>();
 };
 } // namespace
@@ -166,4 +167,24 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_onContentChanged
     ASSERT_TRUE(g_onDidChangeCalled);
 }
 
+/**
+ * @tc.name: getSelectionTest
+ * @tc.desc: Check the functionality of getSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringControllerAccessorTest, getSelectionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSelection, nullptr);
+    ASSERT_NE(mockRichEditorController_, nullptr);
+
+    auto raw = mockRichEditorController_->mockPattern_;
+    raw->SetStyledString(AceType::MakeRefPtr<SpanString>(TEST_TEXT));
+    raw->UpdateSelector(TEST_SELECTION_START, TEST_SELECTION_END);
+
+    Ark_RichEditorRange selection = accessor_->getSelection(peer_);
+    int32_t start = Converter::OptConvert<int32_t>(selection.start).value_or(-1);
+    int32_t end = Converter::OptConvert<int32_t>(selection.end).value_or(-1);
+    EXPECT_EQ(start, TEST_SELECTION_START);
+    EXPECT_EQ(end, TEST_SELECTION_END);
+}
 } // namespace OHOS::Ace::NG
