@@ -67,7 +67,7 @@ void SubMenuLayoutAlgorithm::UpdateHoverRegion(
     OffsetF wrapperOffset;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (parentMenuItem->LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
         }
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
@@ -145,7 +145,7 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if ((!canExpandCurrentWindow_) && isContainerModal) {
         auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (parentMenuItem->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
         }
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
