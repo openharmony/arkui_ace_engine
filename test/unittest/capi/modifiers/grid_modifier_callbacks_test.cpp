@@ -253,6 +253,64 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setOnItemDragStartInvalidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Level1)
+{
+    using namespace Converter;
+    static const int32_t expectedX = 357;
+    static const int32_t expectedY = 468;
+    static const int32_t expectedIdx = 7;
+    static const int32_t expectedResourceId = 123;
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    static const auto expectedParentNode = frameNode;
+    static auto expectedCustomNode = nullptr;
+
+    // set callback to model
+    auto onItemDragStartSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_ItemDragInfo event, const Ark_Number itemIndex,
+        const Callback_CustomBuilder_Void continuation
+    ) {
+        // check input values
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto dragInfo = Convert<ItemDragInfo>(event);
+        EXPECT_EQ(dragInfo.GetX(), expectedX);
+        EXPECT_EQ(dragInfo.GetY(), expectedY);
+        auto index = Convert<int32_t>(itemIndex);
+        EXPECT_EQ(index, expectedIdx);
+
+        // construct the result CustomBuilder
+        auto builderSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(expectedCustomNode);
+        };
+        auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
+
+        // return result
+        CallbackHelper(continuation).Invoke(builder);
+    };
+    auto arkCallback =
+        ArkValue<onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+    modifier_->setOnItemDragStart(node_, &arkCallback);
+
+    // imitate the test case
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(expectedX);
+    dragInfo.SetY(expectedY);
+    auto resultNode = eventHub->FireOnItemDragStart(dragInfo, expectedIdx);
+
+    // check result
+    EXPECT_EQ(resultNode, nullptr);
+}
+
+/*
  * @tc.name: setOnItemDragEnterTest
  * @tc.desc:
  * @tc.type: FUNC
