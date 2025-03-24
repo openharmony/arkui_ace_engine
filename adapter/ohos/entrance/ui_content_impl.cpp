@@ -2854,12 +2854,13 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (context) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
-    }
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
 }
 
 void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
@@ -2877,12 +2878,26 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (context) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
+    CHECK_NULL_VOID(context);
+#ifndef NG_BUILD
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        CHECK_NULL_VOID(window_);
+        auto surfaceNode = window_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        CHECK_NULL_VOID(canvasNode);
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "canvasNode %{public}" PRIu64 "",
+            surfaceNode->GetId(), canvasNode->GetId());
+        surfaceNode->AddChild(canvasNode, -1);
     }
+#endif
+#endif
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
 }
 
 void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
@@ -2913,31 +2928,32 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
         return;
     }
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "canvasNode already exist.");
-        return;
-    }
-    if (auto transactionController =  Rosen::RSSyncTransactionController::GetInstance()) {
-        transactionController->OpenSyncTransaction();
-        auto rsTransaction = transactionController->GetRSTransaction();
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        canvasNode_ = rosenRenderContext->GetCanvasNode();
-        if (addNodeCallback_ && canvasNode_) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-            addNodeCallback_(canvasNode_, rsTransaction);
-        }
+
+    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
+    CHECK_NULL_VOID(transactionController);
+    transactionController->OpenSyncTransaction();
+    auto rsTransaction = transactionController->GetRSTransaction();
+    auto rootElement = context->GetRootElement();
+    if (!rootElement) {
         transactionController->CloseSyncTransaction();
-    } else {
-        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController is null.");
         return;
     }
-    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
-    if (callbackCachedAnimation) {
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    if (!rosenRenderContext) {
+        transactionController->CloseSyncTransaction();
+        return;
     }
+    rosenRenderContext->CreateCanvasNode();
+    canvasNode_ = rosenRenderContext->GetCanvasNode();
+    if (addNodeCallback_ && canvasNode_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
+        addNodeCallback_(canvasNode_, rsTransaction);
+    }
+    transactionController->CloseSyncTransaction();
+
+    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+    CHECK_NULL_VOID(callbackCachedAnimation);
+    rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
 }
 
 bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
@@ -2951,24 +2967,28 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
 
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        return true;
-    }
+    CHECK_NULL_RETURN(container, true);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (!context) {
-        return true;
-    }
+    CHECK_NULL_RETURN(context, true);
 
     bool animateRes = true;
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-        context->GetRootElement()->GetRenderContext());
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_RETURN(rootElement, true);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_RETURN(rosenRenderContext, true);
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            KeyFrameDragStartPolicy(context);
+            if (!rosenRenderContext->GetIsDraggingFlag()) {
+                if (rosenRenderContext->GetCanvasNode()) {
+                    rosenRenderContext->SetReDraggingFlag(true);
+                }
+                rosenRenderContext->SetIsDraggingFlag(true);
+                KeyFrameDragStartPolicy(context);
+            }
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
-            canvasNode_ = nullptr;
+            rosenRenderContext->SetIsDraggingFlag(false);
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,

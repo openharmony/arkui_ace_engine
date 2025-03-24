@@ -451,7 +451,8 @@ public:
     void CheckAnimationParametersValid(int32_t& animationParam);
     bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
     void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
-    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode();
+    void CreateCanvasNode();
+    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode() const;
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
     {
@@ -461,6 +462,26 @@ public:
     void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
     {
         callbackCachedAnimateAction_ = callback;
+    }
+
+    bool GetIsDraggingFlag() const
+    {
+        return isDraggingFlag_;
+    }
+
+    void SetIsDraggingFlag(bool isDraggingFlag)
+    {
+        isDraggingFlag_ = isDraggingFlag;
+    }
+
+    bool GetReDraggingFlag() const
+    {
+        return reDraggingFlag_;
+    }
+
+    void SetReDraggingFlag(bool reDraggingFlag)
+    {
+        reDraggingFlag_ = reDraggingFlag;
     }
 
 protected:
@@ -774,6 +795,8 @@ protected:
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
     std::function<void()> callbackAnimateEnd_ = nullptr;
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
+    bool isDraggingFlag_ = false;
+    bool reDraggingFlag_ = false;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;
