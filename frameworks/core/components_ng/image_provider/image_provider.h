@@ -62,8 +62,8 @@ struct UriDownLoadConfig {
     ImageSourceInfo src;
     ImageDfxConfig imageDfxConfig;
     std::string taskKey;
-    bool sync;
-    bool hasProgressCallback;
+    bool sync = false;
+    bool hasProgressCallback = false;
 };
 
 class ImageObject;
