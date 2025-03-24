@@ -4134,7 +4134,8 @@ void ScrollablePattern::GetRepeatCountInfo(
             repeatDifference += repeatVirtualCount - repeatRealCount;
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
-                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child)) {
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child)) {
             totalChildCount += child->FrameCount();
         } else {
             GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);
