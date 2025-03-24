@@ -84,10 +84,8 @@ HWTEST_F(CanvasPatternAccessorTest, DISABLED_setTransformTest, TestSize.Level1)
 
     ASSERT_NE(accessor_->setTransform, nullptr);
 
-    Ark_Matrix2D arkMatrix;
-    auto peer = new Matrix2DPeer();
-    arkMatrix = peer;
-    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
+    auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(peer);
     peer->SetScaleX(SCALE_VALUE);
     peer->SetScaleY(SCALE_VALUE);
     peer->SetRotateX(DEFAULT_DOUBLE_VALUE);

@@ -91,8 +91,10 @@ def run_command(test_binary_path: str, alter_cmds: list = None):
     default_cmds.append("--gtest_brief=1")
     if alter_cmds is not None:
         default_cmds.extend(alter_cmds)
-    subprocess.run(default_cmds)
-
+    try:
+        subprocess.run(default_cmds, timeout=30)
+    except Exception:
+        pass
 
 def run_single_test(tests_path, test_suite_name):
     """

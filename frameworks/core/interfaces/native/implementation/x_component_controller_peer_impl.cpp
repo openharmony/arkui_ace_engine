@@ -43,7 +43,7 @@ void XComponentControllerPeer::TriggerStartImageAnalyzer(const Ark_ImageAnalyzer
     };
 
     if (isImageAnalyzing_) {
-        auto error = PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState::ONGOING);
+        auto error = OHOS::Ace::NG::PeerUtils::CreateAIError(OHOS::Ace::ImageAnalyzerState::ONGOING);
         onError(error);
         return;
     }
@@ -58,7 +58,7 @@ void XComponentControllerPeer::TriggerStartImageAnalyzer(const Ark_ImageAnalyzer
         (OHOS::Ace::ImageAnalyzerState state) -> void {
         auto ctx = weakCtx.Upgrade();
         CHECK_NULL_VOID(ctx);
-        auto error = PeerUtils::CreateAIError(state);
+        auto error = OHOS::Ace::NG::PeerUtils::CreateAIError(state);
         callback(error);
         ctx->isImageAnalyzing_ = false;
     };
