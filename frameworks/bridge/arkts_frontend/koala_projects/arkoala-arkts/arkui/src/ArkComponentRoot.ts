@@ -13,12 +13,19 @@
  * limitations under the License.
  */
 
-import { mutableState, MutableState, NodeAttach, rememberDisposable, rememberMutableState, RunEffect, scheduleCallback } from "@koalaui/runtime"
+import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode } from "./PeerNode";
 import { ArkComponentRootPeer } from "./generated/peers/ArkStaticComponentsPeer";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
+
+let _isNeedCreate: boolean = false
+
+export function setNeedCreate(isNeedCreate: boolean)
+{
+    _isNeedCreate = isNeedCreate
+}
 
 /** @memo */
 export function ArkComponentRoot(
@@ -29,6 +36,20 @@ export function ArkComponentRoot(
     NodeAttach<PeerNode>(
         () => ArkComponentRootPeer.create(),
         (node: PeerNode) => {
+            if (_isNeedCreate) {
+                rememberDisposable(() => {
+                    let state = mutableState(false)
+                    scheduleCallback(() => {})
+                    return state;
+                }, (_: MutableState<boolean> | undefined) => {
+                    scheduleCallback(() => {
+                        component.aboutToDisappear()
+                    })
+                })
+                component.aboutToAppear()
+                content()
+                return
+            }
             let state = CurrentRouterTransitionState()
             if (state) {
                 RunEffect<int32>(state.visibility, (visibility: int32) => {
@@ -42,8 +63,6 @@ export function ArkComponentRoot(
                         default: break
                     }
                 })
-            } else {
-                content();
             }
             let shown = rememberDisposable(() => {
                 let state = mutableState(false)
@@ -63,7 +82,7 @@ export function ArkComponentRoot(
             )
             // Do we need it here?
             component.pageTransition()
-            if (shown.value) content() // skip first frame and hide router state
+            if (shown.value) WithRouterTransitionState(undefined, content) // skip first frame and hide router state
         }
     )
 }
