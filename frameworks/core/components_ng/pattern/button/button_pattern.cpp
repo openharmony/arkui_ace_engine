@@ -75,6 +75,17 @@ inline std::string ToString(const ButtonRole& role)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), role);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToString(const TextHeightAdaptivePolicy& policy)
+{
+    static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> table[] = {
+        { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "MAX_LINES_FIRST" },
+        { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "MIN_FONT_SIZE_FIRST" },
+        { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "LAYOUT_CONSTRAINT_FIRST" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), policy);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace
 
 FocusPattern ButtonPattern::GetFocusPattern() const
@@ -820,7 +831,7 @@ bool ButtonPattern::IsDynamicSwitchButtonStyle(const BorderWidthProperty& width,
     return false;
 }
 
-void CheckBoxPattern::DumpInfo()
+void ButtonPattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -834,13 +845,17 @@ void CheckBoxPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc("FontSize: " + layoutProperty->GetFontSizeValue().ToString());
     }
     if (layoutProperty->HasFontWeight()) {
-        DumpLog::GetInstance().AddDesc("FontWeight: " + layoutProperty->GetFontWeightValue().ToString());
+        DumpLog::GetInstance().AddDesc("FontWeight: " + StringUtils::ToString(layoutProperty->GetFontWeightValue()));
     }
     if (layoutProperty->HasFontStyle()) {
         DumpLog::GetInstance().AddDesc("FontStyle: " + StringUtils::ToString(layoutProperty->GetFontStyleValue()));
     }
     if (layoutProperty->HasFontFamily()) {
-        DumpLog::GetInstance().AddDesc("FontFamily: " + layoutProperty->GetFontFamilyValue().ToString());
+        std::ostringstream oss;
+        for (const auto& str : layoutProperty->GetFontFamilyValue()) {
+            oss << str << " ";
+        }
+        DumpLog::GetInstance().AddDesc("FontFamily: " + oss.str());
     }
     if (layoutProperty->HasFontColor()) {
         DumpLog::GetInstance().AddDesc("FontColor: " + layoutProperty->GetFontColorValue().ToString());
@@ -860,7 +875,7 @@ void CheckBoxPattern::DumpInfo()
     }
     if (layoutProperty->HasHeightAdaptivePolicy()) {
         DumpLog::GetInstance().AddDesc(
-            "HeightAdaptivePolicy: " + layoutProperty->GetHeightAdaptivePolicyValue().ToString());
+            "HeightAdaptivePolicy: " + StringUtils::ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
     }
     if (layoutProperty->HasBorderRadius()) {
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
@@ -876,7 +891,7 @@ void CheckBoxPattern::DumpInfo()
     }
     if (layoutProperty->HasCreateWithLabel()) {
         DumpLog::GetInstance().AddDesc(
-            "CreateWithLabel: " + std::string(layoutProperty->GetCheckBoxSelectValue() ? "true" : "false"));
+            "CreateWithLabel: " + std::string(layoutProperty->GetCreateWithLabelValue() ? "true" : "false"));
     }
 
     auto eventHub = GetEventHub<ButtonEventHub>();

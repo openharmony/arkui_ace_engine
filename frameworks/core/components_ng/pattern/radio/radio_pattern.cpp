@@ -991,7 +991,7 @@ void RadioPattern::DumpInfo ()
     auto paintProperty = GetPaintProperty<RadioPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasRadioIndicator()) {
-        DumpLog::GetInstance().AddDesc("IndicatorType: " + std::to_string(layoutProperty->GetRadioIndicatorValue()));
+        DumpLog::GetInstance().AddDesc("IndicatorType: " + std::to_string(paintProperty->GetRadioIndicatorValue()));
     }
     if (paintProperty->HasRadioCheck()) {
         DumpLog::GetInstance().AddDesc(

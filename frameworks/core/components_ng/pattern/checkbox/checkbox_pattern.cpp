@@ -26,16 +26,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
-
-inline std::string ToString(const CheckBoxStyle& style)
-{
-    static const LinearEnumMapNode<CheckBoxStyle, std::string> table[] = {
-        { CheckBoxStyle::CIRCULAR_STYLE, "CIRCULAR" },
-        { CheckBoxStyle::SQUARE_STYLE, "SQUARE" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), style);
-    return iter != -1 ? table[iter].value : "";
-}
 } // namespace
 
 RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
@@ -1079,7 +1069,8 @@ void CheckBoxPattern::DumpInfo()
     auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasCheckBoxSelectedStyle()) {
-        DumpLog::GetInstance().AddDesc("Shape: " + ToString(paintProperty->GetCheckBoxSelectedStyleValue()));
+        DumpLog::GetInstance().AddDesc(
+            "Shape: " + CheckBoxModel::ToString(paintProperty->GetCheckBoxSelectedStyleValue()));
     }
     if (paintProperty->HasCheckBoxSelect()) {
         DumpLog::GetInstance().AddDesc(

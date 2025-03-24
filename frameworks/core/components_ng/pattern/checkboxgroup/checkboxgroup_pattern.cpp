@@ -22,22 +22,12 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
-inline std::string ToString(const CheckBoxStyle& style)
-{
-    static const LinearEnumMapNode<CheckBoxStyle, std::string> table[] = {
-        { CheckBoxStyle::CIRCULAR_STYLE, "CIRCULAR" },
-        { CheckBoxStyle::SQUARE_STYLE, "SQUARE" },
-    };
-    auto iter = BinarySearchFindIndex(table, ArraySize(table), style);
-    return iter != -1 ? table[iter].value : "";
-}
-
 inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& status)
 {
     static const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
-        { CheckBoxGroupPaintProperty::SelectStatus::NONE, "NONE" },
         { CheckBoxGroupPaintProperty::SelectStatus::ALL, "ALL" },
         { CheckBoxGroupPaintProperty::SelectStatus::PART, "PART" },
+        { CheckBoxGroupPaintProperty::SelectStatus::NONE, "NONE" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), status);
     return iter != -1 ? table[iter].value : "";
@@ -689,7 +679,8 @@ void CheckBoxGroupPattern::DumpInfo()
     auto paintProperty = GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
-        DumpLog::GetInstance().AddDesc("Shape: " + ToString(paintProperty->GetCheckBoxGroupSelectedStyleValue()));
+        DumpLog::GetInstance().AddDesc(
+            "Shape: " + CheckBoxModel::ToString(paintProperty->GetCheckBoxGroupSelectedStyleValue()));
     }
     DumpLog::GetInstance().AddDesc("SelectStatus: " + ToString(paintProperty->GetSelectStatus()));
     if (paintProperty->HasCheckBoxGroupSelectedColor()) {
