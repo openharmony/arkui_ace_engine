@@ -23,6 +23,7 @@
 #include "core/components/slider/slider_theme.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -88,6 +89,8 @@ const auto ATTRIBUTE_SLIDE_RANGE_FROM_NAME = "from";
 const auto ATTRIBUTE_SLIDE_RANGE_FROM_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_NAME = "to";
 const auto ATTRIBUTE_SLIDE_RANGE_TO_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME = "color";
+const auto ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME = "offset";
 
 } // namespace
 
@@ -1043,13 +1046,143 @@ HWTEST_F(SliderModifierTest, setTrackColorTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setTrackColorTestValidValues
+ * @tc.name: setTrackColorResourceColorTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, DISABLED_setTrackColorTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestValidValues, TestSize.Level1)
 {
-    FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+        inputValueTrackColor = value;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setTrackColor, attribute: resourceColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+    }
+}
+
+/*
+ * @tc.name: setTrackColorResourceColorTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+        inputValueTrackColor = value;
+        colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+        modifier_->setTrackColor(node_, &colorGradientUnion);
+
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setTrackColor, attribute: resourceColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+    }
+    // Check invalid union
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setTrackColorLinearGradientTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestValidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(Color::RED, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setTrackColor(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+    auto gradientJsonArray = JsonUtil::ParseJsonString(resultStr);
+
+    ASSERT_EQ(gradientJsonArray->GetArraySize(), colorStopValues.size());
+    for (int i = 0; i < gradientJsonArray->GetArraySize(); i++) {
+        auto itemJson = gradientJsonArray->GetArrayItem(i);
+        auto colorValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME);
+        auto offsetValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME);
+        EXPECT_EQ(colorValue, std::get<0>(colorStopValues.at(i)).value().ToString());
+        EXPECT_EQ(offsetValue, std::to_string(std::get<1>(colorStopValues.at(i)).Value()));
+    }
+}
+
+/*
+ * @tc.name: setTrackColorLinearGradientTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestInvalidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(std::nullopt, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setTrackColor(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TRACK_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_TRACK_COLOR_DEFAULT_VALUE);
 }
 
 /*
@@ -1140,6 +1273,146 @@ HWTEST_F(SliderModifierTest, setSelectedColor0TestSelectedColorInvalidValues, Te
     }
     // Check invalid union
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setSelectedColor1ResourceColorTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestValidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](
+                          const std::string& input, const Ark_ResourceColor& value, const std::string& expectedStr) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+        inputValueTrackColor = value;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+        EXPECT_EQ(resultStr, expectedStr)
+            << "Input value is: " << input << ", method: setSelectedColor1, attribute: resourceColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value)), std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value)),
+            std::get<2>(value));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(std::get<0>(value),
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)), std::get<2>(value));
+    }
+}
+
+/*
+ * @tc.name: setSelectedColor1ResourceColorTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setSelectedColor1ResourceColorTestInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceColor initValueTrackColor;
+
+    // Initial setup
+    initValueTrackColor =
+        Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(Fixtures::testFixtureColorsStrValidValues[0]));
+
+    auto checkValue = [this, &initValueTrackColor](const std::string& input, const Ark_ResourceColor& value) {
+        Ark_ResourceColor inputValueTrackColor = initValueTrackColor;
+
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+
+        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+        inputValueTrackColor = value;
+        colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(inputValueTrackColor);
+        modifier_->setSelectedColor1(node_, &colorGradientUnion);
+
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE)
+            << "Input value is: " << input << ", method: setSelectedColor1, attribute: resourceColor";
+    };
+
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value)));
+    }
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(std::get<0>(value), Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value)));
+    }
+    // Check invalid union
+    checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setSelectedColor1LinearGradientTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setSelectedColor1LinearGradientTestValidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(Color::RED, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setSelectedColor1(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+    auto gradientJsonArray = JsonUtil::ParseJsonString(resultStr);
+
+    ASSERT_EQ(gradientJsonArray->GetArraySize(), colorStopValues.size());
+    for (int i = 0; i < gradientJsonArray->GetArraySize(); i++) {
+        auto itemJson = gradientJsonArray->GetArrayItem(i);
+        auto colorValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_COLOR_NAME);
+        auto offsetValue = GetAttrValue<std::string>(itemJson, ATTRIBUTE_TRACK_COLOR_GRADIENT_OFFSET_NAME);
+        EXPECT_EQ(colorValue, std::get<0>(colorStopValues.at(i)).value().ToString());
+        EXPECT_EQ(offsetValue, std::to_string(std::get<1>(colorStopValues.at(i)).Value()));
+    }
+}
+
+/*
+ * @tc.name: setTrackColor1LinearGradientTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTest, setTrackColor1LinearGradientTestInvalidValues, TestSize.Level1)
+{
+    std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
+        std::make_pair(std::nullopt, Dimension(0.5f)),
+        std::make_pair(Color::BLUE, Dimension(1.0f)),
+    };
+
+    Ark_LinearGradient gradient = new LinearGradientPeer {colorStopValues};
+    auto colorGradientUnion =
+        Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+
+    modifier_->setSelectedColor1(node_, &colorGradientUnion);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SELECTED_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SELECTED_COLOR_DEFAULT_VALUE);
 }
 
 /*
