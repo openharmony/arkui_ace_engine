@@ -132,8 +132,7 @@ public:
             CHECK_NULL_RETURN(richEditorController, nullptr);
             return richEditorController->GetPattern();
         }
-        WeakPtr<RichEditorPattern> empty;
-        return empty;
+        return nullptr;
     }
 
 protected:

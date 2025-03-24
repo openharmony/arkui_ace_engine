@@ -305,16 +305,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorController peer)
 {
-    auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        peerImpl->DecRefCount();
-    }
+    delete peer;
 }
 Ark_RichEditorController CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<RichEditorControllerPeer *>(Referenced::RawPtr(peerImpl));
+    return new RichEditorControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
