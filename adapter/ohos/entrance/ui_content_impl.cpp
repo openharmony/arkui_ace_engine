@@ -1017,18 +1017,19 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return errorCode;
 }
 
-void UIContentImpl::InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-    const std::string& entryPoint, const std::vector<std::string>& registerComponents)
+void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
 {
     isDynamicRender_ = true;
-    hapPath_ = hapPath;
-    hostInstanceId_ = hostInstanceId;
-    registerComponents_ = registerComponents;
+    hapPath_ = config.hapPath;
+    hostInstanceId_ = config.hostInstanceId;
+    registerComponents_ = config.registerComponents;
     auto env = reinterpret_cast<napi_env>(runtime_);
+    auto entryPoint = config.entryPoint;
+    hostWindowInfo_ = config.hostWindowInfo;
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
-    CommonInitializeForm(nullptr, abcPath, nullptr);
+    CommonInitializeForm(nullptr, config.abcPath, nullptr);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -1531,6 +1532,18 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
+    }
+
+    if (isDynamicRender_) {
+        if (hostWindowInfo_.focusWindowId != 0) {
+            container->SetFocusWindowId(hostWindowInfo_.focusWindowId);
+        }
+
+        if (hostWindowInfo_.realHostWindowId > 0) {
+            container->SetRealHostWindowId(hostWindowInfo_.realHostWindowId);
+        }
+        LOGI("DynamicRender: focusWindowId: %{public}u, realHostWindowId: %{public}d",
+            hostWindowInfo_.focusWindowId, hostWindowInfo_.realHostWindowId);
     }
 
     // after frontend initialize

@@ -25,13 +25,15 @@
 #include <list>
 
 #include "arkui_rect.h"
+#include "constants.h"
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
-#include "serialized_gesture.h"
 #include "serializeable_object.h"
+#include "serialized_gesture.h"
+#include "ui_content_config.h"
 #include "viewport_config.h"
-#include "constants.h"
+
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -128,8 +130,7 @@ public:
                                                 napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
+    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(

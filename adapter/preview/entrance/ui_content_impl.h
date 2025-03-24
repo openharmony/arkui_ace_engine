@@ -47,8 +47,7 @@ public:
     }
     UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
         napi_value storage) override;
-    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
+    void InitializeDynamic(const DynamicInitialConfig& config) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}

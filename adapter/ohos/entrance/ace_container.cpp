@@ -2083,6 +2083,10 @@ bool AceContainer::DumpDynamicUiContent(const std::vector<std::string>& params, 
 {
     LOGI("DumpDynamicUiContent");
     ContainerScope scope(instanceId_);
+    paramUie_.assign(params.begin(), params.end());
+    if (std::find(params.begin(), params.end(), "-simplify") != params.end()) {
+        paramUie_.push_back("-nouie");
+    }
     return DumpInfo(params);
 }
 
