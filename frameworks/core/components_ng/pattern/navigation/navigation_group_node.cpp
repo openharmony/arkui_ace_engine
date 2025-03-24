@@ -1557,10 +1557,14 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         }
     }
     CleanPushAnimations();
-    option.SetOnFinishEvent([weakNavigation = WeakClaim(this)] {
+    option.SetOnFinishEvent([weakNavigation = WeakClaim(this), weakPreNode = WeakPtr<FrameNode>(preNode)] {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
         auto navigation = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigation);
+        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(weakPreNode.Upgrade());
+        if (preNavDestination && preNavDestination->NeedRemoveInPush()) {
+            navigation->hideNodes_.emplace_back(std::make_pair(preNavDestination, true));
+        }
         navigation->CleanPushAnimations();
     });
     auto newPushAnimation = AnimationUtils::StartAnimation(option,
