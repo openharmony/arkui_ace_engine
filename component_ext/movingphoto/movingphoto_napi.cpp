@@ -96,6 +96,8 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
         NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
     }
 
+    SetWaterMask(env, argv[0]);
+
     napi_value getUri = nullptr;
     napi_get_named_property(env, jsData, "getUri", &getUri);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, getUri, napi_function)) {
@@ -106,6 +108,18 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     std::string imageUriStr = ExtNapiUtils::GetStringFromValueUtf8(env, imageUri);
     NG::MovingPhotoModelNG::GetInstance()->SetImageSrc(imageUriStr);
 
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value SetWaterMask(napi_env env, napi_value object)
+{
+    napi_value jsWaterMask = nullptr;
+    napi_get_named_property(env, object, "playWithMask", &jsWaterMask);
+    bool waterMask = false;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsWaterMask, napi_boolean)) {
+        waterMask = ExtNapiUtils::GetBool(env, jsWaterMask);
+        NG::MovingPhotoModelNG::GetInstance()->SetWaterMask(waterMask);
+    }
     return ExtNapiUtils::CreateNull(env);
 }
 
