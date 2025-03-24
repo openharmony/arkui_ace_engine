@@ -245,7 +245,7 @@ public:
     static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
     static void ReportClipboardFailEvent(const std::string& errorType);
     static void ReportReusedNodeSkipMeasureApp();
-    static void ReportPageSlidInfo(OHOS::Ace::NG::SlidInfo &slidInfo);
+    static void ReportPageSlidInfo(NG::SlidInfo &slidInfo);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
