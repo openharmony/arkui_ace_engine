@@ -250,6 +250,7 @@ void SwiperPattern::CheckLoopChange()
             GetLoopIndex(currentIndex_, oldChildrenSize_.has_value() ? oldChildrenSize_.value() : TotalCount());
         if (props->GetPrevMargin().has_value() || props->GetNextMargin().has_value()) {
             jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+            StopIndicatorAnimation(true);
         }
         preLoop_ = currentLoopValue;
     }
