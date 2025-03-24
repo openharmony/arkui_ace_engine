@@ -358,12 +358,7 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        float height = 0.0f;
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            height = itemHeight;
-        } else {
-            height = itemHeight - bordersHeight;
-        }
+        float height = CalcSelfHeight(itemHeight, bordersHeight);
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, height + expandableHeight));
         if (clickableArea) {
             if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -384,6 +379,14 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     if (geometryNode->GetContentSize().Height() > geometryNode->GetMarginFrameSize().Height()) {
         geometryNode->SetFrameHeight(geometryNode->GetContentSize().Height());
     }
+}
+
+float MenuItemLayoutAlgorithm::CalcSelfHeight(float itemHeight, float bordersHeight)
+{
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return itemHeight;
+    }
+    return itemHeight - bordersHeight;
 }
 
 float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
