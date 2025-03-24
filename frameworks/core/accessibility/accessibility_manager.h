@@ -356,6 +356,9 @@ public:
         return AccessibilityWorkMode();
     }
 
+    virtual void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) {}
+    virtual void AddToPageEventController(const RefPtr<NG::FrameNode>& node) {}
+    virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
 protected:
     int32_t treeId_ = 0;
 

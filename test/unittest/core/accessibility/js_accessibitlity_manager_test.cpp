@@ -1018,14 +1018,20 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager0201, TestSize.Level1
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager021, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+    root->AddChild(frameNode);
+
 
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
 
-    int64_t nodeId = 1;
+    int64_t nodeId = frameNode->GetAccessibilityId();
     int32_t eventId = 2;
     // 1. check parameter fail
     std::vector<std::string> params;
@@ -1054,8 +1060,13 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager021, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+    root->AddChild(frameNode);
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
@@ -1065,7 +1076,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
     // 1.  dump event
     params.push_back("-inspector");
     params.push_back("--event-test");
-    params.push_back("1");
+    params.push_back(std::to_string(frameNode->GetAccessibilityId()).c_str());
     params.push_back("2");
 
     EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
