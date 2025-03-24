@@ -769,6 +769,7 @@ HWTEST_F(SearchTestNg, SetCaretWidth001, TestSize.Level1)
     searchModelInstance.SetCaretColor(Color::RED);
     EXPECT_EQ(textPaintProperty->GetCursorWidth()->Value(), 14);
     EXPECT_EQ(textPaintProperty->GetCursorColor(), Color::RED);
+    searchModelInstance.SetBackBorderRadius();
 }
 
 /**
@@ -1460,6 +1461,28 @@ HWTEST_F(SearchTestNg, Create006, TestSize.Level1)
     OHOS::Ace::NG::SearchModelNG::SetType(frameNode, TextInputType::NUMBER);
     OHOS::Ace::NG::SearchModelNG::SetType(frameNode, TextInputType::TEXT);
     OHOS::Ace::NG::SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(OnTextSelectionChange));
+    OHOS::Ace::NG::SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::SENTENCES);
+    auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    TextCommonEvent event;
+    eventHub->FireOnPasteWithEvent(u"", event);
+    eventHub->FireOnCut(u"");
+    ChangeValueInfo changeValueInfo;
+    eventHub->FireOnChange(changeValueInfo);
+    onPasteEvent = [](const std::u16string& u1, NG::TextCommonEvent& te) {
+        return;
+    };
+    onCut = [](const std::u16string& u1) { return; };
+    onChange = [](const ChangeValueInfo& u1) { return; };
+    OHOS::Ace::NG::SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPasteEvent));
+    eventHub->FireOnPasteWithEvent(u"", event);
+    eventHub->FireOnCut(u"");
+    eventHub->FireOnChange(changeValueInfo);
+    std::string test_str[] = { "hello", "world", "this", "find", "gank", "pink", "that", "when", "how", "cpp" };
+    Font testFont1 { OHOS::Ace::FontWeight::BOLD, Dimension(29.0, DimensionUnit::PX), OHOS::Ace::FontStyle::ITALIC,
+        std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
+    OHOS::Ace::NG::SearchModelNG::SetTextFont(frameNode, testFont1);
 }
 
 /**
