@@ -821,45 +821,7 @@ public:
     void CompareAnimationMode(SymbolEffectType effectType, const std::optional<NG::SymbolEffectOptions>& options,
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
  
-    void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
-    {
-        if (symbolEffectOptions.has_value()) {
-            auto options = symbolEffectOptions.value();
-            auto effectType = options.GetEffectType();
-            bool animationStart = options.GetIsTxtActive();
-            if (symbolEffectOptions_.has_value()) {
-                auto oldOptions = symbolEffectOptions_.value();
-                auto oldEffectType = oldOptions.GetEffectType();
-                if (oldEffectType != effectType) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
-                }
-                bool oldAnimationStart = oldOptions.GetIsTxtActive();
-                if (oldAnimationStart != animationStart) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_START));
-                }
- 
-                CompareCommonSubType(options, oldOptions);
-                CompareAnimationMode(effectType, options, oldOptions);
-            }
-        } else {
-            if (symbolEffectOptions_.has_value()) {
-                auto oldOptions = symbolEffectOptions_.value();
-                if (oldOptions.GetEffectType() != SymbolEffectType::NONE) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
-                }
-                if (oldOptions.GetIsTxtActive()) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_START));
-                }
-                if (oldOptions.GetCommonSubType().has_value()) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COMMONSUB_TYPE));
-                }
-                if (oldOptions.GetFillStyle().has_value() || oldOptions.GetScopeType().has_value()) {
-                    reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
-                }
-            }
-        }
-        symbolEffectOptions_ = symbolEffectOptions;
-    }
+    void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions);
  
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
     {
