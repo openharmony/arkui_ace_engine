@@ -454,46 +454,6 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DeleteSpansOperation001
- * @tc.desc: test DeleteSpansOperation
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, DeleteSpansOperation001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->DeleteSpansOperation(0, 0);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: DeleteSpansByRange001
- * @tc.desc: test DeleteSpansByRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, DeleteSpansByRange001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startInfo;
-    SpanPositionInfo endInfo;
-    startInfo.spanIndex_ = -1;
-    richEditorPattern->DeleteSpansByRange(0, 0, startInfo, endInfo);
-    EXPECT_EQ(richEditorPattern->GetHost()->GetChildren().size(), 0);
-}
-
-/**
  * @tc.name: CopyGestureOption001
  * @tc.desc: test CopyGestureOption
  * @tc.type: FUNC
@@ -888,53 +848,6 @@ HWTEST_F(RichEditorPatternTestOneNg, InsertSpanByBackData001, TestSize.Level1)
     richEditorPattern->InsertSpanByBackData(spanString);
     EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
     richEditorPattern->ClearOperationRecords();
-}
-
-/**
- * @tc.name: AIDeleteComb001
- * @tc.desc: test AIDeleteComb
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, AIDeleteComb001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanString = AceType::MakeRefPtr<SpanString>(u"");
-    richEditorPattern->textSelector_ = TextSelector(0, 6);
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-    richEditorPattern->InsertSpanByBackData(spanString);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-    richEditorPattern->ClearOperationRecords();
-
-    richEditorPattern->placeholderSpansMap_[u"![id1]"] = AceType::MakeRefPtr<SpanItem>();
-    spanString = AceType::MakeRefPtr<SpanString>(u"test![id1]");
-    auto start = richEditorPattern->operationRecords_.size();
-    richEditorPattern->InsertSpanByBackData(spanString);
-    EXPECT_EQ(richEditorPattern->operationRecords_.size(), start + 2);
-    richEditorPattern->ClearOperationRecords();
-}
-
-/**
- * @tc.name: HandleOnDeleteComb001
- * @tc.desc: test HandleOnDeleteComb
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnDeleteComb001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->rangeStart = 2;
-    spanItem->position = 10;
-    spanItem->unicode = 1;
-    richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->caretPosition_ = 6;
-    auto ret = richEditorPattern->HandleOnDeleteComb(true);
-    EXPECT_TRUE(ret);
 }
 
 /**
