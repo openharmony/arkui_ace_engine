@@ -175,20 +175,14 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
         snapTrigOnScrollStart_ = false;
-        if (predictSnapEndPos.has_value()) {
-            predictSnapEndPos_ = predictSnapEndPos;
-        } else {
-            predictSnapEndPos_.reset();
-        }
     }
     if (predictSnapEndPos.has_value() && predictSnapEndPos_.has_value() &&
         !NearEqual(predictSnapEndPos.value(), predictSnapEndPos_.value())) {
         if (scrollable_) {
-            scrollable_->UpdateScrollSnapEndWithOffset(
-                predictSnapEndPos.value() - predictSnapEndPos_.value());
+            scrollable_->UpdateScrollSnapEndWithOffset(predictSnapEndPos.value() - predictSnapEndPos_.value());
         }
-        predictSnapEndPos_.reset();
     }
+    predictSnapEndPos_ = predictSnapEndPos;
 
     if (isScrollEnd_) {
         auto host = GetHost();
@@ -599,11 +593,7 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (targetIndexInGroup_) {
         listLayoutAlgorithm->SetTargetIndexInGroup(targetIndexInGroup_.value());
     }
-    if (predictSnapOffset_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
-        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
-    }
-    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
+    SetLayoutAlgorithmSnapParam(listLayoutAlgorithm);
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
@@ -618,9 +608,6 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (chainAnimation_) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
-    }
-    if (predictSnapEndPos_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
     }
     return listLayoutAlgorithm;
 }
@@ -647,6 +634,27 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
     });
     if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
         listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
+    }
+}
+
+void ListPattern::SetLayoutAlgorithmSnapParam(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm)
+{
+    CHECK_NULL_VOID(listLayoutAlgorithm);
+    if (predictSnapOffset_.has_value()) {
+        listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
+        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
+    }
+    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
+    if (scrollable_) {
+        auto snapOffset = scrollable_->GetPredictSnapOffset();
+        if (snapOffset) {
+            predictSnapEndPos_ = GetTotalOffset() - snapOffset.value() + currentDelta_;
+        } else {
+            predictSnapEndPos_.reset();
+        }
+    }
+    if (predictSnapEndPos_.has_value()) {
+        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
     }
 }
 
@@ -937,6 +945,7 @@ bool ListPattern::OnScrollSnapCallback(double targetOffset, double velocity)
     }
     predictSnapOffset_ = targetOffset;
     scrollSnapVelocity_ = velocity;
+    predictSnapEndPos_.reset();
     MarkDirtyNodeSelf();
     return true;
 }

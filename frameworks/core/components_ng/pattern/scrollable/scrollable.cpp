@@ -781,6 +781,14 @@ void Scrollable::UpdateScrollSnapStartOffset(double offset)
     UpdateScrollSnapEndWithOffset(offset);
 }
 
+std::optional<float> Scrollable::GetPredictSnapOffset() const
+{
+    if (!isSnapAnimationStop_ || !isSnapScrollAnimationStop_) {
+        return endPos_ - currentPos_;
+    }
+    return std::nullopt;
+}
+
 void Scrollable::ProcessScrollSnapMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}f, position is %{public}f",

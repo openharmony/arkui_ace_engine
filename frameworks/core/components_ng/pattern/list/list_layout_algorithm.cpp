@@ -1255,7 +1255,7 @@ void ListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>&
     if (GetStartIndex() <= endIndex && endIndex <= GetEndIndex()) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, scrollSnapAlign_);
         predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
-        predictSnapEndPos_.reset();
+        predictSnapEndPos_ = predictEndPos - currentOffset_;
     } else {
         if (IsUniformHeightProbably()) {
             if (scrollSnapAlign_ == V2::ScrollSnapAlign::START) {
