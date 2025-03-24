@@ -176,16 +176,13 @@ void SetRichEditorOptions0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    CHECK_NULL_VOID(value->controller);
     // obtain the internal RichEditorController
-    RefPtr<RichEditorBaseControllerBase> internalController = RichEditorModelNG::GetRichEditorController(frameNode);
-    auto controller = AceType::DynamicCast<RichEditorController>(internalController);
+    RefPtr<RichEditorBaseControllerBase> controller = RichEditorModelNG::GetRichEditorController(frameNode);
     CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = reinterpret_cast<RichEditorControllerPeerImpl *>(value->controller);
-    CHECK_NULL_VOID(peerImplPtr);
-
     // pass the internal controller to external management
-    peerImplPtr->AddTargetController(controller);
+    value->controller->AddTargetController(controller);
 }
 void SetRichEditorOptions1Impl(Ark_NativePointer node,
                                const Ark_RichEditorStyledStringOptions* options)
@@ -194,17 +191,13 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     RichEditorModelNG::SetStyledStringMode(frameNode, true);
+    CHECK_NULL_VOID(options->controller);
     // obtain the internal Styled String RichEditorController
-    RefPtr<RichEditorBaseControllerBase> internalController =
+    RefPtr<RichEditorBaseControllerBase> controller =
         RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
-    auto controller = AceType::DynamicCast<RichEditorStyledStringController>(internalController);
     CHECK_NULL_VOID(controller);
 
-    auto peerImplPtr = options->controller;
-    CHECK_NULL_VOID(peerImplPtr);
-
-    // pass the internal controller to external management
-    peerImplPtr->AddTargetController(controller);
+    options->controller->AddTargetController(controller);
 }
 } // RichEditorInterfaceModifier
 namespace RichEditorAttributeModifier {

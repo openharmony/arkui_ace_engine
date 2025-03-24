@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "styled_string_peer.h"
 
@@ -284,16 +285,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RichEditorControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorController peer)
 {
-    auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        peerImpl->DecRefCount();
-    }
+    delete peer;
 }
 Ark_RichEditorController CtorImpl()
 {
-    auto peerImpl = Referenced::MakeRefPtr<RichEditorControllerPeerImpl>();
-    peerImpl->IncRefCount();
-    return reinterpret_cast<RichEditorControllerPeer *>(Referenced::RawPtr(peerImpl));
+    return new RichEditorControllerPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -356,8 +352,7 @@ Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
         if (!value) {
             result = peerImpl->AddBuilderSpanImpl(locOptions.value());
         } else {
-            auto controller = peerImpl->GetController().Upgrade();
-            auto pattern = controller ? controller->GetPattern().Upgrade() : nullptr;
+            auto pattern = peerImpl->GetPattern().Upgrade();
             auto frameNodeWeakPtr = pattern ? pattern->GetHost() : nullptr;
             auto customNode = CallbackHelper(*value).BuildSync(Referenced::RawPtr(frameNodeWeakPtr));
             if (customNode) {

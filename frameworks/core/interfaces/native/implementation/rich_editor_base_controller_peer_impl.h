@@ -30,9 +30,9 @@ public:
     RichEditorBaseControllerPeerImpl() = default;
     ~RichEditorBaseControllerPeerImpl() override {};
 
-    void AddTargetController(const WeakPtr<RichEditorBaseController> &handler)
+    void AddTargetController(const RefPtr<RichEditorBaseControllerBase>& handler)
     {
-        handler_ = handler;
+        handler_ = WeakPtr(handler);
     }
 
     int32_t GetCaretOffset() override
@@ -116,8 +116,27 @@ public:
         return nullptr;
     }
 
-private:
-    Ace::WeakPtr<RichEditorBaseController> handler_;
+    void SetPattern(const WeakPtr<RichEditorPattern>& pattern)
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
+            CHECK_NULL_VOID(richEditorController);
+            richEditorController->SetPattern(pattern);
+        }
+    }
+
+    WeakPtr<RichEditorPattern> GetPattern()
+    {
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
+            CHECK_NULL_RETURN(richEditorController, nullptr);
+            return richEditorController->GetPattern();
+        }
+        return nullptr;
+    }
+
+protected:
+    WeakPtr<RichEditorBaseControllerBase> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
