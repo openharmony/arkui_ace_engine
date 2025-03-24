@@ -30,8 +30,7 @@ using SendRenderDataCallback = bool (*)(const void*, const size_t, const int32_t
 using SendCurrentRouterCallback = bool (*)(const std::string currentRouterPath);
 using FastPreviewErrorCallback = void (*)(const std::string& jsonStr);
 
-constexpr uint32_t THEME_ID_LIGHT = 117440515;
-constexpr uint32_t THEME_ID_DARK = 117440516;
+constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 enum class AceVersion {
     ACE_1_0,
@@ -56,7 +55,7 @@ struct ACE_FORCE_EXPORT AceRunArgs {
     std::string appResourcesPath;
 
     // Indicate light or dark theme.
-    uint32_t themeId = THEME_ID_LIGHT;
+    uint32_t themeId = OHOS_THEME_ID;
 
     OHOS::Ace::DeviceConfig deviceConfig = {
         .orientation = DeviceOrientation::PORTRAIT,
