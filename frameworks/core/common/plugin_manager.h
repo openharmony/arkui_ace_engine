@@ -30,7 +30,7 @@ class ACE_EXPORT PluginManager final : public Singleton<PluginManager> {
     DECLARE_SINGLETON(PluginManager);
 
 public:
-    void UpdateConfigurationInPlugin(const ResourceConfiguration& resConfig, const RefPtr<TaskExecutor>& taskExecutor);
+    void UpdateConfigurationInPlugin(const ResourceConfiguration& resConfig);
     void AddPluginSubContainer(int64_t pluginId, const RefPtr<PluginSubContainer>& pluginSubContainer);
     void RemovePluginSubContainer(int64_t pluginId);
     void AddPluginParentContainer(int64_t pluginId, int32_t pluginParentContainerId);

@@ -3052,7 +3052,7 @@ void AceContainer::UpdateConfiguration(
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (configurationChange.IsNeedUpdate()) {
-        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig);
     }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
