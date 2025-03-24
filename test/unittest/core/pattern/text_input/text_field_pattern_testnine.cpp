@@ -270,7 +270,7 @@ HWTEST_F(TextFieldPatternTestNine, IsShowAIWrite001, TestSize.Level0)
     ret = pattern_->IsShowAIWrite();
     EXPECT_FALSE(ret);
 
-    layoutProperty->UpdateCopyOptions(CopyOptions::Local); 
+    layoutProperty->UpdateCopyOptions(CopyOptions::Local);
     layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
     auto textFieldTheme = pattern_->GetTheme();
     textFieldTheme->aiWriteBundleName_ = "BundleName";
