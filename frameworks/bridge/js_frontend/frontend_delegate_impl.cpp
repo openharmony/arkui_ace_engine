@@ -18,6 +18,7 @@
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "core/components/toast/toast_component.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
