@@ -806,7 +806,6 @@ export struct ImageSpanBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -1023,6 +1022,7 @@ export struct ImageSpanBootcamp {
       }
     })
   }
+
   @Builder
   Content() {
     Row() {
@@ -1033,8 +1033,10 @@ export struct ImageSpanBootcamp {
           .onClick((event?: ClickEvent) => {
             this.compEventTriggeredLog('点击事件onClick触发');
           })//part1
-          .width(useEnabled(this.enableCompWidth, this.compWidth)?useEnabled(this.enableCompWidth, this.compWidth):300)
-          .height(useEnabled(this.enableCompHeight, this.compHeight)?useEnabled(this.enableCompHeight, this.compHeight):300)
+          .width(useEnabled(this.enableCompWidth, this.compWidth) ?
+          useEnabled(this.enableCompWidth, this.compWidth) : 300)
+          .height(useEnabled(this.enableCompHeight, this.compHeight) ?
+          useEnabled(this.enableCompHeight, this.compHeight) : 300)
           .padding(useEnabled(this.enableCompPadding, this.compPadding))
           .margin(useEnabled(this.enableCompMargin, this.compMargin))
           .constraintSize({
@@ -1628,7 +1630,8 @@ export struct ImageSpanBootcamp {
               this.compFocusBoxStrokeWidth)) : null,
           })
           .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'ImageSpan')
+          .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) :
+            'ImageSpan')
           .focusScopePriority(
             useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
             useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
