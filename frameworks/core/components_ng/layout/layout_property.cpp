@@ -2088,6 +2088,23 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
+std::string LayoutProperty::LayoutInfoToString()
+{
+    std::stringstream ss;
+    if (HasAspectRatio()) {
+        ss << "aspectRatio: " << magicItemProperty_.GetAspectRatioValue() << ",";
+    }
+    if (magicItemProperty_.GetLayoutWeight().has_value()) {
+        ss << "layoutWeight: " << magicItemProperty_.GetLayoutWeight().value() << ",";
+    }
+    if (GetPositionProperty() && GetPositionProperty()->GetAlignment().has_value()) {
+        ss << GetPositionProperty()->GetAlignment().value().ToString() << ",";
+    }
+    if (GetLayoutDirection() != TextDirection::AUTO) {
+        ss << "layoutDirection: " << static_cast<int32_t>(GetLayoutDirection());
+    }
+    return ss.str();
+}
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();

@@ -410,6 +410,8 @@ public:
 
     virtual void OnPropertyChangeMeasure() {}
 
+    std::string LayoutInfoToString();
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
