@@ -193,6 +193,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src);
+    void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src);
     void AssignArkValue(Ark_Length& dst, const Dimension& src);
     void AssignArkValue(Ark_Length& dst, const double& src);
     void AssignArkValue(Ark_Length& dst, const float& src);

@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PixelMapAccessor {
 void DestroyPeerImpl(Ark_PixelMap peer)
 {
-    delete peer;
+    PixelMapPeer::Destroy(peer);
 }
 Ark_PixelMap CtorImpl()
 {
-    return new PixelMapPeer();
+    return PixelMapPeer::Create({});
 }
 Ark_NativePointer GetFinalizerImpl()
 {
