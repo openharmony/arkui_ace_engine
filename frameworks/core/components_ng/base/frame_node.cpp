@@ -1643,33 +1643,6 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-bool GetPositionToParent(const RefPtr<FrameNode>& node, OffsetF& offset)
-{
-    CHECK_NULL_RETURN(node, false);
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, false);
-    CHECK_NULL_RETURN(renderContext->GetPositionProperty(), false);
-    if (renderContext->GetPositionProperty()->HasPosition()) {
-        auto layoutProperty = node->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, false);
-        auto renderPosition = node->ContextPositionConvertToPX(renderContext,
-            layoutProperty->GetLayoutConstraint()->percentReference);
-        offset = { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) };
-        return true;
-    }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) &&
-        renderContext->GetPositionProperty()->HasPositionEdges()) {
-        auto layoutProperty = node->GetLayoutProperty();
-        CHECK_NULL_RETURN(layoutProperty, false);
-        auto positionEdges = renderContext->GetPositionEdgesValue(EdgesParam {});
-        offset = renderContext->GetRectOffsetWithPositionEdges(positionEdges,
-            layoutProperty->GetLayoutConstraint()->percentReference.Width(),
-            layoutProperty->GetLayoutConstraint()->percentReference.Height());
-        return true;
-    }
-    return false;
-}
-
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
     if (!IsActive()) {
@@ -1690,9 +1663,13 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     if (eventHub_ && (eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
-        OffsetF offset;
-        if (GetPositionToParent(Claim(this), offset)) {
-            currFrameRect.SetOffset(offset);
+        if (renderContext_ && renderContext_->GetPositionProperty()) {
+            if (renderContext_->GetPositionProperty()->HasPosition()) {
+                auto renderPosition = ContextPositionConvertToPX(
+                    renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+                currFrameRect.SetOffset(
+                    { static_cast<float>(renderPosition.first), static_cast<float>(renderPosition.second) });
+            }
         }
         bool logFlag = IsDebugInspectorId();
         auto currParentOffsetToWindow =
@@ -5329,7 +5306,14 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag)
 {
     auto currOffset = geometryNode_->GetFrameOffset();
-    GetPositionToParent(Claim(this), currOffset);
+    if (renderContext_ && renderContext_->GetPositionProperty()) {
+        if (renderContext_->GetPositionProperty()->HasPosition()) {
+            auto renderPosition =
+                ContextPositionConvertToPX(renderContext_, layoutProperty_->GetLayoutConstraint()->percentReference);
+            currOffset.SetX(static_cast<float>(renderPosition.first));
+            currOffset.SetY(static_cast<float>(renderPosition.second));
+        }
+    }
 
     auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
