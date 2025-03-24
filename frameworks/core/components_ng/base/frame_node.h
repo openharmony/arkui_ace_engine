@@ -599,6 +599,12 @@ public:
         destroyCallbacksMap_[tag] = callback;
     }
 
+    void SetConfigurationModeUpdateCallback(
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+    {
+        configurationUpdateCallback_ = callback;
+    }
+
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
         colorModeUpdateCallback_ = callback;
@@ -1492,6 +1498,7 @@ private:
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    std::function<void(const ConfigurationChange& configurationChange)> configurationUpdateCallback_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;

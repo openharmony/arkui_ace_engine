@@ -327,7 +327,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_->UpdateStartIndex();
     prevOffset_ = layoutInfo_->Offset();
-    layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
@@ -546,7 +546,7 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     StopAnimate();
     auto footer = footer_.Upgrade();
     const int32_t itemCnt = footer ? GetChildrenCount() - footer->FrameCount() : GetChildrenCount();
-    if (index > EMPTY_JUMP_INDEX && index < itemCnt) {
+    if (index > WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX && index < itemCnt) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {

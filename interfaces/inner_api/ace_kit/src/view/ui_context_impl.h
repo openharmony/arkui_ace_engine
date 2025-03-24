@@ -35,6 +35,7 @@ public:
 
     void RunScopeUITaskSync(Task&& task, const std::string& name) override;
     void RunScopeUITask(Task&& task, const std::string& name) override;
+    void AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask = false) override;
 
     void OnBackPressed() override;
 

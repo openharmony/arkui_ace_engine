@@ -23,6 +23,7 @@
 
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -842,11 +843,6 @@ inline std::string ToString(const VerticalAlign& verticalAlign)
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
-
-enum class BarPosition {
-    START,
-    END,
-};
 
 enum class CalendarType {
     NORMAL = 0,

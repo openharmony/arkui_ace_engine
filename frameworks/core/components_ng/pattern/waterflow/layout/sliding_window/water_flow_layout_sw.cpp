@@ -46,7 +46,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         FillBack(mainLen_, change, itemCnt_ - 1);
     }
 
-    if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+    if (info_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
         MeasureBeforeAnimation(*info_->targetIndex_);

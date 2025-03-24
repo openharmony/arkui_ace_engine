@@ -69,6 +69,7 @@ config("ace_unittest_config") {
     "$ace_root",
     "$ace_root/frameworks",
     "$hilog_root/interfaces/native/innerkits/include",
+    "$ace_root/interfaces/inner_api/ace",
     "$ace_root/interfaces/inner_api/ace_kit/include",
     "$root_out_dir/arkui/framework",
     "//third_party/icu/icu4c/source/common",
@@ -129,6 +130,7 @@ config("ace_unittest_config_ext") {
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace",
     "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
 

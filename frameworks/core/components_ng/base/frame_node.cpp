@@ -1362,6 +1362,10 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
 
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
+    if (configurationUpdateCallback_) {
+        auto cb = configurationUpdateCallback_;
+        cb(configurationChange);
+    }
     if (configurationChange.languageUpdate) {
         pattern_->OnLanguageConfigurationUpdate();
         MarkModifyDone();

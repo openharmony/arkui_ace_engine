@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 enum class WaterFlowLayoutMode;
 
@@ -32,6 +31,8 @@ class WaterFlowLayoutInfoBase : public AceType {
     DECLARE_ACE_TYPE(WaterFlowLayoutInfoBase, AceType);
 
 public:
+    static constexpr int32_t EMPTY_JUMP_INDEX = -2;
+
     WaterFlowLayoutInfoBase() = default;
     ~WaterFlowLayoutInfoBase() override = default;
 

@@ -130,7 +130,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else if (layoutInfo_->jumpIndex_ == LAST_ITEM) {
         // jump to bottom.
     } else {
-        layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+        layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     }
 
     FillViewport(mainSize_, layoutWrapper);
@@ -361,7 +361,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
     while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
-           layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+           layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;
@@ -409,7 +409,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             // restoreOffSet only be used once
             layoutInfo_->restoreOffset_ = 0.0f;
             layoutInfo_->align_ = ScrollAlign::START;
-            layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+            layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
             layoutInfo_->itemStart_ = false;
             if (layoutInfo_->extraOffset_.has_value()) {
                 layoutInfo_->currentOffset_ += layoutInfo_->extraOffset_.value();
@@ -437,7 +437,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
         footerMainSize_ = WaterFlowLayoutUtils::MeasureFooter(layoutWrapper, axis_);
         maxItemHeight += footerMainSize_;
     }
-    if (layoutInfo_->jumpIndex_ != EMPTY_JUMP_INDEX) {
+    if (layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         if (layoutInfo_->extraOffset_.has_value() && Negative(layoutInfo_->extraOffset_.value())) {
             layoutInfo_->extraOffset_.reset();
         }

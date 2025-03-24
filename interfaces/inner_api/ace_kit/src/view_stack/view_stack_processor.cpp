@@ -31,7 +31,7 @@ void ViewStackProcessor::Push(const RefPtr<FrameNode>& node)
 {
     auto nodeImpl = AceType::DynamicCast<FrameNodeImpl>(node);
     CHECK_NULL_VOID(nodeImpl);
-    NG::ViewStackProcessor::GetInstance()->Push(nodeImpl->PopAceNode());
+    NG::ViewStackProcessor::GetInstance()->Push(nodeImpl->MoveOwnershipAndGetAceNode());
 }
 
 RefPtr<FrameNode> ViewStackProcessor::GetTopNode()
@@ -40,7 +40,8 @@ RefPtr<FrameNode> ViewStackProcessor::GetTopNode()
     CHECK_NULL_RETURN(mainNode, nullptr);
     auto kitNode = mainNode->GetKitNode();
     if (!kitNode) {
-        kitNode = Referenced::MakeRefPtr<FrameNodeImpl>(AceType::Claim(mainNode));
+        kitNode = Referenced::MakeRefPtr<FrameNodeImpl>(mainNode);
+        mainNode->SetKitNode(kitNode);
     }
     return kitNode;
 }

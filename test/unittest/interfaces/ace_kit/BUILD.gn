@@ -126,6 +126,8 @@ ohos_source_set("ace_kit_mock") {
 ohos_unittest("ace_kit_test") {
   module_out_path = interface_test_output_path
 
+  defines = [ "USE_ARK_ENGINE" ]
+
   sources = [
     "$ace_root/interfaces/inner_api/ace_kit/src/agingadapation/aging_adapation_dialog_util.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/animation/animation_utils.cpp",

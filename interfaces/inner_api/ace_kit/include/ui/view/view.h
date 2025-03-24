@@ -27,6 +27,7 @@ class FrameNode;
 
 class ACE_FORCE_EXPORT View : public Referenced {
 public:
+    explicit View(const RefPtr<FrameNode>& node);
     ~View() override;
     const RefPtr<FrameNode>& GetNode() const;
 

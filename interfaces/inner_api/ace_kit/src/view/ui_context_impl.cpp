@@ -61,6 +61,12 @@ void UIContextImpl::RunScopeUITask(Task&& task, const std::string& name)
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
+void UIContextImpl::AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask)
+{
+    CHECK_NULL_VOID(context_);
+    context_->AddAfterLayoutTask(std::move(task), isFlushInImplicitAnimationTask);
+}
+
 void UIContextImpl::OnBackPressed()
 {
     CHECK_NULL_VOID(context_);

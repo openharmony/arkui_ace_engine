@@ -45,7 +45,8 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::ShowLongPressDialog(
             break;
     }
     CHECK_NULL_RETURN(dialogNode, nullptr);
-    RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(dialogNode);
+    RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(AceType::RawPtr(dialogNode));
+    dialogNode->SetKitNode(node);
     return node;
 }
 

@@ -30,6 +30,7 @@ class FrameNodeImpl : public FrameNode {
 public:
     FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern);
     explicit FrameNodeImpl(const RefPtr<AceNode>& node);
+    explicit FrameNodeImpl(AceNode* node);
     ~FrameNodeImpl();
 
     void Reset() override;
@@ -43,6 +44,7 @@ public:
     RefPtr<Pattern> GetPattern() override;
     void PushAceNode(const RefPtr<AceNode>& node);
     RefPtr<AceNode> PopAceNode();
+    RefPtr<AceNode> MoveOwnershipAndGetAceNode();
     RefPtr<AceNode> GetAceNode() const;
     NG::LayoutWrapper* GetLayoutWrapper();
     RefPtr<UIContext> GetUIContext() const override;
@@ -61,9 +63,16 @@ public:
     void LayoutChildren() override;
     NodeHandle GetHandle() override;
 
+    void SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)> destroyCallback) override;
+    void SetConfigurationUpdateCallback(
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback) override;
+    void AddExtraCustomProperty(const std::string& key, void* extraData) override;
+    void* GetExtraCustomProperty(const std::string& key) const override;
+    void SetClipEdge(bool isClip) override;
+
 private:
     AceNode* frameNode_;
-    RefPtr<AceNode> nodeRef_;
+    RefPtr<AceNode> nodeTempRef_;
     RefPtr<Pattern> pattern_;
     RefPtr<Property> property_;
 };

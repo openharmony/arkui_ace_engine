@@ -48,7 +48,6 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, MenuType t
     RefPtr<NG::FrameNode> aceNode = OHOS::Ace::NG::MenuView::Create(std::move(aceParams), menuParam.targetId,
         menuParam.targetTag, static_cast<NG::MenuType>(type), aceMenuParam);
     RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(aceNode);
-    aceNode->SetKitNode(node);
     return node;
 }
 } // OHOS::Ace::Kit
