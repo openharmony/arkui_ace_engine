@@ -301,6 +301,8 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
+    RectF GetPaintRectWithTransformWithoutDegree() override;
+
     // get position property
     RectF GetPropertyOfPosition() override;
 
