@@ -627,6 +627,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
+        if (!frameNode) {
+            frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        }
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
