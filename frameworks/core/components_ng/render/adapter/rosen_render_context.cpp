@@ -5198,6 +5198,19 @@ void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
     rsSurfaceNode->SetHDRBrightness(hdrBrightness);
 }
 
+void RosenRenderContext::SetImageHDRPresent(bool hdrPresent)
+{
+    auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
+    CHECK_NULL_VOID(rsCanvasDrawingNode);
+    rsCanvasDrawingNode->SetHDRPresent(hdrPresent);
+}
+
+void RosenRenderContext::SetImageHDRBrightness(float hdrBrightness)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetHDRBrightness(hdrBrightness);
+}
+
 void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
 {
     CHECK_NULL_VOID(rsNode_);

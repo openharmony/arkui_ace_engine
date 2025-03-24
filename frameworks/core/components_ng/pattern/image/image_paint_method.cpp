@@ -25,6 +25,7 @@ constexpr unsigned int TOP_LEFT = 0;
 constexpr unsigned int TOP_RIGHT = 1;
 constexpr unsigned int BOTTOM_LEFT = 2;
 constexpr unsigned int BOTTOM_RIGHT = 3;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -128,6 +129,11 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     auto renderCtx = paintWrapper->GetRenderContext();
     if (renderCtx) {
         config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
+    }
+
+    if (canvasImage_->IsHdrPixelMap() && renderCtx) {
+        renderCtx->SetImageHDRBrightness(renderProps->GetHdrBrightnessValue(DEFAULT_HDR_BRIGHTNESS));
+        renderCtx->SetImageHDRPresent(true);
     }
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
