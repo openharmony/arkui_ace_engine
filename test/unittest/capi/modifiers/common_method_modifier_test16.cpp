@@ -306,6 +306,7 @@ public:
     static void TearDownTestCase()
     {
         MockContainer::Current()->SetTaskExecutor(nullptr);
+        ModifierTestBase::TearDownTestCase();
     }
 
     static void EmitFocusEvent(Ark_NodeHandle node)
