@@ -300,14 +300,7 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
-        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, image);
-        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, image);
-    } else {
-        DynamicRangeModeConvert(dynamicRangeMode_);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
-        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
-    }
+    UpdateImageHdrMode(image);
     auto imagePattern = image->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
@@ -341,6 +334,18 @@ void MovingPhotoPattern::UpdateImageNode()
         image->MarkModifyDone();
     }
     RegisterImageEvent();
+}
+
+void MovingPhotoPattern::UpdateImageHdrMode(FrameNode* imageNode)
+{
+    if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
+    } else {
+        DynamicRangeModeConvert(dynamicRangeMode_);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, imageNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, imageNode);
+    }
 }
 
 void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
