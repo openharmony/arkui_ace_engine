@@ -135,7 +135,7 @@ export struct TextInputBootcamp {
   @State enableEnterKeyType: boolean = false;
   @State enterKeyType: EnterKeyType = EnterKeyType.Done;
   @State enableCaretColor: boolean = false;
-  @State CaretColor: ResourceColor = '#007DFF';
+  @State caretColor: ResourceColor = '#007DFF';
   @State enableMaxLength: boolean = false;
   @State maxLength: number = Infinity;
   @State enableFontColor: boolean = false;
@@ -1149,7 +1149,7 @@ export struct TextInputBootcamp {
       Grid() {
         ForEach([1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'], (item: number | string) => {
           GridItem() {
-            Button(item + "")
+            Button(item + '')
               .width(110).onClick(() => {
               this.text += item
             })
@@ -1246,7 +1246,7 @@ export struct TextInputBootcamp {
         })
         .enterKeyType(useEnabled(this.enableEnterKeyType,
           this.enterKeyType))
-        .caretColor(useEnabled(this.enableCaretColor, this.CaretColor))
+        .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
         .maxLength(useEnabled(this.enableMaxLength, this.maxLength))
         .fontColor(useEnabled(this.enableFontColor, this.fontColor))
         .fontSize(useEnabled(this.enableFontSize, this.fontSize))
@@ -2291,7 +2291,7 @@ export struct TextInputBootcamp {
         ColorBlock({
           title: 'caretColor',
           isEnabled: this.enableCaretColor,
-          color: this.CaretColor
+          color: this.caretColor
         })
 
         SliderBlock({
