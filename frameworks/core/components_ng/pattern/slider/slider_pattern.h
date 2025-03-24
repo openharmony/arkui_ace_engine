@@ -183,6 +183,15 @@ public:
         return crownSensitivity_;
     }
 #endif
+    void SetBubbleFlag(bool flag)
+    {
+        bubbleFlag_ = flag;
+    }
+    
+    RefPtr<SliderContentModifier> GetSliderContentModifier() const
+    {
+        return sliderContentModifier_;
+    }
 
 private:
     void OnAttachToFrameNode() override;
