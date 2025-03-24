@@ -17,7 +17,9 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components/data_panel/data_panel_theme.h"
+#include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "test/unittest/capi/modifiers/generated/test_fixtures.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -37,6 +39,25 @@ namespace  {
     const auto ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE = "#08182431";
     const auto ATTRIBUTE_STROKE_WIDTH_NAME = "strokeWidth";
     const auto ATTRIBUTE_STROKE_WIDTH_DEFAULT_VALUE = "24.00vp";
+    const auto ATTRIBUTE_VALUE_COLORS_NAME = "valueColors";
+    const auto ATTRIBUTE_VALUE_COLORS_COLOR_NAME = "color";
+    const auto ATTRIBUTE_VALUE_COLORS_OFFSET_NAME = "offset";
+    const auto ATTRIBUTE_TRACK_SHADOW_NAME = "trackShadow";
+    const auto ATTRIBUTE_TRACK_SHADOW_COLORS_NAME = "colors";
+    const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME = "offsetX";
+    const auto ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME = "offsetY";
+    const auto ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME = "radius";
+
+    constexpr auto VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE = 9;
+    constexpr auto VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE = 2;
+    constexpr auto VALUE_COLORS_COLOR_THEME_DEFAULT = "#FF000000";
+    constexpr auto VALUE_COLORS_OFFSET_0_THEME_DEFAULT = "0.000000";
+    constexpr auto VALUE_COLORS_OFFSET_1_THEME_DEFAULT = "1.000000";
+    constexpr auto TRACK_SHADOW_OFFSET_X_THEME_DEFAULT = "0.000000";
+    constexpr auto TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT = "0.000000";
+    constexpr auto TRACK_SHADOW_RADIUS_THEME_DEFAULT = "0.000000";
+    const auto RES_VALUE_NAME = NamedResourceId{"test_value", Converter::ResourceType::FLOAT};
+    const auto RES_VALUE_ID = IntResourceId{1, Converter::ResourceType::FLOAT};
 } // namespace
 
 class DataPanelModifierTest : public ModifierTestBase<GENERATED_ArkUIDataPanelModifier,
@@ -51,6 +72,13 @@ public:
         theme->SetAttr(PATTERN_BG_COLOR,
             { .value = Color::FromString(ATTRIBUTE_TRACK_BACKGROUND_COLOR_DEFAULT_VALUE) });
         SetupTheme<DataPanelTheme>();
+
+        for (auto&& res : Fixtures::resourceInitTable) {
+            AddResource(std::get<0>(res), std::get<2>(res)); // 2 - index of resource
+            AddResource(std::get<1>(res), std::get<2>(res)); // 2 - index of resource
+        }
+        AddResource(RES_VALUE_NAME, 5.0f);
+        AddResource(RES_VALUE_ID, 1.0f);
     }
 };
 
@@ -509,4 +537,1108 @@ HWTEST_F(DataPanelModifierTest, setTrackBackgroundColorTestInvalidValues, TestSi
     }
 }
 
+/*
+ * @tc.name: setValueColorsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestStringValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestStringValidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsStrValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestStringInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestStringInvalidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestNumberValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestNumberValidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsNumValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestEnumValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumValidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsEnumValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestEnumInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestEnumInvalidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestResourceValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestResourceValidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsResValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+std::vector<std::vector<std::pair<std::optional<Color>, Dimension>>> colorStopValues = {
+    std::vector<std::pair<std::optional<Color>, Dimension>>
+        {std::make_pair(Color::RED, Dimension(0.5f)), std::make_pair(Color::BLUE, Dimension(9.0f))},
+    std::vector<std::pair<std::optional<Color>, Dimension>>
+        {std::make_pair(Color::GREEN, Dimension(0.2f)), std::make_pair(Color::BLACK, Dimension(0.8f))}
+};
+
+std::vector<std::vector<std::pair<std::optional<Color>, Dimension>>> colorStopValuesInvalid = {
+    std::vector<std::pair<std::optional<Color>, Dimension>>
+        {std::make_pair(std::nullopt, Dimension(0.5f)), std::make_pair(Color::BLUE, Dimension(9.0f))},
+    std::vector<std::pair<std::optional<Color>, Dimension>>
+        {std::make_pair(Color::GREEN, Dimension(0.2f)), std::make_pair(Color::BLACK, Dimension(0.8f))}
+};
+
+/*
+ * @tc.name: setValueColorsTestLinearGradientValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientValidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& values : colorStopValues) {
+        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        colorArray.push_back(colorGradientUnion);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), colorStopValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), colorStopValues.at(i).size());
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, (std::get<0>(colorStopValues.at(i).at(j))).value().ToString());
+            EXPECT_EQ(offsetCheckValue, std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value()));
+        }
+    }
+}
+
+/*
+ * @tc.name: setValueColorsTestLinearGradientInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, TestSize.Level1)
+{
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& values : colorStopValuesInvalid) {
+        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        colorArray.push_back(colorGradientUnion);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    modifier_->setValueColors(node_, &arkColorArray);
+
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_VALUE_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto shadowJsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+
+    auto radiusCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
+    EXPECT_EQ(radiusCheckValue, TRACK_SHADOW_RADIUS_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+    auto offsetXCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
+    EXPECT_EQ(offsetXCheckValue, TRACK_SHADOW_OFFSET_X_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+    auto offsetYCheckValue = GetAttrValue<std::string>(shadowJsonArray, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
+    EXPECT_EQ(offsetYCheckValue, TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT); // a theme value doesn't meet an sdk value
+}
+
+// Valid values for attribute 'radius' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowRadiusValidValues = {
+    {"0.05f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.05f)),
+        "0.050000"},
+    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
+        "10.000000"},
+    {"100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(100.0f)),
+        "100.000000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
+};
+
+// Valid values for attribute 'offsetX' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetXValidValues = {
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
+        "0.000000"},
+    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
+        "10.000000"},
+    {"-0.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-0.5f)),
+        "-0.500000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
+};
+
+// Valid values for attribute 'offsetY' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetYValidValues = {
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
+        "0.000000"},
+    {"-100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-100.0f)),
+        "-100.000000"},
+    {"5.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(5.5f)),
+        "5.500000"},
+    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
+        "5.000000"},
+    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
+        "1.000000"},
+};
+
+// Invalid values for attribute 'radius' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowRadiusInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f))},
+    {"-20.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-20.5f))},
+};
+
+// Invalid values for attribute 'offsetX' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetXInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+};
+
+// Invalid values for attribute 'offsetY' of method 'trackShadow'
+static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetYInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+};
+
+/*
+ * @tc.name: setTrackShadowTestRadiusValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestRadiusValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowRadiusValidValues) {
+        inputValueTrackShadow.radius = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestRadiusInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestRadiusInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowRadiusInvalidValues) {
+        inputValueTrackShadow.radius = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_RADIUS_NAME);
+        expectedStr = TRACK_SHADOW_RADIUS_THEME_DEFAULT; // a theme value doesn't meet an sdk value
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestOffsetXValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetXValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = std::get<1>(trackShadowOffsetXValidValues[0]);
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowOffsetXValidValues) {
+        inputValueTrackShadow.offsetX = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestOffsetXInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetXInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = std::get<1>(trackShadowOffsetXValidValues[0]);
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowOffsetXInvalidValues) {
+        inputValueTrackShadow.offsetX = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_X_NAME);
+        expectedStr = TRACK_SHADOW_OFFSET_X_THEME_DEFAULT; // a theme value doesn't meet an sdk value
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestOffsetYValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetYValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = std::get<1>(trackShadowOffsetYValidValues[0]);
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowOffsetYValidValues) {
+        inputValueTrackShadow.offsetY = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestOffsetYInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetYInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> resultTrackShadow;
+    std::string resultStr;
+    std::string expectedStr;
+
+    Ark_DataPanelShadowOptions inputValueTrackShadow;
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = std::get<1>(trackShadowOffsetYValidValues[0]);
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
+
+    inputValueTrackShadow = initValueTrackShadow;
+    for (auto&& value: trackShadowOffsetYInvalidValues) {
+        inputValueTrackShadow.offsetY = std::get<1>(value);
+        modifier_->setTrackShadow(node_, &inputValueTrackShadow);
+        jsonValue = GetJsonValue(node_);
+        resultTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+        resultStr = GetAttrValue<std::string>(resultTrackShadow, ATTRIBUTE_TRACK_SHADOW_OFFSET_Y_NAME);
+        expectedStr = TRACK_SHADOW_OFFSET_Y_THEME_DEFAULT; // a theme value doesn't meet an sdk value
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorStringValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsStrValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsStrValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsStrValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorStringInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsStrInvalidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorNumberValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorNumberValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsNumValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsNumValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsNumValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorEnumValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsEnumValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsEnumValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsEnumValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorEnumInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsEnumInvalidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorResourceValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& value : Fixtures::testFixtureColorsResValidValues) {
+        auto resourseColor = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(std::get<1>(value));
+        auto color =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(resourseColor);
+        colorArray.push_back(color);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), Fixtures::testFixtureColorsResValidValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, std::get<2>(Fixtures::testFixtureColorsResValidValues.at(i)));
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorLinearGradientValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& values : colorStopValues) {
+        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        colorArray.push_back(colorGradientUnion);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), colorStopValues.size());
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, (std::get<0>(colorStopValues.at(i).at(j))).value().ToString());
+            EXPECT_EQ(offsetCheckValue, std::to_string((std::get<1>(colorStopValues.at(i).at(j))).Value()));
+        }
+    }
+}
+
+/*
+ * @tc.name: setTrackShadowTestColorLinearGradientInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue;
+    std::unique_ptr<JsonValue> jsonTrackShadow;
+    std::unique_ptr<JsonValue> jsonArray;
+    std::string resultStr;
+    std::string expectedStr;
+
+    auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
+    for (auto&& values : colorStopValuesInvalid) {
+        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        auto colorGradientUnion =
+            Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
+        colorArray.push_back(colorGradientUnion);
+    }
+
+    Converter::ArkArrayHolder<Array_Union_ResourceColor_LinearGradient> colorArrayHolder(colorArray);
+    auto arkColorArray = colorArrayHolder.ArkValue();
+
+    Ark_DataPanelShadowOptions initValueTrackShadow;
+
+    // Initial setup
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
+
+    modifier_->setTrackShadow(node_, &initValueTrackShadow);
+
+    jsonValue = GetJsonValue(node_);
+    jsonTrackShadow = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_TRACK_SHADOW_NAME);
+    jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonTrackShadow, ATTRIBUTE_TRACK_SHADOW_COLORS_NAME);
+    ASSERT_EQ(jsonArray->GetArraySize(), VALUE_COLORS_COLOR_THEME_VALUES_ARRAY_SIZE);
+
+    for (int i = 0; i < jsonArray->GetArraySize(); i++) {
+        auto gradientItem = jsonArray->GetArrayItem(i);
+        ASSERT_EQ(gradientItem->GetArraySize(), VALUE_COLORS_COLOR_THEME_GRADIENTS_ARRAY_SIZE);
+        for (int j = 0; j < gradientItem->GetArraySize(); j++) {
+            auto colorStopItem = gradientItem->GetArrayItem(j);
+            auto colorCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_COLOR_NAME);
+            auto offsetCheckValue = GetAttrValue<std::string>(colorStopItem, ATTRIBUTE_VALUE_COLORS_OFFSET_NAME);
+            EXPECT_EQ(colorCheckValue, VALUE_COLORS_COLOR_THEME_DEFAULT);
+            if (0 == j) {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_0_THEME_DEFAULT);
+            } else {
+                EXPECT_EQ(offsetCheckValue, VALUE_COLORS_OFFSET_1_THEME_DEFAULT);
+            }
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
