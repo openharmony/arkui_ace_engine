@@ -191,6 +191,8 @@ public:
 
     bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width, RefPtr<ButtonTheme>& buttonTheme);
 
+    void DumpInfo() override;
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;

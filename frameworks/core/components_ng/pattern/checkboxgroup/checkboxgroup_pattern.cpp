@@ -14,12 +14,34 @@
  */
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
+
+inline std::string ToString(const CheckBoxStyle& style)
+{
+    static const LinearEnumMapNode<CheckBoxStyle, std::string> table[] = {
+        { CheckBoxStyle::CIRCULAR_STYLE, "CIRCULAR" },
+        { CheckBoxStyle::SQUARE_STYLE, "SQUARE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), style);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& status)
+{
+    static const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
+        { CheckBoxGroupPaintProperty::SelectStatus::NONE, "NONE" },
+        { CheckBoxGroupPaintProperty::SelectStatus::ALL, "ALL" },
+        { CheckBoxGroupPaintProperty::SelectStatus::PART, "PART" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), status);
+    return iter != -1 ? table[iter].value : "";
+}
 }
 
 void CheckBoxGroupPattern::OnAttachToFrameNode()
@@ -656,6 +678,37 @@ bool CheckBoxGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         result = true;
     }
     return result;
+}
+
+void CheckBoxGroupPattern::DumpInfo()
+{
+    auto eventHub = GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
+
+    auto paintProperty = GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasCheckBoxGroupSelectedStyle()) {
+        DumpLog::GetInstance().AddDesc("Shape: " + ToString(paintProperty->GetCheckBoxGroupSelectedStyleValue()));
+    }
+    DumpLog::GetInstance().AddDesc("SelectStatus: " + ToString(paintProperty->GetSelectStatus()));
+    if (paintProperty->HasCheckBoxGroupSelectedColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "SelectedColor: " + paintProperty->GetCheckBoxGroupSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxGroupUnSelectedColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "UnSelectedColor: " + paintProperty->GetCheckBoxGroupUnSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkSize()) {
+        DumpLog::GetInstance().AddDesc("MarkSize: " + paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkWidth()) {
+        DumpLog::GetInstance().AddDesc("MarkWidth: " + paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkColor()) {
+        DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxGroupCheckMarkColorValue().ToString());
+    }
 }
 
 void CheckBoxGroupPattern::OnAttachToMainTree()

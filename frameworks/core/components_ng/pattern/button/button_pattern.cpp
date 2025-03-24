@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/log/dump_log.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
@@ -26,6 +27,54 @@ constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
 constexpr float NORMAL_SCALE = 1.0f;
+
+inline std::string ToString(const ButtonType& type)
+{
+    static const LinearEnumMapNode<ButtonType, std::string> table[] = {
+        { ButtonType::NORMAL, "NORMAL" },
+        { ButtonType::CAPSULE, "CAPSULE" },
+        { ButtonType::CIRCLE, "CIRCLE" },
+        { ButtonType::TEXT, "TEXT" },
+        { ButtonType::ARC, "ARC" },
+        { ButtonType::DOWNLOAD, "DOWNLOAD" },
+        { ButtonType::ICON, "ICON" },
+        { ButtonType::CUSTOM, "CUSTOM" },
+        { ButtonType::ROUNDED_RECTANGLE, "ROUNDED_RECTANGLE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), type);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ButtonStyleMode& mode)
+{
+    static const LinearEnumMapNode<ButtonStyleMode, std::string> table[] = {
+        { ButtonStyleMode::NORMAL, "NORMAL" },
+        { ButtonStyleMode::EMPHASIZE, "EMPHASIZE" },
+        { ButtonStyleMode::TEXT, "TEXT" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), mode);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ControlSize& size)
+{
+    static const LinearEnumMapNode<ControlSize, std::string> table[] = {
+        { ControlSize::SMALL, "SMALL" },
+        { ControlSize::NORMAL, "NORMAL" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), size);
+    return iter != -1 ? table[iter].value : "";
+}
+
+inline std::string ToString(const ButtonRole& role)
+{
+    static const LinearEnumMapNode<ButtonRole, std::string> table[] = {
+        { ButtonRole::NORMAL, "NORMAL" },
+        { ButtonRole::ERROR, "ERROR" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), role);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace
 
 FocusPattern ButtonPattern::GetFocusPattern() const
@@ -769,6 +818,70 @@ bool ButtonPattern::IsDynamicSwitchButtonStyle(const BorderWidthProperty& width,
         return true;
     }
     return false;
+}
+
+void CheckBoxPattern::DumpInfo()
+{
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasType()) {
+        DumpLog::GetInstance().AddDesc("Type: " + ToString(layoutProperty->GetTypeValue()));
+    }
+    if (layoutProperty->HasLabel()) {
+        DumpLog::GetInstance().AddDesc("Label: " + layoutProperty->GetLabelValue());
+    }
+    if (layoutProperty->HasFontSize()) {
+        DumpLog::GetInstance().AddDesc("FontSize: " + layoutProperty->GetFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasFontWeight()) {
+        DumpLog::GetInstance().AddDesc("FontWeight: " + layoutProperty->GetFontWeightValue().ToString());
+    }
+    if (layoutProperty->HasFontStyle()) {
+        DumpLog::GetInstance().AddDesc("FontStyle: " + StringUtils::ToString(layoutProperty->GetFontStyleValue()));
+    }
+    if (layoutProperty->HasFontFamily()) {
+        DumpLog::GetInstance().AddDesc("FontFamily: " + layoutProperty->GetFontFamilyValue().ToString());
+    }
+    if (layoutProperty->HasFontColor()) {
+        DumpLog::GetInstance().AddDesc("FontColor: " + layoutProperty->GetFontColorValue().ToString());
+    }
+    if (layoutProperty->HasTextOverflow()) {
+        DumpLog::GetInstance().AddDesc(
+            "TextOverflow: " + StringUtils::ToString(layoutProperty->GetTextOverflowValue()));
+    }
+    if (layoutProperty->HasMaxLines()) {
+        DumpLog::GetInstance().AddDesc("MaxLines: " + std::to_string(layoutProperty->GetMaxLinesValue()));
+    }
+    if (layoutProperty->HasMinFontSize()) {
+        DumpLog::GetInstance().AddDesc("MinFontSize: " + layoutProperty->GetMinFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasMaxFontSize()) {
+        DumpLog::GetInstance().AddDesc("MaxFontSize: " + layoutProperty->GetMaxFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasHeightAdaptivePolicy()) {
+        DumpLog::GetInstance().AddDesc(
+            "HeightAdaptivePolicy: " + layoutProperty->GetHeightAdaptivePolicyValue().ToString());
+    }
+    if (layoutProperty->HasBorderRadius()) {
+        DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
+    }
+    if (layoutProperty->HasButtonStyle()) {
+        DumpLog::GetInstance().AddDesc("ButtonStyle: " + ToString(layoutProperty->GetButtonStyleValue()));
+    }
+    if (layoutProperty->HasControlSize()) {
+        DumpLog::GetInstance().AddDesc("ControlSize: " + ToString(layoutProperty->GetControlSizeValue()));
+    }
+    if (layoutProperty->HasButtonRole()) {
+        DumpLog::GetInstance().AddDesc("ButtonRole: " + ToString(layoutProperty->GetButtonRoleValue()));
+    }
+    if (layoutProperty->HasCreateWithLabel()) {
+        DumpLog::GetInstance().AddDesc(
+            "CreateWithLabel: " + std::string(layoutProperty->GetCheckBoxSelectValue() ? "true" : "false"));
+    }
+
+    auto eventHub = GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("StateEffect: " + eventHub->GetStateEffect());
 }
 
 void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)

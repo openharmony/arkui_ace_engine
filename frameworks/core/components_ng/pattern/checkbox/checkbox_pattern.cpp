@@ -26,6 +26,16 @@ namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr int32_t DEFAULT_CHECKBOX_ANIMATION_DURATION = 100;
+
+inline std::string ToString(const CheckBoxStyle& style)
+{
+    static const LinearEnumMapNode<CheckBoxStyle, std::string> table[] = {
+        { CheckBoxStyle::CIRCULAR_STYLE, "CIRCULAR" },
+        { CheckBoxStyle::SQUARE_STYLE, "SQUARE" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), style);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace
 
 RefPtr<NodePaintMethod> CheckBoxPattern::CreateNodePaintMethod()
@@ -1066,31 +1076,31 @@ void CheckBoxPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName());
     DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
 
-    auto checkBoxPaintProperty = GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(checkBoxPaintProperty);
-    DumpLog::GetInstance().AddDesc(
-        "Shape: " + checkBoxPaintProperty->GetCheckBoxSelectedStyleValue().ToString());
-    DumpLog::GetInstance().AddDesc(
-        "Select: " + std::string(checkBoxPaintProperty->GetCheckBoxSelectValue() ? "true" : "false"));
-    DumpLog::GetInstance().AddDesc(
-        "SelectedColor: " + checkBoxPaintProperty->GetCheckBoxSelectedColorValue().ToString());
-    DumpLog::GetInstance().AddDesc(
-        "UnSelectedColor: " + checkBoxPaintProperty->GetCheckBoxUnSelectedColorValue().ToString());
-    DumpLog::GetInstance().AddDesc(
-        "MarkSize: " + checkBoxPaintProperty->GetCheckBoxCheckMarkSizeValue().ToString());
-    DumpLog::GetInstance().AddDesc(
-        "MarkWidth: " + checkBoxPaintProperty->GetCheckBoxCheckMarkWidthValue().ToString());
-    DumpLog::GetInstance().AddDesc(
-        "MarkColor: " + checkBoxPaintProperty->GetCheckBoxCheckMarkColorValue().ToString());
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto responseRegion = gesture->GetResponseRegion();
-    DumpLog::GetInstance().AddDesc(
-        "responseRegion: " + responseRegion[0].ToString());
-
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        DumpLog::GetInstance().AddDesc("Shape: " + ToString(paintProperty->GetCheckBoxSelectedStyleValue()));
+    }
+    if (paintProperty->HasCheckBoxSelect()) {
+        DumpLog::GetInstance().AddDesc(
+            "IsSelected: " + std::string(paintProperty->GetCheckBoxSelectValue() ? "true" : "false"));
+    }
+    if (paintProperty->HasCheckBoxSelectedColor()) {
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetCheckBoxSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxUnSelectedColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "UnSelectedColor: " + paintProperty->GetCheckBoxUnSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkSize()) {
+        DumpLog::GetInstance().AddDesc("MarkSize: " + paintProperty->GetCheckBoxCheckMarkSizeValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkWidth()) {
+        DumpLog::GetInstance().AddDesc("MarkWidth: " + paintProperty->GetCheckBoxCheckMarkWidthValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkColor()) {
+        DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxCheckMarkColorValue().ToString());
+    }
 }
 
 void CheckBoxPattern::SetPrePageIdToLastPageId()

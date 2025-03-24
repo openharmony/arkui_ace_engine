@@ -178,6 +178,8 @@ public:
         isUserSetUncheckBorderColor_ = isUserSet;
     }
 
+    void DumpInfo() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
