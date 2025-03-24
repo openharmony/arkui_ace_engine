@@ -33,7 +33,6 @@ constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000;
 #ifdef PREVIEW
 constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 #endif
-constexpr int64_t MAX_INBIHIT_PREDICT_DUR = 100 * 1000000;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -66,20 +65,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             if (dvsyncOn) {
                 int64_t frameBufferCount = (refreshPeriod != 0 && timeStampNanos - ts > 0) ?
                     (timeStampNanos - ts) / refreshPeriod : 0;
-                int64_t lastInbihitPredictTs = window->GetLastDVsyncInhibitPredictTs();
-                if (frameBufferCount < 1) {
-                    if (lastInbihitPredictTs == 0 || (ts - lastInbihitPredictTs < MAX_INBIHIT_PREDICT_DUR)) {
-                        // 100ms, inbihit
-                        deadline = 0;
-                    }
-                    if (lastInbihitPredictTs == 0) {
-                        window->SetLastDVsyncInhibitPredictTs(ts);
-                    }
-                } else {
-                    if (lastInbihitPredictTs != 0) {
-                        window->SetLastDVsyncInhibitPredictTs(0);
-                    }
-                }
+                deadline = window->GetDeadlineByFrameCount(deadline, ts, frameBufferCount);
                 ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", refreshPeriod is: %" PRId64 ",\
                     frameBufferCount is %" PRId64 ", deadline is %" PRId64 "",\
                     timeStampNanos, ts, refreshPeriod, frameBufferCount, deadline);

@@ -72,4 +72,28 @@ void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
         platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 }
+
+int64_t Window::GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t frameBufferCount)
+{
+    if (!dvsyncOn_) {
+        return deadline;
+    }
+
+    constexpr int64_t MAX_INBIHIT_PREDICT_DUR = 100 * 1000000;
+    int64_t lastInbihitPredictTs = lastDVsyncInbihitPredictTs_;
+    if (frameBufferCount < 1) {
+        if (lastInbihitPredictTs == 0 || (ts - lastInbihitPredictTs < MAX_INBIHIT_PREDICT_DUR)) {
+            // 100ms, inbihit
+            deadline = 0;
+        }
+        if (lastInbihitPredictTs == 0) {
+            lastDVsyncInbihitPredictTs_ = ts;
+        }
+    } else {
+        if (lastInbihitPredictTs != 0) {
+            lastDVsyncInbihitPredictTs_ = 0;
+        }
+    }
+    return deadline;
+}
 } // namespace OHOS::Ace

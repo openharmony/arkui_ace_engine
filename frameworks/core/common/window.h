@@ -120,15 +120,7 @@ public:
         return dvsyncOn_;
     }
 
-    int64_t GetLastDVsyncInhibitPredictTs() const
-    {
-        return lastDVsyncInbihitPredictTs_;
-    }
-
-    void SetLastDVsyncInhibitPredictTs(const int64_t ts)
-    {
-        lastDVsyncInbihitPredictTs_ = ts;
-    }
+    int64_t GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t frameBufferCount);
 
     void SetDensity(double density)
     {
