@@ -49,12 +49,12 @@ public:
 
     void SetController(const RefPtr<ScrollControllerBase>& controller)
     {
-        controllerWeak_ = controller;
+        controllerWeak_ = WeakPtr(controller);
     }
 
     void SetScrollBarProxy(const RefPtr<ScrollProxy>& proxy)
     {
-        scrollBarProxyWeak_ = proxy;
+        scrollBarProxyWeak_ = WeakPtr(proxy);
     }
 
     RefPtr<ScrollProxy> GetScrollBarProxy()
