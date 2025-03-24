@@ -106,6 +106,9 @@ void MenuItemLayoutAlgorithm::CheckUserHeight(LayoutWrapper* layoutWrapper)
 
 float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRowHeight)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, leftRowHeight:%{public}f, rightRowHeight:%{public}f,"
+        " paddingHeight:%{public}f, idealHeight_:%{public}f, userHeight_:%{public}f",
+        leftRowHeight, rightRowHeight, padding_.Height(), idealHeight_, userHeight_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         if (userSetPadding_) {
             return GreatNotEqual(userHeight_, 0.0f) ? userHeight_ - padding_.Height()
@@ -115,7 +118,8 @@ float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRo
                 : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
         }
     } else {
-        return std::max(leftRowHeight, rightRowHeight) + padding_.Height();
+        return GreatNotEqual(idealHeight_, 0.0f) ? idealHeight_
+            : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
     }
 }
 
@@ -329,6 +333,7 @@ void MenuItemLayoutAlgorithm::CheckNeedExpandContent(LayoutWrapper* layoutWrappe
 void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float width, float itemHeight, float expandableHeight)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto menuNode = layoutWrapper->GetHostNode();
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     auto isEmbedded = menuItemPattern ? menuItemPattern->IsEmbedded() : false;
@@ -353,12 +358,7 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        float height = 0.0f;
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            height = std::max(itemHeight, minItemHeight_);
-        } else {
-            height = std::max(itemHeight - bordersHeight, minItemHeight_);
-        }
+        float height = CalcSelfHeight(itemHeight, bordersHeight);
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, height + expandableHeight));
         if (clickableArea) {
             if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
@@ -372,6 +372,21 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, itemHeight));
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, itemContentSizeH:%{public}f, item marginFrameSizeH:%{public}f",
+        geometryNode->GetContentSize().Height(), geometryNode->GetMarginFrameSize().Height());
+    if (geometryNode->GetContentSize().Height() > geometryNode->GetMarginFrameSize().Height()) {
+        geometryNode->SetFrameHeight(geometryNode->GetContentSize().Height());
+    }
+}
+
+float MenuItemLayoutAlgorithm::CalcSelfHeight(float itemHeight, float bordersHeight)
+{
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        return itemHeight;
+    }
+    return itemHeight - bordersHeight;
 }
 
 float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
