@@ -819,13 +819,17 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringLength, TestSize.Level
 }
 
 /**
- * @tc.name:DISABLED_styledStringGetString
+ * @tc.name: styledStringGetString
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringGetString, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetString, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(accessor_->getString, nullptr);
+
+    auto str = accessor_->getString(peer_);
+    auto result = Converter::Convert<std::string>(str);
+    EXPECT_EQ(result, STRING_TEST_VALUE);
 }
 
 /**
