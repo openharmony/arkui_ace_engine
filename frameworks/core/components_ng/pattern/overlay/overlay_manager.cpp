@@ -2676,6 +2676,7 @@ void OverlayManager::CleanPopupInSubWindow(bool isForceClear)
             bubbleEventHub->FireChangeEvent(false);
             popupMap_[target].isCurrentOnShow = false;
             bubblePattern->SetTransitionStatus(TransitionStatus::INVISIABLE);
+            bubblePattern->CallDoubleBindCallback("false");
             rootNode->RemoveChild(removeNode);
             auto subwindowMgr = SubwindowManager::GetInstance();
             subwindowMgr->DeleteHotAreas(Container::CurrentId(), removeNode->GetId(), SubwindowType::TYPE_POPUP);

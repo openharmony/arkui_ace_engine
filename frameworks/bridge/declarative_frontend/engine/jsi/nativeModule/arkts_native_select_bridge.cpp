@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
@@ -27,6 +28,10 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
+constexpr int32_t OFFSET_1 = 1;
+constexpr int32_t OFFSET_2 = 2;
+constexpr int32_t OFFSET_3 = 3;
+constexpr int32_t OFFSET_5 = 5;
 const int32_t SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
@@ -1141,6 +1146,77 @@ ArkUINativeModuleValue SelectBridge::ResetSelectDirection(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSelectModifier()->resetSelectDirection(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
+{
+    options.push_back(static_cast<uint32_t>(valueColor.has_value()));
+    if (valueColor.has_value()) {
+        options.push_back(static_cast<uint32_t>(valueColor.value().GetValue()));
+    } else {
+        options.push_back(0x19FFFFFF);
+    }
+}
+
+void ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
+{
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + OFFSET_3);
+
+    std::optional<Color> leftColor;
+    std::optional<Color> rightColor;
+    std::optional<Color> topColor;
+    std::optional<Color> bottomColor;
+
+    Color left;
+    if (!leftArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, leftArg, left)) {
+        leftColor = left;
+    }
+    Color right;
+    if (!rightArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, rightArg, right)) {
+        rightColor = right;
+    }
+    Color top;
+    if (!topArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, topArg, top)) {
+        topColor = top;
+    }
+    Color bottom;
+    if (!bottomArg->IsUndefined() && ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottom)) {
+        bottomColor = bottom;
+    }
+
+    PushOuterBorderColorVector(leftColor, values);
+    PushOuterBorderColorVector(rightColor, values);
+    PushOuterBorderColorVector(topColor, values);
+    PushOuterBorderColorVector(bottomColor, values);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::vector<ArkUI_Float32> width;
+    std::vector<uint32_t> color;
+    CommonBridge::ParseOuterBorderWidth(runtimeCallInfo, vm, width);
+    ParseOuterBorderColor(runtimeCallInfo, vm, color, OFFSET_5);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuOutline(
+        nativeNode, width.data(), width.size(), color.data(), color.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuOutline(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuOutline(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

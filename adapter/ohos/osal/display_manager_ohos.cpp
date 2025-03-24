@@ -15,7 +15,7 @@
 
 #include "display_manager_ohos.h"
 
-#include "foundation/window/window_manager/interfaces/innerkits/dm/display_manager.h"
+#include "dm/display_manager.h"
 
 namespace OHOS::Ace {
 

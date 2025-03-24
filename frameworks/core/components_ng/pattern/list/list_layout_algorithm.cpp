@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -110,7 +110,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    CalculateTotalCountByRepeat(layoutWrapper);
     scrollSnapAlign_ = listLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
@@ -1622,7 +1622,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     paddingOffset_ = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
+    CalculateTotalCountByRepeat(layoutWrapper);
     listItemAlign_ = listProps->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
     isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -1660,8 +1660,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         int32_t newCacheCount = UpdateDefaultCachedCount(cacheCount, itemCount);
         listProps->SetDefaultCachedCount(newCacheCount);
     }
-    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     FixItemLayoutOffset(layoutWrapper);
+    ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
     LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
     UpdateOverlay(layoutWrapper);
     ProcessStackFromEnd();
@@ -2639,5 +2639,19 @@ void ListLayoutAlgorithm::ReportGetChildError(const std::string& funcName, int32
     }
     std::string subErrorType = funcName + " get item: " + std::to_string(index) + " failed.";
     EventReport::ReportScrollableErrorEvent("List", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
+}
+
+void ListLayoutAlgorithm::CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto repeatDifference = 0;
+    firstRepeatCount_ = 0;
+    totalItemCount_ = 0;
+    pattern->GetRepeatCountInfo(host, repeatDifference, firstRepeatCount_, totalItemCount_);
+    pattern->SetRepeatDifference(repeatDifference);
+    totalItemCount_ = (repeatDifference > 0 ? firstRepeatCount_ : totalItemCount_) - itemStartIndex_;
 }
 } // namespace OHOS::Ace::NG

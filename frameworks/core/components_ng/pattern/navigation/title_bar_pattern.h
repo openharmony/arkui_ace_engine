@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/navigation/custom_safe_area_expander.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
@@ -26,8 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
-class TitleBarPattern : public Pattern {
-    DECLARE_ACE_TYPE(TitleBarPattern, Pattern);
+class TitleBarPattern : public Pattern, public CustomSafeAreaExpander {
+    DECLARE_ACE_TYPE(TitleBarPattern, Pattern, CustomSafeAreaExpander);
 
 public:
     TitleBarPattern() = default;
@@ -301,6 +302,7 @@ public:
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
+    bool CustomizeExpandSafeArea() override;
 
     void ClearDragState();
     float GetSubtitleOpacity();

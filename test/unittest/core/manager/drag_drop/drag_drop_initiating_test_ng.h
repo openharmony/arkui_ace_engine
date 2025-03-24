@@ -137,5 +137,11 @@ public:
     static void SetUpTestCase();
     static void TearDownTestCase();
 };
+
+class DragDropInitiatingHandlerTestNg : public DragDropInitiatingStateTestNG {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+};
 } // namespace OHOS::Ace::NG
 #endif // TEST_UNITTEST_CORE_MANAGER_DRAG_DROP_DRAG_DROP_INITIATING_TEST_NG_H

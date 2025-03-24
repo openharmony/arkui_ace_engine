@@ -1131,7 +1131,8 @@ struct CustomDialogContentComponent {
           }
         }
         .constraintSize({ maxHeight: this.contentMaxHeight })
-        .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
+        .backgroundBlurStyle(this.customStyle ?
+          BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
         .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
         .margin(this.customStyle ? {
           start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),

@@ -899,6 +899,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
         LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
     auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());

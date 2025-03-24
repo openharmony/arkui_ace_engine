@@ -23,7 +23,7 @@ class ListItemGroupInitializeModifier extends ModifierWithKey<ListItemGroupParam
     if (reset) {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
-      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style);
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style, this.value?.headerComponent, this.value?.footerComponent);
     }
   }
 }
@@ -68,6 +68,8 @@ class ListItemGroupChildrenMainSizeModifier extends ModifierWithKey<ChildrenMain
 interface ListItemGroupParam {
   space: string | number;
   style: ListItemGroupStyle;
+  headerComponent: ComponentContent;
+  footerComponent: ComponentContent;
 }
 
 class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAttribute {

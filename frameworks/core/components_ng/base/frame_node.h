@@ -288,6 +288,8 @@ public:
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
+    void SetNodeFreeze(bool isFreeze);
+
     const RefPtr<RenderContext>& GetRenderContext() const
     {
         return renderContext_;
@@ -815,6 +817,8 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
+
+    void TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};

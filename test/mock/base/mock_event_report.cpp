@@ -19,6 +19,9 @@
 
 namespace OHOS::Ace {
 DragInfo MockEventReport::dragInfo_;
+FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
+int64_t EventReport::calTime_ = 0;
+int32_t EventReport::calFrameRate_ = 0;
 
 void EventReport::SendEvent(const EventInfo& eventInfo) {}
 
@@ -105,4 +108,12 @@ void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidinfo)
 {}
 
+void EventReport::SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_)
+{}
+
+void EventReport::FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status)
+{}
+ 
+void EventReport::AddFrameRateDuration(int32_t frameRate, int32_t duration)
+{}
 } // namespace OHOS::Ace

@@ -39,6 +39,11 @@ public:
         themeConstants_->UpdateConfig(config);
     }
 
+    void SetSystemThemeId(int32_t themeId) override
+    {
+        currentThemeId_ = themeId;
+    }
+
     void LoadSystemTheme(int32_t themeId) override
     {
         currentThemeId_ = themeId;

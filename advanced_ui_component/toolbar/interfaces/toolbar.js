@@ -1109,7 +1109,7 @@ class i1 extends ViewPU {
             Column.create();
             Column.width(this.fontSize === u ? b1 : c1);
             Column.constraintSize({ minHeight: this.fontSize === u ? b1 : c1 });
-            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
             Column.borderRadius(({
               'id': -1,
@@ -1271,7 +1271,7 @@ class i1 extends ViewPU {
             Column.create();
             Column.width(this.fontSize === u ? b1 : c1);
             Column.constraintSize({ minHeight: this.fontSize === u ? b1 : c1 });
-            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+            Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
             Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
             Column.borderRadius(({
               'id': -1,

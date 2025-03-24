@@ -1726,4 +1726,10 @@ void TitleBarPattern::HandleMenuLongPressActionEnd()
     SetLargeFontPopUpDialogNode(nullptr);
 }
 
+bool TitleBarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return RunCustomizeExpandIfNeeded(host);
+}
 } // namespace OHOS::Ace::NG

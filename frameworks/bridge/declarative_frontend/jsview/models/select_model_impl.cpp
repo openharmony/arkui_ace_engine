@@ -457,4 +457,6 @@ void SelectModelImpl::SetLayoutDirection(TextDirection value)
     CHECK_NULL_VOID(selectComponent);
     selectComponent->SetTextDirection(value);
 }
+
+void SelectModelImpl::SetMenuOutline(const NG::MenuParam& menuParam) {}
 } // namespace OHOS::Ace::Framework

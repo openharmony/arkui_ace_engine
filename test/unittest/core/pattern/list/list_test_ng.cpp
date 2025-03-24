@@ -19,7 +19,6 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
@@ -297,33 +296,6 @@ void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smo
     FlushUITasks();
 }
 
-class ListItemMockLazy : public Framework::MockLazyForEachBuilder {
-public:
-    ListItemMockLazy(int32_t itemCnt, float itemMainSize) : itemCnt_(itemCnt), itemMainSize_(itemMainSize) {}
-
-protected:
-    int32_t OnGetTotalCount() override
-    {
-        return itemCnt_;
-    }
-
-    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
-    {
-        ListItemModelNG itemModel;
-        itemModel.Create();
-        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-        ViewAbstract::SetHeight(CalcLength(itemMainSize_));
-        ViewAbstract::SetFocusable(true);
-        auto node = ViewStackProcessor::GetInstance()->Finish();
-        return { std::to_string(index), node };
-    }
-
-private:
-    int32_t itemCnt_ = 0;
-    float itemMainSize_ = 100.0f;
-};
-
 void ListTestNg::CreateItemsInLazyForEach(
     int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
 {
@@ -332,6 +304,20 @@ void ListTestNg::CreateItemsInLazyForEach(
     LazyForEachModelNG lazyForEachModelNG;
     lazyForEachModelNG.Create(mockLazy);
     lazyForEachModelNG.OnMove(std::move(onMove));
+}
+
+RefPtr<ListItemMockLazy> ListTestNg::CreateItemsInLazyForEachWithHandle(
+    int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove)
+{
+    RefPtr<ListItemMockLazy> mockLazy = AceType::MakeRefPtr<ListItemMockLazy>(itemNumber, itemMainSize);
+    RefPtr<LazyForEachActuator> mockActuator = mockLazy;
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockActuator);
+    lazyForEachModelNG.OnMove(std::move(onMove));
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    return mockLazy;
 }
 
 LazyForEachModelNG ListTestNg::CreateItemsInForLazyEachForItemDragEvent(int32_t itemNumber, float itemMainSize)
@@ -369,41 +355,6 @@ ForEachModelNG ListTestNg::CreateForEachListForItemDragEvent(int32_t itemNumber,
     }
     return forEachModelNG;
 }
-
-class ListItemGroupMockLazy : public Framework::MockLazyForEachBuilder {
-public:
-    explicit ListItemGroupMockLazy(int32_t itemGroupCnt) : itemGroupCnt_(itemGroupCnt) {}
-
-protected:
-    int32_t OnGetTotalCount() override
-    {
-        return itemGroupCnt_;
-    }
-
-    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
-    {
-        auto listNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        auto weakList = AceType::WeakClaim(AceType::RawPtr(listNode));
-        ListItemGroupModelNG groupModel;
-        groupModel.Create(V2::ListItemGroupStyle::NONE);
-        auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        listItemGroup->SetParent(weakList);
-        for (int32_t index = 0; index < 2; ++index) {
-            ListItemModelNG itemModel;
-            itemModel.Create();
-            ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
-            ViewAbstract::SetHeight(CalcLength(100.0f));
-            ViewAbstract::SetFocusable(true);
-            ViewStackProcessor::GetInstance()->Pop();
-        }
-        auto groupNode = ViewStackProcessor::GetInstance()->Finish();
-        return { std::to_string(index), groupNode };
-    }
-
-private:
-    int32_t itemGroupCnt_ = 0;
-};
 
 void ListTestNg::CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove)
 {

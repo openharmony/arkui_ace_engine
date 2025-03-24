@@ -60,7 +60,6 @@ struct DragDropInitiatingParams {
         isThumbnailCallbackTriggered = false;
         isNeedGather = false;
         hasGatherNode = false;
-        getTextThumbnailPixelMapCallback = nullptr;
         getThumbnailPixelMapCallback.Cancel();
         notifyPreDragCallback.Cancel();
         showGatherCallback.Cancel();
@@ -116,6 +115,7 @@ protected:
     void SetTextPixelMap();
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     void HandleTextDragCallback();
+    void HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
 
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;

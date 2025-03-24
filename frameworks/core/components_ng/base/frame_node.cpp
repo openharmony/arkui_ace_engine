@@ -31,6 +31,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
+#include "base/log/event_report.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -2109,6 +2110,14 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
     geometryNode_ = node;
+}
+
+void FrameNode::SetNodeFreeze(bool isFreeze)
+{
+    CHECK_NULL_VOID(renderContext_);
+    if (SystemProperties::IsPageTransitionFreeze()) {
+        renderContext_->UpdateFreeze(isFreeze);
+    }
 }
 
 void FrameNode::CreateLayoutTask(bool forceUseMainThread)
@@ -4226,13 +4235,18 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status)
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
         LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
+}
+
+void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+{
+    TryPrintDebugLog(scene, speed, status);
 
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -4244,6 +4258,8 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
+    EventReport::FrameRateDurationsStatistics(expectedRate, scene, status);
+
     switch (status) {
         case SceneStatus::START: {
             if (iter == sceneRateMap_.end()) {

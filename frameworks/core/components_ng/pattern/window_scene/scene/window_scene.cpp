@@ -34,6 +34,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
 const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
+const uint32_t CLEAN_SNAPSHOT_DELAY_TIME = 200;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -68,7 +69,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         }
         CHECK_EQUAL_VOID(self->session_->IsAnco(), true);
         if (self->snapshotWindow_) {
-            self->BufferAvailableCallbackForSnapshot();
+            self->PostDelayTask();
+            self->CleanSnapshot();
         }
     };
 }
@@ -815,5 +817,56 @@ void WindowScene::SetOpacityAnimation(RefPtr<FrameNode>& window)
     auto context = window->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateChainedTransition(effect);
+}
+
+void WindowScene::PostDelayTaskForSnapshot()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->AddAfterRenderTask(
+        [weakThis = WeakClaim(this)]() {
+            ACE_SCOPED_TRACE("WindowScene::PostDelayTaskForSnapshot");
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            if (self->snapshotWindow_) {
+                self->BufferAvailableCallbackForSnapshot();
+            }
+        }
+    );
+}
+
+void WindowScene::PostDelayTask()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::PostDelayTask");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        self->PostDelayTaskForSnapshot();
+    };
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowScenePostDelayTask", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::CleanSnapshot()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    removeSnapshotWindowTask_.Cancel();
+    removeSnapshotWindowTask_.Reset([weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::CleanSnapshotWindow");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        if (self->snapshotWindow_) {
+            self->BufferAvailableCallbackForSnapshot();
+        }
+    });
+    taskExecutor->PostDelayedTask(
+        removeSnapshotWindowTask_, TaskExecutor::TaskType::UI, CLEAN_SNAPSHOT_DELAY_TIME, "ArkUICleanSnapshotWindow");
 }
 } // namespace OHOS::Ace::NG
