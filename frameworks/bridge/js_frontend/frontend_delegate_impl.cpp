@@ -41,6 +41,23 @@ const char RESOURCES_FOLDER[] = "resources/";
 const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/i18n.json";
 
+struct DialogStrings {
+    std::string cancel;
+    std::string confirm;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.cancel = dialogTheme->GetCancelText();
+    strs.confirm = dialogTheme->GetConfirmText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateImpl::GenerateNextPageId()
@@ -1075,10 +1092,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
 
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
+    auto strs = GetDialogStrings();
     DialogProperties dialogProperties = {
         .title = title,
         .autoCancel = true,
@@ -1087,7 +1101,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
         .callbacks = std::move(callbackMarkers),
     };
     ButtonInfo buttonInfo = {
-        .text = dialogTheme->GetCancelText(),
+        .text = strs.cancel,
         .textColor = "#000000"
     };
     dialogProperties.buttons.emplace_back(buttonInfo);
@@ -1142,17 +1156,14 @@ void FrontendDelegateImpl::EnableAlertBeforeBackPage(
         return;
     }
 
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto dialogTheme = context->GetTheme<DialogTheme>();
-    CHECK_NULL_VOID(dialogTheme);
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
-            { .text = dialogTheme->GetOkText(), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }

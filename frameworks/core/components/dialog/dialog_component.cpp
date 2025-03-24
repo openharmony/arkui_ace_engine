@@ -781,7 +781,7 @@ void DialogBuilder::BuildButtonsForWatch(
             buttonText = dialogTheme->GetCancelText();
             buttonIcon = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::WRONG_SVG);
         } else {
-            buttonText = dialogTheme->GetOkText();
+            buttonText = dialogTheme->GetConfirmText();
             buttonIcon = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::CORRECT_SVG);
         }
         data += buttonText + SEPARATE;

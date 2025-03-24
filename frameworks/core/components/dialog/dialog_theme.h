@@ -592,9 +592,9 @@ public:
         return cancelText_;
     }
 
-    const std::string& GetOkText() const
+    const std::string& GetConfirmText() const
     {
-        return okText_;
+        return confirmText_;
     }
 
 protected:
@@ -706,7 +706,7 @@ private:
     Color backgroundBorderColor_;
     int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     std::string cancelText_;
-    std::string okText_;
+    std::string confirmText_;
 };
 
 } // namespace OHOS::Ace
