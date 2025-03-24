@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/symbol/symbol_effect_options.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -94,6 +96,20 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<RenderingStrategy>(value); // for enums
     SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
+bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
+{
+    options.SetEffectType(symbolEffect->type);
+    if (symbolEffect->scope.has_value()) {
+        options.SetScopeType(symbolEffect->scope.value());
+    }
+    if (symbolEffect->direction.has_value()) {
+        options.SetCommonSubType(symbolEffect->direction.value());
+    }
+    if (symbolEffect->fillStyle.has_value()) {
+        options.SetFillStyle(symbolEffect->fillStyle.value());
+    }
+    return true;
+}
 void SymbolEffect0Impl(Ark_NativePointer node,
                        Ark_SymbolEffect symbolEffect,
                        const Opt_Boolean* isActive)
@@ -101,7 +117,17 @@ void SymbolEffect0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    LOGE("Ark_SymbolEffect is not implemented yet.");
+    NG::SymbolEffectOptions symbolEffectOptions;
+    if (!ParseSymbolEffectOptions(symbolEffectOptions, symbolEffect)) {
+        return;
+    }
+    if (isActive) {
+        auto optBool = Converter::OptConvert<bool>(*isActive);
+        if (optBool.has_value()) {
+            symbolEffectOptions.SetIsActive(optBool.value());
+        }
+    }
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 void SymbolEffect1Impl(Ark_NativePointer node,
                        Ark_SymbolEffect symbolEffect,
@@ -110,7 +136,17 @@ void SymbolEffect1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(symbolEffect);
-    LOGE("Ark_SymbolEffect is not implemented yet.");
+    NG::SymbolEffectOptions symbolEffectOptions;
+    if (!ParseSymbolEffectOptions(symbolEffectOptions, symbolEffect)) {
+        return;
+    }
+    if (triggerValue) {
+        auto optTriggerNumb = Converter::OptConvert<int32_t>(*triggerValue);
+        if (optTriggerNumb.has_value()) {
+            symbolEffectOptions.SetTriggerNum(optTriggerNumb.value());
+        }
+    }
+    SymbolModelNG::SetSymbolEffectOptions(frameNode, symbolEffectOptions);
 }
 } // SymbolGlyphAttributeModifier
 const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()

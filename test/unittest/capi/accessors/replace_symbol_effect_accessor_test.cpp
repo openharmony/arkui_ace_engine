@@ -16,7 +16,7 @@
 #include "accessor_test_base.h"
 #include "gmock/gmock.h"
 
-#include "core/interfaces/native/implementation/replace_symbol_effect_peer.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -50,7 +50,8 @@ HWTEST_F(ReplaceSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
 {
     auto scope = Converter::ArkValue<Ark_EffectScope>(OHOS::Ace::ScopeType::WHOLE);
     accessor_->setScope(peer_, scope);
-    auto aceScope = peer_->effectOptions.GetScopeType();
+    ASSERT_TRUE(peer_->scope.has_value());
+    auto aceScope = peer_->scope.value();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
     Ark_EffectScope arkScope = accessor_->getScope(peer_);

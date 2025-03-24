@@ -17,7 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
-#include "replace_symbol_effect_peer.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ReplaceSymbolEffectAccessor {
@@ -28,11 +28,11 @@ void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 }
 Ark_ReplaceSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
-    auto peer = new ReplaceSymbolEffectPeer();
-    peer->effectOptions.SetEffectType(OHOS::Ace::SymbolEffectType::REPLACE);
-    peer->effectOptions.SetScopeType(convScore.value());
-    return peer;
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
+    return new ReplaceSymbolEffectPeer(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,21 +40,22 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
-    auto optValue = peer->effectOptions.GetScopeType();
-    CHECK_NULL_RETURN(optValue, Converter::ArkValue<Ark_EffectScope>(ARK_EFFECT_SCOPE_LAYER));
-    return Converter::ArkValue<Ark_EffectScope>(optValue.value());
+    CHECK_NULL_RETURN(peer, ARK_EFFECT_SCOPE_LAYER);
+    CHECK_NULL_RETURN(peer->scope, ARK_EFFECT_SCOPE_LAYER);
+    switch (peer->scope.value()) {
+        case OHOS::Ace::ScopeType::LAYER:
+            return ARK_EFFECT_SCOPE_LAYER;
+        case OHOS::Ace::ScopeType::WHOLE:
+            return ARK_EFFECT_SCOPE_WHOLE;
+        default:
+            return ARK_EFFECT_SCOPE_LAYER;
+    }
 }
 void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
     CHECK_NULL_VOID(peer);
-    auto scopeConv = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(scope);
-    if (scopeConv) {
-        peer->effectOptions.SetScopeType(scopeConv.value());
-    } else {
-        peer->effectOptions.SetScopeType(OHOS::Ace::ScopeType::LAYER);
-    }
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // ReplaceSymbolEffectAccessor
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor()
@@ -68,8 +69,4 @@ const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor
     };
     return &ReplaceSymbolEffectAccessorImpl;
 }
-
-struct ReplaceSymbolEffectPeer {
-    virtual ~ReplaceSymbolEffectPeer() = default;
-};
 }

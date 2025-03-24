@@ -16,15 +16,21 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AppearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_AppearSymbolEffect peer)
 {
+    delete peer;
 }
 Ark_AppearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    return {};
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
+    return new AppearSymbolEffectPeer(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +38,22 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_EffectScope GetScopeImpl(Ark_AppearSymbolEffect peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer, ARK_EFFECT_SCOPE_LAYER);
+    CHECK_NULL_RETURN(peer->scope, ARK_EFFECT_SCOPE_LAYER);
+    switch (peer->scope.value()) {
+        case OHOS::Ace::ScopeType::LAYER:
+            return ARK_EFFECT_SCOPE_LAYER;
+        case OHOS::Ace::ScopeType::WHOLE:
+            return ARK_EFFECT_SCOPE_WHOLE;
+        default:
+            return ARK_EFFECT_SCOPE_LAYER;
+    }
 }
 void SetScopeImpl(Ark_AppearSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // AppearSymbolEffectAccessor
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor()
@@ -50,8 +67,4 @@ const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor()
     };
     return &AppearSymbolEffectAccessorImpl;
 }
-
-struct AppearSymbolEffectPeer {
-    virtual ~AppearSymbolEffectPeer() = default;
-};
 }
