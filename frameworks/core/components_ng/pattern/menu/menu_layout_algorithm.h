@@ -281,6 +281,7 @@ private:
     MenuDumpInfo dumpInfo_;
     MarginPropertyF layoutRegionMargin_;
     bool isPreviewContainScale_ = false;
+    bool isTargetNodeInSubwindow_ = false;
     bool isExpandDisplay_ = false;
     bool isFreeMultiWindow_ = false;
     bool isUIExtensionSubWindow_ = false;
@@ -291,6 +292,7 @@ private:
     SizeF childMarginFrameSize_;
     std::string clipPath_;
     bool holdEmbeddedMenuPosition_ = false;
+    bool isEnhanceMaximizeBtn_ = false;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;
