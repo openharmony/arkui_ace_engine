@@ -8859,7 +8859,8 @@ void JSViewAbstract::ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::B
     return;
 }
 
-void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius)
+void JSViewAbstract::ParseCommonBorderRadiusProps(
+    const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius, bool notNegative)
 {
     if (CheckLengthMetrics(object)) {
         std::optional<CalcDimension> radiusTopStart;
@@ -8870,7 +8871,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object,
             JSRef<JSObject> topStartObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_START_PROPERTY));
             CalcDimension calcDimension;
             if (ParseJsLengthMetrics(topStartObj, calcDimension)) {
-                CheckDimensionUnit(calcDimension, false, true);
+                CheckDimensionUnit(calcDimension, false, notNegative);
                 radiusTopStart = calcDimension;
             }
         }
@@ -8878,7 +8879,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object,
             JSRef<JSObject> topEndObj = JSRef<JSObject>::Cast(object->GetProperty(TOP_END_PROPERTY));
             CalcDimension calcDimension;
             if (ParseJsLengthMetrics(topEndObj, calcDimension)) {
-                CheckDimensionUnit(calcDimension, false, true);
+                CheckDimensionUnit(calcDimension, false, notNegative);
                 radiusTopEnd = calcDimension;
             }
         }
@@ -8886,7 +8887,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object,
             JSRef<JSObject> bottomStartObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_START_PROPERTY));
             CalcDimension calcDimension;
             if (ParseJsLengthMetrics(bottomStartObj, calcDimension)) {
-                CheckDimensionUnit(calcDimension, false, true);
+                CheckDimensionUnit(calcDimension, false, notNegative);
                 radiusBottomStart = calcDimension;
             }
         }
@@ -8894,7 +8895,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object,
             JSRef<JSObject> bottomEndObj = JSRef<JSObject>::Cast(object->GetProperty(BOTTOM_END_PROPERTY));
             CalcDimension calcDimension;
             if (ParseJsLengthMetrics(bottomEndObj, calcDimension)) {
-                CheckDimensionUnit(calcDimension, false, true);
+                CheckDimensionUnit(calcDimension, false, notNegative);
                 radiusBottomEnd = calcDimension;
             }
         }
@@ -8909,7 +8910,7 @@ void JSViewAbstract::ParseCommonBorderRadiusProps(const JSRef<JSObject>& object,
     ParseBorderRadiusProps(object, radius);
 }
 
-bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative)
 {
     if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
         return false;
@@ -8920,7 +8921,7 @@ bool JSViewAbstract::ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiu
         radius.multiValued = false;
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
-        ParseCommonBorderRadiusProps(object, radius);
+        ParseCommonBorderRadiusProps(object, radius, notNegative);
     } else {
         return false;
     }
