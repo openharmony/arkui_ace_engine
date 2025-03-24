@@ -52,6 +52,9 @@ Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
     std::string result = "";
     CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetLinkUrl();
+    if (result.empty()) {
+        return {};
+    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
@@ -59,6 +62,9 @@ Ark_String GetUnfilteredLinkUrlImpl(Ark_WebContextMenuParam peer)
     std::string result = "";
     CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetUnfilteredLinkUrl();
+    if (result.empty()) {
+        return {};
+    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
@@ -66,6 +72,9 @@ Ark_String GetSourceUrlImpl(Ark_WebContextMenuParam peer)
     std::string result = "";
     CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetSourceUrl();
+    if (result.empty()) {
+        return {};
+    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Boolean ExistsImageContentsImpl(Ark_WebContextMenuParam peer)
@@ -83,6 +92,9 @@ Ark_String GetSelectionTextImpl(Ark_WebContextMenuParam peer)
     std::string result = "";
     CHECK_NULL_RETURN(peer && peer->handler, Converter::ArkValue<Ark_String>(result, Converter::FC));
     result = peer->handler->GetSelectionText();
+    if (result.empty()) {
+        return {};
+    }
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_ContextMenuSourceType GetSourceTypeImpl(Ark_WebContextMenuParam peer)
