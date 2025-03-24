@@ -295,8 +295,8 @@ HWTEST_F(PasteButtonModifierTest, setPasteButtonOptions1TestTextAndIconEmpty, Te
 
 struct CheckEvent {
     int32_t nodeId;
-    Ark_Int32 offsetX = -1;
-    Ark_Int32 offsetY = -1;
+    Ark_Number offsetX = Converter::ArkValue<Ark_Number>(-1.0f);
+    Ark_Number offsetY = Converter::ArkValue<Ark_Number>(-1.0f);
     std::optional<Ark_PasteButtonOnClickResult> result = std::nullopt;
 };
 
@@ -306,7 +306,7 @@ struct CheckEvent {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Level1)
+HWTEST_F(PasteButtonModifierTest, setOnClickTestSecurity, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -325,7 +325,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
         accessor->destroyPeer(peer);
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_ClickEvent_PasteButtonOnClickResult_Void>(nullptr, onClick,
+    auto arkCallback = Converter::ArkValue<Callback_ClickEvent_PasteButtonOnClickResult_Void>(onClick,
         frameNode->GetId());
     modifier_->setOnClick(node_, &arkCallback);
     auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
@@ -349,8 +349,8 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
         ASSERT_TRUE(checkEvent);
         ASSERT_TRUE(checkEvent->result);
         EXPECT_EQ(checkEvent->result.value(), expected);
-        EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
-        EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetX), OFFSET_X);
+        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetY), OFFSET_Y);
     };
 
     testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
@@ -360,8 +360,7 @@ HWTEST_F(PasteButtonModifierTest, DISABLED_setOnClickTestSecurity, TestSize.Leve
 
     checkEvent.reset();
     gestureEventHub->ActClick(createJson(SecurityComponentHandleResult::DROP_CLICK));
-    ASSERT_TRUE(checkEvent && checkEvent->result);
-    EXPECT_EQ(checkEvent->result.value(), ARK_PASTE_BUTTON_ON_CLICK_RESULT_TEMPORARY_AUTHORIZATION_FAILED);
+    ASSERT_FALSE(checkEvent); // callback is not called in modifier in DROP_CLICK case
 }
 #else
 /*
@@ -382,8 +381,8 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .nodeId = resourceId,
-            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
-            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+            .offsetX = accessor->getWindowX(peer),
+            .offsetY = accessor->getWindowY(peer),
             .result = result
         };
         accessor->destroyPeer(peer);
@@ -414,8 +413,8 @@ HWTEST_F(PasteButtonModifierTest, setOnClickTest, TestSize.Level1)
         ASSERT_TRUE(checkEvent);
         ASSERT_TRUE(checkEvent->result);
         EXPECT_EQ(checkEvent->result.value(), expected);
-        EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
-        EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetX), OFFSET_X);
+        EXPECT_FLOAT_EQ(Converter::Convert<double>(checkEvent->offsetY), OFFSET_Y);
     };
 
     testFunction(SecurityComponentHandleResult::CLICK_SUCCESS,
