@@ -4931,6 +4931,20 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
         TaskExecutor::TaskType::UI, "ArkUISetTopWindowBoundaryByID");
 }
 
+void sendCommandCallbackInner(RefPtr<PipelineBase> pipeline)
+{
+    auto sendCommandCallback = [weakContext = WeakPtr(pipeline)](int32_t value) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
+        CHECK_NULL_VOID(pipeline);
+        KeyEvent keyEvent;
+        keyEvent.action = KeyAction::DOWN;
+        keyEvent.code = static_cast<KeyCode>(value);
+        keyEvent.pressedCodes = { keyEvent.code };
+        pipeline->OnNonPointerEvent(keyEvent);
+    };
+    UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
+}
+
 void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
 {
     // set get inspector tree function for ui session manager
@@ -4976,6 +4990,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
     SetupGetPixelMapCallback(pipeline);
     RegisterGetCurrentPageName(pipeline);
     InitSendCommandFunctionsCallbacks(pipeline);
+    sendCommandCallbackInner(pipeline);
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline)

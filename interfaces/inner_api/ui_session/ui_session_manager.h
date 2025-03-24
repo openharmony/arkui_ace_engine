@@ -40,6 +40,7 @@ public:
     using GetPixelMapFunction = std::function<void()>;
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
     using NotifySendCommandAsyncFunction = std::function<int32_t(int32_t id, const std::string& command)>;
+    using SendCommandFunction = std::function<void(int32_t value)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -134,6 +135,8 @@ public:
     virtual void SendTranslateResult(int32_t nodeId, std::string result) {};
     virtual void ResetTranslate(int32_t nodeId = -1) {};
     virtual void GetPixelMap() {};
+    virtual void SendCommand(const std::string& command) {};
+    virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
 #endif
@@ -166,6 +169,7 @@ protected:
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
     static std::shared_mutex translateManagerMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
+    SendCommandFunction sendCommandFunction_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H
