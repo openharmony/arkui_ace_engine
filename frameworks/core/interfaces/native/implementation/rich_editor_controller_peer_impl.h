@@ -25,7 +25,7 @@
 #include "core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-class RichEditorControllerPeerImpl : public RichEditorBaseControllerPeer, public Referenced {
+class RichEditorControllerPeerImpl : public RichEditorBaseControllerPeer {
 public:
     RichEditorControllerPeerImpl() = default;
 
