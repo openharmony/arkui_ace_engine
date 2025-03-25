@@ -926,10 +926,11 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerInitialized()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerInitialized.");
-    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO) {
+    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO && !isAutoChangePlayMode_) {
         isSetAutoPlayPeriod_ = true;
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
+    isAutoChangePlayMode_ = false;
     PrepareSurface();
     if (mediaPlayer_->PrepareAsync() != PREPARE_RETURN) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
@@ -998,6 +999,12 @@ void MovingPhotoPattern::VisiblePlayback()
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto VisiblePlayback.");
     if (!isVisible_) {
         return;
+    }
+    if (isRepeatChangePlayMode_ && historyAutoAndRepeatLevel_ == PlaybackMode::NONE &&
+        autoAndRepeatLevel_ == PlaybackMode::NONE) {
+        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        isRepeatChangePlayMode_ = false;
     }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
@@ -1163,10 +1170,14 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        autoAndRepeatLevel_ = PlaybackMode::NONE;
+        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
+        isRepeatChangePlayMode_ = true;
         Pause();
+    } else if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        isAutoChangePlayMode_ = true;
     }
-    autoAndRepeatLevel_ = PlaybackMode::NONE;
-    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
