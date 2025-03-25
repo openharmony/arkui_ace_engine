@@ -1939,6 +1939,7 @@ void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bo
     bool isFromStandardIndex)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
     int32_t lastStandardIndex = hostNode->GetLastStandardIndex();
     int32_t standardIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
@@ -1986,6 +1987,7 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
         return false;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
     hostNode->SetIsOnAnimation(true);
     if (!newTopNavDestination) {
         // pop animation with top navDestination, recover navBar visible tag
@@ -2412,6 +2414,7 @@ void NavigationPattern::FireInterceptionEvent(bool isBefore,
     const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopPath)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     RefPtr<NavDestinationContext> to;
     if (newTopPath.has_value()) {
         auto topDestination =
@@ -2698,6 +2701,7 @@ void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGrou
     const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
     // don't move position hide lifecycle is from top to end
     if (preDestination) {
         auto lastStandardIndex = hostNode->GetLastStandardIndex();
@@ -2891,7 +2895,9 @@ bool NavigationPattern::ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode
     });
     // add timeout callback
     auto timeout = navigationTransition.timeout;
-    auto pipeline = GetHost()->GetContext();
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
