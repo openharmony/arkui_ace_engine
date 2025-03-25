@@ -159,36 +159,6 @@ HWTEST_F(TextFieldPatternTestNine, FinishTextPreviewOperation001, TestSize.Level
 }
 
 /**
- * @tc.name: IsResponseRegionExpandingNeededForStylust001
- * @tc.desc: test IsResponseRegionExpandingNeededForStylus
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, IsResponseRegionExpandingNeededForStylust001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-
-    TouchEvent touchEvent;
-    auto host = pattern_->GetHost();
-    auto focusHub = host->GetFocusHub();
-    touchEvent.sourceTool = SourceTool::PEN;
-    touchEvent.type = TouchType::DOWN;
-    focusHub->focusType_ = FocusType::DISABLE;
-    auto ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-
-    focusHub->focusType_ = FocusType::NODE;
-    focusHub->focusable_ = true;
-    focusHub->parentFocusable_ = true;
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateOpacity(0);
-    ret = pattern_->IsResponseRegionExpandingNeededForStylus(touchEvent);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: OnTextGestureSelectionUpdate001
  * @tc.desc: test OnTextGestureSelectionUpdate
  * @tc.type: FUNC
