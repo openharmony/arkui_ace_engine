@@ -16,6 +16,7 @@
 #include "gmock/gmock.h"
 
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -25,8 +26,15 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class GlobalScopeOhosFontAccessorTest : public StaticAccessorTest<GENERATED_ArkUIGlobalScope_ohos_fontAccessor,
+class GlobalScopeOhosFontAccessorTest
+    : public StaticAccessorTest<GENERATED_ArkUIGlobalScope_ohos_fontAccessor,
           &GENERATED_ArkUIAccessors::getGlobalScope_ohos_fontAccessor> {
+public:
+    void SetUp() override
+    {
+        StaticAccessorTest::SetUp();
+        MockPipelineContext::GetCurrent()->ResetFontManager();
+    }
 };
 
 namespace {
@@ -67,6 +75,43 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RegisterFontTestResurse
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTestResurse, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->registerFont, nullptr);
+    const auto RES_NAME_ID = NamedResourceId { "text_resource_name", Converter::ResourceType::STRING };
+
+    auto arkResource = CreateResource(RES_NAME_ID);
+
+    Ark_FontOptions options = {
+        .familyName = Converter::ArkUnion<Ark_Union_String_Resource, Ark_Resource>(arkResource),
+        .familySrc = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(TEST_FONTSRC),
+    };
+    AddResource(RES_NAME_ID, TEST_FONTNAME);
+
+    struct CheckEvent {
+        bool result = false;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    ASSERT_NE(pipeline, nullptr);
+    auto fontmanager = pipeline->GetFontManager();
+    ASSERT_NE(fontmanager, nullptr);
+    auto node = NG::FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<NG::Pattern>());
+    fontmanager->RegisterCallbackNG(node, TEST_FONTNAME, []() {
+        checkEvent = { .result = true };
+    });
+
+    EXPECT_FALSE(checkEvent.has_value());
+    accessor_->registerFont(&options);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_TRUE(checkEvent->result);
+}
+
+/**
  * @tc.name: GetSystemFontListTest
  * @tc.desc:
  * @tc.type: FUNC
@@ -85,5 +130,20 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, GetSystemFontListTest, TestSize.Level1
     auto list = accessor_->getSystemFontList();
     auto result = Converter::Convert<std::string>(list);
     EXPECT_EQ(result, TEST_FONTNAME);
+}
+
+/**
+ * @tc.name: GetFontByNameTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GlobalScopeOhosFontAccessorTest, GetFontByNameTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getFontByName, nullptr);
+
+    const auto fontName = Converter::ArkValue<Ark_String>(TEST_FONTNAME);
+    Ark_FontInfo info = accessor_->getFontByName(&fontName);
+    auto result = Converter::Convert<FontInfo>(info);
+    EXPECT_EQ(result.fullName, TEST_FONTNAME);
 }
 } // namespace OHOS::Ace::NG

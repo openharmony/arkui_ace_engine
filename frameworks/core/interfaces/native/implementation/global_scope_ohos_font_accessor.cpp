@@ -19,22 +19,64 @@
 #include "arkoala_api_generated.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::Ace::NG::Converter {
+struct TextFontFamilies {
+    std::string families;
+    std::string bundleName;
+    std::string moduleName;
+};
+template<>
+void AssignCast(std::optional<TextFontFamilies>& dst, const Ark_Resource& value)
+{
+    ResourceConverter converter(value);
+    auto resourceString = converter.ToString();
+    if (resourceString) {
+        TextFontFamilies temp;
+        temp.families = resourceString.value();
+        temp.bundleName = converter.BundleName();
+        temp.moduleName = converter.ModuleName();
+        dst = temp;
+    } else {
+        LOGE("Not a string resource: %{public}s:%{public}s\n", converter.BundleName().c_str(),
+            converter.ModuleName().c_str());
+    }
+}
+template<>
+void AssignCast(std::optional<TextFontFamilies>& dst, const Ark_String& value)
+{
+    std::string str = Converter::Convert<std::string>(value);
+    if (!str.empty()) {
+        TextFontFamilies temp;
+        temp.families = str;
+        dst = temp;
+    }
+}
+} /* namespace OHOS::Ace::NG::Converter */
+
+struct GlobalScope_ohos_fontPeer {
+    virtual ~GlobalScope_ohos_fontPeer() = default;
+};
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScope_ohos_fontAccessor {
 void RegisterFontImpl(const Ark_FontOptions* options)
 {
     CHECK_NULL_VOID(options);
     std::string familyName;
+    std::string familySrc;
+    std::string bundleName;
+    std::string moduleName;
     if (auto familyNameOpt = Converter::OptConvert<Converter::FontFamilies>(options->familyName); familyNameOpt) {
         familyName = !familyNameOpt->families.empty() ? familyNameOpt->families.front() : "";
     }
-    std::string familySrc;
-    if (auto familySrcOpt = Converter::OptConvert<Converter::FontFamilies>(options->familySrc); familySrcOpt) {
-        familySrc = !familySrcOpt->families.empty() ? familySrcOpt->families.front() : "";
+    if (auto familySrcOpt = Converter::OptConvert<Converter::TextFontFamilies>(options->familySrc); familySrcOpt) {
+        familySrc = familySrcOpt->families;
+        bundleName = familySrcOpt->bundleName;
+        moduleName = familySrcOpt->moduleName;
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
-        pipeline->RegisterFont(familyName, familySrc);
+        pipeline->RegisterFont(familyName, familySrc, bundleName, moduleName);
     }
 }
 Array_String GetSystemFontListImpl()
@@ -48,7 +90,13 @@ Array_String GetSystemFontListImpl()
 }
 Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
 {
-    return {};
+    FontInfo fontInfo;
+    auto fontNameCasted = Converter::Convert<std::string>(*fontName);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->GetSystemFont(fontNameCasted, fontInfo);
+    }
+    return Converter::ArkValue<Ark_FontInfo>(fontInfo, Converter::FC);
 }
 } // GlobalScope_ohos_fontAccessor
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()

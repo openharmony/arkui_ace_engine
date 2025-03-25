@@ -169,6 +169,11 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
     return pipeline_;
 }
 
+void MockPipelineContext::ResetFontManager()
+{
+    pipeline_->fontManager_ = MockFontManager::Create();
+}
+
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
@@ -340,6 +345,7 @@ void PipelineContext::OnIdle(int64_t deadline)
 void PipelineContext::Destroy()
 {
     dragDropManager_.Reset();
+    fontManager_.Reset();
     rootNode_.Reset();
 }
 
@@ -1234,6 +1240,13 @@ void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
     }
 }
 
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
+}
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
