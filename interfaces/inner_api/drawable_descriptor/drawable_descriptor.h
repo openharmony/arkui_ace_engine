@@ -100,7 +100,9 @@ public:
 
     virtual DrawableType GetDrawableType();
 
-    virtual void SetDecodeSize(int32_t width, int32_t height) {}
+    OptionalDecodeSize GetDecodeSize();
+
+    void SetDecodeSize(int32_t width, int32_t height);
 
     void SetPixelMap(SharedPixelMap pixelMap)
     {
@@ -123,6 +125,7 @@ private:
     UINT8 mediaData_;
     size_t len_ = 0;
     OptionalPixelMap pixelMap_;
+    OptionalDecodeSize decodeSize_ = std::nullopt;
 };
 
 class DRAWABLE_FORCE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
@@ -153,6 +156,14 @@ public:
         jsonBuf_.reset();
     }
 
+    LayeredDrawableDescriptor(size_t len, std::string path, uint32_t iconType, DataInfo& foregroundInfo,
+        DataInfo& backgroundInfo, const std::pair<int32_t, int32_t>& decoderSize)
+        : len_(len), maskPath_(std::move(path)), iconType_(iconType)
+    {
+        SetDecodeSize(decoderSize.first, decoderSize.second);
+        InitLayeredParam(foregroundInfo, backgroundInfo);
+    }
+
     ~LayeredDrawableDescriptor() override = default;
 
     std::unique_ptr<DrawableDescriptor> GetForeground();
@@ -178,8 +189,6 @@ public:
     bool Customized();
 
     void InitialMask(const SharedResourceManager& resourceMgr);
-
-    void SetDecodeSize(int32_t width, int32_t height) override;
 
     bool GetDefaultMask();
 
@@ -223,7 +232,6 @@ private:
     OptionalPixelMap mask_;
     OptionalPixelMap layeredPixelMap_;
     bool customized_ = false;
-    OptionalDecodeSize decodeSize_ = std::nullopt;
 };
 
 class DRAWABLE_FORCE_EXPORT AnimatedDrawableDescriptor : public DrawableDescriptor {

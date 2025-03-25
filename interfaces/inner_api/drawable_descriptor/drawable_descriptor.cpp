@@ -259,6 +259,10 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
     }
     mediaData_.reset();
     Media::DecodeOptions decodeOpts;
+    auto decoderSize = GetDecodeSize();
+    if (decoderSize.has_value()) {
+        decodeOpts.desiredSize = { std::max(0, decoderSize->first), std::max(0, decoderSize->second) };
+    }
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     if (imageSource) {
         auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
@@ -365,9 +369,14 @@ void LayeredDrawableDescriptor::InitialMask(const SharedResourceManager& resourc
     resourceMgr->GetMediaDataByName(DEFAULT_MASK.c_str(), defaultMaskDataLength_, defaultMaskData_);
 }
 
-void LayeredDrawableDescriptor::SetDecodeSize(int32_t width, int32_t height)
+void DrawableDescriptor::SetDecodeSize(int32_t width, int32_t height)
 {
     decodeSize_ = { width, height };
+}
+
+OptionalDecodeSize DrawableDescriptor::GetDecodeSize()
+{
+    return decodeSize_;
 }
 
 bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
@@ -386,8 +395,9 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         }
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
-        auto decoderWidth = decodeSize_.has_value() ? decodeSize_->first : 0;
-        auto decoderHeight = decodeSize_.has_value() ? decodeSize_->second : 0;
+        auto decoderSize = GetDecodeSize();
+        auto decoderWidth = decoderSize.has_value() ? decoderSize->first : 0;
+        auto decoderHeight = decoderSize.has_value() ? decoderSize->second : 0;
         decodeOpts.desiredSize = { std::max(0, decoderWidth), std::max(0, decoderHeight) };
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
@@ -443,9 +453,13 @@ void LayeredDrawableDescriptor::InitLayeredParam(
     uint32_t errorCode = 0;
     auto foreground =
         Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts, errorCode);
+    auto decoderSize = GetDecodeSize();
     if (errorCode == 0 && foreground) {
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+        if (decoderSize.has_value()) {
+            decodeOpts.desiredSize = { std::max(0, decoderSize->first), std::max(0, decoderSize->second) };
+        }
         auto pixelMapPtr = foreground->CreatePixelMap(decodeOpts, errorCode);
         foreground_ = SharedPixelMap(pixelMapPtr.release());
     }
@@ -454,6 +468,9 @@ void LayeredDrawableDescriptor::InitLayeredParam(
     if (errorCode == 0 && background) {
         Media::DecodeOptions decodeOpts;
         decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+        if (decoderSize.has_value()) {
+            decodeOpts.desiredSize = { std::max(0, decoderSize->first), std::max(0, decoderSize->second) };
+        }
         auto pixelMapPtr = background->CreatePixelMap(decodeOpts, errorCode);
         background_ = SharedPixelMap(pixelMapPtr.release());
     }
