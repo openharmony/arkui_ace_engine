@@ -24,29 +24,17 @@ export enum CheckBoxShape {
     ROUNDED_SQUARE = 1
 }
 export enum Color {
-    WHITE = 0,
     White = 0,
-    BLACK = 1,
     Black = 1,
-    BLUE = 2,
     Blue = 2,
-    BROWN = 3,
     Brown = 3,
-    GRAY = 4,
     Gray = 4,
-    GREEN = 5,
     Green = 5,
-    GREY = 6,
     Grey = 6,
-    ORANGE = 7,
     Orange = 7,
-    PINK = 8,
     Pink = 8,
-    RED = 9,
     Red = 9,
-    YELLOW = 10,
     Yellow = 10,
-    TRANSPARENT = 11,
     Transparent = 11
 }
 export enum ColoringStrategy {
@@ -420,17 +408,11 @@ export enum FontStyle {
     Italic = 1
 }
 export enum FontWeight {
-    LIGHTER = 0,
     Lighter = 0,
-    NORMAL = 1,
     Normal = 1,
-    REGULAR = 2,
     Regular = 2,
-    MEDIUM = 3,
     Medium = 3,
-    BOLD = 4,
     Bold = 4,
-    BOLDER = 5,
     Bolder = 5
 }
 export enum TextAlign {

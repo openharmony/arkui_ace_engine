@@ -20,3 +20,5 @@ export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
 export { CommonModifier } from './handwritten/modifiers/ArkCommonModifier'
 
 export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
+
+export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"

@@ -46,6 +46,7 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
+import { CommonAttribute } from "./ArkCommonInterfaces"
 export type SymbolGlyphInterface = (value?: Resource) => SymbolGlyphAttribute;
 export enum SymbolRenderingStrategy {
     SINGLE = 0,
@@ -63,11 +64,11 @@ export enum EffectFillStyle {
 }
 export interface PulseSymbolEffect extends SymbolEffect {
 }
-export interface SymbolGlyphAttribute extends CommonMethod<SymbolGlyphAttribute> {
-    fontSize: number | string | Resource;
-    fontColor: Array<ResourceColor>;
-    fontWeight: number | FontWeight | string;
-    effectStrategy: SymbolEffectStrategy;
-    renderingStrategy: SymbolRenderingStrategy;
-
+export interface SymbolGlyphAttribute extends CommonAttribute {
+    fontSize(value: number | string | Resource): this;
+    fontColor(value: Array<ResourceColor>): this;
+    fontWeight(value: number | FontWeight | string): this;
+    effectStrategy(value: SymbolEffectStrategy): this;
+    renderingStrategy(value: SymbolRenderingStrategy): this;
+    symbolEffect(symbolEffect: SymbolEffect, isActive?: boolean | undefined | number | undefined): this
 }

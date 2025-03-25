@@ -50,6 +50,8 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./ArkScrollInterfaces"
 import { ScrollState } from "./ArkListInterfaces"
 import { AccessibilityHoverEvent } from "./ArkAccessibilityHoverEventMaterialized"
+import { SymbolGlyphModifier } from "../handwritten/modifiers/ArkSymbolGlyphModifier"
+export { SymbolGlyphModifier } from "../handwritten/modifiers/ArkSymbolGlyphModifier"
 export interface ComponentOptions {
     freezeWhenInactive: boolean;
 }
@@ -746,9 +748,6 @@ export enum MenuPolicy {
 }
 export interface ImageModifier {
     _ImageModifierStub: string;
-}
-export interface SymbolGlyphModifier {
-    _SymbolGlyphModifierStub: string;
 }
 export interface DragPreviewOptions {
     mode?: DragPreviewMode | Array<DragPreviewMode>;
