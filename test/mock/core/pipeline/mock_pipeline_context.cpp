@@ -816,7 +816,9 @@ void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
 
 bool PipelineContext::UsingCaretAvoidMode()
 {
-    return false;
+    CHECK_NULL_RETURN(safeAreaManager_, false);
+    return safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::OFFSET_WITH_CARET ||
+        safeAreaManager_->GetKeyBoardAvoidMode() == KeyBoardAvoidMode::RESIZE_WITH_CARET;
 }
 
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
