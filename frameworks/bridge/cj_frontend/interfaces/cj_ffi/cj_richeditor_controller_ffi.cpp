@@ -127,6 +127,16 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
     };
     return result;
 }
+
+char* MallocCString(const std::string& origin)
+{
+    auto len = origin.length() + 1;
+    char* res = static_cast<char*>(malloc(sizeof(char) * len));
+    if (res == nullptr) {
+        return nullptr;
+    }
+    return std::char_traits<char>::copy(res, origin.c_str(), len);
+}
 }
 
 namespace OHOS::Ace::Framework {
@@ -141,14 +151,14 @@ static void NativeShaowOptionsFree(int64_t size, NativeShadowOptionsResult* src)
 void NativeRichEditorController::ParseTextStyleResult(
     const TextStyleResult& textStyle, NativeRichEditorTextStyleResult& nativeTextStyle)
 {
-    nativeTextStyle.fontColor = textStyle.fontColor.c_str();
+    nativeTextStyle.fontColor = MallocCString(textStyle.fontColor);
     nativeTextStyle.fontSize = textStyle.fontSize;
     nativeTextStyle.fontStyle = textStyle.fontStyle;
     nativeTextStyle.fontWeight = textStyle.fontWeight;
-    nativeTextStyle.fontFamily = textStyle.fontFamily.c_str();
+    nativeTextStyle.fontFamily = MallocCString(textStyle.fontFamily);
     NativeTextDecorationResult decoration;
     decoration.type = textStyle.decorationType;
-    decoration.color = textStyle.decorationColor.c_str();
+    decoration.color = MallocCString(textStyle.decorationColor);
     nativeTextStyle.decoration = decoration;
 }
 
@@ -337,21 +347,21 @@ void NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(
     spanPosition.spanStart = spanObject.GetSpanRangeStart();
     spanPosition.spanEnd = spanObject.GetSpanRangeEnd();
     NativeRichEditorTextStyleResult nativeTextStyle;
-    nativeTextStyle.fontColor = spanObject.GetFontColor().c_str();
+    nativeTextStyle.fontColor = MallocCString(spanObject.GetFontColor());
     nativeTextStyle.fontSize = spanObject.GetFontSize();
     nativeTextStyle.fontStyle = static_cast<int32_t>(spanObject.GetFontStyle());
     nativeTextStyle.fontWeight = spanObject.GetFontWeight();
-    nativeTextStyle.fontFamily = spanObject.GetFontFamily().c_str();
+    nativeTextStyle.fontFamily = MallocCString(spanObject.GetFontFamily());
     NativeTextDecorationResult decoration;
     decoration.type = static_cast<int32_t>(spanObject.GetTextDecoration());
-    decoration.color = spanObject.GetColor().c_str();
+    decoration.color = MallocCString(spanObject.GetColor());
     nativeTextStyle.decoration = decoration;
 
     nativeTextResult.textStyle = nativeTextStyle;
     nativeTextResult.offsetInSpanStart = spanObject.OffsetInSpan();
     nativeTextResult.offsetInSpanEnd = spanObject.OffsetInSpan() + spanObject.GetEraseLength();
     nativeTextResult.spanPosition = spanPosition;
-    nativeTextResult.value = UtfUtils::Str16ToStr8(spanObject.GetValue()).c_str();
+    nativeTextResult.value = MallocCString(UtfUtils::Str16ToStr8(spanObject.GetValue()));
 }
 
 void NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(
@@ -1084,7 +1094,16 @@ static void NativeRichEditorSpanResultListFree(int64_t size, NativeRichEditorSpa
     }
     for (int64_t i = 0; i < size; i++) {
         if (src[i].textResult.value) {
-            delete src[i].textResult.value;
+            free((void*) src[i].textResult.value);
+        }
+        if (src[i].textResult.textStyle.fontColor) {
+            free((void*) src[i].textResult.textStyle.fontColor);
+        }
+        if (src[i].textResult.textStyle.fontFamily) {
+            free((void*) src[i].textResult.textStyle.fontFamily);
+        }
+        if (src[i].textResult.textStyle.decoration.color) {
+            free((void*) src[i].textResult.textStyle.decoration.color);
         }
     }
     delete[] src;

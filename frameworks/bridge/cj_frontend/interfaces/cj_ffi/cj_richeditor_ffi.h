@@ -120,6 +120,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkRichEditorAboutToIMEInput12(bool(*callback)(Na
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichEditorTextSpanResult));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete12(void(*callback)(NativeRichEditorTextSpanResult12));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelection));
+CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnSelect12(void(*callback)(NativeRichEditorSelection12));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditorDeleteValue));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorAboutToDelete12(bool(*callback)(NativeRichEditorDeleteValue12));
 CJ_EXPORT void FfiOHOSAceFrameworkRichEditorOnPaste(void(*callback)(int64_t));
