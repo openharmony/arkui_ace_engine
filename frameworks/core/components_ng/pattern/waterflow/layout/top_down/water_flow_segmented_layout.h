@@ -54,7 +54,7 @@ protected:
         return !props_->GetShowCachedItemsValue(false) && (itemIdx < info->startIndex_ || itemIdx > info->endIndex_);
     }
 
-    virtual void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) const = 0;
+    virtual void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) = 0;
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;
@@ -173,7 +173,7 @@ private:
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
 
-    void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) const override;
+    void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) override;
 
     void MeasureLazyChild(int32_t startIdx, int32_t endIdx);
 
@@ -185,7 +185,7 @@ private:
     float mainSize_ = 0.0f;
 
     // offset to apply after a ResetAndJump
-    std::optional<float> postJumpOffset_;
+    mutable std::optional<float> postJumpOffset_;
 
     RefPtr<WaterFlowLayoutInfo> info_;
 

@@ -328,6 +328,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->UpdateStartIndex();
     prevOffset_ = layoutInfo_->Offset();
     layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
@@ -551,12 +552,14 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
+                layoutInfo_->duringPositionCalc_ = true;
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         } else {
             UpdateStartIndex(index);
+            layoutInfo_->duringPositionCalc_ = true;
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }

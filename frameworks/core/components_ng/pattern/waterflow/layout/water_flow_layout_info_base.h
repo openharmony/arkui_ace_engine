@@ -245,6 +245,9 @@ public:
     int32_t firstRepeatCount_ = 0;
     int32_t childrenCount_ = 0;
 
+    // unfold the LazyVGrid during the position calculation.
+    bool duringPositionCalc_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };
 

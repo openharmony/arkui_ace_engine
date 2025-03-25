@@ -185,7 +185,7 @@ bool WaterFlowLayoutAlgorithm::MeasureToTarget(
         } else {
             ViewPosReference ref {
                 .viewPosStart = 0,
-                .viewPosEnd = expandMainSize,
+                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? Infinity<float>() : expandMainSize,
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,
@@ -376,7 +376,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         } else {
             ViewPosReference ref {
                 .viewPosStart = 0,
-                .viewPosEnd = expandMainSize,
+                .viewPosEnd = layoutInfo_->duringPositionCalc_ ? Infinity<float>() : expandMainSize,
                 .referencePos = position.startMainPos + layoutInfo_->currentOffset_,
                 .referenceEdge = ReferenceEdge::START,
                 .axis = axis_,
