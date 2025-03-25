@@ -1074,6 +1074,9 @@ void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
     if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
         auto popupObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
         JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
+    } else {
+        JSRef<JSObject> popupObj = JSRef<JSObject>::New();
+        JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
     }
     auto ret = JSViewAbstract::OpenPopup(popupParam, popupContentNode);
     if (ret == ERROR_CODE_INTERNAL_ERROR) {
