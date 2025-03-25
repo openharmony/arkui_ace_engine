@@ -6039,15 +6039,14 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->AddFrameNodeChangeListener(WeakClaim(this));
+    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
+        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
+        context->SetIsTransFlag(true);
+    }
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
         if (!context->AddChangedFrameNode(WeakClaim(this))) {
             return;
         }
-    }
-    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
-        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
-        context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }
