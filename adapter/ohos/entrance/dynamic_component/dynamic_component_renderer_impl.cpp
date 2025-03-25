@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t WORKER_ERROR = 10002;
-constexpr size_t WORKER_MAX_NUM = 16;
+constexpr size_t WORKER_MAX_NUM = 1;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -108,7 +108,7 @@ bool DynamicComponentRendererImpl::IsRestrictedWorkerThread()
 bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
 {
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    return usingWorkers_.size() <= WORKER_MAX_NUM;
+    return usingWorkers_.size() < WORKER_MAX_NUM;
 }
 
 bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker)
