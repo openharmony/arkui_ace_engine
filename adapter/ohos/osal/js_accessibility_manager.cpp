@@ -2410,7 +2410,7 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64_t focusNod
 NG::RectT<int32_t> getFrameNodeRectInt(const RefPtr<NG::FrameNode>& frameNode)
 {
     auto rect = frameNode->GetTransformRectRelativeToWindow();
-    NG::RectT<int32_t> rectInt { static_cast<int32_t>(rect.left()), static_cast<int32_t>(rect.Top()),
+    NG::RectT<int32_t> rectInt { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
         static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
     return rectInt;
 }
