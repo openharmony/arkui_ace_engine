@@ -377,6 +377,7 @@ private:
     bool IsPointsInRegion(const std::vector<PointF>& points, const RectF& regionRect);
     bool CheckAndUpdateHostGlobalPaintRect();
     bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
+    bool IsEnableSelectionMenu();
     bool isHandleDragging_ = false;
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
