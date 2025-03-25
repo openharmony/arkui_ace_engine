@@ -155,7 +155,8 @@ void ImagePaintMethod::UpdatePaintMethod(
 {
     selected_ = imagePainterMethodConfig.selected;
     selected_ = imagePainterMethodConfig.selected;
-    sensitive_ = imagePainterMethodConfig.sensitive, canvasImage_ = canvasImage;
+    sensitive_ = imagePainterMethodConfig.sensitive;
+    canvasImage_ = canvasImage;
     interpolationDefault_ = imagePainterMethodConfig.interpolation;
     imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
     imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;

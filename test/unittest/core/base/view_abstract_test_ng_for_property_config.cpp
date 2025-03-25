@@ -1385,9 +1385,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest001, TestSize.Level1)
         V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
     info.popupNode = popupNode1;
     info.target = targetNode2;
-    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300);
+    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300, false);
     overlayManager->tipsInfoList_.emplace_back(targetNode->GetId(), info);
-    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300);
+    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300, false);
 
     /**
      * @tc.steps: step3. Call BindTips many times.

@@ -20,7 +20,6 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/recorder/web_event_recorder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -52,22 +51,14 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
         return;
     }
     client.observer = observer;
-    bool isWebEnable = client.config.IsCategoryEnable(static_cast<int32_t>(EventCategory::CATEGORY_WEB)) &&
-                       !client.config.GetWebJsCode().empty();
     std::unique_lock<std::shared_mutex> lock(cacheLock_);
     clientList_.emplace_back(std::move(client));
     lock.unlock();
     bool isOriginExposureEnable = EventRecorder::Get().IsExposureRecordEnable();
     NotifyConfigChange();
     bool isExposureChanged = EventRecorder::Get().IsExposureRecordEnable() && !isOriginExposureEnable;
-    bool isWebChanged = false;
-    if (!hasWebProcessed_ && isWebEnable) {
-        isWebChanged = true;
-        hasWebProcessed_ = true;
-        cacheJsCode_ = client.config.GetWebJsCode();
-    }
-    if (isExposureChanged || isWebChanged) {
-        ApplyNewestConfig(isExposureChanged, isWebChanged);
+    if (isExposureChanged) {
+        ApplyNewestConfig(isExposureChanged);
     }
     NotifyCacheEventsIfNeed();
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
@@ -150,20 +141,8 @@ void EventController::NotifyCacheEventsIfNeed() const
     });
 }
 
-inline void RecordWebEvent(const RefPtr<NG::UINode>& uiNode)
-{
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<NG::Pattern>();
-    CHECK_NULL_VOID(pattern);
-    auto recorder = AceType::DynamicCast<WebEventRecorder>(pattern);
-    CHECK_NULL_VOID(recorder);
-    recorder->RecordWebEvent(false);
-}
-
 void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
-    const std::unordered_set<ExposureCfg, ExposureCfgHash>& exposureSet, std::list<ExposureWrapper>& outputList,
-    bool isWebChanged)
+    const std::unordered_set<ExposureCfg, ExposureCfgHash>& exposureSet, std::list<ExposureWrapper>& outputList)
 {
     std::queue<RefPtr<NG::UINode>> elements;
     ExposureCfg targetCfg = { "", 0.0, 0 };
@@ -181,19 +160,15 @@ void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
                         pageUrl, targetCfg.id, cfgIter->ratio, cfgIter->duration)));
             }
         }
-        if (isWebChanged && current->GetTag() == V2::WEB_ETS_TAG) {
-            RecordWebEvent(current);
-        }
         for (const auto& child : current->GetChildren()) {
             elements.push(child);
         }
     }
 }
 
-void EventController::ApplyNewestConfig(bool isExposureChanged, bool isWebChanged) const
+void EventController::ApplyNewestConfig(bool isExposureChanged) const
 {
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "ApplyNewestConfig isExposureChanged:%{public}d, isWebChanged:%{public}d",
-        isExposureChanged, isWebChanged);
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "ApplyNewestConfig isExposureChanged:%{public}d", isExposureChanged);
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     if (clientList_.empty()) {
         return;
@@ -206,15 +181,13 @@ void EventController::ApplyNewestConfig(bool isExposureChanged, bool isWebChange
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        [config, isExposureChanged, isWebChanged]() {
-            EventController::Get().ApplyExposureCfgInner(config, isExposureChanged, isWebChanged);
-            EventController::Get().cacheJsCode_ = "";
+        [config, isExposureChanged]() {
+            EventController::Get().ApplyExposureCfgInner(config, isExposureChanged);
         },
         TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
 }
 
-void EventController::ApplyExposureCfgInner(
-    const std::shared_ptr<Config>& config, bool isExposureChanged, bool isWebChanged) const
+void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& config, bool isExposureChanged) const
 {
     auto containerId = EventRecorder::Get().GetContainerId();
     auto pageUrl = GetPageUrlByContainerId(containerId);
@@ -235,7 +208,7 @@ void EventController::ApplyExposureCfgInner(
                 [&exposureSet](const std::list<ExposureCfg>::value_type& cfg) { exposureSet.emplace(cfg); });
         }
     }
-    GetMatchedNodes(pageUrl, rootNode, exposureSet, targets, isWebChanged);
+    GetMatchedNodes(pageUrl, rootNode, exposureSet, targets);
     for (auto& item : targets) {
         item.processor->SetContainerId(containerId);
         auto node = item.node.Upgrade();

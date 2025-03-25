@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 
 namespace OHOS::Ace::NG {
 class MenuPreviewLayoutAlgorithm : public LinearLayoutAlgorithm {
@@ -32,6 +33,7 @@ public:
     void UpdateLayoutConstraintForPreview(LayoutWrapper* layoutWrapper);
 
 private:
+    void LayoutHoverScaleImage(const RefPtr<MenuWrapperPattern>& wrapperPattern);
     ACE_DISALLOW_COPY_AND_MOVE(MenuPreviewLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

@@ -73,6 +73,22 @@ void ShowScaleAnimation(const RefPtr<RenderContext>& context, const RefPtr<MenuT
         scaleOption.GetOnFinishEvent());
 }
 
+void UpdateWhenNonNegative(BorderRadiusPropertyT<Dimension>& result, const BorderRadiusPropertyT<Dimension>& value)
+{
+    if (value.radiusTopLeft.has_value() && value.radiusTopLeft->IsNonNegative()) {
+        result.radiusTopLeft = value.radiusTopLeft;
+    }
+    if (value.radiusTopRight.has_value() && value.radiusTopRight->IsNonNegative()) {
+        result.radiusTopRight = value.radiusTopRight;
+    }
+    if (value.radiusBottomLeft.has_value() && value.radiusBottomLeft->IsNonNegative()) {
+        result.radiusBottomLeft = value.radiusBottomLeft;
+    }
+    if (value.radiusBottomRight.has_value() && value.radiusBottomRight->IsNonNegative()) {
+        result.radiusBottomRight = value.radiusBottomRight;
+    }
+}
+
 void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, const RefPtr<FrameNode>& frameNode,
     bool isShowHoverImage, const MenuParam& menuParam)
 {
@@ -92,7 +108,7 @@ void ShowBorderRadiusAndShadowAnimation(const RefPtr<RenderContext>& context, co
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(previewBorderRadius));
     if (menuParam.previewBorderRadius.has_value()) {
-        borderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        UpdateWhenNonNegative(borderRadius, menuParam.previewBorderRadius.value());
     }
     auto delay = isShowHoverImage ? menuTheme->GetHoverImageDelayDuration() : 0;
     AnimationOption option;

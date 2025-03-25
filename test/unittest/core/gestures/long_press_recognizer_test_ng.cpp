@@ -19,8 +19,13 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
 constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
+constexpr int64_t DEFAULT_MOVE_TIME = 1000000000;
+const std::string TEST_EXTRA_INFO = "Reject: received cancel and succeed.";
+} // namespace
+
 class LongPressRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -1466,5 +1471,223 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureLimitFingerTest002, TestSize
     longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_EQ(longPressRecognizer->isLimitFingerCount_, false);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchDownEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, HandleTouchDownEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case1: eventTimeStamp is greater than currentTimeStamp.
+     * @tc.expected: step2. result equals.
+     */
+    auto eventTimeStamp = GetSysTimestamp() + DEFAULT_MOVE_TIME;
+    touchEvent.time = TimeStamp(std::chrono::nanoseconds(eventTimeStamp));
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case2: isPostEventResult_ is true.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->SetIsPostEventResult(true);
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::READY);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case3: useCatchMode_ is false.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.type = TouchType::DOWN;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer->fingers_ = 1;
+    longPressRecognizer->useCatchMode_ = false;
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::DETECTING);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
+     * @tc.steps: case4: forbiddenType is TouchRestrict::LONG_PRESS.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->touchRestrict_.forbiddenType = TouchRestrict::LONG_PRESS;
+    longPressRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: HandleTouchUpEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, HandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState_ is not SUCCEED.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    longPressRecognizer->fingersId_.insert(0);
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->fingersId_.size(), 0);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case2: refereeState_ is SUCCEED.
+     * @tc.expected: step2. result equals.
+     */
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    longPressRecognizer->firstInputTime_ = timeStape;
+    longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer->isLimitFingerCount_ = true;
+    SystemProperties::traceInputEventEnable_ = true;
+    longPressRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
+    EXPECT_FALSE(longPressRecognizer->hasRepeated_);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case3: fingers_ is 1.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->fingers_ = 1;
+    longPressRecognizer->touchPoints_[1] = touchEvent;
+    longPressRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchMoveEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, HandleTouchMoveEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case1: referee is not SUCCEED.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    TouchEvent event;
+    touchEvent.x = 100.0f;;
+    touchEvent.y = 100.0f;;
+    longPressRecognizer->touchPoints_[event.id] = event;
+    longPressRecognizer->fingers_ = 0;
+    longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
+     * @tc.steps: case2: referee is READY.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->refereeState_ = RefereeState::READY;
+    longPressRecognizer->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: HandleTouchCancelEventTest001
+ * @tc.desc: Test LongPressRecognizer function: HandleTouchCancelEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, HandleTouchCancelEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. call HandleTouchCancelEvent function and compare result.
+     * @tc.steps: case1: referee is FAIL.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    TouchEvent event;
+    event.id = 1;
+    longPressRecognizer->touchPoints_[event.id] = event;
+    longPressRecognizer->refereeState_ = RefereeState::FAIL;
+    longPressRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->extraInfo_, "");
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::NONE);
+
+    /**
+     * @tc.steps: step2. call HandleTouchCancelEvent function and compare result.
+     * @tc.steps: case2: referee is SUCCEED.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->extraInfo_, TEST_EXTRA_INFO);
+    EXPECT_EQ(longPressRecognizer->disposal_, GestureDisposal::REJECT);
+}
+
+/**
+ * @tc.name: DoRepeatTest001
+ * @tc.desc: Test LongPressRecognizer function: DoRepeat
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, DoRepeatTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressRecognizer.
+     */
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. call DoRepeat function and compare result.
+     * @tc.steps: case1: isLimitFingerCount_ is false.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer->fingers_ = 0;
+    longPressRecognizer->DoRepeat();
+    longPressRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 0);
+
+    /**
+     * @tc.steps: step2. call DoRepeat function and compare result.
+     * @tc.steps: case2: isLimitFingerCount_ is true.
+     * @tc.expected: step2. result equals.
+     */
+    longPressRecognizer->isLimitFingerCount_ = true;
+    longPressRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer->DoRepeat();
+    longPressRecognizer->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 1);
 }
 } // namespace OHOS::Ace::NG

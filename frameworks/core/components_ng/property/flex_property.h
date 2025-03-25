@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -229,6 +230,27 @@ public:
     void SetMarkParentMeasure(bool mark)
     {
         needMarkParentMeasure_ = mark;
+    }
+
+    std::string FlexLayoutInfoToString()
+    {
+        std::stringstream ss;
+        if (GetFlexBasis().has_value()) {
+            ss << "flexBasis:" << GetFlexBasis().value().ToString() << ", ";
+        }
+        if (GetFlexGrow().has_value()) {
+            ss << "flexGrow:" << GetFlexGrow().value() << ", ";
+        }
+        if (GetFlexShrink().has_value()) {
+            ss << "flexshrink:" << GetFlexShrink().value() << ", ";
+        }
+        if (GetAlignSelf().has_value()) {
+            ss << "alignSelf:" << static_cast<int32_t>(GetAlignSelf().value()) << ", ";
+        }
+        if (GetDisplayIndex().has_value()) {
+            ss << "displayPriority:" << GetDisplayIndex().value();
+        }
+        return ss.str();
     }
 
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FlexGrow, float);

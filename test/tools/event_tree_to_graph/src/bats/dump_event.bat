@@ -16,26 +16,24 @@ setlocal enabledelayedexpansion
 
 hdc shell param set persist.ace.debug.enabled 1
 
-set "ERROR_MSG=[Fail]"
+set "output="
 
-for /f "delims=" %%a in ('hdc shell "hidumper -s WindowManagerService -a '-a'" 2^>^&1') do (
-    hdc shell "rm %%i" > nul
-)
-
-for /f "delims=" %%a in ('hdc shell "hidumper -s WindowManagerService -a '-a'" 2^>^&1') do (
+for /f "delims=" %%a in ('hdc shell "hidumper -s WindowManagerService -a '-a'"') do (
+    set "output=!output!%%a"
     echo %%a
-    set "OUTPUT=!OUTPUT!%%a\n"
 )
 
-echo %OUTPUT% | findstr /C:"%ERROR_MSG%" >nul
+echo !output! | findstr /C:"Fail" >nul
 if %errorlevel% equ 0 (
-    exit /b 1
+    exit
 )
+
+endlocal 
 
 @set /p windowId=input WindowId :
 
 for /F %%i in ('hdc shell "find data/ -name arkui.dump"') do (
-    hdc shell "rm %%i"
+	hdc shell "rm %%i"
 )
 
 hdc shell "hidumper -s WindowManagerService -a '-w %windowId% -event'" > dump_temp.txt

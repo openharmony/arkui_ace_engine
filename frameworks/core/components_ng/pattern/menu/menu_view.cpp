@@ -383,19 +383,19 @@ RadiusF GetPreviewBorderRadiusFromPattern(
     }
 
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
-    if (borderRadius->radiusTopLeft.has_value()) {
+    if (borderRadius->radiusTopLeft.has_value() && borderRadius->radiusTopLeft->IsNonNegative()) {
         topLeft = borderRadius->radiusTopLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusTopRight.has_value()) {
+    if (borderRadius->radiusTopRight.has_value() && borderRadius->radiusTopRight->IsNonNegative()) {
         topRight = borderRadius->radiusTopRight->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomLeft.has_value()) {
+    if (borderRadius->radiusBottomLeft.has_value() && borderRadius->radiusBottomLeft->IsNonNegative()) {
         bottomLeft = borderRadius->radiusBottomLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomRight.has_value()) {
+    if (borderRadius->radiusBottomRight.has_value() && borderRadius->radiusBottomRight->IsNonNegative()) {
         bottomRight = borderRadius->radiusBottomRight->ConvertToPxWithSize(previewWidth);
     }
 
@@ -724,15 +724,26 @@ BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& pre
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, {});
     auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
-
-    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    BorderRadiusProperty previewBorderRadius = BorderRadiusProperty(Dimension(previewBorderRadiusValue));
     if (menuParam.previewBorderRadius.has_value()) {
-        BorderRadiusProperty previewBorderRadius;
-        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
-        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
-        return previewBorderRadius;
+        if (menuParam.previewBorderRadius->radiusTopLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusTopLeft->IsNonNegative()) {
+            previewBorderRadius.radiusTopLeft = menuParam.previewBorderRadius->radiusTopLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusTopRight.has_value() &&
+            menuParam.previewBorderRadius->radiusTopRight->IsNonNegative()) {
+            previewBorderRadius.radiusTopRight = menuParam.previewBorderRadius->radiusTopRight;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomLeft->IsNonNegative()) {
+            previewBorderRadius.radiusBottomLeft = menuParam.previewBorderRadius->radiusBottomLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomRight.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomRight->IsNonNegative()) {
+            previewBorderRadius.radiusBottomRight = menuParam.previewBorderRadius->radiusBottomRight;
+        }
     }
-    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+    return previewBorderRadius;
 }
 
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,

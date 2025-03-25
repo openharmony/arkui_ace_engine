@@ -19,17 +19,22 @@
 #include <list>
 
 #include "base/json/json_util.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/base/ui_node.h"
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 namespace OHOS::Ace::Recorder {
 class InspectorTreeCollector final : public std::enable_shared_from_this<InspectorTreeCollector> {
 public:
-    InspectorTreeCollector(OnInspectorTreeResult&& callback);
+    InspectorTreeCollector(OnInspectorTreeResult&& callback, bool isBackground);
     ~InspectorTreeCollector() = default;
     void IncreaseTaskNum();
     void DecreaseTaskNum();
+    void CreateJson();
     std::unique_ptr<JsonValue>& GetJson();
+    void RetainNode(const RefPtr<NG::UINode>& node);
+    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor);
 
 private:
     void UpdateTaskNum(int32_t num);
@@ -37,6 +42,11 @@ private:
     std::unique_ptr<JsonValue> root_;
     int32_t taskNum_ = 0;
     OnInspectorTreeResult onResultFunc_;
+    bool isBackground_;
+    std::mutex mutex_;
+
+    RefPtr<TaskExecutor> taskExecutor_;
+    std::list<RefPtr<NG::UINode>> cacheNodes_;
 };
 } // namespace OHOS::Ace::Recorder
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_INSPRCTOR_TREE_COLLECTOR_H

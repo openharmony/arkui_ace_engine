@@ -23,6 +23,7 @@
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -127,6 +128,36 @@ public:
         arrowBuildPlacement_ = arrowBuildPlacement;
     }
 
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetOuterBorderWidthByUser(const Dimension outerBorderWidthByUser)
+    {
+        outerBorderWidthByUser_ = outerBorderWidthByUser.ConvertToPx();
+    }
+
+    void SetInnerBorderWidthByUser(const Dimension innerBorderWidthByUser)
+    {
+        innerBorderWidthByUser_ = innerBorderWidthByUser.ConvertToPx();
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -137,6 +168,11 @@ public:
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     bool IsPaintDoubleBorder(PaintWrapper* paintWrapper);
     void DrawDashedBorder(RSCanvas& canvas, RSPen& paint);
+    std::vector<RSPoint> BorderLinearGradientPoint(int popupInnerBorderDirectionInt);
+    std::pair<std::vector<uint32_t>, std::vector<float>> BorderLinearGradientColors(
+        std::vector<PopupGradientColor> popupBorderGradientColor);
+    void PaintOuterBorderGradient(RSPen& paint);
+    void PaintInnerBorderGradient(RSPen& paint);
 
 private:
     void PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -201,6 +237,10 @@ private:
     Edge padding_;
     // top right bottom left
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
+    float outerBorderWidthByUser_ = Dimension(0.8_vp).ConvertToPx();
+    float innerBorderWidthByUser_ = Dimension(0.6_vp).ConvertToPx();
 
 #ifndef USE_ROSEN_DRAWING
     RSPath path_;

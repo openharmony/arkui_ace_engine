@@ -2480,9 +2480,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
  * @tc.desc: Test SetPaintNode
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, SetPaintNode, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg093, TestSize.Level1)
 {
-    auto paintNode = AceType::MakeRefPtr<FrameNode>("paintNodeTag", 2, nullptr);
+    auto paintNode = FrameNode::CreateFrameNode("paintNodeTag", 2, AceType::MakeRefPtr<Pattern>(), true);
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     frameNode->SetPaintNode(paintNode);
     EXPECT_EQ(frameNode->GetPaintNode(), paintNode);
@@ -2493,7 +2493,7 @@ HWTEST_F(FrameNodeTestNg, SetPaintNode, TestSize.Level1)
  * @tc.desc: Test GetPaintNode
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, GetPaintNodeTest, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg094, TestSize.Level1)
 {
     RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
     FrameNode frameNode("testTag", 1, pattern);
@@ -2508,9 +2508,9 @@ HWTEST_F(FrameNodeTestNg, GetPaintNodeTest, TestSize.Level1)
  * @tc.desc: Test SetFocusPaintNode
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, SetFocusPaintNodeTest, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg095, TestSize.Level1)
 {
-    auto focusPaintNode = AceType::MakeRefPtr<FrameNode>("focusTag", 2, nullptr);
+    auto focusPaintNode = FrameNode::CreateFrameNode("focusTag", 2, AceType::MakeRefPtr<Pattern>(), true);
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     frameNode->SetFocusPaintNode(focusPaintNode);
     EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
@@ -2521,9 +2521,9 @@ HWTEST_F(FrameNodeTestNg, SetFocusPaintNodeTest, TestSize.Level1)
  * @tc.desc: Test GetFocusPaintNode
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, GetFocusPaintNodeTest, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg096, TestSize.Level1)
 {
-    auto focusPaintNode = AceType::MakeRefPtr<FrameNode>("focusPaintNode", 2, nullptr);
+    auto focusPaintNode = FrameNode::CreateFrameNode("focusPaintNode", 2, AceType::MakeRefPtr<Pattern>(), true);
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     frameNode->SetFocusPaintNode(focusPaintNode);
     EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
@@ -2534,9 +2534,23 @@ HWTEST_F(FrameNodeTestNg, GetFocusPaintNodeTest, TestSize.Level1)
  * @tc.desc: Test IsDrawFocusOnTop
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, IsDrawFocusOnTopTest, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg097, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_FALSE(frameNode->IsDrawFocusOnTop());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg098
+ * @tc.desc: Test IsDrawFocusOnTop true value
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg098, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    EXPECT_TRUE(frameNode->IsDrawFocusOnTop());
 }
 } // namespace OHOS::Ace::NG

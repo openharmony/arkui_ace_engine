@@ -831,7 +831,7 @@ public:
         return contentRect_.GetY() == textRect_.GetY();
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }

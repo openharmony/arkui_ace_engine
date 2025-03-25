@@ -21,7 +21,7 @@
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
-#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/simplified_inspector.h"
 
 namespace OHOS::Ace {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
@@ -75,7 +75,8 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
         return;
     }
     if (container->IsUseNewPipeline()) {
-        tree = NG::Inspector::GetSimplifiedInspector(containerId, params);
+        auto inspector = std::make_shared<NG::SimplifiedInspector>(containerId, params);
+        tree = inspector->GetInspector();
     }
 }
 
@@ -89,8 +90,14 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
         return;
     }
     if (container->IsUseNewPipeline()) {
-        auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback));
-        NG::Inspector::GetSimplifiedInspectorAsync(containerId, params, collector);
+        auto inspector = std::make_shared<NG::SimplifiedInspector>(containerId, params);
+        if (params.enableBackground) {
+            auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback), true);
+            inspector->GetInspectorBackgroundAsync(collector);
+        } else {
+            auto collector = std::make_shared<Recorder::InspectorTreeCollector>(std::move(callback), false);
+            inspector->GetInspectorAsync(collector);
+        }
     }
 }
 
