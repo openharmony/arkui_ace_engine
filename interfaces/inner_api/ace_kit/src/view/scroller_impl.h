@@ -36,6 +36,8 @@ public:
     bool IsAtStart() override;
     double GetContentBottom(const RefPtr<FrameNode>& node) override;
     double GetContentTop(const RefPtr<FrameNode>& node) override;
+    bool AnimateTo(const Dimension& position, float duration,
+        const RefPtr<Curve>& curve, bool smooth, bool canOverScroll) override;
 
     bool operator==(const Ace::RefPtr<Scroller>& other) const override;
 

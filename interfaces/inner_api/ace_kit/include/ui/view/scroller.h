@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_SCROLLER_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_UI_VIEW_SCROLLER_H
 
+#include "ui/animation/curve.h"
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/scrollable_properties.h"
@@ -26,8 +27,15 @@ class Scroller : public AceType {
     DECLARE_ACE_TYPE(Scroller, AceType);
 
 public:
+    using OnReachEvent = std::function<void()>;
+    using OnScrollStartEvent = std::function<void()>;
+    using OnScrollStopEvent = std::function<void()>;
     using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
     struct Observer {
+        OnReachEvent onReachStartEvent;
+        OnReachEvent onReachEndEvent;
+        OnScrollStartEvent onScrollStartEvent;
+        OnScrollStopEvent onScrollStopEvent;
         OnDidScrollEvent onDidScrollEvent;
     };
     Scroller() = default;
@@ -41,6 +49,8 @@ public:
     virtual bool IsAtStart() = 0;
     virtual double GetContentBottom(const RefPtr<FrameNode>& node) = 0;
     virtual double GetContentTop(const RefPtr<FrameNode>& node) = 0;
+    virtual bool AnimateTo(const Dimension& position, float duration,
+        const RefPtr<Curve>& curve, bool smooth, bool canOverScroll = false) = 0;
 
     virtual bool operator==(const Ace::RefPtr<Scroller>& other) const = 0;
 };

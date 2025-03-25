@@ -34,6 +34,10 @@ ScrollerImpl::ScrollerImpl(const RefPtr<Framework::JSScroller>& jsScroller) : js
 void ScrollerImpl::AddObserver(const Observer& observer, int32_t id)
 {
     ScrollerObserver scrollerObserver;
+    scrollerObserver.onReachStartEvent = observer.onReachStartEvent;
+    scrollerObserver.onReachEndEvent = observer.onReachEndEvent;
+    scrollerObserver.onScrollStartEvent = observer.onScrollStartEvent;
+    scrollerObserver.onScrollStopEvent = observer.onScrollStopEvent;
     scrollerObserver.onDidScrollEvent = observer.onDidScrollEvent;
     jsScroller_->AddObserver(scrollerObserver, id);
 }
@@ -205,6 +209,16 @@ double ScrollerImpl::GetContentBottom(const RefPtr<FrameNode>& node)
 double ScrollerImpl::GetContentTop(const RefPtr<FrameNode>& node)
 {
     return GetContentEdge<Edge::TOP>(jsScroller_, node);
+}
+
+bool ScrollerImpl::AnimateTo(const Dimension& position, float duration,
+    const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
+{
+    RefPtr<ScrollControllerBase> scrollController = jsScroller_->GetController().Upgrade();
+    if (!scrollController) {
+        return false;
+    }
+    return scrollController->AnimateTo(position, duration, curve, smooth, canOverScroll);
 }
 
 bool ScrollerImpl::operator==(const Ace::RefPtr<Scroller>& other) const
