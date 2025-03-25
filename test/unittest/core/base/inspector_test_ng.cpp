@@ -852,6 +852,9 @@ HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_001, TestSize.Level1)
     Inspector::GetRecordAllPagesNodes(treesInfos);
     EXPECT_TRUE(!treesInfos.empty());
     context1->stageManager_ = nullptr;
+    auto node3 = treesInfos[63];
+    EXPECT_TRUE(node3 != nullptr);
+    EXPECT_EQ(node3->GetParentId(), 6);
 }
 
 /**

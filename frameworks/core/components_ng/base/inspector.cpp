@@ -1040,11 +1040,11 @@ void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, Inspector
     auto rootNode = AddInspectorTreeNode(pageNode, treesInfo);
     CHECK_NULL_VOID(rootNode);
     for (const auto& item : pageNode->GetChildren()) {
-        GetFrameNodeChildren(item, children, pageId, false);
+        GetFrameNodeChildren(item, children, pageId, true);
     }
     auto overlayNode = GetOverlayNode(pageNode);
     if (overlayNode) {
-        GetFrameNodeChildren(overlayNode, children, pageId, false);
+        GetFrameNodeChildren(overlayNode, children, pageId, true);
     }
     GetInspectorTreeInfo(children, pageId, treesInfo);
 }
@@ -1088,6 +1088,10 @@ RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     recNode->SetSelfId(renderContext->GetNodeId());
+    auto parentNode = frameNode->GetParent();
+    if (parentNode != nullptr) {
+        recNode->SetParentId(parentNode->GetId());
+    }
     recNodes.emplace(uiNode->GetId(), recNode);
     return recNode;
 }
@@ -1096,10 +1100,7 @@ void Inspector::GetInspectorTreeInfo(
     std::vector<RefPtr<NG::UINode>> children, int32_t pageId, InspectorTreeMap& recNodes)
 {
     for (auto& uiNode : children) {
-        auto addedItem = AddInspectorTreeNode(uiNode, recNodes);
-        if (addedItem == nullptr) {
-            continue;
-        }
+        AddInspectorTreeNode(uiNode, recNodes);
         GetInspectorChildrenInfo(uiNode, recNodes, pageId);
     }
 }
@@ -1111,12 +1112,9 @@ void Inspector::GetInspectorChildrenInfo(
     if (AceType::InstanceOf<SpanNode>(parent)) {
         return;
     }
-    if (AceType::InstanceOf<CustomNode>(parent)) {
-        return;
-    }
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
-        GetFrameNodeChildren(item, children, pageId, false);
+        GetFrameNodeChildren(item, children, pageId, true);
     }
     auto node = AceType::DynamicCast<FrameNode>(parent);
     if (node != nullptr) {
@@ -1127,10 +1125,7 @@ void Inspector::GetInspectorChildrenInfo(
     }
     if (depth) {
         for (auto uiNode : children) {
-            auto addedNode = AddInspectorTreeNode(uiNode, recNodes);
-            if (addedNode == nullptr) {
-                continue;
-            }
+            AddInspectorTreeNode(uiNode, recNodes);
             GetInspectorChildrenInfo(uiNode, recNodes, pageId, depth - 1);
         }
     }
