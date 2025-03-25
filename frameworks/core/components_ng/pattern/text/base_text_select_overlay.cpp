@@ -20,6 +20,7 @@
 #include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -32,6 +33,10 @@ const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemS
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
+    if (!IsEnableSelectionMenu()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The selectoverlay is not displayed cause enableSelectionMenu is false");
+        return;
+    }
     UpdateTransformFlag();
     if (!PreProcessOverlay(request) || AnimationUtils::IsImplicitAnimationOpen()) {
         return;
@@ -1592,5 +1597,16 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
         }
     }
+}
+
+bool BaseTextSelectOverlay::IsEnableSelectionMenu()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, true);
+    return textOverlayTheme->GetEnableSelectionMenu();
 }
 } // namespace OHOS::Ace::NG

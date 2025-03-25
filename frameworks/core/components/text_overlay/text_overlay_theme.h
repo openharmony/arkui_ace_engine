@@ -129,6 +129,7 @@ public:
             theme->selectAllLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_select_all", "Ctrl+A");
             theme->cutLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_cut", "Ctrl+X");
             theme->showShortcut_ = static_cast<bool>(pattern->GetAttr<double>("text_overlay_menu_show_shortcut", 0.0));
+            theme->enableSelectionMenu_ = static_cast<bool>(pattern->GetAttr<double>("text_overlay_menu_enable", 1.0));
         }
     };
 
@@ -358,7 +359,12 @@ public:
     {
         return symbolColor_;
     }
-    
+
+    bool GetEnableSelectionMenu() const
+    {
+        return enableSelectionMenu_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -389,6 +395,7 @@ private:
     std::string selectAllLabelInfo_;
     std::string cutLabelInfo_;
     bool showShortcut_ = false;
+    bool enableSelectionMenu_ = true;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
