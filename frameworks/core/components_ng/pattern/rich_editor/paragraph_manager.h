@@ -120,8 +120,9 @@ private:
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
-    static void AddParagraphPacingBlankRect(
+    static void AddParagraphSpacingBlankRect(
         std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData);
+    static void AppendParagraphSpacingBlankRect(std::vector<RectF>& rects, const SelectData& selectData);
 };
 } // namespace OHOS::Ace::NG
 #endif
