@@ -154,7 +154,7 @@ private:
     void UpdateVideoNode();
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
-    void UpdateImageHdrMode();
+    void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
