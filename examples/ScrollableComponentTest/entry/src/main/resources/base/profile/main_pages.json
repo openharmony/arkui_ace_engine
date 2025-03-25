@@ -1,7 +1,13 @@
 {
   "src": [
     "pages/Index",
-    "pages/Scrollable/ScrollableMainPage",
-    "pages/Scrollable/ListNestedScroll1"
+    "pages/scrollable/ScrollableMainPage",
+    "pages/scrollable/ListNestedScroll1",
+    "pages/Tabs/TabsMainPage",
+    "pages/Tabs/BarBackgroundBlurStyle",
+    "pages/Tabs/OnContentWillChange",
+    "pages/Tabs/TabContentObserver",
+    "pages/Tabs/TabsHeightAdaptive",
+    "pages/Tabs/TabsSubTabBarStyle"
   ]
 }
