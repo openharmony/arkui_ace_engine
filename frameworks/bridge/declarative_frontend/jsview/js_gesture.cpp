@@ -350,11 +350,12 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     bool isLimitFingerCount = false;
     PanDirection panDirection;
+    PanDistanceMap distanceMap;
+    distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
     if (args.Length() <= 0 || !args[0]->IsObject()) {
-        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum, isLimitFingerCount);
+        PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
         return;
     }
 
@@ -378,9 +379,10 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     }
     if (distance->IsNumber()) {
         double distanceNumber = distance->ToNumber<double>();
-        Dimension dimension =
-            LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
-        distanceNum = dimension.ConvertToPx();
+        if (!LessNotEqual(distanceNumber, 0.0)) {
+            Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
+            distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+        }
     }
     if (directionNum->IsNumber()) {
         uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -390,10 +392,10 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
         }
     }
     if (limitFingerCount->IsBoolean()) {
-            isLimitFingerCount = limitFingerCount->ToBoolean();
+        isLimitFingerCount = limitFingerCount->ToBoolean();
     }
 
-    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceNum, isLimitFingerCount);
+    PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);
 }
 
 void JSSwipeGesture::Create(const JSCallbackInfo& args)
@@ -672,9 +674,10 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
     RefPtr<PanGestureOption> option = AceType::MakeRefPtr<PanGestureOption>();
 
     int32_t fingersNum = DEFAULT_PAN_FINGER;
-    double distanceNum = DEFAULT_PAN_DISTANCE.ConvertToPx();
     bool isLimitFingerCount = false;
     PanDirection panDirection;
+    PanDistanceMap distanceMap;
+    distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
 
     if (args.Length() > 0 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -689,9 +692,10 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         }
         if (distance->IsNumber()) {
             double distanceNumber = distance->ToNumber<double>();
-            Dimension dimension =
-                LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE : Dimension(distanceNumber, DimensionUnit::VP);
-            distanceNum = dimension.ConvertToPx();
+            if (!LessNotEqual(distanceNumber, 0.0)) {
+                Dimension dimension = Dimension(distanceNumber, DimensionUnit::VP);
+                distanceMap[SourceTool::UNKNOWN] = dimension.ConvertToPx();
+            }
         }
         if (directionNum->IsNumber()) {
             uint32_t directNum = directionNum->ToNumber<uint32_t>();
@@ -705,7 +709,8 @@ void JSPanGestureOption::Constructor(const JSCallbackInfo& args)
         }
     }
     option->SetDirection(panDirection);
-    option->SetDistance(distanceNum);
+    option->SetDistanceMap(distanceMap);
+    option->SetDistance(distanceMap[SourceTool::UNKNOWN]);
     option->SetFingers(fingersNum);
     option->SetIsLimitFingerCount(isLimitFingerCount);
 
