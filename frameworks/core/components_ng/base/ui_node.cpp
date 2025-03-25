@@ -2059,7 +2059,7 @@ bool UINode::HasSkipNode()
 
 void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
 {
-    if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !child || !child->IsReusableNode()) {
+    if (!child || !child->IsReusableNode()) {
         return;
     }
     if (!IsInDestroying() && child->IsInDestroying()) {
