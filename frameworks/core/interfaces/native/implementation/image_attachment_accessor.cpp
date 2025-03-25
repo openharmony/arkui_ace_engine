@@ -16,7 +16,9 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/image/image_component.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
+#include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -25,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace GeneratedModifier {
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUIColorFilterAccessor* GetColorFilterAccessor();
 } // namespace GeneratedModifier
 namespace Converter {
 
@@ -43,17 +46,59 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
 {
     ImageSpanOptions imageOptions;
 #if defined(PIXEL_MAP_SUPPORTED) || defined(PIXEL_MAP_TEST_SUPPORTED)
-    auto pixelMapPeer = value.value;
-    if (pixelMapPeer) {
-        imageOptions.imagePixelMap = pixelMapPeer->pixelMap;
+    auto container = Container::CurrentSafely();
+    auto context = PipelineBase::GetCurrentContextSafely();
+    if (container && context) {
+        bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+        auto pixelMapPeer = value.value;
+        if (pixelMapPeer && !isCard) {
+            imageOptions.imagePixelMap = pixelMapPeer->pixelMap;
+        }
     }
 #endif
     auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle).value_or(ImageSpanAttribute());
     imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
     imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit);
     imageStyle.size = OptConvert<ImageSpanSize>(value.size);
+    std::optional<Ark_ColorFilterType> colorFilter = GetOpt(value.colorFilter);
+    if (colorFilter) {
+        Converter::VisitUnion(
+            *colorFilter,
+            [&imageStyle](const Ark_ColorFilter& filter) {
+                if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                    imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
+                }
+            },
+            [](const Ark_DrawingColorFilter& colorStrategy) {
+                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            },
+            []() {
+            });
+    }
     imageOptions.imageAttribute = imageStyle;
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
+}
+
+void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src)
+{
+    Ark_ImageAttachmentLayoutStyle style = {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+    };
+    if (src.marginProp) {
+        auto arkMargin = ArkValue<Ark_Padding>(*(src.marginProp));
+        style.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkMargin);
+    }
+    if (src.paddingProp) {
+        auto arkPadding = ArkValue<Ark_Padding>(*(src.paddingProp));
+        style.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding);
+    }
+    if (src.borderRadius) {
+        auto arkBorder = ArkValue<Ark_BorderRadiuses>(*src.borderRadius);
+        style.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorder);
+    }
+    dst = style;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -96,31 +141,69 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 }
 Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
-    return {};
+    Ark_SizeOptions size = {
+        .width = ArkValue<Opt_Length>(),
+        .height = ArkValue<Opt_Length>(),
+    };
+    CHECK_NULL_RETURN(peer, size);
+    CHECK_NULL_RETURN(peer->imageSpan, size);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), size);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->size, size);
+    if (peer->imageSpan->GetImageAttribute()->size->width) {
+        size.width = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->width);
+    }
+    if (peer->imageSpan->GetImageAttribute()->size->height) {
+        size.height = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->height);
+    }
+    return size;
 }
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
-        INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
-    auto aligment = peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign;
+    CHECK_NULL_RETURN(
+        peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
+    auto aligment = peer->imageSpan->GetImageAttribute()->verticalAlign;
     CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     return ArkValue<Ark_ImageSpanAlignment>(*aligment);
 }
 Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageSpanOptions().imageAttribute,
-        INVALID_ENUM_VAL<Ark_ImageFit>);
-    auto objectFit = peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit;
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageFit>);
+    auto objectFit = peer->imageSpan->GetImageAttribute()->objectFit;
     CHECK_NULL_RETURN(objectFit, INVALID_ENUM_VAL<Ark_ImageFit>);
     return ArkValue<Ark_ImageFit>(*objectFit);
 }
 Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
-    return {};
+    Ark_ImageAttachmentLayoutStyle style = {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+    };
+    CHECK_NULL_RETURN(peer, style);
+    CHECK_NULL_RETURN(peer->imageSpan, style);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), style);
+    style = ArkValue<Ark_ImageAttachmentLayoutStyle>(*peer->imageSpan->GetImageAttribute());
+    return style;
 }
 Ark_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
-    return {};
+    Ark_ColorFilter emptyFilter = nullptr;
+    auto empty = ArkUnion<Ark_ColorFilterType, Ark_ColorFilter>(emptyFilter);
+    CHECK_NULL_RETURN(peer, empty);
+    CHECK_NULL_RETURN(peer->imageSpan, empty);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), empty);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->colorFilterMatrix ||
+        peer->imageSpan->GetImageAttribute()->drawingColorFilter, empty);
+    if (peer->imageSpan->GetImageAttribute()->colorFilterMatrix) {
+        auto& colorFilter = peer->imageSpan->GetImageAttribute()->colorFilterMatrix.value();
+        ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
+        auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
+        auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->ctor(&arrayNumber);
+        return ArkUnion<Ark_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
+    } else {
+        LOGE("Arkoala: ImageAttachmentAccessor.GetColorFilter: DrawinColorFilter doesn't supported");
+    }
+    return empty;
 }
 } // ImageAttachmentAccessor
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()

@@ -220,6 +220,11 @@ void AssignArkValue(Ark_Length& dst, const float& src)
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
 
+void AssignArkValue(Ark_Length& dst, const CalcLength& src)
+{
+    dst = ArkValue<Ark_Length>(src.GetDimension());
+}
+
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
 {
     dst.tag = INTEROP_TAG_INT32;
@@ -256,6 +261,17 @@ void AssignArkValue(Ark_Number& dst, const double& src)
 {
     dst.tag = INTEROP_TAG_FLOAT32;
     dst.f32 = static_cast<float>(src);
+}
+
+void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src)
+{
+    Ark_Padding arkPadding = {
+        .top = ArkValue<Opt_Length>(src.top),
+        .right = ArkValue<Opt_Length>(src.right),
+        .bottom = ArkValue<Opt_Length>(src.bottom),
+        .left = ArkValue<Opt_Length>(src.left),
+    };
+    dst = arkPadding;
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx)
