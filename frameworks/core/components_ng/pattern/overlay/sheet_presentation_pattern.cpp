@@ -573,6 +573,7 @@ void SheetPresentationPattern::HandleFocusEvent()
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
+    keyboardHeight_ = 0;
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
     SetShadowStyle(false);
 }
