@@ -23,6 +23,9 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 class TextMockClipboardImpl : public MockClipboardImpl {

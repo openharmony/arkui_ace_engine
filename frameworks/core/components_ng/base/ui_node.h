@@ -36,7 +36,6 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_event.h"
 

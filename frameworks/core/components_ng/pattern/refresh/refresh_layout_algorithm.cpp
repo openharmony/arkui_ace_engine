@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 
+#include "core/common/container.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 

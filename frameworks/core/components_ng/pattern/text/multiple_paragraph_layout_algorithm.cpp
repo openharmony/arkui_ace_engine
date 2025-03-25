@@ -26,7 +26,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -931,5 +930,28 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
+}
+
+std::string MultipleParagraphLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+            ss << "[" << item->interval.first << "," << item->interval.second << ":"
+               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
+
+std::vector<ParagraphManager::ParagraphInfo> MultipleParagraphLayoutAlgorithm::GetParagraphs()
+{
+    std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
+    if (paragraphManager_) {
+        paragraphInfo = paragraphManager_->GetParagraphs();
+    }
+    return paragraphInfo;
 }
 } // namespace OHOS::Ace::NG

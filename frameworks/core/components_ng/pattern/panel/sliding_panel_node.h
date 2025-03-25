@@ -19,7 +19,6 @@
 #include <optional>
 
 #include "core/components_ng/base/group_node.h"
-#include "core/components_ng/pattern/panel/sliding_panel_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,29 +37,11 @@ public:
         return columnId_.has_value();
     }
 
-    int32_t GetColumnId()
-    {
-        if (!columnId_.has_value()) {
-            columnId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return columnId_.value();
-    }
+    int32_t GetColumnId();
 
-    int32_t GetDragBarId()
-    {
-        if (!dragBarId_.has_value()) {
-            dragBarId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return dragBarId_.value();
-    }
+    int32_t GetDragBarId();
 
-    int32_t GetContentId()
-    {
-        if (!contentId_.has_value()) {
-            contentId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return contentId_.value();
-    }
+    int32_t GetContentId();
 
 private:
     std::optional<int32_t> columnId_;

@@ -15,6 +15,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_progress_ffi.h"
 
+#include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 
 using namespace OHOS::Ace;

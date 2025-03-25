@@ -24,6 +24,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/text/html_utils.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/common/utils/utils.h"

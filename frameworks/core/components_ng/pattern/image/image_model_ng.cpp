@@ -31,6 +31,7 @@
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -32,8 +32,6 @@
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
 #include "core/common/ace_engine_ext.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/recorder/node_data_cache.h"
@@ -42,6 +40,9 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -68,6 +69,13 @@ bool IsJumpLink(const std::string& content)
     return std::regex_match(content, pattern);
 }
 }; // namespace
+
+TextPattern::TextPattern()
+{
+    selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
+    pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ResetOriginCaretPosition();
+}
 
 TextPattern::~TextPattern()
 {
@@ -5493,5 +5501,85 @@ bool TextPattern::IsLocationInFrameRegion(const Offset& localOffset) const
     auto frameSize = geometryNode->GetFrameSize();
     auto frameRect = RectF(OffsetF(0.0f, 0.0f), frameSize);
     return frameRect.IsInRegion(PointF(localOffset.GetX(), localOffset.GetY()));
+}
+
+RefPtr<EventHub> TextPattern::CreateEventHub()
+{
+    return MakeRefPtr<TextEventHub>();
+}
+
+void TextPattern::OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
+{
+    selectOverlay_->OnCreateMenuCallbackUpdate(std::move(onCreateMenuCallback));
+}
+
+void TextPattern::OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
+{
+    selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+}
+
+RefPtr<LayoutAlgorithm> TextPattern::CreateLayoutAlgorithm()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty &&
+        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
+        return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_, true);
+    } else {
+        return MakeRefPtr<TextLayoutAlgorithm>(spans_, pManager_, isSpanStringMode_);
+    }
+}
+
+void TextPattern::SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
+{
+    dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
+    dataDetectorAdapter_->onResult_ = std::move(textDetectConfig.onResult);
+    dataDetectorAdapter_->entityColor_ = textDetectConfig.entityColor;
+    dataDetectorAdapter_->entityDecorationType_ = textDetectConfig.entityDecorationType;
+    dataDetectorAdapter_->entityDecorationColor_ = textDetectConfig.entityDecorationColor;
+    dataDetectorAdapter_->entityDecorationStyle_ = textDetectConfig.entityDecorationStyle;
+    auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
+    dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
+    if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void TextPattern::ModifyAISpanStyle(TextStyle& aiSpanStyle)
+{
+    TextDetectConfig textDetectConfig;
+    aiSpanStyle.SetTextColor(dataDetectorAdapter_->entityColor_.value_or(textDetectConfig.entityColor));
+    aiSpanStyle.SetTextDecoration(
+        dataDetectorAdapter_->entityDecorationType_.value_or(textDetectConfig.entityDecorationType));
+    aiSpanStyle.SetTextDecorationColor(
+        dataDetectorAdapter_->entityDecorationColor_.value_or(textDetectConfig.entityColor));
+    aiSpanStyle.SetTextDecorationStyle(
+        dataDetectorAdapter_->entityDecorationStyle_.value_or(textDetectConfig.entityDecorationStyle));
+}
+
+bool TextPattern::CheckSelectedTypeChange()
+{
+    auto changed = IsSelectedTypeChange();
+    if (changed) {
+        oldSelectedType_ = selectedType_.value();
+    }
+    return changed;
+}
+
+RefPtr<MagnifierController> TextPattern::GetOrCreateMagnifier()
+{
+    if (!magnifierController_) {
+        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+    }
+    return magnifierController_;
+}
+
+void TextPattern::DumpRecord(const std::string& record, bool stateChange)
+{
+    if (stateChange || frameRecord_.length() > MAX_SIZE_OF_LOG) {
+        frameRecord_.clear();
+    }
+    frameRecord_.append("[" + record + "]");
 }
 } // namespace OHOS::Ace::NG

@@ -526,4 +526,9 @@ void DataDetectorAdapter::MarkDirtyNode() const
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->OnPropertyChangeMeasure();
 }
+
+RefPtr<NG::FrameNode> DataDetectorAdapter::GetHost() const
+{
+    return frameNode_.Upgrade();
+}
 } // namespace OHOS::Ace

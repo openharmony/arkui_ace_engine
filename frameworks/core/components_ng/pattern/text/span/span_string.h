@@ -22,9 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 

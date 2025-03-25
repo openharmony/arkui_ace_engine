@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include "core/components_ng/base/distributed_ui.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MIN_RECT_TOP = -0.4f;
@@ -482,7 +484,7 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
         }
         CaretMetricsF caretMetrics;
         bool res = info.paragraph->CalcCaretMetricsByPosition(index, caretMetrics, TextAffinity::UPSTREAM);
-        CHECK_NULL_BREAK(res)
+        CHECK_NULL_BREAK(res);
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         if (GreatNotEqual(rect.Bottom(), height) || (isLastParagraph && IsRectOutByHandler(rect, selectData))) {
             continue;

@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -195,5 +196,69 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     UpdateMaxLines(StringUtils::StringToUint(json->GetString("maxLines")));
     UpdateMarqueeOptionsFromJson(json->GetObject("marqueeOptions"));
     LayoutProperty::FromJson(json);
+}
+
+RefPtr<LayoutProperty> TextLayoutProperty::Clone() const
+{
+    auto value = MakeRefPtr<TextLayoutProperty>();
+    Clone(value);
+    value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+    value->propSymbolSourceInfo_ = CloneSymbolSourceInfo();
+    return value;
+}
+
+void TextLayoutProperty::Reset()
+{
+    LayoutProperty::Reset();
+    ResetFontStyle();
+    ResetTextLineStyle();
+    ResetContent();
+    ResetSymbolSourceInfo();
+    ResetAdaptFontSizeStep();
+    ResetTextMarqueeOptions();
+    ResetCursorColor();
+    ResetSelectedBackgroundColor();
+}
+
+std::string TextLayoutProperty::InspectorGetTextFont() const
+{
+    TextStyle font;
+    if (GetFontFamily().has_value()) {
+        font.SetFontFamilies(GetFontFamily().value());
+    }
+    if (GetFontSize().has_value()) {
+        font.SetFontSize(GetFontSize().value());
+    }
+    if (GetItalicFontStyle().has_value()) {
+        font.SetFontStyle(GetItalicFontStyle().value());
+    }
+    if (GetFontWeight().has_value()) {
+        font.SetFontWeight(GetFontWeight().value());
+    }
+    return V2::GetTextStyleInJson(font);
+}
+
+void TextLayoutProperty::UpdateTextColorByRender(const Color &value)
+{
+    auto& groupProperty = GetOrCreateFontStyle();
+    if (groupProperty->CheckTextColor(value)) {
+        return;
+    }
+    groupProperty->UpdateTextColor(value);
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    propNeedReCreateParagraph_ = true;
+}
+
+void TextLayoutProperty::Clone(RefPtr<LayoutProperty> property) const
+{
+    auto value = DynamicCast<TextLayoutProperty>(property);
+    value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+    value->propFontStyle_ = CloneFontStyle();
+    value->propTextLineStyle_ = CloneTextLineStyle();
+    value->propContent_ = CloneContent();
+    value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
+    value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
+    value->propCursorColor_ = CloneCursorColor();
+    value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
 }
 } // namespace OHOS::Ace::NG

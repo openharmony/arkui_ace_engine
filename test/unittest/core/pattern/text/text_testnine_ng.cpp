@@ -17,6 +17,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "text_base.h"
 
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 

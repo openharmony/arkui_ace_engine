@@ -23,11 +23,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_model.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {

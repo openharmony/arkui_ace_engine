@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 #define private public
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #undef private

@@ -24,6 +24,9 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 

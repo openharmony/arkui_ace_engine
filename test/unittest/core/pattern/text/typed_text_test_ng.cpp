@@ -19,6 +19,7 @@
 
 #include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
 

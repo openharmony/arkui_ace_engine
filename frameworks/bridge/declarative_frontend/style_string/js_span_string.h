@@ -24,8 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
 #include "bridge/declarative_frontend/style_string/js_span_object.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::Framework {
 
 class JSSpanString : public virtual AceType {

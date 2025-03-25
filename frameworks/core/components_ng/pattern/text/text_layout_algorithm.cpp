@@ -15,13 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
-#include "base/geometry/dimension.h"
-#include "base/log/ace_trace.h"
-#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
-#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {

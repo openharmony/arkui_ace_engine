@@ -20,6 +20,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 #define private public
 #define protected public
