@@ -1239,7 +1239,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
         CHECK_NULL_VOID(row);
         auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(rowProps);
-        json->PutExtAttr("space", rowProps->GetSpace()->ToString().c_str(), filter);
+        json->PutExtAttr("space", rowProps->GetSpaceValue(Dimension()).ToString().c_str(), filter);
 
         if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
             json->PutExtAttr("arrowPosition", "ArrowPosition.END", filter);

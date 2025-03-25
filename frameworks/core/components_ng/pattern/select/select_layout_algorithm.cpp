@@ -92,7 +92,7 @@ SizeF SelectLayoutAlgorithm::MeasureSelectText(
         // Make the spinner icon layout at the right end
         textSize.SetWidth(maxWidth.value());
     }
-    auto fontSize = textLayoutProperty->GetFontSize().value().ConvertToPx();
+    auto fontSize = textLayoutProperty->GetFontSizeValue(Dimension()).ConvertToPx();
     bool isTextMin = false;
     MeasureAndGetTextSize(fontSize, textSize, isTextMin);
     if (contentValue.empty()) {
