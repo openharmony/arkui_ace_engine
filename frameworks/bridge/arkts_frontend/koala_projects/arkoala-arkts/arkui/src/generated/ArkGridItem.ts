@@ -50,10 +50,21 @@ import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./Ark
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { GridItemOptions, GridItemAttribute } from "./ArkGridItemInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkGridItemNode } from "../handwritten/modifiers/ArkGridItemNode"
+import { ArkGridItemAttributeSet,GridItemModifier } from "../handwritten/modifiers/ArkGridItemModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkGridItemComponent extends ArkCommonMethodComponent {
     getPeer(): ArkGridItemPeer {
         return (this.peer as ArkGridItemPeer)
+    }
+    getModifierHost(): ArkGridItemNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkGridItemNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkGridItemNode
     }
     /** @memo */
     public setGridItemOptions(value?: GridItemOptions): this {
@@ -144,6 +155,31 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent {
             return
         }
         return
+    }
+    attributeModifier(modifier: AttributeModifier<GridItemAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<GridItemAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkGridItemAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as GridItemAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<GridItemAttribute>);
+            let gridItemModifier = (attributeModifier as Object) as GridItemModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkGridItemAttributeSet();
+                attributeSet._modifiersWithKeys = gridItemModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
     }
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
