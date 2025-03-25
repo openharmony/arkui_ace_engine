@@ -63,8 +63,7 @@ export enum EffectFillStyle {
     CUMULATIVE = 0,
     ITERATIVE = 1
 }
-export interface PulseSymbolEffect extends SymbolEffect {
-}
+
 export interface SymbolGlyphAttribute extends CommonAttribute {
     fontSize(value: number | string | Resource): this;
     fontColor(value: Array<ResourceColor>): this;
