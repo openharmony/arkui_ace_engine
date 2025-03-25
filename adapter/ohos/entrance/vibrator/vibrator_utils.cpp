@@ -79,11 +79,7 @@ void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
     if (strcmp(realVibratorType, VIBRATOR_TYPE_INVALID) == 0) {
         return;
     }
-    bool state = false;
-    Sensors::IsSupportEffect(realVibratorType, &state);
-    if (state) {
-        Sensors::StartVibrator(realVibratorType);
-    }
+    Sensors::StartVibrator(realVibratorType);
 }
 
 bool VibratorUtils::StartExclusiveVibraFeedback(const char* effectId)
