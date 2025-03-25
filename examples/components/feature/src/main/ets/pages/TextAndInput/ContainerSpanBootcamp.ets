@@ -15,6 +15,7 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
+import { curves } from '@kit.ArkUI';
 
 @Component
 export struct ContainerSpanBootcamp {
@@ -24,8 +25,11 @@ export struct ContainerSpanBootcamp {
   @State textBackgroundStyleColor: Color = Color.Transparent;
   @State enableTextBackgroundStyleRadius: boolean = false;
   @State textBackgroundStyleRadius: number = 0;
-
-
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller',this.scroller)
+  }
   build() {
     NavDestination() {
       Drawer({
@@ -33,6 +37,9 @@ export struct ContainerSpanBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -60,7 +67,7 @@ export struct ContainerSpanBootcamp {
             color: useEnabled(this.enableTextBackgroundStyleColor, this.textBackgroundStyleColor),
             radius: useEnabled(this.enableTextBackgroundStyleRadius, this.textBackgroundStyleRadius)
           })
-
+         
       }
 
     }.justifyContent(FlexAlign.Start)
@@ -68,7 +75,7 @@ export struct ContainerSpanBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         ColorBlock({
@@ -87,6 +94,52 @@ export struct ContainerSpanBootcamp {
 
       }
     }
+    .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection==str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
+
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+      Column({ space: 8 }) {
+
+      }.width('100%')
+    }
+    .height('52%')
+    .id('scroll')
   }
 }
 
@@ -99,4 +152,6 @@ struct ContainerSpanBootcampPreviewer {
     })
   }
 }
+
+
 
