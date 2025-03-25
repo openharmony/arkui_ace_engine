@@ -208,7 +208,7 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     // set accessibilityProperty to sheet close button
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    std::string message = sheetTheme->GetSheetClose();
     accessibilityProperty->SetAccessibilityText(message);
 }
 
