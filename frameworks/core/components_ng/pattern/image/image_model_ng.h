@@ -68,6 +68,7 @@ public:
     void SetCopyOption(const CopyOptions& copyOption) override;
     void SetSmoothEdge(float value) override;
     void SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode) override;
+    void SetHdrBrightness(float hdrBrightness) override;
     void SetEnhancedImageQuality(AIImageQuality imageQuality) override;
     void SetOrientation(ImageRotateOrientation orientation) override;
     bool UpdateDragItemInfo(DragItemInfo& itemInfo) override;
@@ -134,6 +135,7 @@ public:
     static void ResetResizableLattice(FrameNode* frameNode);
     static ImageResizableSlice GetResizableSlice(FrameNode* frameNode);
     static void SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode);
+    static void SetHdrBrightness(FrameNode* frameNode, float hdrBrightness);
     static void SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality);
     static bool GetFitOriginalSize(FrameNode* frameNode);
     static uint32_t GetFillColor(FrameNode* frameNode);

@@ -285,6 +285,8 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
     void SetHDRBrightness(float hdrBrightness) override;
+    void SetImageHDRBrightness(float hdrBrightness) override;
+    void SetImageHDRPresent(bool hdrPresent) override;
     void SetTransparentLayer(bool isTransparentLayer) override;
     void SetScreenId(uint64_t screenId) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
