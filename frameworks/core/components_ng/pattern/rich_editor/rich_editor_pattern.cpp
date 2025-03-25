@@ -10532,7 +10532,7 @@ void RichEditorPattern::GetDeletedSpan(RichEditorChangeValue& changeValue, int32
     if (!textSelector_.SelectNothing()) {
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
         innerPosition = std::min(textSelector_.GetStart(), textSelector_.GetEnd());
-    } else if (!previewTextRecord_.previewContent.empty()) {
+    } else if (previewTextRecord_.NeedReplace()) {
         length = previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start;
         innerPosition = previewTextRecord_.replacedRange.start;
     } else {
@@ -10816,7 +10816,7 @@ bool RichEditorPattern::BeforeChangeText(
         if (textSelector_.IsValid()) {
             GetDeletedSpan(changeValue, innerPosition,
                 static_cast<int32_t>(textSelector_.GetTextEnd() - textSelector_.GetTextStart()));
-        } else if (!previewTextRecord_.previewContent.empty()) {
+        } else if (previewTextRecord_.NeedReplace()) {
             GetDeletedSpan(changeValue, innerPosition,
                 static_cast<int32_t>(previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start));
         }
