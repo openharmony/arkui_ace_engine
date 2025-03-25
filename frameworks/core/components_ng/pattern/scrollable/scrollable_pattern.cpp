@@ -911,7 +911,7 @@ bool ScrollablePattern::CanFadeEffect(float offset, bool isAtTop, bool isAtBotto
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     bool isAtTop = IsAtTop();
-    bool isAtBottom = IsAtBottom();
+    bool isAtBottom = IsAtBottom(true);
     bool isNotPositiveScrollableDistance = isAtTop && isAtBottom;
     // check edgeEffect is not springEffect
     if (scrollEffect_ && scrollEffect_->IsFadeEffect() &&

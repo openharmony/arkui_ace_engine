@@ -1430,7 +1430,12 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
 
     for (uint32_t i = 0; i < crossCount_; i++) {
         // already finish first line forward
-        if (reverse && currentIndex >= info_.startIndex_) {
+        if ((reverse && currentIndex >= info_.startIndex_)) {
+            break;
+        }
+        if (currentIndex >= info_.GetChildrenCount()) {
+            TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
+                info_.GetChildrenCount());
             break;
         }
         // Step1. Get wrapper of [GridItem]

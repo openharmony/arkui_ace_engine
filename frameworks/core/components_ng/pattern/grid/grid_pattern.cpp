@@ -82,7 +82,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_, crossCount, mainCount);
     }
     result->SetCanOverScrollStart(canOverScrollStart);
-    result->SetCanOverScrollEnd(canOverScrollEnd);
+    result->SetCanOverScrollEnd(canOverScrollEnd && (info_.repeatDifference_ == 0));
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -1104,7 +1104,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         return offset;
     }
-    if (info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (info_.endIndex_ == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
         float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_;
         float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
         if (GreatNotEqual(GetMainContentSize(), info_.currentOffset_ + info_.totalHeightOfItemsInView_)) {

@@ -84,9 +84,9 @@ bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_->itemStart_;
 };
-bool WaterFlowPattern::IsAtBottom() const
+bool WaterFlowPattern::IsAtBottom(bool considerRepeat) const
 {
-    return layoutInfo_->offsetEnd_;
+    return considerRepeat ? (layoutInfo_->offsetEnd_ && layoutInfo_->repeatDifference_ == 0) : layoutInfo_->offsetEnd_;
 };
 bool WaterFlowPattern::IsAtTopWithDelta() const
 {
@@ -177,7 +177,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
     algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
-    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && (layoutInfo_->repeatDifference_ == 0));
     return algorithm;
 }
 

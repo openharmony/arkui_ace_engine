@@ -30,7 +30,7 @@ class PartiallyMockedScrollable : public ScrollablePattern {
 private:
     MOCK_METHOD(bool, UpdateCurrentOffset, (float delta, int32_t source), (override));
     MOCK_METHOD(bool, IsAtTop, (), (const, override));
-    MOCK_METHOD(bool, IsAtBottom, (), (const, override));
+    MOCK_METHOD(bool, IsAtBottom, (bool considerRepeat), (const, override));
     MOCK_METHOD(void, UpdateScrollBarOffset, (), (override));
     MOCK_METHOD(bool, IsScrollable, (), (const, override));
     MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));
