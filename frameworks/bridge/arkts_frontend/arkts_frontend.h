@@ -57,7 +57,10 @@ class ACE_FORCE_EXPORT ArktsFrontend : public Frontend {
     DECLARE_ACE_TYPE(ArktsFrontend, Frontend);
 
 public:
-    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ani_env*>(runtime)) {}
+    explicit ArktsFrontend(void* runtime) : env_(reinterpret_cast<ani_env*>(runtime))
+    {
+        type_ = FrontendType::ARK_TS;
+    }
     ~ArktsFrontend() override = default;
 
     bool Initialize(FrontendType type, const RefPtr<TaskExecutor>& taskExecutor) override
