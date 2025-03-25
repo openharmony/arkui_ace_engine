@@ -505,4 +505,297 @@ HWTEST_F(ScrollBarTestNg, ProcessFrictionMotionStop001, TestSize.Level1)
     scrollBarPattern->ProcessFrictionMotionStop();
     EXPECT_FALSE(scrollBarPattern->scrollBarProxy_->scrollSnapTrigger_);
 }
+
+/**
+ * @tc.name: DumpAdvanceInfo001
+ * @tc.desc: Test ScrollBarPattern DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBarPattern->scrollBar_ = scrollBar;
+    scrollBarPattern->scrollBar_->activeRect_ = Rect(2, 6, 5, 10);
+    scrollBarPattern->DumpAdvanceInfo(json);
+    EXPECT_EQ(json->GetString("activeRect"), "Rect (2.00, 6.00) - [5.00 x 10.00]");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo002
+ * @tc.desc: Test ScrollBarPattern DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBarPattern->hasChild_ = true;
+    scrollBarPattern->scrollBar_ = scrollBar;
+    scrollBarPattern->scrollBar_->activeRect_ = Rect(2, 6, 5, 10);
+    scrollBarPattern->DumpAdvanceInfo(json);
+    EXPECT_NE(json->GetString("activeRect"), "Rect (2.00, 6.00) - [5.00 x 10.00]");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo003
+ * @tc.desc: Test ScrollBarPattern DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    OuterScrollBarLayoutInfo layoutInfo;
+    layoutInfo.layoutTime_ = 2;
+    layoutInfo.currentOffset_ = 3.f;
+    layoutInfo.scrollableNodeOffset_ = 5.f;
+    scrollBarPattern->outerScrollBarLayoutInfos_.emplace_back(layoutInfo);
+    scrollBarPattern->hasChild_ = true;
+    scrollBarPattern->DumpAdvanceInfo(json);
+    EXPECT_NE(json->GetString("activeRect"), "Rect (2.00, 6.00) - [5.00 x 10.00]");
+}
+
+/**
+ * @tc.name: DumpAdvanceInfo004
+ * @tc.desc: Test ScrollBarPattern DumpAdvanceInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, DumpAdvanceInfo004, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    OuterScrollBarLayoutInfo layoutInfo;
+    layoutInfo.layoutTime_ = 2;
+    layoutInfo.currentOffset_ = 3.f;
+    layoutInfo.scrollableNodeOffset_ = 5.f;
+    scrollBarPattern->outerScrollBarLayoutInfos_.emplace_back(layoutInfo);
+    scrollBarPattern->DumpAdvanceInfo(json);
+    EXPECT_NE(json->GetString("activeRect"), "Rect (2.00, 6.00) - [5.00 x 10.00]");
+}
+
+/**
+ * @tc.name: GetDisplayModeDumpInfo001
+ * @tc.desc: Test ScrollBarPattern GetDisplayModeDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetDisplayModeDumpInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->displayMode_ = DisplayMode::OFF;
+    scrollBarPattern->GetDisplayModeDumpInfo(json);
+    EXPECT_EQ(json->GetString("outerScrollBarState"), "OFF");
+}
+
+/**
+ * @tc.name: GetDisplayModeDumpInfo002
+ * @tc.desc: Test ScrollBarPattern GetDisplayModeDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetDisplayModeDumpInfo002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->GetDisplayModeDumpInfo(json);
+    EXPECT_EQ(json->GetString("outerScrollBarState"), "AUTO");
+}
+
+/**
+ * @tc.name: GetDisplayModeDumpInfo003
+ * @tc.desc: Test ScrollBarPattern GetDisplayModeDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetDisplayModeDumpInfo003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->displayMode_ = DisplayMode::ON;
+    scrollBarPattern->GetDisplayModeDumpInfo(json);
+    EXPECT_EQ(json->GetString("outerScrollBarState"), "ON");
+}
+
+/**
+ * @tc.name: GetDisplayModeDumpInfo004
+ * @tc.desc: Test ScrollBarPattern GetDisplayModeDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetDisplayModeDumpInfo004, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    int32_t displayMode = 100;
+    scrollBarPattern->displayMode_ = static_cast<DisplayMode>(displayMode);
+    json->Put("outerScrollBarState", "null");
+    scrollBarPattern->GetDisplayModeDumpInfo(json);
+    EXPECT_EQ(json->GetString("outerScrollBarState"), "null");
+}
+
+/**
+ * @tc.name: GetPanDirectionDumpInfo001
+ * @tc.desc: Test ScrollBarPattern GetPanDirectionDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPanDirectionDumpInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    scrollBarPattern->panRecognizer_ = panRecognizer;
+    scrollBarPattern->panRecognizer_->direction_.type = PanDirection::NONE;
+    scrollBarPattern->GetPanDirectionDumpInfo(json);
+    EXPECT_EQ(json->GetString("panDirection"), "NONE");
+}
+
+/**
+ * @tc.name: GetPanDirectionDumpInfo002
+ * @tc.desc: Test ScrollBarPattern GetPanDirectionDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPanDirectionDumpInfo002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    scrollBarPattern->panRecognizer_ = panRecognizer;
+    scrollBarPattern->panRecognizer_->direction_.type = PanDirection::VERTICAL;
+    scrollBarPattern->GetPanDirectionDumpInfo(json);
+    EXPECT_EQ(json->GetString("panDirection"), "VERTICAL");
+}
+
+/**
+ * @tc.name: GetPanDirectionDumpInfo003
+ * @tc.desc: Test ScrollBarPattern GetPanDirectionDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPanDirectionDumpInfo003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    scrollBarPattern->panRecognizer_ = panRecognizer;
+    scrollBarPattern->panRecognizer_->direction_.type = PanDirection::HORIZONTAL;
+    scrollBarPattern->GetPanDirectionDumpInfo(json);
+    EXPECT_EQ(json->GetString("panDirection"), "HORIZONTAL");
+}
+
+/**
+ * @tc.name: GetPanDirectionDumpInfo004
+ * @tc.desc: Test ScrollBarPattern GetPanDirectionDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPanDirectionDumpInfo004, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+    scrollBarPattern->panRecognizer_ = panRecognizer;
+    scrollBarPattern->panRecognizer_->direction_.type = PanDirection::ALL;
+    scrollBarPattern->GetPanDirectionDumpInfo(json);
+    EXPECT_EQ(json->GetString("panDirection"), "FREE");
+}
+/**
+ * @tc.name: GetPanDirectionDumpInfo005
+ * @tc.desc: Test ScrollBarPattern GetPanDirectionDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPanDirectionDumpInfo005, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    json->Put("outerScrollBarState", "null");
+    scrollBarPattern->GetPanDirectionDumpInfo(json);
+    EXPECT_EQ(json->GetString("panDirection"), "null");
+}
+
+/**
+ * @tc.name: GetAxisDumpInfo001
+ * @tc.desc: Test ScrollBarPattern GetAxisDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetAxisDumpInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->axis_ = Axis::NONE;
+    scrollBarPattern->GetAxisDumpInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "NONE");
+}
+
+/**
+ * @tc.name: GetAxisDumpInfo002
+ * @tc.desc: Test ScrollBarPattern GetAxisDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetAxisDumpInfo002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->GetAxisDumpInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "VERTICAL");
+}
+
+/**
+ * @tc.name: GetAxisDumpInfo003
+ * @tc.desc: Test ScrollBarPattern GetAxisDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetAxisDumpInfo003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->axis_ = Axis::HORIZONTAL;
+    scrollBarPattern->GetAxisDumpInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "HORIZONTAL");
+}
+
+/**
+ * @tc.name: GetAxisDumpInfo004
+ * @tc.desc: Test ScrollBarPattern GetAxisDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetAxisDumpInfo004, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollBarPattern->axis_ = Axis::FREE;
+    scrollBarPattern->GetAxisDumpInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "FREE");
+}
+
+/**
+ * @tc.name: GetAxisDumpInfo005
+ * @tc.desc: Test ScrollBarPattern GetAxisDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetAxisDumpInfo005, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    int32_t axis = 100;
+    scrollBarPattern->axis_ = static_cast<Axis>(axis);
+    json->Put("Axis", "null");
+    scrollBarPattern->GetAxisDumpInfo(json);
+    EXPECT_EQ(json->GetString("Axis"), "null");
+}
+
+/**
+ * @tc.name: ScrollPositionCallback001
+ * @tc.desc: Test ScrollBarPattern ScrollPositionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollPositionCallback001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    scrollBarPattern->ScrollPositionCallback(2.0f, SCROLL_FROM_START, true);
+    EXPECT_TRUE(scrollBarPattern->isScrolling_);
+}
 } // namespace OHOS::Ace::NG
