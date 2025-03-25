@@ -6976,6 +6976,10 @@ void RosenRenderContext::FreezeCanvasNode(bool freezeFlag)
 
 void RosenRenderContext::RemoveCanvasNode()
 {
+    if (reDraggingFlag_) {
+        reDraggingFlag_ = false;
+        return;
+    }
     if (canvasNode_) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "RemoveCanvasNode.");
         canvasNode_->RemoveFromTree();
@@ -7044,18 +7048,24 @@ void RosenRenderContext::LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootN
 {
     if (canvasNode_ && rootNode) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "SetLinkedRootNodeId");
-        canvasNode_->SetLinkedRootNodeId(rootNode->GetRenderContext()->GetNodeId());
+        auto renderContext = rootNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        canvasNode_->SetLinkedRootNodeId(renderContext->GetNodeId());
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
 }
 
-std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode()
+void RosenRenderContext::CreateCanvasNode()
 {
     if (!canvasNode_) {
         TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode.");
         canvasNode_ = Rosen::RSCanvasNode::Create();
         Rosen::RSTransaction::FlushImplicitTransaction();
     }
+}
+
+std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode() const
+{
     return canvasNode_;
 }
 } // namespace OHOS::Ace::NG
