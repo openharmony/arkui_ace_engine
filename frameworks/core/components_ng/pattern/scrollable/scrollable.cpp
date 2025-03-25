@@ -126,7 +126,11 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     springVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
                                ? scrollableTheme->GetSpringVelocityScale()
                                : VELOCITY_SCALE;
-    ratio_ = scrollableTheme->GetRatio();
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        ratio_ = scrollableTheme->GetGreatApiRatio();
+    } else {
+        ratio_ = scrollableTheme->GetRatio();
+    }
     springResponse_ = scrollableTheme->GetSpringResponse();
     touchPadVelocityScaleRate_ = scrollableTheme->GetTouchPadVelocityScaleRate();
     if (friction_ == -1) {
