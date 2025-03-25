@@ -433,12 +433,12 @@
             "name": "VariableFontWeightEnum",
             "type": "Ark_FontWeight",
             "validValues": [
-                ["ARK_FONT_WEIGHT_LIGHTER", "400"],
-                ["ARK_FONT_WEIGHT_NORMAL", "400"],
-                ["ARK_FONT_WEIGHT_REGULAR", "400"],
-                ["ARK_FONT_WEIGHT_MEDIUM", "400"],
-                ["ARK_FONT_WEIGHT_BOLD", "400"],
-                ["ARK_FONT_WEIGHT_BOLDER", "400"],
+                ["ARK_FONT_WEIGHT_LIGHTER", "0"],
+                ["ARK_FONT_WEIGHT_NORMAL", "1"],
+                ["ARK_FONT_WEIGHT_REGULAR", "2"],
+                ["ARK_FONT_WEIGHT_MEDIUM", "3"],
+                ["ARK_FONT_WEIGHT_BOLD", "4"],
+                ["ARK_FONT_WEIGHT_BOLDER", "5"],
             ],
             "invalidValues": [
                 "static_cast<Ark_FontWeight>(-1)",
@@ -1754,6 +1754,13 @@
                     ]
                 }
             ],
+            "remove": [
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+            ],
             "disable": [
                 "setTextAreaOptionsTestValidValues",
                 "setEnterKeyTypeTestDefaultValues",
@@ -2122,6 +2129,11 @@
                 }
             ],
             "remove": [
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
             ],
             "disable": [
                 "setCaretPositionTestCaretPositionValidValues",
