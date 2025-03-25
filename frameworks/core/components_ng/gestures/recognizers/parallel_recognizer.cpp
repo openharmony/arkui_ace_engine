@@ -26,9 +26,13 @@ void ParallelRecognizer::OnAccepted()
         currentBatchRecognizer_->AboutToAccept();
         currentBatchRecognizer_.Reset();
     }
-    if (succeedBlockRecognizer_ && succeedBlockRecognizer_->GetGestureState() == RefereeState::SUCCEED_BLOCKED) {
-        succeedBlockRecognizer_->AboutToAccept();
-        succeedBlockRecognizer_.Reset();
+    for (auto& recognizer : succeedBlockRecognizers_) {
+        if (recognizer && recognizer->GetGestureState() == RefereeState::SUCCEED_BLOCKED) {
+            recognizer->AboutToAccept();
+        }
+    }
+    if (!succeedBlockRecognizers_.empty()) {
+        succeedBlockRecognizers_.clear();
     }
 }
 
@@ -53,7 +57,7 @@ void ParallelRecognizer::OnRejected()
             recognizer->OnRejectBridgeObj();
         }
     }
-    succeedBlockRecognizer_.Reset();
+    succeedBlockRecognizers_.clear();
 }
 
 void ParallelRecognizer::OnPending()
@@ -72,7 +76,7 @@ void ParallelRecognizer::OnBlocked()
         if (currentBatchRecognizer_) {
             currentBatchRecognizer_->OnBlocked();
             if (currentBatchRecognizer_->GetGestureState() == RefereeState::SUCCEED_BLOCKED) {
-                succeedBlockRecognizer_ = currentBatchRecognizer_;
+                AddSucceedBlockRecognizer(currentBatchRecognizer_);
             }
             currentBatchRecognizer_.Reset();
         }
@@ -147,6 +151,9 @@ void ParallelRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& reco
             recognizer->AboutToAccept();
         } else if ((refereeState_ == RefereeState::PENDING_BLOCKED) ||
                    (refereeState_ == RefereeState::SUCCEED_BLOCKED)) {
+            if (refereeState_ == RefereeState::SUCCEED_BLOCKED) {
+                AddSucceedBlockRecognizer(recognizer);
+            }
             recognizer->OnBlocked();
         } else {
             currentBatchRecognizer_ = recognizer;
@@ -224,7 +231,7 @@ void ParallelRecognizer::CleanRecognizerState()
         disposal_ = GestureDisposal::NONE;
     }
     currentBatchRecognizer_ = nullptr;
-    succeedBlockRecognizer_ = nullptr;
+    succeedBlockRecognizers_.clear();
 }
 
 void ParallelRecognizer::ForceCleanRecognizer()
@@ -236,7 +243,7 @@ void ParallelRecognizer::ForceCleanRecognizer()
     }
     MultiFingersRecognizer::ForceCleanRecognizer();
     currentBatchRecognizer_ = nullptr;
-    succeedBlockRecognizer_ = nullptr;
+    succeedBlockRecognizers_.clear();
 }
 
 void ParallelRecognizer::CleanRecognizerStateVoluntarily()
