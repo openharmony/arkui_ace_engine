@@ -326,10 +326,11 @@ void ButtonComponent::ApplyTheme(const RefPtr<ButtonTheme>& theme)
         textStyle.SetTextAlign(TextAlign::CENTER);
         textStyle.SetMaxLines(theme->GetTextMaxLines());
         textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
-        if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
-        SetBackgroundColor(Color(WATCH_BACKGROUND_COLOR));
-        textStyle.SetTextColor(Color(WATCH_TEXT_COLOR));
-        text->SetFocusColor(Color(WATCH_TEXT_COLOR));
+        auto devieType = SystemProperties::GetDeviceType();
+        if (devieType == DeviceType::WATCH || devieType == DeviceType::WEARABLE) {
+            SetBackgroundColor(Color(WATCH_BACKGROUND_COLOR));
+            textStyle.SetTextColor(Color(WATCH_TEXT_COLOR));
+            text->SetFocusColor(Color(WATCH_TEXT_COLOR));
         }
         text->SetTextStyle(textStyle);
 }
