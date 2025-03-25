@@ -105,9 +105,10 @@ common_bin = [
     part_name = "glfw"
   },
   {
-    label = "//foundation/graphic/graphic_2d/rosen/modules/graphics_effect:libgraphics_effect"
+    label = "//foundation/graphic/graphics_effect:graphics_effect_core"
     subsystem_name = "graphic"
-    part_name = "graphic_2d"
+    part_name = "graphics_effect"
+    lib_names = [ "graphics_effect" ]
   },
   {
     label = "//third_party/jsoncpp:jsoncpp"
