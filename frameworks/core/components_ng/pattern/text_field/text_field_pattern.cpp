@@ -2373,25 +2373,23 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         auto data = event->GetData();
         CHECK_NULL_VOID(data);
         std::u16string str;
-        auto arr = UdmfClient::GetInstance()->GetSpanStringRecord(data);
+        auto arr = UdmfClient::GetInstance()->GetSpanStringEntry(data);
         if (arr.size() > 0) {
             auto spanStr = SpanString::DecodeTlv(arr);
             str += spanStr->GetU16string();
         } else {
-            auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
-            if (records.empty()) {
+            auto plainText = UdmfClient::GetInstance()->GetPlainTextEntry(data);
+            if (plainText.empty()) {
                 std::string linkUrl;
                 std::string linkTitle;
-                UdmfClient::GetInstance()->GetLinkRecord(data, linkUrl, linkTitle);
+                UdmfClient::GetInstance()->GetLinkEntry(data, linkUrl, linkTitle);
                 if (!linkTitle.empty()) {
                     str +=  UtfUtils::Str8DebugToStr16(linkTitle);
                 } else if (!linkUrl.empty()) {
                     str +=  UtfUtils::Str8DebugToStr16(linkUrl);
                 }
             }
-            for (const auto& record : records) {
-                str +=  UtfUtils::Str8DebugToStr16(record);
-            }
+            str += UtfUtils::Str8DebugToStr16(plainText);
         }
         pattern->dragRecipientStatus_ = DragStatus::NONE;
         if (str.empty()) {
