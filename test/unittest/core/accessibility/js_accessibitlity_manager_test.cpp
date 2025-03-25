@@ -1411,7 +1411,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     AccessibilityWorkMode accessibilityWorkMode;
     accessibilityWorkMode.isTouchExplorationEnabled = false;
     /**
-     * @tc.steps: step2. test IsEventIgnoredByWorkMode return false
+     * @tc.steps: step2. test IsEventIgnoredByWorkMode return true
      */
     event.type = AccessibilityEventType::FOCUS;
     EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
@@ -1425,7 +1425,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
 
     /**
-     * @tc.steps: step3. test IsEventIgnoredByWorkMode return true
+     * @tc.steps: step3. test IsEventIgnoredByWorkMode return false
      */
     event.type = AccessibilityEventType::CLICK;
     EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
