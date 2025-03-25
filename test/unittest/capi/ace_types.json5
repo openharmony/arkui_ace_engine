@@ -1814,6 +1814,13 @@
                     ]
                 }
             ],
+            "remove": [
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
+            ],
             "disable": [
                 "setTextAreaOptionsTestValidValues",
                 "setEnterKeyTypeTestDefaultValues",
@@ -2193,6 +2200,11 @@
                 }
             ],
             "remove": [
+                "setPlaceholderFontTestDefaultValues",
+                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
+                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
+                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
             ],
             "disable": [
                 "setCaretPositionTestCaretPositionValidValues",
