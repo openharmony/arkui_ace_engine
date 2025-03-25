@@ -380,6 +380,11 @@ protected:
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
     bool isOnTree_ = false;
+    float hdrBrightness_ = 1.0f;
+    bool isTransparentLayer_ = false;
+    bool isEnableSecure_ = false;
+    bool isSurfaceLock_ = false;
+    RenderFit renderFit_ = RenderFit::RESIZE_FILL;
 
 private:
     void OnAreaChangedInner() override;
@@ -477,7 +482,6 @@ private:
     std::optional<float> selfIdealSurfaceOffsetX_;
     std::optional<float> selfIdealSurfaceOffsetY_;
 
-    bool isSurfaceLock_ = false;
     uint32_t windowId_ = 0;
     int32_t treeId_ = 0;
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
@@ -493,9 +497,6 @@ private:
     bool isTypedNode_ = false;
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
-    bool isEnableSecure_ = false;
-    float hdrBrightness_ = 1.0f;
-    bool isTransparentLayer_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
