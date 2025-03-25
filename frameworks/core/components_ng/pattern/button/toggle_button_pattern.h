@@ -137,10 +137,7 @@ private:
     Color checkedColor_;
     Color unCheckedColor_;
     Color backgroundColor_;
-    float disabledAlpha_ { 1.0f };
     Dimension textMargin_;
-    Dimension buttonMargin_;
-    Dimension buttonHeight_;
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Color textColor_;
