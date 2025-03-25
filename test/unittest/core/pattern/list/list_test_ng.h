@@ -156,6 +156,8 @@ protected:
     AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset) override;
     AssertionResult Position(float expectOffset) override;
 
+    void AddCustomNode();
+
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
