@@ -229,7 +229,7 @@ public:
     {
         return false;
     }
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return false;
     }
