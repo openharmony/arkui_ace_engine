@@ -1114,6 +1114,54 @@ HWTEST_F(ListEventTestNg, ScrollSnapAlign016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollSnapAlign017
+ * @tc.desc: Test ListItem height changed while the snap animation is in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ScrollSnapAlign017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with ScrollSnapAlign::START
+     * @tc.expected: Set the list is layout from the end.
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(15);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.0f);
+
+    /**
+     * @tc.steps: step2. StartSnapAnimation.
+     * @tc.expected: Start snap Animation.
+     */
+    MockAnimationManager::GetInstance().SetTicks(4);
+
+    DragAction(frameNode_, Offset(), -60, 0);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 70.f);
+
+    /**
+     * @tc.steps: step3. update ListItem Height.
+     * @tc.expected: snap Animation update.
+     */
+    for (int32_t i = 0; i < 15; i++) {
+        auto child = GetChildFrameNode(frameNode_, i);
+        child->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(FILL_LENGTH), CalcLength(150)));
+    }
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), 150);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 80.f);
+    for (int32_t i = 1; i <= 4; i++) {
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
+        EXPECT_EQ(pattern_->GetTotalOffset(), 80.f + i * 17.5);
+    }
+}
+
+/**
  * @tc.name: StartSnapAnimation001
  * @tc.desc: Test start snap align by mouse wheel.
  * @tc.type: FUNC
