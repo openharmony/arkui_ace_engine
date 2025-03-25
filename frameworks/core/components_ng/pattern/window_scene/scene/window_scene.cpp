@@ -284,7 +284,7 @@ void WindowScene::BufferAvailableCallback()
         if (self->session_->GetSystemConfig().IsPcWindow()) {
             auto leashSurfaceNode = self->session_->GetLeashWinSurfaceNode();
             if (leashSurfaceNode) {
-                leashSurfaceNode->MarkUifirstNode(false);
+                leashSurfaceNode->SetUIFirstSwitch(Rosen::RSUIFirstSwitch::FORCE_DISABLE);
             }
         }
         CHECK_NULL_VOID(self->startingWindow_);
@@ -311,7 +311,7 @@ void WindowScene::BufferAvailableCallback()
                 CHECK_EQUAL_VOID(session->GetSystemConfig().IsPcWindow(), false);
                 auto leashSurfaceNode = session->GetLeashWinSurfaceNode();
                 CHECK_NULL_VOID(leashSurfaceNode);
-                leashSurfaceNode->MarkUifirstNode(true);
+                leashSurfaceNode->SetUIFirstSwitch(Rosen::RSUIFirstSwitch::NONE);
             });
         }
 
