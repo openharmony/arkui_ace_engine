@@ -136,16 +136,6 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(decoration, ctx);
 }
 
-void AssignArkValue(Ark_LineBreakStrategy& dst, const OHOS::Ace::LineBreakStrategy& src)
-{
-    switch (src) {
-        case LineBreakStrategy::GREEDY: dst = ARK_LINE_BREAK_STRATEGY_GREEDY; break;
-        case LineBreakStrategy::HIGH_QUALITY: dst = ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY; break;
-        case LineBreakStrategy::BALANCED: dst = ARK_LINE_BREAK_STRATEGY_BALANCED; break;
-        default: LOGE("Unexpected enum value in LineBreakStrategy: %{public}d", src);
-    }
-}
-
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style)
 {
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(style.textAlign);
