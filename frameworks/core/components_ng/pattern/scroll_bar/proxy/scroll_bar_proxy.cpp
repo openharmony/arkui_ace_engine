@@ -189,7 +189,7 @@ void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource)
             scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
             scrollBar->UpdateScrollBarOffset(scrollSource);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            return;
+            continue;
         }
 
         scrollBar->SetScrollableNodeOffset(
