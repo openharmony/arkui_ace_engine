@@ -299,6 +299,29 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
     ret.end = Converter::OptConvert<int32_t>(src.end);
     return ret;
 }
+void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src)
+{
+    LeadingMargin leadingMargin {
+        .size = LeadingMarginSize(
+            StringUtils::StringToDimension(src.leadingMarginSize[0]),
+            StringUtils::StringToDimension(src.leadingMarginSize[1])),
+        .pixmap = src.leadingMarginPixmap,
+    };
+    dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
+    dst.leadingMargin = Converter::ArkUnion<
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(leadingMargin);
+    dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
+    dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
+        static_cast<LineBreakStrategy>(src.lineBreakStrategy));
+}
+void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src)
+{
+    dst.style = Converter::ArkValue<Ark_RichEditorParagraphStyle>(src);
+    dst.range = {
+        .value0 = Converter::ArkValue<Ark_Number>(src.range.first),
+        .value1 = Converter::ArkValue<Ark_Number>(src.range.second)
+    };
+}
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -452,15 +475,14 @@ Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
                                                   const Opt_RichEditorRange* value)
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
-    CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(value, {});
+    std::vector<ParagraphInfo> results = {};
+    CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Array_RichEditorParagraphResult>(results, Converter::FC));
+    CHECK_NULL_RETURN(value, Converter::ArkValue<Array_RichEditorParagraphResult>(results, Converter::FC));
     auto options = Converter::OptConvert<RangeOptions>(*value);
     if (options) {
-        peerImpl->GetParagraphsImpl(options.value());
+        results = peerImpl->GetParagraphsImpl(options.value());
     }
-    LOGW("GENERATED_ArkUIRichEditorControllerAccessor::getParagraphs should return a value");
-    //And this GetParagraphsImpl should return a value
-    return {};
+    return Converter::ArkValue<Array_RichEditorParagraphResult>(results, Converter::FC);
 }
 Ark_RichEditorSelection GetSelectionImpl(Ark_RichEditorController peer)
 {
