@@ -52,19 +52,16 @@ void CheckBoxGroupModelNG::SetSelectAll(bool isSelected)
 void CheckBoxGroupModelNG::SetSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color);
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, true);
 }
 
 void CheckBoxGroupModelNG::SetUnSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color);
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, true);
 }
 
 void CheckBoxGroupModelNG::SetCheckMarkColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color);
-    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser, true);
 }
 
 void CheckBoxGroupModelNG::SetCheckMarkSize(const Dimension& size)
@@ -128,40 +125,61 @@ RefPtr<FrameNode> CheckBoxGroupModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
+void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, const std::optional<bool> isSelected)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected, frameNode);
+    if (isSelected.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, frameNode);
+    }
 }
 
-void CheckBoxGroupModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
+void CheckBoxGroupModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, true, frameNode);
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, frameNode);
+    }
 }
 
-void CheckBoxGroupModelNG::SetUnSelectedColor(FrameNode* frameNode, const Color& color)
+void CheckBoxGroupModelNG::SetUnSelectedColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, true, frameNode);
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, frameNode);
+    }
 }
 
-void CheckBoxGroupModelNG::SetCheckMarkColor(FrameNode* frameNode, const Color& color)
+void CheckBoxGroupModelNG::SetCheckMarkColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser, true, frameNode);
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, frameNode);    
+    }
 }
 
-void CheckBoxGroupModelNG::SetCheckMarkSize(FrameNode* frameNode, const Dimension& size)
+void CheckBoxGroupModelNG::SetCheckMarkSize(FrameNode* frameNode, const std::optional<Dimension>& size)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size, frameNode);
+    if (size.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, frameNode);
+    }
 }
 
-void CheckBoxGroupModelNG::SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width)
+void CheckBoxGroupModelNG::SetCheckMarkWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width, frameNode);
+    if (width.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, frameNode);
+    }
 }
 
 void CheckBoxGroupModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
@@ -179,10 +197,15 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyl
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle);
 }
 
-void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxStyle checkboxGroupStyle)
+void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxGroupStyle)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(
-        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle, frameNode);
+    if (checkboxGroupStyle.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, frameNode);
+    }
 }
 
 void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName)
@@ -284,7 +307,7 @@ CheckBoxStyle CheckBoxGroupModelNG::GetCheckboxGroupStyle(FrameNode* frameNode)
     return value;
 }
 
-void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
+void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -293,33 +316,9 @@ void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& 
 
 void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
 {
-    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
-void CheckBoxGroupModelNG::ResetSelectedColor()
-{
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor,
-        PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER);
-}
-
-void CheckBoxGroupModelNG::ResetUnSelectedColor()
-{
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor,
-        PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER);
-}
-
-void CheckBoxGroupModelNG::ResetCheckMarkColor()
-{
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor,
-        PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser,
-        PROPERTY_UPDATE_RENDER);
-}
 } // namespace OHOS::Ace::NG
