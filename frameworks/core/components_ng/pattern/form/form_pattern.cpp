@@ -981,7 +981,7 @@ void FormPattern::UpdateTimeLimitFontCfg()
     Dimension fontSize(GetTimeLimitFontSize());
     if (!textLayoutProperty->GetFontSize().has_value() ||
         !NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
+        TAG_LOGD(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
             cardInfo_.bundleName.c_str(), cardInfo_.id, fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
         isNeedUpdate = true;
