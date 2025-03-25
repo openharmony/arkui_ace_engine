@@ -178,30 +178,30 @@ advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuipopupwindow
 advanced_ui_component/chipgroup/ @arkuipopupwindow
 advanced_ui_component/chip/ @arkuipopupwindow
-advanced_ui_component/composelistitem/ @hanyujia1
-advanced_ui_component/composetitlebar/ @hanyujia1
+advanced_ui_component/composelistitem/ @wxwg_admin
+advanced_ui_component/composetitlebar/ @wxwg_admin
 advanced_ui_component/counter/ @arkuipopupwindow
-advanced_ui_component/dialog/ @hanyujia1
+advanced_ui_component/dialog/ @wxwg_admin
 advanced_ui_component/downloadfilebutton/
-advanced_ui_component/editabletitlebar/ @hanyujia1
-advanced_ui_component/exceptionprompt/ @hanyujia1
-advanced_ui_component/filter/ @hanyujia1
+advanced_ui_component/editabletitlebar/ @wxwg_admin
+advanced_ui_component/exceptionprompt/ @wxwg_admin
+advanced_ui_component/filter/ @wxwg_admin
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
 advanced_ui_component/formmenu/ 
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
-advanced_ui_component/gridobjectsortcomponent/ @hanyujia1
+advanced_ui_component/gridobjectsortcomponent/ @wxwg_admin
 advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
-advanced_ui_component/progressbutton/ @hanyujia1
+advanced_ui_component/progressbutton/ @wxwg_admin
 advanced_ui_component/segmentbutton/ @arkuipopupwindow
 advanced_ui_component/selectionmenu/ @huawei_g_five
-advanced_ui_component/selecttitlebar/ @hanyujia1
-advanced_ui_component/splitlayout/ @hanyujia1
-advanced_ui_component/subheader/ @hanyujia1
-advanced_ui_component/swiperefresher/ @hanyujia1
-advanced_ui_component/tabtitlebar/ @hanyujia1
-advanced_ui_component/toolbar/ @hanyujia1
-advanced_ui_component/treeview/ @hanyujia1
+advanced_ui_component/selecttitlebar/ @wxwg_admin
+advanced_ui_component/splitlayout/ @wxwg_admin
+advanced_ui_component/subheader/ @wxwg_admin
+advanced_ui_component/swiperefresher/ @wxwg_admin
+advanced_ui_component/tabtitlebar/ @wxwg_admin
+advanced_ui_component/toolbar/ @wxwg_admin
+advanced_ui_component/treeview/ @wxwg_admin
 
 [Extend UI Components]
 component_ext/arc_swiper/ 
