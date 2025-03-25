@@ -89,6 +89,16 @@ public:
         return duration_;
     }
 
+    void SetIsRepeat(bool repeat)
+    {
+        repeat_ = repeat;
+    }
+
+    bool GetIsRepeat() const
+    {
+        return repeat_;
+    }
+
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
     {
         gestureHub_ = gestureHub;
@@ -119,6 +129,8 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
 
     void PrintCurrentFingersInfo() const;
+
+    void RemoteRepeatTimer();
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
@@ -155,6 +167,7 @@ private:
     DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
     std::unique_ptr<GestureEventFunc> longPressRecorder_;
+    int32_t longPressFingerCountForSequence_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

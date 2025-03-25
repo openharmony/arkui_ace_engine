@@ -179,6 +179,20 @@ bool SequencedRecognizer::NeedStartDeadlineTimerInner(
            curRecognizer->IsAllowedType(sourceTool);
 }
 
+void SequencedRecognizer::StopLongPressRepeatTimer(int32_t pointerId)
+{
+    int32_t idx = 0;
+    for (const auto& recognizer : recognizers_) {
+        if (idx < currentIndex_ && recognizer && recognizer->CheckTouchId(pointerId)) {
+            RefPtr<LongPressRecognizer> longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+            if (longPressRecognizer && longPressRecognizer->GetIsRepeat()) {
+                longPressRecognizer->RemoteRepeatTimer();
+            }
+        }
+        idx++;
+    }
+}
+
 bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
 {
     if (point.type == TouchType::DOWN || point.type == TouchType::UP) {
@@ -223,10 +237,13 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
             break;
     }
 
-    if ((point.type == TouchType::UP) && (refereeState_ == RefereeState::PENDING) &&
-        NeedStartDeadlineTimerInner(curRecognizer, point.sourceTool)) {
-        DeadlineTimer();
+    if (point.type == TouchType::UP) {
+        StopLongPressRepeatTimer(point.id);
+        if ((refereeState_ == RefereeState::PENDING) && NeedStartDeadlineTimerInner(curRecognizer, point.sourceTool)) {
+            DeadlineTimer();
+        }
     }
+
     return true;
 }
 
