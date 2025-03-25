@@ -92,7 +92,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
             !(textLayoutProperty->GetFontFamily().has_value())) {
             textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
         } else {
-            textStyle.SetFontFamilies(textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
+            textStyle.SetFontFamilies(
+                textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
         }
     }
     if (contentModifier) {
