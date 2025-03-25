@@ -175,14 +175,6 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
-        postJumpOffset_ = info_.currentOffset_;
-        info_.lineHeightMap_.clear();
-        PrepareJumpOnReset(info_);
-        ResetLayoutRange(info_);
-        return;
-    }
-
     if (wrapper_->ConstraintChanged()) {
         // need to remeasure all items in current view
         postJumpOffset_ = info_.currentOffset_;
@@ -393,6 +385,7 @@ void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t star
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
+    cacheLine = 0; // not implemented
     const auto& info = info_;
     const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     const Alignment align = GetAlignment(info.axis_, props);
@@ -441,6 +434,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
+            child->SetActive(true);
         }
         // add mainGap below the item
         mainOffset += lineHeightIt->second + mainGap_;

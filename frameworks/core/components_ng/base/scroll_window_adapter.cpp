@@ -193,7 +193,6 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
         if (auto scroll = container_->GetPattern<ScrollablePattern>(); scroll) {
             scroll->ScrollToIndex(target_->index, true, target_->align, target_->extraOffset);
         } else if (auto swiper = container_->GetPattern<SwiperPattern>(); swiper) {
-            std::cout << "changeIdx to " << target_->index << "\n";
             swiper->ChangeIndex(target_->index, true);
         }
     }
@@ -201,6 +200,10 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
 
 void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
 {
+    if (fillAlgorithm_->GetMarkIndex() != markIndex_) {
+        markIndex_ = fillAlgorithm_->GetMarkIndex();
+        RequestRecompose(markIndex_);
+    }
     if (size == size_ && axis == axis_) {
         return;
     }
