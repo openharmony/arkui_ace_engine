@@ -24,6 +24,7 @@ ohos_shared_library("ace_network") {
     "netmanager_base:net_conn_parcel",
     "netstack:http_client",
     "request:preload_native",
+    "samgr:samgr_proxy",
   ]
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
