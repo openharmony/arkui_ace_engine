@@ -4697,6 +4697,10 @@ void ArkUINativeModule::RegisterRefreshAttributes(Local<panda::ObjectRef> object
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetOnRefreshing));
     refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRefreshing"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetOnRefreshing));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxPullDownDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::SetMaxPullDownDistance));
+    refresh->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxPullDownDistance"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RefreshBridege::ResetMaxPullDownDistance));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "refresh"), refresh);
 }
 

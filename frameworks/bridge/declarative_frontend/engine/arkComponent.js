@@ -19173,6 +19173,10 @@ class ArkRefreshComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RefreshOnOffsetChangeModifier.identity, RefreshOnOffsetChangeModifier, callback);
     return this;
   }
+  maxPullDownDistance(value) {
+    modifierWithKey(this._modifiersWithKeys, MaxPullDownDistanceModifier.identity, MaxPullDownDistanceModifier, value);
+    return this;
+  }
 }
 class RefreshOnOffsetChangeModifier extends ModifierWithKey {
   constructor(value) {
@@ -19258,6 +19262,23 @@ class PullDownRatioModifier extends ModifierWithKey {
   }
 }
 PullDownRatioModifier.identity = Symbol('pullDownRatio');
+class MaxPullDownDistanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetMaxPullDownDistance(node);
+    }
+    else {
+      getUINativeModule().refresh.setMaxPullDownDistance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MaxPullDownDistanceModifier.identity = Symbol('maxPullDownDistance');
 // @ts-ignore
 if (globalThis.Refresh !== undefined) {
   globalThis.Refresh.attributeModifier = function (modifier) {

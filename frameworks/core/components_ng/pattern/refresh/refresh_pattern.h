@@ -112,6 +112,7 @@ private:
     void HandleDragEnd(float speed);
     void HandleDragCancel();
     float CalculatePullDownRatio();
+    float GetMaxPullDownDistance();
     void TriggerStatusChange(RefreshStatus newStatus);
     void OnAttachToFrameNode() override;
     float GetFollowRatio();
