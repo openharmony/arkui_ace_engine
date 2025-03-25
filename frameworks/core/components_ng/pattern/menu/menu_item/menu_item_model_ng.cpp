@@ -48,9 +48,11 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     renderContext->UpdateBorderRadius(border);
 
     CHECK_NULL_VOID(customNode);
-    if (menuItem->GetChildren().empty()) {
-        menuItem->AddChild(customNode);
+    if (!menuItem->GetChildren().empty()) {
+        menuItem->Clean();
     }
+    menuItem->AddChild(customNode);
+    menuItem->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 /*
