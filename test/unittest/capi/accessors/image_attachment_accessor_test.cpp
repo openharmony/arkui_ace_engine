@@ -29,7 +29,7 @@ using namespace AccessorTestFixtures;
 using namespace Converter;
 
 namespace GeneratedModifier {
-    const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
 }
 class ImageAttachmentAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIImageAttachmentAccessor,
         &GENERATED_ArkUIAccessors::getImageAttachmentAccessor, ImageAttachmentPeer> {
@@ -55,6 +55,60 @@ RefPtr<PixelMap> ImageAttachmentAccessorTest::CreatePixelMap(std::string& src)
     return PixelMap::CreatePixelMap(ptr);
 }
 
+namespace {
+const CalcLength TEST_CALC_LENGHT(123.0_vp);
+const auto TEST_DIMENSION = TEST_CALC_LENGHT.GetDimension();
+
+const MarginProperty MARGIN_PADDING_PROPERTY = {
+    .left = TEST_CALC_LENGHT,
+    .right = TEST_CALC_LENGHT,
+    .top = TEST_CALC_LENGHT,
+    .bottom = TEST_CALC_LENGHT
+};
+const BorderRadiusProperty BORDER_RADIUES_PROPERTY(TEST_DIMENSION);
+
+Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
+{
+    const Ark_Padding arkPadding = {
+        .left = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .top = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .right = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .bottom = ArkValue<Opt_Length>(TEST_DIMENSION),
+    };
+    const Ark_BorderRadiuses arkBorderRadiuses = {
+        .bottomLeft = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .bottomRight = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .topLeft = ArkValue<Opt_Length>(TEST_DIMENSION),
+        .topRight = ArkValue<Opt_Length>(TEST_DIMENSION)
+    };
+    const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorderRadiuses),
+    };
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
+}
+Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
+{
+    const Ark_LengthMetrics lengthMetrics = ArkValue<Ark_LengthMetrics>(TEST_DIMENSION);
+    const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(lengthMetrics),
+    };
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
+};
+
+Opt_ImageAttachmentLayoutStyle getImageLayoutStyleOptional()
+{
+    Ark_ImageAttachmentLayoutStyle imageLayoutStyle = {
+        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
+        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+    };
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
+};
+} // namespace
 /**
  * @tc.name: ctorTestPixelMap
  * @tc.desc: Check the functionality of ctor
@@ -85,25 +139,23 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureDimensionAnyValidValues) {
         Ark_SizeOptions size {
-            .width = Converter::ArkValue<Opt_Length>(test),
-            .height = Converter::ArkValue<Opt_Length>(test),
+            .width = ArkValue<Opt_Length>(test),
+            .height = ArkValue<Opt_Length>(test),
         };
         Ark_ImageAttachmentInterface value {
             .size = ArkValue<Opt_SizeOptions>(size),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size);
         if (expected.IsNonNegative()) {
-            ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width);
-            ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height);
-            EXPECT_EQ(
-                peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width->ToString(), expected.ToString());
-            EXPECT_EQ(
-                peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height->ToString(), expected.ToString());
+            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->width);
+            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->height);
+            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->width->ToString(), expected.ToString());
+            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->height->ToString(), expected.ToString());
         } else {
-            ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width);
-            ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height);
+            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->width);
+            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->height);
         }
         accessor_->destroyPeer(peer);
     }
@@ -121,25 +173,23 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
         ASSERT_TRUE(expectPointer);
         auto sizeResource = ArkValue<Ark_Length>(Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = num_id });
         Ark_SizeOptions size {
-            .width = Converter::ArkValue<Opt_Length>(sizeResource),
-            .height = Converter::ArkValue<Opt_Length>(sizeResource),
+            .width = ArkValue<Opt_Length>(sizeResource),
+            .height = ArkValue<Opt_Length>(sizeResource),
         };
         Ark_ImageAttachmentInterface value {
             .size = ArkValue<Opt_SizeOptions>(size),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size);
         if (expectPointer->IsNonNegative()) {
-            ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width);
-            ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height);
-            EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width->ToString(),
-                expectPointer->ToString());
-            EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height->ToString(),
-                expectPointer->ToString());
+            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->width);
+            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->height);
+            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->width->ToString(), expectPointer->ToString());
+            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->height->ToString(), expectPointer->ToString());
         } else {
-            ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->width);
-            ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->size->height);
+            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->width);
+            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->height);
         }
         accessor_->destroyPeer(peer);
     }
@@ -157,9 +207,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign);
-        EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign, expected);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->verticalAlign);
+        EXPECT_EQ(peer->imageSpan->GetImageAttribute()->verticalAlign, expected);
         accessor_->destroyPeer(peer);
     }
 }
@@ -176,8 +226,8 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->verticalAlign);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->verticalAlign);
         accessor_->destroyPeer(peer);
     }
 }
@@ -194,9 +244,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit);
-        EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit, expected);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->objectFit);
+        EXPECT_EQ(peer->imageSpan->GetImageAttribute()->objectFit, expected);
         accessor_->destroyPeer(peer);
     }
 }
@@ -213,11 +263,29 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-        ASSERT_FALSE(peer->imageSpan->GetImageSpanOptions().imageAttribute->objectFit);
+        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->objectFit);
         accessor_->destroyPeer(peer);
     }
 }
+
+/**
+ * @tc.name: ctorTestImageStyleMargins
+ * @tc.desc: Check the functionality of ctor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level1)
+{
+    const Ark_ImageAttachmentInterface value {
+        .layoutStyle = getImageLayoutStyleOptional(),
+    };
+    auto peer = accessor_->ctor(&value);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->marginProp);
+    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->paddingProp);
+    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->borderRadius);
+    accessor_->destroyPeer(peer);
+};
 
 /**
  * @tc.name: ctorTestImageStyleLengthMetrics
@@ -226,26 +294,17 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
  */
 HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.Level1)
 {
-    const CalcLength length(123.0_vp);
-    MarginProperty prop = {
-        .left = length,
-        .right = length,
-        .top = length,
-        .bottom = length
-    };
-    const Ark_LengthMetrics lengthMetrics = Converter::ArkValue<Ark_LengthMetrics>(length.GetDimension());
-    const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
-        .padding = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
-        .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(lengthMetrics),
-    };
     Ark_ImageAttachmentInterface value {
-        .layoutStyle = ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle),
+        .layoutStyle = getImageLayoutStyleLengthMetrics(),
     };
     auto peer = accessor_->ctor(&value);
-    ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-    ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->marginProp);
-    EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->marginProp, prop);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->marginProp);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->paddingProp);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->borderRadius);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
     accessor_->destroyPeer(peer);
 };
 
@@ -254,39 +313,19 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
  * @tc.desc: Check the functionality of ctor
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleMargins, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
 {
-    const CalcLength length(123.0_vp);
-    MarginProperty prop = {
-        .left = length,
-        .right = length,
-        .top = length,
-        .bottom = length
-    };
-    Ark_Padding arkPadding = {
-        .left = ArkValue<Opt_Length>(length.GetDimension()),
-        .top = ArkValue<Opt_Length>(length.GetDimension()),
-        .right = ArkValue<Opt_Length>(length.GetDimension()),
-        .bottom= ArkValue<Opt_Length>(length.GetDimension()),
-    };
-    Ark_BorderRadiuses arkBorderRadiuses = {
-        .bottomLeft = ArkValue<Opt_Length>(length.GetDimension()),
-        .bottomRight = ArkValue<Opt_Length>(length.GetDimension()),
-        .topLeft = ArkValue<Opt_Length>(length.GetDimension()),
-        .topRight = ArkValue<Opt_Length>(length.GetDimension())
-    };
-    const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorderRadiuses),
-    };
-    Ark_ImageAttachmentInterface value {
-        .layoutStyle = ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle),
+    const Ark_ImageAttachmentInterface value {
+        .layoutStyle = getImageLayoutStyleFilled(),
     };
     auto peer = accessor_->ctor(&value);
-    ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute);
-    ASSERT_TRUE(peer->imageSpan->GetImageSpanOptions().imageAttribute->marginProp);
-    EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imageAttribute->marginProp, prop);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->marginProp);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->paddingProp);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->borderRadius);
+    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
     accessor_->destroyPeer(peer);
 };
 
@@ -314,11 +353,42 @@ HWTEST_F(ImageAttachmentAccessorTest, getValueTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ctorTestSize
+ * @tc.desc: Check the functionality of ctor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAttachmentAccessorTest, getSizeTest, TestSize.Level1)
+{
+    for (auto& [input, test, expected] : testFixtureDimensionAnyValidValues) {
+        Ark_SizeOptions size {
+            .width = ArkValue<Opt_Length>(test),
+            .height = ArkValue<Opt_Length>(test),
+        };
+        Ark_ImageAttachmentInterface value {
+            .size = ArkValue<Opt_SizeOptions>(size),
+        };
+        auto peer = accessor_->ctor(&value);
+        if (expected.IsNonNegative()) {
+            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(size))
+                << "Passed value is: " << input;
+        } else {
+            Ark_SizeOptions emptySize {
+                .width = ArkValue<Opt_Length>(test),
+                .height = ArkValue<Opt_Length>(test),
+            };
+            EXPECT_THAT(accessor_->getSize(peer), CompareArkSize(emptySize))
+                << "Passed value is: " << input;;
+        }
+        accessor_->destroyPeer(peer);
+    }
+}
+
+/**
  * @tc.name: getVerticalAlignValidValues
  * @tc.desc: Check the functionality of getVerticalAlign
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignValidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestValidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureVerticalAlignValidValues) {
         Ark_ImageAttachmentInterface value {
@@ -335,7 +405,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignValidValues, TestSize.Leve
  * @tc.desc: Check the functionality of getVerticalAlign
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignInvalidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureVerticalAlignInvalidValues) {
         Ark_ImageAttachmentInterface value {
@@ -369,7 +439,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestValidValues, TestSize.Leve
  * @tc.desc: Check the functionality of getObjectFit
  * @tc.type: FUNC
  */
-HWTEST_F(ImageAttachmentAccessorTest, getObjectFitInvalidValues, TestSize.Level1)
+HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Level1)
 {
     for (auto& [input, test, expected] : testFixtureObjectFitInvalidValues) {
         Ark_ImageAttachmentInterface value {
@@ -379,5 +449,45 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitInvalidValues, TestSize.Level1
         EXPECT_EQ(accessor_->getObjectFit(peer), INVALID_ENUM_VAL<Ark_ImageFit>);
         accessor_->destroyPeer(peer);
     }
+}
+
+/**
+ * @tc.name: getObjectFitInvalidValues
+ * @tc.desc: Check the functionality of getObjectFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level1)
+{
+    auto expected = OptConvert<Ark_ImageAttachmentLayoutStyle>(getImageLayoutStyleOptional());
+    const Ark_ImageAttachmentInterface value {
+        .layoutStyle = getImageLayoutStyleOptional(),
+    };
+    auto peer = accessor_->ctor(&value);
+    auto arkGetValue = accessor_->getLayoutStyle(peer);
+    ASSERT_TRUE(expected);
+    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
+    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
+    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    accessor_->destroyPeer(peer);
+}
+
+/**
+ * @tc.name: getObjectFitInvalidValues
+ * @tc.desc: Check the functionality of getObjectFit
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
+{
+    auto expected = OptConvert<Ark_ImageAttachmentLayoutStyle>(getImageLayoutStyleFilled());
+    const Ark_ImageAttachmentInterface value {
+        .layoutStyle = getImageLayoutStyleFilled(),
+    };
+    auto peer = accessor_->ctor(&value);
+    auto arkGetValue = accessor_->getLayoutStyle(peer);
+    ASSERT_TRUE(expected);
+    EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
+    EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
+    EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
+    accessor_->destroyPeer(peer);
 }
 } // namespace OHOS::Ace::NG

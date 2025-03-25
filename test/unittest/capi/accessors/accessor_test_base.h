@@ -195,5 +195,25 @@ template<typename AccessorType, auto GetAccessorFunc>
 class StaticAccessorTest : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, void> {
 };
 
+MATCHER_P(CompareOptMarginsPaddings, expected, "Compare margins and paddings")
+{
+    auto optArg = Converter::OptConvert<MarginProperty>(arg);
+    auto optExpected = Converter::OptConvert<MarginProperty>(expected);
+    return optArg == optExpected;
+}
+
+MATCHER_P(CompareOptBorderRadius, expected, "Compare border radius")
+{
+    auto optArg = Converter::OptConvert<BorderRadiusProperty>(arg);
+    auto optExpected = Converter::OptConvert<BorderRadiusProperty>(expected);
+    return optArg == optExpected;
+}
+
+MATCHER_P(CompareArkSize, expected, "Compare size values")
+{
+    auto optArg = Converter::OptConvert<ImageSpanSize>(arg);
+    auto optExpected = Converter::OptConvert<ImageSpanSize>(expected);
+    return optArg == optExpected;
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
