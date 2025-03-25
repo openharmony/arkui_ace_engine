@@ -1806,6 +1806,26 @@ void callManagedCallback_OffsetResult_VoidSync(Ark_VMContext vmContext, Ark_Int3
     argsSerializer.writeOffsetResult(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_ScrollResult_Void(Ark_Int32 resourceId, Ark_ScrollResult value)
+{
+    CallbackBuffer __buffer = {{}, {}};
+    const Ark_CallbackResource __callbackResource = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    __buffer.resourceHolder.holdCallbackResource(&__callbackResource);
+    Serializer argsSerializer = Serializer(__buffer.buffer, sizeof(__buffer.buffer), &(__buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_ScrollResult_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeScrollResult(value);
+    enqueueCallback(&__buffer);
+}
+void callManagedCallback_ScrollResult_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ScrollResult value)
+{
+    uint8_t __buffer[60 * 4];
+    Serializer argsSerializer = Serializer(__buffer, sizeof(__buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_ScrollResult_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeScrollResult(value);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(__buffer), __buffer);
+}
 void callManagedCallback_OnAlertEvent_Boolean(Ark_Int32 resourceId, Ark_OnAlertEvent parameter, Callback_Boolean_Void continuation)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -4844,6 +4864,36 @@ void callManagedOnSafeBrowsingCheckResultCallbackSync(Ark_VMContext vmContext, A
     argsSerializer.writeInt32(static_cast<Ark_ThreatType>(threatType));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedOnWillScrollCallback(Ark_Int32 resourceId, Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, Callback_ScrollResult_Void continuation)
+{
+    CallbackBuffer __buffer = {{}, {}};
+    const Ark_CallbackResource __callbackResource = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    __buffer.resourceHolder.holdCallbackResource(&__callbackResource);
+    Serializer argsSerializer = Serializer(__buffer.buffer, sizeof(__buffer.buffer), &(__buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_OnWillScrollCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(scrollOffset);
+    argsSerializer.writeInt32(static_cast<Ark_ScrollState>(scrollState));
+    argsSerializer.writeInt32(static_cast<Ark_ScrollSource>(scrollSource));
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    enqueueCallback(&__buffer);
+}
+void callManagedOnWillScrollCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, Callback_ScrollResult_Void continuation)
+{
+    uint8_t __buffer[60 * 4];
+    Serializer argsSerializer = Serializer(__buffer, sizeof(__buffer), nullptr);
+    argsSerializer.writeInt32(Kind_OnWillScrollCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(scrollOffset);
+    argsSerializer.writeInt32(static_cast<Ark_ScrollState>(scrollState));
+    argsSerializer.writeInt32(static_cast<Ark_ScrollSource>(scrollSource));
+    argsSerializer.writeCallbackResource(continuation.resource);
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
+    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(__buffer), __buffer);
+}
 void callManagedOnScrollCallback(Ark_Int32 resourceId, Ark_Number scrollOffset, Ark_ScrollState scrollState)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -5916,6 +5966,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Number_Tuple_Number_Number_Number_Number: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Number_Tuple_Number_Number_Number_Number);
         case Kind_Callback_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Number_Void);
         case Kind_Callback_OffsetResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OffsetResult_Void);
+        case Kind_Callback_ScrollResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ScrollResult_Void);
         case Kind_Callback_OnAlertEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnAlertEvent_Boolean);
         case Kind_Callback_OnAudioStateChangedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnAudioStateChangedEvent_Void);
         case Kind_Callback_OnBeforeUnloadEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnBeforeUnloadEvent_Boolean);
@@ -6043,6 +6094,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnRenderProcessRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessRespondingCallback);
         case Kind_OnSafeBrowsingCheckResultCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnSafeBrowsingCheckResultCallback);
         case Kind_OnScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollCallback);
+        case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallback);
         case Kind_OnScrollEdgeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollEdgeCallback);
         case Kind_OnScrollFrameBeginCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollFrameBeginCallback);
         case Kind_OnScrollVisibleContentChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollVisibleContentChangeCallback);
@@ -6161,6 +6213,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Number_Tuple_Number_Number_Number_Number: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Number_Tuple_Number_Number_Number_NumberSync);
         case Kind_Callback_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Number_VoidSync);
         case Kind_Callback_OffsetResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OffsetResult_VoidSync);
+        case Kind_Callback_ScrollResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ScrollResult_VoidSync);
         case Kind_Callback_OnAlertEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnAlertEvent_BooleanSync);
         case Kind_Callback_OnAudioStateChangedEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnAudioStateChangedEvent_VoidSync);
         case Kind_Callback_OnBeforeUnloadEvent_Boolean: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_OnBeforeUnloadEvent_BooleanSync);
@@ -6288,6 +6341,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnRenderProcessRespondingCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnRenderProcessRespondingCallbackSync);
         case Kind_OnSafeBrowsingCheckResultCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnSafeBrowsingCheckResultCallbackSync);
         case Kind_OnScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollCallbackSync);
+        case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallbackSync);
         case Kind_OnScrollEdgeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollEdgeCallbackSync);
         case Kind_OnScrollFrameBeginCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollFrameBeginCallbackSync);
         case Kind_OnScrollVisibleContentChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnScrollVisibleContentChangeCallbackSync);

@@ -2504,9 +2504,6 @@ export class TypeChecker {
     static isOnTouchIconUrlReceivedEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean): boolean {
         return value instanceof OnTouchIconUrlReceivedEvent
     }
-    static isOnWillScrollCallback(value: object|string|number|undefined|null, arg0: boolean): boolean {
-        return value instanceof OnWillScrollCallback
-    }
     static isOnWindowNewEvent(value: object|string|number|undefined|null, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof OnWindowNewEvent
     }

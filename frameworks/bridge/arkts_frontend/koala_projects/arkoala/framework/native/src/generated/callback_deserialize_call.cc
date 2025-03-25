@@ -1628,6 +1628,24 @@ void deserializeAndCallSyncCallback_OffsetResult_Void(Ark_VMContext vmContext, u
     Ark_OffsetResult value = thisDeserializer.readOffsetResult();
     _callSync(vmContext, _resourceId, value);
 }
+void deserializeAndCallCallback_ScrollResult_Void(uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_ScrollResult value = thisDeserializer.readScrollResult();
+    _call(_resourceId, value);
+}
+void deserializeAndCallSyncCallback_ScrollResult_Void(Ark_VMContext vmContext, uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointer());
+    Ark_ScrollResult value = thisDeserializer.readScrollResult();
+    _callSync(vmContext, _resourceId, value);
+}
 void deserializeAndCallCallback_OnAlertEvent_Boolean(uint8_t* thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -4413,6 +4431,30 @@ void deserializeAndCallSyncOnScrollCallback(Ark_VMContext vmContext, uint8_t* th
     Ark_ScrollState scrollState = static_cast<Ark_ScrollState>(thisDeserializer.readInt32());
     _callSync(vmContext, _resourceId, scrollOffset, scrollState);
 }
+void deserializeAndCallOnWillScrollCallback(uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Number scrollOffset = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_ScrollState scrollState = static_cast<Ark_ScrollState>(thisDeserializer.readInt32());
+    Ark_ScrollSource scrollSource = static_cast<Ark_ScrollSource>(thisDeserializer.readInt32());
+    Callback_ScrollResult_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_ScrollResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_ScrollResult_Void))))};
+    _call(_resourceId, scrollOffset, scrollState, scrollSource, _continuation);
+}
+void deserializeAndCallSyncOnWillScrollCallback(Ark_VMContext vmContext, uint8_t* thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointer());
+    Ark_Number scrollOffset = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    Ark_ScrollState scrollState = static_cast<Ark_ScrollState>(thisDeserializer.readInt32());
+    Ark_ScrollSource scrollSource = static_cast<Ark_ScrollSource>(thisDeserializer.readInt32());
+    Callback_ScrollResult_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_ScrollResult_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ScrollResult value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_ScrollResult_Void))))};
+    _callSync(vmContext, _resourceId, scrollOffset, scrollState, scrollSource, _continuation);
+}
 void deserializeAndCallOnScrollEdgeCallback(uint8_t* thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -5405,6 +5447,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 th
         case 1618565120/*Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisArray, thisLength);
         case 36519084/*Kind_Callback_Number_Void*/: return deserializeAndCallCallback_Number_Void(thisArray, thisLength);
         case 1295952075/*Kind_Callback_OffsetResult_Void*/: return deserializeAndCallCallback_OffsetResult_Void(thisArray, thisLength);
+        case 1385252075/*Kind_Callback_ScrollResult_Void*/: return deserializeAndCallCallback_ScrollResult_Void(thisArray, thisLength);
         case 806070428/*Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisArray, thisLength);
         case -1559789631/*Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisArray, thisLength);
         case -873162122/*Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisArray, thisLength);
@@ -5532,6 +5575,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, uint8_t* thisArray, Ark_Int32 th
         case 1334389194/*Kind_OnRenderProcessRespondingCallback*/: return deserializeAndCallOnRenderProcessRespondingCallback(thisArray, thisLength);
         case -1099824577/*Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallOnSafeBrowsingCheckResultCallback(thisArray, thisLength);
         case -160015401/*Kind_OnScrollCallback*/: return deserializeAndCallOnScrollCallback(thisArray, thisLength);
+        case -150015401/*Kind_OnWillScrollCallback*/: return deserializeAndCallOnWillScrollCallback(thisArray, thisLength);
         case -1259214476/*Kind_OnScrollEdgeCallback*/: return deserializeAndCallOnScrollEdgeCallback(thisArray, thisLength);
         case -2133791987/*Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallOnScrollFrameBeginCallback(thisArray, thisLength);
         case 625641334/*Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisArray, thisLength);
@@ -5651,6 +5695,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uin
         case 1618565120/*Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallSyncCallback_Number_Tuple_Number_Number_Number_Number(vmContext, thisArray, thisLength);
         case 36519084/*Kind_Callback_Number_Void*/: return deserializeAndCallSyncCallback_Number_Void(vmContext, thisArray, thisLength);
         case 1295952075/*Kind_Callback_OffsetResult_Void*/: return deserializeAndCallSyncCallback_OffsetResult_Void(vmContext, thisArray, thisLength);
+        case 1385252075/*Kind_Callback_ScrollResult_Void*/: return deserializeAndCallSyncCallback_ScrollResult_Void(vmContext, thisArray, thisLength);
         case 806070428/*Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallSyncCallback_OnAlertEvent_Boolean(vmContext, thisArray, thisLength);
         case -1559789631/*Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallSyncCallback_OnAudioStateChangedEvent_Void(vmContext, thisArray, thisLength);
         case -873162122/*Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallSyncCallback_OnBeforeUnloadEvent_Boolean(vmContext, thisArray, thisLength);
@@ -5778,6 +5823,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, uin
         case 1334389194/*Kind_OnRenderProcessRespondingCallback*/: return deserializeAndCallSyncOnRenderProcessRespondingCallback(vmContext, thisArray, thisLength);
         case -1099824577/*Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallSyncOnSafeBrowsingCheckResultCallback(vmContext, thisArray, thisLength);
         case -160015401/*Kind_OnScrollCallback*/: return deserializeAndCallSyncOnScrollCallback(vmContext, thisArray, thisLength);
+        case -150015401/*Kind_OnWillScrollCallback*/: return deserializeAndCallSyncOnWillScrollCallback(vmContext, thisArray, thisLength);
         case -1259214476/*Kind_OnScrollEdgeCallback*/: return deserializeAndCallSyncOnScrollEdgeCallback(vmContext, thisArray, thisLength);
         case -2133791987/*Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallSyncOnScrollFrameBeginCallback(vmContext, thisArray, thisLength);
         case 625641334/*Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallSyncOnScrollVisibleContentChangeCallback(vmContext, thisArray, thisLength);

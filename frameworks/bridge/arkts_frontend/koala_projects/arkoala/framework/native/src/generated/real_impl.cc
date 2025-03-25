@@ -2449,14 +2449,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Callback_Number_Number_Void* value)
     {
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                          const Opt_ScrollOnWillScrollCallback* value)
-    {
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const ScrollOnScrollCallback* value)
-    {
-    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -3062,6 +3054,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Callback_Number_Number_Void* value)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -3577,6 +3577,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                           const OnScrollVisibleContentChangeCallback* value)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -7832,6 +7839,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_Boolean show)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -8393,8 +8408,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::FrictionImpl,
             ScrollableCommonMethodModifier::OnScrollImpl,
-            ScrollableCommonMethodModifier::OnWillScrollImpl,
-            ScrollableCommonMethodModifier::OnDidScrollImpl,
             ScrollableCommonMethodModifier::OnReachStartImpl,
             ScrollableCommonMethodModifier::OnReachEndImpl,
             ScrollableCommonMethodModifier::OnScrollStartImpl,
@@ -8632,6 +8645,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::FrictionImpl,
             GridAttributeModifier::AlignItemsImpl,
             GridAttributeModifier::OnScrollImpl,
+            GridAttributeModifier::OnWillScrollImpl,
+            GridAttributeModifier::OnDidScrollImpl,
             GridAttributeModifier::OnReachStartImpl,
             GridAttributeModifier::OnReachEndImpl,
             GridAttributeModifier::OnScrollStartImpl,
@@ -8813,6 +8828,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::OnScrollImpl,
             ListAttributeModifier::OnScrollIndexImpl,
             ListAttributeModifier::OnScrollVisibleContentChangeImpl,
+            GridAttributeModifier::OnWillScrollImpl,
+            GridAttributeModifier::OnDidScrollImpl,
             ListAttributeModifier::OnReachStartImpl,
             ListAttributeModifier::OnReachEndImpl,
             ListAttributeModifier::OnScrollStartImpl,
@@ -10225,6 +10242,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::FrictionImpl,
             WaterFlowAttributeModifier::CachedCount0Impl,
             WaterFlowAttributeModifier::CachedCount1Impl,
+            WaterFlowAttributeModifier::OnWillScrollImpl,
+            WaterFlowAttributeModifier::OnDidScrollImpl,
             WaterFlowAttributeModifier::OnReachStartImpl,
             WaterFlowAttributeModifier::OnReachEndImpl,
             WaterFlowAttributeModifier::OnScrollFrameBeginImpl,

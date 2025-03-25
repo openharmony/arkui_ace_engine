@@ -726,6 +726,12 @@ export function deserializeAndCallCallback_OffsetResult_Void(thisDeserializer: D
     let value: OffsetResult = thisDeserializer.readOffsetResult()
     _call(value)
 }
+export function deserializeAndCallCallback_ScrollResult_Void(thisDeserializer: Deserializer): void {
+    const _resourceId: int32 = thisDeserializer.readInt32()
+    const _call = (ResourceHolder.instance().get(_resourceId) as ((value: ScrollResult) => void))
+    let value: ScrollResult = thisDeserializer.readScrollResult()
+    _call(value)
+}
 export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer: Deserializer): void {
     const _resourceId: int32 = thisDeserializer.readInt32()
     const _call = (ResourceHolder.instance().get(_resourceId) as ((parameter: OnAlertEvent) => boolean))
@@ -1717,6 +1723,16 @@ export function deserializeAndCallOnScrollCallback(thisDeserializer: Deserialize
     let scrollState: ScrollState = (thisDeserializer.readInt32() as ScrollState)
     _call(scrollOffset, scrollState)
 }
+export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deserializer): void {
+    const _resourceId: int32 = thisDeserializer.readInt32()
+    const _call = (ResourceHolder.instance().get(_resourceId) as OnWillScrollCallback)
+    let scrollOffset: number = (thisDeserializer.readNumber() as number)
+    let scrollState: ScrollState = (thisDeserializer.readInt32() as ScrollState)
+    let scrollSource: ScrollSource = (thisDeserializer.readInt32() as ScrollSource)
+    let _continuation: ((value: ScrollResult) => void) = thisDeserializer.readCallback_ScrollResult_Void(true)
+    const _callResult = _call(scrollOffset, scrollState, scrollSource)
+    _continuation(_callResult)
+}
 export function deserializeAndCallOnScrollEdgeCallback(thisDeserializer: Deserializer): void {
     const _resourceId: int32 = thisDeserializer.readInt32()
     const _call = (ResourceHolder.instance().get(_resourceId) as OnScrollEdgeCallback)
@@ -2135,6 +2151,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1618565120/*CallbackKind.Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer);
         case 36519084/*CallbackKind.Kind_Callback_Number_Void*/: return deserializeAndCallCallback_Number_Void(thisDeserializer);
         case 1295952075/*CallbackKind.Kind_Callback_OffsetResult_Void*/: return deserializeAndCallCallback_OffsetResult_Void(thisDeserializer);
+        case 1385252075/*CallbackKind.Kind_Callback_ScrollResult_Void*/: return deserializeAndCallCallback_ScrollResult_Void(thisDeserializer);
         case 806070428/*CallbackKind.Kind_Callback_OnAlertEvent_Boolean*/: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer);
         case -1559789631/*CallbackKind.Kind_Callback_OnAudioStateChangedEvent_Void*/: return deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisDeserializer);
         case -873162122/*CallbackKind.Kind_Callback_OnBeforeUnloadEvent_Boolean*/: return deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeserializer);
@@ -2262,6 +2279,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1334389194/*CallbackKind.Kind_OnRenderProcessRespondingCallback*/: return deserializeAndCallOnRenderProcessRespondingCallback(thisDeserializer);
         case -1099824577/*CallbackKind.Kind_OnSafeBrowsingCheckResultCallback*/: return deserializeAndCallOnSafeBrowsingCheckResultCallback(thisDeserializer);
         case -160015401/*CallbackKind.Kind_OnScrollCallback*/: return deserializeAndCallOnScrollCallback(thisDeserializer);
+        case -150015401/*CallbackKind.Kind_OnWillScrollCallback*/: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
         case -1259214476/*CallbackKind.Kind_OnScrollEdgeCallback*/: return deserializeAndCallOnScrollEdgeCallback(thisDeserializer);
         case -2133791987/*CallbackKind.Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer);
         case 625641334/*CallbackKind.Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisDeserializer);
