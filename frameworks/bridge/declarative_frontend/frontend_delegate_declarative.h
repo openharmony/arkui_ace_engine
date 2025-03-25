@@ -463,6 +463,7 @@ private:
     void ClearAlertCallback(PageInfo pageInfo);
     bool CheckIndexValid(int32_t index) const;
 
+    void ParsePartialPropertiesFromAttr(DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr);
     DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
     std::unique_ptr<JsonValue> GetNavigationJsonInfo();
