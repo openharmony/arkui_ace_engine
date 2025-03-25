@@ -238,11 +238,11 @@ void FromHtmlImpl(Ark_VMContext vmContext,
 Ark_String ToHtmlImpl(Ark_VMContext vmContext,
                       Ark_StyledString styledString)
 {
-    CHECK_NULL_RETURN(styledString, {});
-    CHECK_NULL_RETURN(styledString->spanString, {});
-    auto htmlStr = OHOS::Ace::HtmlUtils::ToHtml(styledString->spanString.GetRawPtr());
-    LOGE("StyledStringAccessor::ToHtmlImpl - return value need to be supported");
-    return {};
+    std::string result = "";
+    CHECK_NULL_RETURN(styledString, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    CHECK_NULL_RETURN(styledString->spanString, Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = OHOS::Ace::HtmlUtils::ToHtml(Referenced::RawPtr(styledString->spanString));
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
 {

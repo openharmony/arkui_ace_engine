@@ -153,6 +153,8 @@ ace_unittest("capi_all_accessors_test") {
     "..:ace_core_interfaces_native_node_linux_unittest",
     "../stubs:capi-ut-stubs",
   ]
+
+  external_deps = [ "libxml2:libxml2" ]
 }
 
 group("capi_accessors_unittest") {
