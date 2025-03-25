@@ -327,7 +327,7 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-    
+
     void ResetIndicatorParameters()
     {
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -798,8 +798,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
-
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 protected:
     void MarkDirtyNodeSelf();
@@ -1235,7 +1235,8 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-
+    int32_t GetNodeId() const;
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

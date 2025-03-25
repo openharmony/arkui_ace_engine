@@ -143,7 +143,7 @@ public:
     {
         return false;
     }
-    
+
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
     {
         return MakeRefPtr<AccessibilityProperty>();
@@ -586,7 +586,6 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
-
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -681,6 +680,23 @@ public:
     virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
+    virtual int32_t OnInjectionEvent(const std::string& command)
+    {
+        return RET_SUCCESS;
+    };
+
+    int32_t OnRecvCommand(const std::string& command)
+    {
+        auto json = JsonUtil::ParseJsonString(command);
+        if (!json || !json->IsValid() || !json->IsObject()) {
+            return RET_FAILED;
+        }
+        auto event = json->GetString("cmd");
+        if (event != "click") {
+            return OnInjectionEvent(command);
+        }
+        return RET_FAILED;
+    }
 
     virtual bool BorderUnoccupied() const
     {

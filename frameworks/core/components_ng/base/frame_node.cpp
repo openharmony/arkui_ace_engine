@@ -6634,4 +6634,11 @@ std::string FrameNode::PrintVisibilityDumpInfo() const
     res += "]";
     return res;
 }
+
+int32_t FrameNode::OnRecvCommand(const std::string& command)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    return pattern->OnRecvCommand(command);
+}
 } // namespace OHOS::Ace::NG
