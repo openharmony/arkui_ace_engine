@@ -96,7 +96,7 @@ Ark_FontInfo GetFontByNameImpl(const Ark_String* fontName)
     if (pipeline) {
         pipeline->GetSystemFont(fontNameCasted, fontInfo);
     }
-    return Converter::ArkValue<Ark_FontInfo>(fontInfo);
+    return Converter::ArkValue<Ark_FontInfo>(fontInfo, Converter::FC);
 }
 } // GlobalScope_ohos_fontAccessor
 const GENERATED_ArkUIGlobalScope_ohos_fontAccessor* GetGlobalScope_ohos_fontAccessor()
