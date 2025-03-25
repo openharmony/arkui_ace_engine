@@ -50,32 +50,55 @@ public:
 };
 
 /**
- * @tc.name: offsetAndPositionTest
+ * @tc.name: offsetTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PathShapeAccessorTest, offsetAndPositionTest, TestSize.Level1)
+HWTEST_F(PathShapeAccessorTest, offsetTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->offset, nullptr);
-    ASSERT_NE(accessor_->position, nullptr);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(peer_->shape, nullptr);
 
     using OffsetTestStep = std::pair<int32_t, int32_t>;
     static const std::vector<OffsetTestStep> OFFSET_TEST_PLAN = {{2, 4}, {6, 8}, {10, 12}};
     Opt_Length optX, optY;
-    Ark_Position arkPosition{};
-    DimensionOffset peerOffset, peerPosition;
+    Ark_Position arkOffset{};
+    DimensionOffset peerOffset;
 
     for (const auto &[x, y]: OFFSET_TEST_PLAN) {
         optX = Converter::ArkValue<Opt_Length>(x);
         optY = Converter::ArkValue<Opt_Length>(y);
-        arkPosition = {optX, optY};
+        arkOffset = {optX, optY};
 
-        accessor_->offset(peer_, &arkPosition);
+        accessor_->offset(peer_, &arkOffset);
         peerOffset = peer_->shape->GetOffset();
         EXPECT_EQ(peerOffset.GetX(), Dimension(x));
         EXPECT_EQ(peerOffset.GetY(), Dimension(y));
+    }
+}
+
+/**
+ * @tc.name: PositionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PathShapeAccessorTest, PositionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->position, nullptr);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(peer_->shape, nullptr);
+
+    using PositionTestStep = std::pair<int32_t, int32_t>;
+    static const std::vector<PositionTestStep> POSITION_TEST_PLAN = {{2, 4}, {6, 8}, {10, 12}};
+    Opt_Length optX, optY;
+    Ark_Position arkPosition{};
+    DimensionOffset peerPosition;
+
+    for (const auto &[x, y]: POSITION_TEST_PLAN) {
+        optX = Converter::ArkValue<Opt_Length>(x);
+        optY = Converter::ArkValue<Opt_Length>(y);
+        arkPosition = {optX, optY};
 
         accessor_->position(peer_, &arkPosition);
         peerPosition = peer_->shape->GetPosition();

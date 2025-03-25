@@ -16,7 +16,7 @@
 #pragma once
 
 #include "arkoala_api_generated.h"
-#include "interfaces/inner_api/ace_kit/include/ui/properties/color.h"
+#include "core/components/common/properties/color.h"
 
 struct ColorMetricsPeer {
     OHOS::Ace::ColorParam colorValue { .value = 0xff000000 };
