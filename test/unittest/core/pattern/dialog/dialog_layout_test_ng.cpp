@@ -32,9 +32,12 @@
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -54,6 +57,9 @@ const Dimension DIMENSION_RADIUS(10.0, DimensionUnit::PX);
 const Dimension DIMENSION_WIDTH(2.0, DimensionUnit::PX);
 constexpr float DEFAULT_WIDTH = 600.0f;
 constexpr float DEFAULT_HEIGHT = 1000.0f;
+constexpr float FIRST_ITEM_WIDTH = 100.0f;
+constexpr float FIRST_ITEM_HEIGHT = 50.0f;
+const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 } // namespace
 
 class MockDialogTheme : public DialogTheme, public ButtonTheme {
@@ -157,6 +163,16 @@ void DialogLayoutTestNg::SetDialogTheme()
 {
     auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockDialogTheme>()));
+}
+
+RefPtr<LayoutWrapperNode> CreatlayoutWrapper()
+{
+    auto rowFrameNode = FrameNode::CreateFrameNode("test", 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
+    return layoutWrapper;
 }
 
 /**
@@ -1461,5 +1477,455 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmSetSubWindowHotarea, TestSize.
     dialogLayoutAlgorithm.SetSubWindowHotarea(dialogProp, childSize, selfSize, 0);
     EXPECT_TRUE(dialogProp->GetShowInSubWindowValue(false));
     EXPECT_TRUE(dialogProp->GetIsScenceBoardDialog().value_or(false));
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmComputeInnerLayoutParam
+ * @tc.desc: Test DialogLayoutAlgorithm::ComputeInnerLayoutParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmComputeInnerLayoutParam, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto dialogProp = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    LayoutConstraintF innerLayout = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    dialogLayoutAlgorithm.gridCount_ = 1;
+    EXPECT_FALSE(dialogLayoutAlgorithm.ComputeInnerLayoutSizeParam(innerLayout, dialogProp));
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    SystemProperties::deviceType_ = DeviceType::WATCH;
+    dialogLayoutAlgorithm.expandDisplay_ = true;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 12;
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    dialogLayoutAlgorithm.ComputeInnerLayoutParam(innerLayout, dialogProp);
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmGetCurrentPipelineContext
+ * @tc.desc: Test DialogLayoutAlgorithm::GetCurrentPipelineContext function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmGetCurrentPipelineContext, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    Container::UpdateCurrent(COMPONENT_SUBWINDOW_CONTAINER * CONTAINER_ID_DIVIDE_SIZE + 1);
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    EXPECT_TRUE(Container::CurrentId() >= MIN_SUBCONTAINER_ID);
+    dialogLayoutAlgorithm.GetCurrentPipelineContext();
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmIsGetExpandDisplayValidHeight
+ * @tc.desc: Test DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmIsGetExpandDisplayValidHeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.expandDisplay_ = true;
+    dialogLayoutAlgorithm.isShowInSubWindow_ = true;
+    Container::UpdateCurrent(0);
+    auto pipelineContext = dialogLayoutAlgorithm.GetCurrentPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->UpdateDisplayAvailableRect(Rect(1.0f, 1.0f, 1.0f, 1.0f));
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    EXPECT_TRUE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight());
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmUpdateChildMaxSizeHeight
+ * @tc.desc: Test DialogLayoutAlgorithm::UpdateChildMaxSizeHeight function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmUpdateChildMaxSizeHeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    dialogLayoutAlgorithm.isHoverMode_ = false;
+    dialogLayoutAlgorithm.gridCount_ = 1;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 12;
+    SizeT<float> maxSize = SizeT(1.0f, 1.0f);
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    EXPECT_FALSE(LessNotEqual(dialogLayoutAlgorithm.gridCount_, 0));
+    dialogLayoutAlgorithm.ResizeDialogSubwindow(false, true, true);
+    dialogLayoutAlgorithm.ResizeDialogSubwindow(true, false, true);
+    dialogLayoutAlgorithm.ResizeDialogSubwindow(true, true, false);
+    dialogLayoutAlgorithm.UpdateChildMaxSizeHeight(maxSize);
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmComputeInnerLayoutSizeParam001
+ * @tc.desc: Test DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmComputeInnerLayoutSizeParam001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto dialogProp = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    LayoutConstraintF innerLayout = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    dialogLayoutAlgorithm.gridCount_ = -1;
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 16;
+    EXPECT_TRUE(dialogLayoutAlgorithm.ComputeInnerLayoutSizeParam(innerLayout, dialogProp));
+
+    dialogProp->propHeight_ = CalcDimension(DEFAULT_STR);
+    dialogProp->propWidth_ = CalcDimension(DEFAULT_STR);
+    dialogLayoutAlgorithm.isSuitableForElderly_ = true;
+    EXPECT_TRUE(dialogLayoutAlgorithm.ComputeInnerLayoutSizeParam(innerLayout, dialogProp));
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmComputeInnerLayoutSizeParam002
+ * @tc.desc: Test DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmComputeInnerLayoutSizeParam002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        customNode, customNode->GetGeometryNode(), customNode->GetLayoutProperty());
+    ASSERT_NE(childLayoutWrapper, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    auto dialogProp = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    LayoutConstraintF innerLayout = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    dialogLayoutAlgorithm.gridCount_ = -1;
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 16;
+    dialogProp->propHeight_ = Dimension(1.0f, DimensionUnit::PERCENT);
+    dialogProp->propWidth_ = Dimension(1.0f, DimensionUnit::PERCENT);
+    EXPECT_TRUE(dialogLayoutAlgorithm.ComputeInnerLayoutSizeParam(innerLayout, dialogProp));
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmAnalysisLayoutOfContent001
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmAnalysisLayoutOfContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    RefPtr<LayoutWrapperNode> scroll = customNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(scroll, nullptr);
+    auto layoutWrapperNode = dialogWithCustom->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    auto textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textLayoutAlgorithm));
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    scroll->AppendChild(textLayoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    dialogPattern->title_ = "";
+    EXPECT_TRUE(dialogPattern->GetTitle().empty());
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    dialogPattern->subtitle_ = TITLE;
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(layoutWrapper, scroll);
+    dialogPattern->subtitle_ = "";
+    EXPECT_TRUE(dialogPattern->GetSubtitle().empty());
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(layoutWrapper, scroll);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 12;
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(layoutWrapper, scroll);
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmAnalysisLayoutOfContent002
+ * @tc.desc: Test DialogLayoutAlgorithm::AnalysisLayoutOfContent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmAnalysisLayoutOfContent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    RefPtr<LayoutWrapperNode> scroll = customNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(scroll, nullptr);
+    auto layoutWrapperNode = dialogWithCustom->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textNode, textGeometryNode, textNode->GetLayoutProperty());
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    auto textLayoutAlgorithm = textPattern->CreateLayoutAlgorithm();
+    textLayoutWrapper->SetLayoutAlgorithm(
+        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(textLayoutAlgorithm));
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    scroll->AppendChild(textLayoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    dialogTheme->text_align_content_ = 1;
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(layoutWrapper, scroll);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->minPlatformVersion_ = 12;
+    EXPECT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    dialogLayoutAlgorithm.AnalysisLayoutOfContent(layoutWrapper, scroll);
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmMeasure001
+ * @tc.desc: Test DialogLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    RefPtr<LayoutWrapper> child = customNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(child, nullptr);
+    auto layoutWrapperNode = dialogWithCustom->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    std::list<RefPtr<LayoutWrapper>> childList;
+    auto layoutWrapper2 = CreatlayoutWrapper();
+    layoutWrapper2->GetLayoutProperty()->propVisibility_ = VisibleType::GONE;
+    childList.push_front(layoutWrapper2);
+    auto hostNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 99, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->tag_ = V2::PAGE_ETS_TAG;
+    hostNode->MountToParent(parentNode);
+    auto dialogPattern = hostNode->GetPattern<DialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto dialogContext = hostNode->GetPattern<Pattern>()->GetContext();
+    ASSERT_NE(dialogContext, nullptr);
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    dialogPattern->isPickerDialog_ = true;
+    dialogContext->fontScale_ = 2.0f;
+    dialogLayoutAlgorithm.Measure(layoutWrapper);
+    EXPECT_FALSE(dialogLayoutAlgorithm.isSuitableForElderly_);
+    dialogPattern->dialogProperties_.dialogImmersiveMode = ImmersiveMode::EXTEND;
+    dialogLayoutAlgorithm.Measure(layoutWrapper);
+}
+
+/**
+ * @tc.name: DialogLayoutAlgorithmMeasure002
+ * @tc.desc: Test DialogLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmMeasure002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto customNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customNode, nullptr);
+    DialogProperties param {
+        .type = DialogType::ACTION_SHEET,
+        .title = "dialog test",
+        .content = "dialog content test",
+        .sheetsInfo = sheetItems,
+        .isShowInSubWindow = true,
+        .offset = DimensionOffset(Dimension(10.0), Dimension(10.0)),
+    };
+    auto dialogWithCustom = DialogView::CreateDialogNode(param, customNode);
+    ASSERT_NE(dialogWithCustom, nullptr);
+    RefPtr<LayoutWrapper> child = customNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(child, nullptr);
+    auto layoutWrapperNode = dialogWithCustom->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto hostNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+    auto parentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 99, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->tag_ = V2::PAGE_ETS_TAG;
+    hostNode->MountToParent(parentNode);
+    /**
+     * @tc.steps: step2. test DialogLayoutAlgorithm functions.
+     * @tc.expected: These properties are matched.
+     */
+    auto& layoutConstraint =
+        AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty())->layoutConstraint_;
+    auto& parentIdealSize = layoutConstraint->parentIdealSize;
+    parentIdealSize.SetSize(SizeT<float>(2.0f, 2.0f));
+    OptionalSizeF realSize;
+    // dialog size fit screen.
+    realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
+    EXPECT_TRUE(realSize.IsValid());
+    dialogLayoutAlgorithm.Measure(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG
