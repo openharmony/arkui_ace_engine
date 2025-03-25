@@ -50,7 +50,7 @@ const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");
 const auto MIN_FONT_SIZE_ATTR("minFontSize");
 const auto PLACEHOLDER_FONT_ATTRS("placeholderFont");
-const auto PLACEHOLDER_FONT_FAMILY("family");
+const auto PLACEHOLDER_FONT_FAMILY("fontFamily");
 const auto PLACEHOLDER_FONT_SIZE("size");
 const auto PLACEHOLDER_COLOR_ATTR("placeholderColor");
 const auto SEARCH_ICON_ATTR("searchIcon");

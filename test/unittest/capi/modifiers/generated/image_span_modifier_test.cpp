@@ -222,35 +222,6 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setObjectFitTestObjectFitValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageSpanModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestSize.Level1)
-{
-    Ark_ImageFit initValueObjectFit;
-
-    // Initial setup
-    initValueObjectFit = std::get<1>(Fixtures::testFixtureEnumImageFitValidValues[0]);
-
-    auto checkValue = [this, &initValueObjectFit](
-                          const std::string& input, const std::string& expectedStr, const Ark_ImageFit& value) {
-        Ark_ImageFit inputValueObjectFit = initValueObjectFit;
-
-        inputValueObjectFit = value;
-        modifier_->setObjectFit(node_, inputValueObjectFit);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OBJECT_FIT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setObjectFit, attribute: objectFit";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumImageFitValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setObjectFitTestObjectFitInvalidValues
  * @tc.desc:
  * @tc.type: FUNC

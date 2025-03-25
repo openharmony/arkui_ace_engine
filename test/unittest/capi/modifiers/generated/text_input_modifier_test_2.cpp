@@ -18,240 +18,6 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
- * @tc.name: setShowErrorTestShowErrorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
-{
-    Opt_ResourceStr initValueShowError;
-
-    // Initial setup
-    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
-
-    auto checkValue = [this, &initValueShowError](
-                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Opt_ResourceStr inputValueShowError = initValueShowError;
-
-        inputValueShowError = value;
-        modifier_->setShowError(node_, &inputValueShowError);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setShowError, attribute: showError";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
-    }
-}
-
-/*
- * @tc.name: setShowErrorTestShowErrorInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
-{
-    Opt_ResourceStr initValueShowError;
-
-    // Initial setup
-    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
-
-    auto checkValue = [this, &initValueShowError](const std::string& input, const Opt_ResourceStr& value) {
-        Opt_ResourceStr inputValueShowError = initValueShowError;
-
-        modifier_->setShowError(node_, &inputValueShowError);
-        inputValueShowError = value;
-        modifier_->setShowError(node_, &inputValueShowError);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setShowError, attribute: showError";
-    };
-
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_ResourceStr>());
-}
-
-/*
- * @tc.name: setShowUnderlineTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowUnderlineTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_UNDERLINE_DEFAULT_VALUE) << "Default value for attribute 'showUnderline'";
-}
-
-/*
- * @tc.name: setShowUnderlineTestShowUnderlineValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowUnderlineTestShowUnderlineValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueShowUnderline;
-
-    // Initial setup
-    initValueShowUnderline = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueShowUnderline](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueShowUnderline = initValueShowUnderline;
-
-        inputValueShowUnderline = value;
-        modifier_->setShowUnderline(node_, inputValueShowUnderline);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setShowUnderline, attribute: showUnderline";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setUnderlineColorTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultUnderlineColor =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
-        "Default value for attribute 'underlineColor.UnderlineColor.typing'";
-
-    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_DEFAULT_VALUE) <<
-        "Default value for attribute 'underlineColor.UnderlineColor.normal'";
-
-    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_DEFAULT_VALUE) <<
-        "Default value for attribute 'underlineColor.UnderlineColor.error'";
-
-    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'underlineColor.UnderlineColor.disable'";
-}
-
-/*
- * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues, TestSize.Level1)
-{
-    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
-
-    // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueUnderlineColor](
-                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
-        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
-
-        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
-        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input
-            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues, TestSize.Level1)
-{
-    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
-
-    // Initial setup
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
-        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
-
-    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
-        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
-
-        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
-        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
-            "Input value is: " << input
-            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_ResourceColor>());
-}
-
-/*
  * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorNormalValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2230,6 +1996,238 @@ HWTEST_F(TextInputModifierTest, setPasswordRulesTestDefaultValues, TestSize.Leve
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_PASSWORD_RULES_DEFAULT_VALUE) << "Default value for attribute 'passwordRules'";
+}
+
+/*
+ * @tc.name: setPasswordRulesTestPasswordRulesValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, TestSize.Level1)
+{
+    Ark_String initValuePasswordRules;
+
+    // Initial setup
+    initValuePasswordRules = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValuePasswordRules](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValuePasswordRules = initValuePasswordRules;
+
+        inputValuePasswordRules = value;
+        modifier_->setPasswordRules(node_, &inputValuePasswordRules);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setFontFeatureTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
+{
+    Ark_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
+
+    auto checkValue = [this, &initValueFontFeature](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValueFontFeature = initValueFontFeature;
+
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontFeatureValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setFontFeatureTestFontFeatureInvalidValues, TestSize.Level1)
+{
+    Ark_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = std::get<1>(Fixtures::testFixtureFontFeatureValidValues[0]);
+
+    auto checkValue = [this, &initValueFontFeature](const std::string& input, const Ark_String& value) {
+        Ark_String inputValueFontFeature = initValueFontFeature;
+
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureFontFeatureInvalidValues) {
+        checkValue(input, value);
+    }
+}
+
+/*
+ * @tc.name: setShowPasswordTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowPasswordTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_PASSWORD_DEFAULT_VALUE) << "Default value for attribute 'showPassword'";
+}
+
+/*
+ * @tc.name: setShowPasswordTestShowPasswordValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowPasswordTestShowPasswordValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueShowPassword;
+
+    // Initial setup
+    initValueShowPassword = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueShowPassword](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueShowPassword = initValueShowPassword;
+
+        inputValueShowPassword = value;
+        modifier_->setShowPassword(node_, inputValueShowPassword);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_PASSWORD_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowPassword, attribute: showPassword";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnablePreviewTextTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_PREVIEW_TEXT_DEFAULT_VALUE) <<
+        "Default value for attribute 'enablePreviewText'";
+}
+
+/*
+ * @tc.name: setEnablePreviewTextTestEnablePreviewTextValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnablePreviewTextTestEnablePreviewTextValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnablePreviewText;
+
+    // Initial setup
+    initValueEnablePreviewText = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnablePreviewText](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnablePreviewText = initValueEnablePreviewText;
+
+        inputValueEnablePreviewText = value;
+        modifier_->setEnablePreviewText(node_, inputValueEnablePreviewText);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnablePreviewText, attribute: enablePreviewText";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableHapticFeedback'";
+}
+
+/*
+ * @tc.name: setEnableHapticFeedbackTestEnableHapticFeedbackValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableHapticFeedback;
+
+    // Initial setup
+    initValueEnableHapticFeedback = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableHapticFeedback](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableHapticFeedback = initValueEnableHapticFeedback;
+
+        inputValueEnableHapticFeedback = value;
+        modifier_->setEnableHapticFeedback(node_, inputValueEnableHapticFeedback);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
 }
 
 } // namespace OHOS::Ace::NG

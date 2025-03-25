@@ -6764,10 +6764,40 @@ std::string TextFieldPattern::GetPlaceholderFont() const
         jsonValue->Put("size", layoutProperty->GetPlaceholderFontSize()->ToString().c_str());
     }
     auto weight = layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight());
-    jsonValue->Put("weight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
-    auto family = layoutProperty->GetPlaceholderFontFamilyValue({ "HarmonyOS Sans" });
+    switch (weight) {
+        case FontWeight::W100:
+            jsonValue->Put("weight", "100");
+            break;
+        case FontWeight::W200:
+            jsonValue->Put("weight", "200");
+            break;
+        case FontWeight::W300:
+            jsonValue->Put("weight", "300");
+            break;
+        case FontWeight::W400:
+            jsonValue->Put("weight", "400");
+            break;
+        case FontWeight::W500:
+            jsonValue->Put("weight", "500");
+            break;
+        case FontWeight::W600:
+            jsonValue->Put("weight", "600");
+            break;
+        case FontWeight::W700:
+            jsonValue->Put("weight", "700");
+            break;
+        case FontWeight::W800:
+            jsonValue->Put("weight", "800");
+            break;
+        case FontWeight::W900:
+            jsonValue->Put("weight", "900");
+            break;
+        default:
+            jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(weight).c_str());
+    }
+    auto family = layoutProperty->GetPlaceholderFontFamilyValue({ "sans-serif" });
     std::string jsonFamily = ConvertFontFamily(family);
-    jsonValue->Put("family", jsonFamily.c_str());
+    jsonValue->Put("fontFamily", jsonFamily.c_str());
     return jsonValue->ToString();
 }
 
