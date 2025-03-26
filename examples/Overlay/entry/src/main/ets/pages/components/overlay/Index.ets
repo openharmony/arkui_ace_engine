@@ -16,22 +16,16 @@
 import { NavList, NavListItem } from '../../utils/navigationList'
 
 @Builder
-export function DialogIndexBuilder(name: string, param: Object) {
-  DialogIndex()
+export function OverlayIndexBuilder(name: string, param: Object) {
+  OverlayIndex()
 }
 
 @Entry
 @Component
-export struct DialogIndex {
+export struct OverlayIndex {
   pathStack: NavPathStack = new NavPathStack()
   paths: NavListItem[] = [
-    { name: 'AlertDialog', path: 'AlertDialog' },
-    { name: 'ActionSheet', path: 'ActionSheet' },
-    { name: 'CustomDialog', path: 'CustomDialog' },
-    { name: 'PromptAction', path: 'PromptAction' },
-    { name: 'DialogController', path: 'DialogController' },
-    { name: 'DialogLevelOrder', path: 'DialogLevelOrder' },
-    { name: 'DialogFocusable', path: 'DialogFocusable' },
+    { name: 'OverlayLevelOrder', path: 'OverlayLevelOrder' },
   ]
 
   build() {
@@ -43,7 +37,7 @@ export struct DialogIndex {
         }
       })
     }
-    .title('Dialog')
+    .title('Overlay')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
