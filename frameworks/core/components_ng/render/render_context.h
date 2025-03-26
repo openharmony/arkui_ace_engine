@@ -412,6 +412,11 @@ public:
         return {};
     }
 
+    virtual RectF GetPaintRectWithTransformWithoutDegree()
+    {
+        return {};
+    }
+
     // get position property
     virtual RectF GetPropertyOfPosition()
     {
