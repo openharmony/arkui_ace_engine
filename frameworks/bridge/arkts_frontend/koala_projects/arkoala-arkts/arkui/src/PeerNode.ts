@@ -20,6 +20,7 @@ import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
 
 export const PeerNodeType = 11
+export const RootPeerType = 33
 export const LazyForEachType = 13
 const INITIAL_ID = 1000
 
@@ -34,7 +35,7 @@ export class PeerNode extends IncrementalNode {
     private _onReuse?: () => void
     private _onRecycle?: () => void
     // Pool to store recycled child scopes, grouped by type
-    private _reusePool?: Map<string, Array<Disposable>>
+    private static _reusePool?: Map<string, Array<Disposable>>
     private _reusable: boolean = false
 
     setId(id: int32) {
@@ -49,13 +50,14 @@ export class PeerNode extends IncrementalNode {
 
     onReuse(): void {
         if (!this._reusable) {
-            this._reusable = true // becomes reusable after initial mount
-        } else {
-            this._onReuse?.() // could change states
+            return
+        }
+        if (this._onReuse) {
+            scheduleCallback(() => { this._onReuse?.() }) // could change states
         }
         // traverse subtree to notify all children
         for (let child = this.firstChild; child; child = child!.nextSibling) {
-            if (child instanceof PeerNode)
+            if (child?.isKind(PeerNodeType))
                 (child as PeerNode)!.onReuse()
         }
     }
@@ -69,23 +71,22 @@ export class PeerNode extends IncrementalNode {
         }
     }
 
+    /* reuse and recycle object on RootPeers */
     override reuse(reuseKey: string): Disposable | undefined {
-        if (this._reusePool === undefined)
-            return undefined
-        if (this._reusePool!.has(reuseKey)) {
-            const scopes = this._reusePool!.get(reuseKey)!;
+        if (PeerNode._reusePool?.has(reuseKey)) {
+            const scopes = PeerNode._reusePool?.get(reuseKey)!;
             return scopes.pop();
         }
         return undefined;
     }
 
     override recycle(reuseKey: string, child: Disposable): boolean {
-        if (!this._reusePool)
-            this._reusePool = new Map<string, Array<Disposable>>()
-        if (!this._reusePool!.has(reuseKey)) {
-            this._reusePool!.set(reuseKey, new Array<Disposable>());
+        if (!PeerNode._reusePool)
+            PeerNode._reusePool = new Map<string, Array<Disposable>>()
+        if (!PeerNode._reusePool!.has(reuseKey)) {
+            PeerNode!._reusePool!.set(reuseKey, new Array<Disposable>());
         }
-        this._reusePool!.get(reuseKey)!.push(child);
+        PeerNode._reusePool!.get(reuseKey)!.push(child);
         return true
     }
 
@@ -110,8 +111,8 @@ export class PeerNode extends IncrementalNode {
         this.insertDirection = upDirection ? 0 : 1
     }
 
-    constructor(peerPtr: pointer, id: int32, name: string, flags: int32) {
-        super(PeerNodeType)
+    constructor(peerPtr: pointer, id: int32, name: string, flags: int32, derivedNodeType?: int32) {
+        super(derivedNodeType ?? PeerNodeType)
         this.id = id
         this.peer = NativePeerNode.create(this, peerPtr, flags)
         PeerNode.peerNodeMap.set(this.id, this)
@@ -119,6 +120,7 @@ export class PeerNode extends IncrementalNode {
             // TODO: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
+                peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {
@@ -138,7 +140,6 @@ export class PeerNode extends IncrementalNode {
                     }
                 }
                 this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
-                scheduleCallback(() => peer!.onReuse())
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
@@ -158,10 +159,6 @@ export class PeerNode extends IncrementalNode {
         }
         this.peer.close()
         PeerNode.peerNodeMap.delete(this.id)
-        this._reusePool?.forEach((value: Array<Disposable>) =>
-            value.forEach((disposable: Disposable) => disposable.dispose())
-        )
-        this._reusePool = undefined
         this._onRecycle = undefined
         this._onReuse = undefined
         super.dispose()

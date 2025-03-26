@@ -51,9 +51,9 @@ class ArkchildComponent extends ArkReusableStruct<ArkchildComponent, childOption
     private set reguar_value(value: string) {
         this.__backing_reguar_value = value;
     }
-    __rebindStates(initializers?: childOptions): void {
-        if (initializers?.state_value)
-            this.state_value = initializers!.state_value!;
+    override __toRecord(initializers: Object): Record<string, Object> {
+        const _optionData = initializers as childOptions;
+        return { "state_value": _optionData.__backing_state_value?.value ?? (new Object()), "reguar_value": _optionData.__backing_reguar_value?.value ?? (new Object()) };
     }
     /** @memo */
     __build(/**/

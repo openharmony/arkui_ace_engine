@@ -472,8 +472,8 @@ export class StructTransformer extends AbstractVisitor {
             translator.translateMember()
         )
         const updateStruct = this.createBuildProlog(structNode, structNode.members, propertyTranslators)
-        const rebindStates = this.allowReusable(structNode)
-            ? this.createRebindStatesMethod(structNode, propertyTranslators)
+        const toRecord = this.allowReusable(structNode)
+            ? this.createToRecordMethod(structNode, propertyTranslators)
             : undefined
 
         // The rest of the struct members are translated here directly.
@@ -495,7 +495,7 @@ export class StructTransformer extends AbstractVisitor {
         return collect(
             ...propertyMembers,
             updateStruct,
-            rebindStates,
+            toRecord,
             ...restMembers
         )
     }
@@ -767,24 +767,49 @@ export class StructTransformer extends AbstractVisitor {
         )
     }
 
-    createRebindStatesMethod(
-        node: ts.StructDeclaration, 
-        propertyTranslators: PropertyTranslator[]
-    ): ts.MethodDeclaration {
-        const parameters = [optionalParameter(initializers(), this.structOptions.createTypeReference(node))]
-
-        const updates = propertyTranslators
-            .map(it => it.translateToReuse())
+    /**
+     * Create __ToRecord override method in ReusableStruct to convert StructOption to Record<string, Object> for aboutToReuse
+     */
+    createToRecordMethod(node: ts.StructDeclaration, propertyTranslators: PropertyTranslator[]): ts.MethodDeclaration {
+        const structType = this.structOptions.createTypeReference(node)
+        const arg = initializers()
+        const argCasted = "_optionData"
+        const objectType = ts.factory.createTypeReferenceNode(ts.factory.createIdentifier('Object'))
+    
+        const castArg = ts.factory.createVariableStatement(
+            undefined, // modifiers
+            ts.factory.createVariableDeclarationList(
+                [
+                    ts.factory.createVariableDeclaration(
+                        argCasted, // variable name
+                        undefined, // type annotation
+                        undefined, // type
+                        ts.factory.createAsExpression(arg, structType) // initializer with type assertion
+                    )
+                ],
+                ts.NodeFlags.Const
+            )
+        )
+        const propAssignments = propertyTranslators
+            .map(it => it.translateToRecordEntry(ts.factory.createIdentifier(argCasted)))
             .filter(isDefined)
+
+        const returnType = ts.factory.createTypeReferenceNode('Record', [ // return type = Record<string, Object>
+            ts.factory.createKeywordTypeNode(ts.SyntaxKind.StringKeyword),
+            objectType
+        ])
         return ts.factory.createMethodDeclaration(
+            [ts.factory.createModifier(ts.SyntaxKind.OverrideKeyword)],
+            undefined,
+            RewriteNames.ToRecord,
             undefined,
             undefined,
-            RewriteNames.RebindStates,
-            undefined,
-            undefined,
-            parameters,
-            Void(),
-            ts.factory.createBlock(updates, true)
+            [parameter(arg, objectType, undefined)], // input = param: Object
+            returnType,
+            ts.factory.createBlock([
+                castArg,
+                ts.factory.createReturnStatement(ts.factory.createObjectLiteralExpression(propAssignments))
+            ], true)
         )
     }
 

@@ -64,7 +64,7 @@ export enum RewriteNames {
     Initializers = "initializers",
     InitializeStruct = "__initializeStruct",
     UpdateStruct = "__updateStruct",
-    RebindStates = "__rebindStates",
+    ToRecord = "__toRecord",
     ApplyStyle = "__applyStyle",
     ApplyAnimatableExtend = "__applyAnimatableExtend"
 }

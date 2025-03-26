@@ -47,7 +47,7 @@ class GoodListSource implements IDataSource<Number> {
 @Component
 struct GGGItem {
   @State data: ProductDataModel = new ProductDataModel('/resources/homeImg/imgLoads/product001.png', 'XX设备 优惠直购', '尊享', '￥4122.0', 0)
-  @State ratio: number = 1
+  @Link ratio: number
   build() {
     GridItem() {
       Column() {
@@ -83,8 +83,11 @@ struct GGGItem {
     .backgroundColor(Color.White)
   }
 
-  aboutToReuse(parma: Object) {
-    console.log(`reusing, new data = ${this.data}`)
+  aboutToReuse(param: Record<string, Object>) {
+    console.log(`reusing, new data = ${param}`)
+    if (param["data"] instanceof ProductDataModel) {
+      this.data = param["data"] as ProductDataModel
+    }
   }
 
   aboutToRecycle() {
