@@ -49,12 +49,25 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { RowOptions, RowAttribute } from "./ArkRowInterfaces"
+import { RowOptions, RowAttribute, RowInterface } from "./ArkRowInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkRowNode } from "../handwritten/modifiers/ArkRowNode"
+import { ArkRowAttributeSet,RowModifier } from "../handwritten/modifiers/ArkRowModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkRowComponent extends ArkCommonMethodComponent {
     getPeer(): ArkRowPeer {
         return (this.peer as ArkRowPeer)
     }
+
+    getModifierHost(): ArkRowNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkRowNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkRowNode
+    }
+
     /** @memo */
     public setRowOptions(options?: RowOptions): this {
         if (this.checkPriority("setRowOptions")) {
@@ -64,6 +77,33 @@ export class ArkRowComponent extends ArkCommonMethodComponent {
         }
         return this
     }
+
+    attributeModifier(modifier: AttributeModifier<RowAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<RowAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkRowAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as RowAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<RowAttribute>);
+            let rowModifier = (attributeModifier as Object) as RowModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkRowAttributeSet();
+                attributeSet._modifiersWithKeys = rowModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
+    }
+
     /** @memo */
     public alignItems(value: VerticalAlign): this {
         if (this.checkPriority("alignItems")) {
