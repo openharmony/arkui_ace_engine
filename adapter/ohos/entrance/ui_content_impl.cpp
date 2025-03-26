@@ -3844,7 +3844,7 @@ void UIContentImpl::SetFormBackgroundColor(const std::string& color)
 
 void UIContentImpl::SetFontScaleFollowSystem(const bool fontScaleFollowSystem)
 {
-    LOGI("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
+    LOGD("SetFontScaleFollowSystem: %{public}d", fontScaleFollowSystem);
     fontScaleFollowSystem_ = fontScaleFollowSystem;
 }
 
