@@ -131,6 +131,9 @@ export struct DatePickerDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -671,6 +674,11 @@ export struct DatePickerDialogBootcamp {
         })
       }.width('100%')
     }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

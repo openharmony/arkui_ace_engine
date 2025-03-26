@@ -92,6 +92,9 @@ export struct ActionSheetBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -516,5 +519,10 @@ export struct ActionSheetBootcamp {
     }
     .height('52%')
     .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }

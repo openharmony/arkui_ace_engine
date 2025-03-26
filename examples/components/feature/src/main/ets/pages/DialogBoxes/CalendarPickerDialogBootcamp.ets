@@ -101,6 +101,9 @@ export struct CalendarPickerDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -528,6 +531,11 @@ export struct CalendarPickerDialogBootcamp {
     }
     .height('52%')
     .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

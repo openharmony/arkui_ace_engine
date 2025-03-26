@@ -125,6 +125,9 @@ export struct TimePickerDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -609,6 +612,11 @@ export struct TimePickerDialogBootcamp {
         })
       }.width('100%')
     }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 
