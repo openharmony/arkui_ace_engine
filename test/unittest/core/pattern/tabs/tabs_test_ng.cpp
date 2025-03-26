@@ -310,6 +310,12 @@ void TabsTestNg::MockPaintRect(const RefPtr<FrameNode>& frameNode)
     mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
 }
 
+void TabsTestNg::MockPaintRectSmallSize(const RefPtr<FrameNode>& frameNode)
+{
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, 0.f);
+}
+
 /**
  * @tc.name: InitSurfaceChangedCallback001
  * @tc.desc: test InitSurfaceChangedCallback
