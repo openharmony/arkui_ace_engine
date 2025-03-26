@@ -1008,4 +1008,129 @@ HWTEST_F(SwiperIndicatorTestNg, DynamicChangeIndicatorType001, TestSize.Level1)
     auto lastIndicatorId = pattern_->GetIndicatorId();
     EXPECT_NE(lastIndicatorId, newIndicatorId);
 }
+
+/**
+ * @tc.name: CheckPointLocation001
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation002
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation003
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation004
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation005
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
