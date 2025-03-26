@@ -925,7 +925,8 @@ HWTEST_F(SelectOverlayTestTwoNg, BuildButtonPasteButton, TestSize.Level1)
      * @tc.steps: step2. call ShowPaste.
      */
     selectOverlayNode->isDefaultBtnOverMaxWidth_ = false;
-    selectOverlayNode->ShowPaste(maxWidth, allocatedSize, infoPtr);
+    std::string pasteLabel = "粘贴";
+    selectOverlayNode->ShowPaste(maxWidth, allocatedSize, infoPtr, pasteLabel);
     
     auto button = AceType::DynamicCast<FrameNode>(selectOverlayNode->selectMenuInner_->GetLastChild());
     EXPECT_NE(button, nullptr);
