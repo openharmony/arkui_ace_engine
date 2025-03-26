@@ -101,7 +101,7 @@ public:
         themeConstants_ = nullptr;
     }
 
-    static void AddResource(std::string key, const ResRawValue& value)
+    static void AddResource(const std::string& key, const ResRawValue& value)
     {
         ThemeConstantsType type = ThemeConstantsType::ERROR;
         if (std::holds_alternative<Color>(value)) {
