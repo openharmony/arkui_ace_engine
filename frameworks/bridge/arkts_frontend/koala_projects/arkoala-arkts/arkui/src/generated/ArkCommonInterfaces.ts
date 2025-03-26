@@ -19,7 +19,7 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, Color, ColoringStrategy, TouchType, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, HitTestMode, ImageSize, Alignment, HoverEffect, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType, ScrollSource } from "./ArkEnumsInterfaces"
+import { TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, Color, ColoringStrategy, TouchType, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, HitTestMode, ImageSize, Alignment, HoverEffect, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType } from "./ArkEnumsInterfaces"
 import { ResourceColor, Length, Bias, Area, Font, BorderRadiuses, EdgeWidths, LocalizedEdgeWidths, SizeOptions, ResourceStr, Dimension, EdgeColors, LocalizedEdgeColors, EdgeStyles, Position, LocalizedBorderRadiuses, Margin, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, BorderOptions, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, EdgeWidth } from "./ArkUnitsInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { ICurve } from "./ArkICurveMaterialized"
@@ -903,6 +903,8 @@ export interface ScrollableCommonMethod<T> extends CommonMethod<T> {
     enableScrollInteraction: boolean;
     friction: number | Resource;
     onScroll: ((first: number,last: number) => void);
+    onWillScroll: ScrollOnWillScrollCallback | undefined;
+    onDidScroll: ScrollOnScrollCallback;
     onReachStart: (() => void);
     onReachEnd: (() => void);
     onScrollStart: (() => void);
@@ -913,7 +915,9 @@ export interface ScrollableCommonMethod<T> extends CommonMethod<T> {
 export interface ScrollResult {
     offsetRemain: number;
 }
-export type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult;
+export interface OnWillScrollCallback {
+    stub: string;
+}
 export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
 export type OnMoveHandler = (from: number, to: number) => void;
 export interface DynamicNode<T> {

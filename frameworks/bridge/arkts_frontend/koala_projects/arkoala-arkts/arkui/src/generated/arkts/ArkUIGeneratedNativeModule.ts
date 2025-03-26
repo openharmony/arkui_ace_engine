@@ -702,6 +702,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _ScrollableCommonMethod_onScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
+    native static _ScrollableCommonMethod_onWillScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _ScrollableCommonMethod_onDidScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
+    @ani.unsafe.Quick
     native static _ScrollableCommonMethod_onReachStart(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
     native static _ScrollableCommonMethod_onReachEnd(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
@@ -952,10 +956,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _GridAttribute_onScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
-    native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
-    @ani.unsafe.Quick
-    native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
-    @ani.unsafe.Quick
     native static _GridAttribute_onReachStart(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
     native static _GridAttribute_onReachEnd(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
@@ -1177,10 +1177,6 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_onScrollIndex(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
     native static _ListAttribute_onScrollVisibleContentChange(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
-    @ani.unsafe.Quick
-    native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
-    @ani.unsafe.Quick
-    native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
     @ani.unsafe.Quick
     native static _ListAttribute_onReachStart(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick
@@ -3067,10 +3063,6 @@ export class ArkUIGeneratedNativeModule {
     native static _WaterFlowAttribute_cachedCount0(ptr: KPointer, value: number): void
     @ani.unsafe.Quick
     native static _WaterFlowAttribute_cachedCount1(ptr: KPointer, count: number, show: KInt): void
-    @ani.unsafe.Quick
-    native static _WaterFlowAttribute_onWillScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
-    @ani.unsafe.Quick
-    native static _WaterFlowAttribute_onDidScroll(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void 
     @ani.unsafe.Quick
     native static _WaterFlowAttribute_onReachStart(ptr: KPointer, thisArray: KUint8ArrayPtr, thisLength: int32): void
     @ani.unsafe.Quick

@@ -561,7 +561,6 @@ namespace Converter {
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> PathShapeOptions Convert(const Ark_PathShapeOptions& value);
     template<> Rect Convert(const Ark_RectResult& src);
-    template<> ScrollFrameResult Convert<ScrollFrameResult>(const Ark_ScrollResult& src);
     template<> ShapePoint Convert(const Ark_Point& src);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!

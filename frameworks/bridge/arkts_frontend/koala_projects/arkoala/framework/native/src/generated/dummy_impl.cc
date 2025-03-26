@@ -4629,6 +4629,26 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_ScrollOnWillScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onWillScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const ScrollOnScrollCallback* value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("onDidScroll(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -6039,26 +6059,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                         const Opt_OnWillScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("OnWillScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("onDidScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -7273,26 +7273,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         if (!needGroupedLog(1))
             return;
         string out("onScrollVisibleContentChange(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                         const Opt_OnWillScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("OnWillScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("onDidScroll(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -17492,26 +17472,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnWillScrollImpl(Ark_NativePointer node,
-                         const Opt_OnWillScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("OnWillScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnDidScrollImpl(Ark_NativePointer node,
-                         const Opt_OnScrollCallback* value)
-    {
-        if (!needGroupedLog(1))
-            return;
-        string out("onDidScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -18185,6 +18145,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ScrollableCommonMethodModifier::EnableScrollInteractionImpl,
             ScrollableCommonMethodModifier::FrictionImpl,
             ScrollableCommonMethodModifier::OnScrollImpl,
+            ScrollableCommonMethodModifier::OnWillScrollImpl,
+            ScrollableCommonMethodModifier::OnDidScrollImpl,
             ScrollableCommonMethodModifier::OnReachStartImpl,
             ScrollableCommonMethodModifier::OnReachEndImpl,
             ScrollableCommonMethodModifier::OnScrollStartImpl,
@@ -18422,8 +18384,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::FrictionImpl,
             GridAttributeModifier::AlignItemsImpl,
             GridAttributeModifier::OnScrollImpl,
-            GridAttributeModifier::OnWillScrollImpl,
-            GridAttributeModifier::OnDidScrollImpl,
             GridAttributeModifier::OnReachStartImpl,
             GridAttributeModifier::OnReachEndImpl,
             GridAttributeModifier::OnScrollStartImpl,
@@ -18605,8 +18565,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::OnScrollImpl,
             ListAttributeModifier::OnScrollIndexImpl,
             ListAttributeModifier::OnScrollVisibleContentChangeImpl,
-            ListAttributeModifier::OnWillScrollImpl,
-            ListAttributeModifier::OnDidScrollImpl,
             ListAttributeModifier::OnReachStartImpl,
             ListAttributeModifier::OnReachEndImpl,
             ListAttributeModifier::OnScrollStartImpl,
@@ -20019,8 +19977,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::FrictionImpl,
             WaterFlowAttributeModifier::CachedCount0Impl,
             WaterFlowAttributeModifier::CachedCount1Impl,
-            WaterFlowAttributeModifier::OnWillScrollImpl,
-            WaterFlowAttributeModifier::OnDidScrollImpl,
             WaterFlowAttributeModifier::OnReachStartImpl,
             WaterFlowAttributeModifier::OnReachEndImpl,
             WaterFlowAttributeModifier::OnScrollFrameBeginImpl,

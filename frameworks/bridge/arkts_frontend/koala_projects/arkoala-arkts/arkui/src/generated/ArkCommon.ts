@@ -2054,6 +2054,24 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         return this
     }
     /** @memo */
+    public onWillScroll(value?: ScrollOnWillScrollCallback): this {
+        if (this.checkPriority("onWillScroll")) {
+            const value_casted = value as (ScrollOnWillScrollCallback | undefined)
+            this.getPeer()?.onWillScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
+    public onDidScroll(value: ScrollOnScrollCallback): this {
+        if (this.checkPriority("onDidScroll")) {
+            const value_casted = value as (ScrollOnScrollCallback)
+            this.getPeer()?.onDidScrollAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    /** @memo */
     public onReachStart(value: (() => void)): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void))
