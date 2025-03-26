@@ -140,9 +140,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     inheritTextStyle_ = textStyle_.value();
     MeasureChildren(layoutWrapper, textStyle_.value());
     CheckNeedReCreateParagraph(layoutWrapper, textStyle_.value());
-    auto logTag = "MeasureContent";
-    pattern->DumpRecord(logTag);
-    pattern->LogForFormRender(logTag);
     ACE_SCOPED_TRACE(
         "TextLayoutAlgorithm::MeasureContent[id:%d][needReCreateParagraph:%d]", host->GetId(), needReCreateParagraph_);
 
@@ -337,9 +334,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    auto logTag = "CreateParagraph";
-    pattern->DumpRecord(logTag);
-    pattern->LogForFormRender(logTag);
     pattern->ClearCustomSpanPlaceholderInfo();
     if (pattern->IsSensitiveEnable()) {
         UpdateSensitiveContent(content);
