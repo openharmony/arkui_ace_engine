@@ -234,7 +234,7 @@ HWTEST_F(ScrollableCommonMethodModifierTest, DISABLED_setOnWillScrollTest, TestS
             .xOffset = xOffset,
             .yOffset = yOffset
         };
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto func = ArkValue<ScrollOnWillScrollCallback>(nullptr, callSyncFunc, expectedResId);
     auto funcOpt = ArkValue<Opt_ScrollOnWillScrollCallback>(func);

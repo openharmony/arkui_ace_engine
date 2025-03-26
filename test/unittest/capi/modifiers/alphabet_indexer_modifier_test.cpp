@@ -1332,7 +1332,7 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
         EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
         EXPECT_EQ(Converter::Convert<int32_t>(index), expectedIndex);
         Converter::ArkArrayHolder<Array_String> arkArrStr(expectedResults);
-        CallbackHelper(cbReturn).Invoke(arkArrStr.ArkValue());
+        CallbackHelper(cbReturn).InvokeSync(arkArrStr.ArkValue());
     };
 
     auto arkCallback = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(nullptr, callback,

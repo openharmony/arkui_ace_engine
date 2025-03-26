@@ -312,7 +312,7 @@ HWTEST_F(GridModifierTest, setGridOptionsGetSizeByIndex, TestSize.Level1)
         Ark_Tuple_Number_Number arkRes;
         arkRes.value0 = ArkValue<Ark_Number>(1);
         arkRes.value1 = ArkValue<Ark_Number>(1);
-        CallbackHelper(continuation).Invoke(arkRes);
+        CallbackHelper(continuation).InvokeSync(arkRes);
     };
     auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number>(nullptr, inputCallback, expectedResId);
     auto optFunc = Converter::ArkValue<Opt_Callback_Number_Tuple_Number_Number>(func);
@@ -362,7 +362,7 @@ HWTEST_F(GridModifierTest, setGridOptionsGetRectByIndex, TestSize.Level1)
         arkRes.value1 = ArkValue<Ark_Number>(1);
         arkRes.value0 = ArkValue<Ark_Number>(-1);
         arkRes.value1 = ArkValue<Ark_Number>(1);
-        CallbackHelper(continuation).Invoke(arkRes);
+        CallbackHelper(continuation).InvokeSync(arkRes);
     };
     auto func = Converter::ArkValue<Callback_Number_Tuple_Number_Number_Number_Number>
                                                     (nullptr, inputCallback, expectedResId);

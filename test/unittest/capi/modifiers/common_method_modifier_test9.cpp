@@ -553,7 +553,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
         GeneratedModifier::GetTouchEventAccessor()->destroyPeer(parameter);
         checkEvent = { .resId = resourceId };
         Ark_HitTestMode retVal = Ark_HitTestMode::ARK_HIT_TEST_MODE_BLOCK;
-        CallbackHelper(continuation).Invoke(retVal);
+        CallbackHelper(continuation).InvokeSync(retVal);
     };
 
     auto callbackValue =

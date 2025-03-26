@@ -726,7 +726,7 @@ HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<int32_t>(to), TO);
         TabContentAnimatedTransition result;
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Opt_TabContentAnimatedTransition>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Opt_TabContentAnimatedTransition>(result));
     };
     auto arkFunc = Converter::ArkValue<TabsCustomContentTransitionCallback>(
         nullptr, onTransition, expectedResId);
@@ -757,7 +757,7 @@ HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
         EXPECT_EQ(Converter::Convert<int32_t>(currentIndex), CURRENT_INDEX);
         EXPECT_EQ(Converter::Convert<int32_t>(comingIndex), COMING_INDEX);
         bool result = Converter::Convert<int32_t>(comingIndex) > 0;
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
     auto arkFunc = Converter::ArkValue<OnTabsContentWillChangeCallback>(
         nullptr, onContentWillChange, expectedResId);

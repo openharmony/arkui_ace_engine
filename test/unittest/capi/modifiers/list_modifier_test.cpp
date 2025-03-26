@@ -1048,12 +1048,12 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
         auto builderSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
             EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
-            CallbackHelper(continuation).Invoke(expectedCustomNode);
+            CallbackHelper(continuation).InvokeSync(expectedCustomNode);
         };
         auto builder = ArkValue<CustomNodeBuilder>(nullptr, builderSyncFunc);
 
         // return result
-        CallbackHelper(continuation).Invoke(builder);
+        CallbackHelper(continuation).InvokeSync(builder);
     };
     auto arkCallback =
         ArkValue<onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
@@ -1271,7 +1271,7 @@ HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
         Ark_Literal_Number_offsetRemain arkResult {
             .offsetRemain = Converter::ArkValue<Ark_Number>(offsetRemain)
         };
-        CallbackHelper(cbReturn).Invoke(arkResult);
+        CallbackHelper(cbReturn).InvokeSync(arkResult);
     };
     func = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
         nullptr, onScrollFrameBegin, expectedResourceId
@@ -1322,7 +1322,7 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
         ) {
         EXPECT_EQ(resourceId, expectedResourceId);
         auto result = Converter::Convert<int32_t>(from) > Converter::Convert<int32_t>(to);
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
     auto func2 = Converter::ArkValue<Callback_Number_Number_Boolean>(nullptr, onItemMoveFunc, expectedResourceId);
 
@@ -1364,7 +1364,7 @@ HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
         ) {
         EXPECT_EQ(resourceId, expectedResourceId);
         auto result = Converter::Convert<int32_t>(index) < fakeTotalCount;
-        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Boolean>(result));
     };
     func = Converter::ArkValue<Callback_Number_Boolean>(nullptr, callbackSyncFunc, expectedResourceId);
 

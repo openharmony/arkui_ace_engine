@@ -362,7 +362,7 @@ HWTEST_F(CommonMethodModifierTest2, setOnKeyPreImeTest, TestSize.Level1)
             .code = info->GetKeyCode()
         };
         accessor->destroyPeer(peer);
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(nullptr, checkCallback, expectedResId);
     modifier_->setOnKeyPreIme(node_, &arkCallback);
