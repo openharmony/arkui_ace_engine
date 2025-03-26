@@ -121,9 +121,92 @@ std::string TextStyle::ToString() const
     jsonValue->Put("renderColors", ss.str().c_str());
     JSON_STRING_PUT_INT(jsonValue, propRenderStrategy_);
     JSON_STRING_PUT_INT(jsonValue, propEffectStrategy_);
-    JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, propSymbolEffectOptions_);
+    JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, symbolEffectOptions_);
 
     return jsonValue->ToString();
 }
 
+void TextStyle::CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
+    const std::optional<NG::SymbolEffectOptions>& oldOptions)
+{
+    if (options->GetCommonSubType().has_value()) {
+        auto commonType = static_cast<uint16_t>(options->GetCommonSubType().value());
+        if (oldOptions->GetCommonSubType().has_value()) {
+            auto oldCommonType = static_cast<uint16_t>(oldOptions->GetCommonSubType().value());
+            if (commonType != oldCommonType) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COMMONSUB_TYPE));
+            }
+        } else {
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COMMONSUB_TYPE));
+        }
+    } else {
+        if (oldOptions->GetCommonSubType().has_value()) {
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COMMONSUB_TYPE));
+        }
+    }
+}
+ 
+void TextStyle::CompareAnimationMode(SymbolEffectType effectType, const std::optional<NG::SymbolEffectOptions>& options,
+    const std::optional<NG::SymbolEffectOptions>& oldOptions)
+{
+    if (effectType == SymbolEffectType::HIERARCHICAL && options->GetFillStyle().has_value()) {
+        if (oldOptions->GetFillStyle().has_value()) {
+            if (options->GetFillStyle().value() != oldOptions->GetFillStyle().value()) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
+            }
+        } else {
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
+        }
+        return;
+    }
+    if (options->GetScopeType().has_value()) {
+        if (oldOptions->GetScopeType().has_value()) {
+            if (options->GetScopeType().value() != oldOptions->GetScopeType().value()) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
+            }
+        } else {
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
+        }
+    }
+}
+
+void TextStyle::SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions)
+{
+    if (symbolEffectOptions.has_value()) {
+        auto options = symbolEffectOptions.value();
+        auto effectType = options.GetEffectType();
+        bool animationStart = options.GetIsTxtActive();
+        if (symbolEffectOptions_.has_value()) {
+            auto oldOptions = symbolEffectOptions_.value();
+            auto oldEffectType = oldOptions.GetEffectType();
+            if (oldEffectType != effectType) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
+            }
+            bool oldAnimationStart = oldOptions.GetIsTxtActive();
+            if (oldAnimationStart != animationStart) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_START));
+            }
+
+            CompareCommonSubType(options, oldOptions);
+            CompareAnimationMode(effectType, options, oldOptions);
+        }
+    } else {
+        if (symbolEffectOptions_.has_value()) {
+            auto oldOptions = symbolEffectOptions_.value();
+            if (oldOptions.GetEffectType() != SymbolEffectType::NONE) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::EFFECT_STRATEGY));
+            }
+            if (oldOptions.GetIsTxtActive()) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_START));
+            }
+            if (oldOptions.GetCommonSubType().has_value()) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COMMONSUB_TYPE));
+            }
+            if (oldOptions.GetFillStyle().has_value() || oldOptions.GetScopeType().has_value()) {
+                reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::ANIMATION_MODE));
+            }
+        }
+    }
+    symbolEffectOptions_ = symbolEffectOptions;
+}
 }  // namespace OHOS::Ace
