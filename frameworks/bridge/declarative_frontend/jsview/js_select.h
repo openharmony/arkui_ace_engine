@@ -65,6 +65,10 @@ public:
     static void BackgroundColor(const JSCallbackInfo& info);
     static void SetDividerStyle(const JSCallbackInfo& info);
     static void SetMenuOutline(const JSCallbackInfo& info);
+    static void SetArrowModifier(const JSCallbackInfo& info);
+    static void SetTextModifier(const JSCallbackInfo& info);
+    static void SetOptionTextModifier(const JSCallbackInfo& info);
+    static void SetSelectedOptionTextModifier(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

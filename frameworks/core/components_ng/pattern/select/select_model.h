@@ -112,6 +112,10 @@ public:
     virtual void ResetBackgroundColor() = 0;
     virtual void ResetFontColor() {};
     virtual void SetMenuOutline(const NG::MenuParam& menuParam);
+    virtual void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
+    virtual void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    virtual void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
+    virtual void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
 
 private:
     static std::unique_ptr<SelectModel> instance_;
