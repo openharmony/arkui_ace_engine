@@ -38,12 +38,12 @@ class WeakRefPool {
   }
 
   // Add handler to track when the given object is GC'ed
-  public static onGC<T extends Object | Symbol>(obj: T, onGarbageCollect: () => void) {
+  public static onGC<T extends Object | Symbol>(obj: T, onGarbageCollect: () => void): void {
     // list of functions is faster alternative to multiple FinalizationRegistry.register calls
-    const weakRef= WeakRefPool.get(obj);
+    const weakRef = WeakRefPool.get(obj);
     const fnList = WeakRefPool.fmap_.get(weakRef);
 
-    if (fnList == undefined) {
+    if (fnList === undefined) {
       WeakRefPool.fmap_.set(weakRef, [onGarbageCollect]);
       WeakRefPool.freg_.register(obj, weakRef);
     } else {

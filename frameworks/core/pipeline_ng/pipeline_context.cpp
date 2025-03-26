@@ -4825,6 +4825,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
     }
