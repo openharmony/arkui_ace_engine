@@ -22,6 +22,7 @@
 
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
@@ -363,5 +364,14 @@ void ListTestNg::CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function
     LazyForEachModelNG lazyForEachModelNG;
     lazyForEachModelNG.Create(mockLazy);
     lazyForEachModelNG.OnMove(std::move(onMove));
+}
+
+void ListTestNg::AddCustomNode()
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto customNode = CustomFrameNode::GetOrCreateCustomFrameNode(nodeId);
+    CHECK_NULL_VOID(customNode);
+    customNode->MountToParent(frameNode_);
 }
 } // namespace OHOS::Ace::NG

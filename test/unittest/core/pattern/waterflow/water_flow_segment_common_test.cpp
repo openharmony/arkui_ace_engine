@@ -946,7 +946,7 @@ HWTEST_F(WaterFlowSegmentCommonTest, Multi001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Multi001
+ * @tc.name: Spring001
  * @tc.desc: Test spring bounce-back offset.
  * @tc.type: FUNC
  */
