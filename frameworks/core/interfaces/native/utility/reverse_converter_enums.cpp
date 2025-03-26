@@ -879,6 +879,7 @@ void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
 void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
 {
     switch (src) {
+        case DragBehavior::UNKNOWN:
         case DragBehavior::COPY: dst = ARK_DRAG_BEHAVIOR_COPY; break;
         case DragBehavior::MOVE: dst = ARK_DRAG_BEHAVIOR_MOVE; break;
         default:

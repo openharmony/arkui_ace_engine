@@ -140,7 +140,7 @@ const std::vector<std::tuple<std::string, OHOS::Ace::DragBehavior, Ark_DragBehav
     testFixtureEnumArkDragBehaviorValues = {
     { "ARK_DRAG_BEHAVIOR_COPY", OHOS::Ace::DragBehavior::COPY, ARK_DRAG_BEHAVIOR_COPY },
     { "ARK_DRAG_BEHAVIOR_MOVE", OHOS::Ace::DragBehavior::MOVE, ARK_DRAG_BEHAVIOR_MOVE },
-    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, static_cast<Ark_DragBehavior>(OHOS::Ace::DragBehavior::UNKNOWN) },
+    { "-1", OHOS::Ace::DragBehavior::UNKNOWN, ARK_DRAG_BEHAVIOR_COPY },
 };
 
 const std::vector<DimensionTestType> testFixturesDimensionWithPercentAndNegativeValues = {
