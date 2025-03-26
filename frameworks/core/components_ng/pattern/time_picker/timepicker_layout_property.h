@@ -113,8 +113,6 @@ public:
         json->PutExtAttr("loop", V2::ConvertBoolToString(GetLoopValue(true)).c_str(), filter);
 
         FontAddJsonValue(json, filter);
-        json->PutExtAttr("enableCascade",
-            V2::ConvertBoolToString(GetIsEnableCascade().value_or(false)).c_str(), filter);
 
         auto options = JsonUtil::Create(true);
         options->Put("hour", TimeFormat::GetHourFormat(
