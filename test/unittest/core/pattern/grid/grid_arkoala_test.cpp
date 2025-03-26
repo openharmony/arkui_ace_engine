@@ -14,6 +14,8 @@
  */
 #include "grid_test_ng.h"
 #include "test/mock/core/pattern/mock_koala_lazy_for_each.h"
+#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 class GridArkoalaTest : public GridTestNg {
@@ -28,10 +30,18 @@ private:
     {
         lazy_ = MockKoalaLazyForEach(frameNode_.GetRawPtr(), itemCnt, [](int32_t idx) {
             auto node = GridItemModelNG::CreateGridItem(-1);
-            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(450.0f)));
+            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(450.0f)));
             return node;
         });
         lazy_.Register();
+    }
+
+    static RefPtr<MockFrontend> frontend_;
+    static void SetUpTestSuite() {
+        TestNG::SetUpTestSuite();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        ASSERT_TRUE(pipeline);
+        pipeline->frontendType_ = FrontendType::ARK_TS;
     }
 
     MockKoalaLazyForEach lazy_;
@@ -48,6 +58,7 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     InitMockLazy(100);
     CreateDone(frameNode_);
+    ASSERT_TRUE(frameNode_->GetContext());
 
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 4));
@@ -76,21 +87,17 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
     UpdateCurrentOffset(300.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1));
+    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (240.00, -400.00) - [240.00 x 450.00]");
 
     UpdateCurrentOffset(-51.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
-    EXPECT_EQ(pattern_->info_.currentOffset_, -1.0f);
-
     UpdateCurrentOffset(2.0f);
-    IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8)); // to be optimized
-    EXPECT_TRUE(GetChildFrameNode(frameNode_, 1));
-    EXPECT_EQ(GetChildRect(frameNode_, 1).ToString(), "RectT (240.00, -449.00) - [240.00 x 450.00]");
+    EXPECT_EQ(pattern_->info_.startIndex_, 0); 
+    EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, 1.00) - [240.00 x 450.00]");
+    EXPECT_TRUE(lazy_.NeedRecompose()); // to be optimized
 
     UpdateCurrentOffset(-2.0f);
-    EXPECT_FALSE(lazy_.NeedRecompose());
+    EXPECT_EQ(pattern_->info_.startIndex_, 2);
 }
 
 /**
@@ -113,14 +120,14 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
     UpdateCurrentOffset(-450.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8));
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
-    EXPECT_EQ(pattern_->info_.currentOffset_, -450.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 8.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 9));
     EXPECT_FALSE(lazy_.NeedRecompose());
 
     UpdateCurrentOffset(-2.0f);
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
-    EXPECT_EQ(pattern_->info_.currentOffset_, -452.0f);
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 6.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
 
     UpdateCurrentOffset(-18.0f);
@@ -131,10 +138,9 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
     UpdateCurrentOffset(15.0f);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
     EXPECT_EQ(pattern_->info_.currentOffset_, 3.0f);
-    IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(0, 8)); // to optimize
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
-    EXPECT_EQ(pattern_->info_.currentOffset_, -455.0f);
+    EXPECT_FALSE(lazy_.NeedRecompose());
+    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 3.0f);
 
     UpdateCurrentOffset(15.0f);
     IncrementAndLayout(__LINE__);
@@ -161,19 +167,19 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
 
     UpdateCurrentOffset(-5000.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(20, 26));
-    EXPECT_EQ(GetChildRect(frameNode_, 21).ToString(), "RectT (240.00, -78.00) - [240.00 x 450.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(24, 30));
+    EXPECT_EQ(GetChildRect(frameNode_, 25).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
 
     UpdateCurrentOffset(-8000.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(54, 60));
-    EXPECT_EQ(GetChildRect(frameNode_, 60).ToString(), "RectT (120.00, 1382.00) - [0.00 x 450.00]");
+    EXPECT_EQ(lazy_.GetRange(), std::pair(60, 66));
+    EXPECT_EQ(GetChildRect(frameNode_, 61).ToString(), "RectT (240.00, -86.00) - [240.00 x 450.00]");
+    EXPECT_EQ(pattern_->info_.startIndex_, 60);
 
     UpdateCurrentOffset(4000.0f);
     IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(36, 42));
-    EXPECT_EQ(GetChildRect(frameNode_, 38).ToString(), "RectT (0.00, 466.00) - [240.00 x 450.00]");
-    EXPECT_EQ(pattern_->info_.startIndex_, 36);
+    EXPECT_EQ(lazy_.GetRange(), std::pair(42, 48));
+    EXPECT_EQ(pattern_->info_.ToString(), "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
 }
 
 /**
@@ -192,14 +198,13 @@ HWTEST_F(GridArkoalaTest, Jump001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
 
     pattern_->ScrollToIndex(90, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(90, 96));
     EXPECT_EQ(pattern_->info_.jumpIndex_, -2);
     EXPECT_EQ(pattern_->info_.startIndex_, 90);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 45);
-    EXPECT_EQ(GetChildRect(frameNode_, 90).ToString(), "RectT (0.00, 8.00) - [240.00 x 450.00]");
-    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 466.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 90).ToString(), "RectT (0.00, 0.00) - [240.00 x 450.00]");
+    EXPECT_EQ(GetChildRect(frameNode_, 93).ToString(), "RectT (240.00, 458.00) - [240.00 x 450.00]");
 }
 
 /**
@@ -218,8 +223,6 @@ HWTEST_F(GridArkoalaTest, TargetAnimation001, TestSize.Level1)
     IncrementAndLayout(__LINE__);
 
     pattern_->ScrollToIndex(10, true, ScrollAlign::END);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->info_.endIndex_, 5);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(0, 10));
     FlushLayoutTask(frameNode_);
@@ -252,8 +255,7 @@ HWTEST_F(GridArkoalaTest, Reset001, TestSize.Level1)
     CreateDone(frameNode_);
     IncrementAndLayout(__LINE__);
 
-    pattern_->ScrollToIndex(50);
-    FlushLayoutTask(frameNode_);
+    pattern_->ScrollToIndex(50, false, ScrollAlign::START);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
     EXPECT_EQ(pattern_->info_.startIndex_, 50);
@@ -261,26 +263,21 @@ HWTEST_F(GridArkoalaTest, Reset001, TestSize.Level1)
     frameNode_->ChildrenUpdatedFrom(40);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
-    IncrementAndLayout(__LINE__);
-    EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
-    EXPECT_EQ(pattern_->info_.startIndex_, 50);
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
+    EXPECT_FALSE(lazy_.NeedRecompose());
 
     frameNode_->ChildrenUpdatedFrom(52);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     lazy_.NormalModeUpdate(50, nullptr);
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
     FlushLayoutTask(frameNode_);
-    IncrementAndLayout(__LINE__);
-    EXPECT_EQ(pattern_->info_.startIndex_, 50);
-    EXPECT_EQ(pattern_->info_.startMainLineIndex_, 25);
+    EXPECT_FALSE(lazy_.NeedRecompose());
 
-    EXPECT_EQ(GetChildY(frameNode_, 52), 466.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 52), 458.0f);
     frameNode_->ChildrenUpdatedFrom(52);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     UpdateCurrentOffset(-20.0f);
-    IncrementAndLayout(__LINE__);
+    EXPECT_FALSE(lazy_.NeedRecompose());
     EXPECT_EQ(lazy_.GetRange(), std::pair(50, 56));
-    EXPECT_EQ(GetChildY(frameNode_, 52), 446.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 52), 438.0f);
 }
 } // namespace OHOS::Ace::NG

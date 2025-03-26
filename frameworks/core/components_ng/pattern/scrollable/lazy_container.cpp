@@ -28,11 +28,16 @@ bool LazyContainer::UpdateOffset(float delta)
 
 void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
 {
-    if (adapter_) {
-        adapter_->UpdateViewport(GetHost()->GetGeometryNode()->GetContentSize(), axis);
-        if (firstLayout) {
-            adapter_->PrepareReset(0);
-        }
+    if (!adapter_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geo = host->GetGeometryNode();
+    CHECK_NULL_VOID(geo);
+    adapter_->UpdateViewport(geo->GetContentSize(), axis);
+    if (firstLayout) {
+        adapter_->PrepareReset(0);
     }
 }
 

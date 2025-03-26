@@ -38,6 +38,15 @@ double CalcCoordinatesDistance(double curFocusMain, double curFocusCross, double
 }
 } // namespace
 
+void GridPattern::OnAttachToFrameNode()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+        irregular_ = true; // GridScrollLayoutAlgorithm deprecated in ArkTS
+    }
+}
+
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
@@ -93,11 +102,6 @@ void GridPattern::BeforeCreateLayoutWrapper()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     info_.childrenCount_ = host->GetTotalChildCount();
-    if (info_.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        RequestJump(info_.jumpIndex_, info_.scrollAlign_, GetExtraOffset().value_or(0.0f));
-    } else if (targetIndex_) {
-        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
-    }
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -1349,6 +1353,7 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     info_.jumpIndex_ = index;
+    RequestJump(index, info_.scrollAlign_, -info_.extraOffset_.value_or(0.0f));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // AccessibilityEventType::SCROLL_END
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1949,6 +1954,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             targetIndex_ = index;
             scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            RequestFillToTarget(index, align, extraOffset.value_or(0.0f));
         } else {
             UpdateStartIndex(index, align);
         }

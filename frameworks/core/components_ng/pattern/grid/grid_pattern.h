@@ -58,6 +58,8 @@ class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
 public:
     GridPattern() = default;
 
+    void OnAttachToFrameNode() override;
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<GridLayoutProperty>();

@@ -51,8 +51,7 @@ void ScrollWindowAdapter::PrepareJump(int32_t idx, ScrollAlign align, float extr
 bool ScrollWindowAdapter::PrepareLoadToTarget(int32_t targetIdx, ScrollAlign align, float extraOffset)
 {
     if (target_ && targetIdx == target_->index) {
-        target_.reset(); // prevent loop and good timing to reset target_
-        return true;
+        return true; // prevent loop
     }
     target_ = std::make_unique<PendingJump>(targetIdx, align, extraOffset);
     RequestRecompose(markIndex_);
@@ -119,7 +118,11 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     }
     if (target_) {
         bool reached = FillToTarget(direction, index);
-        return reached ? nullptr : pendingNode;
+        if (reached) {
+            target_.reset();
+            return nullptr;
+        }
+        return pendingNode;
         // keep creating until targetNode is reached
     }
     if (!filled_.count(index)) {
@@ -200,10 +203,6 @@ void ScrollWindowAdapter::Prepare(uint32_t offset)
 
 void ScrollWindowAdapter::UpdateViewport(const SizeF& size, Axis axis)
 {
-    if (fillAlgorithm_->GetMarkIndex() != markIndex_) {
-        markIndex_ = fillAlgorithm_->GetMarkIndex();
-        RequestRecompose(markIndex_);
-    }
     if (size == size_ && axis == axis_) {
         return;
     }

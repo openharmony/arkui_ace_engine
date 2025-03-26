@@ -25,7 +25,6 @@ void MockKoalaLazyForEach::Register()
     auto adapter = parent_->GetPattern()->GetOrCreateScrollWindowAdapter();
     adapter->RegisterUpdater([this](int32_t s, void* pointer) {
         // frontend
-        std::cout << "update " << s << std::endl;
         Update(s, pointer);
     });
     adapter->SetTotalCount(totalCnt_);
@@ -33,6 +32,14 @@ void MockKoalaLazyForEach::Register()
 
 void MockKoalaLazyForEach::NormalModeUpdate(int32_t s, void* pointer)
 {
+    if (s < range_.first) { // to mock detachChildScopes
+        for (auto& item : itemCache_) {
+            if (item.first <= range_.first) {
+                parent_->RemoveChild(item.second);
+            }
+        }
+        itemCache_.clear();
+    }
     bool insertInFront = false;
     auto* insertRef = (FrameNode*)pointer;
     VisibleRange visibleRange(parent_, s, s);
