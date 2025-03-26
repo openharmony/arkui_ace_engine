@@ -1536,4 +1536,38 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractHandleHoverTipsInfoTest001, TestSize.Le
     }
     EXPECT_EQ(overlayManager->GetPopupInfo(targetNode->GetId()).popupNode, nullptr);
 }
+
+/**
+ * @tc.name: ViewAbstractBindTipsTest002
+ * @tc.desc: Test the BindTips of View_Abstract.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractBindTipsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create some FrameNode and params.
+     */
+    const RefPtr<FrameNode> targetNode = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> targetNode2 = FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<Pattern>());
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto nodeId = targetNode->GetId();
+    PopupInfo info = overlayManager->GetPopupInfo(nodeId);
+    info.isCurrentOnShow = true;
+    info.popupId = 1;
+    auto popupNode1 = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, info.popupId, AceType::MakeRefPtr<BubblePattern>(targetNode->GetId(), targetNode->GetTag()));
+    info.popupNode = popupNode1;
+    info.target = targetNode2;
+    overlayManager->ShowTips(targetNode->GetId(), info, 300, 300, true);
+    EXPECT_NE(overlayManager->GetTipsStatus(targetNode->GetId()), true);
+}
 } // namespace OHOS::Ace::NG
