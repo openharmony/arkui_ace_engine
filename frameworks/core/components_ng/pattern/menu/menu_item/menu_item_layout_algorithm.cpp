@@ -118,7 +118,8 @@ float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRo
                 : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
         }
     } else {
-        return std::max(leftRowHeight, rightRowHeight) + padding_.Height();
+        return GreatNotEqual(idealHeight_, 0.0f) ? idealHeight_
+            : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
     }
 }
 
