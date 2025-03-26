@@ -18,6 +18,7 @@
 #include "accessor_test_base.h"
 #include "node_api.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "gmock/gmock.h"
 #include "base/memory/ace_type.h"
 
@@ -31,11 +32,6 @@ public:
     MockWaterFlowSections() = default;
     ~MockWaterFlowSections() override = default;
 
-    const std::vector<Section>& GetSectionInfo() const
-    {
-        counter++;
-        return vector;
-    }
 public:
     mutable int counter = 0;
     std::vector<Section> vector;
@@ -73,17 +69,56 @@ public:
  */
 HWTEST_F(WaterFlowSectionAccessorTest, LengthTest, TestSize.Level1)
 {
-    auto controller = peer_->GetController();
-    ASSERT_NE(controller, nullptr);
-    auto refPtr = controller.GetRawPtr();
-    ASSERT_NE(refPtr, nullptr);
-    MockWaterFlowSections* mockSections = reinterpret_cast<MockWaterFlowSections*>(refPtr);
+    Ark_SectionOptions section1;
+    section1.columnsGap = Converter::ArkValue<Opt_Length>(1);
+    section1.crossCount = Converter::ArkValue<Opt_Number>(2);
+    section1.itemsCount = Converter::ArkValue<Ark_Number>(3);
+    section1.rowsGap = Converter::ArkValue<Opt_Length>(4);
+    Ark_SectionOptions section2;
+    section2.columnsGap = Converter::ArkValue<Opt_Length>(5);
+    section2.crossCount = Converter::ArkValue<Opt_Number>(6);
+    section2.itemsCount = Converter::ArkValue<Ark_Number>(7);
+    section2.rowsGap = Converter::ArkValue<Opt_Length>(8);
+    accessor_->push(peer_, &section1);
+    accessor_->push(peer_, &section2);
+    auto length = accessor_->length(peer_);
+    EXPECT_EQ(Converter::Convert<int>(length), 2);
+}
 
-    accessor_->length(peer_);
-    accessor_->length(peer_);
-    accessor_->length(nullptr);
-    accessor_->length(peer_);
-
-    EXPECT_EQ(mockSections->counter, 3);
+/**
+ * @tc.name: ValuesTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
+{
+    Ark_SectionOptions section;
+    section.columnsGap = Converter::ArkValue<Opt_Length>(1);
+    section.crossCount = Converter::ArkValue<Opt_Number>(2);
+    section.itemsCount = Converter::ArkValue<Ark_Number>(3);
+    section.rowsGap = Converter::ArkValue<Opt_Length>(4);
+    const CalcLength length(123.0_vp);
+    Ark_Padding arkPadding = {
+        .left = Converter::ArkValue<Opt_Length>(length.GetDimension()),
+        .top = Converter:: ArkValue<Opt_Length>(length.GetDimension()),
+        .right = Converter::ArkValue<Opt_Length>(length.GetDimension()),
+        .bottom = Converter::ArkValue<Opt_Length>(length.GetDimension()),
+    };
+    Opt_Union_Margin_Dimension margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>
+                        (Converter::ArkValue<Ark_Padding>(arkPadding));
+    section.margin = margin;
+    accessor_->push(peer_, &section);
+    Array_SectionOptions sections = accessor_->values(peer_);
+    EXPECT_EQ(sections.length, 1);
+    EXPECT_EQ(Converter::Convert<int32_t>(sections.array[0].itemsCount), 3);
+    auto crossCountOpt  = Converter::OptConvert<Ark_Number>(sections.array[0].crossCount);
+    auto crossCount = Converter::Convert<int32_t>(crossCountOpt.value());
+    EXPECT_EQ(crossCount, 2);
+    EXPECT_EQ(Converter::OptConvert<Dimension>(section.columnsGap),
+              Converter::OptConvert<Dimension>(sections.array[0].columnsGap));
+    EXPECT_EQ(Converter::OptConvert<Dimension>(section.rowsGap),
+              Converter::OptConvert<Dimension>(sections.array[0].rowsGap));
+    EXPECT_EQ(Converter::OptConvert<MarginProperty>(section.margin),
+              Converter::OptConvert<MarginProperty>(sections.array[0].margin));
 }
 } // namespace OHOS::Ace::NG
