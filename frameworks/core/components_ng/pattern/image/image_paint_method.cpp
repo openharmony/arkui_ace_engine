@@ -131,9 +131,10 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
         config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
     }
 
-    if (canvasImage_->IsHdrPixelMap() && renderCtx) {
+    if (renderProps->HasHdrBrightness() && canvasImage_->IsHdrPixelMap() && renderCtx) {
         renderCtx->SetImageHDRBrightness(renderProps->GetHdrBrightnessValue(DEFAULT_HDR_BRIGHTNESS));
         renderCtx->SetImageHDRPresent(true);
+        config.dynamicMode = DynamicRangeMode::HIGH;
     }
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
