@@ -142,6 +142,10 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
     JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
+    JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
+    JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1006,5 +1010,50 @@ void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
         JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
     }
     SelectModel::GetInstance()->SetMenuOutline(menuParam);
+}
+
+void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject() ||
+        !SystemProperties::IsNeedSymbol()) {
+        SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetSymbolOptionApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+}
+
+void JSSelect::SetTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+}
+
+void JSSelect::SetOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
 }
 } // namespace OHOS::Ace::Framework

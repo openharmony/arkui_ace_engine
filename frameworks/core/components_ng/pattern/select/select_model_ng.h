@@ -95,6 +95,10 @@ public:
     void ResetBackgroundColor() override;
     void ResetFontColor() override;
     void SetMenuOutline(const MenuParam& menuParam) override;
+    void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply) override;
+    void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply) override;
+    void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply) override;
+    void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params);
