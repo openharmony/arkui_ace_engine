@@ -176,13 +176,23 @@ void FfiOHOSAceFrameworkRichEditorOnDeleteComplete(void(*callback)())
     RichEditorModel::GetInstance()->SetOnDeleteComplete(CJLambda::Create(callback));
 }
 
+char* MallocCString(const std::string& origin)
+{
+    auto len = origin.length() + 1;
+    char* res = static_cast<char*>(malloc(sizeof(char) * len));
+    if (res == nullptr) {
+        return nullptr;
+    }
+    return std::char_traits<char>::copy(res, origin.c_str(), len);
+}
+
 void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEditorInsertValue))
 {
     auto aboutToIMEInputFunc = [cjCallback = CJLambda::Create(callback)](
         const NG::RichEditorInsertValue& insertValue) -> bool {
-        auto utilstring = UtfUtils::Str16ToStr8(insertValue.GetInsertValue()).c_str();
         NativeRichEditorInsertValue result {
-            insertValue.GetInsertOffset(), utilstring
+            insertValue.GetInsertOffset(),
+            MallocCString(UtfUtils::Str16ToStr8(insertValue.GetInsertValue()))
         };
         return cjCallback(result);
     };
@@ -226,10 +236,10 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
             textSpanResult.GetFontFamily().c_str(),
             decoration
         };
-        auto utilstring = UtfUtils::Str16ToStr8(textSpanResult.GetValue()).c_str();
+
         NativeRichEditorTextSpanResult result {
             spanPosition,
-            utilstring,
+            MallocCString(UtfUtils::Str16ToStr8(textSpanResult.GetValue())),
             textStyle,
             textSpanResult.OffsetInSpan(),
             textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength()

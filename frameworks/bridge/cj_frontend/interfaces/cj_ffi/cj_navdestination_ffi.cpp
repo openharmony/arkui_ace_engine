@@ -74,7 +74,8 @@ void FfiOHOSAceFrameworkNavdestinationSetOnReady(void (*callback)(CJNavDestinati
     auto onReadyCallback = [ffiCallback = CJLambda::Create(callback)](RefPtr<NG::NavDestinationContext> context) {
         auto pathInfo = context->GetNavPathInfo();
         CJNavPathInfoFFi info = CJNavPathInfoFFi();
-        info.name = strdup(pathInfo->GetName().c_str());
+        char* temp = strdup(pathInfo->GetName().c_str());
+        info.name = temp;
         int64_t pathStackId = 0;
         auto stack = context->GetNavigationStack().Upgrade();
         if (stack) {
@@ -88,6 +89,9 @@ void FfiOHOSAceFrameworkNavdestinationSetOnReady(void (*callback)(CJNavDestinati
         cjContext.pathStack = pathStackId;
         cjContext.pathInfo = info;
         ffiCallback(cjContext);
+        if (temp != nullptr) {
+            free(temp);
+        }
     };
     NavDestinationModel::GetInstance()->SetOnReady(std::move(onReadyCallback));
 }
