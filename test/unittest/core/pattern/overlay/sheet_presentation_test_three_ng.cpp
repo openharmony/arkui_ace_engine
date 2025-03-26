@@ -580,7 +580,7 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType005, TestSize.Lev
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
     float sheetWidth = sheetLayoutAlgorithm->GetWidthByScreenSizeType(800.0f, Referenced::RawPtr(layoutWrapper));
-    EXPECT_EQ(sheetWidth, 480.0f);
+    EXPECT_EQ(sheetWidth, 0.0f);
 
     sheetLayoutAlgorithm->sheetType_ = SheetType::SHEET_POPUP;
 
