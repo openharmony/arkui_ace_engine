@@ -215,5 +215,6 @@ MATCHER_P(CompareArkSize, expected, "Compare size values")
     auto optExpected = Converter::OptConvert<ImageSpanSize>(expected);
     return optArg == optExpected;
 }
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H

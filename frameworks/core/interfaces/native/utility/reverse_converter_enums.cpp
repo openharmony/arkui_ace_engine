@@ -855,7 +855,7 @@ void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
         case DragBehavior::COPY: dst = ARK_DRAG_BEHAVIOR_COPY; break;
         case DragBehavior::MOVE: dst = ARK_DRAG_BEHAVIOR_MOVE; break;
         default:
-            dst = static_cast<Ark_DragBehavior>(-1);
+            dst = static_cast<Ark_DragBehavior>(DragBehavior::UNKNOWN);
             LOGE("Unexpected enum value in DragBehavior: %{public}d", src);
             break;
     }
