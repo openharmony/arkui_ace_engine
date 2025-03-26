@@ -35,7 +35,11 @@ void LazyContainer::UpdateLayoutRange(Axis axis, bool firstLayout)
     CHECK_NULL_VOID(host);
     auto geo = host->GetGeometryNode();
     CHECK_NULL_VOID(geo);
-    adapter_->UpdateViewport(geo->GetContentSize(), axis);
+    auto size = geo->GetFrameSize();
+    if (geo->GetContentSize().IsPositive()) {
+        size = geo->GetContentSize();
+    }
+    adapter_->UpdateViewport(size, axis);
     if (firstLayout) {
         adapter_->PrepareReset(0);
     }

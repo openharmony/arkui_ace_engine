@@ -114,8 +114,6 @@ bool StaggeredFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSiz
                                         : CanFillMoreAtStart(axis)) {
         return true;
     }
-    if (direction == FillDirection::START) {
-    }
     if (!startIdx || !endIdx) {
         return true;
     }
