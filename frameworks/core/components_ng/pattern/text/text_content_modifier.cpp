@@ -422,10 +422,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
-                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
-            textPattern->DumpRecord(logTag);
-            textPattern->LogForFormRender(logTag);
             DrawText(canvas, pManager);
         } else {
             // Racing
