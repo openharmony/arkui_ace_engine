@@ -7628,6 +7628,9 @@ AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelative
 {
     AccessibilityParentRectInfo rectInfo;
     CHECK_NULL_RETURN(node, rectInfo);
+    auto finalScale = node->GetTransformScaleRelativeToWindow();
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
     CHECK_NULL_RETURN(context, rectInfo);
     auto windowInfo = GenerateWindowInfo(node, context);
     auto rectFinal = GetFinalRealRect(node);
