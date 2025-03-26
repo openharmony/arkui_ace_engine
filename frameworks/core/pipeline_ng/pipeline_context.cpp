@@ -727,7 +727,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::FlushMouseEventVoluntarily()
 {
-    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE ||
+        windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -5907,8 +5908,7 @@ void PipelineContext::FlushMouseEventForHover()
         return;
     }
     CHECK_NULL_VOID(rootNode_);
-    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG ||
-        windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
+    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -5920,6 +5920,8 @@ void PipelineContext::FlushMouseEventForHover()
     event.screenX = lastMouseEvent_->screenX;
     event.screenY = lastMouseEvent_->screenY;
     event.button = lastMouseEvent_->button;
+    event.deviceId = lastMouseEvent_->deviceId;
+    event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
     event.action = lastMouseEvent_->action;
     event.time = lastMouseEvent_->time;
@@ -5972,6 +5974,7 @@ void PipelineContext::FlushMouseEventInVsync()
         FlushMouseEventForHover();
         isTransFlag_ = false;
     }
+    windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 }
 
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
