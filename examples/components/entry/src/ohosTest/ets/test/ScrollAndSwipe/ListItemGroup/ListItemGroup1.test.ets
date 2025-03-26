@@ -1,62 +1,46 @@
-import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, ON } from '@kit.TestKit';
+/*
+ * Copyright (c) 2025 Hunan OpenValley Digital Industry Development Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { beforeAll, describe, it } from '@ohos/hypium';
+import { Driver, ON } from '@kit.TestKit';
 import { Component } from '@ohos.UiTest';
 import {
+  buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  ToggleClick,
   Search,
-  buttonClick,
-  sliderDrag,
   Slide,
+  sliderDrag,
   titleSearch,
-  getToggle,
-  searchToggle,
-  searchParentBlock
-} from '../../utils';
-const TAG = 'ListItemGroupBootcamp'
-/*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+  ToggleClick
+} from '../../../utils';
+import { ListItemGroupStart } from './ListItemGroup.test';
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export default function ListItemGroupBootcampTest() {
-  describe('ListItemGroupBootcampTest', () => {
+export default function ListItemGroup1Test() {
+  describe('ListItemGroup1Test', () => {
     /**
      * 打开应用
      */
     beforeAll(async (done: Function) => {
-      console.info('beforeAll begin');
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(5000);
-        console.info(TAG + 'ListItemGroup001' + ' begin');
-
-        let atomDisplays: Component = await driver.findComponent(ON.text('滚动与滑动'));
-        await atomDisplays.click();
-        await driver.delayMs(1000);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('分组列表/ListItemGroup'))
-        await scrollSearch.click()
-        await driver.delayMs(1000);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(1000);
-
-      } catch (err) {
-
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-
-      }
-      console.info(`beforeAll end`);
-      done();
+      await ListItemGroupStart(done);
     })
+
     //scrollBar
     /*
      * 测试组件scrollBar支持设置Auto且获取属性正确
@@ -713,295 +697,6 @@ export default function ListItemGroupBootcampTest() {
           toggleClickType: ToggleClick.Close
         },
       })
-
-      done();
-    })
-    /**
-     * 测试组件position.left且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0014', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'position');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'position.left');
-      //无值，只有xy的值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-      })
-
-      done();
-    })
-    /**
-     * 测试组件position.right且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0015', 0, async (done: Function) => {
-      //无值，只有xy的值
-      await titleSearch('基础属性', 'position');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'position.right');
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-      })
-
-      done();
-    })
-    /**
-     * 测试关闭position
-     */
-    it('ArkUI_ListItemGroup_Comp_0016', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'position');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')));
-      if (await toggle[0].isChecked() === true) {
-        await toggle[0].click()
-      }
-      await driver.delayMs(1000);
-
-      done();
-    })
-    /**
-     * 测试开启markAnchor
-     */
-    it('ArkUI_ListItemGroup_Comp_0017', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'markAnchor');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
-      await toggle[0].click()
-      await driver.delayMs(1000);
-      done();
-    })
-    /**
-     * 测试组件markAnchor.x且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0018', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'position');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'markAnchor.x');
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('markAnchor', JsonType.obj),
-          new KeyStruct('x', JsonType.value)
-        ],
-        assertEqual: '500.00vp'
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('markAnchor', JsonType.obj),
-          new KeyStruct('x', JsonType.value)
-        ],
-        assertEqual: '0.00vp'
-      })
-
-      done();
-    })
-    /**
-     * 测试组件markAnchor.y且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0019', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'position');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'markAnchor.y');
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('markAnchor', JsonType.obj),
-          new KeyStruct('y', JsonType.value)
-        ],
-        assertEqual: '500.00vp'
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('markAnchor', JsonType.obj),
-          new KeyStruct('y', JsonType.value)
-        ],
-        assertEqual: '0.00vp'
-      })
-
-      done();
-    })
-    /**
-     * 测试关闭markAnchor
-     */
-    it('ArkUI_ListItemGroup_Comp_0020', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'markAnchor');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')));
-      if (await toggle[0].isChecked() === true) {
-        await toggle[0].click()
-      }
-      await driver.delayMs(1000);
-
-      done();
-    })
-    /**
-     * 测试开启offset
-     */
-    it('ArkUI_ListItemGroup_Comp_0021', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'offset');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
-      await toggle[0].click()
-      await driver.delayMs(1000);
-      done();
-    })
-    /**
-     * 测试组件offset.x且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0022', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'offset');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'offset.x');
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('offset', JsonType.obj),
-          new KeyStruct('x', JsonType.value)
-        ],
-        assertEqual: '500.00vp'
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('offset', JsonType.obj),
-          new KeyStruct('x', JsonType.value)
-        ],
-        assertEqual: '0.00vp'
-      })
-
-      done();
-    })
-    /**
-     * 测试组件offset.y且获取属性正确
-     */
-    it('ArkUI_ListItemGroup_Comp_0023', 0, async (done: Function) => {
-      await titleSearch('基础属性', 'offset');
-      let toggle: Component =
-        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
-      if (await toggle.isChecked() === false) {
-        await toggle.click();
-      }
-      await titleSearch('基础属性', 'offset.y');
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('offset', JsonType.obj),
-          new KeyStruct('y', JsonType.value)
-        ],
-        assertEqual: '500.00vp'
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close
-        },
-        id: 'ListItemGroup',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('offset', JsonType.obj),
-          new KeyStruct('y', JsonType.value)
-        ],
-        assertEqual: '0.00vp'
-      })
-
-      done();
-    })
-    /**
-     * 测试关闭offset
-     */
-    it('ArkUI_ListItemGroup_Comp_0024', 0, async (done: Function) => {
-      // 无断言
-      await titleSearch('基础属性', 'offset');
-      let toggle: Array<Component> =
-        await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')));
-      if (await toggle[0].isChecked() === true) {
-        await toggle[0].click()
-      }
-      await driver.delayMs(1000);
 
       done();
     })
