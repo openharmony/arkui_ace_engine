@@ -2452,26 +2452,13 @@ void ClearVirtualNodeAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64
     renderContext->UpdateAccessibilityFocus(false);
 }
 
-void renderContextUpdateAndReset(const RefPtr<NG::RenderContext>& renderContext,
-    bool isAccessibilityVirtualNode, const RefPtr<NG::FrameNode>& frameNode)
-{
-    if (isAccessibilityVirtualNode) {
-        renderContext->UpdateAccessibilityFocusRect(getFrameNodeRectInt(frameNode));
-        renderContext->UpdateAccessibilityFocus(true, frameNode->GetAccessibilityId());
-    } else {
-        renderContext->ResetAccessibilityFocusRect();
-        renderContext->UpdateAccessibilityFocus(true);
-    }
-}
-
-bool setParentAccessibilityId(const RefPtr<NG::FrameNode>& frameNode, FocusInfo& focusInfo)
+void setParentAccessibilityId(const RefPtr<NG::FrameNode>& frameNode, FocusInfo& focusInfo)
 {
     auto parentUinode = frameNode->GetVirtualNodeParent().Upgrade();
-    CHECK_NULL_RETURN(parentUinode, false);
+    CHECK_NULL_VOID(parentUinode);
     auto parentFrame = AceType::DynamicCast<NG::FrameNode>(parentUinode);
-    CHECK_NULL_RETURN(parentFrame, false);
+    CHECK_NULL_VOID(parentFrame);
     focusInfo.currentFocusVirtualNodeParentId = parentFrame->GetAccessibilityId();
-    return true;
 }
 
 bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frameNode,
@@ -2513,11 +2500,9 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
         ClearVirtualNodeAccessibilityFocus(context->GetRootElement(), focusInfo.currentFocusVirtualNodeParentId);
     }
     UpdateAccessibilityFocusRect(frameNode, renderContext, isAccessibilityVirtualNode);
-    renderContextUpdateAndReset(renderContext, isAccessibilityVirtualNode, frameNode);
     focusInfo.currentFocusNodeId = frameNode->GetAccessibilityId();
     if (isAccessibilityVirtualNode) {
-        bool ret = setParentAccessibilityId(frameNode, focusInfo);
-        CHECK_EQUAL_RETURN(ret, false, false);
+        setParentAccessibilityId(frameNode, focusInfo);
     }
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
