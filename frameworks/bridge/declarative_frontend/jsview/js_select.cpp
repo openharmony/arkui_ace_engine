@@ -720,26 +720,27 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
 
 void JSSelect::SetAvoidance(const JSCallbackInfo& info)
 {
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
     if (info.Length() < 1) {
         return;
     }
     if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetAvoidance(mode);
         return;
     }
-    int32_t modeValue = info[0]->ToNumber<int32_t>();
-    Avoidance avoidance;
-    switch (modeValue) {
+
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
         case static_cast<int32_t>(AvoidanceMode::COVER_TARGET):
-            avoidance.mode = AvoidanceMode::COVER_TARGET;
+            mode = AvoidanceMode::COVER_TARGET;
             break;
         case static_cast<int32_t>(AvoidanceMode::AVOID_AROUND_TARGET):
-            avoidance.mode = AvoidanceMode::AVOID_AROUND_TARGET;
+            mode = AvoidanceMode::AVOID_AROUND_TARGET;
             break;
         default:
-            avoidance.mode = AvoidanceMode::COVER_TARGET;
+            break;
     }
-
-    SelectModel::GetInstance()->SetAvoidance(avoidance);
+    SelectModel::GetInstance()->SetAvoidance(mode);
 }
 
 bool JSSelect::IsPercentStr(std::string& percent)
