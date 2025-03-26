@@ -169,12 +169,14 @@ public:
     {
         isRootNode_ = isRoot;
     }
-    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect);
+    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin,
+        const SvgLengthScaleRule& lengthRule);
     float GetRegionLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetRegionPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     Rect GetSvgContainerRect() const;
+    void ApplyTransform(RSRecordingPath& path, const SvgLengthScaleRule& contentRule);
     bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 protected:
     // override as need by derived class
