@@ -398,35 +398,6 @@ HWTEST_F(TextInputModifierTest, setTextIndentTestTextIndentValidValues, TestSize
 }
 
 /*
- * @tc.name: setPlaceholderFontTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPlaceholderFontTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultPlaceholderFont =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_FONT_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_DEFAULT_VALUE) <<
-        "Default value for attribute 'placeholderFont.size'";
-
-    resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE) <<
-        "Default value for attribute 'placeholderFont.weight'";
-
-    resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE) <<
-        "Default value for attribute 'placeholderFont.family'";
-
-    resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_DEFAULT_VALUE) <<
-        "Default value for attribute 'placeholderFont.style'";
-}
-
-/*
  * @tc.name: setPlaceholderFontTestPlaceholderFontSizeValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -502,186 +473,6 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeInvalid
     }
     // Check empty optional
     checkValue("undefined", ArkValue<Opt_Length>());
-}
-
-/*
- * @tc.name: setPlaceholderFontTestPlaceholderFontWeightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontWeightValidValues, TestSize.Level1)
-{
-    Opt_Font initValuePlaceholderFont;
-
-    // Initial setup
-    WriteTo(initValuePlaceholderFont).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValuePlaceholderFont).style =
-        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
-
-    auto checkValue = [this, &initValuePlaceholderFont](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_FontWeight_Number_String& value) {
-        Opt_Font inputValuePlaceholderFont = initValuePlaceholderFont;
-
-        WriteTo(inputValuePlaceholderFont).weight = value;
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholderFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_FONT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.weight";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setPlaceholderFontTestPlaceholderFontWeightInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontWeightInvalidValues, TestSize.Level1)
-{
-    Opt_Font initValuePlaceholderFont;
-
-    // Initial setup
-    WriteTo(initValuePlaceholderFont).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValuePlaceholderFont).style =
-        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
-
-    auto checkValue = [this, &initValuePlaceholderFont](
-                          const std::string& input, const Opt_Union_FontWeight_Number_String& value) {
-        Opt_Font inputValuePlaceholderFont = initValuePlaceholderFont;
-
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        WriteTo(inputValuePlaceholderFont).weight = value;
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholderFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_FONT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.weight";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_FontWeight_Number_String>());
-}
-
-/*
- * @tc.name: setPlaceholderFontTestPlaceholderFontFamilyValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontFamilyValidValues, TestSize.Level1)
-{
-    Opt_Font initValuePlaceholderFont;
-
-    // Initial setup
-    WriteTo(initValuePlaceholderFont).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValuePlaceholderFont).style =
-        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
-
-    auto checkValue = [this, &initValuePlaceholderFont](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_String_Resource& value) {
-        Opt_Font inputValuePlaceholderFont = initValuePlaceholderFont;
-
-        WriteTo(inputValuePlaceholderFont).family = value;
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholderFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_FONT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.family";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
-    }
-}
-
-/*
- * @tc.name: setPlaceholderFontTestPlaceholderFontFamilyInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontFamilyInvalidValues, TestSize.Level1)
-{
-    Opt_Font initValuePlaceholderFont;
-
-    // Initial setup
-    WriteTo(initValuePlaceholderFont).size =
-        ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
-    WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
-        std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
-    WriteTo(initValuePlaceholderFont).style =
-        ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
-
-    auto checkValue = [this, &initValuePlaceholderFont](
-                          const std::string& input, const Opt_Union_String_Resource& value) {
-        Opt_Font inputValuePlaceholderFont = initValuePlaceholderFont;
-
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        WriteTo(inputValuePlaceholderFont).family = value;
-        modifier_->setPlaceholderFont(node_, &inputValuePlaceholderFont);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultPlaceholderFont =
-            GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_PLACEHOLDER_FONT_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultPlaceholderFont, ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.family";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureFontFamilyStringInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
-    // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Resource>());
 }
 
 /*
@@ -2187,6 +1978,240 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) << "Default value for attribute 'showError'";
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
+{
+    Opt_ResourceStr initValueShowError;
+
+    // Initial setup
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
+
+    auto checkValue = [this, &initValueShowError](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
+
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+}
+
+/*
+ * @tc.name: setShowErrorTestShowErrorInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorInvalidValues, TestSize.Level1)
+{
+    Opt_ResourceStr initValueShowError;
+
+    // Initial setup
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
+
+    auto checkValue = [this, &initValueShowError](const std::string& input, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
+
+        modifier_->setShowError(node_, &inputValueShowError);
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceStr>());
+}
+
+/*
+ * @tc.name: setShowUnderlineTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_UNDERLINE_DEFAULT_VALUE) << "Default value for attribute 'showUnderline'";
+}
+
+/*
+ * @tc.name: setShowUnderlineTestShowUnderlineValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnderlineTestShowUnderlineValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueShowUnderline;
+
+    // Initial setup
+    initValueShowUnderline = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueShowUnderline](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueShowUnderline = initValueShowUnderline;
+
+        inputValueShowUnderline = value;
+        modifier_->setShowUnderline(node_, inputValueShowUnderline);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_UNDERLINE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowUnderline, attribute: showUnderline";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setUnderlineColorTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::unique_ptr<JsonValue> resultUnderlineColor =
+        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.typing'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_NORMAL_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.normal'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_ERROR_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.error'";
+
+    resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_DISABLE_DEFAULT_VALUE) <<
+        "Default value for attribute 'underlineColor.UnderlineColor.disable'";
+}
+
+/*
+ * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingValidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
+
+    // Initial setup
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueUnderlineColor](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
+
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+}
+
+/*
+ * @tc.name: setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setUnderlineColorTestUnderlineColorUnderlineColorTypingInvalidValues, TestSize.Level1)
+{
+    Opt_Union_ResourceColor_UnderlineColor initValueUnderlineColor;
+
+    // Initial setup
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).typing =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).normal =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).error =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+    WriteToUnion<Ark_UnderlineColor>(WriteTo(initValueUnderlineColor)).disable =
+        ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0]));
+
+    auto checkValue = [this, &initValueUnderlineColor](const std::string& input, const Opt_ResourceColor& value) {
+        Opt_Union_ResourceColor_UnderlineColor inputValueUnderlineColor = initValueUnderlineColor;
+
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        WriteToUnion<Ark_UnderlineColor>(WriteTo(inputValueUnderlineColor)).typing = value;
+        modifier_->setUnderlineColor(node_, &inputValueUnderlineColor);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultUnderlineColor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_UNDERLINE_COLOR_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultUnderlineColor, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_UNDERLINE_COLOR_I_TYPING_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setUnderlineColor, attribute: underlineColor.UnderlineColor.typing";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceColor, Ark_Color>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceColor, Ark_Empty>(nullptr));
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_ResourceColor>());
 }
 
 } // namespace OHOS::Ace::NG

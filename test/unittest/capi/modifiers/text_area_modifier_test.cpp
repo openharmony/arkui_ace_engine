@@ -1430,8 +1430,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("family");
-        auto checkWeight = placeholderFont->GetString("weight");
+        auto checkFamily = placeholderFont->GetString("fontFamily");
+        auto checkWeight = placeholderFont->GetString("fontWeight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1465,8 +1465,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("family");
-        auto checkWeight = placeholderFont->GetString("weight");
+        auto checkFamily = placeholderFont->GetString("fontFamily");
+        auto checkWeight = placeholderFont->GetString("fontWeight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1500,7 +1500,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("family");
+        auto checkFamily = placeholderFont->GetString("fontFamily");
         auto checkWeight = placeholderFont->GetString("weight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
@@ -1535,8 +1535,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest4, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("family");
-        auto checkWeight = placeholderFont->GetString("weight");
+        auto checkFamily = placeholderFont->GetString("fontFamily");
+        auto checkWeight = placeholderFont->GetString("fontWeight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily,  familyStr);
