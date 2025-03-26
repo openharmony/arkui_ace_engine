@@ -305,7 +305,7 @@ private:
     std::optional<double> enableOpacity_;
     OnFinishFunc onFinishEvent_;
     bool isLayouted_ = false;
-    bool springMotionTraceFlag_ = false;
+    bool isSpringMotionRunning_ = false;
     bool isDragging_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
