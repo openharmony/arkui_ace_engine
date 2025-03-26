@@ -58,6 +58,15 @@ constexpr int HALF_ANGLE = 180;
 constexpr int THREE_QUARTER_ANGLE = 270;
 constexpr int FULL_ANGLE = 360;
 
+class MockFrameNode : public FrameNode {
+public:
+    VectorF GetTransformScale()
+    {
+        VectorF testScale {1.2f, 1.2f};
+        return testScale;
+    }
+};
+
 class AccessibilityManagerNgTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -271,6 +280,10 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
 
     endNode->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNode, hoverPoint, pointNode);
+    EXPECT_EQ(result, true);
+
+    auto endNodeMock = MockFrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
+    result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNodeMock, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
 }
 
@@ -604,6 +617,11 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityRectTest006, TestSize.Level1
     EXPECT_EQ(rect.GetHeight(), 600);
 }
 
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter001
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
 HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter001, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
@@ -616,6 +634,11 @@ HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter00
     EXPECT_FALSE(result);
 }
 
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter002
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
 HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter002, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
@@ -627,6 +650,11 @@ HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter00
     EXPECT_FALSE(result);
 }
 
+/**
+* @tc.name: IsHandlePipelineAccessibilityHoverEnter003
+* @tc.desc: IsHandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
 HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter003, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
@@ -639,6 +667,11 @@ HWTEST_F(AccessibilityManagerNgTestNg, IsHandlePipelineAccessibilityHoverEnter00
     EXPECT_FALSE(result);
 }
 
+/**
+* @tc.name: HandlePipelineAccessibilityHoverEnter001
+* @tc.desc: HandlePipelineAccessibilityHoverEnter
+* @tc.type: FUNC
+*/
 HWTEST_F(AccessibilityManagerNgTestNg, HandlePipelineAccessibilityHoverEnter001, TestSize.Level1) {
     AccessibilityManagerNG manager;
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,

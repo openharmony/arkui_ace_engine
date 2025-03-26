@@ -1078,6 +1078,8 @@ ArkThemeWhiteList.whiteList = [
     'Badge',
     'Button',
     'DataPanel',
+    'Menu',
+    'MenuItem',
     'PatternLock',
     'QRCode',
     'Radio',

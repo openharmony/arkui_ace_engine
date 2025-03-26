@@ -106,7 +106,6 @@ private:
     bool appHasDarkRes_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
-    void PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme);
 };
 } // namespace OHOS::Ace
 

@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 
 namespace {
-constexpr uint32_t MAX_FILE_SIZE = 100000;
+constexpr uint32_t MAX_FILE_SIZE = 100 * 1024 * 1024;
 constexpr char REC_FILE_NAME[] = "/arkui_dump.rec";
 const std::vector<std::string> SKIP_COMPARE_PARAMS = { "time", "children" };
 } // namespace
@@ -42,6 +42,7 @@ void DumpRecorder::Init()
 
 void DumpRecorder::Clear()
 {
+    fileSize_ = 0;
     records_.clear();
     recordTree_.reset();
 }
@@ -87,6 +88,8 @@ void DumpRecorder::Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json)
         info->Put("startTime", timestamp);
         auto& infoJson = records_.at(timestamp);
         info->Put("info", infoJson);
+        std::string infoContent = info->ToString();
+        fileSize_ += static_cast<uint32_t>(infoContent.size());
         auto infos = recordTree_->GetValue("infos");
         infos->PutRef(std::move(info));
     }
@@ -114,10 +117,11 @@ void DumpRecorder::Diff(int64_t timestamp)
         auto infoJson = JsonUtil::ParseJsonString(diff);
         info->PutRef("info", std::move(infoJson));
     }
+    std::string infoContent = info->ToString();
+    fileSize_ += static_cast<uint32_t>(infoContent.size());
     auto infos = recordTree_->GetValue("infos");
     infos->PutRef(std::move(info));
-    auto output = recordTree_->ToString();
-    if (sizeof(output) > MAX_FILE_SIZE) {
+    if (fileSize_ > MAX_FILE_SIZE) {
         Stop();
     }
     records_.erase(timestamp);

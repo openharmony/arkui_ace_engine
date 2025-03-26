@@ -405,6 +405,14 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
+
+            // After first render, new bindings (pending) need to be recorded
+            // immediately, as they may fire changes before the next idle time,
+            // e.g. in the onAreaChange handler
+            if (isFirstRender) {
+                ObserveV2.getObserve().runIdleTasks();
+            }
+
             if (!isFirstRender) {
                 _popFunc();
             }

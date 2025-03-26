@@ -333,8 +333,9 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     const JSRef<JSVal> cleanUpIdleTask = globalObject->GetProperty("uiNodeCleanUpIdleTask");
     if (cleanUpIdleTask->IsFunction()) {
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const std::function<void(void)> callback = [jsFunc = globalFunc, globalObject = globalObject]() {
-            jsFunc->Call(globalObject);
+        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+            auto params = ConvertToJSValues(maxTimeInNs / 1e6);
+            jsFunc->Call(globalObject, params.size(), params.data());
         };
         ElementRegister::GetInstance()->RegisterJSCleanUpIdleTaskFunc(callback);
     }
@@ -611,8 +612,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRotationRecognizer::JSBind(globalObj);
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
-    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
+void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -624,7 +624,6 @@ void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runt
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
-    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

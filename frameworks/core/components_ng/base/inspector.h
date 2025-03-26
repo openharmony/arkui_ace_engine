@@ -21,9 +21,7 @@
 
 #include "base/utils/macros.h"
 #include "bridge/common/utils/componentInfo.h"
-#include "core/common/recorder/inspector_tree_collector.h"
 #include "core/components_ng/base/frame_node.h"
-#include "interfaces/inner_api/ace/ui_event_observer.h"
 #include "rec_node.h"
 
 namespace OHOS::Ace::NG {
@@ -52,9 +50,6 @@ public:
     static std::string GetInspector(bool isLayoutInspector, const InspectorFilter& filter, bool& needThrow);
     static std::string GetInspectorOfNode(RefPtr<NG::UINode> node);
     static std::string GetSubWindowInspector(bool isLayoutInspector = false);
-    static std::string GetSimplifiedInspector(int32_t containerId, const TreeParams& params);
-    static void GetSimplifiedInspectorAsync(int32_t containerId, const TreeParams& params,
-        const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);

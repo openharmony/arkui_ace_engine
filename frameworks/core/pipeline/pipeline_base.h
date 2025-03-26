@@ -179,11 +179,10 @@ public:
     virtual void RemoveScheduleTask(uint32_t id) = 0;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) = 0;
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
-        bool isEventsPassThrough = false)
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false)
     {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
@@ -1085,6 +1084,16 @@ public:
         return false;
     }
 
+    void SetPixelRoundMode(PixelRoundMode pixelRoundMode)
+    {
+        pixelRoundMode_ = pixelRoundMode;
+    }
+
+    PixelRoundMode GetPixelRoundMode() const
+    {
+        return pixelRoundMode_;
+    }
+
     virtual void RequireSummary() {}
 
     void SetPluginOffset(const Offset& offset)
@@ -1495,6 +1504,8 @@ public:
     void FireAccessibilityEvents();
     void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
+    virtual void SetTouchAccelarate(bool isEnable) {}
+    virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
 
     std::shared_ptr<ArkUIPerfMonitor> GetPerfMonitor();
@@ -1598,6 +1609,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
     std::unordered_map<int32_t, AceVsyncCallback> jsFormVsyncCallbacks_;

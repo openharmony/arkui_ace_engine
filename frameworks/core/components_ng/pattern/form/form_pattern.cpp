@@ -77,6 +77,8 @@ constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
+constexpr int32_t FORM_COMPONENT_UPDATE_VALID_DURATION = 1000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -292,6 +294,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
         }
     }
 
+    isStaticFormSnaping_ = true;
     executor->PostDelayedTask(
         [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
@@ -301,9 +304,10 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
                 TAG_LOGD(AceLogTag::ACE_FORM, "another snapshot task has been posted.");
                 return;
             }
+            form->isStaticFormSnaping_ = false;
             form->TakeSurfaceCaptureForUI();
         },
-        TaskExecutor::TaskType::UI, delayTime, "ArkUIFormTakeSurfaceCapture");
+        TaskExecutor::TaskType::UI, delayTime, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
@@ -832,6 +836,7 @@ void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->formManagerBridge_->SetParamForWant(info);
+        pattern->ReAddStaticFormSnapshotTimer();
         }, "ArkUISetParamForWant");
 }
 
@@ -964,13 +969,24 @@ void FormPattern::UpdateTimeLimitFontCfg()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isNeedUpdate = false;
+    auto currentColor = textLayoutProperty->GetTextColor();
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color(FONT_COLOR_DARK) : Color(FONT_COLOR_LIGHT);
+    if (currentColor != newColor) {
+        textLayoutProperty->UpdateTextColor(newColor);
+        isNeedUpdate = true;
+    }
     Dimension fontSize(GetTimeLimitFontSize());
     if (!textLayoutProperty->GetFontSize().has_value() ||
         !NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
         TAG_LOGD(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
             cardInfo_.bundleName.c_str(), cardInfo_.id, fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
+        isNeedUpdate = true;
+    }
+    if (isNeedUpdate) {
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -983,11 +999,17 @@ void FormPattern::UpdateAppLockCfg()
     auto imageLayoutProperty = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(sourceInfo);
     auto currentColor = sourceInfo->GetFillColor();
-    auto newColor = Container::CurrentColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
     if (currentColor != newColor) {
         sourceInfo->SetFillColor(newColor);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        auto imageRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateSvgFillColor(newColor);
         node->MarkModifyDone();
         node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -1223,8 +1245,14 @@ RefPtr<FrameNode> FormPattern::CreateAppLockNode()
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     auto info = ImageSourceInfo("");
     info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(Container::CurrentColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    info.SetFillColor(newColor);
     imageLayoutProperty->UpdateImageSourceInfo(info);
+    auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateSvgFillColor(newColor);
     CalcSize idealSize = { CalcLength(32, DimensionUnit::VP), CalcLength(32, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
@@ -2549,5 +2577,34 @@ void FormPattern::UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &rend
     gradient.AddColor(endGredientColor);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     renderContext->UpdateLinearGradient(gradient);
+}
+
+void FormPattern::ReAddStaticFormSnapshotTimer()
+{
+    if (isDynamic_) {
+        return;
+    }
+
+    int64_t currentTime = GetCurrentTimestamp();
+    if (updateFormComponentTimestamp_ == 0 || !isStaticFormSnaping_) {
+        updateFormComponentTimestamp_ = currentTime;
+        return;
+    }
+
+    if (currentTime - updateFormComponentTimestamp_ < FORM_COMPONENT_UPDATE_VALID_DURATION) {
+        return;
+    }
+
+    updateFormComponentTimestamp_ = currentTime;
+    TAG_LOGI(AceLogTag::ACE_FORM, "ReAddStaticFormSnapshotTimer.");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto executor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    std::string nodeIdStr = std::to_string(host->GetId());
+    executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
+    HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
 }
 } // namespace OHOS::Ace::NG

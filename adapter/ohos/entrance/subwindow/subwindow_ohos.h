@@ -66,6 +66,11 @@ public:
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset) override;
     bool ShowPreviewNG(bool isStartDraggingFromSubWindow = false) override;
+    void SetWindowTouchable(bool touchable) override
+    {
+        CHECK_NULL_VOID(window_);
+        window_->SetTouchable(touchable);
+    }
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
@@ -79,7 +84,7 @@ public:
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true) override;
     void ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-        int32_t appearingTimeWithContinuousOperation) override;
+        int32_t appearingTimeWithContinuousOperation, bool isSubwindow) override;
     void HideTipsNG(int32_t targetId, int32_t disappearingTime) override;
     void HidePopupNG(int32_t targetId) override;
     void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;

@@ -217,9 +217,10 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
         size = Size(display->GetWidth(), display->GetHeight());
     }
 
+    auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s", isScenceBoard,
-        isCrossWindow, size.ToString().c_str());
+        "parentWindow windowId: %{public}d isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
+        parentWindowId, isScenceBoard, isCrossWindow, size.ToString().c_str());
     return size;
 }
 
@@ -614,11 +615,10 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     context->FlushPipelineImmediately();
     HideEventColumn();
     HidePixelMap();
-    HideFilter(false);
 }
 
 void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo, int32_t appearingTime,
-    int32_t appearingTimeWithContinuousOperation)
+    int32_t appearingTimeWithContinuousOperation, bool isSubwindow)
 {
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -632,7 +632,7 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation);
+    overlayManager->ShowTips(targetId, popupInfo, appearingTime, appearingTimeWithContinuousOperation, isSubwindow);
     window_->SetFocusable(true);
 }
 
@@ -651,7 +651,6 @@ void SubwindowOhos::HideTipsNG(int32_t targetId, int32_t disappearingTime)
     context->FlushPipelineImmediately();
     HideEventColumn();
     HidePixelMap();
-    HideFilter(false);
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -936,7 +935,7 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -1223,7 +1222,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         parentOverlay->SetSubWindowId(childContainerId_);
     }
     ResizeWindow();
-    ShowWindow();
+    ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);

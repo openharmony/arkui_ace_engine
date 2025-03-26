@@ -257,7 +257,8 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    auto limitSize = static_cast<uint32_t>(static_cast<int32_t>(maxLength) * counterType / SHOW_COUNTER_PERCENT);
+    double thresholdPercent = static_cast<double>(counterType) / static_cast<double>(SHOW_COUNTER_PERCENT);
+    auto limitSize = static_cast<uint32_t>(static_cast<double>(maxLength) * thresholdPercent);
     if (counterType == DEFAULT_MODE || (textLength >= limitSize && counterType != DEFAULT_MODE)) {
         UpdateCounterContentAndStyle(textLength, maxLength, true);
     } else {

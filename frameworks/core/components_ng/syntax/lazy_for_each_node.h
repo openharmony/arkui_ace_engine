@@ -118,6 +118,8 @@ public:
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
 
+    const std::list<RefPtr<UINode>>& GetChildrenForInspector() const override;
+
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
         itemConstraint_ = itemConstraint;

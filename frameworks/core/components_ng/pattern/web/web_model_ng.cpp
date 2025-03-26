@@ -759,7 +759,7 @@ void WebModelNG::SetOnDragMove(
 void WebModelNG::SetOnDragLeave(
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
 {
-    ViewAbstract::SetOnDrop(std::move(onDragLeave));
+    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
 }
 
 void WebModelNG::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId)
@@ -1044,6 +1044,13 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void WebModelNG::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
 }
 
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)

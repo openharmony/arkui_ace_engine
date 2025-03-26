@@ -555,6 +555,9 @@ void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& view
 void SvgAttributesParser::ComputeScale(const Size& viewBox, const Size& viewPort,
     const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY)
 {
+    if (!viewBox.IsValid()) {
+        return;
+    }
     float ratioX = viewPort.Width() / viewBox.Width();
     float ratioY = viewPort.Height() / viewBox.Height();
     if (preserveAspectRatio.svgAlign == SvgAlign::ALIGN_NONE) {

@@ -344,14 +344,10 @@ public:
         enterSelectedAreaEventCallback_ = value;
     }
 
-    void UpdateUserSetSelectColor()
-    {
-        isUserSetSelectColor_ = true;
-    }
-
     void SetSelectedMarkListener(const std::function<void(const std::string& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
 #ifdef SUPPORT_DIGITAL_CROWN
     std::string& GetSelectedColumnId();
     bool IsCrownEventEnded();

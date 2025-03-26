@@ -15,6 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -145,6 +146,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);
     }
+    longPressFingerCountForSequence_++;
     globalPoint_ = Point(event.x, event.y);
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
@@ -176,6 +178,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
     }
+    longPressFingerCountForSequence_--;
     lastTouchEvent_ = event;
     if (refereeState_ == RefereeState::SUCCEED) {
         if (isLimitFingerCount_ && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
@@ -342,6 +345,14 @@ void LongPressRecognizer::StartRepeatTimer()
     taskExecutor.PostDelayedTask(timer_, duration_, "ArkUIGestureLongPressRepeatTimer");
 }
 
+void LongPressRecognizer::RemoteRepeatTimer()
+{
+    longPressFingerCountForSequence_--;
+    if (longPressFingerCountForSequence_ < fingers_) {
+        timer_.Cancel();
+    }
+}
+
 double LongPressRecognizer::ConvertPxToVp(double offset) const
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -354,7 +365,8 @@ double LongPressRecognizer::ConvertPxToVp(double offset) const
 void LongPressRecognizer::SendCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, bool isOnAction)
 {
-    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+    auto extraHandlingResult = GestureExtraHandler::IsGestureShouldBeAbandoned(AceType::Claim(this));
+    if ((gestureInfo_ && gestureInfo_->GetDisposeTag()) || extraHandlingResult) {
         return;
     }
     if (callback && *callback) {
@@ -402,6 +414,7 @@ void LongPressRecognizer::OnResetStatus()
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
+    longPressFingerCountForSequence_ = 0;
 }
 
 bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

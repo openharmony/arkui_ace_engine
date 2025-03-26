@@ -2089,6 +2089,64 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListCacheCount001
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: Not pre load item.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(true);
+    UpdateCurrentOffset(-250);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: ListItem 1 and 7 is cached, ListItem 2,3,4,5,6 is active.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(false);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 7);
+    cachedItem = frameNode_->GetChildByIndex(1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
+}
+
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC
@@ -2488,6 +2546,41 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
     // below cache
     EXPECT_FALSE(IsExist(frameNode_, 7));
+}
+
+/**
+ * @tc.name: NullLazyForEach001
+ * @tc.desc: Test List with null LazyForEach, GetOrCreateChildByIndex will not be called during measure and layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, NullLazyForEach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List-LazyForEach, no child in LazyForEach.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    auto handler = CreateItemsInLazyForEachWithHandle(0, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+
+    /**
+     * @tc.steps: step2. first layout finish, and no child layouted.
+     * @tc.expected: itemPosition_ empty.
+     */
+    EXPECT_TRUE(pattern_->itemPosition_.empty());
+
+    /**
+     * @tc.steps: step3. add children to LazyForEach and reLayout.
+     * @tc.expected: item 0-3 layouted normally.
+     */
+    handler->SetTotalCount(6);
+    FlushUITasks();
+    EXPECT_TRUE(IsEqual(pattern_->itemPosition_.size(), 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
 }
 
 /**

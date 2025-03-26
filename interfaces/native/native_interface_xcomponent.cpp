@@ -362,8 +362,9 @@ int32_t OH_NativeXComponent_RegisterKeyEventCallbackWithResult(
 int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* userData,
     void (*callback)(ArkUI_NodeHandle node, ArkUI_XComponent_ImageAnalyzerState statusCode, void* userData))
 {
-    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
-        && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) || callback == nullptr) {
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE) ||
+        (callback == nullptr)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
@@ -374,8 +375,8 @@ int32_t OH_ArkUI_XComponent_StartImageAnalyzer(ArkUI_NodeHandle node, void* user
 
 int32_t OH_ArkUI_XComponent_StopImageAnalyzer(ArkUI_NodeHandle node)
 {
-    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) || (node->type != ARKUI_NODE_XCOMPONENT
-        && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
+    if ((!OHOS::Ace::NodeModel::IsValidArkUINode(node)) ||
+        (!node->isBindNative && node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();

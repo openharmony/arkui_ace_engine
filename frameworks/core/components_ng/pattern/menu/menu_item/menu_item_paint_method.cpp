@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
@@ -50,7 +51,7 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
         }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+        auto selectTheme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
         if (!selectTheme->GetDefaultShowDivider() && (press || hover)) {
             return;

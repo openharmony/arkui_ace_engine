@@ -102,6 +102,8 @@ public:
     bool IsStopBackPress() const;
     bool IsRightClickSubWindowMenu();
     bool IsSelectOverlaySubWindowMenu();
+    void FocusFirstFocusableChildInMenu();
+    void NotifyAccessibilityOwner();
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

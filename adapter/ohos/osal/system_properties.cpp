@@ -431,6 +431,11 @@ int32_t ReadDragDropFrameworkStatus()
     return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
 }
 
+int32_t ReadTouchAccelarateMode()
+{
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+}
+
 bool IsAsyncInitializeEnabled()
 {
     return system::GetBoolParameter("persist.ace.async.initialize", true);
@@ -577,6 +582,9 @@ float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
+int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
+
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -713,6 +721,7 @@ void SystemProperties::InitDeviceInfo(
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
+    pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
@@ -1125,9 +1134,20 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
     return dragDropFrameworkStatus_;
 }
 
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
+}
+
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     InitFoldScreenTypeBySystemProperty();
     return foldScreenType_ == FoldScreenType::SUPER_FOLDER;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
 } // namespace OHOS::Ace

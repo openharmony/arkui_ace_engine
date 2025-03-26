@@ -97,25 +97,22 @@ constexpr float ONE = 1.0f;
 constexpr float TWENTY = 20.0f;
 constexpr float ZERO = 0.0f;
 constexpr float FOUR = 4.0f;
+constexpr float ONE_HUNDRED = 100.0f;
+constexpr float NINETY = 90.0f;
+constexpr float FORTY = 40.0f;
+constexpr float HORIZONTAL_SIZE_WIDTH = 110.0f;
+constexpr float HORIZONTAL_SIZE_HEIGHT = 200.0f;
+constexpr float HORIZONTAL_SIZE_WIDTH_NEW = 200.0f;
+constexpr float HORIZONTAL_WRAPPER_SIZE_WIDTH = 200.0f;
+constexpr float MENU_ITEM_WIDTH_NEW = 50.0f;
+constexpr float MENU_ITEM_HEIGHT_NEW = 20.0f;
+constexpr int NODE_ID = 1;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else {
-        return AceType::MakeRefPtr<MenuTheme>();
-    }
-}
 } // namespace
 class SubMenuTestNg : public testing::Test {
 public:
@@ -131,9 +128,6 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
-    RefPtr<FrameNode> targetFrameNode_;
-    int32_t targetId_ = 0;
-    std::string targetTag_ = "";
 };
 
 void SubMenuTestNg::SetUpTestCase() {}
@@ -148,10 +142,16 @@ void SubMenuTestNg::SetUp()
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme_ = AceType::MakeRefPtr<MenuTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([menuTheme_](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return menuTheme_;
+        }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void SubMenuTestNg::TearDown()
@@ -907,5 +907,130 @@ HWTEST_F(SubMenuTestNg, VerticalLayoutSubMenu002, TestSize.Level1)
         Rect(MENU_ITEM_WRAPPER_X, MENU_ITEM_WRAPPER_Y_NEW, MENU_ITEM_WRAPPER_WIDTH, TARGET_SIZE_HEIGHT);
     float position = ONE;
     EXPECT_EQ(subMenuLayoutAlgorithm.VerticalLayoutSubMenu(size, position, menuItemSize), TARGET_SIZE_WIDTH);
+}
+
+/**
+ * @tc.name: HorizontalLayoutSubMenu001
+ * @tc.desc: Verify HorizontalLayoutSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, HorizontalLayoutSubMenu001, TestSize.Level1)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    auto safeAreaManager = mainPipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(HORIZONTAL_SIZE_WIDTH, HORIZONTAL_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH_NEW, MENU_ITEM_HEIGHT_NEW);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(HORIZONTAL_WRAPPER_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = ONE_HUNDRED;
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    EXPECT_EQ(subMenuLayoutAlgorithm.HorizontalLayoutSubMenu(size, position, menuItemSize, layoutWrapper), NINETY);
+}
+
+/**
+ * @tc.name: HorizontalLayoutSubMenu002
+ * @tc.desc: Verify HorizontalLayoutSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, HorizontalLayoutSubMenu002, TestSize.Level1)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    auto safeAreaManager = mainPipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(HORIZONTAL_SIZE_WIDTH, HORIZONTAL_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH_NEW, MENU_ITEM_HEIGHT_NEW);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(HORIZONTAL_WRAPPER_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = HORIZONTAL_WRAPPER_SIZE_WIDTH;
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    EXPECT_EQ(subMenuLayoutAlgorithm.HorizontalLayoutSubMenu(size, position, menuItemSize, layoutWrapper), FORTY);
+}
+
+/**
+ * @tc.name: HorizontalLayoutSubMenu003
+ * @tc.desc: Verify HorizontalLayoutSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, HorizontalLayoutSubMenu003, TestSize.Level1)
+{
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(mainPipeline, nullptr);
+    auto safeAreaManager = mainPipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    SizeF size = SizeT(HORIZONTAL_SIZE_WIDTH_NEW, HORIZONTAL_SIZE_HEIGHT);
+    SizeF menuItemSize = SizeT(MENU_ITEM_WIDTH_NEW, MENU_ITEM_HEIGHT_NEW);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.wrapperSize_ = SizeT(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    float position = ONE_HUNDRED;
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    EXPECT_EQ(subMenuLayoutAlgorithm.HorizontalLayoutSubMenu(size, position, menuItemSize, layoutWrapper), ZERO);
+}
+
+/**
+ * @tc.name: ModifySubMenuWrapper001
+ * @tc.desc: Verify ModifySubMenuWrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, ModifySubMenuWrapper001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", NODE_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    subMenuLayoutAlgorithm.canExpandCurrentWindow_ = false;
+    subMenuLayoutAlgorithm.param_.menuWindowRect.width_ = TWENTY;
+    subMenuLayoutAlgorithm.ModifySubMenuWrapper(layoutWrapper);
+    EXPECT_EQ(subMenuLayoutAlgorithm.wrapperSize_.width_, TWENTY);
+}
+
+/**
+ * @tc.name: InitializePadding001
+ * @tc.desc: Verify InitializePadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, InitializePadding001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "test1", NODE_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
+    ASSERT_NE(layoutWrapper->GetHostNode(), nullptr);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    menuPattern->type_ = MenuType::SUB_MENU;
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    subMenuLayoutAlgorithm.InitializePadding(layoutWrapper);
+    EXPECT_EQ(subMenuLayoutAlgorithm.paddingTop_, ZERO);
 }
 } // namespace OHOS::Ace::NG

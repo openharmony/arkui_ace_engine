@@ -187,8 +187,8 @@ struct SelectMenuInfo {
     bool showCopyAll = true;
     bool showCut = true;
     bool showTranslate = false;
-    bool showSearch = false;
     bool showShare = false;
+    bool showSearch = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;

@@ -17,6 +17,7 @@
 
 #include "core/components/progress/progress_theme.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 constexpr float PROGRSS_MAX_VALUE = 100.f;

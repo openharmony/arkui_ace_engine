@@ -517,4 +517,12 @@ float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
     CHECK_NULL_RETURN(titlePattern, 0.f);
     return titlePattern->GetTitleBarHeightLessThanMaxBarHeight();
 }
+
+bool NavBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    hostNode->AdjustRenderContextIfNeeded();
+    return false;
+}
 } // namespace OHOS::Ace::NG

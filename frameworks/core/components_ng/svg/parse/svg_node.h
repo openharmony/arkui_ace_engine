@@ -219,8 +219,10 @@ protected:
     template<typename T>
     void UpdateAttr(const std::string& name, const T& val);
     void UpdateAttrHelper(const std::string& name, const std::string& val);
-    SvgLengthScaleRule TransformForCurrentOBB(RSCanvas& canvas, const SvgCoordinateSystemContext& context,
-        SvgLengthScaleUnit contentUnits, float offsetX, float offsetY);
+    SvgLengthScaleRule BuildContentScaleRule(const SvgCoordinateSystemContext& parentContext,
+        SvgLengthScaleUnit contentUnits);
+    void TransformForCurrentOBB(RSCanvas& canvas, const SvgLengthScaleRule& contentRule,
+        const Size& ContainerSize, const Offset& offset);
 
     // defs gradient animation
     void InitNoneFlag()

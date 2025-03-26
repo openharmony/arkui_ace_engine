@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,6 +199,11 @@ public:
 
     void UpdateDefaultCachedCount();
 
+    int32_t GetChildrenCount() const
+    {
+        return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
+    }
+
     bool itemStart_ = false;
     /**
      * @brief last item is partially in viewport.
@@ -235,6 +240,10 @@ public:
     std::vector<PaddingPropertyF> margins_;
     // default cached count
     int32_t defCachedCount_ = 1;
+
+    int32_t repeatDifference_ = 0;
+    int32_t firstRepeatCount_ = 0;
+    int32_t childrenCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

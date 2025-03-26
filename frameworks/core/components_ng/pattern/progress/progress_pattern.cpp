@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -525,6 +526,7 @@ void ProgressPattern::OnModifyDone()
         progressLayoutProperty->UpdatePadding(padding);
     }
     OnAccessibilityEvent();
+    ReportProgressEvent();
 }
 
 void ProgressPattern::DumpInfo()
@@ -842,5 +844,20 @@ bool ProgressPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     isUserInitiatedBgColor_ = (themeScopeId && isModifierInitiatedBgColor_) ? false : isUserInitiatedBgColor_;
 
     return result;
+}
+
+void ProgressPattern::ReportProgressEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto progressPaintProperty = host->GetPaintProperty<NG::ProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    auto value = progressPaintProperty->GetValueValue(PROGRESS_DEFAULT_VALUE);
+    auto maxValue = progressPaintProperty->GetMaxValue().value();
+    if (value >= maxValue) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
+        TAG_LOGI(AceLogTag::ACE_PROGRESS, "nodeId:[%{public}d] Progress reportComponentChangeEvent onProgress",
+            GetHost()->GetId());
+    }
 }
 } // namespace OHOS::Ace::NG

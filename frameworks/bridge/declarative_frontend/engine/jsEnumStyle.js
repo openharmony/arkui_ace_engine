@@ -297,6 +297,12 @@ let PixelRoundCalcPolicy;
   PixelRoundCalcPolicy[PixelRoundCalcPolicy.FORCE_FLOOR = 2] = 'FORCE_FLOOR';
 })(PixelRoundCalcPolicy || (PixelRoundCalcPolicy = {}));
 
+let PixelRoundMode;
+(function (PixelRoundMode) {
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_ON_LAYOUT_FINISH = 0] = 'PIXEL_ROUND_ON_LAYOUT_FINISH';
+  PixelRoundMode[PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE = 1] = 'PIXEL_ROUND_AFTER_MEASURE';
+})(PixelRoundMode || (PixelRoundMode = {}));
+
 let VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign.Top = 1] = 'Top';
@@ -754,6 +760,7 @@ let FormDimension;
   FormDimension.DIMENSION_6_4 = 7;
   FormDimension.DIMENSION_2_3 = 8;
   FormDimension.DIMENSION_3_3 = 9;
+  FormDimension.DIMENSION_3_4 = 10;
 })(FormDimension || (FormDimension = {}));
 
 let FormShape;
@@ -2280,6 +2287,7 @@ class NavPathInfo {
     this.fromRecovery = false;
     this.mode = undefined;
     this.singletonMoved = false;
+    this.isForceSet = undefined;
   }
 }
 
@@ -2302,6 +2310,12 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+  }
+  getPathStack() {
+    return this.nativeStack?.getPathStack(this);
+  }
+  setPathStack(pathStack, animated) {
+    this.nativeStack?.setPathStack(this, pathStack, animated);
   }
   getJsIndexFromNativeIndex(index) {
     for (let i = 0; i < this.pathArray.length; i++) {

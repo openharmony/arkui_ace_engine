@@ -952,6 +952,7 @@ void DotIndicatorModifier::StopAnimation(bool ifImmediately)
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->ifNeedFinishCallback_ = false;
+            modifier->animationState_ = TouchBottomAnimationStage::STAGE_NONE;
             modifier->longPointLeftCenterX_->Set(modifier->longPointLeftCenterX_->Get());
             modifier->longPointRightCenterX_->Set(modifier->longPointRightCenterX_->Get());
         });

@@ -60,7 +60,6 @@ const int32_t OFFSETX = 10;
 const int32_t OFFSETY = 20;
 constexpr int32_t SELECT_ERROR = -1;
 constexpr int32_t CURRENT_INDEX = 10;
-constexpr int32_t FONT_SIZE = 0;
 const std::string EMPTY_TEXT = "";
 const std::string SELECT_TEXT = "select";
 const std::string OPTION_TEXT = "aaa";
@@ -1469,9 +1468,7 @@ HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
 HWTEST_F(SelectTestNg, InspectorGetSelectedFont001, TestSize.Level1)
 {
     SelectModelNG model;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     model.Create(params);
     ViewAbstract::SetWidth(CalcLength(100.f));
     ViewAbstract::SetHeight(CalcLength(40.f));
@@ -1609,13 +1606,11 @@ HWTEST_F(SelectTestNg, SetOptionFontColor001, TestSize.Level1)
 HWTEST_F(SelectTestNg, OnAfterModifyDone001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     /**
      * @tc.steps: step1. Create select.
      */
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
         { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     /**
      * @tc.steps: step2. Get frameNode and pattern.
@@ -1643,23 +1638,20 @@ HWTEST_F(SelectTestNg, ShowSelectMenuTest003, TestSize.Level1)
     /**
      * @tc.steps: step1. Get frameNode and pattern.
      */
-    SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-    selectModelInstance.Create(params);
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    pattern->isFitTrigger_ = true;
+    EXPECT_TRUE(pattern);
     /**
      * @tc.steps: step2. call ShowSelectMenu function.
      * @tc.expected: the function exits normally
      */
-    selectPattern->ShowSelectMenu();
-    auto offset = selectPattern->GetHost()->GetPaintRectOffset();
-    EXPECT_EQ(offset.GetY(), FONT_SIZE);
+    pattern->ShowSelectMenu();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
 }
 
 /**
@@ -1672,23 +1664,19 @@ HWTEST_F(SelectTestNg, SetDisabledStyle001, TestSize.Level1)
     /**
      * @tc.steps: step1. Get frameNode and pattern.
      */
-    SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-    selectModelInstance.Create(params);
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
     /**
      * @tc.steps: step2. call ShowSelectMenu function.
      * @tc.expected: the function exits normally
      */
-    selectPattern->SetDisabledStyle();
-    auto offset = selectPattern->GetHost()->GetPaintRectOffset();
-    EXPECT_EQ(offset.GetY(), FONT_SIZE);
+    pattern->SetDisabledStyle();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
 }
 
 /**
@@ -1699,10 +1687,8 @@ HWTEST_F(SelectTestNg, SetDisabledStyle001, TestSize.Level1)
 HWTEST_F(SelectTestNg, UpdateLastSelectedProps001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1726,10 +1712,8 @@ HWTEST_F(SelectTestNg, UpdateLastSelectedProps001, TestSize.Level1)
 HWTEST_F(SelectTestNg, UpdateLastSelectedProps002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1753,10 +1737,8 @@ HWTEST_F(SelectTestNg, UpdateLastSelectedProps002, TestSize.Level1)
 HWTEST_F(SelectTestNg, UpdateText001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1775,10 +1757,8 @@ HWTEST_F(SelectTestNg, UpdateText001, TestSize.Level1)
 HWTEST_F(SelectTestNg, UpdateText002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1804,10 +1784,8 @@ HWTEST_F(SelectTestNg, UpdateText002, TestSize.Level1)
 HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1829,10 +1807,8 @@ HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
 HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1857,22 +1833,17 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. Get frameNode and geometryNode.
      */
-    SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
-        { OPTION_TEXT_3, INTERNAL_SOURCE } };
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
-    selectModelInstance.Create(params);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto frame = Referenced::WeakClaim(frameNode);
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     /**
      * @tc.steps: step2. Get layoutWrapper and Call Measure.
      * @tc.expected: the function exits normally
      */
     auto layoutProperty = frameNode->GetLayoutProperty();
-    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frame, geometryNode, layoutProperty);
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+
     auto text = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
     auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(text, geometryNode2, text->GetLayoutProperty());
@@ -1900,13 +1871,11 @@ HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
      * @tc.steps: step1. Get frameNode and geometryNode.
      */
     SelectModelNG selectModelNG;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params;
     SelectParam sparam_one;
     sparam_one.text = "100";
     sparam_one.icon = "icon_one";
     params.push_back(sparam_one);
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelNG.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(select, nullptr);
@@ -1937,7 +1906,6 @@ HWTEST_F(SelectTestNg, selectMenuPatterntTest001, TestSize.Level1)
 HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params;
     SelectParam sparam_one;
     sparam_one.text = "100";
@@ -1948,7 +1916,6 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
     };
     sparam_one.symbolIcon = onApply;
     params.push_back(sparam_one);
-    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
@@ -1964,27 +1931,5 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
         row->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(0)) : nullptr;
     EXPECT_NE(icon, nullptr);
     EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
-}
-
-/**
- * @tc.name: SelectThemeTest001
- * @tc.desc: Test Select Theme GetLabelColor SetLabelColor.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectThemeTest001, TestSize.Level1)
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
-    ASSERT_NE(selectTheme, nullptr);
-    selectTheme->optionApplyFocusedStyle_ = 1;
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
-
-    selectTheme->SetLabelColor(TEXT_COLOR_VALUE);
-    EXPECT_EQ(selectTheme->GetLabelColor(), TEXT_COLOR_VALUE);
-    selectTheme->SetLabelColor(BG_COLOR_VALUE);
-    EXPECT_EQ(selectTheme->GetLabelColor(), BG_COLOR_VALUE);
 }
 } // namespace OHOS::Ace::NG

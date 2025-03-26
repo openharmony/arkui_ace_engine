@@ -336,28 +336,6 @@ HWTEST_F(TextFieldAlgorithmTest, CounterLayout003, TestSize.Level1)
 }
 
 /**
- * @tc.name: CounterNodeMeasure
- * @tc.desc: Test the function CounterNodeMeasure.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, CounterNodeMeasure, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetShowCounterBorder(true);
-        model.SetShowPasswordIcon(false);
-    });
-    auto textInputLayoutAlgorithm =
-        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm->UpdateUnitLayout(&layoutWrapper);
-    EXPECT_EQ(textInputLayoutAlgorithm->CounterNodeMeasure(1.0f, &layoutWrapper), 0.0);
-}
-
-/**
  * @tc.name: CreateParagraph001
  * @tc.desc: Test the function CreateParagraph.
  * @tc.type: FUNC

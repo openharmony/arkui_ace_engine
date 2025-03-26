@@ -750,11 +750,7 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
-        if (userData) {
-            interruptInfo.userData = userData;
-        } else {
-            interruptInfo.userData = gestureInfo->GetUserData();
-        }
+        interruptInfo.userData = userData ? userData : gestureInfo->GetUserData();
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
         auto count = static_cast<int32_t>(others.size());

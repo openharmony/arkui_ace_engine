@@ -288,14 +288,14 @@ void ViewAbstract::SetBackgroundImagePosition(FrameNode* frameNode, const Backgr
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
-void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
+void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
 void ViewAbstract::SetForegroundEffect(float radius)
@@ -319,15 +319,15 @@ void ViewAbstract::SetMotionBlur(const MotionBlurOption &motionBlurOption)
     ACE_UPDATE_RENDER_CONTEXT(MotionBlur, motionBlurOption);
 }
 
-void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption)
+void ViewAbstract::SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption);
+    SetBackgroundEffect(ViewStackProcessor::GetInstance()->GetMainFrameNode(), effectOption, sysOptions);
 }
 
-void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
+void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -336,7 +336,7 @@ void ViewAbstract::SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle)
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurStyle(fgBlurStyle);
+        target->UpdateFrontBlurStyle(fgBlurStyle, sysOptions);
         if (target->GetFrontBlurRadius().has_value()) {
             target->UpdateFrontBlurRadius(Dimension());
         }
@@ -1715,7 +1715,7 @@ void ViewAbstract::SetVisibility(VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1979,10 +1979,23 @@ void ViewAbstract::BindPopup(
             subwindow->GetPopupInfoNG(targetId, popupInfo);
         }
         if (popupInfo.popupNode) {
-            showInSubWindow = true;
+            if (popupInfo.isTips && subwindow) {
+                auto overlayManager1 = subwindow->GetOverlayManager();
+                CHECK_NULL_VOID(overlayManager1);
+                overlayManager1->ErasePopup(targetId);
+                popupInfo = {};
+                overlayManager1->HideTips(targetId, popupInfo, 0);
+            } else {
+                showInSubWindow = true;
+            }
         }
     }
-
+    if (popupInfo.popupNode && popupInfo.isTips) {
+        // subwindow need to handle
+        overlayManager->ErasePopup(targetId);
+        popupInfo = {};
+        overlayManager->HideTips(targetId, popupInfo, 0);
+    }
     auto popupId = popupInfo.popupId;
     auto popupNode = popupInfo.popupNode;
     RefPtr<BubblePattern> popupPattern;
@@ -2097,13 +2110,20 @@ void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameN
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto tipsInfo = overlayManager->GetPopupInfo(targetId);
-    auto showInSubWindow = param->IsShowInSubWindow();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        subwindow->GetPopupInfoNG(targetId, tipsInfo);
+    if (tipsInfo.isTips) {
+        return;
     }
+    auto showInSubWindow = param->IsShowInSubWindow();
     if (tipsInfo.popupNode) {
-        showInSubWindow = true;
+        showInSubWindow = false;
+    } else {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_POPUP);
+        if (subwindow) {
+            subwindow->GetPopupInfoNG(targetId, tipsInfo);
+        }
+        if (tipsInfo.popupNode) {
+            showInSubWindow = true;
+        }
     }
     HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
 }
@@ -2117,6 +2137,9 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    if (!tipsInfo.isTips && popupNode) {
+        return;
+    }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
     popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
@@ -2135,7 +2158,8 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
         targetNode->PushDestroyCallbackWithTag(destructor, std::to_string(popupId));
     } else {
         auto destructor = [id = targetNode->GetId(), containerId = instanceId]() {
-            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            auto subwindow =
+                SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_POPUP);
             CHECK_NULL_VOID(subwindow);
             auto overlayManager = subwindow->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -2147,6 +2171,7 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     tipsInfo.popupId = popupId;
     tipsInfo.popupNode = popupNode;
     tipsInfo.isBlockEvent = param->IsBlockEvent();
+    tipsInfo.isTips = true;
     if (popupNode) {
         popupNode->MarkModifyDone();
     }
@@ -2163,6 +2188,10 @@ void ViewAbstract::AddHoverEventForTips(
     tipsInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    CHECK_NULL_VOID(popupNode);
+    auto bubbleRenderProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(bubbleRenderProp);
+    bubbleRenderProp->UpdateAutoCancel(false);
     auto targetId = targetNode->GetId();
     auto context = targetNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -2173,6 +2202,9 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(inputHub);
     auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode](
                          bool isHover) {
+        if (!overlayManager->GetPopupInfo(targetId).isTips && overlayManager->GetPopupInfo(targetId).popupNode) {
+            return;
+        }
         if (isHover) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2182,7 +2214,7 @@ void ViewAbstract::AddHoverEventForTips(
                 return;
             }
             overlayManager->ShowTips(
-                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
+                targetId, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation(), false);
         } else {
             if (showInSubWindow) {
                 SubwindowManager::GetInstance()->HideTipsNG(targetId, param->GetDisappearingTime());
@@ -2387,7 +2419,7 @@ void ViewAbstract::DismissDialog()
     auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
     auto dialogTag = DialogManager::GetInstance().GetDialogTag();
     if (dialogId && !dialogTag.empty()) {
-        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
+        dialogNode = FrameNode::GetFrameNodeOnly(dialogTag, dialogId);
     }
     if (!dialogNode) {
         if (overlayManager->GetDismissDialogId()) {
@@ -2416,7 +2448,7 @@ void ViewAbstract::ShowMenuPreview(
     CHECK_NULL_VOID(wrapperNode);
     auto menuWrapperPattern = wrapperNode->GetPattern<NG::MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
+    if (menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
         auto context = targetNode->GetRenderContext();
         CHECK_NULL_VOID(context);
@@ -2458,6 +2490,7 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
         // The menu is already opened, close the previous menu and open the new menu
         overlayManager->HideMenu(isShowMenu, targetNode->GetId(), false);
     }
+    NG::MenuView::UpdatePreviewInfo(targetNode, menuParam);
     auto wrapperNode = NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam);
     CHECK_NULL_RETURN(wrapperNode, ERROR_CODE_INTERNAL_ERROR);
     ShowMenuPreview(targetNode, wrapperNode, menuParam);
@@ -2473,11 +2506,10 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     menuPattern->SetCustomNode(node);
     auto pipelineContext = targetNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-    auto theme = pipelineContext->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, ERROR_CODE_INTERNAL_ERROR);
-    auto expandDisplay = theme->GetExpandDisplay();
     menuWrapperPattern->SetIsOpenMenu(true);
-    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (theme->GetExpandDisplay() && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(wrapperNode, menuParam, targetNode, menuParam.positionOffset);
         return ERROR_CODE_NO_ERROR;
     }
@@ -2572,7 +2604,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params, const Re
     menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
+    auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
 
@@ -2602,7 +2634,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>(targetNode->GetThemeScopeId());
+    auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     auto pipelineContext = targetNode->GetContext();
@@ -2624,7 +2656,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
+    if (previewBuildFunc && menuParam.previewMode.value_or(MenuPreviewMode::NONE) == MenuPreviewMode::CUSTOM) {
         previewBuildFunc();
         previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
@@ -2637,7 +2669,7 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
 }
 
-void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -2649,7 +2681,7 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& bl
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius, blurOption, sysOptions);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -2671,7 +2703,8 @@ void ViewAbstract::SetNodeBackdropBlur(FrameNode *frameNode, const Dimension& ra
     }
 }
 
-void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetBackdropBlur(
+    FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
@@ -2679,7 +2712,7 @@ void ViewAbstract::SetBackdropBlur(FrameNode *frameNode, const Dimension &radius
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlur(radius, blurOption);
+        target->UpdateBackBlur(radius, blurOption, sysOptions);
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
@@ -2727,7 +2760,7 @@ void ViewAbstract::SetBrightnessBlender(const OHOS::Rosen::BrightnessBlender* br
     ACE_UPDATE_RENDER_CONTEXT(BrightnessBlender, brightnessBlender);
 }
 
-void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
@@ -2736,7 +2769,7 @@ void ViewAbstract::SetFrontBlur(const Dimension& radius, const BlurOption& blurO
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlur(radius, blurOption);
+        target->UpdateFrontBlur(radius, blurOption, sysOptions);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -2751,12 +2784,13 @@ void ViewAbstract::SetDynamicDim(float DimDegree)
     ACE_UPDATE_RENDER_CONTEXT(DynamicDimDegree, DimDegree);
 }
 
-void ViewAbstract::SetFrontBlur(FrameNode *frameNode, const Dimension &radius, const BlurOption &blurOption)
+void ViewAbstract::SetFrontBlur(
+    FrameNode* frameNode, const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlur(radius, blurOption);
+        target->UpdateFrontBlur(radius, blurOption, sysOptions);
         if (target->GetFrontBlurStyle().has_value()) {
             target->UpdateFrontBlurStyle(std::nullopt);
         }
@@ -3715,11 +3749,12 @@ void ViewAbstract::SetBorderImageGradient(FrameNode* frameNode, const NG::Gradie
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderSourceFromImage, false, frameNode);
 }
 
-void ViewAbstract::SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle)
+void ViewAbstract::SetForegroundBlurStyle(
+    FrameNode* frameNode, const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions)
 {
     const auto target = frameNode->GetRenderContext();
     if (target) {
-        target->UpdateFrontBlurStyle(fgBlurStyle);
+        target->UpdateFrontBlurStyle(fgBlurStyle, sysOptions);
         if (target->GetFrontBlurRadius().has_value()) {
             target->UpdateFrontBlurRadius(Dimension());
         }
@@ -3741,7 +3776,8 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Magnifier, frameNode);
 }
 
-void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleOption& bgBlurStyle)
+void ViewAbstract::SetBackgroundBlurStyle(
+    FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -3755,7 +3791,7 @@ void ViewAbstract::SetBackgroundBlurStyle(FrameNode *frameNode, const BlurStyleO
         if (target->GetBackgroundEffect().has_value()) {
             target->UpdateBackgroundEffect(std::nullopt);
         }
-        target->UpdateBackBlurStyle(bgBlurStyle);
+        target->UpdateBackBlurStyle(bgBlurStyle, sysOptions);
         if (target->GetBackBlurRadius().has_value()) {
             target->UpdateBackBlurRadius(Dimension());
         }
@@ -4003,7 +4039,7 @@ void ViewAbstract::SetVisibility(FrameNode* frameNode, VisibleType visible)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     if (layoutProperty) {
-        layoutProperty->UpdateVisibility(visible, true);
+        layoutProperty->UpdateVisibility(visible, true, true);
     }
 
     auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -4274,7 +4310,8 @@ void ViewAbstract::SetMotionBlur(FrameNode* frameNode, const MotionBlurOption &m
     ACE_UPDATE_NODE_RENDER_CONTEXT(MotionBlur, motionBlurOption, frameNode);
 }
 
-void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
+void ViewAbstract::SetBackgroundEffect(
+    FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -4292,7 +4329,7 @@ void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption 
         if (target->GetBackBlurStyle().has_value()) {
             target->UpdateBackBlurStyle(std::nullopt);
         }
-        target->UpdateBackgroundEffect(effectOption);
+        target->UpdateBackgroundEffect(effectOption, sysOptions);
     }
 }
 

@@ -33,7 +33,7 @@
 namespace OHOS::Ace::NG {
 constexpr int32_t CONST_AVERAGE = 2;
 constexpr int32_t BACKGROUND_HIGH = 12;
-constexpr int32_t SELECTED_ROW_BACKGROUND_COLOR = 0x33FFFFFF;
+constexpr uint32_t SELECTED_ROW_BACKGROUND_COLOR = 0x33FFFFFF;
 constexpr double  CONST_HALF_VALUE = 2.0;
 constexpr int32_t CONST_DELTA_STEP = 1;
 constexpr int32_t CONST_LINE_DIFF = 1;

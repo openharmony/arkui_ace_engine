@@ -314,7 +314,7 @@ void ViewAbstractModelImpl::SetBackgroundImagePosition(const BackgroundImagePosi
     decoration->SetImage(image);
 }
 
-void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
+void ViewAbstractModelImpl::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurStyle(bgBlurStyle);
@@ -923,14 +923,16 @@ void ViewAbstractModelImpl::SetMask(const RefPtr<BasicShape>& shape)
     box->SetMask(maskPath);
 }
 
-void ViewAbstractModelImpl::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstractModelImpl::SetBackdropBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     auto decoration = GetBackDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));
     decoration->SetBlurStyle(BlurStyleOption());
 }
 
-void ViewAbstractModelImpl::SetFrontBlur(const Dimension& radius, const BlurOption& blurOption)
+void ViewAbstractModelImpl::SetFrontBlur(
+    const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions)
 {
     auto decoration = GetFrontDecoration();
     decoration->SetBlurRadius(ToAnimatableDimension(radius));

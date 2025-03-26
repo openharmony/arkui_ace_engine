@@ -297,7 +297,7 @@ void SheetPresentationLayoutAlgorithm::LayoutCloseIcon(const NG::OffsetF& transl
     auto sheetGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(sheetGeometryNode);
     auto closeIconX = sheetGeometryNode->GetFrameSize().Width() -
-                      static_cast<float>(SHEET_CLOSE_ICON_WIDTH.ConvertToPx()) -
+                      static_cast<float>(sheetTheme->GetCloseIconButtonWidth().ConvertToPx()) -
                       static_cast<float>(sheetTheme->GetTitleTextMargin().ConvertToPx());
     if (AceApplicationInfo::GetInstance().IsRightToLeft() &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -454,7 +454,7 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float par
         case SheetType::SHEET_BOTTOMLANDSPACE:
             [[fallthrough]];
         case SheetType::SHEET_CENTER:
-            sheetWidth = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+            sheetWidth = GetCenterDefaultWidth(host);
             break;
         case SheetType::SHEET_POPUP:
             sheetWidth = SHEET_POPUP_WIDTH.ConvertToPx();
@@ -476,6 +476,18 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const float par
         width = sheetWidth;
     }
     return width;
+}
+
+float SheetPresentationLayoutAlgorithm::GetCenterDefaultWidth(const RefPtr<FrameNode>& host) const
+{
+    auto sheetWidth = SHEET_LANDSCAPE_WIDTH.ConvertToPx();
+    CHECK_NULL_RETURN(host, sheetWidth);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, sheetWidth);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, sheetWidth);
+    sheetWidth = sheetTheme->GetCenterDefaultWidth().ConvertToPx();
+    return sheetWidth;
 }
 
 float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConstraintHeight,

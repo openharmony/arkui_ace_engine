@@ -2315,7 +2315,7 @@ typedef enum {
 /**
  * @brief Enumerates the keyboard avoidance modes.
  *
- * @since 18
+ * @since 15
  */
 typedef enum {
     /** Automatically avoids the soft keyboard and compresses the height when reaching the maximum limit. */
@@ -2327,7 +2327,7 @@ typedef enum {
 /**
  * @brief Enumerates the types of display areas for the hover mode.
  *
- * @since 18
+ * @since 15
  */
 typedef enum {
     /** Upper half screen. */

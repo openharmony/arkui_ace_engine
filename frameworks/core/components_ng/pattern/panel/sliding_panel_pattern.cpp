@@ -17,6 +17,12 @@
 
 #include "core/animation/spring_animation.h"
 #include "core/components/close_icon/close_icon_theme.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_algorithm.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
+#include "core/components_ng/pattern/panel/sliding_panel_event_hub.h"
+#include "core/components_ng/pattern/panel/drag_bar_pattern.h"
+#include "core/components_ng/pattern/panel/close_icon_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -983,5 +989,19 @@ void SlidingPanelPattern::ResetLayoutWeight()
         CHECK_NULL_VOID(contentLayoutProperty);
         contentLayoutProperty->UpdateLayoutWeight(0.0f);
     }
+}
+
+RefPtr<LayoutProperty> SlidingPanelPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<SlidingPanelLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> SlidingPanelPattern::CreateLayoutAlgorithm()
+{
+    auto layoutAlgorithm = MakeRefPtr<SlidingPanelLayoutAlgorithm>();
+    layoutAlgorithm->SetCurrentOffset(currentOffset_);
+    layoutAlgorithm->SetIsFirstLayout(isFirstLayout_);
+    layoutAlgorithm->SetInvisibleFlag(invisibleFlag_.value_or(false));
+    return layoutAlgorithm;
 }
 } // namespace OHOS::Ace::NG

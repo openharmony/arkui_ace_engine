@@ -37,7 +37,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>(menuItem->GetThemeScopeId());
+    auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -50,9 +50,6 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     CHECK_NULL_VOID(customNode);
     if (menuItem->GetChildren().empty()) {
         menuItem->AddChild(customNode);
-    }
-    if (menuItem->GetThemeScopeId()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, theme->GetLabelColor());
     }
 }
 
@@ -74,18 +71,22 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
+
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>(menuItem->GetThemeScopeId());
+    auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     BorderRadiusProperty border;
-    Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-        ? border.SetRadius(theme->GetMenuDefaultInnerRadius())
-        : border.SetRadius(theme->GetInnerBorderRadius());
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        border.SetRadius(theme->GetMenuDefaultInnerRadius());
+    } else {
+        border.SetRadius(theme->GetInnerBorderRadius());
+    }
     renderContext->UpdateBorderRadius(border);
+
     if (menuItem->GetChildren().empty()) {
         auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -95,6 +96,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
         leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
         leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
         leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+
         leftRow->MountToParent(menuItem);
         auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -104,10 +106,8 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
         rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
         rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
         rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+
         rightRow->MountToParent(menuItem);
-    }
-    if (menuItem->GetThemeScopeId()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, theme->GetLabelColor());
     }
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
@@ -115,6 +115,7 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+
     UpdateMenuProperty(menuItem, menuItemProps);
 }
 
@@ -199,14 +200,10 @@ void MenuItemModelNG::SetFontStyle(Ace::FontStyle style)
 
 void MenuItemModelNG::SetFontColor(const std::optional<Color>& color)
 {
-    auto pattern = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value());
-        pattern->SetContentActiveSetting(true);
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor);
-        pattern->SetContentActiveSetting(false);
     }
 }
 
@@ -236,14 +233,10 @@ void MenuItemModelNG::SetLabelFontStyle(Ace::FontStyle style)
 
 void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
 {
-    auto pattern = NG::ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value());
-        pattern->SetLabelActiveSetting(true);
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
-        pattern->SetLabelActiveSetting(false);
     }
 }
 
@@ -272,29 +265,19 @@ void MenuItemModelNG::SetSelected(FrameNode* frameNode, bool isSelected)
 
 void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPatternPtr<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value(), frameNode);
-        pattern->SetLabelActiveSetting(true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, frameNode);
-        pattern->SetLabelActiveSetting(false);
     }
 }
 
 void MenuItemModelNG::SetFontColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPatternPtr<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value(), frameNode);
-        pattern->SetContentActiveSetting(true);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, frameNode);
-        pattern->SetContentActiveSetting(false);
     }
 }
 

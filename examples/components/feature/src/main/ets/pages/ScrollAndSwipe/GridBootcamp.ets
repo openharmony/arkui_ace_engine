@@ -911,6 +911,8 @@ export struct GridBootcamp {
   @State enableDragGray: boolean = false;
   @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
   private controller: TabsController = new TabsController();
+  @State enableBackToTop: boolean = true;
+  @State backToTop: boolean = false;
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -1817,6 +1819,7 @@ export struct GridBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('网格滑动停止事件触发')
           })
+          .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
 
         }.tabBar(this.tabBuilder(0, '水平布局'))
 
@@ -2787,6 +2790,7 @@ export struct GridBootcamp {
           .onScrollStop(() => {
             this.compEventTriggeredLog('网格滑动停止事件触发')
           })
+          .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(1, '竖直布局'))
 
       }
@@ -3828,6 +3832,16 @@ export struct GridBootcamp {
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false },
+          ]
+        })
+
+        RadioBlock({
+          title: 'backToTop',
+          isEnabled: $enableBackToTop,
+          value: $backToTop,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
       }

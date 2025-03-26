@@ -116,6 +116,8 @@ uint32_t SystemProperties::canvasDebugMode_ = 0;
 double SystemProperties::scrollableDistance_ = 0.0;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
+int32_t SystemProperties::touchAccelarate_ = 0;
+bool SystemProperties::pageTransitionFrzEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -383,6 +385,11 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
     return dragDropFrameworkStatus_;
 }
 
+int32_t SystemProperties::GetTouchAccelarate()
+{
+    return touchAccelarate_;
+}
+
 bool SystemProperties::GetContainerDeleteFlag()
 {
     return true;
@@ -392,4 +399,10 @@ bool SystemProperties::IsSuperFoldDisplayDevice()
 {
     return false;
 }
+
+bool SystemProperties::IsPageTransitionFreeze()
+{
+    return pageTransitionFrzEnabled_;
+}
+
 } // namespace OHOS::Ace

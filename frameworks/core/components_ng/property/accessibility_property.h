@@ -451,6 +451,8 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    void OnAccessibilityDetachFromMainTree();
+
     bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
 
     bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
@@ -464,6 +466,8 @@ public:
     bool IsAccessibilityTextPreferred() const;
 
     void NotifyComponentChangeEvent(AccessibilityEventType eventType);
+
+    void UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey);
 
     int32_t GetChildTreeId() const;
 

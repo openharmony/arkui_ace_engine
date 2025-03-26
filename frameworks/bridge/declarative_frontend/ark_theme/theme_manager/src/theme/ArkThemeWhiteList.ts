@@ -24,6 +24,8 @@ class ArkThemeWhiteList {
         'Badge',
         'Button',
         'DataPanel',
+        'Menu',
+        'MenuItem',
         'PatternLock',
         'QRCode',
         'Radio',

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -307,8 +308,7 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         child->Measure(resetLayoutConstraint);
         auto childGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(childGeometryNode);
-        auto childHeight = std::max(childGeometryNode->GetMarginFrameSize().Height(),
-            childGeometryNode->GetContentSize().Height());
+        auto childHeight = childGeometryNode->GetMarginFrameSize().Height();
         contentHeight += childHeight;
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));

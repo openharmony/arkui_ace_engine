@@ -22,9 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace {
 
@@ -44,11 +42,11 @@ public:
     const std::u16string& GetU16string() const;
     int32_t GetLength() const;
     void SetString(const std::u16string& text);
-    void SetGroupId(const RefPtr<SpanBase>& span);
     void SetFramNode(const WeakPtr<NG::FrameNode>& frameNode);
     void MarkDirtyFrameNode();
     void AddCustomSpan();
     void RemoveCustomSpan();
+    void SetGroupId(const RefPtr<SpanBase>& span);
     void SetSpanItems(const std::list<RefPtr<NG::SpanItem>>&& spanItems);
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
@@ -124,8 +122,8 @@ protected:
     std::u16string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
-    int32_t groupId_ = 0;
     WeakPtr<NG::FrameNode> framNode_;
+    int32_t groupId_ = 0;
 };
 } // namespace OHOS::Ace
 

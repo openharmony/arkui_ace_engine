@@ -940,7 +940,7 @@ struct TabTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
@@ -974,7 +974,7 @@ struct TabTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)

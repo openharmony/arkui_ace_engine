@@ -1122,6 +1122,9 @@ void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "selectedTextStyle");
     }
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    if (textStyle.textColor.has_value() && theme->IsCircleDial()) {
+        TextPickerModel::GetInstance()->UpdateUserSetSelectColor();
+    }
 }
 
 void JSTextPicker::ProcessCascadeSelected(

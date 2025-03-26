@@ -149,6 +149,39 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorUpdateContentModifier003,
 }
 
 /**
+ * @tc.name: SwiperIndicatorUpdateContentModifier004
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorUpdateContentModifier004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isHover_ = true;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+
+    /**
+    * @tc.steps: step3. call GetContentModifier.
+    * @tc.expected: dotIndicatorModifier_->isPressed_ is true.
+    */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
  * @tc.name: DotIndicatorModifier001
  * @tc.desc: Test DotIndicatorModifier
  * @tc.type: FUNC
@@ -806,6 +839,42 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorPaintHoverIndicator003, T
      * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
      */
     paintMethod->mouseClickIndex_ = 100;
+    paintMethod->PaintHoverIndicator(&paintWrapper);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator004
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorPaintHoverIndicator004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->hoverIndex_ = 10;
+    paintMethod->currentIndex_ = 10;
+    paintMethod->mouseClickIndex_ = 5;
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetNormalToHoverIndex(5);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(false);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+
+    /**
+    * @tc.steps: step3. call PaintHoverIndicator.
+    * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
+    */
     paintMethod->PaintHoverIndicator(&paintWrapper);
     EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsPressed());
 }

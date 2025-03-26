@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 

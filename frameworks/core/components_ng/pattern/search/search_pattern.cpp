@@ -846,6 +846,7 @@ void SearchPattern::OnClickButtonAndImage()
         textFieldPattern->StopEditing();
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -1774,6 +1775,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.PHONE_NUMBER";
         case TextInputType::URL:
             return "SearchType.URL";
+        case TextInputType::NUMBER_DECIMAL:
+            return "SearchType.NUMBER_DECIMAL";
         default:
             return "SearchType.NORMAL";
     }

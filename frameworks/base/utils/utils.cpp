@@ -19,7 +19,7 @@
 #include <shlwapi.h>
 #endif
 namespace OHOS::Ace {
-constexpr int64_t MAX_FILE_SIZE = 100 * 1024 * 1024;
+constexpr int64_t MAX_FILE_SIZE = 20 * 1024 * 1024;
     bool RealPath(const std::string& fileName, char* realPath)
 {
 #if defined(WINDOWS_PLATFORM)
@@ -62,7 +62,7 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
         return "";
     }
 
-    char* fileData = new (std::nothrow) char[size];
+    char* fileData = new (std::nothrow) char[size + 1];
     if (fileData == nullptr) {
         return "";
     }
@@ -70,6 +70,7 @@ std::string ReadFileToString(const std::string& packagePathStr, const std::strin
     rewind(file.get());
     std::unique_ptr<char[]> jsonStream(fileData);
     size_t result = std::fread(jsonStream.get(), 1, size, file.get());
+    jsonStream[size] = '\0';
     if (result != static_cast<size_t>(size)) {
         LOGE("read file failed");
         return "";

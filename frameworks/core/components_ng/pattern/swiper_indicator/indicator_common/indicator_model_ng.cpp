@@ -33,6 +33,7 @@ RefPtr<IndicatorController> IndicatorModelNG::Create()
     stack->Push(indicatorNode);
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->InitIndicatorController();
     return pattern->GetIndicatorController();
 }
 

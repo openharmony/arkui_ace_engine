@@ -34,6 +34,6 @@ void DragDropInitiatingStateMoving::HandlePanOnActionEnd(const GestureEvent& inf
     dragDropManager->SetIsDisableDefaultDropAnimation(true);
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::IDLE));
 }
 } // namespace OHOS::Ace::NG

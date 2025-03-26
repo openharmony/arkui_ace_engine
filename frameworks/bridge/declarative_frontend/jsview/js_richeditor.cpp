@@ -2221,7 +2221,7 @@ void JSRichEditorController::ParseParagraphSpacing(const JSRef<JSObject>& styleO
     auto paragraphSpacing = styleObject->GetProperty("paragraphSpacing");
     CalcDimension size;
     if (!paragraphSpacing->IsNull() && JSContainerBase::ParseJsDimensionFpNG(paragraphSpacing, size, false) &&
-        !size.IsNonPositive() && size.Unit() != DimensionUnit::PERCENT) {
+        !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         style.paragraphSpacing = size;
     }
 }

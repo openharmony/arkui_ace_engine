@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"

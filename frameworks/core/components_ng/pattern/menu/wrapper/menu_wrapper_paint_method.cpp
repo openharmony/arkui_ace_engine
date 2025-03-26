@@ -25,6 +25,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t RADIUS_MIDPOINT = 2;
 constexpr float BORDER_MULTIPLES = 2.0f;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr Dimension ARROW_P1_OFFSET_X = 8.0_vp;
@@ -43,6 +44,16 @@ RefPtr<MenuTheme> GetMenuThemeFromPaintWrapper(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     return pipelineContext->GetTheme<MenuTheme>();
 }
+
+RefPtr<MenuWrapperPattern> GetMenuWrapperPatternFromPaintWrapper(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_RETURN(paintWrapper, nullptr);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    return host->GetPattern<MenuWrapperPattern>();
+}
 }
 
 CanvasDrawFunction MenuWrapperPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
@@ -53,7 +64,9 @@ CanvasDrawFunction MenuWrapperPaintMethod::GetOverlayDrawFunction(PaintWrapper* 
         }
         auto menuTheme = GetMenuThemeFromPaintWrapper(paintWrapper);
         CHECK_NULL_VOID(menuTheme);
-        if (!menuTheme->GetDoubleBorderEnable()) {
+        auto wrapperPattern = GetMenuWrapperPatternFromPaintWrapper(paintWrapper);
+        CHECK_NULL_VOID(wrapperPattern);
+        if (!menuTheme->GetDoubleBorderEnable() && !wrapperPattern->GetHasCustomOutlineWidth()) {
             return;
         }
         auto paintMethod = weak.Upgrade();
@@ -96,12 +109,13 @@ void MenuWrapperPaintMethod::PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* p
         CHECK_NULL_VOID(pattern);
         auto params = pattern->GetMenuPathParams();
         if (params.has_value()) {
-            PaintAndClipSinglePath(canvas, paintWrapper, params.value());
+            PaintInnerBorderAndClipSinglePath(canvas, paintWrapper, params.value());
+            PaintOuterBorderAndClipSinglePath(canvas, paintWrapper, params.value());
         }
     }
 }
 
-void MenuWrapperPaintMethod::PaintAndClipSinglePath(
+void MenuWrapperPaintMethod::PaintInnerBorderAndClipSinglePath(
     RSCanvas& canvas, PaintWrapper* paintWrapper, const MenuPathParams& params)
 {
     RSPath rsPath;
@@ -123,18 +137,94 @@ void MenuWrapperPaintMethod::PaintAndClipSinglePath(
     canvas.DrawPath(rsPath);
     canvas.DetachPen();
     canvas.Restore();
-    paint.SetWidth(menuTheme->GetOuterBorderWidth() * BORDER_MULTIPLES);
-    paint.SetColor(menuTheme->GetOuterBorderColor().GetValue());
+}
+
+void CanvasDrawOutline(RSCanvas& canvas, const RSPen& paint, const RSPath& rsPathEdge)
+{
     canvas.Save();
     canvas.AttachPen(paint);
-    canvas.ClipPath(rsPath, RSClipOp::DIFFERENCE, true);
-    canvas.DrawPath(rsPath);
+    canvas.DrawPath(rsPathEdge);
     canvas.DetachPen();
+}
+
+void MenuWrapperPaintMethod::PaintEdgeOuterBorder(
+    const MenuPathParams& params, RSCanvas& canvas, const MenuParam& menuParam, const RSPath& rsPath)
+{
+    RSPath rsPathTop;
+    RSPath rsPathRight;
+    RSPath rsPathBottom;
+    RSPath rsPathLeft;
+    RSPen paint;
+    paint.SetAntiAlias(true);
+
+    rsPathTop.MoveTo(
+        params.childOffset.GetX() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT));
+    BuildTopLinePath(rsPathTop, params);
+    paint.SetWidth(menuParam.outlineWidth->topDimen->ConvertToPx() * BORDER_MULTIPLES);
+    paint.SetColor(menuParam.outlineColor->topColor->GetValue());
+    CanvasDrawOutline(canvas, paint, rsPathTop);
+
+    rsPathRight.MoveTo(params.childOffset.GetX() + params.frameSize.Width() - params.radiusTopRightPx +
+                           params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.radiusTopRightPx - params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT));
+    BuildRightLinePath(rsPathRight, params);
+    paint.SetWidth(menuParam.outlineWidth->rightDimen->ConvertToPx() * BORDER_MULTIPLES);
+    paint.SetColor(menuParam.outlineColor->rightColor->GetValue());
+    CanvasDrawOutline(canvas, paint, rsPathRight);
+
+    rsPathBottom.MoveTo(params.childOffset.GetX() + params.frameSize.Width() - params.radiusBottomRightPx +
+                            params.radiusBottomRightPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomRightPx +
+            params.radiusBottomRightPx / sqrt(RADIUS_MIDPOINT));
+    BuildBottomLinePath(rsPathBottom, params);
+    paint.SetWidth(menuParam.outlineWidth->bottomDimen->ConvertToPx() * BORDER_MULTIPLES);
+    paint.SetColor(menuParam.outlineColor->bottomColor->GetValue());
+    CanvasDrawOutline(canvas, paint, rsPathBottom);
+
+    rsPathLeft.MoveTo(
+        params.childOffset.GetX() + params.radiusBottomLeftPx - params.radiusBottomLeftPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomLeftPx +
+            params.radiusBottomLeftPx / sqrt(RADIUS_MIDPOINT));
+    BuildLeftLinePath(rsPathLeft, params);
+    paint.SetWidth(menuParam.outlineWidth->leftDimen->ConvertToPx() * BORDER_MULTIPLES);
+    paint.SetColor(menuParam.outlineColor->leftColor->GetValue());
+    CanvasDrawOutline(canvas, paint, rsPathLeft);
+}
+
+void MenuWrapperPaintMethod::PaintOuterBorderAndClipSinglePath(
+    RSCanvas& canvas, PaintWrapper* paintWrapper, const MenuPathParams& params)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto wrapperPattern = GetMenuWrapperPatternFromPaintWrapper(paintWrapper);
+    CHECK_NULL_VOID(wrapperPattern);
+    RSPath rsPath;
+    MenuParam menuParam = wrapperPattern->GetMenuParam();
+    BuildCompletePath(rsPath, params);
+    canvas.Save();
+    if (!params.didNeedArrow) {
+        canvas.ClipPath(rsPath, RSClipOp::DIFFERENCE, true);
+        return;
+    }
+    RSPen paint;
+    paint.SetAntiAlias(true);
+    auto menuTheme = GetMenuThemeFromPaintWrapper(paintWrapper);
+    CHECK_NULL_VOID(menuTheme);
+    if (!wrapperPattern->GetHasCustomOutlineWidth()) {
+        paint.SetWidth(menuTheme->GetOuterBorderWidth() * BORDER_MULTIPLES);
+        paint.SetColor(menuTheme->GetOuterBorderColor().GetValue());
+        CanvasDrawOutline(canvas, paint, rsPath);
+    } else {
+        canvas.Save();
+        canvas.ClipPath(rsPath, RSClipOp::DIFFERENCE, true);
+        PaintEdgeOuterBorder(params, canvas, menuParam, rsPath);
+    }
 }
 
 void MenuWrapperPaintMethod::BuildCompletePath(RSPath& rsPath, const MenuPathParams& params)
 {
-    rsPath.MoveTo(params.childOffset.GetX() + params.radiusTopLeftPx, params.childOffset.GetY());
+    rsPath.MoveTo(params.childOffset.GetX() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT));
     BuildTopLinePath(rsPath, params);
     BuildRightLinePath(rsPath, params);
     BuildBottomLinePath(rsPath, params);
@@ -143,6 +233,8 @@ void MenuWrapperPaintMethod::BuildCompletePath(RSPath& rsPath, const MenuPathPar
 
 void MenuWrapperPaintMethod::BuildTopLinePath(RSPath& rsPath, const MenuPathParams& params)
 {
+    rsPath.ArcTo(params.radiusTopLeftPx, params.radiusTopLeftPx, 0.0f, RSPathDirection::CW_DIRECTION,
+        params.childOffset.GetX() + params.radiusTopLeftPx, params.childOffset.GetY());
     if (params.didNeedArrow) {
         switch (params.arrowPlacement) {
             case Placement::BOTTOM:
@@ -157,11 +249,15 @@ void MenuWrapperPaintMethod::BuildTopLinePath(RSPath& rsPath, const MenuPathPara
     rsPath.LineTo(
         params.childOffset.GetX() + params.frameSize.Width() - params.radiusTopRightPx, params.childOffset.GetY());
     rsPath.ArcTo(params.radiusTopRightPx, params.radiusTopRightPx, 0.0f, RSPathDirection::CW_DIRECTION,
-        params.childOffset.GetX() + params.frameSize.Width(), params.childOffset.GetY() + params.radiusTopRightPx);
+        params.childOffset.GetX() + params.frameSize.Width() - params.radiusTopRightPx +
+            params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.radiusTopRightPx - params.radiusTopRightPx / sqrt(RADIUS_MIDPOINT));
 }
 
 void MenuWrapperPaintMethod::BuildRightLinePath(RSPath& rsPath, const MenuPathParams& params)
 {
+    rsPath.ArcTo(params.radiusTopRightPx, params.radiusTopRightPx, 0.0f, RSPathDirection::CW_DIRECTION,
+        params.childOffset.GetX() + params.frameSize.Width(), params.childOffset.GetY() + params.radiusTopRightPx);
     if (params.didNeedArrow) {
         switch (params.arrowPlacement) {
             case Placement::LEFT:
@@ -176,12 +272,17 @@ void MenuWrapperPaintMethod::BuildRightLinePath(RSPath& rsPath, const MenuPathPa
     rsPath.LineTo(params.childOffset.GetX() + params.frameSize.Width(),
         params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomRightPx);
     rsPath.ArcTo(params.radiusBottomRightPx, params.radiusBottomRightPx, 0.0f, RSPathDirection::CW_DIRECTION,
-        params.childOffset.GetX() + params.frameSize.Width() - params.radiusBottomRightPx,
-        params.childOffset.GetY() + params.frameSize.Height());
+        params.childOffset.GetX() + params.frameSize.Width() - params.radiusBottomRightPx +
+            params.radiusBottomRightPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomRightPx +
+            params.radiusBottomRightPx / sqrt(RADIUS_MIDPOINT));
 }
 
 void MenuWrapperPaintMethod::BuildBottomLinePath(RSPath& rsPath, const MenuPathParams& params)
 {
+    rsPath.ArcTo(params.radiusBottomRightPx, params.radiusBottomRightPx, 0.0f, RSPathDirection::CW_DIRECTION,
+        params.childOffset.GetX() + params.frameSize.Width() - params.radiusBottomRightPx,
+        params.childOffset.GetY() + params.frameSize.Height());
     if (params.didNeedArrow) {
         switch (params.arrowPlacement) {
             case Placement::TOP:
@@ -196,11 +297,15 @@ void MenuWrapperPaintMethod::BuildBottomLinePath(RSPath& rsPath, const MenuPathP
     rsPath.LineTo(
         params.childOffset.GetX() + params.radiusBottomLeftPx, params.childOffset.GetY() + params.frameSize.Height());
     rsPath.ArcTo(params.radiusBottomLeftPx, params.radiusBottomLeftPx, 0.0f, RSPathDirection::CW_DIRECTION,
-        params.childOffset.GetX(), params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomLeftPx);
+        params.childOffset.GetX() + params.radiusBottomLeftPx - params.radiusBottomLeftPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomLeftPx +
+            params.radiusBottomLeftPx / sqrt(RADIUS_MIDPOINT));
 }
 
 void MenuWrapperPaintMethod::BuildLeftLinePath(RSPath& rsPath, const MenuPathParams& params)
 {
+    rsPath.ArcTo(params.radiusBottomLeftPx, params.radiusBottomLeftPx, 0.0f, RSPathDirection::CW_DIRECTION,
+        params.childOffset.GetX(), params.childOffset.GetY() + params.frameSize.Height() - params.radiusBottomLeftPx);
     if (params.didNeedArrow) {
         switch (params.arrowPlacement) {
             case Placement::RIGHT:
@@ -214,7 +319,8 @@ void MenuWrapperPaintMethod::BuildLeftLinePath(RSPath& rsPath, const MenuPathPar
     }
     rsPath.LineTo(params.childOffset.GetX(), params.childOffset.GetY() + params.radiusTopLeftPx);
     rsPath.ArcTo(params.radiusTopLeftPx, params.radiusTopLeftPx, 0.0f, RSPathDirection::CW_DIRECTION,
-        params.childOffset.GetX() + params.radiusTopLeftPx, params.childOffset.GetY());
+        params.childOffset.GetX() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT),
+        params.childOffset.GetY() + params.radiusTopLeftPx - params.radiusTopLeftPx / sqrt(RADIUS_MIDPOINT));
 }
 
 void MenuWrapperPaintMethod::BuildBottomArrowPath(RSPath& rsPath, float arrowX, float arrowY)

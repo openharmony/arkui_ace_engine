@@ -1944,7 +1944,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;

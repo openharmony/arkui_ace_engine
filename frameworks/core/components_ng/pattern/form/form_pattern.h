@@ -40,6 +40,9 @@ class PointerEvent;
 namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
+class DrawDelegate;
+struct SerializedGesture;
+struct AccessibilityParentRectInfo;
 
 namespace NG {
 enum class FormChildNodeType : int32_t {
@@ -243,6 +246,7 @@ private:
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
     void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
+    void ReAddStaticFormSnapshotTimer();
     RefPtr<FrameNode> CreateActionNode();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
@@ -281,6 +285,8 @@ private:
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
     bool ShouldAddChildAtReuildFrame();
+    bool isStaticFormSnaping_ = false;
+    int64_t updateFormComponentTimestamp_ = 0;
 };
 } // namespace NG
 } // namespace Ace

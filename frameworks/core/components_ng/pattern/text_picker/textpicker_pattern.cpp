@@ -1817,6 +1817,7 @@ void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnim
 
 void TextPickerPattern::UpdateUserSetSelectColor()
 {
+    CHECK_EQUAL_VOID(IsCircle(), false);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();

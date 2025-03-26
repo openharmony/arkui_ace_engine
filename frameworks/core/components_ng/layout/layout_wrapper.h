@@ -185,7 +185,7 @@ public:
         return false;
     }
 
-    OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
+    virtual OffsetF GetParentGlobalOffsetWithSafeArea(bool checkBoundary = false, bool checkPosition = false) const;
 
     virtual bool SkipMeasureContent() const;
 

@@ -20,6 +20,7 @@ import { GridColBootcamp } from './GridColBootcamp';
 import { GridRowBootcamp } from './GridRowBootcamp';
 import { RowSplitBootcamp } from './RowSplitBootcamp';
 import { SideBarContainerBootcamp } from './SideBarContainerBootcamp';
+import { TitleBarBootcamp } from './TitleBarBootcamp';
 import { ToolBarBootcamp } from './ToolBarBootcamp';
 
 
@@ -33,7 +34,9 @@ export const gridAndColumnLayoutRoute: RouteGroup = {
     { name: 'RowSplit', label: '横向分割容器/RowSplit' },
     { name: 'FoldSplitContainer', label: '折叠屏分栏组件/FoldSplitContainer' },
     { name: 'SideBarContainer', label: '侧边栏容器/SideBarContainer' },
-    { name: 'ToolBar', label: '工具栏/ToolBar' }
+    { name: 'ToolBar', label: '工具栏/ToolBar' },
+    { name: 'TitleBar', label: '标题栏/TitleBar' }
+
   ]
 };
 
@@ -53,6 +56,7 @@ export function gridAndColumnLayoutDestination(name: string, route: Route) {
       SideBarContainerBootcamp({title: route.label})
   }else if (name === 'GridAndColumnLayout/ToolBar'){
     ToolBarBootcamp({title: route.label})
+  }else if (name === 'GridAndColumnLayout/TitleBar') {
+    TitleBarBootcamp({ title: route.label })
   }
-
 }

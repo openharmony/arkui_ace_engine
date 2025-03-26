@@ -154,6 +154,9 @@ ArkUINativeModuleValue ListItemGroupBridge::SetListItemGroupInitialize(ArkUIRunt
         GetArkUINodeModifiers()->getListItemGroupModifier()->setListItemGroupStyle(nativeNode, style);
     }
 
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    SetHeaderComponent(vm, nativeNode, info);
+    SetFooterComponent(vm, nativeNode, info);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -166,7 +169,57 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetListItemGroupInitialize(ArkUIRu
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupSpace(nativeNode);
     GetArkUINodeModifiers()->getListItemGroupModifier()->resetListItemGroupStyle(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+    GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
 
     return panda::JSValueRef::Undefined(vm);
+}
+
+void ListItemGroupBridge::SetHeaderComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info)
+{
+    // 3 means the third parameter, which represents the headerComponent
+    if (info[3]->IsObject()) {
+        // 3 means the third parameter, which represents the headerComponent
+        JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[3]);
+        JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                auto node = nodePtr(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetHeader(nativeNode, node);
+            } else {
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+            }
+        } else {
+            GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetHeader(nativeNode);
+    }
+}
+
+void ListItemGroupBridge::SetFooterComponent(EcmaVM* vm, ArkUINodeHandle nativeNode, Framework::JsiCallbackInfo& info)
+{
+    // 4 means the fourth parameter, which represents the footerComponent
+    if (info[4]->IsObject()) {
+        // 4 means the fourth parameter, which represents the footerComponent
+        JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(info[4]);
+        JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+        if (builderNodeParam->IsObject()) {
+            JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+            JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+            if (!nodeptr.IsEmpty()) {
+                auto node = nodePtr(nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value());
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupSetFooter(nativeNode, node);
+            } else {
+                GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+            }
+        } else {
+            GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+        }
+    } else {
+        GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetFooter(nativeNode);
+    }
 }
 } // namespace OHOS::Ace::NG

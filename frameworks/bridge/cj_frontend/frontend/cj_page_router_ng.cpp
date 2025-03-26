@@ -15,13 +15,14 @@
 
 #include "bridge/cj_frontend/frontend/cj_page_router_ng.h"
 
+#include "securec.h"
+
 #include "base/i18n/localization.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "securec.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 
 using namespace OHOS::Ace::NG;
 
@@ -415,10 +416,6 @@ void CJPageRouterNG::BackCheckAlert(const RouterPageInfo& target, const std::str
     CHECK_NULL_VOID(currentPage);
     auto pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
-    if (pagePattern->OnBackPressed()) {
-        return;
-    }
-
     auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_VOID(pageInfo);
     if (pageInfo->GetAlertCallback()) {

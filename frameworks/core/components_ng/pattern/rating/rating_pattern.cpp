@@ -940,7 +940,7 @@ void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         HandleEnabled();
     }
     auto host = GetHost();

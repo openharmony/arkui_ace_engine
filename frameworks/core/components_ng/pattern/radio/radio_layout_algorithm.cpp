@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/pipeline/pipeline_base.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 

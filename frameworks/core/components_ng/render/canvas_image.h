@@ -155,6 +155,11 @@ public:
         }
     }
 
+    virtual bool IsHdrPixelMap()
+    {
+        return false;
+    }
+
 protected:
     bool isDrawAnimate_ = false;
 

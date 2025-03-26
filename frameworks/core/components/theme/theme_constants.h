@@ -375,10 +375,13 @@ private:
     static const ResValueWrapper* GetPlatformConstants(uint32_t key);
     static const ResValueWrapper* styleMapDefault[];
     static uint32_t DefaultMapCount;
+#ifdef WEARABLE_PRODUCT
     static const ResValueWrapper* styleMapWatch[];
     static uint32_t WatchMapCount;
+#else
     static const ResValueWrapper* styleMapTv[];
     static uint32_t TvMapCount;
+#endif
 
     ResValueWrapper GetValue(uint32_t key) const;
     double GetBlendAlpha(const BlendAlpha& blendAlpha) const;

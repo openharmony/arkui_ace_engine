@@ -316,4 +316,22 @@ void MockNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
 {
     mockIsEntryMap_[index] = isEntry;
 }
+
+std::vector<RefPtr<MockNavPathInfo>> MockNavigationStack::MockGetPathStack()
+{
+    std::vector<RefPtr<MockNavPathInfo>> pathArray;
+    for (int32_t index = 0; index < static_cast<int32_t>(mockPathArray_.size()); ++index) {
+        pathArray.push_back(mockPathArray_[index]);
+    }
+    return pathArray;
+}
+
+void MockNavigationStack::MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated)
+{
+    Clear();
+    for (int32_t index = 0; index < static_cast<int32_t>(setPathArray.size()); ++index) {
+        mockPathArray_.push_back(setPathArray[index]);
+    }
+    animated_ = animated;
+}
 } // namespace OHOS::Ace::NG

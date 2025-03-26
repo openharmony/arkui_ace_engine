@@ -179,8 +179,9 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     BorderRadiusProperty borderRaduis;
     borderRaduis.SetRadius(sheetTheme->GetCloseIconRadius());
     buttonLayoutProperty->UpdateBorderRadius(borderRaduis);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHEET_CLOSE_ICON_WIDTH), CalcLength(SHEET_CLOSE_ICON_HEIGHT)));
+    buttonLayoutProperty->UpdateButtonStyle(static_cast<ButtonStyleMode>(sheetTheme->GetCloseIconButtonStyle()));
+    auto closeIconButtonSize = CalcLength(sheetTheme->GetCloseIconButtonWidth());
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(closeIconButtonSize, closeIconButtonSize));
     buttonLayoutProperty->UpdateVisibility(VisibleType::GONE);
     auto eventConfirmHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventConfirmHub);
@@ -299,8 +300,17 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     auto titleTextFontSize = sheetTheme->GetTitleTextFontSize();
     auto sheetTitleFontWeight = sheetTheme->GetSheetTitleFontWeight();
     titleTextFontSize.SetUnit(DimensionUnit::FP);
-    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
-    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    if (textTheme && textTheme->GetIsTextFadeout()) {
+        titleProp->UpdateTextOverflow(TextOverflow::MARQUEE);
+        titleProp->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        titleProp->UpdateTextMarqueeFadeout(true);
+    } else {
+        titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+        titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
+
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
     titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
     if (sheetStyle.sheetTitle.has_value()) {
@@ -340,8 +350,17 @@ RefPtr<FrameNode> SheetView::BuildSubTitle(RefPtr<FrameNode> sheetNode, NG::Shee
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetSubtitleTextFontSize();
     titleTextFontSize.SetUnit(DimensionUnit::VP);
-    titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
-    titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    if (textTheme && textTheme->GetIsTextFadeout()) {
+        titleProp->UpdateTextOverflow(TextOverflow::MARQUEE);
+        titleProp->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        titleProp->UpdateTextMarqueeFadeout(true);
+    } else {
+        titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
+        titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
+
     titleProp->UpdateAdaptMaxFontSize(titleTextFontSize);
     titleProp->UpdateAdaptMinFontSize(titleTextFontSize);
     if (sheetStyle.sheetSubtitle.has_value()) {

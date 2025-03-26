@@ -54,7 +54,7 @@ const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
 const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
-const SEND_EVENT_DURATION = 10;
+const SEND_EVENT_DURATION = 100;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38); // Drag to move and fill curves
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24); // Delete Add Curve
@@ -415,16 +415,18 @@ export struct GridObjectSortComponent {
       let editableTittleBarUniqueId =
         this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
       let eventInfo: accessibility.EventInfo = ({
-        type: 'requestFocusForAccessibility',
+        type: 'requestFocusForAccessibilityNotInterrupt',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: `ImageMenuItem_${editableTittleBarUniqueId}_0`
       });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        setTimeout(()=>{
-          this.isPointToEditTitleBarSaveButton = false;
-        }, ENTER_EXIT_ICON_DURATION);
-      });
+      setTimeout(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          setTimeout(() => {
+            this.isPointToEditTitleBarSaveButton = false;
+          }, ENTER_EXIT_ICON_DURATION);
+        });
+      }, SEND_EVENT_DURATION);
     }
   }
 
@@ -466,18 +468,16 @@ export struct GridObjectSortComponent {
       let composeTittleBarUniqueId =
         this.getUIContext()?.getFrameNodeById(ADD_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
       let eventInfo: accessibility.EventInfo = ({
-        type: 'requestFocusForAccessibilityNotInterrupt',
+        type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: `ComposeTitleBar_ImageMenuItem_${composeTittleBarUniqueId}_0`
       });
-      setTimeout(() => {
-        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-          setTimeout(() => {
-            this.isPointToAddTitleBarEditButton = false;
-          }, ENTER_EXIT_ICON_DURATION);
-        });
-      }, SEND_EVENT_DURATION);
+      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+        setTimeout(() => {
+          this.isPointToAddTitleBarEditButton = false;
+        }, ENTER_EXIT_ICON_DURATION);
+      });
     }
   }
 

@@ -29,8 +29,9 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -77,7 +78,6 @@ SwiperModel* SwiperModel::GetInstance()
 
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
-WeakPtr<JSIndicatorController> JSSwiper::jSIndicatorController_;
 namespace {
 
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -861,16 +861,11 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
     if (!jsIndicatorController) {
         return;
     }
-    jSIndicatorController_ = jsIndicatorController;
     SwiperModel::GetInstance()->SetBindIndicator(true);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    jsIndicatorController->SetSwiperNode(targetNode);
-}
-
-void JSSwiper::ResetSwiperNode()
-{
-    if (jSIndicatorController_.Upgrade()) {
-        jSIndicatorController_.Upgrade()->ResetSwiperNode();
+    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
+    if (resetFunc) {
+        SwiperModel::GetInstance()->SetJSIndicatorController(resetFunc);
     }
 }
 
@@ -888,7 +883,6 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
-        ResetSwiperNode();
 
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {

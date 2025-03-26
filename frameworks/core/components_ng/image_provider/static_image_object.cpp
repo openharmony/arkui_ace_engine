@@ -15,25 +15,34 @@
 
 #include "core/components_ng/image_provider/static_image_object.h"
 
+#include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
+RefPtr<CanvasImage> StaticImageObject::QueryCanvasFromCache(const ImageSourceInfo& src, const SizeF& size)
+{
+    auto pixelMapWp = ImageDecoder::GetFromPixelMapCache(src, size);
+    auto pixelMapPtr = pixelMapWp.Upgrade();
+    if (pixelMapPtr) {
+        return PixelMapImage::Create(pixelMapPtr);
+    }
+    auto key = ImageUtils::GenerateImageKey(src, size);
+    if (SystemProperties::GetImageFrameworkEnabled()) {
+        return PixelMapImage::QueryFromCache(key);
+    } else {
+        return DrawingImage::QueryFromCache(key);
+    }
+}
 
 void StaticImageObject::MakeCanvasImage(
     const WeakPtr<ImageLoadingContext>& ctxWp, const SizeF& targetSize, bool forceResize, bool syncLoad)
 {
     auto ctx = ctxWp.Upgrade();
     CHECK_NULL_VOID(ctx);
-    RefPtr<CanvasImage> cachedImage;
-    auto key = ImageUtils::GenerateImageKey(src_, targetSize);
-    if (SystemProperties::GetImageFrameworkEnabled()) {
-        cachedImage = PixelMapImage::QueryFromCache(key);
-    } else {
-        cachedImage = DrawingImage::QueryFromCache(key);
-    }
+    RefPtr<CanvasImage> cachedImage = QueryCanvasFromCache(src_, targetSize);
     if (cachedImage) {
         ctx->SuccessCallback(cachedImage);
         return;

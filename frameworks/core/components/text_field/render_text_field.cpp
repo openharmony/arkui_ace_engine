@@ -91,6 +91,7 @@ void RemoveErrorTextFromValue(const std::string& value, const std::string& error
         valuePtr++;
         errorTextPtr++;
     }
+    valuePtr = std::clamp(valuePtr, 0, static_cast<int32_t>(value.length()));
     result += value.substr(valuePtr);
 }
 #endif
@@ -1707,6 +1708,7 @@ void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate
         }
         std::string strInSelection;
         if (start < end) {
+            start = std::clamp(start, 0, static_cast<int32_t>(valueToUpdate.text.length()));
             strInSelection = valueToUpdate.text.substr(start, end - start);
             textChanged |= FilterWithRegex(strInSelection, keyboardFilterValue);
         }

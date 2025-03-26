@@ -28,12 +28,14 @@ ace_unittest("window_scene_test") {
     "$ace_root/test/unittest/core/pattern/window_scene/mock/mock_rosen_render_context.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/helper/window_scene_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/input_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/panel_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/system_window_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/transform_scene.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_event_process.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
@@ -51,6 +53,7 @@ ace_unittest("window_scene_test") {
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "relational_store:native_rdb",
     "window_manager:libdm",
     "window_manager:libwm",
     "window_manager:scene_session",

@@ -189,7 +189,7 @@ public:
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
     void SetMenuAlign(const MenuAlign& menuAlign);
-    void SetAvoidance(const Avoidance& avoidance);
+    void SetAvoidance(AvoidanceMode mode);
 
     std::string GetValue();
     std::string ProvideRestoreInfo() override;
@@ -215,6 +215,7 @@ public:
         return MakeRefPtr<SelectPaintProperty>();
     }
     void ResetFontColor();
+    void SetMenuOutline(const MenuParam& menuParam);
 
 private:
     void OnAttachToFrameNode() override;
@@ -335,7 +336,6 @@ private:
     bool isHover_ = false;
     bool isSelected_ = false;
     MenuAlign menuAlign_;
-    Avoidance avoidance_;
     std::string selectValue_;
     bool isFitTrigger_ = false;
     ControlSize controlSize_ = ControlSize::NORMAL;

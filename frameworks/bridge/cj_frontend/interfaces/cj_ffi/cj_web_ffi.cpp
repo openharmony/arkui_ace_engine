@@ -467,22 +467,37 @@ void MapToCFFIArrayToFreeMemory(MapToCFFIArray& mapToCFFIArray)
     free(mapToCFFIArray.value);
 }
 
-void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(void* event))
+void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event))
 {
+    auto instanceId = Container::CurrentId();
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) -> bool {
-        auto webNode = node.Upgrade();
-        CHECK_NULL_RETURN(webNode, false);
-        ContainerScope(webNode->GetInstanceId());
+    auto onLoadIntercept = [func = CJLambda::Create(callback), instanceId, node = frameNode](
+        const BaseEventInfo* info) -> bool  {
+        ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (pipelineContext) {
-            pipelineContext->UpdateCurrentActiveNode(node);
-        }
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+
+        auto cjWebResourceRequest = new FfiWebResourceRequest();
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
-        auto request = new RefPtr<WebRequest>(eventInfo->GetRequest());
-        return func(request);
+        auto request = eventInfo->GetRequest();
+        MapToCFFIArray mapToCFFIArray;
+        auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
+        if (!wirteSuccess) {
+            return false;
+        }
+        cjWebResourceRequest->url = request->GetUrl().c_str();
+        cjWebResourceRequest->isMainFrame = request->IsMainFrame();
+        cjWebResourceRequest->isRedirect = request->IsRedirect();
+        cjWebResourceRequest->hasGesture = request->HasGesture();
+        cjWebResourceRequest->method = request->GetMethod().c_str();
+        cjWebResourceRequest->mapToCFFIArray = &mapToCFFIArray;
+        auto res = func(*cjWebResourceRequest);
+        delete cjWebResourceRequest;
+        MapToCFFIArrayToFreeMemory(mapToCFFIArray);
+        return res;
     };
-    WebModel::GetInstance()->SetOnLoadIntercept(std::move(cjCallback));
+    WebModel::GetInstance()->SetOnLoadIntercept(std::move(onLoadIntercept));
 }
 
 void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url))
@@ -1046,7 +1061,7 @@ void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent event))
     WebModel::GetInstance()->SetOnDownloadStart(std::move(cjCallback));
 }
 
-void FfiWebOnErrorReceive(void (*callback)(void* request, void* error))
+void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* error))
 {
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const BaseEventInfo* info) {
@@ -1058,9 +1073,23 @@ void FfiWebOnErrorReceive(void (*callback)(void* request, void* error))
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
-        auto request = new RefPtr<WebRequest>(eventInfo->GetRequest());
+        auto cjWebResourceRequest = new FfiWebResourceRequest();
+        auto request = eventInfo->GetRequest();
+        MapToCFFIArray mapToCFFIArray;
+        auto wirteSuccess = WebRequestHeadersToMapToCFFIArray(request, mapToCFFIArray);
+        if (!wirteSuccess) {
+            return;
+        }
+        cjWebResourceRequest->url = request->GetUrl().c_str();
+        cjWebResourceRequest->isMainFrame = request->IsMainFrame();
+        cjWebResourceRequest->isRedirect = request->IsRedirect();
+        cjWebResourceRequest->hasGesture = request->HasGesture();
+        cjWebResourceRequest->method = request->GetMethod().c_str();
+        cjWebResourceRequest->mapToCFFIArray = &mapToCFFIArray;
         auto error = new RefPtr<WebError>(eventInfo->GetError());
-        func(request, error);
+        func(*cjWebResourceRequest, error);
+        delete cjWebResourceRequest;
+        MapToCFFIArrayToFreeMemory(mapToCFFIArray);
     };
     WebModel::GetInstance()->SetOnErrorReceive(std::move(cjCallback));
 }

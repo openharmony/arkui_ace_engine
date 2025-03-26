@@ -17,7 +17,11 @@
 
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#ifdef UI_SERVICE_WITH_IDL
+#include "ui_service_mgr_client_idl.h"
+#else
 #include "ui_service_mgr_client.h"
+#endif
 
 #include "core/common/ace_engine.h"
 
@@ -40,14 +44,22 @@ std::shared_ptr<PluginComponentManager> PluginComponentManager::GetInstance()
 int PluginComponentManager::Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
     const std::string& data, const std::string& extraData)
 {
+#ifdef UI_SERVICE_WITH_IDL
+    return Ace::UIServiceMgrClientIdl::GetInstance()->Push(want, name, jsonPath, data, extraData);
+#else
     return Ace::UIServiceMgrClient::GetInstance()->Push(want, name, jsonPath, data, extraData);
+#endif
 }
 
 int PluginComponentManager::Request(
     const AAFwk::Want& want, const std::string& name, const std::string& jsonPath, const std::string& data)
 {
     if (jsonPath.empty()) {
+#ifdef UI_SERVICE_WITH_IDL
+        return Ace::UIServiceMgrClientIdl::GetInstance()->Request(want, name, data);
+#else
         return Ace::UIServiceMgrClient::GetInstance()->Request(want, name, data);
+#endif
     } else {
         PluginComponentTemplate pluginTemplate;
         // Read external.json(assets\external.json) or jsonPath
@@ -66,7 +78,11 @@ int PluginComponentManager::Request(
 int PluginComponentManager::ReturnRequest(
     const AAFwk::Want& want, const std::string& pluginName, const std::string& data, const std::string& extraData)
 {
+#ifdef UI_SERVICE_WITH_IDL
+    return Ace::UIServiceMgrClientIdl::GetInstance()->ReturnRequest(want, pluginName, data, extraData);
+#else
     return Ace::UIServiceMgrClient::GetInstance()->ReturnRequest(want, pluginName, data, extraData);
+#endif
 }
 
 void PluginComponentManager::RegisterCallBack(
@@ -74,7 +90,11 @@ void PluginComponentManager::RegisterCallBack(
 {
     if (listener_) {
         listener_->ResgisterListener(callback, callBackType);
+#ifdef UI_SERVICE_WITH_IDL
+        Ace::UIServiceMgrClientIdl::GetInstance()->RegisterCallBack(want, listener_);
+#else
         Ace::UIServiceMgrClient::GetInstance()->RegisterCallBack(want, listener_);
+#endif
     }
 }
 
@@ -87,7 +107,11 @@ void PluginComponentManager::UnregisterCallBack(const std::shared_ptr<PluginComp
 
 void PluginComponentManager::UnregisterCallBack(const AAFwk::Want& want)
 {
+#ifdef UI_SERVICE_WITH_IDL
+    Ace::UIServiceMgrClientIdl::GetInstance()->UnregisterCallBack(want);
+#else
     Ace::UIServiceMgrClient::GetInstance()->UnregisterCallBack(want);
+#endif
 }
 
 sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
@@ -122,8 +146,13 @@ void PluginComponentManager::UIServiceListener::ResgisterListener(
     callbackVec_.try_emplace(callback, callBackType);
 }
 
+#ifdef UI_SERVICE_WITH_IDL
+ErrCode PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want& want, const std::string& name,
+    const std::string& jsonPath, const std::string& data, const std::string& extraData)
+#else
 void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want& want, const std::string& name,
     const std::string& jsonPath, const std::string& data, const std::string& extraData)
+#endif
 {
     PluginComponentTemplate pluginTemplate;
     if (!jsonPath.empty()) {
@@ -145,10 +174,18 @@ void PluginComponentManager::UIServiceListener::OnPushCallBack(const AAFwk::Want
             callback.first->OnPushEvent(want, pluginTemplate, data, extraData);
         }
     }
+#ifdef UI_SERVICE_WITH_IDL
+    return ERR_NONE;
+#endif
 }
 
+#ifdef UI_SERVICE_WITH_IDL
+ErrCode PluginComponentManager::UIServiceListener::OnRequestCallBack(
+    const AAFwk::Want& want, const std::string& name, const std::string& data)
+#else
 void PluginComponentManager::UIServiceListener::OnRequestCallBack(
     const AAFwk::Want& want, const std::string& name, const std::string& data)
+#endif
 {
     std::lock_guard<std::recursive_mutex> lock(mutex_);
     for (auto& callback : callbackVec_) {
@@ -156,10 +193,18 @@ void PluginComponentManager::UIServiceListener::OnRequestCallBack(
             callback.first->OnRequestEvent(want, name, data);
         }
     }
+#ifdef UI_SERVICE_WITH_IDL
+    return ERR_NONE;
+#endif
 }
 
+#ifdef UI_SERVICE_WITH_IDL
+ErrCode PluginComponentManager::UIServiceListener::OnReturnRequest(
+    const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
+#else
 void PluginComponentManager::UIServiceListener::OnReturnRequest(
     const AAFwk::Want& want, const std::string& source, const std::string& data, const std::string& extraData)
+#endif
 {
     {
         std::lock_guard<std::recursive_mutex> lock(mutex_);
@@ -167,11 +212,19 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
             if (iter->second == CallBackType::RequestCallBack && iter->first != nullptr) {
                 auto container = AceEngine::Get().GetContainer(iter->first->GetContainerId());
                 if (!container) {
+#ifdef UI_SERVICE_WITH_IDL
+                    return ERR_NONE;
+#else
                     return;
+#endif
                 }
                 auto taskExecutor = container->GetTaskExecutor();
                 if (!taskExecutor) {
+#ifdef UI_SERVICE_WITH_IDL
+                    return ERR_NONE;
+#else
                     return;
+#endif
                 }
                 taskExecutor->PostTask(
                     [callback = iter->first, want, source, data, extraData]() {
@@ -195,6 +248,9 @@ void PluginComponentManager::UIServiceListener::OnReturnRequest(
             }
         }
     }
+#ifdef UI_SERVICE_WITH_IDL
+    return ERR_NONE;
+#endif
 }
 
 void PluginComponentManager::UIServiceListener::RequestByJsonPath(

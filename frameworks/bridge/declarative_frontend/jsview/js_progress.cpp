@@ -32,21 +32,18 @@ ProgressType g_progressType = ProgressType::LINEAR;
 
 ProgressModel* ProgressModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ProgressModelNG());
+    static NG::ProgressModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ProgressModelNG());
-            } else {
-                instance_.reset(new Framework::ProgressModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ProgressModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ProgressModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace

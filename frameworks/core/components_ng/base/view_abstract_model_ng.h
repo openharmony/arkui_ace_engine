@@ -37,6 +37,7 @@
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
@@ -144,14 +145,14 @@ public:
         ViewAbstract::SetBackgroundImagePosition(bgImgPosition);
     }
 
-    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
+    void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+        ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle, sysOptions);
     }
 
-    void SetBackgroundEffect(const EffectOption& effectOption) override
+    void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackgroundEffect(effectOption);
+        ViewAbstract::SetBackgroundEffect(effectOption, sysOptions);
     }
 
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) override
@@ -159,9 +160,9 @@ public:
         ViewAbstract::SetBackgroundImageResizableSlice(slice);
     }
 
-    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) override
+    void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle);
+        ViewAbstract::SetForegroundBlurStyle(fgBlurStyle, sysOptions);
     }
 
     void SetSphericalEffect(double radio) override
@@ -790,9 +791,9 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetBackdropBlur(radius, blurOption);
+        ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
     }
 
     void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara) override
@@ -824,9 +825,9 @@ public:
         ViewAbstract::SetBrightnessBlender(brightnessBlender);
     }
 
-    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override
+    void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
-        ViewAbstract::SetFrontBlur(radius, blurOption);
+        ViewAbstract::SetFrontBlur(radius, blurOption, sysOptions);
     }
 
     void SetMotionBlur(const MotionBlurOption& motionBlurOption) override

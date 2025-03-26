@@ -281,17 +281,13 @@ public:
         clickBreak_ = value;
     }
 
-    void UpdateUserSetSelectColor()
-    {
-        isUserSetSelectColor_ = true;
-    }
-
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
     void InitHapticController();
     void StopHaptic();
     void SetSelectedMarkListener(std::function<void(std::string& selectedColumnId)>& listener);
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const std::string &strColumnId);
+    void UpdateUserSetSelectColor();
 #ifdef SUPPORT_DIGITAL_CROWN
     std::string& GetSelectedColumnId();
     bool IsCrownEventEnded();

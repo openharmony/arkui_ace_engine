@@ -428,11 +428,16 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     }
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     auto arrowAccessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty) {
-        accessibilityProperty->SetAccessibilityLevel(
-            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
-        arrowAccessibilityProperty->SetAccessibilityLevel(
-            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (visible) {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+        arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
+    } else {
+        accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
     }
 }
 

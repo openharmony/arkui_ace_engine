@@ -963,6 +963,8 @@ export struct ListBootcamp {
   @State compFlexBasis: number | string = 'auto';
   @State enableCompDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
+  @State enableBackToTop: boolean = true;
+  @State backToTop: boolean = false;
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -2054,6 +2056,7 @@ export struct ListBootcamp {
       .onScrollVisibleContentChange((start:VisibleListContentInfo	,end:VisibleListContentInfo	) => {
         this.compEventTriggeredLog('onScrollVisibleContentChange,有子组件划入或划出List显示区域时触发')
       })
+      .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
 
     }
   }
@@ -3372,6 +3375,16 @@ export struct ListBootcamp {
             { label: 'false', value: false },
           ]
         })
+        
+        RadioBlock({
+          title: 'backToTop',
+          isEnabled: $enableBackToTop,
+          value: $backToTop,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })        
       }
     }
     .align(Alignment.Top)

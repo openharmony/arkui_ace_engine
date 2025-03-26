@@ -208,8 +208,8 @@ RSRect SvgImage::CalcDstRect(const Size& realSize, const Rect& viewBox)
     auto translateX = 0.0f;
     auto translateY = 0.0f;
     SvgPreserveAspectRatio preserveAspectRatio;
-    SvgAttributesParser::ComputeScale(viewBox.GetSize(), realSize, preserveAspectRatio, scaleX, scaleY);
-    SvgAttributesParser::ComputeTranslate(viewBox.GetSize(), realSize, scaleX, scaleY, preserveAspectRatio.svgAlign,
+    SvgAttributesParser::ComputeScale(realSize, viewBox.GetSize(), preserveAspectRatio, scaleX, scaleY);
+    SvgAttributesParser::ComputeTranslate(realSize, viewBox.GetSize(), scaleX, scaleY, preserveAspectRatio.svgAlign,
         translateX, translateY);
     offsetX = viewBox.Left() + translateX;
     offsetY = viewBox.Top() + translateY;

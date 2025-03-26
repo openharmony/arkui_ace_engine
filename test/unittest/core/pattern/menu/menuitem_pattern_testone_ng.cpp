@@ -70,22 +70,7 @@ const std::string TEXT_TAG = "text";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t TARGET_ID = 3;
-constexpr int32_t API_VERSION = 99;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else {
-        return AceType::MakeRefPtr<MenuTheme>();
-    }
-}
-
 } // namespace
 class MenuItemPatternTestOneNg : public testing::Test {
 public:
@@ -116,7 +101,6 @@ void MenuItemPatternTestOneNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     MockContainer::SetUp();
 }
 
@@ -125,10 +109,16 @@ void MenuItemPatternTestOneNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 void MenuItemPatternTestOneNg::TearDown()
@@ -1132,10 +1122,6 @@ HWTEST_F(MenuItemPatternTestOneNg, OnTouch002, TestSize.Level1)
  */
 HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon001, TestSize.Level1)
 {
-    MockContainer::Current()->SetApiTargetVersion(API_VERSION);
-    MockPipelineContextGetTheme();
-    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
-    ASSERT_NE(selectTheme, nullptr);
     std::function<void()> buildFun = []() {
         MenuModelNG MenuModelInstance;
         MenuModelInstance.Create();
@@ -1372,14 +1358,6 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
             return selectTheme;
         }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([=](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
-            if (type == TextTheme::TypeId()) {
-                return textTheme;
-            } else {
-                return selectTheme;
-            }
-        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
@@ -1437,14 +1415,6 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent004, TestSize.Level1)
             return selectTheme;
         }
     });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([=](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> {
-            if (type == TextTheme::TypeId()) {
-                return textTheme;
-            } else {
-                return selectTheme;
-            }
-        });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;

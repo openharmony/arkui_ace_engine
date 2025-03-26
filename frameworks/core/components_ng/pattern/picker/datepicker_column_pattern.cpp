@@ -1618,6 +1618,16 @@ void DatePickerColumnPattern::UpdateSelectedTextColor(const RefPtr<PickerTheme>&
     host->MarkDirtyNode(PROPERTY_UPDATE_DIFF);
 }
 
+void DatePickerColumnPattern::UpdateUserSetSelectColor()
+{
+    isUserSetSelectColor_ = true;
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    UpdateSelectedTextColor(pickerTheme);
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 std::string& DatePickerColumnPattern::GetSelectedColumnId()
 {

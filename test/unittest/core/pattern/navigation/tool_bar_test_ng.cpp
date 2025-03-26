@@ -1167,4 +1167,44 @@ HWTEST_F(ToolBarTestNg, InitDragEvent003, TestSize.Level1)
     EXPECT_EQ(toolbarPattern->moveIndex_, -1);
     ToolBarTestNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: SetToolbarMoreButtonOptionsTest001
+ * @tc.desc: Branch: if (options_.bgOptions.blurStyleOption.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetToolbarMoreButtonOptionsTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    MoreButtonOptions opt;
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    navToolbarPattern->SetToolbarMoreButtonOptions(std::move(opt));
+    EXPECT_EQ(
+        navToolbarPattern->GetToolbarMoreButtonOptions().bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+}
+
+/**
+ * @tc.name: SetToolbarMoreButtonOptionsTest002
+ * @tc.desc: Branch: if (options_.bgOptions.effectOption.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, SetToolbarMoreButtonOptionsTest002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavToolbarPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto navToolbarPattern = frameNode->GetPattern<NavToolbarPattern>();
+    EXPECT_NE(navToolbarPattern, nullptr);
+    MoreButtonOptions opt;
+    EffectOption effectOption;
+    effectOption.adaptiveColor = AdaptiveColor::DEFAULT;
+    opt.bgOptions.effectOption = effectOption;
+    navToolbarPattern->SetToolbarMoreButtonOptions(std::move(opt));
+    EXPECT_EQ(
+        navToolbarPattern->GetToolbarMoreButtonOptions().bgOptions.effectOption->adaptiveColor, AdaptiveColor::DEFAULT);
+}
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -765,9 +765,22 @@ public:
     void SetBindIndicator(bool bind)
     {
         isBindIndicator_ = bind;
+        // Need to reset the last independent indicator first,
+        // whether it will rebind to a new independent navigation point.
+        ResetIndicatorNode();
     }
 
-    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
+    void SetJSIndicatorController(std::function<void()> resetFunc)
+    {
+        if (resetFunc_) {
+            resetFunc_();
+        }
+        resetFunc_ = resetFunc;
+    }
+
+    void SetIndicatorNode(const RefPtr<FrameNode>& indicatorNode);
+
+    void ResetIndicatorNode();
 
     RefPtr<FrameNode> GetIndicatorNode() const
     {
@@ -785,6 +798,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
+
+    bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
 
 protected:
     void MarkDirtyNodeSelf();
@@ -1187,8 +1202,6 @@ private:
         return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
     }
 
-    std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
-
     bool IsItemOverlay() const;
     void UpdateIndicatorOnChildChange();
     void UpdateDigitalIndicator();
@@ -1398,8 +1411,9 @@ private:
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
-    WeakPtr<NG::UINode> indicatorNode_;
+    WeakPtr<FrameNode> indicatorNode_;
     bool isBindIndicator_ = false;
+    std::function<void()> resetFunc_;
 
     SwiperHoverFlag hoverFlag_ = HOVER_NONE;
     GestureStatus gestureStatus_ = GestureStatus::INIT;

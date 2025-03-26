@@ -189,6 +189,7 @@ public:
 
     void OnUIExtensionWindowSizeChange(int32_t instanceId, Rect windowRect, WindowSizeChangeReason reason);
     void OnHostWindowSizeChanged(int32_t containerId, Rect windowRect, WindowSizeChangeReason reason);
+    void OnWaterfallModeChanged(int32_t instanceId, bool enabled) {}
     void HideSheetSubWindow(int32_t containerId);
     void ShowBindSheetNG(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<NG::UINode>()>&& buildNodeFunc, std::function<RefPtr<NG::UINode>()>&& buildtitleNodeFunc,

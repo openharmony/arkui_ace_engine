@@ -14,10 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 #include "cj_lambda.h"
 #include "securec.h"
+
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -174,13 +176,23 @@ void FfiOHOSAceFrameworkRichEditorOnDeleteComplete(void(*callback)())
     RichEditorModel::GetInstance()->SetOnDeleteComplete(CJLambda::Create(callback));
 }
 
+char* MallocCString(const std::string& origin)
+{
+    auto len = origin.length() + 1;
+    char* res = static_cast<char*>(malloc(sizeof(char) * len));
+    if (res == nullptr) {
+        return nullptr;
+    }
+    return std::char_traits<char>::copy(res, origin.c_str(), len);
+}
+
 void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEditorInsertValue))
 {
     auto aboutToIMEInputFunc = [cjCallback = CJLambda::Create(callback)](
         const NG::RichEditorInsertValue& insertValue) -> bool {
-        auto utilstring = UtfUtils::Str16ToStr8(insertValue.GetInsertValue()).c_str();
         NativeRichEditorInsertValue result {
-            insertValue.GetInsertOffset(), utilstring
+            insertValue.GetInsertOffset(),
+            MallocCString(UtfUtils::Str16ToStr8(insertValue.GetInsertValue()))
         };
         return cjCallback(result);
     };
@@ -224,10 +236,10 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
             textSpanResult.GetFontFamily().c_str(),
             decoration
         };
-        auto utilstring = UtfUtils::Str16ToStr8(textSpanResult.GetValue()).c_str();
+
         NativeRichEditorTextSpanResult result {
             spanPosition,
-            utilstring,
+            MallocCString(UtfUtils::Str16ToStr8(textSpanResult.GetValue())),
             textStyle,
             textSpanResult.OffsetInSpan(),
             textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength()
@@ -603,9 +615,9 @@ void FfiOHOSAceFrameworkRichEditorOnWillChange(bool(*callback)(NativeRichEditorC
         nativeParams.replacedSpans = nativeReplacedSpans;
         nativeParams.replacedImageSpans = nativeReplacedImageSpans;
         nativeParams.replacedSymbolSpans = nativeReplacedSymbolSpans;
-        nativeParams.replacedSpansSize = replacedSpans.size();
-        nativeParams.replacedImageSpansSize = replacedImageSpans.size();
-        nativeParams.replacedSymbolSpansSize = replacedSymbolSpans.size();
+        nativeParams.replacedSpansSize = static_cast<int64_t>(replacedSpans.size());
+        nativeParams.replacedImageSpansSize = static_cast<int64_t>(replacedImageSpans.size());
+        nativeParams.replacedSymbolSpansSize = static_cast<int64_t>(replacedSymbolSpans.size());
         bool res = cjCallback(nativeParams);
         delete[] nativeReplacedSpans;
         delete[] nativeReplacedImageSpans;

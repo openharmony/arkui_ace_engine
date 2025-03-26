@@ -50,15 +50,17 @@ ImageLoadingContext::~ImageLoadingContext()
         auto state = stateManager_->GetCurrentState();
         if (state == ImageLoadingState::DATA_LOADING) {
             // cancel CreateImgObj task
-            ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
-            if (Downloadable()) {
-                DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc(), imageDfxConfig_.nodeId_);
+            if (!Downloadable()) {
+                ImageProvider::CancelTask(src_.GetTaskKey(), WeakClaim(this));
+                return;
             }
-        } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
+            std::string taskKey = src_.GetTaskKey() + (GetOnProgressCallback() ? "1" : "0");
+            if (ImageProvider::CancelTask(taskKey, WeakClaim(this))) {
+                DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(src_.GetSrc());
+            }
+        } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE && InstanceOf<StaticImageObject>(imageObj_)) {
             // cancel MakeCanvasImage task
-            if (InstanceOf<StaticImageObject>(imageObj_)) {
-                ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
-            }
+            ImageProvider::CancelTask(canvasKey_, WeakClaim(this));
         }
     }
 }
@@ -231,8 +233,8 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, %{public}s",
-        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadFail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
+        errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
     needErrorCallBack_ = false;

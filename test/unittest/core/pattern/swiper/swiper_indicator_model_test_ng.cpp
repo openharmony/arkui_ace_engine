@@ -441,6 +441,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg009, TestSize.Level1)
     EXPECT_NE(frameNode_, nullptr);
     indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
     EXPECT_NE(indicatorPattern_, nullptr);
+    indicatorPattern_->InitIndicatorController();
     indicatorLayoutProperty_ = frameNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     EXPECT_NE(indicatorLayoutProperty_, nullptr);
     indicatorController_ = indicatorPattern_->GetIndicatorController();

@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
 
@@ -899,6 +901,10 @@ HWTEST_F(TextTestTwoNg, TextDecorationStyleTest002, TestSize.Level1)
         LayoutWrapperNode(textFrameNode, AceType::MakeRefPtr<GeometryNode>(), textLayoutProperty);
     auto textLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextLayoutAlgorithm>();
     LayoutConstraintF layoutConstraint;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
     textLayoutAlgorithm->ConstructTextStyles(layoutConstraint, &layoutWrapper, textStyle);
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());

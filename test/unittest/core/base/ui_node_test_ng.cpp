@@ -1569,8 +1569,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
     int32_t depth = 0;
 
     parent->GetPageNodeCountAndDepth(&count, &depth);
-    EXPECT_EQ(parent->depth_, 1);
-    EXPECT_EQ(parent->depth_, 1);
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
 
     auto child1 = FrameNode::CreateFrameNode(
         "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
@@ -2424,14 +2424,20 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CollectRemovedChildren001
- * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.name: CollectCleanedChildren
+ * @tc.desc: Test ui node method CollectCleanedChildren
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
+HWTEST_F(UINodeTestNg, CollectCleanedChildren, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create FrameNode with child
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -2445,7 +2451,7 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. add child
+     * @tc.steps: step3. add child
      */
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(testNode3, 1, false);
@@ -2453,10 +2459,56 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
     testNode2->AddChild(testNode5, 1, false);
 
     /**
-     * @tc.steps: step3. set API12.
+     * @tc.steps: step4. test CollectCleanedChildren.
+     */
+    testNode2->isDisappearing_ = true;
+    std::list<int32_t> removedElmtId2;
+    std::list<int32_t> reservedElmtIds;
+    testNode1->CollectCleanedChildren(testNode1->GetChildren(), removedElmtId2, reservedElmtIds, true);
+    EXPECT_EQ(removedElmtId2.size(), 4);
+    testNode2->CollectCleanedChildren(testNode2->GetChildren(), removedElmtId2, reservedElmtIds, false);
+    EXPECT_EQ(removedElmtId2.size(), 5);
+
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: CollectRemovedChildren001
+ * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API12.
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode1->AddChild(testNode3, 1, false);
+    testNode1->AddChild(testNode4, 1, false);
+    testNode2->AddChild(testNode5, 1, false);
 
     /**
      * @tc.steps: step4. test CollectRemovedChildren.
@@ -2482,7 +2534,13 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
 HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create FrameNode with child
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -2496,18 +2554,12 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. add child
+     * @tc.steps: step3. add child
      */
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(testNode3, 1, false);
     testNode1->AddChild(testNode4, 1, false);
     testNode2->AddChild(testNode5, 1, false);
-
-    /**
-     * @tc.steps: step3. set API13.
-     */
-    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step4. test CollectRemovedChildren.
@@ -2518,7 +2570,7 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
     EXPECT_EQ(removedElmtId2.size(), 4);
     testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId2, false);
     EXPECT_EQ(removedElmtId2.size(), 5);
-    
+
     /**
      * @tc.steps: step5. revert to the origin API.
      */
@@ -2555,4 +2607,38 @@ HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
     EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
 }
 
+/**
+ * @tc.name: AddFunc_API01
+ * @tc.desc: CanAddChildWhenTopNodeIsModalUec
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API01, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+    testNode->DoAddChild(itr, ONE, true);
+    bool res = testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddFunc_API02
+ * @tc.desc: AddChildAfter
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API02, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(testNode->children_.size(), 0);
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto node2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode->AddChild(node, 1, false);
+    testNode->AddChildAfter(node, node);
+    EXPECT_EQ(testNode->children_.size(), 1);
+    testNode->AddChildAfter(node2, node);
+    EXPECT_EQ(testNode->children_.size(), 2);
+    testNode->Clean(false);
+}
 } // namespace OHOS::Ace::NG

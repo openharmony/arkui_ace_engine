@@ -994,6 +994,201 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationSyncStackTestNg020, TestSize.Level
     ASSERT_EQ(navDestinationPattern->GetName(), moveToName);
 }
 
+
+/**
+ * @tc.name: NavigationGetPathStackTestNg001
+ * @tc.desc: Test interface getPathStack with empty path stack
+ *           Condition: this.pathArray.length() == 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationGetPathStackTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern, but do not push destination into stack.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_EQ(mockNavPathStack->Size(), 0);
+    /**
+     * @tc.steps: step2. sync stack and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), 0);
+    /**
+     * @tc.steps: step3. do getPathStack, test whether get the correct array of pathStack.
+     */
+    auto returnPathArray = mockNavPathStack->MockGetPathStack();
+    auto realLength = returnPathArray.size();
+    ASSERT_EQ(realLength, 0);
+}
+
+/**
+ * @tc.name: NavigationGetPathStackTestNg002
+ * @tc.desc: Test interface getPathStack after several navDestination page is push
+ *           Condition: this.pathArray.length() != 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationGetPathStackTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern, and push some destination page into stack.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_EQ(mockNavPathStack->Size(), 0);
+    const std::string destNameBase = "dest";
+    const int32_t diffDestNum = 5;
+    for (int32_t index = 0; index < diffDestNum; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
+    }
+    ASSERT_EQ(mockNavPathStack->Size(), diffDestNum);
+    /**
+     * @tc.steps: step2. sync stack and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), diffDestNum);
+    /**
+     * @tc.steps: step3. do getPathStack, test whether get the correct array of pathStack.
+     */
+    auto returnPathArray = mockNavPathStack->MockGetPathStack();
+    auto realLength = returnPathArray.size();
+    ASSERT_EQ(realLength, diffDestNum);
+    for (int32_t index = 0; index < realLength; index++) {
+        auto realName = returnPathArray[index]->GetName();
+        ASSERT_EQ(realName, destNameBase + std::to_string(index));
+        auto isEntry = returnPathArray[index]->GetIsEntry();
+        ASSERT_EQ(isEntry, false);
+    }
+}
+
+/**
+ * @tc.name: NavigationSetPathStackTestNg001
+ * @tc.desc: Test interface setPathStack with empty path info.
+ *           Condition: this.setPathStack(empty)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationSetPathStackTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern, and push some destination page into stack.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_EQ(mockNavPathStack->Size(), 0);
+    const std::string destNameBase = "dest";
+    const int32_t diffDestNum = 5;
+    for (int32_t index = 0; index < diffDestNum; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
+    }
+    ASSERT_EQ(mockNavPathStack->Size(), diffDestNum);
+    /**
+     * @tc.steps: step2. sync stack and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), diffDestNum);
+    /**
+     * @tc.steps: step3. do setPathStack, test whether get the correct array of pathStack.
+     */
+    std::vector<RefPtr<MockNavPathInfo>> newPathArray;
+    newPathArray.clear();
+    mockNavPathStack->MockSetPathStack(newPathArray);
+    ASSERT_EQ(mockNavPathStack->Size(), 0);
+
+    /**
+     * @tc.steps: step4. sync again and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), 1);
+}
+
+/**
+ * @tc.name: NavigationSetPathStackTestNg002
+ * @tc.desc: Test interface setPathStack with several path infos.
+ *           Condition: this.setPathStack(newPathArray)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationSyncStackTestNg, NavigationSetPathStackTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, stack, frameNode and pattern, but do not push destination into stack.
+     */
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    RefPtr<NavigationGroupNode> navigationNode =
+        AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+    ASSERT_NE(navigationPattern, nullptr);
+    ASSERT_EQ(mockNavPathStack->Size(), 0);
+    const std::string destNameBase = "dest";
+    const int32_t diffDestNum = 5;
+    for (int32_t index = 0; index < diffDestNum; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
+    }
+    ASSERT_EQ(mockNavPathStack->Size(), diffDestNum);
+    /**
+     * @tc.steps: step2. sync stack and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), diffDestNum);
+    /**
+     * @tc.steps: step3. do setPathStack, test whether get the correct array of pathStack.
+     */
+    std::vector<RefPtr<MockNavPathInfo>> newPathArray;
+    const std::string setNameBase = "set";
+    const int32_t setDestNum = 6;
+    for (int32_t index = 0; index < setDestNum; ++index) {
+        newPathArray.push_back(AceType::MakeRefPtr<MockNavPathInfo>(setNameBase + std::to_string(index)));
+    }
+    mockNavPathStack->MockSetPathStack(newPathArray);
+    ASSERT_EQ(mockNavPathStack->Size(), setDestNum);
+
+    /**
+     * @tc.steps: step4. sync stack again and do verify.
+     */
+    RunNavigationStackSync(navigationPattern);
+    navigationContent = navigationNode->GetContentNode();
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), setDestNum);
+}
+
 /**
  * @tc.name: NavigationSyncStackTestNg021
  * @tc.desc: Test interface moveToTop with invalid name

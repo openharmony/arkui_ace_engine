@@ -242,6 +242,11 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     } else {
         return;
     }
+    if (opacityAnimationType == OpacityAnimationType::APPEAR_WITHOUT_ANIMATION) {
+        opacityAnimatingType_ = OpacityAnimationType::NONE;
+        opacity_->Set(UINT8_MAX);
+        return;
+    }
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {

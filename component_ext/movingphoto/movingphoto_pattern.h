@@ -109,6 +109,11 @@ public:
         dynamicRangeMode_ = rangeMode;
     }
 
+    void SetWaterMask(bool enabled)
+    {
+        isPlayWithMask_ = enabled;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -149,6 +154,7 @@ private:
     void UpdateVideoNode();
     void UpdatePlayMode();
     void HandleImageAnalyzerMode();
+    void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
@@ -245,6 +251,7 @@ private:
     bool isVisible_ = false;
     bool isChangePlayMode_ = false;
     bool needUpdateImageNode_ = false;
+    bool isPlayWithMask_ = false;
     PlaybackStatus currentPlayStatus_ = PlaybackStatus::NONE;
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;

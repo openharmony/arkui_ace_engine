@@ -102,6 +102,7 @@ private:
 
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -137,6 +138,7 @@ private:
     bool isShowInFloatingWindow_ = false;
 
     float embeddedDialogOffsetY_ = 0.0f;
+    float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);

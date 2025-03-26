@@ -18,34 +18,74 @@
 #include <string>
 
 namespace OHOS::Ace::Recorder {
-InspectorTreeCollector::InspectorTreeCollector(OnInspectorTreeResult&& callback) : onResultFunc_(std::move(callback))
+InspectorTreeCollector::InspectorTreeCollector(OnInspectorTreeResult&& callback, bool isBackground)
+    : onResultFunc_(std::move(callback)), isBackground_(isBackground)
 {
     root_ = JsonUtil::Create(true);
 }
 
 void InspectorTreeCollector::IncreaseTaskNum()
 {
-    UpdateTaskNum(1);
+    if (isBackground_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        UpdateTaskNum(1);
+    } else {
+        UpdateTaskNum(1);
+    }
 }
 
 void InspectorTreeCollector::DecreaseTaskNum()
 {
-    UpdateTaskNum(-1);
+    if (isBackground_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        UpdateTaskNum(-1);
+    } else {
+        UpdateTaskNum(-1);
+    }
 }
 
 void InspectorTreeCollector::UpdateTaskNum(int32_t num)
 {
     taskNum_ += num;
     if (taskNum_ == 0) {
-        if (onResultFunc_) {
-            onResultFunc_(std::make_shared<std::string>(root_->ToString()));
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree UpdateTaskNum send tree");
+        if (!root_) {
+            return;
         }
+        if (!onResultFunc_) {
+            root_ = JsonUtil::Create(true);
+            return;
+        }
+        onResultFunc_(std::make_shared<std::string>(root_->ToString()));
         root_ = JsonUtil::Create(true);
+        if (taskExecutor_ && isBackground_) {
+            taskExecutor_->PostTask(
+                [collector = shared_from_this()]() {
+                    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree UpdateTaskNum clear cache");
+                    collector->cacheNodes_.clear();
+                },
+                TaskExecutor::TaskType::UI, "InspectorTreeCollector");
+        }
     }
+}
+
+void InspectorTreeCollector::CreateJson()
+{
+    root_ = JsonUtil::Create(true);
 }
 
 std::unique_ptr<JsonValue>& InspectorTreeCollector::GetJson()
 {
     return root_;
+}
+
+void InspectorTreeCollector::RetainNode(const RefPtr<NG::UINode>& node)
+{
+    cacheNodes_.emplace_back(node);
+}
+
+void InspectorTreeCollector::SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor)
+{
+    taskExecutor_ = taskExecutor;
 }
 } // namespace OHOS::Ace::Recorder

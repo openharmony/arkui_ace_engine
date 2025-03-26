@@ -104,6 +104,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
         auto child = jsonRoot->GetChild();
@@ -1681,7 +1682,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
 }
 
-void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine, const shared_ptr<JsValue> globalPtr)
+void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
@@ -1700,7 +1701,7 @@ void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine, const sh
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
-    JsBindWorkerViews(globalObj, runtime, nativeEngine, globalPtr);
+    JsBindWorkerViews(globalObj, nativeEngine);
 }
 
 } // namespace OHOS::Ace::Framework

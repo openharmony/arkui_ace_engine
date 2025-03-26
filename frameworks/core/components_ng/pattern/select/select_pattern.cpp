@@ -302,10 +302,20 @@ void SelectPattern::RegisterOnHover()
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
+        auto selectRenderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(selectRenderContext);
         // update hover status, repaint background color
         if (isHover) {
+            float scaleHover = theme->GetSelectHoverOrFocusedScale();
+            VectorF scale(scaleHover, scaleHover);
+            auto&& transform = selectRenderContext->GetOrCreateTransform();
+            CHECK_NULL_VOID(transform);
+            if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
+                selectRenderContext->SetScale(scaleHover, scaleHover);
+            }
             pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
+            selectRenderContext->SetScale(1.0f, 1.0f);
             pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
         pattern->PlayBgColorAnimation();
@@ -470,7 +480,7 @@ void SelectPattern::SetFocusStyle()
         GetShadowFromTheme(shadowStyle, shadow);
         selectRenderContext->UpdateBackShadow(shadow);
     }
-    float scaleFocus = selectTheme->GetSelectFocusedScale();
+    float scaleFocus = selectTheme->GetSelectHoverOrFocusedScale();
     VectorF scale(scaleFocus, scaleFocus);
     if (!transform->HasTransformScale() || transform->GetTransformScale() == scale) {
         scaleModify_ = true;
@@ -1443,14 +1453,13 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 
-void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+void SelectPattern::SetAvoidance(AvoidanceMode mode)
 {
-    avoidance_ = avoidance;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
+    menuLayoutProps->UpdateSelectAvoidanceMode(mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()
@@ -1826,5 +1835,15 @@ void SelectPattern::SetDividerMode(const std::optional<DividerMode>& mode)
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateMenuItemDivider();
+}
+
+void SelectPattern::SetMenuOutline(const MenuParam& menuParam)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
+    renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
 }
 } // namespace OHOS::Ace::NG

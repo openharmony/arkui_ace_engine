@@ -55,7 +55,7 @@ class TouchPoint(BaseBean):
 
     def check_parse_result(self):
         if (self.id is None or self.type is None or self.timestamp
-                is None or self.isInjected is None or self.downFingerIds is None):
+                is None or self.isInjected is None):
             self.parse_failed()
         else:
             self.parse_succeed()

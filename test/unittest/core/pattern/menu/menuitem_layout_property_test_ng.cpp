@@ -85,21 +85,6 @@ const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "cont
     { "", "icon3" }, { "", "" } };
 const std::vector<SelectParam> CREATE_VALUE_NEW = { { "content1_new", "" }, { "", "icon4_new" },
     { "", "" }, { "", "icon4_new" } };
-
-RefPtr<Theme> GetTheme(ThemeType type)
-{
-    if (type == TextTheme::TypeId()) {
-        return AceType::MakeRefPtr<TextTheme>();
-    } else if (type == IconTheme::TypeId()) {
-        return AceType::MakeRefPtr<IconTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<SelectTheme>();
-    } else if (type == SelectTheme::TypeId()) {
-        return AceType::MakeRefPtr<MenuTheme>();
-    } else {
-        return nullptr;
-    }
-}
 } // namespace
 class MenuItemLayoutPropertyTestNg : public testing::Test {
 public:
@@ -108,8 +93,6 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitMenuItemTestNg();
-    void MockPipelineContextGetTheme();
-    void InitTargetFrameNode();
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
@@ -118,9 +101,6 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     RefPtr<MenuItemAccessibilityProperty> menuItemAccessibilityProperty_;
-    RefPtr<FrameNode> targetFrameNode_;
-    int32_t targetId_ = 0;
-    std::string targetTag_ = "";
 };
 
 void MenuItemLayoutPropertyTestNg::SetUpTestCase() {}
@@ -133,7 +113,6 @@ void MenuItemLayoutPropertyTestNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
-    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 }
 
 void MenuItemLayoutPropertyTestNg::TearDown()
@@ -160,26 +139,6 @@ void MenuItemLayoutPropertyTestNg::InitMenuItemTestNg()
 
     menuItemAccessibilityProperty_ = menuItemFrameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     ASSERT_NE(menuItemAccessibilityProperty_, nullptr);
-}
-
-void MenuItemLayoutPropertyTestNg::InitTargetFrameNode()
-{
-    targetFrameNode_ = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(targetFrameNode_, nullptr);
-    targetId_ = targetFrameNode_->GetId();
-    targetTag_ = targetFrameNode_->GetTag();
-}
-
-void MenuItemLayoutPropertyTestNg::MockPipelineContextGetTheme()
-{
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        return GetTheme(type);
-    });
-    EXPECT_CALL(*themeManager, GetTheme(_, _))
-        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 PaintWrapper* MenuItemLayoutPropertyTestNg::GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty)
@@ -484,29 +443,22 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, Clone001, TestSize.Level1)
  */
 HWTEST_F(MenuItemLayoutPropertyTestNg, ToJsonValue001, TestSize.Level1)
 {
-    MenuItemModelNG MneuItemModelInstance;
-    MenuItemProperties itemOption;
-    MneuItemModelInstance.Create(itemOption);
-    MneuItemModelInstance.SetSelectIcon(true);
-    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(itemNode, nullptr);
-    auto property = itemNode->GetLayoutProperty<MenuItemLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    property->UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
-    property->UpdateContent("content");
-    property->UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
-    property->UpdateLabel("label");
-    property->UpdateSelectIcon(true);
-    property->UpdateSelectIconSrc("select.png");
-    property->UpdateFontSize(Dimension(25.0f));
-    property->UpdateFontColor(Color::RED);
-    property->UpdateFontWeight(FontWeight::BOLD);
-    property->UpdateLabelFontSize(Dimension(35.0f));
-    property->UpdateLabelFontColor(Color::BLUE);
-    property->UpdateLabelFontWeight(FontWeight::LIGHTER);
+    MenuItemLayoutProperty property;
+    property.UpdateStartIcon(ImageSourceInfo(IMAGE_SRC_URL));
+    property.UpdateContent("content");
+    property.UpdateEndIcon(ImageSourceInfo(IMAGE_SRC_URL));
+    property.UpdateLabel("label");
+    property.UpdateSelectIcon(true);
+    property.UpdateSelectIconSrc("select.png");
+    property.UpdateFontSize(Dimension(25.0f));
+    property.UpdateFontColor(Color::RED);
+    property.UpdateFontWeight(FontWeight::BOLD);
+    property.UpdateLabelFontSize(Dimension(35.0f));
+    property.UpdateLabelFontColor(Color::BLUE);
+    property.UpdateLabelFontWeight(FontWeight::LIGHTER);
 
     auto json = JsonUtil::Create(true);
-    property->ToJsonValue(json, filter);
+    property.ToJsonValue(json, filter);
     auto labelFontJson = json->GetObject("labelFont");
     auto contentFontJson = json->GetObject("contentFont");
     EXPECT_EQ(json->GetString("startIcon"), IMAGE_SRC_URL);

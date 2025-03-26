@@ -62,8 +62,7 @@ struct _ArkUIDialog {
     OHOS::Ace::DimensionUnit widthUnit;
     std::optional<ArkUI_Float32> heightValue;
     OHOS::Ace::DimensionUnit heightUnit;
-    OHOS::Ace::ShadowStyle shadowStyle;
-    OHOS::Ace::Shadow customShadow;
+    std::optional<OHOS::Ace::Shadow> customShadow;
     ArkUI_Int32 blurStyle;
     OHOS::Ace::KeyboardAvoidMode keyboardAvoidMode;
     ArkUI_Bool enableHoverMode;

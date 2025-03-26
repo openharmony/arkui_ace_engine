@@ -14,7 +14,6 @@
  */
 
 /// <reference path='./import.ts' />
-/// <reference path="../../state_mgmt/src/lib/common/utils.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function getUINativeModule(): any {
   if (arkUINativeModule) {
@@ -150,9 +149,6 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(18)) {
-    return false;
-  }
   return (stageValue.bundleName === value.bundleName) &&
     (stageValue.moduleName === value.moduleName) &&
     (stageValue.id === value.id) &&

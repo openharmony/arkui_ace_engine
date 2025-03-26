@@ -423,7 +423,7 @@ struct MultiSelectBackground {
             .height(this.buttonItemsSize[index].height)
             .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
             .borderRadius(this.buttonBorderRadius[index])
-            .backgroundBlurStyle(this.options.backgroundBlurStyle)
+            .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         }
       })
     }
@@ -1284,7 +1284,7 @@ export struct SegmentButton {
           .size(this.componentSize)
           .backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR)
           .borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height as number / 2)
-          .backgroundBlurStyle(this.options.backgroundBlurStyle)
+          .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
         }
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {

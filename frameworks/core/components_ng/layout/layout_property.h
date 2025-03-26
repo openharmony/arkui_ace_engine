@@ -297,8 +297,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -392,6 +392,8 @@ public:
         return needLazyLayout_;
     }
 
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
@@ -408,6 +410,8 @@ public:
 
     virtual void OnPropertyChangeMeasure() {}
 
+    std::string LayoutInfoToString();
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -422,7 +426,6 @@ private:
     void CheckBorderAndPadding();
     void ConstraintContentByPadding();
     void ConstraintContentByBorder();
-    void ConstraintViewPosRef();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding();
     bool DecideMirror();

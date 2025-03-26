@@ -24,9 +24,9 @@ void LazyGridLayoutModel::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LAZY_GRID_LAYOUT_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LAZY_V_GRID_LAYOUT_ETS_TAG, nodeId);
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::LAZY_GRID_LAYOUT_ETS_TAG, nodeId, []() {
+        FrameNode::GetOrCreateFrameNode(V2::LAZY_V_GRID_LAYOUT_ETS_TAG, nodeId, []() {
             return AceType::MakeRefPtr<LazyGridLayoutPattern>();
         });
     stack->Push(frameNode);

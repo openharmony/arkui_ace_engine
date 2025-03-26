@@ -1326,9 +1326,7 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     auto controller = indicatorPattern->GetIndicatorController();
     ASSERT_NE(controller, nullptr);
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
     indicatorPattern->SaveDotIndicatorProperty();
     FlushUITasks();

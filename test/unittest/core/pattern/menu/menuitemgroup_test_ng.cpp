@@ -85,6 +85,11 @@ constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr float BLUR_STYLE_SCALE = 1.5f;
+constexpr float EFFECT_SATURATION = 1.2f;
+constexpr float BLUR_OPTION = 0.5f;
+constexpr float BRIGHTNESS = 0.8f;
+constexpr float RADIUS = 10.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
@@ -695,8 +700,10 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPattern001, TestSize.Level1)
 
     menuPattern->OnModifyDone();
 
-    auto contentNode = itemPattern->GetHost();
+    auto contentNode = itemPattern->GetContentNode();
     ASSERT_NE(contentNode, nullptr);
+    auto textProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
 
     auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
     auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
@@ -1000,6 +1007,248 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle003, TestSize.Level1)
     ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, effectOption.saturation);
 
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundBlurStyle001
+ * @tc.desc: MenuView SetBackgroundBlurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundBlurStyle001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    BlurStyleOption option { .blurStyle = BlurStyle::REGULAR,
+        .colorMode = ThemeColorMode::LIGHT,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .scale = BLUR_STYLE_SCALE,
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color::FromARGB(128, 0, 0, 0),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundBlurStyleOption = option;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackBlurStyle(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::LIGHT);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundBlurStyle002
+ * @tc.desc: MenuView SetBackgroundBlurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundBlurStyle002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    BlurStyleOption option { .blurStyle = BlurStyle::REGULAR,
+        .colorMode = ThemeColorMode::LIGHT,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .scale = BLUR_STYLE_SCALE,
+        .policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color::FromARGB(128, 0, 0, 0),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundBlurStyleOption = option;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackBlurStyle(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::LIGHT);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundBlurStyle003
+ * @tc.desc: MenuView SetBackgroundBlurStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundBlurStyle003, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    BlurStyleOption option { .blurStyle = BlurStyle::REGULAR,
+        .colorMode = ThemeColorMode::LIGHT,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .scale = BLUR_STYLE_SCALE,
+        .policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color::FromARGB(128, 0, 0, 0),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundBlurStyleOption = option;
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    const auto& groupProperty = renderContext->GetOrCreateBackground();
+    groupProperty->propBlurRadius = std::make_optional<Dimension>(1.0f);
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    ASSERT_NE(renderContext->GetBackBlurStyle(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackBlurStyle()->colorMode, ThemeColorMode::LIGHT);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundEffect001
+ * @tc.desc: MenuView SetBackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundEffect001, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    BlurStyleOption option { .blurStyle = BlurStyle::REGULAR,
+        .colorMode = ThemeColorMode::LIGHT,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .scale = BLUR_STYLE_SCALE,
+        .policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color::FromARGB(128, 0, 0, 0),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundBlurStyleOption = option;
+    EffectOption optionNew { .radius = Dimension(RADIUS, DimensionUnit::PX),
+        .saturation = EFFECT_SATURATION,
+        .brightness = BRIGHTNESS,
+        .color = Color(Color::RED),
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = BlurOption { std::vector<float> { BLUR_OPTION, BLUR_OPTION } },
+        .blurType = BlurType::BEHIND_WINDOW,
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .inactiveColor = Color(Color::BLUE),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundEffectOption = optionNew;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, EFFECT_SATURATION);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundEffect002
+ * @tc.desc: MenuView SetBackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundEffect002, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    EffectOption option { .radius = Dimension(RADIUS, DimensionUnit::PX),
+        .saturation = EFFECT_SATURATION,
+        .brightness = BRIGHTNESS,
+        .color = Color(Color::RED),
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = BlurOption { std::vector<float> { BLUR_OPTION, BLUR_OPTION } },
+        .blurType = BlurType::BEHIND_WINDOW,
+        .policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE,
+        .inactiveColor = Color(Color::BLUE),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundEffectOption = option;
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, EFFECT_SATURATION);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: SetBackgroundEffect003
+ * @tc.desc: MenuView SetBackgroundEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, SetBackgroundEffect003, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    MenuParam menuParam;
+    BlurStyleOption blurStyleOption;
+    EffectOption effectOption;
+    blurStyleOption.colorMode = ThemeColorMode::LIGHT;
+    menuParam.blurStyleOption = blurStyleOption;
+    menuParam.effectOption = effectOption;
+    auto menuWrapperNode = GetPreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    EffectOption option { .radius = Dimension(RADIUS, DimensionUnit::PX),
+        .saturation = EFFECT_SATURATION,
+        .brightness = BRIGHTNESS,
+        .color = Color(Color::RED),
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = BlurOption { std::vector<float> { BLUR_OPTION, BLUR_OPTION } },
+        .blurType = BlurType::BEHIND_WINDOW,
+        .policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE,
+        .inactiveColor = Color(Color::BLUE),
+        .isValidColor = true,
+        .isWindowFocused = false };
+    menuParam.backgroundEffectOption = option;
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    const auto& groupProperty = renderContext->GetOrCreateBackground();
+    groupProperty->propBlurRadius = std::make_optional<Dimension>(1.0f);
+    MenuView::UpdateMenuBackgroundStyle(menuNode, menuParam);
+    ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
+    EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, EFFECT_SATURATION);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

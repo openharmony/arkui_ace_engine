@@ -114,13 +114,13 @@ public:
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();
 
-    void RegisterJSCleanUpIdleTaskFunc(const std::function<void(void)>& jsCallback) {
+    void RegisterJSCleanUpIdleTaskFunc(const std::function<void(int64_t)>& jsCallback) {
         jsCleanUpIdleTaskCallback_ = std::move(jsCallback);
     }
 
-    void CallJSCleanUpIdleTaskFunc() {
+    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) {
         if (jsCleanUpIdleTaskCallback_) {
-            jsCleanUpIdleTaskCallback_();
+            jsCleanUpIdleTaskCallback_(maxTimeInNs);
         }
     }
 
@@ -168,7 +168,7 @@ private:
 
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
-    std::function<void(void)> jsCleanUpIdleTaskCallback_;
+    std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

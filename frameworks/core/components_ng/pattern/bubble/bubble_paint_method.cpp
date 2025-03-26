@@ -224,7 +224,7 @@ bool BubblePaintMethod::IsPaintDoubleBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(pipelineContext, false);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, false);
-    padding_ = popupTheme->GetPadding();
+    padding_ = isTips_ ? popupTheme->GetTipsPadding() : popupTheme->GetPadding();
     if (isTips_) {
         return enableArrow_ && showArrow_ && popupTheme->GetTipsDoubleBorderEnable();
     }
@@ -250,6 +250,26 @@ void BubblePaintMethod::PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintW
     }
 }
 
+void BubblePaintMethod::PaintOuterBorderGradient(RSPen& paint)
+{
+    auto halfWidth = childSize_.Width() / 2;
+    RSPoint startPoint(childOffset_.GetX() + halfWidth, childOffset_.GetY());
+    RSPoint endPoint(childOffset_.GetX() + halfWidth, childOffset_.GetY() + childSize_.Height());
+    int popupOuterBorderDirectionInt = static_cast<int>(outlineLinearGradient_.popupDirection);
+    std::vector<RSPoint> points = BorderLinearGradientPoint(popupOuterBorderDirectionInt);
+    startPoint = points[0];
+    endPoint = points[1];
+    std::vector<uint32_t> colorQuads;
+    std::vector<float> positions;
+    std::pair<std::vector<uint32_t>, std::vector<float>> colors =
+        BorderLinearGradientColors(outlineLinearGradient_.gradientColors);
+    colorQuads = colors.first;
+    positions = colors.second;
+    std::shared_ptr<RSShaderEffect> shader = RSShaderEffect::CreateLinearGradient(startPoint,
+        endPoint, colorQuads, positions, RSTileMode::CLAMP);
+    paint.SetShaderEffect(shader);
+}
+
 void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     if (!IsPaintDoubleBorder(paintWrapper)) {
@@ -270,7 +290,13 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
     paint.SetFilter(filter);
     paint.SetAntiAlias(true);
-    if (isTips_) {
+    if (!outlineLinearGradient_.gradientColors.empty()) {
+        if (outerBorderWidthByUser_ == 0) {
+            return;
+        }
+        PaintOuterBorderGradient(paint);
+        paint.SetWidth(outerBorderWidthByUser_);
+    } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsOuterBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsOuterBorderColor().GetValue());
     } else {
@@ -282,6 +308,26 @@ void BubblePaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWr
     PaintDoubleBorderWithArrow(canvas, paintWrapper);
     canvas.DetachPen();
     needPaintOuterBorder_ = false;
+}
+
+void BubblePaintMethod::PaintInnerBorderGradient(RSPen& paint)
+{
+    auto halfWidth = childSize_.Width() / 2;
+    RSPoint startPoint(childOffset_.GetX() + halfWidth, childOffset_.GetY());
+    RSPoint endPoint(childOffset_.GetX() + halfWidth, childOffset_.GetY() + childSize_.Height());
+    int popupInnerBorderDirectionInt = static_cast<int>(innerBorderLinearGradient_.popupDirection);
+    std::vector<RSPoint> points = BorderLinearGradientPoint(popupInnerBorderDirectionInt);
+    startPoint = points[0];
+    endPoint = points[1];
+    std::vector<uint32_t> colorQuads;
+    std::vector<float> positions;
+    std::pair<std::vector<uint32_t>, std::vector<float>> colors =
+        BorderLinearGradientColors(innerBorderLinearGradient_.gradientColors);
+    colorQuads = colors.first;
+    positions = colors.second;
+    std::shared_ptr<RSShaderEffect> shader = RSShaderEffect::CreateLinearGradient(startPoint,
+        endPoint, colorQuads, positions, RSTileMode::CLAMP);
+    paint.SetShaderEffect(shader);
 }
 
 void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -305,7 +351,13 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(RSBlurType::SOLID, BLUR_MASK_FILTER));
     paint.SetFilter(filter);
     paint.SetAntiAlias(true);
-    if (isTips_) {
+    if (!innerBorderLinearGradient_.gradientColors.empty()) {
+        if (innerBorderWidthByUser_ == 0) {
+            return;
+        }
+        PaintInnerBorderGradient(paint);
+        paint.SetWidth(innerBorderWidthByUser_);
+    } else if (isTips_) {
         paint.SetWidth(popupTheme->GetTipsInnerBorderWidth().ConvertToPx());
         paint.SetColor(popupTheme->GetTipsInnerBorderColor().GetValue());
     } else {
@@ -315,6 +367,84 @@ void BubblePaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWr
     canvas.AttachPen(paint);
     PaintDoubleBorderWithArrow(canvas, paintWrapper);
     canvas.DetachPen();
+}
+
+std::pair<std::vector<uint32_t>, std::vector<float>> BubblePaintMethod::BorderLinearGradientColors(
+    std::vector<PopupGradientColor> popupBorderGradientColor)
+{
+    std::vector<uint32_t> colorQuads;
+    std::vector<float> positions;
+    if (!popupBorderGradientColor.empty()) {
+        for (auto it = popupBorderGradientColor.begin(); it != popupBorderGradientColor.end(); ++it) {
+            auto colorItem = it->gradientColor;
+            auto numberItem = it->gradientNumber;
+            colorQuads.push_back(colorItem.GetValue());
+            positions.push_back(static_cast<float>(numberItem));
+        }
+    }
+    return std::make_pair(colorQuads, positions);
+}
+
+std::vector<RSPoint> CalculateGradientPoints(GradientDirection direction,
+    float topLeftX, float topLeftY, float width, float height)
+{
+    auto halfWidth = width / 2;
+    auto halfHeight = height / 2;
+    RSPoint startPoint(topLeftX + halfWidth, topLeftY);
+    RSPoint endPoint(topLeftX + halfWidth, topLeftY + height);
+    switch (direction) {
+        case GradientDirection::LEFT:
+            startPoint = RSPoint(topLeftX + width, topLeftY + halfHeight);
+            endPoint = RSPoint(topLeftX, topLeftY + halfHeight);
+            break;
+        case GradientDirection::TOP:
+            startPoint = RSPoint(topLeftX + halfWidth, topLeftY + height);
+            endPoint = RSPoint(topLeftX + halfWidth, topLeftY);
+            break;
+        case GradientDirection::RIGHT:
+            startPoint = RSPoint(topLeftX, topLeftY + halfHeight);
+            endPoint = RSPoint(topLeftX + width, topLeftY + halfHeight);
+            break;
+        case GradientDirection::BOTTOM:
+            startPoint = RSPoint(topLeftX + halfWidth, topLeftY);
+            endPoint = RSPoint(topLeftX + halfWidth, topLeftY + height);
+            break;
+        case GradientDirection::LEFT_TOP:
+            startPoint = RSPoint(topLeftX + width, topLeftY + height);
+            endPoint = RSPoint(0, 0);
+            break;
+        case GradientDirection::LEFT_BOTTOM:
+            startPoint = RSPoint(topLeftX + width, topLeftY);
+            endPoint = RSPoint(topLeftX, topLeftY + height);
+            break;
+        case GradientDirection::RIGHT_TOP:
+            startPoint = RSPoint(topLeftX, topLeftY + height);
+            endPoint = RSPoint(topLeftX + width, topLeftY);
+            break;
+        case GradientDirection::RIGHT_BOTTOM:
+            startPoint = RSPoint(topLeftX, topLeftY);
+            endPoint = RSPoint(topLeftX + width, topLeftY + height);
+            break;
+        case GradientDirection::NONE:
+            startPoint = RSPoint(topLeftX, topLeftY);
+            endPoint = RSPoint(topLeftX, topLeftY);
+            break;
+        default:
+            break;
+    }
+    return std::vector<RSPoint>{startPoint, endPoint};
+}
+
+std::vector<RSPoint> BubblePaintMethod::BorderLinearGradientPoint(int popupInnerBorderDirectionInt)
+{
+    GradientDirection direction = static_cast<GradientDirection>(popupInnerBorderDirectionInt);
+    auto topLeftX = childOffset_.GetX();
+    auto topLeftY = childOffset_.GetY();
+    auto width = childSize_.Width();
+    auto height = childSize_.Height();
+    std::vector<RSPoint> points = CalculateGradientPoints(direction, topLeftX,
+        topLeftY, width, height);
+    return points;
 }
 
 void BubblePaintMethod::ClipBubble(PaintWrapper* paintWrapper)

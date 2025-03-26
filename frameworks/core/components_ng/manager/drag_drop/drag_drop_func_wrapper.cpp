@@ -626,7 +626,7 @@ bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
         SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    return container->IsFreeMultiWindow();
+    return container->IsFreeMultiWindow() || container->IsUIExtensionWindow();
 }
 
 OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)
@@ -1448,5 +1448,32 @@ bool DragDropFuncWrapper::IsTextCategoryComponent(const std::string& frameTag)
     return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
            frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG ||
            frameTag == V2::RICH_EDITOR_ETS_TAG;
+}
+
+RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
+    const RefPtr<PipelineBase>& context, const RefPtr<PipelineBase>& nodeContext,
+    const RefPtr<Subwindow>& subWindow, bool isExpandDisplay, int32_t instanceId)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    auto nodePipeline = AceType::DynamicCast<PipelineContext>(nodeContext);
+    CHECK_NULL_RETURN(nodePipeline, dragDropManager);
+    if (nodePipeline == pipeline || isExpandDisplay) {
+        return dragDropManager;
+    }
+    auto mainContainerId = instanceId >= MIN_SUBCONTAINER_ID ?
+        SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
+    auto container = Container::GetContainer(mainContainerId);
+    CHECK_NULL_RETURN(container, dragDropManager);
+    if (!container->IsScenceBoardWindow()) {
+        return dragDropManager;
+    }
+    CHECK_NULL_RETURN(subWindow, dragDropManager);
+    subWindow->SetWindowTouchable(false);
+    auto pixelMapOffset = dragDropManager->GetPixelMapOffset();
+    dragDropManager = nodePipeline->GetDragDropManager();
+    dragDropManager->SetPixelMapOffset(pixelMapOffset);
+    return dragDropManager;
 }
 } // namespace OHOS::Ace::NG

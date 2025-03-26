@@ -161,6 +161,21 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
             hoverRectHeight, hoverRectHeight);
     }
 }
+
+void TextInputResponseArea::SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight)
+{
+    auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
+    auto hotZoneY = - (hotZoneHeight - iconSize) / HALF_SPACE;
+
+    OffsetF hotZoneOffset;
+    hotZoneOffset.SetX(hotZoneX);
+    hotZoneOffset.SetY(hotZoneY);
+    SizeF hotZoneSize;
+    hotZoneSize.SetWidth(hotZoneHeight);
+    hotZoneSize.SetHeight(hotZoneHeight);
+    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
+    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+}
 // TextInputResponseArea end
 
 // PasswordResponseArea begin
@@ -248,23 +263,18 @@ void PasswordResponseArea::AddIconHotZoneRect()
     auto stackRect = stackGeometryNode->GetFrameRect();
 
     auto iconSize = stackRect.Width() - GetIconRightOffset();
-    auto hotZoneHeight = DEFAULT_ICON_HOT_ZONE.ConvertToPx();
+    auto hotZoneHeight = static_cast<float>(DEFAULT_ICON_HOT_ZONE.ConvertToPx());
     hotZoneHeight = passwordHoverSize_ > hotZoneHeight ? passwordHoverSize_ : hotZoneHeight;
-    auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
-    auto hotZoneY = - (hotZoneHeight - iconSize) / HALF_SPACE;
-
-    OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(hotZoneX);
-    hotZoneOffset.SetY(hotZoneY);
-    SizeF hotZoneSize;
-    hotZoneSize.SetWidth(hotZoneHeight);
-    hotZoneSize.SetHeight(hotZoneHeight);
     DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
-    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+    SetHotZoneRect(hotZoneRegion, iconSize, hotZoneHeight);
+
+    auto defaultHoverSize = static_cast<float>(DEFAULT_HOVER_SIZE.ConvertToPx());
+    auto mouseHotZoneHeight = NearZero(passwordHoverSize_) ? defaultHoverSize : passwordHoverSize_;
+    DimensionRect mouseHotZoneRegion;
+    SetHotZoneRect(mouseHotZoneRegion, iconSize, mouseHotZoneHeight);
 
     std::vector<DimensionRect> mouseRegion;
-    mouseRegion.emplace_back(hotZoneRegion);
+    mouseRegion.emplace_back(mouseHotZoneRegion);
 
     auto stackGestureHub = stackNode_->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(stackGestureHub);
@@ -293,6 +303,7 @@ void PasswordResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
     auto maxHoverRectHeight = iconSize + DOUBLE_PADDING * GetIconRightOffset();
     hoverRectHeight = hoverRectHeight > maxHoverRectHeight ? maxHoverRectHeight : hoverRectHeight;
     passwordHoverSize_ = hoverRectHeight;
+    hoverIconPadding_ = (hoverRectHeight - iconSize) / HALF_SPACE;
     RectF rect;
     SetHoverRect(stackNode_, rect, iconSize, hoverRectHeight, isFocus);
     paintRect.SetRect(rect);
@@ -764,24 +775,24 @@ void CleanNodeResponseArea::AddIconHotZoneRect()
         return;
     }
     CHECK_NULL_VOID(cleanNode_);
-    auto iconSize = GetIconSize();
-    auto hotZoneHeight = DEFAULT_ICON_HOT_ZONE.ConvertToPx();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
+    auto iconSize = imageRect.Height();
+    auto hotZoneHeight = static_cast<float>(DEFAULT_ICON_HOT_ZONE.ConvertToPx());
     hotZoneHeight = cancelHoverSize_ > hotZoneHeight ? cancelHoverSize_ : hotZoneHeight;
-    auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
-    auto hotZoneY = - (hotZoneHeight - iconSize) / HALF_SPACE;
-
-    OffsetF hotZoneOffset;
-    hotZoneOffset.SetX(hotZoneX);
-    hotZoneOffset.SetY(hotZoneY);
-    SizeF hotZoneSize;
-    hotZoneSize.SetWidth(hotZoneHeight);
-    hotZoneSize.SetHeight(hotZoneHeight);
     DimensionRect hotZoneRegion;
-    hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize.Width()), Dimension(hotZoneSize.Height())));
-    hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset.GetX()), Dimension(hotZoneOffset.GetY())));
+    SetHotZoneRect(hotZoneRegion, iconSize, hotZoneHeight);
+
+    auto defaultHoverSize = static_cast<float>(DEFAULT_HOVER_SIZE.ConvertToPx());
+    auto mouseHotZoneHeight = NearZero(cancelHoverSize_) ? defaultHoverSize : cancelHoverSize_;
+    DimensionRect mouseHotZoneRegion;
+    SetHotZoneRect(mouseHotZoneRegion, iconSize, mouseHotZoneHeight);
 
     std::vector<DimensionRect> mouseRegion;
-    mouseRegion.emplace_back(hotZoneRegion);
+    mouseRegion.emplace_back(mouseHotZoneRegion);
 
     auto stackGestureHub = cleanNode_->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(stackGestureHub);
@@ -829,6 +840,7 @@ void CleanNodeResponseArea::CreateIconRect(RoundRect& paintRect, bool isFocus)
     auto maxHoverRectHeight = iconSize + DOUBLE_PADDING * GetCancelButtonPadding(theme);
     hoverRectHeight = hoverRectHeight > maxHoverRectHeight ? maxHoverRectHeight : hoverRectHeight;
     cancelHoverSize_ = hoverRectHeight;
+    hoverIconPadding_ = (hoverRectHeight - iconSize) / HALF_SPACE;
     RectF rect;
     SetHoverRect(cleanNode_, rect, iconSize, hoverRectHeight, isFocus);
     paintRect.SetRect(rect);

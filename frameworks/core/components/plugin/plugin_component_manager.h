@@ -21,8 +21,13 @@
 #include <unordered_set>
 
 #include "bundlemgr/bundle_mgr_interface.h"
+#ifdef UI_SERVICE_WITH_IDL
+#include "iu_i_service_new.h"
+#include "ui_service_new_stub.h"
+#else
 #include "ui_service_interface.h"
 #include "ui_service_stub.h"
+#endif
 #include "want.h"
 
 #include "base/json/json_util.h"
@@ -60,7 +65,11 @@ public:
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
 
+#ifdef UI_SERVICE_WITH_IDL
+    class UIServiceListener final : public Ace::UIServiceNewStub {
+#else
     class UIServiceListener final : public Ace::UIServiceStub {
+#endif
     public:
         UIServiceListener() = default;
         ~UIServiceListener()
@@ -71,17 +80,29 @@ public:
 
         void ResgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback, CallBackType callBackType);
         void UnresgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback);
+#ifdef UI_SERVICE_WITH_IDL
+        ErrCode OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
+            const std::string& data, const std::string& extraData) override;
+        ErrCode OnRequestCallBack(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
+        ErrCode OnReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
+            const std::string& extraData) override;
+#else
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
             const std::string& data, const std::string& extraData) override;
         void OnRequestCallBack(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
         void OnReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
             const std::string& extraData) override;
+#endif
         void RequestByJsonPath(const PluginComponentTemplate& pluginTemplate, const std::string& data);
 
     private:
         std::recursive_mutex mutex_;
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType> callbackVec_;
         std::unordered_set<std::shared_ptr<PluginComponentCallBack>> callbacks_;
+
+#ifdef UI_SERVICE_WITH_IDL
+        DISALLOW_COPY_AND_MOVE(UIServiceListener);
+#endif
     };
 
 private:

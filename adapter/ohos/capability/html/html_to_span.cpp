@@ -199,8 +199,10 @@ Dimension HtmlToSpan::FromString(const std::string& str)
 
     for (int32_t i = static_cast<int32_t>(str.length()) - 1; i >= 0; --i) {
         if (str[i] >= '0' && str[i] <= '9') {
-            value = StringUtils::StringToDouble(str.substr(0, i + 1));
-            auto subStr = str.substr(i + 1);
+            auto startIndex = i + 1;
+            value = StringUtils::StringToDouble(str.substr(0, startIndex));
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(str.length()));
+            auto subStr = str.substr(startIndex);
             if (subStr == "pt") {
                 value = static_cast<int>(value * PT_TO_PX + ROUND_TO_INT);
                 break;
@@ -396,9 +398,10 @@ Color HtmlToSpan::ToSpanColor(const std::string& value)
     std::string color = value;
     std::string tmp = value;
     tmp.erase(std::remove(tmp.begin(), tmp.end(), ' '), tmp.end());
-    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ?
+    auto regStr = Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) ?
         "#[0-9A-Fa-f]{6,8}" : "#[0-9A-Fa-f]{7,8}";
-    if (std::regex_match(tmp, matches, std::regex(regStr))) {
+    constexpr auto tmpLeastLength = 3;
+    if (std::regex_match(tmp, matches, std::regex(regStr)) && tmp.length() >= tmpLeastLength) {
         auto rgb = tmp.substr(1);
         // remove last 2 character rgba -> argb
         rgb.erase(rgb.length() - 2, 2);

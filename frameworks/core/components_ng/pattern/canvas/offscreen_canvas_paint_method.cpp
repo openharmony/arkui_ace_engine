@@ -91,6 +91,11 @@ void OffscreenCanvasPaintMethod::Reset()
     InitBitmap();
 }
 
+TextDirection OffscreenCanvasPaintMethod::GetSystemDirection()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+}
+
 void OffscreenCanvasPaintMethod::UpdateSize(int32_t width, int32_t height)
 {
     width_ = width;

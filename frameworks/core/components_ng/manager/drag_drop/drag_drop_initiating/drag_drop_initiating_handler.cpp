@@ -125,6 +125,7 @@ void DragDropInitiatingHandler::NotifyPullEvent(const DragPointerEvent& dragPoin
 void DragDropInitiatingHandler::NotifyReStartDrag(const GestureEvent& info)
 {
     CHECK_NULL_VOID(initiatingFlow_);
+    initiatingFlow_->InitializeState();
     initiatingFlow_->HandleReStartDrag(info);
 }
 

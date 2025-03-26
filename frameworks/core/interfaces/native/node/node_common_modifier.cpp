@@ -1128,8 +1128,8 @@ void ResetAlign(ArkUINodeHandle node)
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
 }
 
-void SetBackdropBlur(
-    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+    ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     ArkUI_Float32 blur = 0.0f;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1140,7 +1140,9 @@ void SetBackdropBlur(
     BlurOption blurOption;
     blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
     CalcDimension dimensionRadius(blur, DimensionUnit::PX);
-    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackdropBlur(frameNode, dimensionRadius, blurOption, sysOptions);
 }
 
 void ResetBackdropBlur(ArkUINodeHandle node)
@@ -1318,7 +1320,8 @@ void ResetBrightness(ArkUINodeHandle node)
     ViewAbstract::SetBrightness(frameNode, value);
 }
 
-void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1329,7 +1332,9 @@ void SetBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blu
         blur = value;
     }
     CalcDimension dimensionBlur(blur, DimensionUnit::PX);
-    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetFrontBlur(frameNode, dimensionBlur, blurOption, sysOptions);
 }
 
 void ResetBlur(ArkUINodeHandle node)
@@ -1589,7 +1594,7 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
 }
 
 void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1620,7 +1625,9 @@ void SetForegroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[3], Ar
         blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
         fgBlurStyle.blurOption = blurOption;
     }
-    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle, sysOptions);
 }
 
 void ResetForegroundBlurStyle(ArkUINodeHandle node)
@@ -1710,7 +1717,8 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
 }
 
 void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
-    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg)
+    const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
+    ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1746,7 +1754,9 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], Ar
     bgBlurStyle.isValidColor = isValidColor;
     Color inactiveColor(inactiveColorArg);
     bgBlurStyle.inactiveColor = inactiveColor;
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
 ArkUIBlurStyleOptionType GetBackgroundBlurStyle(ArkUINodeHandle node)
@@ -2345,44 +2355,46 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     std::string messageString = message;
     tipsParam->SetMessage(messageString);
+    tipsParam->SetShowInSubWindow(true);
     tipsParam->SetAppearingTime(timeOptions.appearingTime);
     tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
     tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
-    if (arrowOptions.arrowPointPosition) {
-        CalcDimension offset;
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
         if (pEnd != nullptr) {
             if (std::strcmp(pEnd, "Start") == 0) {
-                offset = ARROW_ZERO_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ZERO_PERCENT);
             }
             if (std::strcmp(pEnd, "Center") == 0) {
-                offset = ARROW_HALF_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_HALF_PERCENT);
             }
             if (std::strcmp(pEnd, "End") == 0) {
-                offset = ARROW_ONE_HUNDRED_PERCENT;
+                tipsParam->SetArrowOffset(ARROW_ONE_HUNDRED_PERCENT);
             }
-            tipsParam->SetArrowOffset(offset);
         }
     }
-    CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
-    bool setArrowWidthError = true;
-    if (arrowOptions.arrowWidthValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowWidth(arrowWidth);
-        setArrowWidthError = false;
+    if (arrowOptions.enableArrow) {
+        CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+        bool setArrowWidthError = true;
+        if (arrowOptions.arrowWidthValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowWidth(arrowWidth);
+            setArrowWidthError = false;
+        }
+        tipsParam->SetErrorArrowWidth(setArrowWidthError);
+        CalcDimension arrowHeight(
+            arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+        bool setArrowHeightError = true;
+        if (arrowOptions.arrowHeightValue > 0 &&
+            static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+            tipsParam->SetArrowHeight(arrowHeight);
+            setArrowHeightError = false;
+        }
+        tipsParam->SetErrorArrowHeight(setArrowHeightError);
     }
-    tipsParam->SetErrorArrowWidth(setArrowWidthError);
-    CalcDimension arrowHeight(arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
-    bool setArrowHeightError = true;
-    if (arrowOptions.arrowHeightValue > 0 &&
-        static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
-        tipsParam->SetArrowHeight(arrowHeight);
-        setArrowHeightError = false;
-    }
-    tipsParam->SetErrorArrowHeight(setArrowHeightError);
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
     ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
@@ -3615,7 +3627,7 @@ void ResetForegroundEffect(ArkUINodeHandle node)
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
-    ArkUI_Uint32 inactiveColorArg)
+    ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -3641,7 +3653,9 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     Color inactiveColor(inactiveColorArg);
     option.inactiveColor = inactiveColor;
     option.isValidColor = isValidColor;
-    ViewAbstract::SetBackgroundEffect(frameNode, option);
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    ViewAbstract::SetBackgroundEffect(frameNode, option, sysOptions);
 }
 
 void ResetBackgroundEffect(ArkUINodeHandle node)

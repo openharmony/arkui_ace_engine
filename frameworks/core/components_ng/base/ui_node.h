@@ -36,7 +36,6 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_event.h"
 
@@ -117,6 +116,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+
+    // Return value: 0 indicates successful execution, non - zero indicates failed execution.
+    virtual int32_t OnRecvCommand(const std::string& command) { return 0; }
+
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -149,6 +152,12 @@ public:
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    {
+        return children_;
+    }
+
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
     {
         return children_;
     }
@@ -1011,7 +1020,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 1;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;

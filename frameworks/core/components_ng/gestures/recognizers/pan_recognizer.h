@@ -85,6 +85,11 @@ public:
 
     void HandlePanGestureAccept(
         const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
+    
+    void SetPanEndCallback(const GestureEventFunc& panEndCallback)
+    {
+        panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
+    }
 
 private:
     class PanVelocity {
@@ -132,7 +137,7 @@ private:
     void UpdateTouchEventInfo(const TouchEvent& event);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
@@ -180,6 +185,8 @@ private:
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
     bool isStartTriggered_ = false;
+    // this callback will be triggered when pan end, but the enable state is false
+    std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -232,7 +232,7 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
         CHECK_NULL_VOID(eventHub);
         dragDropManager->SetIsAnyDraggableHit(gestureHub->IsAllowedDrag(eventHub));
     }
-    machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::READY));
+    machine->RequestStatusTransition(static_cast<int32_t>(DragDropInitiatingStatus::READY));
 }
 
 void DragDropInitiatingStateIdle::RegisterDragListener()

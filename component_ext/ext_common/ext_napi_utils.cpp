@@ -23,6 +23,7 @@
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/container.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 namespace {

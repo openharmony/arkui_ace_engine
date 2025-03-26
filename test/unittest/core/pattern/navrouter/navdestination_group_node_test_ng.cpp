@@ -250,15 +250,15 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoTransitionTest004, TestSize.Level1)
 
 /**
  * @tc.name: DoSystemFadeTransition001
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition001, TestSize.Level1)
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -269,15 +269,15 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition001, TestSize.Leve
 
 /**
  * @tc.name: DoSystemFadeTransition002
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = true, eventHub = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = true, eventHub = false
  * @tc.type: FUNC
  */
 HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition002, TestSize.Level1)
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     navDestinationNode->eventHub_ = nullptr;
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationNode->pattern_ = nullptr;
@@ -289,15 +289,15 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition002, TestSize.Leve
 
 /**
  * @tc.name: DoSystemFadeTransition003
- * @tc.desc: Branch: if (!canReused_ && eventHub) = true
- *           Condition: !canReused_ = true, eventHub = true
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = true
+ *           Condition: !inCurrentStack_ = true, eventHub = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition003, TestSize.Level1)
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -308,8 +308,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemFadeTransition003, TestSize.Leve
 
 /**
  * @tc.name: DoSystemSlideTransition001
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = false
  *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = false
  * @tc.type: FUNC
  */
@@ -317,7 +317,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition001, TestSize.Lev
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -332,8 +332,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition001, TestSize.Lev
 
 /**
  * @tc.name: DoSystemSlideTransition002
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = true, eventHub = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = true, eventHub = false
  *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = true
  *           Branch: if (!isEnter) = false
  *           Branch: if (!isEnter) = false
@@ -343,7 +343,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition002, TestSize.Lev
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     navDestinationNode->eventHub_ = nullptr;
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationNode->pattern_ = nullptr;
@@ -360,8 +360,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition002, TestSize.Lev
 
 /**
  * @tc.name: DoSystemSlideTransition003
- * @tc.desc: Branch: if (!canReused_ && eventHub) = true
- *           Condition: !canReused_ = true, eventHub = true
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = true
+ *           Condition: !inCurrentStack_ = true, eventHub = true
  *           Branch: if ((operation == NavigationOperation::POP) ^ isEnter) = true
  *           Branch: if (!isEnter) = true
  *           Branch: if (!isEnter) = true
@@ -371,7 +371,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -389,8 +389,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemSlideTransition003, TestSize.Lev
 
 /**
  * @tc.name: DoSystemEnterExplodeTransition001
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = false
  *           Branch: if (operation == NavigationOperation::POP) = false
  * @tc.type: FUNC
  */
@@ -398,7 +398,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition001, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -413,8 +413,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition001, TestS
 
 /**
  * @tc.name: DoSystemEnterExplodeTransition002
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = true, eventHub = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = true, eventHub = false
  *           Branch: if (operation == NavigationOperation::POP) = true
  * @tc.type: FUNC
  */
@@ -422,7 +422,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition002, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     navDestinationNode->eventHub_ = nullptr;
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationNode->pattern_ = nullptr;
@@ -438,8 +438,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition002, TestS
 
 /**
  * @tc.name: DoSystemEnterExplodeTransition003
- * @tc.desc: Branch: if (!canReused_ && eventHub) = true
- *           Condition: !canReused_ = true, eventHub = true
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = true
+ *           Condition: !inCurrentStack_ = true, eventHub = true
  *           Branch: if (operation == NavigationOperation::POP) = true
  * @tc.type: FUNC
  */
@@ -447,7 +447,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition003, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -462,8 +462,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemEnterExplodeTransition003, TestS
 
 /**
  * @tc.name: DoSystemExitExplodeTransition001
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = false
  *           Branch: if (operation == NavigationOperation::POP) = false
  * @tc.type: FUNC
  */
@@ -471,7 +471,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition001, TestSi
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -486,8 +486,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition001, TestSi
 
 /**
  * @tc.name: DoSystemExitExplodeTransition002
- * @tc.desc: Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = true, eventHub = false
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = true, eventHub = false
  *           Branch: if (operation == NavigationOperation::POP) = true
  * @tc.type: FUNC
  */
@@ -495,7 +495,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition002, TestSi
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     navDestinationNode->eventHub_ = nullptr;
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationNode->pattern_ = nullptr;
@@ -511,8 +511,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition002, TestSi
 
 /**
  * @tc.name: DoSystemExitExplodeTransition003
- * @tc.desc: Branch: if (!canReused_ && eventHub) = true
- *           Condition: !canReused_ = true, eventHub = true
+ * @tc.desc: Branch: if (!inCurrentStack_ && eventHub) = true
+ *           Condition: !inCurrentStack_ = true, eventHub = true
  *           Branch: if (operation == NavigationOperation::POP) = false
  * @tc.type: FUNC
  */
@@ -520,7 +520,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoSystemExitExplodeTransition003, TestSi
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     auto eventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     eventHub->SetEnabledInternal(true);
@@ -543,7 +543,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation001, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     NavDestinationTransition navDestinationTransition;
     navDestinationTransition.event = []() { };
     navDestinationTransition.onTransitionEnd = []() { };
@@ -566,7 +566,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation002, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     NavDestinationTransition navDestinationTransition;
     navDestinationTransition.event = []() { };
     navDestinationTransition.onTransitionEnd = []() { };
@@ -590,7 +590,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation003, TestS
 {
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     NavDestinationTransition navDestinationTransition;
     navDestinationTransition.event = []() { };
     navDestinationTransition.onTransitionEnd = []() { };
@@ -626,7 +626,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, StartCustomTransitionAnimation004, TestS
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     navigationPattern->SetNavigationStack(navigationStack);
     navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     NavDestinationTransition navDestinationTransition;
     navDestinationTransition.event = []() { };
     navDestinationTransition.onTransitionEnd = []() { };
@@ -655,7 +655,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback001, TestSi
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navDestinationNode->SetIsOnAnimation(true);
-    navDestinationNode->SetCanReused(true);
+    navDestinationNode->SetInCurrentStack(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
     ASSERT_NE(navDestinationRenderContext, nullptr);
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
@@ -673,7 +673,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback001, TestSi
  * @tc.desc: Branch: if (extraOption) = true
  *           Branch: if (animationId != navDestination->GetAnimationId()) = false
  *           Branch: if (isSystemTransition) = true
- *           Branch: if (!navDestination->GetCanReused()) = false
+ *           Branch: if (!navDestination->SetInCurrentStack()) = false
  *           Branch: if (navDestination->HasStandardBefore()) = true
  * @tc.type: FUNC
  */
@@ -693,7 +693,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback002, TestSi
     navDestinationNode->index_ = 0;
     navigationNode->lastStandardIndex_ = 1;
     navDestinationNode->SetIsOnAnimation(true);
-    navDestinationNode->SetCanReused(true);
+    navDestinationNode->SetInCurrentStack(true);
     auto navDestinationRenderContext = AceType::DynamicCast<MockRenderContext>(navDestinationNode->GetRenderContext());
     ASSERT_NE(navDestinationRenderContext, nullptr);
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
@@ -715,7 +715,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback002, TestSi
 /**
  * @tc.name: BuildTransitionFinishCallback003
  * @tc.desc: Branch: if (animationId != navDestination->GetAnimationId()) = false
- *           Branch: if (!navDestination->GetCanReused()) = true
+ *           Branch: if (!navDestination->SetInCurrentStack()) = true
  * @tc.type: FUNC
  */
 HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback003, TestSize.Level1)
@@ -733,7 +733,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback003, TestSi
     navDestinationPattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigationNode));
     navDestinationNode->index_ = 0;
     navigationNode->lastStandardIndex_ = 1;
-    navDestinationNode->SetCanReused(false);
+    navDestinationNode->SetInCurrentStack(false);
     navDestinationNode->SetIsOnAnimation(true);
 
     auto finish = navDestinationNode->BuildTransitionFinishCallback(true, [] () {});
@@ -965,8 +965,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition001, TestSize.Level1)
 /**
  * @tc.name: DoCustomTransition002
  * @tc.desc: Branch: if (!delegate) = false
- *           Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = false
+ *           Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = false
  *           Branch: if (!allTransitions.has_value()) = true
  * @tc.type: FUNC
  */
@@ -977,7 +977,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition002, TestSize.Level1)
     navDestinationNode->navDestinationTransitionDelegate_ = [](NavigationOperation operation, bool isEnter) {
         return std::nullopt;
     };
-    navDestinationNode->canReused_ = true;
+    navDestinationNode->inCurrentStack_ = true;
     auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationEventHub->SetEnabledInternal(true);
@@ -990,8 +990,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition002, TestSize.Level1)
 /**
  * @tc.name: DoCustomTransition003
  * @tc.desc: Branch: if (!delegate) = false
- *           Branch: if (!canReused_ && eventHub) = false
- *           Condition: !canReused_ = true, eventHub = false
+ *           Branch: if (!inCurrentStack_ && eventHub) = false
+ *           Condition: !inCurrentStack_ = true, eventHub = false
  *           Branch: if (!allTransitions.has_value()) = false
  *           Branch: if (transition.duration + transition.delay > longestAnimationDuration) = true
  *           Branch: if (longestAnimationDuration != INT32_MIN) = true
@@ -1013,7 +1013,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition003, TestSize.Level1)
         allTransitions.emplace_back(transition);
         return allTransitions;
     };
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     navDestinationNode->eventHub_ = nullptr;
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     navDestinationNode->pattern_ = nullptr;
@@ -1027,8 +1027,8 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition003, TestSize.Level1)
 /**
  * @tc.name: DoCustomTransition004
  * @tc.desc: Branch: if (!delegate) = false
- *           Branch: if (!canReused_ && eventHub) = true
- *           Condition: !canReused_ = true, eventHub = true
+ *           Branch: if (!inCurrentStack_ && eventHub) = true
+ *           Condition: !inCurrentStack_ = true, eventHub = true
  *           Branch: if (!allTransitions.has_value()) = false
  *           Branch: if (transition.duration + transition.delay > longestAnimationDuration) = false
  *           Branch: if (longestAnimationDuration != INT32_MIN) = false
@@ -1059,7 +1059,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, DoCustomTransition004, TestSize.Level1)
         allTransitions.emplace_back(transition);
         return allTransitions;
     };
-    navDestinationNode->canReused_ = false;
+    navDestinationNode->inCurrentStack_ = false;
     auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
     ASSERT_NE(navDestinationEventHub, nullptr);
     navDestinationNode->animationId_ = 0;

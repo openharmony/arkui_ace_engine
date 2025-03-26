@@ -361,6 +361,7 @@ private:
     int32_t labelId_;
     static bool isComponentMode_;
     std::string containerSdkPath_;
+    friend class WindowFreeContainer;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

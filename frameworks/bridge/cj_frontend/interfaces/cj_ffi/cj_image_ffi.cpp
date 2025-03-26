@@ -228,13 +228,24 @@ void FfiOHOSAceFrameworkImageDraggable(bool value)
     ImageModel::GetInstance()->SetDraggable(value);
 }
 
+void FfiOHOSAceFrameworkImageOnErrorV2(void (*callback)(CJImageErrorV2 errorInfo))
+{
+    auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
+        CJImageErrorV2 ffiErrorInfo {};
+        ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
+        ffiOnError(ffiErrorInfo);
+    };
+    ImageModel::GetInstance()->SetOnError(onError);
+}
+
 void FfiOHOSAceFrameworkImageOnError(void (*callback)(CJImageError errorInfo))
 {
     auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
         CJImageError ffiErrorInfo {};
         ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
         ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
-        ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();
         ffiOnError(ffiErrorInfo);
     };
     ImageModel::GetInstance()->SetOnError(onError);
@@ -248,10 +259,10 @@ void FfiOHOSAceFrameworkImageOnFinish(void (*callback)())
     ImageModel::GetInstance()->SetSvgAnimatorFinishEvent(onFinish);
 }
 
-void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete completeInfo))
+void FfiOHOSAceFrameworkImageOnCompleteV2(void (*callback)(CJImageCompleteV2 completeInfo))
 {
     auto onComplete = [ffiOnComplete = CJLambda::Create(callback)](const LoadImageSuccessEvent& newInfo) -> void {
-        CJImageComplete ffiCompleteInfo {};
+        CJImageCompleteV2 ffiCompleteInfo {};
         ffiCompleteInfo.width = newInfo.GetWidth();
         ffiCompleteInfo.height = newInfo.GetHeight();
         ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
@@ -261,6 +272,20 @@ void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete complet
         ffiCompleteInfo.contentHeight = newInfo.GetContentHeight();
         ffiCompleteInfo.contentOffsetX = newInfo.GetContentOffsetX();
         ffiCompleteInfo.contentOffsetY = newInfo.GetContentOffsetY();
+        ffiOnComplete(ffiCompleteInfo);
+    };
+    ImageModel::GetInstance()->SetOnComplete(onComplete);
+}
+
+void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete completeInfo))
+{
+    auto onComplete = [ffiOnComplete = CJLambda::Create(callback)](const LoadImageSuccessEvent& newInfo) -> void {
+        CJImageComplete ffiCompleteInfo {};
+        ffiCompleteInfo.width = newInfo.GetWidth();
+        ffiCompleteInfo.height = newInfo.GetHeight();
+        ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
+        ffiCompleteInfo.componentHeight = newInfo.GetComponentHeight();
+        ffiCompleteInfo.loadingStatus = newInfo.GetLoadingStatus();
         ffiOnComplete(ffiCompleteInfo);
     };
     ImageModel::GetInstance()->SetOnComplete(onComplete);

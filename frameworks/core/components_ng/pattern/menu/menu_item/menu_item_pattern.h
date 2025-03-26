@@ -308,7 +308,6 @@ public:
     // XTS inspector functions
     std::string InspectorGetFont();
     float GetSelectOptionWidth();
-    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     inline void SetIcon(const std::string& src)
     {
@@ -412,15 +411,6 @@ public:
     }
     void AttachBottomDivider();
     void RemoveBottomDivider();
-    inline void SetLabelActiveSetting(bool active)
-    {
-        labelActiveSetting_ = active;
-    }
-
-    inline void SetContentActiveSetting(bool active)
-    {
-        contentActiveSetting_ = active;
-    }
 
 protected:
     void RegisterOnKeyEvent();
@@ -465,8 +455,7 @@ private:
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
     void UpdateDisabledStyle();
-    bool UpdateFontColorByThemeScope(
-        const RefPtr<FrameNode>& node, bool activeSetting, const std::optional<Color>& fontColor, bool isLabel);
+
     void ShowSubMenu(ShowSubMenuType type = ShowSubMenuType::DEFAULT);
     RefPtr<UINode> BuildSubMenuCustomNode();
     RefPtr<FrameNode> GetSubMenu(RefPtr<UINode>& customNode);
@@ -594,8 +583,6 @@ private:
     bool isOptionPattern_ = false;  // if it is OptionPattern
     bool isSelectOption_ = false;
     bool isWidthModifiedBySelect_ = false;
-    bool labelActiveSetting_ = false;
-    bool contentActiveSetting_ = false;
 
     bool isFocused_ = false;
     bool isFocusShadowSet_ = false;

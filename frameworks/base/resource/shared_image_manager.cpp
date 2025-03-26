@@ -142,8 +142,10 @@ void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
 bool SharedImageManager::FindImageInSharedImageMap(
     const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
 {
+    LOGD("find image %{public}s in SharedImageMap", name.c_str());
     auto loader = providerWp.Upgrade();
     if (!loader) {
+        LOGW("image %{public}s loader nullptr", name.c_str());
         return false;
     }
     std::lock_guard<std::mutex> lockImageMap(sharedImageMapMutex_);

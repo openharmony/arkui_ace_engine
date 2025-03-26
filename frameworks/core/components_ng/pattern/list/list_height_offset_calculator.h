@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -189,7 +190,11 @@ public:
 
     void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
         int32_t count = node->FrameCount();
+        if (repeat2) {
+            count = repeat2->GetTotalCount();
+        }
         if (count <= 0) {
             return;
         }

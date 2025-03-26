@@ -949,7 +949,7 @@ public:
     {
         return false;
     }
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return false;
     }
@@ -5074,5 +5074,50 @@ HWTEST_F(WebSelectOverlayTest, OnHandleGlobalTouchEvent_001, TestSize.Level1)
     sourceType = SourceType::NONE;
     touchType = TouchType::UNKNOWN;
     overlay.OnHandleGlobalTouchEvent(sourceType, touchType);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuOptions
+ * @tc.desc: Test function UpdateSelectMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptions, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    WebSelectOverlay overlay(textBase);
+    overlay.webSelectInfo_.menuInfo.showTranslate = true;
+    overlay.webSelectInfo_.menuInfo.showSearch = true;
+    overlay.UpdateSelectMenuOptions();
+    EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showTranslate);
+    EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showSearch);
+}
+
+/**
+ * @tc.name: OnMenuItemActionTest006
+ * @tc.desc: Test function OnMenuItemAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest006, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebSelectOverlay overlay(textBase);
+    overlay.startSelectionHandle_ = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMock>();
+    std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback =
+        std::make_shared<OHOS::NWeb::NWebQuickMenuCallbackMock>();
+    overlay.quickMenuCallback_ = callback;
+    overlay.OnMenuItemAction(OptionMenuActionId::TRANSLATE, OptionMenuType::TOUCH_MENU);
+    EXPECT_FALSE(overlay.startSelectionHandle_);
+    overlay.endSelectionHandle_ = std::make_shared<OHOS::NWeb::NWebTouchHandleStateMock>();
+    overlay.quickMenuCallback_ = callback;
+    overlay.OnMenuItemAction(OptionMenuActionId::SEARCH, OptionMenuType::TOUCH_MENU);
+    EXPECT_FALSE(overlay.endSelectionHandle_);
 }
 } // namespace OHOS::Ace::NG

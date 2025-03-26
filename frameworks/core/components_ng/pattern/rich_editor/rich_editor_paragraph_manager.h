@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/base/distributed_ui.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,8 +52,7 @@ public:
         if (!hasPosyRange) {
             CalPosyRange();
         }
-        auto& lastParagraph = paragraphs_.back();
-        return lastParagraph.bottomPos - lastParagraph.paragraphStyle.paragraphSpacing.ConvertToPx();
+        return paragraphs_.back().bottomPos;
     }
 
     void CalPosyRange()

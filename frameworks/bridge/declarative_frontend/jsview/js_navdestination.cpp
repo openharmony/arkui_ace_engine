@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
@@ -69,6 +70,51 @@ constexpr int32_t JS_ENUM_TRANSITIONTYPE_EXPLODE = 5;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_RIGHT = 6;
 constexpr int32_t JS_ENUM_TRANSITIONTYPE_SLIDE_BOTTOM = 7;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
+
+// sources in js_window_utils.h
+enum class ApiOrientation : uint32_t {
+    BEGIN = 0,
+    UNSPECIFIED = BEGIN,
+    PORTRAIT = 1,
+    LANDSCAPE = 2,
+    PORTRAIT_INVERTED = 3,
+    LANDSCAPE_INVERTED = 4,
+    AUTO_ROTATION = 5,
+    AUTO_ROTATION_PORTRAIT = 6,
+    AUTO_ROTATION_LANDSCAPE = 7,
+    AUTO_ROTATION_RESTRICTED = 8,
+    AUTO_ROTATION_PORTRAIT_RESTRICTED = 9,
+    AUTO_ROTATION_LANDSCAPE_RESTRICTED = 10,
+    LOCKED = 11,
+    AUTO_ROTATION_UNSPECIFIED = 12,
+    USER_ROTATION_PORTRAIT = 13,
+    USER_ROTATION_LANDSCAPE = 14,
+    USER_ROTATION_PORTRAIT_INVERTED = 15,
+    USER_ROTATION_LANDSCAPE_INVERTED = 16,
+    FOLLOW_DESKTOP = 17,
+    END = FOLLOW_DESKTOP,
+};
+
+const std::map<ApiOrientation, Orientation> JS_TO_NATIVE_ORIENTATION_MAP {
+    {ApiOrientation::UNSPECIFIED,                           Orientation::UNSPECIFIED                        },
+    {ApiOrientation::PORTRAIT,                              Orientation::VERTICAL                           },
+    {ApiOrientation::LANDSCAPE,                             Orientation::HORIZONTAL                         },
+    {ApiOrientation::PORTRAIT_INVERTED,                     Orientation::REVERSE_VERTICAL                   },
+    {ApiOrientation::LANDSCAPE_INVERTED,                    Orientation::REVERSE_HORIZONTAL                 },
+    {ApiOrientation::AUTO_ROTATION,                         Orientation::SENSOR                             },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT,                Orientation::SENSOR_VERTICAL                    },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE,               Orientation::SENSOR_HORIZONTAL                  },
+    {ApiOrientation::AUTO_ROTATION_RESTRICTED,              Orientation::AUTO_ROTATION_RESTRICTED           },
+    {ApiOrientation::AUTO_ROTATION_PORTRAIT_RESTRICTED,     Orientation::AUTO_ROTATION_PORTRAIT_RESTRICTED  },
+    {ApiOrientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED,    Orientation::AUTO_ROTATION_LANDSCAPE_RESTRICTED },
+    {ApiOrientation::LOCKED,                                Orientation::LOCKED                             },
+    {ApiOrientation::AUTO_ROTATION_UNSPECIFIED,             Orientation::AUTO_ROTATION_UNSPECIFIED          },
+    {ApiOrientation::USER_ROTATION_PORTRAIT,                Orientation::USER_ROTATION_PORTRAIT             },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE,               Orientation::USER_ROTATION_LANDSCAPE            },
+    {ApiOrientation::USER_ROTATION_PORTRAIT_INVERTED,       Orientation::USER_ROTATION_PORTRAIT_INVERTED    },
+    {ApiOrientation::USER_ROTATION_LANDSCAPE_INVERTED,      Orientation::USER_ROTATION_LANDSCAPE_INVERTED   },
+    {ApiOrientation::FOLLOW_DESKTOP,                        Orientation::FOLLOW_DESKTOP                     },
+};
 
 NG::NavigationSystemTransitionType ParseTransitionType(int32_t value)
 {
@@ -703,6 +749,9 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("bindToNestedScrollable", &JSNavDestination::BindToNestedScrollable);
     JSClass<JSNavDestination>::StaticMethod("customTransition", &JSNavDestination::SetCustomTransition);
     JSClass<JSNavDestination>::StaticMethod("onNewParam", &JSNavDestination::SetOnNewParam);
+    JSClass<JSNavDestination>::StaticMethod("preferredOrientation", &JSNavDestination::SetPreferredOrientation);
+    JSClass<JSNavDestination>::StaticMethod("enableStatusBar", &JSNavDestination::EnableStatusBar);
+    JSClass<JSNavDestination>::StaticMethod("enableNavigationIndicator", &JSNavDestination::EnableNavigationIndicator);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -805,5 +854,40 @@ void JSNavDestination::SetOnNewParam(const JSCallbackInfo& info)
     };
     NavDestinationModel::GetInstance()->SetOnNewParam(std::move(onNewParamCallback));
     info.ReturnSelf();
+}
+
+void JSNavDestination::SetPreferredOrientation(const JSCallbackInfo& info)
+{
+    std::optional<Orientation> orientation;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto ori = info[0]->ToNumber<int32_t>();
+        if (ori >= static_cast<int32_t>(ApiOrientation::BEGIN) && ori <= static_cast<int32_t>(ApiOrientation::END)) {
+            orientation = JS_TO_NATIVE_ORIENTATION_MAP.at(static_cast<ApiOrientation>(ori));
+        }
+    }
+    NavDestinationModel::GetInstance()->SetPreferredOrientation(orientation);
+}
+
+void JSNavDestination::EnableStatusBar(const JSCallbackInfo& info)
+{
+    std::optional<std::pair<bool, bool>> statusBar;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        bool enable = info[0]->ToBoolean();
+        bool animated = false;
+        if (info.Length() > 1 && info[1]->IsBoolean()) {
+            animated = info[1]->ToBoolean();
+        }
+        statusBar = std::make_pair(enable, animated);
+    }
+    NavDestinationModel::GetInstance()->SetEnableStatusBar(statusBar);
+}
+
+void JSNavDestination::EnableNavigationIndicator(const JSCallbackInfo& info)
+{
+    std::optional<bool> navigationIndicator;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        navigationIndicator = info[0]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetEnableNavigationIndicator(navigationIndicator);
 }
 } // namespace OHOS::Ace::Framework

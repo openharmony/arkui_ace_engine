@@ -50,6 +50,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/window_free_container.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",

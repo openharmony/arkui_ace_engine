@@ -22,6 +22,8 @@ if (PUV2ViewBase.contextStack === undefined) {
 }
 const curves = requireNativeModule('ohos.curves');
 const hilog = requireNapi('hilog');
+const i18n = requireNapi('i18n');
+
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
@@ -267,16 +269,27 @@ export class ExceptionPrompt extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
-            Text.margin({
-                left: {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.ohos_id_dialog_margin_end'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
-            });
+            Text.margin(i18n.isRTL(i18n.System.getSystemLanguage()) ?
+                {
+                    right: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.ohos_id_dialog_margin_end'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                } :
+                {
+                    left: {
+                        'id': -1,
+                        'type': 10002,
+                        params: ['sys.float.ohos_id_dialog_margin_end'],
+                        'bundleName': '__harDefaultBundleName__',
+                        'moduleName': '__harDefaultModuleName__'
+                    }
+                });
             Text.flexShrink(1);
+            Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
         }, Text);
         Text.pop();
         Row.pop();
@@ -336,18 +349,29 @@ export class ExceptionPrompt extends ViewPU {
                         });
                         Text.maxLines(2);
                         Text.padding(0);
-                        Text.margin({
-                            right: {
-                                'id': -1,
-                                'type': 10002,
-                                params: ['sys.float.ohos_id_text_paragraph_margin_s'],
-                                'bundleName': '__harDefaultBundleName__',
-                                'moduleName': '__harDefaultModuleName__'
-                            }
-                        });
+                        Text.margin(i18n.isRTL(i18n.System.getSystemLanguage()) ?
+                            {
+                                left: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.ohos_id_text_paragraph_margin_s'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            } :
+                            {
+                                right: {
+                                    'id': -1,
+                                    'type': 10002,
+                                    params: ['sys.float.ohos_id_text_paragraph_margin_s'],
+                                    'bundleName': '__harDefaultBundleName__',
+                                    'moduleName': '__harDefaultModuleName__'
+                                }
+                            });
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.flexShrink(1);
                         Text.textAlign(TextAlign.End);
+                        Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {

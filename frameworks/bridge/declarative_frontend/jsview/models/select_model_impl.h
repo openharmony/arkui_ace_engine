@@ -58,7 +58,7 @@ public:
     void SetSpace(const Dimension& value) override;
     void SetArrowPosition(const ArrowPosition value) override;
     void SetMenuAlign(const MenuAlign& menuAlign) override;
-    void SetAvoidance(const Avoidance& avoidance) override;
+    void SetAvoidance(AvoidanceMode mode) override;
     void SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent) override;
     void SetValueChangeEvent(NG::ValueChangeEvent&& valueChangeEvent) override;
     void SetOptionWidth(const Dimension& value) override;
@@ -75,6 +75,7 @@ public:
     void ResetFontColor() override {};
     void BackgroundColor(const Color& color) override {};
     void ResetBackgroundColor() override {};
+    void SetMenuOutline(const NG::MenuParam& menuParam) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H
