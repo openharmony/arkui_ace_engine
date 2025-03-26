@@ -118,6 +118,13 @@ void GridLayoutProperty::UpdateIrregularFlag(const GridLayoutOptions& layoutOpti
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    if (frontend->GetType() == FrontendType::ARK_TS) {
+        pattern->SetIrregular(true);
+    }
     pattern->SetIrregular(false);
     CHECK_NULL_VOID(layoutOptions.getSizeByIndex);
 

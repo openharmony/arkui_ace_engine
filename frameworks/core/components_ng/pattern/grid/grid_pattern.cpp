@@ -436,10 +436,7 @@ void GridPattern::UpdateOffsetHelper(float offset)
 {
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    if (UpdateOffset(-userOffset) && InRegion(-GetMainContentSize(), 0.0f, userOffset)) {
-        // grid legacy layout would reset offset when items above are not found. skip layout to avoid that.
-        return;
-    }
+    UpdateOffset(-userOffset);
     auto host = GetHost();
     if (host) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

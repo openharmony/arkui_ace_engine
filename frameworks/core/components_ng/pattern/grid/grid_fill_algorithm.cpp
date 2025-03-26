@@ -102,7 +102,7 @@ bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, in
     }
     if (direction == FillDirection::START) {
         range_.AdjustBackward(info_.lineHeightMap_, params_.mainGap, row);
-        return Positive(range_.offset);
+        return GreatNotEqual(range_.offset, params_.mainGap);
     }
 
     range_.endLine = row - 1;
@@ -114,7 +114,7 @@ bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, in
 void GridFillAlgorithm::LayoutRange::AdjustBackward(
     const decltype(info_.lineHeightMap_)& lineHeights, float gap, int32_t firstRow)
 {
-    while (startLine > firstRow && Positive(offset)) {
+    while (startLine > firstRow && GreatNotEqual(offset, gap)) {
         auto height = lineHeights.find(--startLine);
         if (height == lineHeights.end()) {
             LOGW("line heights data is corrupted");
