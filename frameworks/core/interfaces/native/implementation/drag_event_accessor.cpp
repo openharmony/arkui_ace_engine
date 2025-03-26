@@ -127,11 +127,11 @@ void SetDataImpl(Ark_DragEvent peer,
 Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
                             Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(peer->dragInfo, nullptr);
-    auto data = peer->dragInfo->GetData();
-    CHECK_NULL_RETURN(data, nullptr);
     const auto unifiedPeer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
+    CHECK_NULL_RETURN(peer, unifiedPeer);
+    CHECK_NULL_RETURN(peer->dragInfo, unifiedPeer);
+    auto data = peer->dragInfo->GetData();
+    CHECK_NULL_RETURN(data, unifiedPeer);
     unifiedPeer->unifiedData = data;
     return unifiedPeer;
 }
