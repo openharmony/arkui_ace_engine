@@ -443,15 +443,7 @@ bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animatio
     CHECK_NULL_RETURN(preNavDesPattern, false);
 
     // NavRouter will restore the preNavDesNode and needs to set the initial state after the animation ends.
-    if (isNeedCleanContent) {
-        auto shallowBuilder = preNavDesPattern->GetShallowBuilder();
-        if (shallowBuilder && !IsCacheNode()) {
-            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-        }
-        if (!IsCacheNode() && GetContentNode()) {
-            GetContentNode()->Clean();
-        }
-    }
+    CleanContent();
     GetEventHub<EventHub>()->SetEnabledInternal(true);
     GetRenderContext()->RemoveClipWithRRect();
     if (IsNeedContentTransition()) {
@@ -651,7 +643,7 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
     textNodeList_.clear();
 }
 
-void NavDestinationGroupNode::CleanContent()
+void NavDestinationGroupNode::CleanContent(bool cleanDirectly, bool allowTransition)
 {
     // cacheNode is cached for pip info, and is no need to clean when clean content node
     if (IsCacheNode()) {
@@ -664,7 +656,7 @@ void NavDestinationGroupNode::CleanContent()
         shallowBuilder->MarkIsExecuteDeepRenderDone(false);
     }
     if (GetContentNode()) {
-        GetContentNode()->Clean(false, true);
+        GetContentNode()->Clean(cleanDirectly, allowTransition);
     }
 }
 
