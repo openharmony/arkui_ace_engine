@@ -2170,6 +2170,7 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 void XComponentPattern::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    renderFit_ = renderFit;
     handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 
