@@ -137,8 +137,6 @@ public:
             theme->textButtonFontSize_ = buttonPattern->GetAttr<Dimension>("text_button_font_size", 0.0_fp);
             theme->isApplyFontSize_ =
                 static_cast<bool>(buttonPattern->GetAttr<double>("apply_text_font_size", 0.0));
-            theme->cancelText_ = buttonPattern->GetAttr<std::string>("common_cancel_text", "");
-            theme->pasteText_ = buttonPattern->GetAttr<std::string>("textoverlay_paste", "");
             ParseSubStylePattern(buttonPattern, theme);
         }
 
@@ -536,16 +534,6 @@ public:
         return isApplyFontSize_;
     }
 
-    const std::string& GetPasteText() const
-    {
-        return pasteText_;
-    }
-
-    const std::string& GetCancelText() const
-    {
-        return cancelText_;
-    }
-
 protected:
     ButtonTheme() = default;
 
@@ -615,8 +603,6 @@ private:
     Dimension agingSmallPadding_;
     uint32_t agingTextMaxLines_ = 2;
     bool isApplyFontSize_ = false;
-    std::string pasteText_;
-    std::string cancelText_;
 };
 
 } // namespace OHOS::Ace

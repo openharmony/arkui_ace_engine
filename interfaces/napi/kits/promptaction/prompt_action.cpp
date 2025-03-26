@@ -22,7 +22,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
-#include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -812,7 +812,7 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
     if (isShowActionMenu) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
-        auto theme = pipeline->GetTheme<ButtonTheme>();
+        auto theme = pipeline->GetTheme<NG::MenuTheme>();
         CHECK_NULL_RETURN(theme, false);
         ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
