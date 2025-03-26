@@ -107,6 +107,9 @@ export struct BindContentCoverBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -496,6 +499,11 @@ export struct BindContentCoverBootcamp {
 
       }
     }.height('50%').id('scroll')
+
+  }
+
+  @Builder
+  Generic() {
 
   }
 }
