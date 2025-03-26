@@ -1874,6 +1874,8 @@ private:
     void ProcessAutoFillOnFocus();
     bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
+    void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
+    void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
 
     RectF frameRect_;
     RectF textRect_;

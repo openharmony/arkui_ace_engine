@@ -1805,6 +1805,7 @@ void TextFieldPattern::HandleOnPaste()
         TextCommonEvent event;
         const std::u16string pasteData = UtfUtils::Str8DebugToStr16(data);
         eventHub->FireOnPasteWithEvent(pasteData, event);
+        textfield->OnReportPasteEvent(host);
         if (event.IsPreventDefault()) {
             textfield->CloseSelectOverlay(true);
             textfield->selectController_->ResetHandles();
@@ -5710,6 +5711,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (IsNormalInlineState() && action != TextInputAction::NEW_LINE) {
         RecordSubmitEvent();
         eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
+        OnReportSubmitEvent(host);
         if (event.IsKeepEditable()) {
             return;
         }
@@ -5728,6 +5730,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
         return;
     }
     eventHub->FireOnSubmit(static_cast<int32_t>(action), event);
+    OnReportSubmitEvent(host);
     RecordSubmitEvent();
     if (event.IsKeepEditable()) {
         return;
@@ -10968,6 +10971,30 @@ bool TextFieldPattern::IsStopEditWhenCloseKeyboard()
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, true);
     return !(context->GetIsFocusActive() && independentControlKeyboard_);
+}
+
+void TextFieldPattern::OnReportPasteEvent(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onPasteComplete");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onPasteComplete",
+            frameNode->GetId());
+    } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onPasteComplete");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onPasteComplete",
+            frameNode->GetId());
+    }
+}
+
+void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onSubmitComplete");
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onSubmitComplete",
+            frameNode->GetId());
+    }
 }
 
 } // namespace OHOS::Ace::NG
