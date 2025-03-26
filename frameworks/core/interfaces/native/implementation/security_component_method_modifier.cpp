@@ -84,6 +84,17 @@ void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value);
 void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value);
+void IdImpl(Ark_NativePointer node,
+            const Ark_String* value);
+void AlignRules0Impl(Ark_NativePointer node,
+                     const Ark_AlignRuleOption* value);
+void AlignRules1Impl(Ark_NativePointer node,
+                     const Ark_LocalizedAlignRuleOptions* value);
+void EnabledImpl(Ark_NativePointer node,
+                 Ark_Boolean value);
+void ChainModeImpl(Ark_NativePointer node,
+                   Ark_Axis direction,
+                   Ark_ChainStyle style);
 } // namespace CommonMethodModifier
 namespace SecurityComponentMethodModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -300,36 +311,23 @@ void AlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SecurityComponentMethodModelNG::SetAlign(frameNode, convValue);
+    auto convValue = Converter::OptConvert<Alignment>(value);
+    SecurityComponentModelNG::SetAlign(frameNode, convValue);
 }
 void AlignRules0Impl(Ark_NativePointer node,
                      const Ark_AlignRuleOption* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetAlignRules0(frameNode, convValue);
+    CommonMethodModifier::AlignRules0Impl(node, value);
 }
 void AlignRules1Impl(Ark_NativePointer node,
                      const Ark_LocalizedAlignRuleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetAlignRules1(frameNode, convValue);
+    CommonMethodModifier::AlignRules1Impl(node, value);
 }
 void IdImpl(Ark_NativePointer node,
             const Ark_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //SecurityComponentMethodModelNG::SetId(frameNode, convValue);
+    CommonMethodModifier::IdImpl(node, value);
 }
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Ark_Union_Number_Resource* value)
@@ -337,8 +335,11 @@ void MinFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetMinFontScale(frameNode, convValue);
+    auto minFontScale = Converter::OptConvert<float>(*value);
+    Validator::ValidatePositive(minFontScale);
+    const auto maxValue = 1.f;
+    Validator::ValidateLessOrEqual(minFontScale, maxValue);
+    SecurityComponentModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Ark_Union_Number_Resource* value)
@@ -346,8 +347,10 @@ void MaxFontScaleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetMaxFontScale(frameNode, convValue);
+    auto maxFontScale = Converter::OptConvert<float>(*value);
+    const auto minValue = 1.f;
+    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
+    SecurityComponentModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -355,8 +358,9 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetMaxLines(frameNode, convValue);
+    auto maxLines = Converter::OptConvert<int32_t>(*value);
+    Validator::ValidateNonNegative(maxLines);
+    SecurityComponentModelNG::SetMaxLines(frameNode, maxLines);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -364,8 +368,10 @@ void MinFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetMinFontSize(frameNode, convValue);
+    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -373,35 +379,29 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetMaxFontSize(frameNode, convValue);
+    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(fontSize);
+    Validator::ValidateNonPercent(fontSize);
+    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SecurityComponentMethodModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
+    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(value);
+    SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void EnabledImpl(Ark_NativePointer node,
                  Ark_Boolean value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //SecurityComponentMethodModelNG::SetEnabled(frameNode, convValue);
+    CommonMethodModifier::EnabledImpl(node, value);
 }
 void ChainModeImpl(Ark_NativePointer node,
                    Ark_Axis direction,
                    Ark_ChainStyle style)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(direction);
-    //auto convValue = Converter::OptConvert<type>(direction); // for enums
-    //SecurityComponentMethodModelNG::SetChainMode(frameNode, convValue);
+    CommonMethodModifier::ChainModeImpl(node, direction, style);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()

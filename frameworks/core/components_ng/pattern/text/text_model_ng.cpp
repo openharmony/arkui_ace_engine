@@ -588,9 +588,13 @@ void TextModelNG::SetTextCase(FrameNode* frameNode, const std::optional<Ace::Tex
     }
 }
 
-void TextModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
+void TextModelNG::SetMaxLines(FrameNode* frameNode, const std::optional<uint32_t>& value)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value, frameNode);
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxLines, frameNode);
+    }
 }
 
 void TextModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
