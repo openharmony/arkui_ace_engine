@@ -431,6 +431,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
     if (sliderPaintProperty->GetValidSlideRange().has_value()) {
         auto range = sliderPaintProperty->GetValidSlideRange().value();
+        CHECK_NULL_VOID(range);
         rangeFromPointIndex = range->GetFromValue() / step;
         rangeToPointIndex = range->GetToValue() / step;
     }
@@ -1062,6 +1063,7 @@ float SliderPattern::GetValueInValidRange(
     CHECK_NULL_RETURN(paintProperty, value);
     if (paintProperty->GetValidSlideRange().has_value()) {
         auto range = paintProperty->GetValidSlideRange().value();
+        CHECK_NULL_RETURN(range, value);
         if (range->HasValidValues()) {
             auto fromValue = range->GetFromValue();
             auto toValue = range->GetToValue();
