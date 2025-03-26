@@ -82,7 +82,8 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {
-    return {};
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), {});
+    return Converter::ArkValue<Ark_EventTarget>(peer->GetBaseInfo()->GetTarget());
 }
 void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
