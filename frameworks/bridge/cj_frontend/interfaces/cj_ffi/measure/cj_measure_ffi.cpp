@@ -116,29 +116,19 @@ MeasureContext FromCJCreateMeasureContext(CJMeasureContextToC context)
 extern "C" {
 double FfiMeasureText(const CJMeasureContextToC cjcontext)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
-    if (!frontend) {
-        LOGE("Can not get frontend.");
-        return 0.0;
-    }
     MeasureContext context = FromCJCreateMeasureContext(cjcontext);
 
-    return frontend->MeasureText(context);
+    return MeasureUtil::MeasureText(context);
 }
 
 CJSize FfiMeasureTextSize(const CJMeasureContextToC cjcontext)
 {
-    auto frontend = AceType::DynamicCast<CJFrontendAbstract>(Utils::GetCurrentFrontend());
     CJSize thisSize;
     thisSize.height = 0.0;
     thisSize.width = 0.0;
-    if (!frontend) {
-        LOGE("Can not get frontend.");
-        return thisSize;
-    }
 
     MeasureContext measureContext = FromCJCreateMeasureContext(cjcontext);
-    auto size = frontend->MeasureTextSize(measureContext);
+    auto size = MeasureUtil::MeasureTextSize(measureContext);
     thisSize.height = size.Height();
     thisSize.width = size.Width();
     return thisSize;
