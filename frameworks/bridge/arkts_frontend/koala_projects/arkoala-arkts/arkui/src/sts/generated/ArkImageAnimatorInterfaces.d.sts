@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkImageAnimator")
-export declare function ArkImageAnimator(
+@BuildLambda("ImageAnimator")
+export declare function ImageAnimator(
     
     @memo
     _content?: () => void,
 ): ArkImageAnimatorComponent
 
 @memo
-export declare function ArkImageAnimatorImpl(
+export declare function ImageAnimatorImpl(
     @memo
     _style: ((attributes: ArkImageAnimatorComponent) => void) | undefined,
     

@@ -39,7 +39,7 @@ export class SwipeGestureInterfaceInternal implements MaterializedBase,GestureIn
         const retval  = ArkUIGeneratedNativeModule._SwipeGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = SwipeGestureInterfaceInternal.ctor_swipegestureinterface()
         this.peer = new Finalizable(ctorPtr, SwipeGestureInterfaceInternal.getFinalizer())
     }
@@ -53,7 +53,7 @@ export class SwipeGestureInterfaceInternal implements MaterializedBase,GestureIn
     private onAction_serialize(event: ((event: GestureEvent) => void)): SwipeGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._SwipeGestureInterface_onAction(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._SwipeGestureInterface_onAction(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : SwipeGestureInterface = SwipeGestureInterfaceInternal.fromPtr(retval)
         return obj

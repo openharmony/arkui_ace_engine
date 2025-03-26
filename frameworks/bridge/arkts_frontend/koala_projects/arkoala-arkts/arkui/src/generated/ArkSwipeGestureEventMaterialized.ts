@@ -48,7 +48,7 @@ export class SwipeGestureEventInternal extends BaseGestureEventInternal implemen
         const retval  = ArkUIGeneratedNativeModule._SwipeGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = SwipeGestureEventInternal.ctor_swipegestureevent()
         this.peer = new Finalizable(ctorPtr, SwipeGestureEventInternal.getFinalizer())

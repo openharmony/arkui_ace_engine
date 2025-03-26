@@ -13,7 +13,7 @@ export class BottomTabBarStyle {
     _symmetricExtensible?: boolean | undefined
     _id?: string | undefined
     _iconStyle?: TabBarIconStyle | undefined
-     constructor(icon: ResourceStr | TabBarSymbol, text: ResourceStr) {
+    constructor(icon: ResourceStr | TabBarSymbol, text: ResourceStr) {
         this._icon = icon
         this._text = text
     }

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkFormComponent")
-export declare function ArkFormComponent(
+@BuildLambda("FormComponent")
+export declare function FormComponent(
     value: FormInfo, 
     @memo
     _content?: () => void,
 ): ArkFormComponentComponent
 
 @memo
-export declare function ArkFormComponentImpl(
+export declare function FormComponentImpl(
     @memo
     _style: ((attributes: ArkFormComponentComponent) => void) | undefined,
     value: FormInfo, 

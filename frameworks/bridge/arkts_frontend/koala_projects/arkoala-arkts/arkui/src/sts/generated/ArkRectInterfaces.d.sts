@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRect")
-export declare function ArkRect(
+@BuildLambda("Rect")
+export declare function Rect(
     options?: RectOptions | RoundedRectOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkRectComponent
 
 @memo
-export declare function ArkRectImpl(
+export declare function RectImpl(
     @memo
     _style: ((attributes: ArkRectComponent) => void) | undefined,
     options?: RectOptions | RoundedRectOptions | undefined, 

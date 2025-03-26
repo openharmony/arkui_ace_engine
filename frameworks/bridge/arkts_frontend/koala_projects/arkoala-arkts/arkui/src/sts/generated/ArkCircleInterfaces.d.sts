@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCircle")
-export declare function ArkCircle(
+@BuildLambda("Circle")
+export declare function Circle(
     value?: CircleOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkCircleComponent
 
 @memo
-export declare function ArkCircleImpl(
+export declare function CircleImpl(
     @memo
     _style: ((attributes: ArkCircleComponent) => void) | undefined,
     value?: CircleOptions | undefined, 

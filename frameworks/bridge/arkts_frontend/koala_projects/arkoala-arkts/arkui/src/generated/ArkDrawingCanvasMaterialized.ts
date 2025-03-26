@@ -40,7 +40,7 @@ export class DrawingCanvas implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._DrawingCanvas_ctor(toPeerPtr(pixelmap))
         return retval
     }
-     constructor(pixelmap?: PixelMap) {
+    constructor(pixelmap?: PixelMap) {
         if ((pixelmap) !== (undefined))
         {
             const ctorPtr : KPointer = DrawingCanvas.ctor_drawingcanvas((pixelmap)!)

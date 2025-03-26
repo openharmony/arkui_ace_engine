@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -65,8 +64,6 @@ import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized
 import { SwiperController } from "./../ArkSwiperControllerMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
 import { BottomTabBarStyle } from "./../ArkBottomTabBarStyleBuilder"
 export class ArkSwiperPeer extends ArkCommonMethodPeer {
@@ -89,7 +86,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const controller_value  = controller!
             thisSerializer.writeSwiperController(controller_value)
         }
-        ArkUIGeneratedNativeModule._SwiperInterface_setSwiperOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperInterface_setSwiperOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     indexAttribute(value: number): void {
@@ -120,7 +117,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const value_2  = value as boolean
             thisSerializer.writeBoolean(value_2)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_indicator0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_indicator0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     indicator1Attribute(value: IndicatorComponentController): void {
@@ -149,17 +146,17 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const value_1  = value as string
             thisSerializer.writeString(value_1)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_itemSpace(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_itemSpace(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     displayModeAttribute(value: SwiperDisplayMode): void {
-        ArkUIGeneratedNativeModule._SwiperAttribute_displayMode(this.peer.ptr, ((value as SwiperDisplayMode) as int32))
+        ArkUIGeneratedNativeModule._SwiperAttribute_displayMode(this.peer.ptr, value.valueOf())
     }
     cachedCountAttribute(value: number): void {
         ArkUIGeneratedNativeModule._SwiperAttribute_cachedCount(this.peer.ptr, value)
     }
     effectModeAttribute(value: EdgeEffect): void {
-        ArkUIGeneratedNativeModule._SwiperAttribute_effectMode(this.peer.ptr, ((value as EdgeEffect) as int32))
+        ArkUIGeneratedNativeModule._SwiperAttribute_effectMode(this.peer.ptr, value.valueOf())
     }
     disableSwipeAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._SwiperAttribute_disableSwipe(this.peer.ptr, value ? 1 : 0)
@@ -171,7 +168,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         if (TypeChecker.isCurve(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Curve
-            thisSerializer.writeInt32(((value_0 as Curve) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -183,13 +180,13 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const value_2  = value as ICurve
             thisSerializer.writeICurve(value_2)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_curve(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_curve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onChangeAttribute(value: ((index: number) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_onChange(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     indicatorStyleAttribute(value?: IndicatorStyle): void {
@@ -201,40 +198,40 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeIndicatorStyle(value_value)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_indicatorStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_indicatorStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAnimationStartAttribute(value: OnSwiperAnimationStartCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_onAnimationStart(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_onAnimationStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAnimationEndAttribute(value: OnSwiperAnimationEndCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_onAnimationEnd(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_onAnimationEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onGestureSwipeAttribute(value: OnSwiperGestureSwipeCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_onGestureSwipe(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_onGestureSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     nestedScrollAttribute(value: SwiperNestedScrollMode): void {
-        ArkUIGeneratedNativeModule._SwiperAttribute_nestedScroll(this.peer.ptr, ((value as SwiperNestedScrollMode) as int32))
+        ArkUIGeneratedNativeModule._SwiperAttribute_nestedScroll(this.peer.ptr, value.valueOf())
     }
     customContentTransitionAttribute(value: SwiperContentAnimatedTransition): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSwiperContentAnimatedTransition(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_customContentTransition(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_customContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onContentDidScrollAttribute(value: ContentDidScrollCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._SwiperAttribute_onContentDidScroll(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_onContentDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     indicatorInteractiveAttribute(value: boolean): void {
@@ -261,7 +258,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const isHoverShow_value  = isHoverShow!
             thisSerializer.writeBoolean(isHoverShow_value)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_displayArrow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_displayArrow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     displayCountAttribute(value: number | string | SwiperAutoFill, swipeByGroup?: boolean): void {
@@ -290,7 +287,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const swipeByGroup_value  = swipeByGroup!
             thisSerializer.writeBoolean(swipeByGroup_value)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_displayCount(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_displayCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     prevMarginAttribute(value: Length, ignoreBlank?: boolean): void {
@@ -302,7 +299,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const ignoreBlank_value  = ignoreBlank!
             thisSerializer.writeBoolean(ignoreBlank_value)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_prevMargin(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_prevMargin(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     nextMarginAttribute(value: Length, ignoreBlank?: boolean): void {
@@ -314,13 +311,13 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const ignoreBlank_value  = ignoreBlank!
             thisSerializer.writeBoolean(ignoreBlank_value)
         }
-        ArkUIGeneratedNativeModule._SwiperAttribute_nextMargin(this.peer.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute_nextMargin(this.peer.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     _onChangeEvent_indexAttribute(callback: ((index: number) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(callback)
-        ArkUIGeneratedNativeModule._SwiperAttribute__onChangeEvent_index(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SwiperAttribute__onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

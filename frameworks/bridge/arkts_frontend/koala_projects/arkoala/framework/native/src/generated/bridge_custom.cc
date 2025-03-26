@@ -40,7 +40,7 @@ void disposeNode(KNativePointer* ptr) {
 KNativePointer impl_GetNodeFinalizer() {
     return fnPtr<KNativePointer>(disposeNode);
 }
-KOALA_INTEROP_0(GetNodeFinalizer, KNativePointer)
+KOALA_INTEROP_DIRECT_0(GetNodeFinalizer, KNativePointer)
 
 // custom methods
 void impl_ShowCrash(const KStringPtr& messagePtr) {
@@ -191,27 +191,27 @@ Ark_NativePointer impl_CreateNode(Ark_Int32 type, Ark_Int32 id, Ark_Int32 flags)
     GENERATED_Ark_NodeType typeCast = GENERATED_Ark_NodeType(type);
     return GetArkUIBasicNodeAPI()->createNode(typeCast, id, flags);
 }
-KOALA_INTEROP_3(CreateNode, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
+KOALA_INTEROP_DIRECT_3(CreateNode, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
 
 Ark_NativePointer impl_GetNodeByViewStack()
 {
     return GetArkUIBasicNodeAPI()->getNodeByViewStack();
 }
-KOALA_INTEROP_0(GetNodeByViewStack, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_0(GetNodeByViewStack, Ark_NativePointer)
 
 void impl_DisposeNode(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIBasicNodeAPI()->disposeNode(nodePtrCast);
 }
-KOALA_INTEROP_V1(DisposeNode, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V1(DisposeNode, Ark_NativePointer)
 
 void impl_DumpTreeNode(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIBasicNodeAPI()->dumpTreeNode(nodePtrCast);
 }
-KOALA_INTEROP_V1(DumpTreeNode, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V1(DumpTreeNode, Ark_NativePointer)
 
 void impl_RemoveChild(Ark_NativePointer parent, Ark_NativePointer child)
 {
@@ -220,7 +220,7 @@ void impl_RemoveChild(Ark_NativePointer parent, Ark_NativePointer child)
     GetArkUIBasicNodeAPI()->removeChild(parentCast, childCast);
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
 }
-KOALA_INTEROP_V2(RemoveChild, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V2(RemoveChild, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_InsertChildAfter(Ark_NativePointer parent, Ark_NativePointer child, Ark_NativePointer sibling)
 {
@@ -231,7 +231,7 @@ Ark_Int32 impl_InsertChildAfter(Ark_NativePointer parent, Ark_NativePointer chil
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
-KOALA_INTEROP_3(InsertChildAfter, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_3(InsertChildAfter, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_AddChild(Ark_NativePointer parent, Ark_NativePointer child)
 {
@@ -241,7 +241,7 @@ Ark_Int32 impl_AddChild(Ark_NativePointer parent, Ark_NativePointer child)
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
-KOALA_INTEROP_2(AddChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(AddChild, Ark_Int32, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_InsertChildBefore(Ark_NativePointer parent, Ark_NativePointer child, Ark_NativePointer sibling)
 {
@@ -252,7 +252,7 @@ Ark_Int32 impl_InsertChildBefore(Ark_NativePointer parent, Ark_NativePointer chi
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
-KOALA_INTEROP_3(InsertChildBefore, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_3(InsertChildBefore, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_InsertChildAt(Ark_NativePointer parent, Ark_NativePointer child, Ark_Int32 position)
 {
@@ -262,14 +262,14 @@ Ark_Int32 impl_InsertChildAt(Ark_NativePointer parent, Ark_NativePointer child, 
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
     return result;
 }
-KOALA_INTEROP_3(InsertChildAt, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_3(InsertChildAt, Ark_Int32, Ark_NativePointer, Ark_NativePointer, Ark_Int32)
 
 void impl_ApplyModifierFinish(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIBasicNodeAPI()->applyModifierFinish(nodePtrCast);
 }
-KOALA_INTEROP_V1(ApplyModifierFinish, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V1(ApplyModifierFinish, Ark_NativePointer)
 
 void impl_MarkDirty(Ark_NativePointer nodePtr, KUInt dirtyFlag)
 {
@@ -284,13 +284,13 @@ KBoolean impl_IsBuilderNode(Ark_NativePointer nodePtr)
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIBasicNodeAPI()->isBuilderNode(nodePtrCast);
 }
-KOALA_INTEROP_1(IsBuilderNode, KBoolean, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(IsBuilderNode, KBoolean, Ark_NativePointer)
 
 Ark_Float32 impl_ConvertLengthMetricsUnit(Ark_Float32 value, Ark_Int32 originUnit, Ark_Int32 targetUnit)
 {
     return GetArkUIBasicNodeAPI()->convertLengthMetricsUnit(value, originUnit, targetUnit);
 }
-KOALA_INTEROP_3(ConvertLengthMetricsUnit, Ark_Float32, Ark_Float32, Ark_Int32, Ark_Int32)
+KOALA_INTEROP_DIRECT_3(ConvertLengthMetricsUnit, Ark_Float32, Ark_Float32, Ark_Int32, Ark_Int32)
 
 void impl_MeasureLayoutAndDraw(KVMContext vmContext, Ark_NativePointer nodePtr)
 {
@@ -347,84 +347,84 @@ void impl_SetMeasureWidth(Ark_NativePointer nodePtr, Ark_Int32 value)
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setMeasureWidth(nodePtrCast, value);
 }
-KOALA_INTEROP_V2(SetMeasureWidth, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetMeasureWidth, Ark_NativePointer, Ark_Int32)
 
 Ark_Int32 impl_GetMeasureWidth(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIExtendedNodeAPI()->getMeasureWidth(nodePtrCast);
 }
-KOALA_INTEROP_1(GetMeasureWidth, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GetMeasureWidth, Ark_Int32, Ark_NativePointer)
 
 void impl_SetMeasureHeight(Ark_NativePointer nodePtr, Ark_Int32 value)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setMeasureHeight(nodePtrCast, value);
 }
-KOALA_INTEROP_V2(SetMeasureHeight, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetMeasureHeight, Ark_NativePointer, Ark_Int32)
 
 Ark_Int32 impl_GetMeasureHeight(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIExtendedNodeAPI()->getMeasureHeight(nodePtrCast);
 }
-KOALA_INTEROP_1(GetMeasureHeight, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GetMeasureHeight, Ark_Int32, Ark_NativePointer)
 
 void impl_SetX(Ark_NativePointer nodePtr, Ark_Int32 value)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setX(nodePtrCast, value);
 }
-KOALA_INTEROP_V2(SetX, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetX, Ark_NativePointer, Ark_Int32)
 
 Ark_Int32 impl_GetX(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIExtendedNodeAPI()->getX(nodePtrCast);
 }
-KOALA_INTEROP_1(GetX, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GetX, Ark_Int32, Ark_NativePointer)
 
 void impl_SetY(Ark_NativePointer nodePtr, Ark_Int32 value)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setY(nodePtrCast, value);
 }
-KOALA_INTEROP_V2(SetY, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetY, Ark_NativePointer, Ark_Int32)
 
 Ark_Int32 impl_GetY(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIExtendedNodeAPI()->getY(nodePtrCast);
 }
-KOALA_INTEROP_1(GetY, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GetY, Ark_Int32, Ark_NativePointer)
 
 void impl_SetAlignment(Ark_NativePointer nodePtr, Ark_Int32 value)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setAlignment(nodePtrCast, value);
 }
-KOALA_INTEROP_V2(SetAlignment, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetAlignment, Ark_NativePointer, Ark_Int32)
 
 Ark_Int32 impl_GetAlignment(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     return GetArkUIExtendedNodeAPI()->getAlignment(nodePtrCast);
 }
-KOALA_INTEROP_1(GetAlignment, Ark_Int32, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_1(GetAlignment, Ark_Int32, Ark_NativePointer)
 
 void impl_SetRangeUpdater(Ark_NativePointer nodePtr, Ark_Int32 updaterId)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setRangeUpdater(nodePtrCast, updaterId);
 }
-KOALA_INTEROP_V2(SetRangeUpdater, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetRangeUpdater, Ark_NativePointer, Ark_Int32)
 
 void impl_SetChildTotalCount(Ark_NativePointer nodePtr, Ark_Int32 totalCount)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
     GetArkUIExtendedNodeAPI()->setChildTotalCount(nodePtrCast, totalCount);
 }
-KOALA_INTEROP_V2(SetChildTotalCount, Ark_NativePointer, Ark_Int32)
+KOALA_INTEROP_DIRECT_V2(SetChildTotalCount, Ark_NativePointer, Ark_Int32)
 
 KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, const KStringPtr& viewParams) {
 #ifdef KOALA_USE_JAVA_VM

@@ -20,7 +20,7 @@
 #include "interop-types.h"
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
-static const char* callCallbackFromNativeSig = "I[BI:I";
+static const char* callCallbackFromNativeSig = "IJI:I";
 
 static const char* FAST_NATIVE_PREFIX = "#F$";
 
@@ -71,6 +71,7 @@ bool registerAllModules(ets_env *env) {
 }
 
 extern "C" ETS_EXPORT ets_int ETS_CALL EtsNapiOnLoad(ets_env *env) {
+    LOGE("Use ETSNAPI")
     if (!registerAllModules(env)) {
         LOGE("Failed to register ets modules");
         return ETS_ERR;

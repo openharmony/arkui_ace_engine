@@ -35,7 +35,7 @@ export class PixelMapMockInternal implements MaterializedBase,PixelMapMock {
         const retval  = ArkUIGeneratedNativeModule._PixelMapMock_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PixelMapMockInternal.ctor_pixelmapmock()
         this.peer = new Finalizable(ctorPtr, PixelMapMockInternal.getFinalizer())
     }

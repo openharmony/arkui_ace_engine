@@ -21,6 +21,8 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { BusinessError } from "./ArkBaseInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
+import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "./ArkEnumsInterfaces"
+import { Dimension } from "./ArkUnitsInterfaces"
 export interface NodeController {
 }
 export interface TextModifier {
@@ -99,6 +101,35 @@ export interface FontOptions {
     familyName: string | Resource;
     familySrc: string | Resource;
 }
+export interface FontInfo {
+    path: string;
+    postScriptName: string;
+    fullName: string;
+    family: string;
+    subfamily: string;
+    weight: number;
+    width: number;
+    italic: boolean;
+    monoSpace: boolean;
+    symbolic: boolean;
+}
+export interface MeasureOptions {
+    textContent: string | Resource;
+    constraintWidth?: number | string | Resource;
+    fontSize?: number | string | Resource;
+    fontStyle?: number | FontStyle;
+    fontWeight?: number | string | FontWeight;
+    fontFamily?: string | Resource;
+    letterSpacing?: number | string;
+    textAlign?: number | TextAlign;
+    overflow?: number | TextOverflow;
+    maxLines?: number;
+    lineHeight?: number | string | Resource;
+    baselineOffset?: number | string;
+    textCase?: number | TextCase;
+    textIndent?: number | string;
+    wordBreak?: WordBreak;
+}
 export enum EffectDirection {
     DOWN = 0,
     UP = 1
@@ -107,5 +138,7 @@ export enum EffectScope {
     LAYER = 0,
     WHOLE = 1
 }
-export interface SymbolEffect {
+export interface TouchPoint {
+    x: Dimension;
+    y: Dimension;
 }

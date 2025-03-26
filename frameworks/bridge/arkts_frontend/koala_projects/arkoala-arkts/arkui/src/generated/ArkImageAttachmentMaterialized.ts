@@ -57,11 +57,11 @@ export class ImageAttachment implements MaterializedBase {
     static ctor_imageattachment(value: ImageAttachmentInterface): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeImageAttachmentInterface(value)
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: ImageAttachmentInterface) {
+    constructor(value?: ImageAttachmentInterface) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = ImageAttachment.ctor_imageattachment((value)!)
@@ -74,16 +74,28 @@ export class ImageAttachment implements MaterializedBase {
     private getValue(): PixelMap {
         return this.getValue_serialize()
     }
+    private getSize(): SizeOptions {
+        return this.getSize_serialize()
+    }
     private getVerticalAlign(): ImageSpanAlignment {
         return this.getVerticalAlign_serialize()
     }
     private getObjectFit(): ImageFit {
         return this.getObjectFit_serialize()
     }
+    private getLayoutStyle(): ImageAttachmentLayoutStyle {
+        return this.getLayoutStyle_serialize()
+    }
     private getValue_serialize(): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
         const obj : PixelMap = PixelMapInternal.fromPtr(retval)
         return obj
+    }
+    private getSize_serialize(): SizeOptions {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
+        return returnResult
     }
     private getVerticalAlign_serialize(): ImageSpanAlignment {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)
@@ -92,5 +104,11 @@ export class ImageAttachment implements MaterializedBase {
     private getObjectFit_serialize(): ImageFit {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
+    }
+    private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : ImageAttachmentLayoutStyle = retvalDeserializer.readImageAttachmentLayoutStyle()
+        return returnResult
     }
 }

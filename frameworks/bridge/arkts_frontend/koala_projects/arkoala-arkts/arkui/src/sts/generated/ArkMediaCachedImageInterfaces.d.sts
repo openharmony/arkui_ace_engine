@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkMediaCachedImage")
-export declare function ArkMediaCachedImage(
+@BuildLambda("MediaCachedImage")
+export declare function MediaCachedImage(
     src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource, 
     @memo
     _content?: () => void,
 ): ArkMediaCachedImageComponent
 
 @memo
-export declare function ArkMediaCachedImageImpl(
+export declare function MediaCachedImageImpl(
     @memo
     _style: ((attributes: ArkMediaCachedImageComponent) => void) | undefined,
     src: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource, 

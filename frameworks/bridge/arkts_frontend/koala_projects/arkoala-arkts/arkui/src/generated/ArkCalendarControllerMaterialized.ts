@@ -40,7 +40,7 @@ export class CalendarController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CalendarController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CalendarController.ctor_calendarcontroller()
         this.peer = new Finalizable(ctorPtr, CalendarController.getFinalizer())
     }
@@ -66,7 +66,7 @@ export class CalendarController implements MaterializedBase {
         thisSerializer.writeNumber(value_month)
         const value_day  = value.day
         thisSerializer.writeNumber(value_day)
-        const retval  = ArkUIGeneratedNativeModule._CalendarController_goTo(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CalendarController_goTo(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

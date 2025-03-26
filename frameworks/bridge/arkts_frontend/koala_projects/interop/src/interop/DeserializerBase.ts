@@ -14,8 +14,9 @@
  */
 import { CustomTextDecoder, float32, int32, int64 } from "@koalaui/common"
 import { Tags, CallbackResource } from "./SerializerBase";
-import { pointer } from "./InteropTypes"
-import { InteropNativeModule } from "./InteropNativeModule"
+import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
+import { NativeBuffer } from "./NativeBuffer";
+import { ResourceHolder } from "../arkts/ResourceManager";
 
 export class DeserializerBase {
     private position = 0
@@ -37,8 +38,13 @@ export class DeserializerBase {
         }
     }
 
-    constructor(buffer: ArrayBuffer, length: int32) {
-        this.buffer = buffer
+    constructor(buffer: ArrayBuffer|KSerializerBuffer|KUint8ArrayPtr, length: int32) {
+        if (typeof buffer != 'object')
+            throw new Error('Must be used only with ArrayBuffer')
+        if (buffer && ("buffer" in buffer)) {
+            buffer = buffer.buffer as ArrayBuffer
+        }
+        this.buffer = buffer as ArrayBuffer
         this.length = length
         this.view = new DataView(this.buffer)
     }
@@ -49,6 +55,10 @@ export class DeserializerBase {
 
         // TBD: Use cache
         return factory(args, length);
+    }
+
+    asBuffer(position?: number, length?: number): KSerializerBuffer {
+        return new Uint8Array(this.buffer, position, length)
     }
 
     asArray(position?: number, length?: number): Uint8Array {
@@ -166,6 +176,10 @@ export class DeserializerBase {
             release: this.readPointer(),
         }
     }
+    readObject():any {
+        const resource = this.readCallbackResource()
+        return ResourceHolder.instance().get(resource.resourceId)
+    }
 
     static lengthUnitFromInt(unit: int32): string {
         let suffix: string
@@ -187,12 +201,12 @@ export class DeserializerBase {
         }
         return suffix
     }
-    readBuffer(): ArrayBuffer {
+    readBuffer(): NativeBuffer {
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()
 
-        return InteropNativeModule._MaterializeBuffer(data, length, resource.resourceId, resource.hold, resource.release)
+        return NativeBuffer.wrap(data, length, resource.resourceId, resource.hold, resource.release)
     }
 }
 

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCalendarPicker")
-export declare function ArkCalendarPicker(
+@BuildLambda("CalendarPicker")
+export declare function CalendarPicker(
     options?: CalendarOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkCalendarPickerComponent
 
 @memo
-export declare function ArkCalendarPickerImpl(
+export declare function CalendarPickerImpl(
     @memo
     _style: ((attributes: ArkCalendarPickerComponent) => void) | undefined,
     options?: CalendarOptions | undefined, 

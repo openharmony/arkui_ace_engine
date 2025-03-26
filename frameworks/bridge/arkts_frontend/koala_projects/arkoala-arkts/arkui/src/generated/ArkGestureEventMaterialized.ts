@@ -117,7 +117,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
         const retval  = ArkUIGeneratedNativeModule._GestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = GestureEventInternal.ctor_gestureevent()
         this.peer = new Finalizable(ctorPtr, GestureEventInternal.getFinalizer())
@@ -246,7 +246,7 @@ export class GestureEventInternal extends BaseEventInternal implements Materiali
             const fingerList_element : FingerInfo = fingerList[i]
             thisSerializer.writeFingerInfo(fingerList_element)
         }
-        ArkUIGeneratedNativeModule._GestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GestureEvent_setFingerList(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getOffsetX_serialize(): number {

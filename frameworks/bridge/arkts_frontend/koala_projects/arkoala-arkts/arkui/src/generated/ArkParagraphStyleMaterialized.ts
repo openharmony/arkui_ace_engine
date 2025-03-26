@@ -65,11 +65,11 @@ export class ParagraphStyle implements MaterializedBase {
             const value_value  = value!
             thisSerializer.writeParagraphStyleInterface(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: ParagraphStyleInterface) {
+    constructor(value?: ParagraphStyleInterface) {
         const ctorPtr : KPointer = ParagraphStyle.ctor_paragraphstyle((value)!)
         this.peer = new Finalizable(ctorPtr, ParagraphStyle.getFinalizer())
     }
@@ -91,6 +91,9 @@ export class ParagraphStyle implements MaterializedBase {
     private getWordBreak(): WordBreak {
         return this.getWordBreak_serialize()
     }
+    private getLeadingMargin(): number | LeadingMarginPlaceholder {
+        return this.getLeadingMargin_serialize()
+    }
     private getTextAlign_serialize(): TextAlign {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
@@ -109,6 +112,10 @@ export class ParagraphStyle implements MaterializedBase {
     }
     private getWordBreak_serialize(): WordBreak {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getWordBreak(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getLeadingMargin_serialize(): number | LeadingMarginPlaceholder {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getLeadingMargin(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
 }

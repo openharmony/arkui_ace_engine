@@ -14,7 +14,7 @@ export class DigitIndicator {
     _selectedFontColor?: ResourceColor | undefined
     _digitFont?: Font | undefined
     _selectedDigitFont?: Font | undefined
-     constructor() {
+    constructor() {
     }
     static dot(): DotIndicator {
         return new DotIndicator()

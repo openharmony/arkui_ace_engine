@@ -1076,6 +1076,8 @@ export interface ScrollableCommonMethod<T> extends CommonMethod<T> {
     enableScrollInteraction: boolean;
     friction: number | Resource;
     onScroll: ((first: number, last: number) => void);
+    onWillScroll: ScrollOnWillScrollCallback | undefined;
+    onDidScroll: ScrollOnScrollCallback;
     onReachStart: (() => void);
     onReachEnd: (() => void);
     onScrollStart: (() => void);
@@ -1086,7 +1088,9 @@ export interface ScrollableCommonMethod<T> extends CommonMethod<T> {
 export interface ScrollResult {
     offsetRemain: number;
 }
-export type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => void;
+export interface OnWillScrollCallback {
+    stub: string;
+}
 export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
 export type OnMoveHandler = (from: number, to: number) => void;
 export interface DynamicNode<T> {

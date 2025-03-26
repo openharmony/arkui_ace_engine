@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,30 +13,31 @@
  * limitations under the License.
  */
 
-import { KPointer, runtimeType, RuntimeType, CallbackResource, DeserializerBase } from "@koalaui/interop"
-import { int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./Serializer"
-import { ArkUIGeneratedNativeModule } from "#components"
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./CallbackKind"
+import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
-import { KUint8ArrayPtr, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, CustomBuilder, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, DismissReason, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, PointLightStyle, OnWillScrollCallback, ScrollResult } from "./../ArkCommonInterfaces"
+import { AccessibilityCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnMoveHandler, OnScrollCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, ShadowType, SymbolGlyphModifier, ShadowOptions, SheetSize, DrawContext, ShadowStyle, ComponentContent, SheetTitleOptions, TransitionEffects, TranslateOptions, RotateOptions, ScaleOptions, TransitionEdge, AnimateParam, MenuPreviewMode, DismissPopupAction, DragPreviewMode, OutlineStyle, SourceTool, SourceType, EventTarget, HoverModeAreaType, BlurStyle, Rectangle, PickerTextStyle, PickerDialogButtonStyle, MenuPolicy, BlurStyleActivePolicy, BlurOptions, AdaptiveColor, ThemeColorMode, CustomBuilder, ExpectedFrameRateRange, FinishCallbackType, SheetKeyboardAvoidMode, UIContext, SheetType, ScrollSizeMode, SheetMode, SpringBackAction, DismissSheetAction, SheetDismiss, DismissContentCoverAction, ModalTransition, ContextMenuAnimationOptions, PopupMessageOptions, TransitionHierarchyStrategy, OverlayOffset, ImageModifier, MotionPathOptions, LinearGradient_common, ScrollableCommonMethod, CommonMethod, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, TransitionOptions, MotionBlurOptions, InvertOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragItemInfo, UniformDataType, PreDragStatus, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, SafeAreaType, SafeAreaEdge, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ContentCoverOptions, SheetOptions, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, RectResult, TouchObject, HistoricalPoint, TextDecorationOptions, InputCounterOptions, CaretOffset, SelectionOptions, BlurStyleOptions, ContentModifier, LayoutSafeAreaType, LayoutSafeAreaEdge, ItemDragInfo, KeyboardAvoidMode, UIGestureEvent, VisibleAreaEventOptions, MeasureResult, SizeResult, BindOptions, FractionStop, LocalizedVerticalAlignParam, LocalizedHorizontalAlignParam, MotionBlurAnchor, RepeatMode, TouchTestStrategy, DismissReason, IntentionCode, DragResult, Summary, DragBehavior, Context, LightSource, MultiShadowOptions, PointLightStyle } from "./../ArkCommonInterfaces"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, LabelStyle, ControlSize, ButtonOptions } from "./../ArkButtonInterfaces"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../ArkAnimationExtenderInterfaces"
 import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterfaces"
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, SwiperAnimationEvent } from "./../ArkSwiperInterfaces"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, TextRange, StyledStringChangeValue, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, StyledStringChangedListener, TextDataDetectorType } from "./../ArkTextCommonInterfaces"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, Affinity } from "./../ArkArkuiExternalInterfaces"
+import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, MeasureOptions, FontInfo, FontOptions, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController, Affinity } from "./../ArkArkuiExternalInterfaces"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowOptions } from "./../ArkWaterFlowInterfaces"
 import { ImageCompleteCallback, ImageLoadResult } from "./../ArkImageSpanInterfaces"
-import { ImageErrorCallback, ResizableOptions, DrawableDescriptor, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
-import { InterceptionModeCallback, InterceptionShowCallback, PopInfo, NavigationOptions, NavigationInterception, NavigationMode, NavBar, NavigationOperation, LaunchMode, BarStyle, NavigationAnimatedTransition, NavContentInfo, NavigationMenuItem, SystemBarStyle, NavigationTitleOptions, ToolbarItem, NavigationToolbarOptions, ToolbarItemStatus, NavigationTitleMode, NavBarPosition } from "./../ArkNavigationInterfaces"
-import { IsolatedComponentInterface, RestrictedWorker, IsolatedOptions, IsolatedComponentAttribute } from "./../ArkIsolatedComponentInterfaces"
+import { ImageErrorCallback, ResizableOptions, DrawingColorFilter, ImageContent, DrawingLattice, ResolutionQuality, ImageError, ImageSourceSize, ImageInterpolation, DynamicRangeMode, ImageRenderMode } from "./../ArkImageInterfaces"
+import { InterceptionModeCallback, InterceptionShowCallback, PopInfo, NavigationOptions, NavigationInterception, NavigationMode, NavBar, NavigationOperation, LaunchMode, BarStyle, NavContentInfo, NavigationAnimatedTransition, NavigationMenuItem, SystemBarStyle, NavigationTitleOptions, ToolbarItem, NavigationToolbarOptions, ToolbarItemStatus, NavigationTitleMode, NavBarPosition } from "./../ArkNavigationInterfaces"
+import { IsolatedComponentInterface, RestrictedWorker, IsolatedComponentAttribute, IsolatedOptions } from "./../ArkIsolatedComponentInterfaces"
 import { MenuOnAppearCallback, PasteEventCallback, SubmitCallback, LeadingMarginPlaceholder, RichEditorLayoutStyle, RichEditorImageSpanStyleResult, RichEditorSpanPosition, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorTextStyleResult, RichEditorImageSpanStyle, RichEditorTextStyle, RichEditorGesture, KeyboardOptions, PasteEvent, SelectionMenuOptions, RichEditorRange, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorTextSpanResult, RichEditorParagraphResult, RichEditorSelection, RichEditorSpan, RichEditorAttribute, RichEditorInsertValue, RichEditorDeleteValue, RichEditorChangeValue, CutEvent, CopyEvent, RichEditorSpanType, RichEditorResponseType, PlaceholderStyle, RichEditorDeleteDirection, RichEditorSpanStyleOptions, RichEditorStyledStringOptions, RichEditorOptions } from "./../ArkRichEditorInterfaces"
 import { NavExtender_OnUpdateStack } from "./../ArkNavigationExtenderInterfaces"
-import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, Header, HitTestType, WebCaptureMode, WebAttribute, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, OnPageEndEvent, OnPageBeginEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnLoadInterceptEvent, OnOverScrollEvent, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, NativeEmbedTouchInfo, NativeMediaPlayerConfig, ExpandedMenuItemOptions, WebKeyboardAvoidMode, WebElementType, WebResponseType, SelectionMenuOptionsExt, RenderProcessNotRespondingReason, NativeEmbedInfo, NativeEmbedStatus, WebNavigationType, SslError, ContextMenuMediaType, ContextMenuSourceType, ContextMenuInputFieldType, ScreenCaptureConfig, FileSelectorMode, RenderExitReason, MessageLevel, RenderMode, WebKeyboardOptions, AdsBlockedDetails, WebKeyboardCallbackInfo, ViewportFit, RenderProcessNotRespondingData, NativeEmbedVisibilityInfo, IntelligentTrackingPreventionDetails, LoadCommittedDetails, ThreatType, LargestContentfulPaint, FirstMeaningfulPaint, SslErrorEvent, FullScreenEnterEvent, WebOptions, ContextMenuEditStateFlags, ProtectedResourceType } from "./../ArkWebInterfaces"
+import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, Header, HitTestType, WebCaptureMode, WebAttribute, MixedMode, JavaScriptProxy, CacheMode, WebDarkMode, WebMediaOptions, OverScrollMode, OnPageEndEvent, OnPageBeginEvent, OnProgressChangeEvent, OnTitleReceiveEvent, OnGeolocationShowEvent, OnAlertEvent, OnBeforeUnloadEvent, OnConfirmEvent, OnPromptEvent, OnConsoleEvent, OnErrorReceiveEvent, OnHttpErrorReceiveEvent, OnDownloadStartEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnShowFileSelectorEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnHttpAuthRequestEvent, OnInterceptRequestEvent, OnPermissionRequestEvent, OnScreenCaptureRequestEvent, OnContextMenuShowEvent, OnSearchResultReceiveEvent, OnScrollEvent, OnSslErrorEventReceiveEvent, OnClientAuthenticationEvent, OnWindowNewEvent, OnTouchIconUrlReceivedEvent, OnFaviconReceivedEvent, OnPageVisibleEvent, OnDataResubmittedEvent, OnAudioStateChangedEvent, OnFirstContentfulPaintEvent, OnLoadInterceptEvent, OnOverScrollEvent, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, NativeEmbedDataInfo, NativeEmbedTouchInfo, NativeMediaPlayerConfig, ExpandedMenuItemOptions, WebKeyboardAvoidMode, WebElementType, WebResponseType, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedStatus, SslError, ContextMenuMediaType, ContextMenuSourceType, ContextMenuInputFieldType, ScreenCaptureConfig, FileSelectorMode, RenderExitReason, MessageLevel, RenderMode, RenderProcessNotRespondingReason, WebNavigationType, WebKeyboardOptions, WebOptions, ContextMenuEditStateFlags, ProtectedResourceType, FullScreenEnterEvent, ThreatType, WebKeyboardCallbackInfo, AdsBlockedDetails, ViewportFit, RenderProcessNotRespondingData, NativeEmbedVisibilityInfo, IntelligentTrackingPreventionDetails, FirstMeaningfulPaint, LargestContentfulPaint, SslErrorEvent, LoadCommittedDetails } from "./../ArkWebInterfaces"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, IndexerAlign, AlphabetIndexerOptions } from "./../ArkAlphabetIndexerInterfaces"
 import { OnCheckboxChangeCallback, CheckboxOptions } from "./../ArkCheckboxInterfaces"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../ArkCheckboxgroupInterfaces"
@@ -49,17 +49,17 @@ import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallbac
 import { OnScrollVisibleContentChangeCallback, ListItemGroupArea, ScrollState, ScrollSnapAlign, ListDividerOptions, ListAttribute, ListItemAlign, ChainAnimationOptions, StickyStyle, ChainEdgeEffect, VisibleListContentInfo, CloseSwipeActionOptions, ListOptions } from "./../ArkListInterfaces"
 import { OnTabsAnimationEndCallback, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback, LayoutStyle, DividerStyle, TabsAttribute, BarPosition, BarMode, AnimationMode, BarGridColumnOptions, ScrollableBarModeOptions, TabContentAnimatedTransition, TabsAnimationEvent, TabsOptions } from "./../ArkTabsInterfaces"
 import { PageTransitionCallback, RouteType, SlideEffect } from "./../ArkPageTransitionInterfaces"
-import { PluginErrorCallback, PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../ArkPluginComponentInterfaces"
+import { PluginErrorCallback, PluginComponentTemplate, PluginComponentOptions, PluginErrorData } from "./../ArkPluginComponentInterfaces"
 import { SearchSubmitCallback, CancelButtonStyle, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchAttribute, SearchType, SearchButtonOptions, SearchOptions } from "./../ArkSearchInterfaces"
 import { SliderTriggerChangeCallback, SliderAttribute, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../ArkSliderInterfaces"
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, TextAreaType, TextAreaOptions } from "./../ArkTextAreaInterfaces"
 import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, DirectionalEdgesT, Bias, MarkStyle } from "./../ArkUnitsInterfaces"
-import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../ArkWithThemeInterfaces"
+import { WithThemeInterface, CustomTheme, WithThemeAttribute, WithThemeOptions } from "./../ArkWithThemeInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
-import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, TextCase, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
+import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TextCase, NestedScrollMode, TouchType, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../ArkEnumsInterfaces"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
-import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_String_Unknown_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_ScrollResult_Void, Callback_NavigationTitleMode_Void, Callback_NavigationMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
+import { Tuple_Dimension_Dimension, Callback_GestureEvent_Void, Callback_ClickEvent_Void, Callback_PopInfo_Void, Callback_SwipeActionState_Void, Callback_Void, Callback_DismissPopupAction_Void, Literal_String_script_Callback_String_Void_callback_, Callback_String_Void, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Literal_Object_object__String_name_Array_String_methodList, Callback_TimePickerResult_Void, Callback_TextPickerResult_Void, Tuple_Number_Number, Callback_TabContentTransitionProxy_Void, Callback_StyledStringChangeValue_Boolean, Callback_NavigationTransitionProxy_Void, Callback_Boolean_Void, Callback_Date_Void, Callback_DatePickerResult_Void, Callback_SheetType_Void, Callback_Number_Void, Callback_SpringBackAction_Void, Callback_DismissSheetAction_Void, Callback_SheetDismiss_Void, Callback_DismissContentCoverAction_Void, AnimationRange_Number, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Literal_Number_angle_fingers, Literal_Number_fingers_speed_SwipeDirection_direction, Literal_Number_distance_fingers, Literal_Number_distance_fingers_PanDirection_direction, Literal_Number_duration_fingers_Boolean_repeat, Tuple_ResourceColor_Number, Callback_DismissDialogAction_Void, Callback_UIExtensionProxy_Void, Callback_Array_TouchTestInfo_TouchResult, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Literal_Boolean_next_Axis_direction, Literal_Number_surfaceHeight_surfaceWidth, Callback_OnPageEndEvent_Void, Callback_OnPageBeginEvent_Void, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, Callback_OnGeolocationShowEvent_Void, Callback_OnAlertEvent_Boolean, Callback_OnBeforeUnloadEvent_Boolean, Callback_OnConfirmEvent_Boolean, Callback_OnPromptEvent_Boolean, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, Callback_OnHttpErrorReceiveEvent_Void, Callback_OnDownloadStartEvent_Void, Callback_OnRefreshAccessedHistoryEvent_Void, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, Callback_OnInterceptRequestEvent_WebResourceResponse, Callback_OnPermissionRequestEvent_Void, Callback_OnScreenCaptureRequestEvent_Void, Callback_OnContextMenuShowEvent_Boolean, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, Callback_OnClientAuthenticationEvent_Void, Callback_OnWindowNewEvent_Void, Callback_OnTouchIconUrlReceivedEvent_Void, Callback_OnFaviconReceivedEvent_Void, Callback_OnPageVisibleEvent_Void, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, Callback_OnLoadInterceptEvent_Boolean, Callback_OnOverScrollEvent_Void, Callback_NativeEmbedDataInfo_Void, Callback_NativeEmbedTouchInfo_Void, Callback_Literal_String_plainText_Void, Literal_String_plainText, Callback_Union_String_Array_String_Void, Callback_Union_Number_Array_Number_Void, Callback_ResourceStr_Void, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, Callback_SwiperContentTransitionProxy_Void, Callback_Number_SliderChangeMode_Void, Callback_Union_Number_Resource_Void, Callback_Number_String_Void, Callback_RichEditorSelection_Void, Callback_RichEditorRange_Void, Callback_RichEditorInsertValue_Boolean, Callback_RichEditorTextSpanResult_Void, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, Callback_RichEditorChangeValue_Boolean, Callback_CutEvent_Void, Callback_CopyEvent_Void, Callback_PanelMode_Void, Callback_Boolean, Callback_NavDestinationContext_Void, Callback_Number_Number_Number_Void, Callback_Number_Boolean, Callback_Number_Number_Boolean, onItemDragStart_event_type, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, Callback_Number_Number_ComputedBarAttribute, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, Type_SheetOptions_detents, Literal_ResourceColor_color, Literal_String_value_Callback_Void_action, Literal_Number_day_month_year, AsyncCallback_image_PixelMap_Void, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void, Callback_Literal_Number_code_Want_want_Void, Literal_Number_code_Want_want, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, Callback_FullscreenInfo_Void, Type_TextPickerAttribute_onChange_callback, Callback_String_Number_Void, Callback_ClickEvent_SaveButtonOnClickResult_Void, Callback_RefreshStatus_Void, Callback_Array_Number_Void, Callback_ClickEvent_PasteButtonOnClickResult_Void, Callback_Number_Number_PanelMode_Void, Type_NavigationAttribute_customNavContentTransition_delegate, Callback_String_Unknown_Void, Callback_NavigationMode_Void, Callback_NavigationTitleMode_Void, Callback_ClickEvent_LocationButtonOnClickResult_Void, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, Callback_Any_Void, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, Callback_FormCallbackInfo_Void, Callback_TerminationInfo_Void, Literal_String_anchor_HorizontalAlign_align, Literal_String_anchor_VerticalAlign_align, Callback_CalendarRequestedData_Void, Callback_CalendarSelectedDate_Void } from "./../SyntheticDeclarations"
 import { ICurve, ICurveInternal } from "./../ArkICurveMaterialized"
 import { TextBackgroundStyle } from "./../ArkSpanInterfaces"
 import { ImageAttachmentLayoutStyle, UserDataSpan, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, ParagraphStyleInterface, ImageAttachmentInterface, GestureStyleInterface, DecorationStyleInterface, TextStyleInterface, StyledStringKey, StyleOptions, SpanStyle, StyledStringValue } from "./../ArkStyledStringInterfaces"
@@ -85,14 +85,13 @@ import { TransitionEffect, TransitionEffectInternal } from "./../ArkTransitionEf
 import { CanvasPattern, CanvasPatternInternal } from "./../ArkCanvasPatternMaterialized"
 import { Matrix2D, Matrix2DInternal } from "./../ArkMatrix2DMaterialized"
 import { CanvasGradient, CanvasGradientInternal } from "./../ArkCanvasGradientMaterialized"
-import { NavigationTransitionProxy, NavigationTransitionProxyInternal } from "./../ArkNavigationTransitionProxyMaterialized"
 import { ColorMetrics, ColorMetricsInternal } from "./../ArkColorMetricsMaterialized"
 import { ImageAnalyzerController, ImageAnalyzerControllerInternal } from "./../ArkImageAnalyzerControllerMaterialized"
 import { ImageAnalyzerType, ImageAIOptions, ImageAnalyzerConfig } from "./../ArkImageCommonInterfaces"
-import { WebResourceRequest, WebResourceRequestInternal } from "./../ArkWebResourceRequestMaterialized"
 import { WebviewController, WebviewControllerInternal } from "./../ArkWebviewControllerMaterialized"
 import { WebController, WebControllerInternal } from "./../ArkWebControllerMaterialized"
 import { WebCookie, WebCookieInternal } from "./../ArkWebCookieMaterialized"
+import { WebResourceRequest, WebResourceRequestInternal } from "./../ArkWebResourceRequestMaterialized"
 import { PlaybackSpeed, SeekMode, PlaybackInfo, PreparedInfo, FullscreenInfo, VideoOptions } from "./../ArkVideoInterfaces"
 import { DateTimeOptions, TimePickerResult, TimePickerFormat, TimePickerDialogOptions, TimePickerOptions } from "./../ArkTimePickerInterfaces"
 import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogParamWithOptions, AlertDialogParam, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParamWithConfirm } from "./../ArkAlertDialogInterfaces"
@@ -101,6 +100,7 @@ import { TextMenuItemId, TextMenuItemIdInternal } from "./../ArkTextMenuItemIdMa
 import { TabContentTransitionProxy, TabContentTransitionProxyInternal } from "./../ArkTabContentTransitionProxyMaterialized"
 import { ProgressStatus, ProgressStyleOptions, CommonProgressStyleOptions, CapsuleStyleOptions, ScanEffectOptions, RingStyleOptions, LinearStyleOptions, ProgressType, ProgressStyle, ProgressOptions } from "./../ArkProgressInterfaces"
 import { NavDestinationMode, RouteMapConfig, NavDestinationAttribute, NavigationSystemTransitionType, NavDestinationCommonTitle, NavDestinationCustomTitle } from "./../ArkNavDestinationInterfaces"
+import { NavigationTransitionProxy, NavigationTransitionProxyInternal } from "./../ArkNavigationTransitionProxyMaterialized"
 import { NavPathStack, NavPathStackInternal } from "./../ArkNavPathStackMaterialized"
 import { NavPathInfo, NavPathInfoInternal } from "./../ArkNavPathInfoMaterialized"
 import { NavDestinationContext, NavDestinationContextInternal } from "./../ArkNavDestinationContextMaterialized"
@@ -124,6 +124,7 @@ import { FrameNode, FrameNodeInternal } from "./../ArkFrameNodeMaterialized"
 import { BadgePosition, BadgeStyle, BadgeParamWithString, BadgeParam, BadgeParamWithNumber } from "./../ArkBadgeInterfaces"
 import { DismissDialogAction, ActionSheetOffset, ActionSheetButtonOptions, ActionSheetOptions, SheetInfo } from "./../ArkActionSheetInterfaces"
 import { StyledString, StyledStringInternal } from "./../ArkStyledStringMaterialized"
+import { Profiler } from "./../ArkProfilerNamespace"
 import { DpiFollowStrategy, ReceiveCallback, UIExtensionOptions } from "./../ArkUiExtensionComponentInterfaces"
 import { UIExtensionProxy, UIExtensionProxyInternal } from "./../ArkUIExtensionProxyMaterialized"
 import { DrawModifier, DrawModifierInternal } from "./../ArkDrawModifierMaterialized"
@@ -149,7 +150,6 @@ import { XComponentController, XComponentControllerInternal } from "./../ArkXCom
 import { WindowSceneAttribute } from "./../ArkWindowSceneInterfaces"
 import { WebResourceResponse, WebResourceResponseInternal } from "./../ArkWebResourceResponseMaterialized"
 import { EditMenuOptions, EditMenuOptionsInternal } from "./../ArkEditMenuOptionsMaterialized"
-import { WebKeyboardController, WebKeyboardControllerInternal } from "./../ArkWebKeyboardControllerMaterialized"
 import { EventResult, EventResultInternal } from "./../ArkEventResultMaterialized"
 import { BaseEvent, BaseEventInternal } from "./../ArkBaseEventMaterialized"
 import { DataResubmissionHandler, DataResubmissionHandlerInternal } from "./../ArkDataResubmissionHandlerMaterialized"
@@ -161,13 +161,14 @@ import { WebContextMenuParam, WebContextMenuParamInternal } from "./../ArkWebCon
 import { ScreenCaptureHandler, ScreenCaptureHandlerInternal } from "./../ArkScreenCaptureHandlerMaterialized"
 import { PermissionRequest, PermissionRequestInternal } from "./../ArkPermissionRequestMaterialized"
 import { HttpAuthHandler, HttpAuthHandlerInternal } from "./../ArkHttpAuthHandlerMaterialized"
-import { FullScreenExitHandler, FullScreenExitHandlerInternal } from "./../ArkFullScreenExitHandlerMaterialized"
 import { FileSelectorParam, FileSelectorParamInternal } from "./../ArkFileSelectorParamMaterialized"
 import { FileSelectorResult, FileSelectorResultInternal } from "./../ArkFileSelectorResultMaterialized"
 import { WebResourceError, WebResourceErrorInternal } from "./../ArkWebResourceErrorMaterialized"
 import { ConsoleMessage, ConsoleMessageInternal } from "./../ArkConsoleMessageMaterialized"
 import { JsResult, JsResultInternal } from "./../ArkJsResultMaterialized"
 import { JsGeolocation, JsGeolocationInternal } from "./../ArkJsGeolocationMaterialized"
+import { FullScreenExitHandler, FullScreenExitHandlerInternal } from "./../ArkFullScreenExitHandlerMaterialized"
+import { WebKeyboardController, WebKeyboardControllerInternal } from "./../ArkWebKeyboardControllerMaterialized"
 import { VideoController, VideoControllerInternal } from "./../ArkVideoControllerMaterialized"
 import { ToggleType, SwitchStyle, ToggleOptions } from "./../ArkToggleInterfaces"
 import { TextTimerController, TextTimerControllerInternal } from "./../ArkTextTimerControllerMaterialized"
@@ -182,6 +183,7 @@ import { TextController, TextControllerInternal } from "./../ArkTextControllerMa
 import { BottomTabBarStyle } from "./../ArkBottomTabBarStyleBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
 import { TabsController, TabsControllerInternal } from "./../ArkTabsControllerMaterialized"
+import { SymbolEffect, SymbolEffectInternal } from "./../ArkSymbolEffectMaterialized"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { Indicator } from "./../ArkIndicatorBuilder"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
@@ -207,6 +209,7 @@ import { PanelMode, PanelHeight, PanelType } from "./../ArkPanelInterfaces"
 import { NavigationType } from "./../ArkNavigatorInterfaces"
 import { MenuItemOptions } from "./../ArkMenuItemInterfaces"
 import { ASTCResource } from "./../ArkMediaCachedImageInterfaces"
+import { DrawableDescriptor, DrawableDescriptorInternal } from "./../ArkDrawableDescriptorMaterialized"
 import { LocationDescription, LocationIconStyle, LocationButtonOnClickResult, LocationButtonOptions } from "./../ArkLocationButtonInterfaces"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../ArkListItemGroupInterfaces"
 import { ChildrenMainSize, ChildrenMainSizeInternal } from "./../ArkChildrenMainSizeMaterialized"
@@ -232,13 +235,14 @@ import { RenderingContextSettings, RenderingContextSettingsInternal } from "./..
 import { OffscreenCanvasRenderingContext2D, OffscreenCanvasRenderingContext2DInternal } from "./../ArkOffscreenCanvasRenderingContext2DMaterialized"
 import { CalendarDialogOptions, CalendarOptions, CalendarPickerAttribute, CalendarAlign } from "./../ArkCalendarPickerInterfaces"
 import { CalendarController, CalendarControllerInternal } from "./../ArkCalendarControllerMaterialized"
-import { MonthData, CalendarDay, CalendarRequestedData, CalendarSelectedDate, WorkStateStyle, WeekStyle, TodayStyle, NonCurrentDayStyle, CurrentDayStyle } from "./../ArkCalendarInterfaces"
+import { MonthData, CalendarDay, WorkStateStyle, WeekStyle, TodayStyle, NonCurrentDayStyle, CurrentDayStyle, CalendarRequestedData, CalendarSelectedDate } from "./../ArkCalendarInterfaces"
 import { BaseShape, BaseShapeInternal } from "./../ArkBaseShapeMaterialized"
 import { CommonShape, CommonShapeInternal } from "./../ArkCommonShapeMaterialized"
 import { LinearIndicatorController, LinearIndicatorControllerInternal } from "./../ArkLinearIndicatorControllerMaterialized"
 import { TextTimerOptions } from "./../ArkTextTimerInterfaces"
 import { SubmitEvent, SubmitEventInternal } from "./../ArkSubmitEventMaterialized"
 import { TextClockOptions } from "./../ArkTextClockInterfaces"
+import { PulseSymbolEffect, PulseSymbolEffectInternal } from "./../ArkPulseSymbolEffectMaterialized"
 import { BounceSymbolEffect, BounceSymbolEffectInternal } from "./../ArkBounceSymbolEffectMaterialized"
 import { DisappearSymbolEffect, DisappearSymbolEffectInternal } from "./../ArkDisappearSymbolEffectMaterialized"
 import { AppearSymbolEffect, AppearSymbolEffectInternal } from "./../ArkAppearSymbolEffectMaterialized"
@@ -277,7 +281,6 @@ import { LongPressGestureEvent, LongPressGestureEventInternal } from "./../ArkLo
 import { TapGestureEvent, TapGestureEventInternal } from "./../ArkTapGestureEventMaterialized"
 import { GaugeIndicatorOptions, GaugeShadowOptions, GaugeOptions } from "./../ArkGaugeInterfaces"
 import { FormLinkOptions } from "./../ArkFormLinkInterfaces"
-import { BusinessError } from "./../ArkBaseInterfaces"
 import { TerminationInfo } from "./../ArkEmbeddedComponentInterfaces"
 import { EllipseOptions } from "./../ArkEllipseInterfaces"
 import { CustomDialogControllerOptions } from "./../ArkCustomDialogControllerInterfaces"
@@ -296,9 +299,14 @@ import { FrictionMotion, FrictionMotionInternal } from "./../ArkFrictionMotionMa
 import { SpringMotion, SpringMotionInternal } from "./../ArkSpringMotionMaterialized"
 import { ReplaceSymbolEffect, ReplaceSymbolEffectInternal } from "./../ArkReplaceSymbolEffectMaterialized"
 import { ScaleSymbolEffect, ScaleSymbolEffectInternal } from "./../ArkScaleSymbolEffectMaterialized"
+import { BusinessError } from "./../ArkBaseInterfaces"
+import { AnimationOptions } from "./../ArkArkuiDrawabledescriptorInterfaces"
+import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal } from "./../ArkAnimatedDrawableDescriptorMaterialized"
+import { PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../ArkPixelMapDrawableDescriptorMaterialized"
+import { LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal } from "./../ArkLayeredDrawableDescriptorMaterialized"
 
 export class Deserializer extends DeserializerBase {
-     constructor(data: KUint8ArrayPtr, length: int32) {
+    constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
     }
     readResource(): Resource {
@@ -1147,7 +1155,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeGestureEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1161,7 +1169,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1175,7 +1183,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePopInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1188,8 +1196,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((state as SwipeActionState) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(state.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1202,7 +1210,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1219,7 +1227,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : KPointer | undefined;
     const _continuationCallback : ((value: KPointer) => void) = (value: KPointer):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as KPointer); }
     }
@@ -1440,7 +1448,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissPopupAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1463,35 +1471,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_NavigationTransitionProxy_Void(isSync: boolean = false): ((transitionProxy: NavigationTransitionProxy) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (transitionProxy: NavigationTransitionProxy):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNavigationTransitionProxy(transitionProxy);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Boolean_Void(isSync: boolean = false): ((parameter: boolean) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: boolean):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeBoolean(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1513,7 +1493,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : number | undefined;
     const _continuationCallback : ((index: number) => void) = (value: number):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2076995110, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2076995110, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2076995110, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2076995110, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as number); }
     }
@@ -1521,6 +1501,16 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return ImageAnalyzerControllerInternal.fromPtr(ptr)
+    }
+    readWebviewController(): WebviewController {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return WebviewControllerInternal.fromPtr(ptr)
+    }
+    readWebController(): WebController {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return WebControllerInternal.fromPtr(ptr)
     }
     readEventTarget(): EventTarget {
         let valueDeserializer : Deserializer = this
@@ -1533,16 +1523,6 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return WebResourceRequestInternal.fromPtr(ptr)
     }
-    readWebviewController(): WebviewController {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return WebviewControllerInternal.fromPtr(ptr)
-    }
-    readWebController(): WebController {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return WebControllerInternal.fromPtr(ptr)
-    }
     readCallback_String_Void(isSync: boolean = false): ((breakpoints: string) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -1553,7 +1533,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(breakpoints);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1573,7 +1553,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTimePickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1557859605, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1557859605, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1557859605, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1557859605, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1836,7 +1816,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextPickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1290504509, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1290504509, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1290504509, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1290504509, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1856,7 +1836,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(start);
     _argsSerializer.writeNumber(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-614475458, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-614475458, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-614475458, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-614475458, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2129,7 +2109,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTabContentTransitionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1223938478, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1223938478, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1223938478, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1223938478, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2419,7 +2399,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextRange(rangeBefore);
     _argsSerializer.writeTextRange(rangeAfter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1648184341, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1648184341, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1648184341, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1648184341, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2436,7 +2416,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2116745428, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2116745428, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2116745428, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2116745428, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -2663,6 +2643,34 @@ export class Deserializer extends DeserializerBase {
         let value : RichEditorGesture = ({onClick: onClick_result, onLongPress: onLongPress_result} as RichEditorGesture)
         return value
     }
+    readCallback_NavigationTransitionProxy_Void(isSync: boolean = false): ((transitionProxy: NavigationTransitionProxy) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (transitionProxy: NavigationTransitionProxy):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNavigationTransitionProxy(transitionProxy);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_Boolean_Void(isSync: boolean = false): ((parameter: boolean) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readNavPathStack(): NavPathStack {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
@@ -2682,8 +2690,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((mode as NavigationMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1502213270, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1502213270, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1502213270, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1502213270, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2720,9 +2728,9 @@ export class Deserializer extends DeserializerBase {
         const to_1  = to as NavBar;
         _argsSerializer.writeString(to_1);
     }
-    _argsSerializer.writeInt32(((operation as NavigationOperation) as int32));
+    _argsSerializer.writeInt32(operation.valueOf());
     _argsSerializer.writeBoolean(isAnimated);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1852781814, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1852781814, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1852781814, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1852781814, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2927,7 +2935,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt64((parameter.getTime() as int64));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1405382363, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1405382363, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1405382363, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1405382363, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2941,7 +2949,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDatePickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1280920532, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1280920532, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1280920532, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1280920532, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3051,8 +3059,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((parameter as SheetType) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-224451112, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-224451112, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(parameter.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-224451112, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-224451112, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3066,7 +3074,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(36519084, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(36519084, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(36519084, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(36519084, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3080,7 +3088,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSpringBackAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1536231691, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1536231691, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1536231691, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1536231691, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3094,7 +3102,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissSheetAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(889549796, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(889549796, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(889549796, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(889549796, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3108,7 +3116,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSheetDismiss(sheetDismiss);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(22609082, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(22609082, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(22609082, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(22609082, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3122,7 +3130,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissContentCoverAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1283506641, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1283506641, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1283506641, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1283506641, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3167,7 +3175,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const event_isVisible  = event.isVisible;
     _argsSerializer.writeBoolean(event_isVisible);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1561407084, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1561407084, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1561407084, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1561407084, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3604,7 +3612,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissDialogAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2095828093, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2095828093, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2095828093, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2095828093, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3778,7 +3786,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-733525640, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-733525640, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-733525640, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-733525640, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3792,141 +3800,28 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFloat32(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1264236374, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1264236374, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1264236374, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1264236374, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readCustomTheme(): CustomTheme {
-        let valueDeserializer : Deserializer = this
-        const _CustomThemeStub_result : string = (valueDeserializer.readString() as string)
-        let value : CustomTheme = ({_CustomThemeStub: _CustomThemeStub_result} as CustomTheme)
-        return value
-    }
-    readRestrictedWorker(): RestrictedWorker {
-        let valueDeserializer : Deserializer = this
-        const _RestrictedWorkerStub_result : string = (valueDeserializer.readString() as string)
-        let value : RestrictedWorker = ({_RestrictedWorkerStub: _RestrictedWorkerStub_result} as RestrictedWorker)
-        return value
-    }
-    readWant(): Want {
-        let valueDeserializer : Deserializer = this
-        const bundleName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bundleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (bundleName_buf_runtimeType))
-        {
-            bundleName_buf = (valueDeserializer.readString() as string)
-        }
-        const bundleName_result : string | undefined = bundleName_buf
-        const abilityName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let abilityName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (abilityName_buf_runtimeType))
-        {
-            abilityName_buf = (valueDeserializer.readString() as string)
-        }
-        const abilityName_result : string | undefined = abilityName_buf
-        const deviceId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let deviceId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (deviceId_buf_runtimeType))
-        {
-            deviceId_buf = (valueDeserializer.readString() as string)
-        }
-        const deviceId_result : string | undefined = deviceId_buf
-        const uri_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let uri_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (uri_buf_runtimeType))
-        {
-            uri_buf = (valueDeserializer.readString() as string)
-        }
-        const uri_result : string | undefined = uri_buf
-        const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let type_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
-        {
-            type_buf = (valueDeserializer.readString() as string)
-        }
-        const type_result : string | undefined = type_buf
-        const flags_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let flags_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (flags_buf_runtimeType))
-        {
-            flags_buf = (valueDeserializer.readNumber() as number)
-        }
-        const flags_result : number | undefined = flags_buf
-        const action_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let action_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (action_buf_runtimeType))
-        {
-            action_buf = (valueDeserializer.readString() as string)
-        }
-        const action_result : string | undefined = action_buf
-        const parameters_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let parameters_buf : Map<string, Object> | undefined
-        if ((RuntimeType.UNDEFINED) != (parameters_buf_runtimeType))
-        {
-            const parameters_buf__size : int32 = valueDeserializer.readInt32()
-            let parameters_buf_ : Map<string, Object> = new Map<string, Object>()
-            // TODO: TS map resize
-            for (let parameters_buf__i = 0; parameters_buf__i < parameters_buf__size; parameters_buf__i++) {
-                const parameters_buf__key : string = (valueDeserializer.readString() as string)
-                const parameters_buf__value : Object = (valueDeserializer.readCustomObject("Object") as Object)
-                parameters_buf_.set(parameters_buf__key, parameters_buf__value)
-            }
-            parameters_buf = parameters_buf_
-        }
-        const parameters_result : Map<string, Object> | undefined = parameters_buf
-        const entities_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let entities_buf : Array<string> | undefined
-        if ((RuntimeType.UNDEFINED) != (entities_buf_runtimeType))
-        {
-            const entities_buf__length : int32 = valueDeserializer.readInt32()
-            let entities_buf_ : Array<string> = new Array<string>(entities_buf__length)
-            for (let entities_buf__i = 0; entities_buf__i < entities_buf__length; entities_buf__i++) {
-                entities_buf_[entities_buf__i] = (valueDeserializer.readString() as string)
-            }
-            entities_buf = entities_buf_
-        }
-        const entities_result : Array<string> | undefined = entities_buf
-        const moduleName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let moduleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (moduleName_buf_runtimeType))
-        {
-            moduleName_buf = (valueDeserializer.readString() as string)
-        }
-        const moduleName_result : string | undefined = moduleName_buf
-        let value : Want = ({bundleName: bundleName_result, abilityName: abilityName_result, deviceId: deviceId_result, uri: uri_result, type: type_result, flags: flags_result, action: action_result, parameters: parameters_result, entities: entities_result, moduleName: moduleName_result} as Want)
-        return value
     }
     readStyledString(): StyledString {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return StyledStringInternal.fromPtr(ptr)
     }
-    readNavigationAnimatedTransition(): NavigationAnimatedTransition {
-        let valueDeserializer : Deserializer = this
-        const onTransitionEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onTransitionEnd_buf : ((parameter: boolean) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onTransitionEnd_buf_runtimeType))
-        {
-            onTransitionEnd_buf = valueDeserializer.readCallback_Boolean_Void()
-        }
-        const onTransitionEnd_result : ((parameter: boolean) => void) | undefined = onTransitionEnd_buf
-        const timeout_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let timeout_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (timeout_buf_runtimeType))
-        {
-            timeout_buf = (valueDeserializer.readNumber() as number)
-        }
-        const timeout_result : number | undefined = timeout_buf
-        const isInteractive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let isInteractive_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isInteractive_buf_runtimeType))
-        {
-            isInteractive_buf = valueDeserializer.readBoolean()
-        }
-        const isInteractive_result : boolean | undefined = isInteractive_buf
-        const transition_result : ((transitionProxy: NavigationTransitionProxy) => void) = valueDeserializer.readCallback_NavigationTransitionProxy_Void()
-        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEnd_result, timeout: timeout_result, isInteractive: isInteractive_result, transition: transition_result} as NavigationAnimatedTransition)
-        return value
+    readProfiler_Callback_String_Void(isSync: boolean = false): Callback_String_Void {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (info: string):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeString(info);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readOnLinearIndicatorChangeCallback(isSync: boolean = false): OnLinearIndicatorChangeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -3939,7 +3834,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(progress);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-968773856, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-968773856, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-968773856, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-968773856, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -4089,6 +3984,100 @@ export class Deserializer extends DeserializerBase {
         let value : SpanStyle = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as SpanStyle)
         return value
     }
+    readRestrictedWorker(): RestrictedWorker {
+        let valueDeserializer : Deserializer = this
+        const _RestrictedWorkerStub_result : string = (valueDeserializer.readString() as string)
+        let value : RestrictedWorker = ({_RestrictedWorkerStub: _RestrictedWorkerStub_result} as RestrictedWorker)
+        return value
+    }
+    readWant(): Want {
+        let valueDeserializer : Deserializer = this
+        const bundleName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bundleName_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (bundleName_buf_runtimeType))
+        {
+            bundleName_buf = (valueDeserializer.readString() as string)
+        }
+        const bundleName_result : string | undefined = bundleName_buf
+        const abilityName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let abilityName_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (abilityName_buf_runtimeType))
+        {
+            abilityName_buf = (valueDeserializer.readString() as string)
+        }
+        const abilityName_result : string | undefined = abilityName_buf
+        const deviceId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let deviceId_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (deviceId_buf_runtimeType))
+        {
+            deviceId_buf = (valueDeserializer.readString() as string)
+        }
+        const deviceId_result : string | undefined = deviceId_buf
+        const uri_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let uri_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (uri_buf_runtimeType))
+        {
+            uri_buf = (valueDeserializer.readString() as string)
+        }
+        const uri_result : string | undefined = uri_buf
+        const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let type_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        {
+            type_buf = (valueDeserializer.readString() as string)
+        }
+        const type_result : string | undefined = type_buf
+        const flags_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let flags_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (flags_buf_runtimeType))
+        {
+            flags_buf = (valueDeserializer.readNumber() as number)
+        }
+        const flags_result : number | undefined = flags_buf
+        const action_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let action_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (action_buf_runtimeType))
+        {
+            action_buf = (valueDeserializer.readString() as string)
+        }
+        const action_result : string | undefined = action_buf
+        const parameters_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let parameters_buf : Map<string, Object> | undefined
+        if ((RuntimeType.UNDEFINED) != (parameters_buf_runtimeType))
+        {
+            const parameters_buf__size : int32 = valueDeserializer.readInt32()
+            let parameters_buf_ : Map<string, Object> = new Map<string, Object>()
+            // TODO: TS map resize
+            for (let parameters_buf__i = 0; parameters_buf__i < parameters_buf__size; parameters_buf__i++) {
+                const parameters_buf__key : string = (valueDeserializer.readString() as string)
+                const parameters_buf__value : Object = (valueDeserializer.readCustomObject("Object") as Object)
+                parameters_buf_.set(parameters_buf__key, parameters_buf__value)
+            }
+            parameters_buf = parameters_buf_
+        }
+        const parameters_result : Map<string, Object> | undefined = parameters_buf
+        const entities_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let entities_buf : Array<string> | undefined
+        if ((RuntimeType.UNDEFINED) != (entities_buf_runtimeType))
+        {
+            const entities_buf__length : int32 = valueDeserializer.readInt32()
+            let entities_buf_ : Array<string> = new Array<string>(entities_buf__length)
+            for (let entities_buf__i = 0; entities_buf__i < entities_buf__length; entities_buf__i++) {
+                entities_buf_[entities_buf__i] = (valueDeserializer.readString() as string)
+            }
+            entities_buf = entities_buf_
+        }
+        const entities_result : Array<string> | undefined = entities_buf
+        const moduleName_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let moduleName_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (moduleName_buf_runtimeType))
+        {
+            moduleName_buf = (valueDeserializer.readString() as string)
+        }
+        const moduleName_result : string | undefined = moduleName_buf
+        let value : Want = ({bundleName: bundleName_result, abilityName: abilityName_result, deviceId: deviceId_result, uri: uri_result, type: type_result, flags: flags_result, action: action_result, parameters: parameters_result, entities: entities_result, moduleName: moduleName_result} as Want)
+        return value
+    }
     readCallback_UIExtensionProxy_Void(isSync: boolean = false): ((parameter: UIExtensionProxy) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -4099,7 +4088,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeUIExtensionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1063506522, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1063506522, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1063506522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1063506522, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -4418,11 +4407,6 @@ export class Deserializer extends DeserializerBase {
         let value : SelectionMenuOptionsExt = ({onAppear: onAppear_result, onDisappear: onDisappear_result, preview: preview_result, menuType: menuType_result} as SelectionMenuOptionsExt)
         return value
     }
-    readWebKeyboardController(): WebKeyboardController {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return WebKeyboardControllerInternal.fromPtr(ptr)
-    }
     readCallback_Literal_String_plainText_Void(isSync: boolean = false): ((selectedText: Literal_String_plainText) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -4434,9 +4418,49 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const selectedText_plainText  = selectedText.plainText;
     _argsSerializer.writeString(selectedText_plainText);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-122223466, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-122223466, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-122223466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-122223466, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    readNestedScrollOptionsExt(): NestedScrollOptionsExt {
+        let valueDeserializer : Deserializer = this
+        const scrollUp_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let scrollUp_buf : NestedScrollMode | undefined
+        if ((RuntimeType.UNDEFINED) != (scrollUp_buf_runtimeType))
+        {
+            scrollUp_buf = (valueDeserializer.readInt32() as NestedScrollMode)
+        }
+        const scrollUp_result : NestedScrollMode | undefined = scrollUp_buf
+        const scrollDown_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let scrollDown_buf : NestedScrollMode | undefined
+        if ((RuntimeType.UNDEFINED) != (scrollDown_buf_runtimeType))
+        {
+            scrollDown_buf = (valueDeserializer.readInt32() as NestedScrollMode)
+        }
+        const scrollDown_result : NestedScrollMode | undefined = scrollDown_buf
+        const scrollRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let scrollRight_buf : NestedScrollMode | undefined
+        if ((RuntimeType.UNDEFINED) != (scrollRight_buf_runtimeType))
+        {
+            scrollRight_buf = (valueDeserializer.readInt32() as NestedScrollMode)
+        }
+        const scrollRight_result : NestedScrollMode | undefined = scrollRight_buf
+        const scrollLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let scrollLeft_buf : NestedScrollMode | undefined
+        if ((RuntimeType.UNDEFINED) != (scrollLeft_buf_runtimeType))
+        {
+            scrollLeft_buf = (valueDeserializer.readInt32() as NestedScrollMode)
+        }
+        const scrollLeft_result : NestedScrollMode | undefined = scrollLeft_buf
+        let value : NestedScrollOptionsExt = ({scrollUp: scrollUp_result, scrollDown: scrollDown_result, scrollRight: scrollRight_result, scrollLeft: scrollLeft_result} as NestedScrollOptionsExt)
+        return value
+    }
+    readNestedScrollOptions(): NestedScrollOptions {
+        let valueDeserializer : Deserializer = this
+        const scrollForward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
+        const scrollBackward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
+        let value : NestedScrollOptions = ({scrollForward: scrollForward_result, scrollBackward: scrollBackward_result} as NestedScrollOptions)
+        return value
     }
     readEventResult(): EventResult {
         let valueDeserializer : Deserializer = this
@@ -4524,46 +4548,6 @@ export class Deserializer extends DeserializerBase {
         let value : NativeEmbedInfo = ({id: id_result, type: type_result, src: src_result, position: position_result, width: width_result, height: height_result, url: url_result, tag: tag_result, params: params_result} as NativeEmbedInfo)
         return value
     }
-    readNestedScrollOptionsExt(): NestedScrollOptionsExt {
-        let valueDeserializer : Deserializer = this
-        const scrollUp_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scrollUp_buf : NestedScrollMode | undefined
-        if ((RuntimeType.UNDEFINED) != (scrollUp_buf_runtimeType))
-        {
-            scrollUp_buf = (valueDeserializer.readInt32() as NestedScrollMode)
-        }
-        const scrollUp_result : NestedScrollMode | undefined = scrollUp_buf
-        const scrollDown_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scrollDown_buf : NestedScrollMode | undefined
-        if ((RuntimeType.UNDEFINED) != (scrollDown_buf_runtimeType))
-        {
-            scrollDown_buf = (valueDeserializer.readInt32() as NestedScrollMode)
-        }
-        const scrollDown_result : NestedScrollMode | undefined = scrollDown_buf
-        const scrollRight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scrollRight_buf : NestedScrollMode | undefined
-        if ((RuntimeType.UNDEFINED) != (scrollRight_buf_runtimeType))
-        {
-            scrollRight_buf = (valueDeserializer.readInt32() as NestedScrollMode)
-        }
-        const scrollRight_result : NestedScrollMode | undefined = scrollRight_buf
-        const scrollLeft_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let scrollLeft_buf : NestedScrollMode | undefined
-        if ((RuntimeType.UNDEFINED) != (scrollLeft_buf_runtimeType))
-        {
-            scrollLeft_buf = (valueDeserializer.readInt32() as NestedScrollMode)
-        }
-        const scrollLeft_result : NestedScrollMode | undefined = scrollLeft_buf
-        let value : NestedScrollOptionsExt = ({scrollUp: scrollUp_result, scrollDown: scrollDown_result, scrollRight: scrollRight_result, scrollLeft: scrollLeft_result} as NestedScrollOptionsExt)
-        return value
-    }
-    readNestedScrollOptions(): NestedScrollOptions {
-        let valueDeserializer : Deserializer = this
-        const scrollForward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
-        const scrollBackward_result : NestedScrollMode = (valueDeserializer.readInt32() as NestedScrollMode)
-        let value : NestedScrollOptions = ({scrollForward: scrollForward_result, scrollBackward: scrollBackward_result} as NestedScrollOptions)
-        return value
-    }
     readDataResubmissionHandler(): DataResubmissionHandler {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
@@ -4608,11 +4592,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return HttpAuthHandlerInternal.fromPtr(ptr)
-    }
-    readFullScreenExitHandler(): FullScreenExitHandler {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return FullScreenExitHandlerInternal.fromPtr(ptr)
     }
     readFileSelectorParam(): FileSelectorParam {
         let valueDeserializer : Deserializer = this
@@ -4660,10 +4639,26 @@ export class Deserializer extends DeserializerBase {
         let value : ScreenCaptureConfig = ({captureMode: captureMode_result} as ScreenCaptureConfig)
         return value
     }
+    readFullScreenExitHandler(): FullScreenExitHandler {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return FullScreenExitHandlerInternal.fromPtr(ptr)
+    }
+    readWebKeyboardController(): WebKeyboardController {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return WebKeyboardControllerInternal.fromPtr(ptr)
+    }
     readVideoController(): VideoController {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return VideoControllerInternal.fromPtr(ptr)
+    }
+    readCustomTheme(): CustomTheme {
+        let valueDeserializer : Deserializer = this
+        const _CustomThemeStub_result : string = (valueDeserializer.readString() as string)
+        let value : CustomTheme = ({_CustomThemeStub: _CustomThemeStub_result} as CustomTheme)
+        return value
     }
     readTimePickerDialogOptions(): TimePickerDialogOptions {
         let valueDeserializer : Deserializer = this
@@ -5190,7 +5185,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(value_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-720435526, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-720435526, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-720435526, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-720435526, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5219,7 +5214,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeNumber(selected_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1111620998, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1111620998, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1111620998, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1111620998, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5294,7 +5289,7 @@ export class Deserializer extends DeserializerBase {
         const value_1  = value as Resource;
         _argsSerializer.writeResource(value_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(188373904, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(188373904, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(188373904, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(188373904, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5749,8 +5744,9 @@ export class Deserializer extends DeserializerBase {
         throw new Error("Interface with functions is not supported")
     }
     readSymbolEffect(): SymbolEffect {
-        let value : SymbolEffect = ({} as SymbolEffect)
-        return value
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return SymbolEffectInternal.fromPtr(ptr)
     }
     readDigitIndicator(): DigitIndicator {
         throw new Error("Can not deserialize builder class")
@@ -5869,7 +5865,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSwiperContentTransitionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-416053361, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-416053361, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-416053361, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-416053361, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5900,7 +5896,7 @@ export class Deserializer extends DeserializerBase {
         const selected_1  = selected as Resource;
         _argsSerializer.writeResource(selected_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-956455499, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-956455499, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-956455499, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-956455499, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -6082,32 +6078,14 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(xOffset);
     _argsSerializer.writeNumber(yOffset);
-    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
-    _argsSerializer.writeInt32(((scrollSource as ScrollSource) as int32));
+    _argsSerializer.writeInt32(scrollState.valueOf());
+    _argsSerializer.writeInt32(scrollSource.valueOf());
     let _continuationValue : OffsetResult | undefined;
     const _continuationCallback : ((value: OffsetResult) => void) = (value: OffsetResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-721521596, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721521596, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-721521596, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721521596, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as OffsetResult); }
-    }
-    readOnWillScrollCallback(isSync: boolean = false): OnWillScrollCallback {
-        const _resource: CallbackResource = this.readCallbackResource()
-        const _call: KPointer = this.readPointer()
-        const _callSync: KPointer = this.readPointer()
-        return (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource): ScrollResult => { const _argsSerializer: Serializer = Serializer.hold();
-        _argsSerializer.writeInt32(_resource.resourceId);
-        _argsSerializer.writePointer(_call);
-        _argsSerializer.writePointer(_callSync);
-        _argsSerializer.writeNumber(scrollOffset);
-        _argsSerializer.writeInt32((scrollState.valueOf() as int32));
-        _argsSerializer.writeInt32((scrollSource.valueOf() as int32));
-        let _continuationValue: ScrollResult | undefined|undefined ;
-        const _continuationCallback: ((value: ScrollResult) => void) = (value: ScrollResult): void => { _continuationValue = value; }
-        _argsSerializer.holdAndWriteCallback(_continuationCallback);
-        (isSync) ? (InteropNativeModule._CallCallbackSync(-150015401, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-150015401, _argsSerializer.asArray(), _argsSerializer.length()));
-        _argsSerializer.release();
-        return (_continuationValue as ScrollResult); }
     }
     readRectResult(): RectResult {
         let valueDeserializer : Deserializer = this
@@ -6135,12 +6113,6 @@ export class Deserializer extends DeserializerBase {
         const xOffset_result : number = (valueDeserializer.readNumber() as number)
         const yOffset_result : number = (valueDeserializer.readNumber() as number)
         let value : OffsetResult = ({xOffset: xOffset_result, yOffset: yOffset_result} as OffsetResult)
-        return value
-    }
-    readScrollResult(): ScrollResult {
-        let valueDeserializer: Deserializer = this
-        const offsetRemain_result: number = (valueDeserializer.readNumber() as number)
-        let value: ScrollResult = ({offsetRemain: offsetRemain_result} as ScrollResult)
         return value
     }
     readScrollPageOptions(): ScrollPageOptions {
@@ -6998,8 +6970,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((mode as PanelMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(388680218, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(388680218, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(388680218, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(388680218, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7035,6 +7007,33 @@ export class Deserializer extends DeserializerBase {
         }
         const navDestinationId_result : string | undefined = navDestinationId_buf
         let value : NavContentInfo = ({name: name_result, index: index_result, mode: mode_result, param: param_result, navDestinationId: navDestinationId_result} as NavContentInfo)
+        return value
+    }
+    readNavigationAnimatedTransition(): NavigationAnimatedTransition {
+        let valueDeserializer : Deserializer = this
+        const onTransitionEnd_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let onTransitionEnd_buf : ((parameter: boolean) => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (onTransitionEnd_buf_runtimeType))
+        {
+            onTransitionEnd_buf = valueDeserializer.readCallback_Boolean_Void()
+        }
+        const onTransitionEnd_result : ((parameter: boolean) => void) | undefined = onTransitionEnd_buf
+        const timeout_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let timeout_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (timeout_buf_runtimeType))
+        {
+            timeout_buf = (valueDeserializer.readNumber() as number)
+        }
+        const timeout_result : number | undefined = timeout_buf
+        const isInteractive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let isInteractive_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (isInteractive_buf_runtimeType))
+        {
+            isInteractive_buf = valueDeserializer.readBoolean()
+        }
+        const isInteractive_result : boolean | undefined = isInteractive_buf
+        const transition_result : ((transitionProxy: NavigationTransitionProxy) => void) = valueDeserializer.readCallback_NavigationTransitionProxy_Void()
+        let value : NavigationAnimatedTransition = ({onTransitionEnd: onTransitionEnd_result, timeout: timeout_result, isInteractive: isInteractive_result, transition: transition_result} as NavigationAnimatedTransition)
         return value
     }
     readNavDestinationContext(): NavDestinationContext {
@@ -7434,9 +7433,8 @@ export class Deserializer extends DeserializerBase {
     }
     readDrawableDescriptor(): DrawableDescriptor {
         let valueDeserializer : Deserializer = this
-        const _DrawableDescriptorStub_result : string = (valueDeserializer.readString() as string)
-        let value : DrawableDescriptor = ({_DrawableDescriptorStub: _DrawableDescriptorStub_result} as DrawableDescriptor)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DrawableDescriptorInternal.fromPtr(ptr)
     }
     readMatrix2D(): Matrix2D {
         let valueDeserializer : Deserializer = this
@@ -7573,7 +7571,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : [ number, number, number, number ] | undefined;
     const _continuationCallback : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1618565120, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1618565120, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1618565120, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1618565120, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as [ number, number, number, number ]); }
     }
@@ -7590,7 +7588,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : [ number, number ] | undefined;
     const _continuationCallback : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1602877440, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1602877440, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1602877440, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1602877440, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as [ number, number ]); }
     }
@@ -7980,7 +7978,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isExpanding);
     _argsSerializer.writeNumber(currentRatio);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(541663396, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(541663396, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(541663396, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(541663396, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8013,7 +8011,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSizeOptions(oldValue);
     _argsSerializer.writeSizeOptions(newValue);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1716637992, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1716637992, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1716637992, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1716637992, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8027,7 +8025,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeMouseEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1382640094, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1382640094, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1382640094, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1382640094, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8042,7 +8040,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isHover);
     _argsSerializer.writeHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(68560477, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(68560477, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(68560477, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(68560477, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8056,7 +8054,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeKeyEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(707696468, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(707696468, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(707696468, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(707696468, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8070,7 +8068,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTouchEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1676021850, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1676021850, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1676021850, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1676021850, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8167,7 +8165,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : GestureJudgeResult | undefined;
     const _continuationCallback : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2119548940, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2119548940, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2119548940, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2119548940, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as GestureJudgeResult); }
     }
@@ -9971,7 +9969,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(transitionIn);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1878458553, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1878458553, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1878458553, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1878458553, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12620,14 +12618,289 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return (name: string):void => { 
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeString(name);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    readMeasureOptions(): MeasureOptions {
+        let valueDeserializer : Deserializer = this
+        const textContent_buf_selector : int32 = valueDeserializer.readInt8()
+        let textContent_buf : string | Resource | undefined
+        if (textContent_buf_selector == 0) {
+            textContent_buf = (valueDeserializer.readString() as string)
+        }
+        else if (textContent_buf_selector == 1) {
+            textContent_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for textContent_buf has to be chosen through deserialisation.")
+        }
+        const textContent_result : string | Resource = (textContent_buf as string | Resource)
+        const constraintWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let constraintWidth_buf : number | string | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (constraintWidth_buf_runtimeType))
+        {
+            const constraintWidth_buf__selector : int32 = valueDeserializer.readInt8()
+            let constraintWidth_buf_ : number | string | Resource | undefined
+            if (constraintWidth_buf__selector == 0) {
+                constraintWidth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (constraintWidth_buf__selector == 1) {
+                constraintWidth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (constraintWidth_buf__selector == 2) {
+                constraintWidth_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for constraintWidth_buf_ has to be chosen through deserialisation.")
+            }
+            constraintWidth_buf = (constraintWidth_buf_ as number | string | Resource)
+        }
+        const constraintWidth_result : number | string | Resource | undefined = constraintWidth_buf
+        const fontSize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontSize_buf : number | string | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (fontSize_buf_runtimeType))
+        {
+            const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontSize_buf_ : number | string | Resource | undefined
+            if (fontSize_buf__selector == 0) {
+                fontSize_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontSize_buf__selector == 1) {
+                fontSize_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontSize_buf__selector == 2) {
+                fontSize_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontSize_buf_ has to be chosen through deserialisation.")
+            }
+            fontSize_buf = (fontSize_buf_ as number | string | Resource)
+        }
+        const fontSize_result : number | string | Resource | undefined = fontSize_buf
+        const fontStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontStyle_buf : number | FontStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (fontStyle_buf_runtimeType))
+        {
+            const fontStyle_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontStyle_buf_ : number | FontStyle | undefined
+            if (fontStyle_buf__selector == 0) {
+                fontStyle_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontStyle_buf__selector == 1) {
+                fontStyle_buf_ = (valueDeserializer.readInt32() as FontStyle)
+            }
+            else {
+                throw new Error("One of the branches for fontStyle_buf_ has to be chosen through deserialisation.")
+            }
+            fontStyle_buf = (fontStyle_buf_ as number | FontStyle)
+        }
+        const fontStyle_result : number | FontStyle | undefined = fontStyle_buf
+        const fontWeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontWeight_buf : number | string | FontWeight | undefined
+        if ((RuntimeType.UNDEFINED) != (fontWeight_buf_runtimeType))
+        {
+            const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontWeight_buf_ : number | string | FontWeight | undefined
+            if (fontWeight_buf__selector == 0) {
+                fontWeight_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (fontWeight_buf__selector == 1) {
+                fontWeight_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontWeight_buf__selector == 2) {
+                fontWeight_buf_ = (valueDeserializer.readInt32() as FontWeight)
+            }
+            else {
+                throw new Error("One of the branches for fontWeight_buf_ has to be chosen through deserialisation.")
+            }
+            fontWeight_buf = (fontWeight_buf_ as number | string | FontWeight)
+        }
+        const fontWeight_result : number | string | FontWeight | undefined = fontWeight_buf
+        const fontFamily_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let fontFamily_buf : string | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (fontFamily_buf_runtimeType))
+        {
+            const fontFamily_buf__selector : int32 = valueDeserializer.readInt8()
+            let fontFamily_buf_ : string | Resource | undefined
+            if (fontFamily_buf__selector == 0) {
+                fontFamily_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (fontFamily_buf__selector == 1) {
+                fontFamily_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for fontFamily_buf_ has to be chosen through deserialisation.")
+            }
+            fontFamily_buf = (fontFamily_buf_ as string | Resource)
+        }
+        const fontFamily_result : string | Resource | undefined = fontFamily_buf
+        const letterSpacing_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let letterSpacing_buf : number | string | undefined
+        if ((RuntimeType.UNDEFINED) != (letterSpacing_buf_runtimeType))
+        {
+            const letterSpacing_buf__selector : int32 = valueDeserializer.readInt8()
+            let letterSpacing_buf_ : number | string | undefined
+            if (letterSpacing_buf__selector == 0) {
+                letterSpacing_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (letterSpacing_buf__selector == 1) {
+                letterSpacing_buf_ = (valueDeserializer.readString() as string)
+            }
+            else {
+                throw new Error("One of the branches for letterSpacing_buf_ has to be chosen through deserialisation.")
+            }
+            letterSpacing_buf = (letterSpacing_buf_ as number | string)
+        }
+        const letterSpacing_result : number | string | undefined = letterSpacing_buf
+        const textAlign_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let textAlign_buf : number | TextAlign | undefined
+        if ((RuntimeType.UNDEFINED) != (textAlign_buf_runtimeType))
+        {
+            const textAlign_buf__selector : int32 = valueDeserializer.readInt8()
+            let textAlign_buf_ : number | TextAlign | undefined
+            if (textAlign_buf__selector == 0) {
+                textAlign_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (textAlign_buf__selector == 1) {
+                textAlign_buf_ = (valueDeserializer.readInt32() as TextAlign)
+            }
+            else {
+                throw new Error("One of the branches for textAlign_buf_ has to be chosen through deserialisation.")
+            }
+            textAlign_buf = (textAlign_buf_ as number | TextAlign)
+        }
+        const textAlign_result : number | TextAlign | undefined = textAlign_buf
+        const overflow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let overflow_buf : number | TextOverflow | undefined
+        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        {
+            const overflow_buf__selector : int32 = valueDeserializer.readInt8()
+            let overflow_buf_ : number | TextOverflow | undefined
+            if (overflow_buf__selector == 0) {
+                overflow_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (overflow_buf__selector == 1) {
+                overflow_buf_ = (valueDeserializer.readInt32() as TextOverflow)
+            }
+            else {
+                throw new Error("One of the branches for overflow_buf_ has to be chosen through deserialisation.")
+            }
+            overflow_buf = (overflow_buf_ as number | TextOverflow)
+        }
+        const overflow_result : number | TextOverflow | undefined = overflow_buf
+        const maxLines_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let maxLines_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (maxLines_buf_runtimeType))
+        {
+            maxLines_buf = (valueDeserializer.readNumber() as number)
+        }
+        const maxLines_result : number | undefined = maxLines_buf
+        const lineHeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let lineHeight_buf : number | string | Resource | undefined
+        if ((RuntimeType.UNDEFINED) != (lineHeight_buf_runtimeType))
+        {
+            const lineHeight_buf__selector : int32 = valueDeserializer.readInt8()
+            let lineHeight_buf_ : number | string | Resource | undefined
+            if (lineHeight_buf__selector == 0) {
+                lineHeight_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (lineHeight_buf__selector == 1) {
+                lineHeight_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (lineHeight_buf__selector == 2) {
+                lineHeight_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for lineHeight_buf_ has to be chosen through deserialisation.")
+            }
+            lineHeight_buf = (lineHeight_buf_ as number | string | Resource)
+        }
+        const lineHeight_result : number | string | Resource | undefined = lineHeight_buf
+        const baselineOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let baselineOffset_buf : number | string | undefined
+        if ((RuntimeType.UNDEFINED) != (baselineOffset_buf_runtimeType))
+        {
+            const baselineOffset_buf__selector : int32 = valueDeserializer.readInt8()
+            let baselineOffset_buf_ : number | string | undefined
+            if (baselineOffset_buf__selector == 0) {
+                baselineOffset_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (baselineOffset_buf__selector == 1) {
+                baselineOffset_buf_ = (valueDeserializer.readString() as string)
+            }
+            else {
+                throw new Error("One of the branches for baselineOffset_buf_ has to be chosen through deserialisation.")
+            }
+            baselineOffset_buf = (baselineOffset_buf_ as number | string)
+        }
+        const baselineOffset_result : number | string | undefined = baselineOffset_buf
+        const textCase_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let textCase_buf : number | TextCase | undefined
+        if ((RuntimeType.UNDEFINED) != (textCase_buf_runtimeType))
+        {
+            const textCase_buf__selector : int32 = valueDeserializer.readInt8()
+            let textCase_buf_ : number | TextCase | undefined
+            if (textCase_buf__selector == 0) {
+                textCase_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (textCase_buf__selector == 1) {
+                textCase_buf_ = (valueDeserializer.readInt32() as TextCase)
+            }
+            else {
+                throw new Error("One of the branches for textCase_buf_ has to be chosen through deserialisation.")
+            }
+            textCase_buf = (textCase_buf_ as number | TextCase)
+        }
+        const textCase_result : number | TextCase | undefined = textCase_buf
+        const textIndent_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let textIndent_buf : number | string | undefined
+        if ((RuntimeType.UNDEFINED) != (textIndent_buf_runtimeType))
+        {
+            const textIndent_buf__selector : int32 = valueDeserializer.readInt8()
+            let textIndent_buf_ : number | string | undefined
+            if (textIndent_buf__selector == 0) {
+                textIndent_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (textIndent_buf__selector == 1) {
+                textIndent_buf_ = (valueDeserializer.readString() as string)
+            }
+            else {
+                throw new Error("One of the branches for textIndent_buf_ has to be chosen through deserialisation.")
+            }
+            textIndent_buf = (textIndent_buf_ as number | string)
+        }
+        const textIndent_result : number | string | undefined = textIndent_buf
+        const wordBreak_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let wordBreak_buf : WordBreak | undefined
+        if ((RuntimeType.UNDEFINED) != (wordBreak_buf_runtimeType))
+        {
+            wordBreak_buf = (valueDeserializer.readInt32() as WordBreak)
+        }
+        const wordBreak_result : WordBreak | undefined = wordBreak_buf
+        let value : MeasureOptions = ({textContent: textContent_result, constraintWidth: constraintWidth_result, fontSize: fontSize_result, fontStyle: fontStyle_result, fontWeight: fontWeight_result, fontFamily: fontFamily_result, letterSpacing: letterSpacing_result, textAlign: textAlign_result, overflow: overflow_result, maxLines: maxLines_result, lineHeight: lineHeight_result, baselineOffset: baselineOffset_result, textCase: textCase_result, textIndent: textIndent_result, wordBreak: wordBreak_result} as MeasureOptions)
+        return value
+    }
+    readFontInfo(): FontInfo {
+        let valueDeserializer : Deserializer = this
+        const path_result : string = (valueDeserializer.readString() as string)
+        const postScriptName_result : string = (valueDeserializer.readString() as string)
+        const fullName_result : string = (valueDeserializer.readString() as string)
+        const family_result : string = (valueDeserializer.readString() as string)
+        const subfamily_result : string = (valueDeserializer.readString() as string)
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        const width_result : number = (valueDeserializer.readNumber() as number)
+        const italic_result : boolean = valueDeserializer.readBoolean()
+        const monoSpace_result : boolean = valueDeserializer.readBoolean()
+        const symbolic_result : boolean = valueDeserializer.readBoolean()
+        let value : FontInfo = ({path: path_result, postScriptName: postScriptName_result, fullName: fullName_result, family: family_result, subfamily: subfamily_result, weight: weight_result, width: width_result, italic: italic_result, monoSpace: monoSpace_result, symbolic: symbolic_result} as FontInfo)
+        return value
     }
     readFontOptions(): FontOptions {
         let valueDeserializer : Deserializer = this
@@ -12852,7 +13125,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePixelMap(result);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1289587365, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1289587365, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1289587365, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1289587365, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12868,7 +13141,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(index);
     _argsSerializer.writePointer(mark);
     _argsSerializer.writeInt32(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12911,149 +13184,6 @@ export class Deserializer extends DeserializerBase {
         let value : DoubleAnimationParam = ({propertyName: propertyName_result, startValue: startValue_result, endValue: endValue_result, duration: duration_result, delay: delay_result, curve: curve_result, onProgress: onProgress_result, onFinish: onFinish_result} as DoubleAnimationParam)
         return value
     }
-    readWithThemeOptions(): WithThemeOptions {
-        let valueDeserializer : Deserializer = this
-        const theme_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let theme_buf : CustomTheme | undefined
-        if ((RuntimeType.UNDEFINED) != (theme_buf_runtimeType))
-        {
-            theme_buf = valueDeserializer.readCustomTheme()
-        }
-        const theme_result : CustomTheme | undefined = theme_buf
-        const colorMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let colorMode_buf : ThemeColorMode | undefined
-        if ((RuntimeType.UNDEFINED) != (colorMode_buf_runtimeType))
-        {
-            colorMode_buf = (valueDeserializer.readInt32() as ThemeColorMode)
-        }
-        const colorMode_result : ThemeColorMode | undefined = colorMode_buf
-        let value : WithThemeOptions = ({theme: theme_result, colorMode: colorMode_result} as WithThemeOptions)
-        return value
-    }
-    readWithThemeInterface(isSync: boolean = false): WithThemeInterface {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (options: WithThemeOptions):WithThemeAttribute => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeWithThemeOptions(options);
-    let _continuationValue : WithThemeAttribute | undefined;
-    const _continuationCallback : ((value: WithThemeAttribute) => void) = (value: WithThemeAttribute):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as WithThemeAttribute); }
-    }
-    readType_NavigationAttribute_customNavContentTransition_delegate(isSync: boolean = false): ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation):NavigationAnimatedTransition | undefined => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNavContentInfo(from);
-    _argsSerializer.writeNavContentInfo(to);
-    _argsSerializer.writeInt32(((operation as NavigationOperation) as int32));
-    let _continuationValue : NavigationAnimatedTransition | undefined;
-    const _continuationCallback : ((value: NavigationAnimatedTransition | undefined) => void) = (value?: NavigationAnimatedTransition | undefined):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1044833488, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1044833488, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as NavigationAnimatedTransition | undefined); }
-    }
-    readSliderTriggerChangeCallback(isSync: boolean = false): SliderTriggerChangeCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (value: number, mode: SliderChangeMode):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(value);
-    _argsSerializer.writeInt32(((mode as SliderChangeMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readPageTransitionCallback(isSync: boolean = false): PageTransitionCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (type: RouteType, progress: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((type as RouteType) as int32));
-    _argsSerializer.writeNumber(progress);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1627123591, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1627123591, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnScrollCallback(isSync: boolean = false): OnScrollCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (scrollOffset: number, scrollState: ScrollState):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(scrollOffset);
-    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-160015401, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-160015401, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnMoveHandler(isSync: boolean = false): OnMoveHandler {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(from);
-    _argsSerializer.writeNumber(to);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readIsolatedOptions(): IsolatedOptions {
-        let valueDeserializer : Deserializer = this
-        const want_result : Want = valueDeserializer.readWant()
-        const worker_result : RestrictedWorker = valueDeserializer.readRestrictedWorker()
-        let value : IsolatedOptions = ({want: want_result, worker: worker_result} as IsolatedOptions)
-        return value
-    }
-    readIsolatedComponentInterface(isSync: boolean = false): IsolatedComponentInterface {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (options: IsolatedOptions):IsolatedComponentAttribute => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeIsolatedOptions(options);
-    let _continuationValue : IsolatedComponentAttribute | undefined;
-    const _continuationCallback : ((value: IsolatedComponentAttribute) => void) = (value: IsolatedComponentAttribute):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2139680213, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2139680213, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as IsolatedComponentAttribute); }
-    }
-    readWithThemeAttribute(): WithThemeAttribute {
-        let value : WithThemeAttribute = ({} as WithThemeAttribute)
-        return value
-    }
     readCallback_WithThemeAttribute_Void(isSync: boolean = false): ((value: WithThemeAttribute) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -13064,7 +13194,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWithThemeAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1436479104, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1436479104, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1436479104, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1436479104, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13078,7 +13208,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWebResourceResponse(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(831645046, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(831645046, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(831645046, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(831645046, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13092,7 +13222,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWebKeyboardOptions(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1376223390, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1376223390, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1376223390, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1376223390, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13117,7 +13247,7 @@ export class Deserializer extends DeserializerBase {
         const value_1  = value as DragItemInfo;
         _argsSerializer.writeDragItemInfo(value_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-620935067, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-620935067, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-620935067, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-620935067, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13134,7 +13264,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(value_0);
     const value_1  = value[1];
     _argsSerializer.writeNumber(value_1);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-607365481, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-607365481, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-607365481, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-607365481, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13155,7 +13285,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(value_2);
     const value_3  = value[3];
     _argsSerializer.writeNumber(value_3);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(148489367, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(148489367, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(148489367, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(148489367, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13169,22 +13299,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTouchResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1943507619, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1943507619, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_String_Unknown_Void(isSync: boolean = false): ((name: string,param: object) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (name: string, param: object):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeString(name);
-    _argsSerializer.writeCustomObject("Any", param);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1493806035, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1493806035, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1943507619, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1943507619, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13198,7 +13313,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePointer(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(721562324, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(721562324, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(721562324, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(721562324, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13218,7 +13333,7 @@ export class Deserializer extends DeserializerBase {
         const value_value  = value!;
         _argsSerializer.writeTabContentAnimatedTransition(value_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-143931627, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143931627, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-143931627, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143931627, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13249,7 +13364,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(error_value_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-756319131, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-756319131, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-756319131, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-756319131, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13269,7 +13384,7 @@ export class Deserializer extends DeserializerBase {
         const value_value  = value!;
         _argsSerializer.writeNavigationAnimatedTransition(value_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2035339519, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2035339519, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2035339519, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2035339519, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13293,7 +13408,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(error_value_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-543655128, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-543655128, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-543655128, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-543655128, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13307,7 +13422,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnScrollFrameBeginHandlerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1637092936, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1637092936, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1637092936, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1637092936, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13321,48 +13436,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOffsetResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1295952075, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1295952075, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_ScrollResult_Void(isSync: boolean = false): ((value: ScrollResult) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (value: ScrollResult):void => { const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeScrollResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1385252075, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1385252075, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_NavigationTitleMode_Void(isSync: boolean = false): ((titleMode: NavigationTitleMode) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (titleMode: NavigationTitleMode):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((titleMode as NavigationTitleMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1685437830, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1685437830, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_NavigationMode_Void(isSync: boolean = false): ((mode: NavigationMode) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (mode: NavigationMode):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((mode as NavigationMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(960690982, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(960690982, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13377,12 +13451,9 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const value_offsetRemain  = value.offsetRemain;
     _argsSerializer.writeNumber(value_offsetRemain);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-251706058, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-251706058, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-251706058, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-251706058, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readIsolatedComponentAttribute(): IsolatedComponentAttribute {
-        throw new Error("Interface with functions is not supported")
     }
     readCallback_IsolatedComponentAttribute_Void(isSync: boolean = false): ((value: IsolatedComponentAttribute) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -13394,7 +13465,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeIsolatedComponentAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(719029905, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(719029905, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(719029905, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(719029905, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13407,8 +13478,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((value as HitTestMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1755111025, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1755111025, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(value.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1755111025, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1755111025, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13422,7 +13493,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeGestureRecognizer(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(776202910, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(776202910, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(776202910, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(776202910, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13435,8 +13506,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((value as GestureJudgeResult) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-684588584, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-684588584, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(value.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-684588584, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-684588584, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13450,7 +13521,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-721106019, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721106019, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-721106019, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721106019, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13464,7 +13535,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeComputedBarAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1270343661, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1270343661, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1270343661, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1270343661, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13482,22 +13553,7 @@ export class Deserializer extends DeserializerBase {
         const value_element : string = value[i];
         _argsSerializer.writeString(value_element);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-440782244, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-440782244, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readButtonTriggerClickCallback(isSync: boolean = false): ButtonTriggerClickCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (xPos: number, yPos: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(xPos);
-    _argsSerializer.writeNumber(yPos);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1964292933, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1964292933, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-440782244, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-440782244, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13764,6 +13820,39 @@ export class Deserializer extends DeserializerBase {
         let value : StyleOptions = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as StyleOptions)
         return value
     }
+    readIsolatedComponentAttribute(): IsolatedComponentAttribute {
+        throw new Error("Interface with functions is not supported")
+    }
+    readIsolatedOptions(): IsolatedOptions {
+        let valueDeserializer : Deserializer = this
+        const want_result : Want = valueDeserializer.readWant()
+        const worker_result : RestrictedWorker = valueDeserializer.readRestrictedWorker()
+        let value : IsolatedOptions = ({want: want_result, worker: worker_result} as IsolatedOptions)
+        return value
+    }
+    readIsolatedComponentInterface(isSync: boolean = false): IsolatedComponentInterface {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (options: IsolatedOptions):IsolatedComponentAttribute => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeIsolatedOptions(options);
+    let _continuationValue : IsolatedComponentAttribute | undefined;
+    const _continuationCallback : ((value: IsolatedComponentAttribute) => void) = (value: IsolatedComponentAttribute):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2139680213, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2139680213, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as IsolatedComponentAttribute); }
+    }
+    readReceiveCallback(): ReceiveCallback {
+        let valueDeserializer : Deserializer = this
+        const _ReceiveCallbackStub_result : string = (valueDeserializer.readString() as string)
+        let value : ReceiveCallback = ({_ReceiveCallbackStub: _ReceiveCallbackStub_result} as ReceiveCallback)
+        return value
+    }
     readCallback_Literal_Number_code_Want_want_Void(isSync: boolean = false): ((parameter: Literal_Number_code_Want_want) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -13783,15 +13872,9 @@ export class Deserializer extends DeserializerBase {
         const parameter_want_value  = parameter_want!;
         _argsSerializer.writeWant(parameter_want_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-582934742, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-582934742, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readReceiveCallback(): ReceiveCallback {
-        let valueDeserializer : Deserializer = this
-        const _ReceiveCallbackStub_result : string = (valueDeserializer.readString() as string)
-        let value : ReceiveCallback = ({_ReceiveCallbackStub: _ReceiveCallbackStub_result} as ReceiveCallback)
-        return value
     }
     readUIExtensionOptions(): UIExtensionOptions {
         let valueDeserializer : Deserializer = this
@@ -13937,7 +14020,7 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writeCustomObject("Object", event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-823037763, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-823037763, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-823037763, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-823037763, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13954,98 +14037,6 @@ export class Deserializer extends DeserializerBase {
         const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
         let value : XComponentOptions = ({type: type_result, controller: controller_result, imageAIOptions: imageAIOptions_result} as XComponentOptions)
         return value
-    }
-    readAdsBlockedDetails(): AdsBlockedDetails {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const adsBlocked_buf_length : int32 = valueDeserializer.readInt32()
-        let adsBlocked_buf : Array<string> = new Array<string>(adsBlocked_buf_length)
-        for (let adsBlocked_buf_i = 0; adsBlocked_buf_i < adsBlocked_buf_length; adsBlocked_buf_i++) {
-            adsBlocked_buf[adsBlocked_buf_i] = (valueDeserializer.readString() as string)
-        }
-        const adsBlocked_result : Array<string> = adsBlocked_buf
-        let value : AdsBlockedDetails = ({url: url_result, adsBlocked: adsBlocked_result} as AdsBlockedDetails)
-        return value
-    }
-    readOnAdsBlockedCallback(isSync: boolean = false): OnAdsBlockedCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (details: AdsBlockedDetails):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeAdsBlockedDetails(details);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1572284740, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1572284740, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readWebKeyboardOptions(): WebKeyboardOptions {
-        let valueDeserializer : Deserializer = this
-        const useSystemKeyboard_result : boolean = valueDeserializer.readBoolean()
-        const enterKeyType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let enterKeyType_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (enterKeyType_buf_runtimeType))
-        {
-            enterKeyType_buf = (valueDeserializer.readNumber() as number)
-        }
-        const enterKeyType_result : number | undefined = enterKeyType_buf
-        const customKeyboard_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let customKeyboard_buf : CustomBuilder | undefined
-        if ((RuntimeType.UNDEFINED) != (customKeyboard_buf_runtimeType))
-        {
-            customKeyboard_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
-        }
-        const customKeyboard_result : CustomBuilder | undefined = customKeyboard_buf
-        let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboard_result, enterKeyType: enterKeyType_result, customKeyboard: customKeyboard_result} as WebKeyboardOptions)
-        return value
-    }
-    readWebKeyboardCallbackInfo(): WebKeyboardCallbackInfo {
-        let valueDeserializer : Deserializer = this
-        const controller_result : WebKeyboardController = (valueDeserializer.readWebKeyboardController() as WebKeyboardController)
-        const attributes_buf_size : int32 = valueDeserializer.readInt32()
-        let attributes_buf : Map<string, string> = new Map<string, string>()
-        // TODO: TS map resize
-        for (let attributes_buf_i = 0; attributes_buf_i < attributes_buf_size; attributes_buf_i++) {
-            const attributes_buf_key : string = (valueDeserializer.readString() as string)
-            const attributes_buf_value : string = (valueDeserializer.readString() as string)
-            attributes_buf.set(attributes_buf_key, attributes_buf_value)
-        }
-        const attributes_result : Map<string, string> = attributes_buf
-        let value : WebKeyboardCallbackInfo = ({controller: controller_result, attributes: attributes_result} as WebKeyboardCallbackInfo)
-        return value
-    }
-    readWebKeyboardCallback(isSync: boolean = false): WebKeyboardCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (keyboardCallbackInfo: WebKeyboardCallbackInfo):WebKeyboardOptions => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeWebKeyboardCallbackInfo(keyboardCallbackInfo);
-    let _continuationValue : WebKeyboardOptions | undefined;
-    const _continuationCallback : ((value: WebKeyboardOptions) => void) = (value: WebKeyboardOptions):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1829763354, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1829763354, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as WebKeyboardOptions); }
-    }
-    readOnViewportFitChangedCallback(isSync: boolean = false): OnViewportFitChangedCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (viewportFit: ViewportFit):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((viewportFit as ViewportFit) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1847083191, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1847083191, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
     }
     readExpandedMenuItemOptions(): ExpandedMenuItemOptions {
         let valueDeserializer : Deserializer = this
@@ -14083,172 +14074,12 @@ export class Deserializer extends DeserializerBase {
         let value : ExpandedMenuItemOptions = ({content: content_result, startIcon: startIcon_result, action: action_result} as ExpandedMenuItemOptions)
         return value
     }
-    readOnRenderProcessRespondingCallback(isSync: boolean = false): OnRenderProcessRespondingCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return ():void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1334389194, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1334389194, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readRenderProcessNotRespondingData(): RenderProcessNotRespondingData {
-        let valueDeserializer : Deserializer = this
-        const jsStack_result : string = (valueDeserializer.readString() as string)
-        const pid_result : number = (valueDeserializer.readNumber() as number)
-        const reason_result : RenderProcessNotRespondingReason = (valueDeserializer.readInt32() as RenderProcessNotRespondingReason)
-        let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
-        return value
-    }
-    readOnRenderProcessNotRespondingCallback(isSync: boolean = false): OnRenderProcessNotRespondingCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (data: RenderProcessNotRespondingData):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeRenderProcessNotRespondingData(data);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(47282303, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(47282303, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readNativeMediaPlayerConfig(): NativeMediaPlayerConfig {
         let valueDeserializer : Deserializer = this
         const enable_result : boolean = valueDeserializer.readBoolean()
         const shouldOverlay_result : boolean = valueDeserializer.readBoolean()
         let value : NativeMediaPlayerConfig = ({enable: enable_result, shouldOverlay: shouldOverlay_result} as NativeMediaPlayerConfig)
         return value
-    }
-    readOnOverrideUrlLoadingCallback(isSync: boolean = false): OnOverrideUrlLoadingCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (webResourceRequest: WebResourceRequest):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeWebResourceRequest(webResourceRequest);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(865258467, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(865258467, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readNativeEmbedTouchInfo(): NativeEmbedTouchInfo {
-        let valueDeserializer : Deserializer = this
-        const embedId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let embedId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (embedId_buf_runtimeType))
-        {
-            embedId_buf = (valueDeserializer.readString() as string)
-        }
-        const embedId_result : string | undefined = embedId_buf
-        const touchEvent_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let touchEvent_buf : TouchEvent | undefined
-        if ((RuntimeType.UNDEFINED) != (touchEvent_buf_runtimeType))
-        {
-            touchEvent_buf = (valueDeserializer.readTouchEvent() as TouchEvent)
-        }
-        const touchEvent_result : TouchEvent | undefined = touchEvent_buf
-        const result_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let result_buf : EventResult | undefined
-        if ((RuntimeType.UNDEFINED) != (result_buf_runtimeType))
-        {
-            result_buf = (valueDeserializer.readEventResult() as EventResult)
-        }
-        const result_result : EventResult | undefined = result_buf
-        let value : NativeEmbedTouchInfo = ({embedId: embedId_result, touchEvent: touchEvent_result, result: result_result} as NativeEmbedTouchInfo)
-        return value
-    }
-    readCallback_NativeEmbedTouchInfo_Void(isSync: boolean = false): ((event: NativeEmbedTouchInfo) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: NativeEmbedTouchInfo):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNativeEmbedTouchInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1090303858, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1090303858, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readNativeEmbedVisibilityInfo(): NativeEmbedVisibilityInfo {
-        let valueDeserializer : Deserializer = this
-        const visibility_result : boolean = valueDeserializer.readBoolean()
-        const embedId_result : string = (valueDeserializer.readString() as string)
-        let value : NativeEmbedVisibilityInfo = ({visibility: visibility_result, embedId: embedId_result} as NativeEmbedVisibilityInfo)
-        return value
-    }
-    readOnNativeEmbedVisibilityChangeCallback(isSync: boolean = false): OnNativeEmbedVisibilityChangeCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (nativeEmbedVisibilityInfo: NativeEmbedVisibilityInfo):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNativeEmbedVisibilityInfo(nativeEmbedVisibilityInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1641338704, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1641338704, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readNativeEmbedDataInfo(): NativeEmbedDataInfo {
-        let valueDeserializer : Deserializer = this
-        const status_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let status_buf : NativeEmbedStatus | undefined
-        if ((RuntimeType.UNDEFINED) != (status_buf_runtimeType))
-        {
-            status_buf = (valueDeserializer.readInt32() as NativeEmbedStatus)
-        }
-        const status_result : NativeEmbedStatus | undefined = status_buf
-        const surfaceId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let surfaceId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (surfaceId_buf_runtimeType))
-        {
-            surfaceId_buf = (valueDeserializer.readString() as string)
-        }
-        const surfaceId_result : string | undefined = surfaceId_buf
-        const embedId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let embedId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (embedId_buf_runtimeType))
-        {
-            embedId_buf = (valueDeserializer.readString() as string)
-        }
-        const embedId_result : string | undefined = embedId_buf
-        const info_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let info_buf : NativeEmbedInfo | undefined
-        if ((RuntimeType.UNDEFINED) != (info_buf_runtimeType))
-        {
-            info_buf = valueDeserializer.readNativeEmbedInfo()
-        }
-        const info_result : NativeEmbedInfo | undefined = info_buf
-        let value : NativeEmbedDataInfo = ({status: status_result, surfaceId: surfaceId_result, embedId: embedId_result, info: info_result} as NativeEmbedDataInfo)
-        return value
-    }
-    readCallback_NativeEmbedDataInfo_Void(isSync: boolean = false): ((event: NativeEmbedDataInfo) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: NativeEmbedDataInfo):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNativeEmbedDataInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(477481563, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(477481563, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
     }
     readScriptItem(): ScriptItem {
         let valueDeserializer : Deserializer = this
@@ -14261,1145 +14092,6 @@ export class Deserializer extends DeserializerBase {
         const scriptRules_result : Array<string> = scriptRules_buf
         let value : ScriptItem = ({script: script_result, scriptRules: scriptRules_result} as ScriptItem)
         return value
-    }
-    readIntelligentTrackingPreventionDetails(): IntelligentTrackingPreventionDetails {
-        let valueDeserializer : Deserializer = this
-        const host_result : string = (valueDeserializer.readString() as string)
-        const trackerHost_result : string = (valueDeserializer.readString() as string)
-        let value : IntelligentTrackingPreventionDetails = ({host: host_result, trackerHost: trackerHost_result} as IntelligentTrackingPreventionDetails)
-        return value
-    }
-    readOnIntelligentTrackingPreventionCallback(isSync: boolean = false): OnIntelligentTrackingPreventionCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (details: IntelligentTrackingPreventionDetails):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeIntelligentTrackingPreventionDetails(details);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1377876844, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1377876844, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readLoadCommittedDetails(): LoadCommittedDetails {
-        let valueDeserializer : Deserializer = this
-        const isMainFrame_result : boolean = valueDeserializer.readBoolean()
-        const isSameDocument_result : boolean = valueDeserializer.readBoolean()
-        const didReplaceEntry_result : boolean = valueDeserializer.readBoolean()
-        const navigationType_result : WebNavigationType = (valueDeserializer.readInt32() as WebNavigationType)
-        const url_result : string = (valueDeserializer.readString() as string)
-        let value : LoadCommittedDetails = ({isMainFrame: isMainFrame_result, isSameDocument: isSameDocument_result, didReplaceEntry: didReplaceEntry_result, navigationType: navigationType_result, url: url_result} as LoadCommittedDetails)
-        return value
-    }
-    readOnNavigationEntryCommittedCallback(isSync: boolean = false): OnNavigationEntryCommittedCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (loadCommittedDetails: LoadCommittedDetails):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeLoadCommittedDetails(loadCommittedDetails);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-398722176, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-398722176, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnSafeBrowsingCheckResultCallback(isSync: boolean = false): OnSafeBrowsingCheckResultCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (threatType: ThreatType):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((threatType as ThreatType) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1099824577, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1099824577, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnOverScrollEvent(): OnOverScrollEvent {
-        let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
-        return value
-    }
-    readCallback_OnOverScrollEvent_Void(isSync: boolean = false): ((parameter: OnOverScrollEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnOverScrollEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnOverScrollEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-860386431, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-860386431, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnLoadInterceptEvent(): OnLoadInterceptEvent {
-        let valueDeserializer : Deserializer = this
-        const data_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
-        let value : OnLoadInterceptEvent = ({data: data_result} as OnLoadInterceptEvent)
-        return value
-    }
-    readCallback_OnLoadInterceptEvent_Boolean(isSync: boolean = false): ((parameter: OnLoadInterceptEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnLoadInterceptEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnLoadInterceptEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1231444306, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1231444306, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readLargestContentfulPaint(): LargestContentfulPaint {
-        let valueDeserializer : Deserializer = this
-        const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let navigationStartTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
-        {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
-        const largestImagePaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImagePaintTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (largestImagePaintTime_buf_runtimeType))
-        {
-            largestImagePaintTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const largestImagePaintTime_result : number | undefined = largestImagePaintTime_buf
-        const largestTextPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestTextPaintTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (largestTextPaintTime_buf_runtimeType))
-        {
-            largestTextPaintTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const largestTextPaintTime_result : number | undefined = largestTextPaintTime_buf
-        const imageBPP_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let imageBPP_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (imageBPP_buf_runtimeType))
-        {
-            imageBPP_buf = (valueDeserializer.readNumber() as number)
-        }
-        const imageBPP_result : number | undefined = imageBPP_buf
-        const largestImageLoadStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImageLoadStartTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (largestImageLoadStartTime_buf_runtimeType))
-        {
-            largestImageLoadStartTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const largestImageLoadStartTime_result : number | undefined = largestImageLoadStartTime_buf
-        const largestImageLoadEndTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImageLoadEndTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (largestImageLoadEndTime_buf_runtimeType))
-        {
-            largestImageLoadEndTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const largestImageLoadEndTime_result : number | undefined = largestImageLoadEndTime_buf
-        let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
-        return value
-    }
-    readOnLargestContentfulPaintCallback(isSync: boolean = false): OnLargestContentfulPaintCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (largestContentfulPaint: LargestContentfulPaint):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeLargestContentfulPaint(largestContentfulPaint);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1390640532, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1390640532, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readFirstMeaningfulPaint(): FirstMeaningfulPaint {
-        let valueDeserializer : Deserializer = this
-        const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let navigationStartTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
-        {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
-        const firstMeaningfulPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let firstMeaningfulPaintTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (firstMeaningfulPaintTime_buf_runtimeType))
-        {
-            firstMeaningfulPaintTime_buf = (valueDeserializer.readNumber() as number)
-        }
-        const firstMeaningfulPaintTime_result : number | undefined = firstMeaningfulPaintTime_buf
-        let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
-        return value
-    }
-    readOnFirstMeaningfulPaintCallback(isSync: boolean = false): OnFirstMeaningfulPaintCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (firstMeaningfulPaint: FirstMeaningfulPaint):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeFirstMeaningfulPaint(firstMeaningfulPaint);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(767275770, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(767275770, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnFirstContentfulPaintEvent(): OnFirstContentfulPaintEvent {
-        let valueDeserializer : Deserializer = this
-        const navigationStartTick_result : number = (valueDeserializer.readNumber() as number)
-        const firstContentfulPaintMs_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
-        return value
-    }
-    readCallback_OnFirstContentfulPaintEvent_Void(isSync: boolean = false): ((parameter: OnFirstContentfulPaintEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnFirstContentfulPaintEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnFirstContentfulPaintEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1852060212, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1852060212, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnAudioStateChangedEvent(): OnAudioStateChangedEvent {
-        let valueDeserializer : Deserializer = this
-        const playing_result : boolean = valueDeserializer.readBoolean()
-        let value : OnAudioStateChangedEvent = ({playing: playing_result} as OnAudioStateChangedEvent)
-        return value
-    }
-    readCallback_OnAudioStateChangedEvent_Void(isSync: boolean = false): ((parameter: OnAudioStateChangedEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnAudioStateChangedEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnAudioStateChangedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1559789631, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1559789631, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnDataResubmittedEvent(): OnDataResubmittedEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : DataResubmissionHandler = (valueDeserializer.readDataResubmissionHandler() as DataResubmissionHandler)
-        let value : OnDataResubmittedEvent = ({handler: handler_result} as OnDataResubmittedEvent)
-        return value
-    }
-    readCallback_OnDataResubmittedEvent_Void(isSync: boolean = false): ((parameter: OnDataResubmittedEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnDataResubmittedEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnDataResubmittedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(118631204, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(118631204, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnPageVisibleEvent(): OnPageVisibleEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        let value : OnPageVisibleEvent = ({url: url_result} as OnPageVisibleEvent)
-        return value
-    }
-    readCallback_OnPageVisibleEvent_Void(isSync: boolean = false): ((parameter: OnPageVisibleEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageVisibleEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnPageVisibleEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1805946367, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1805946367, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnFaviconReceivedEvent(): OnFaviconReceivedEvent {
-        let valueDeserializer : Deserializer = this
-        const favicon_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
-        let value : OnFaviconReceivedEvent = ({favicon: favicon_result} as OnFaviconReceivedEvent)
-        return value
-    }
-    readCallback_OnFaviconReceivedEvent_Void(isSync: boolean = false): ((parameter: OnFaviconReceivedEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnFaviconReceivedEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnFaviconReceivedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-243916553, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-243916553, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnTouchIconUrlReceivedEvent(): OnTouchIconUrlReceivedEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const precomposed_result : boolean = valueDeserializer.readBoolean()
-        let value : OnTouchIconUrlReceivedEvent = ({url: url_result, precomposed: precomposed_result} as OnTouchIconUrlReceivedEvent)
-        return value
-    }
-    readCallback_OnTouchIconUrlReceivedEvent_Void(isSync: boolean = false): ((parameter: OnTouchIconUrlReceivedEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnTouchIconUrlReceivedEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnTouchIconUrlReceivedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1657893064, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1657893064, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnWindowNewEvent(): OnWindowNewEvent {
-        let valueDeserializer : Deserializer = this
-        const isAlert_result : boolean = valueDeserializer.readBoolean()
-        const isUserTrigger_result : boolean = valueDeserializer.readBoolean()
-        const targetUrl_result : string = (valueDeserializer.readString() as string)
-        const handler_result : ControllerHandler = (valueDeserializer.readControllerHandler() as ControllerHandler)
-        let value : OnWindowNewEvent = ({isAlert: isAlert_result, isUserTrigger: isUserTrigger_result, targetUrl: targetUrl_result, handler: handler_result} as OnWindowNewEvent)
-        return value
-    }
-    readCallback_OnWindowNewEvent_Void(isSync: boolean = false): ((parameter: OnWindowNewEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnWindowNewEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnWindowNewEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2052382574, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2052382574, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnClientAuthenticationEvent(): OnClientAuthenticationEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : ClientAuthenticationHandler = (valueDeserializer.readClientAuthenticationHandler() as ClientAuthenticationHandler)
-        const host_result : string = (valueDeserializer.readString() as string)
-        const port_result : number = (valueDeserializer.readNumber() as number)
-        const keyTypes_buf_length : int32 = valueDeserializer.readInt32()
-        let keyTypes_buf : Array<string> = new Array<string>(keyTypes_buf_length)
-        for (let keyTypes_buf_i = 0; keyTypes_buf_i < keyTypes_buf_length; keyTypes_buf_i++) {
-            keyTypes_buf[keyTypes_buf_i] = (valueDeserializer.readString() as string)
-        }
-        const keyTypes_result : Array<string> = keyTypes_buf
-        const issuers_buf_length : int32 = valueDeserializer.readInt32()
-        let issuers_buf : Array<string> = new Array<string>(issuers_buf_length)
-        for (let issuers_buf_i = 0; issuers_buf_i < issuers_buf_length; issuers_buf_i++) {
-            issuers_buf[issuers_buf_i] = (valueDeserializer.readString() as string)
-        }
-        const issuers_result : Array<string> = issuers_buf
-        let value : OnClientAuthenticationEvent = ({handler: handler_result, host: host_result, port: port_result, keyTypes: keyTypes_result, issuers: issuers_result} as OnClientAuthenticationEvent)
-        return value
-    }
-    readCallback_OnClientAuthenticationEvent_Void(isSync: boolean = false): ((parameter: OnClientAuthenticationEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnClientAuthenticationEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnClientAuthenticationEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(608991355, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(608991355, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readSslErrorEvent(): SslErrorEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : SslErrorHandler = (valueDeserializer.readSslErrorHandler() as SslErrorHandler)
-        const error_result : SslError = (valueDeserializer.readInt32() as SslError)
-        const url_result : string = (valueDeserializer.readString() as string)
-        const originalUrl_result : string = (valueDeserializer.readString() as string)
-        const referrer_result : string = (valueDeserializer.readString() as string)
-        const isFatalError_result : boolean = valueDeserializer.readBoolean()
-        const isMainFrame_result : boolean = valueDeserializer.readBoolean()
-        let value : SslErrorEvent = ({handler: handler_result, error: error_result, url: url_result, originalUrl: originalUrl_result, referrer: referrer_result, isFatalError: isFatalError_result, isMainFrame: isMainFrame_result} as SslErrorEvent)
-        return value
-    }
-    readOnSslErrorEventCallback(isSync: boolean = false): OnSslErrorEventCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (sslErrorEvent: SslErrorEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeSslErrorEvent(sslErrorEvent);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-399603614, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-399603614, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnSslErrorEventReceiveEvent(): OnSslErrorEventReceiveEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : SslErrorHandler = (valueDeserializer.readSslErrorHandler() as SslErrorHandler)
-        const error_result : SslError = (valueDeserializer.readInt32() as SslError)
-        const certChainData_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let certChainData_buf : Array<NativeBuffer> | undefined
-        if ((RuntimeType.UNDEFINED) != (certChainData_buf_runtimeType))
-        {
-            const certChainData_buf__length : int32 = valueDeserializer.readInt32()
-            let certChainData_buf_ : Array<NativeBuffer> = new Array<NativeBuffer>(certChainData_buf__length)
-            for (let certChainData_buf__i = 0; certChainData_buf__i < certChainData_buf__length; certChainData_buf__i++) {
-                certChainData_buf_[certChainData_buf__i] = (valueDeserializer.readBuffer() as NativeBuffer)
-            }
-            certChainData_buf = certChainData_buf_
-        }
-        const certChainData_result : Array<NativeBuffer> | undefined = certChainData_buf
-        let value : OnSslErrorEventReceiveEvent = ({handler: handler_result, error: error_result, certChainData: certChainData_result} as OnSslErrorEventReceiveEvent)
-        return value
-    }
-    readCallback_OnSslErrorEventReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSslErrorEventReceiveEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnSslErrorEventReceiveEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnSslErrorEventReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1624791665, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1624791665, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnScrollEvent(): OnScrollEvent {
-        let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
-        return value
-    }
-    readCallback_OnScrollEvent_Void(isSync: boolean = false): ((parameter: OnScrollEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScrollEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnScrollEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-172908881, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-172908881, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnSearchResultReceiveEvent(): OnSearchResultReceiveEvent {
-        let valueDeserializer : Deserializer = this
-        const activeMatchOrdinal_result : number = (valueDeserializer.readNumber() as number)
-        const numberOfMatches_result : number = (valueDeserializer.readNumber() as number)
-        const isDoneCounting_result : boolean = valueDeserializer.readBoolean()
-        let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result, numberOfMatches: numberOfMatches_result, isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
-        return value
-    }
-    readCallback_OnSearchResultReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSearchResultReceiveEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnSearchResultReceiveEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnSearchResultReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1495570, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1495570, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnContextMenuHideCallback(isSync: boolean = false): OnContextMenuHideCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return ():void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1788572278, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1788572278, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnContextMenuShowEvent(): OnContextMenuShowEvent {
-        let valueDeserializer : Deserializer = this
-        const param_result : WebContextMenuParam = (valueDeserializer.readWebContextMenuParam() as WebContextMenuParam)
-        const result_result : WebContextMenuResult = (valueDeserializer.readWebContextMenuResult() as WebContextMenuResult)
-        let value : OnContextMenuShowEvent = ({param: param_result, result: result_result} as OnContextMenuShowEvent)
-        return value
-    }
-    readCallback_OnContextMenuShowEvent_Boolean(isSync: boolean = false): ((parameter: OnContextMenuShowEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnContextMenuShowEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnContextMenuShowEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(332449533, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(332449533, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnScreenCaptureRequestEvent(): OnScreenCaptureRequestEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : ScreenCaptureHandler = (valueDeserializer.readScreenCaptureHandler() as ScreenCaptureHandler)
-        let value : OnScreenCaptureRequestEvent = ({handler: handler_result} as OnScreenCaptureRequestEvent)
-        return value
-    }
-    readCallback_OnScreenCaptureRequestEvent_Void(isSync: boolean = false): ((parameter: OnScreenCaptureRequestEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScreenCaptureRequestEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnScreenCaptureRequestEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1972321573, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1972321573, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnPermissionRequestEvent(): OnPermissionRequestEvent {
-        let valueDeserializer : Deserializer = this
-        const request_result : PermissionRequest = (valueDeserializer.readPermissionRequest() as PermissionRequest)
-        let value : OnPermissionRequestEvent = ({request: request_result} as OnPermissionRequestEvent)
-        return value
-    }
-    readCallback_OnPermissionRequestEvent_Void(isSync: boolean = false): ((parameter: OnPermissionRequestEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPermissionRequestEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnPermissionRequestEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(529980696, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(529980696, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnInterceptRequestEvent(): OnInterceptRequestEvent {
-        let valueDeserializer : Deserializer = this
-        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
-        let value : OnInterceptRequestEvent = ({request: request_result} as OnInterceptRequestEvent)
-        return value
-    }
-    readCallback_OnInterceptRequestEvent_WebResourceResponse(isSync: boolean = false): ((parameter: OnInterceptRequestEvent) => WebResourceResponse) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnInterceptRequestEvent):WebResourceResponse => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnInterceptRequestEvent(parameter);
-    let _continuationValue : WebResourceResponse | undefined;
-    const _continuationCallback : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1442698200, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1442698200, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as WebResourceResponse); }
-    }
-    readOnHttpAuthRequestEvent(): OnHttpAuthRequestEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : HttpAuthHandler = (valueDeserializer.readHttpAuthHandler() as HttpAuthHandler)
-        const host_result : string = (valueDeserializer.readString() as string)
-        const realm_result : string = (valueDeserializer.readString() as string)
-        let value : OnHttpAuthRequestEvent = ({handler: handler_result, host: host_result, realm: realm_result} as OnHttpAuthRequestEvent)
-        return value
-    }
-    readCallback_OnHttpAuthRequestEvent_Boolean(isSync: boolean = false): ((parameter: OnHttpAuthRequestEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnHttpAuthRequestEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnHttpAuthRequestEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(780282803, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(780282803, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnScaleChangeEvent(): OnScaleChangeEvent {
-        let valueDeserializer : Deserializer = this
-        const oldScale_result : number = (valueDeserializer.readNumber() as number)
-        const newScale_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
-        return value
-    }
-    readCallback_OnScaleChangeEvent_Void(isSync: boolean = false): ((parameter: OnScaleChangeEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScaleChangeEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnScaleChangeEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1782102148, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1782102148, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readFullScreenEnterEvent(): FullScreenEnterEvent {
-        let valueDeserializer : Deserializer = this
-        const handler_result : FullScreenExitHandler = (valueDeserializer.readFullScreenExitHandler() as FullScreenExitHandler)
-        const videoWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let videoWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (videoWidth_buf_runtimeType))
-        {
-            videoWidth_buf = (valueDeserializer.readNumber() as number)
-        }
-        const videoWidth_result : number | undefined = videoWidth_buf
-        const videoHeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let videoHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (videoHeight_buf_runtimeType))
-        {
-            videoHeight_buf = (valueDeserializer.readNumber() as number)
-        }
-        const videoHeight_result : number | undefined = videoHeight_buf
-        let value : FullScreenEnterEvent = ({handler: handler_result, videoWidth: videoWidth_result, videoHeight: videoHeight_result} as FullScreenEnterEvent)
-        return value
-    }
-    readOnFullScreenEnterCallback(isSync: boolean = false): OnFullScreenEnterCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: FullScreenEnterEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeFullScreenEnterEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(81230317, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(81230317, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnResourceLoadEvent(): OnResourceLoadEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        let value : OnResourceLoadEvent = ({url: url_result} as OnResourceLoadEvent)
-        return value
-    }
-    readCallback_OnResourceLoadEvent_Void(isSync: boolean = false): ((parameter: OnResourceLoadEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnResourceLoadEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnResourceLoadEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(793995118, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(793995118, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readType_WebAttribute_onFileSelectorShow_callback(isSync: boolean = false): ((event?: Literal_Function_callback__Object_fileSelector) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Function_callback__Object_fileSelector | undefined):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        const event_value_callback_  = event_value.callback_;
-        _argsSerializer.writeFunction(event_value_callback_);
-        const event_value_fileSelector  = event_value.fileSelector;
-        _argsSerializer.writeCustomObject("Object", event_value_fileSelector);
-    }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1962174977, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1962174977, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Literal_Object_detail_Boolean(isSync: boolean = false): ((event?: Literal_Object_detail) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Object_detail | undefined):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        const event_value_detail  = event_value.detail;
-        _argsSerializer.writeCustomObject("Object", event_value_detail);
-    }
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(222742448, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(222742448, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnShowFileSelectorEvent(): OnShowFileSelectorEvent {
-        let valueDeserializer : Deserializer = this
-        const result_result : FileSelectorResult = (valueDeserializer.readFileSelectorResult() as FileSelectorResult)
-        const fileSelector_result : FileSelectorParam = (valueDeserializer.readFileSelectorParam() as FileSelectorParam)
-        let value : OnShowFileSelectorEvent = ({result: result_result, fileSelector: fileSelector_result} as OnShowFileSelectorEvent)
-        return value
-    }
-    readCallback_OnShowFileSelectorEvent_Boolean(isSync: boolean = false): ((parameter: OnShowFileSelectorEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnShowFileSelectorEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnShowFileSelectorEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-636069598, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-636069598, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnRenderExitedEvent(): OnRenderExitedEvent {
-        let valueDeserializer : Deserializer = this
-        const renderExitReason_result : RenderExitReason = (valueDeserializer.readInt32() as RenderExitReason)
-        let value : OnRenderExitedEvent = ({renderExitReason: renderExitReason_result} as OnRenderExitedEvent)
-        return value
-    }
-    readCallback_OnRenderExitedEvent_Void(isSync: boolean = false): ((parameter: OnRenderExitedEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnRenderExitedEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnRenderExitedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1413785559, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1413785559, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Literal_Function_handler_Object_error_Void(isSync: boolean = false): ((event?: Literal_Function_handler_Object_error) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Function_handler_Object_error | undefined):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        const event_value_handler  = event_value.handler;
-        _argsSerializer.writeFunction(event_value_handler);
-        const event_value_error  = event_value.error;
-        _argsSerializer.writeCustomObject("Object", event_value_error);
-    }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(361012115, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(361012115, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readType_WebAttribute_onUrlLoadIntercept_callback(isSync: boolean = false): ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Union_String_WebResourceRequest_data | undefined):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        const event_value_data  = event_value.data;
-        let event_value_data_type : int32 = RuntimeType.UNDEFINED;
-        event_value_data_type = runtimeType(event_value_data);
-        if (RuntimeType.STRING == event_value_data_type) {
-            _argsSerializer.writeInt8(0 as int32);
-            const event_value_data_0  = event_value_data as string;
-            _argsSerializer.writeString(event_value_data_0);
-        }
-        else if (RuntimeType.OBJECT == event_value_data_type) {
-            _argsSerializer.writeInt8(1 as int32);
-            const event_value_data_1  = event_value_data as WebResourceRequest;
-            _argsSerializer.writeWebResourceRequest(event_value_data_1);
-        }
-    }
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-985284966, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-985284966, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnRefreshAccessedHistoryEvent(): OnRefreshAccessedHistoryEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const isRefreshed_result : boolean = valueDeserializer.readBoolean()
-        let value : OnRefreshAccessedHistoryEvent = ({url: url_result, isRefreshed: isRefreshed_result} as OnRefreshAccessedHistoryEvent)
-        return value
-    }
-    readCallback_OnRefreshAccessedHistoryEvent_Void(isSync: boolean = false): ((parameter: OnRefreshAccessedHistoryEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnRefreshAccessedHistoryEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnRefreshAccessedHistoryEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1978364344, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1978364344, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnDownloadStartEvent(): OnDownloadStartEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const userAgent_result : string = (valueDeserializer.readString() as string)
-        const contentDisposition_result : string = (valueDeserializer.readString() as string)
-        const mimetype_result : string = (valueDeserializer.readString() as string)
-        const contentLength_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnDownloadStartEvent = ({url: url_result, userAgent: userAgent_result, contentDisposition: contentDisposition_result, mimetype: mimetype_result, contentLength: contentLength_result} as OnDownloadStartEvent)
-        return value
-    }
-    readCallback_OnDownloadStartEvent_Void(isSync: boolean = false): ((parameter: OnDownloadStartEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnDownloadStartEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnDownloadStartEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1834611702, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1834611702, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnHttpErrorReceiveEvent(): OnHttpErrorReceiveEvent {
-        let valueDeserializer : Deserializer = this
-        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
-        const response_result : WebResourceResponse = (valueDeserializer.readWebResourceResponse() as WebResourceResponse)
-        let value : OnHttpErrorReceiveEvent = ({request: request_result, response: response_result} as OnHttpErrorReceiveEvent)
-        return value
-    }
-    readCallback_OnHttpErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnHttpErrorReceiveEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnHttpErrorReceiveEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnHttpErrorReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2066745559, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2066745559, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnErrorReceiveEvent(): OnErrorReceiveEvent {
-        let valueDeserializer : Deserializer = this
-        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
-        const error_result : WebResourceError = (valueDeserializer.readWebResourceError() as WebResourceError)
-        let value : OnErrorReceiveEvent = ({request: request_result, error: error_result} as OnErrorReceiveEvent)
-        return value
-    }
-    readCallback_OnErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnErrorReceiveEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnErrorReceiveEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnErrorReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1792851375, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1792851375, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnConsoleEvent(): OnConsoleEvent {
-        let valueDeserializer : Deserializer = this
-        const message_result : ConsoleMessage = (valueDeserializer.readConsoleMessage() as ConsoleMessage)
-        let value : OnConsoleEvent = ({message: message_result} as OnConsoleEvent)
-        return value
-    }
-    readCallback_OnConsoleEvent_Boolean(isSync: boolean = false): ((parameter: OnConsoleEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnConsoleEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnConsoleEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(893367077, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(893367077, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnPromptEvent(): OnPromptEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const value_result : string = (valueDeserializer.readString() as string)
-        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnPromptEvent = ({url: url_result, message: message_result, value: value_result, result: result_result} as OnPromptEvent)
-        return value
-    }
-    readCallback_OnPromptEvent_Boolean(isSync: boolean = false): ((parameter: OnPromptEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPromptEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnPromptEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1826742986, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1826742986, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnConfirmEvent(): OnConfirmEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnConfirmEvent = ({url: url_result, message: message_result, result: result_result} as OnConfirmEvent)
-        return value
-    }
-    readCallback_OnConfirmEvent_Boolean(isSync: boolean = false): ((parameter: OnConfirmEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnConfirmEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnConfirmEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(317864672, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(317864672, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnBeforeUnloadEvent(): OnBeforeUnloadEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnBeforeUnloadEvent = ({url: url_result, message: message_result, result: result_result} as OnBeforeUnloadEvent)
-        return value
-    }
-    readCallback_OnBeforeUnloadEvent_Boolean(isSync: boolean = false): ((parameter: OnBeforeUnloadEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnBeforeUnloadEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnBeforeUnloadEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-873162122, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-873162122, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnAlertEvent(): OnAlertEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
-        let value : OnAlertEvent = ({url: url_result, message: message_result, result: result_result} as OnAlertEvent)
-        return value
-    }
-    readCallback_OnAlertEvent_Boolean(isSync: boolean = false): ((parameter: OnAlertEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnAlertEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnAlertEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(806070428, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(806070428, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnGeolocationShowEvent(): OnGeolocationShowEvent {
-        let valueDeserializer : Deserializer = this
-        const origin_result : string = (valueDeserializer.readString() as string)
-        const geolocation_result : JsGeolocation = (valueDeserializer.readJsGeolocation() as JsGeolocation)
-        let value : OnGeolocationShowEvent = ({origin: origin_result, geolocation: geolocation_result} as OnGeolocationShowEvent)
-        return value
-    }
-    readCallback_OnGeolocationShowEvent_Void(isSync: boolean = false): ((parameter: OnGeolocationShowEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnGeolocationShowEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnGeolocationShowEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-941896815, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-941896815, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnTitleReceiveEvent(): OnTitleReceiveEvent {
-        let valueDeserializer : Deserializer = this
-        const title_result : string = (valueDeserializer.readString() as string)
-        let value : OnTitleReceiveEvent = ({title: title_result} as OnTitleReceiveEvent)
-        return value
-    }
-    readCallback_OnTitleReceiveEvent_Void(isSync: boolean = false): ((parameter: OnTitleReceiveEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnTitleReceiveEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnTitleReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-318085495, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-318085495, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnProgressChangeEvent(): OnProgressChangeEvent {
-        let valueDeserializer : Deserializer = this
-        const newProgress_result : number = (valueDeserializer.readNumber() as number)
-        let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
-        return value
-    }
-    readCallback_OnProgressChangeEvent_Void(isSync: boolean = false): ((parameter: OnProgressChangeEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnProgressChangeEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnProgressChangeEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1018740377, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1018740377, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnPageBeginEvent(): OnPageBeginEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        let value : OnPageBeginEvent = ({url: url_result} as OnPageBeginEvent)
-        return value
-    }
-    readCallback_OnPageBeginEvent_Void(isSync: boolean = false): ((parameter: OnPageBeginEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageBeginEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnPageBeginEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2040193994, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2040193994, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readOnPageEndEvent(): OnPageEndEvent {
-        let valueDeserializer : Deserializer = this
-        const url_result : string = (valueDeserializer.readString() as string)
-        let value : OnPageEndEvent = ({url: url_result} as OnPageEndEvent)
-        return value
-    }
-    readCallback_OnPageEndEvent_Void(isSync: boolean = false): ((parameter: OnPageEndEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageEndEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeOnPageEndEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-130135362, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-130135362, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
     }
     readWebMediaOptions(): WebMediaOptions {
         let valueDeserializer : Deserializer = this
@@ -15464,6 +14156,1006 @@ export class Deserializer extends DeserializerBase {
         let value : JavaScriptProxy = ({object_: object__result, name: name_result, methodList: methodList_result, controller: controller_result, asyncMethodList: asyncMethodList_result, permission: permission_result} as JavaScriptProxy)
         return value
     }
+    readNativeEmbedTouchInfo(): NativeEmbedTouchInfo {
+        let valueDeserializer : Deserializer = this
+        const embedId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let embedId_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (embedId_buf_runtimeType))
+        {
+            embedId_buf = (valueDeserializer.readString() as string)
+        }
+        const embedId_result : string | undefined = embedId_buf
+        const touchEvent_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let touchEvent_buf : TouchEvent | undefined
+        if ((RuntimeType.UNDEFINED) != (touchEvent_buf_runtimeType))
+        {
+            touchEvent_buf = (valueDeserializer.readTouchEvent() as TouchEvent)
+        }
+        const touchEvent_result : TouchEvent | undefined = touchEvent_buf
+        const result_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let result_buf : EventResult | undefined
+        if ((RuntimeType.UNDEFINED) != (result_buf_runtimeType))
+        {
+            result_buf = (valueDeserializer.readEventResult() as EventResult)
+        }
+        const result_result : EventResult | undefined = result_buf
+        let value : NativeEmbedTouchInfo = ({embedId: embedId_result, touchEvent: touchEvent_result, result: result_result} as NativeEmbedTouchInfo)
+        return value
+    }
+    readCallback_NativeEmbedTouchInfo_Void(isSync: boolean = false): ((event: NativeEmbedTouchInfo) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: NativeEmbedTouchInfo):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNativeEmbedTouchInfo(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1090303858, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1090303858, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readNativeEmbedDataInfo(): NativeEmbedDataInfo {
+        let valueDeserializer : Deserializer = this
+        const status_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let status_buf : NativeEmbedStatus | undefined
+        if ((RuntimeType.UNDEFINED) != (status_buf_runtimeType))
+        {
+            status_buf = (valueDeserializer.readInt32() as NativeEmbedStatus)
+        }
+        const status_result : NativeEmbedStatus | undefined = status_buf
+        const surfaceId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let surfaceId_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (surfaceId_buf_runtimeType))
+        {
+            surfaceId_buf = (valueDeserializer.readString() as string)
+        }
+        const surfaceId_result : string | undefined = surfaceId_buf
+        const embedId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let embedId_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (embedId_buf_runtimeType))
+        {
+            embedId_buf = (valueDeserializer.readString() as string)
+        }
+        const embedId_result : string | undefined = embedId_buf
+        const info_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let info_buf : NativeEmbedInfo | undefined
+        if ((RuntimeType.UNDEFINED) != (info_buf_runtimeType))
+        {
+            info_buf = valueDeserializer.readNativeEmbedInfo()
+        }
+        const info_result : NativeEmbedInfo | undefined = info_buf
+        let value : NativeEmbedDataInfo = ({status: status_result, surfaceId: surfaceId_result, embedId: embedId_result, info: info_result} as NativeEmbedDataInfo)
+        return value
+    }
+    readCallback_NativeEmbedDataInfo_Void(isSync: boolean = false): ((event: NativeEmbedDataInfo) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: NativeEmbedDataInfo):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNativeEmbedDataInfo(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(477481563, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(477481563, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnOverScrollEvent(): OnOverScrollEvent {
+        let valueDeserializer : Deserializer = this
+        const xOffset_result : number = (valueDeserializer.readNumber() as number)
+        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
+        return value
+    }
+    readCallback_OnOverScrollEvent_Void(isSync: boolean = false): ((parameter: OnOverScrollEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnOverScrollEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnOverScrollEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-860386431, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-860386431, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnLoadInterceptEvent(): OnLoadInterceptEvent {
+        let valueDeserializer : Deserializer = this
+        const data_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
+        let value : OnLoadInterceptEvent = ({data: data_result} as OnLoadInterceptEvent)
+        return value
+    }
+    readCallback_OnLoadInterceptEvent_Boolean(isSync: boolean = false): ((parameter: OnLoadInterceptEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnLoadInterceptEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnLoadInterceptEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1231444306, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1231444306, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnFirstContentfulPaintEvent(): OnFirstContentfulPaintEvent {
+        let valueDeserializer : Deserializer = this
+        const navigationStartTick_result : number = (valueDeserializer.readNumber() as number)
+        const firstContentfulPaintMs_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
+        return value
+    }
+    readCallback_OnFirstContentfulPaintEvent_Void(isSync: boolean = false): ((parameter: OnFirstContentfulPaintEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnFirstContentfulPaintEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnFirstContentfulPaintEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1852060212, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1852060212, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnAudioStateChangedEvent(): OnAudioStateChangedEvent {
+        let valueDeserializer : Deserializer = this
+        const playing_result : boolean = valueDeserializer.readBoolean()
+        let value : OnAudioStateChangedEvent = ({playing: playing_result} as OnAudioStateChangedEvent)
+        return value
+    }
+    readCallback_OnAudioStateChangedEvent_Void(isSync: boolean = false): ((parameter: OnAudioStateChangedEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnAudioStateChangedEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnAudioStateChangedEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1559789631, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1559789631, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnDataResubmittedEvent(): OnDataResubmittedEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : DataResubmissionHandler = (valueDeserializer.readDataResubmissionHandler() as DataResubmissionHandler)
+        let value : OnDataResubmittedEvent = ({handler: handler_result} as OnDataResubmittedEvent)
+        return value
+    }
+    readCallback_OnDataResubmittedEvent_Void(isSync: boolean = false): ((parameter: OnDataResubmittedEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnDataResubmittedEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnDataResubmittedEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(118631204, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(118631204, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnPageVisibleEvent(): OnPageVisibleEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        let value : OnPageVisibleEvent = ({url: url_result} as OnPageVisibleEvent)
+        return value
+    }
+    readCallback_OnPageVisibleEvent_Void(isSync: boolean = false): ((parameter: OnPageVisibleEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnPageVisibleEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnPageVisibleEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1805946367, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1805946367, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnFaviconReceivedEvent(): OnFaviconReceivedEvent {
+        let valueDeserializer : Deserializer = this
+        const favicon_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
+        let value : OnFaviconReceivedEvent = ({favicon: favicon_result} as OnFaviconReceivedEvent)
+        return value
+    }
+    readCallback_OnFaviconReceivedEvent_Void(isSync: boolean = false): ((parameter: OnFaviconReceivedEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnFaviconReceivedEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnFaviconReceivedEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-243916553, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-243916553, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnTouchIconUrlReceivedEvent(): OnTouchIconUrlReceivedEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const precomposed_result : boolean = valueDeserializer.readBoolean()
+        let value : OnTouchIconUrlReceivedEvent = ({url: url_result, precomposed: precomposed_result} as OnTouchIconUrlReceivedEvent)
+        return value
+    }
+    readCallback_OnTouchIconUrlReceivedEvent_Void(isSync: boolean = false): ((parameter: OnTouchIconUrlReceivedEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnTouchIconUrlReceivedEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnTouchIconUrlReceivedEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1657893064, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1657893064, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnWindowNewEvent(): OnWindowNewEvent {
+        let valueDeserializer : Deserializer = this
+        const isAlert_result : boolean = valueDeserializer.readBoolean()
+        const isUserTrigger_result : boolean = valueDeserializer.readBoolean()
+        const targetUrl_result : string = (valueDeserializer.readString() as string)
+        const handler_result : ControllerHandler = (valueDeserializer.readControllerHandler() as ControllerHandler)
+        let value : OnWindowNewEvent = ({isAlert: isAlert_result, isUserTrigger: isUserTrigger_result, targetUrl: targetUrl_result, handler: handler_result} as OnWindowNewEvent)
+        return value
+    }
+    readCallback_OnWindowNewEvent_Void(isSync: boolean = false): ((parameter: OnWindowNewEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnWindowNewEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnWindowNewEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2052382574, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2052382574, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnClientAuthenticationEvent(): OnClientAuthenticationEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : ClientAuthenticationHandler = (valueDeserializer.readClientAuthenticationHandler() as ClientAuthenticationHandler)
+        const host_result : string = (valueDeserializer.readString() as string)
+        const port_result : number = (valueDeserializer.readNumber() as number)
+        const keyTypes_buf_length : int32 = valueDeserializer.readInt32()
+        let keyTypes_buf : Array<string> = new Array<string>(keyTypes_buf_length)
+        for (let keyTypes_buf_i = 0; keyTypes_buf_i < keyTypes_buf_length; keyTypes_buf_i++) {
+            keyTypes_buf[keyTypes_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const keyTypes_result : Array<string> = keyTypes_buf
+        const issuers_buf_length : int32 = valueDeserializer.readInt32()
+        let issuers_buf : Array<string> = new Array<string>(issuers_buf_length)
+        for (let issuers_buf_i = 0; issuers_buf_i < issuers_buf_length; issuers_buf_i++) {
+            issuers_buf[issuers_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const issuers_result : Array<string> = issuers_buf
+        let value : OnClientAuthenticationEvent = ({handler: handler_result, host: host_result, port: port_result, keyTypes: keyTypes_result, issuers: issuers_result} as OnClientAuthenticationEvent)
+        return value
+    }
+    readCallback_OnClientAuthenticationEvent_Void(isSync: boolean = false): ((parameter: OnClientAuthenticationEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnClientAuthenticationEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnClientAuthenticationEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(608991355, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(608991355, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnSslErrorEventReceiveEvent(): OnSslErrorEventReceiveEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : SslErrorHandler = (valueDeserializer.readSslErrorHandler() as SslErrorHandler)
+        const error_result : SslError = (valueDeserializer.readInt32() as SslError)
+        const certChainData_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let certChainData_buf : Array<NativeBuffer> | undefined
+        if ((RuntimeType.UNDEFINED) != (certChainData_buf_runtimeType))
+        {
+            const certChainData_buf__length : int32 = valueDeserializer.readInt32()
+            let certChainData_buf_ : Array<NativeBuffer> = new Array<NativeBuffer>(certChainData_buf__length)
+            for (let certChainData_buf__i = 0; certChainData_buf__i < certChainData_buf__length; certChainData_buf__i++) {
+                certChainData_buf_[certChainData_buf__i] = (valueDeserializer.readBuffer() as NativeBuffer)
+            }
+            certChainData_buf = certChainData_buf_
+        }
+        const certChainData_result : Array<NativeBuffer> | undefined = certChainData_buf
+        let value : OnSslErrorEventReceiveEvent = ({handler: handler_result, error: error_result, certChainData: certChainData_result} as OnSslErrorEventReceiveEvent)
+        return value
+    }
+    readCallback_OnSslErrorEventReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSslErrorEventReceiveEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnSslErrorEventReceiveEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnSslErrorEventReceiveEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1624791665, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1624791665, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnScrollEvent(): OnScrollEvent {
+        let valueDeserializer : Deserializer = this
+        const xOffset_result : number = (valueDeserializer.readNumber() as number)
+        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
+        return value
+    }
+    readCallback_OnScrollEvent_Void(isSync: boolean = false): ((parameter: OnScrollEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnScrollEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnScrollEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-172908881, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-172908881, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnSearchResultReceiveEvent(): OnSearchResultReceiveEvent {
+        let valueDeserializer : Deserializer = this
+        const activeMatchOrdinal_result : number = (valueDeserializer.readNumber() as number)
+        const numberOfMatches_result : number = (valueDeserializer.readNumber() as number)
+        const isDoneCounting_result : boolean = valueDeserializer.readBoolean()
+        let value : OnSearchResultReceiveEvent = ({activeMatchOrdinal: activeMatchOrdinal_result, numberOfMatches: numberOfMatches_result, isDoneCounting: isDoneCounting_result} as OnSearchResultReceiveEvent)
+        return value
+    }
+    readCallback_OnSearchResultReceiveEvent_Void(isSync: boolean = false): ((parameter: OnSearchResultReceiveEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnSearchResultReceiveEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnSearchResultReceiveEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1495570, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1495570, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnContextMenuShowEvent(): OnContextMenuShowEvent {
+        let valueDeserializer : Deserializer = this
+        const param_result : WebContextMenuParam = (valueDeserializer.readWebContextMenuParam() as WebContextMenuParam)
+        const result_result : WebContextMenuResult = (valueDeserializer.readWebContextMenuResult() as WebContextMenuResult)
+        let value : OnContextMenuShowEvent = ({param: param_result, result: result_result} as OnContextMenuShowEvent)
+        return value
+    }
+    readCallback_OnContextMenuShowEvent_Boolean(isSync: boolean = false): ((parameter: OnContextMenuShowEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnContextMenuShowEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnContextMenuShowEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(332449533, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(332449533, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnScreenCaptureRequestEvent(): OnScreenCaptureRequestEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : ScreenCaptureHandler = (valueDeserializer.readScreenCaptureHandler() as ScreenCaptureHandler)
+        let value : OnScreenCaptureRequestEvent = ({handler: handler_result} as OnScreenCaptureRequestEvent)
+        return value
+    }
+    readCallback_OnScreenCaptureRequestEvent_Void(isSync: boolean = false): ((parameter: OnScreenCaptureRequestEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnScreenCaptureRequestEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnScreenCaptureRequestEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1972321573, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1972321573, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnPermissionRequestEvent(): OnPermissionRequestEvent {
+        let valueDeserializer : Deserializer = this
+        const request_result : PermissionRequest = (valueDeserializer.readPermissionRequest() as PermissionRequest)
+        let value : OnPermissionRequestEvent = ({request: request_result} as OnPermissionRequestEvent)
+        return value
+    }
+    readCallback_OnPermissionRequestEvent_Void(isSync: boolean = false): ((parameter: OnPermissionRequestEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnPermissionRequestEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnPermissionRequestEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(529980696, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(529980696, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnInterceptRequestEvent(): OnInterceptRequestEvent {
+        let valueDeserializer : Deserializer = this
+        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
+        let value : OnInterceptRequestEvent = ({request: request_result} as OnInterceptRequestEvent)
+        return value
+    }
+    readCallback_OnInterceptRequestEvent_WebResourceResponse(isSync: boolean = false): ((parameter: OnInterceptRequestEvent) => WebResourceResponse) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnInterceptRequestEvent):WebResourceResponse => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnInterceptRequestEvent(parameter);
+    let _continuationValue : WebResourceResponse | undefined;
+    const _continuationCallback : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1442698200, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1442698200, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as WebResourceResponse); }
+    }
+    readOnHttpAuthRequestEvent(): OnHttpAuthRequestEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : HttpAuthHandler = (valueDeserializer.readHttpAuthHandler() as HttpAuthHandler)
+        const host_result : string = (valueDeserializer.readString() as string)
+        const realm_result : string = (valueDeserializer.readString() as string)
+        let value : OnHttpAuthRequestEvent = ({handler: handler_result, host: host_result, realm: realm_result} as OnHttpAuthRequestEvent)
+        return value
+    }
+    readCallback_OnHttpAuthRequestEvent_Boolean(isSync: boolean = false): ((parameter: OnHttpAuthRequestEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnHttpAuthRequestEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnHttpAuthRequestEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(780282803, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(780282803, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnScaleChangeEvent(): OnScaleChangeEvent {
+        let valueDeserializer : Deserializer = this
+        const oldScale_result : number = (valueDeserializer.readNumber() as number)
+        const newScale_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
+        return value
+    }
+    readCallback_OnScaleChangeEvent_Void(isSync: boolean = false): ((parameter: OnScaleChangeEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnScaleChangeEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnScaleChangeEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1782102148, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1782102148, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnResourceLoadEvent(): OnResourceLoadEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        let value : OnResourceLoadEvent = ({url: url_result} as OnResourceLoadEvent)
+        return value
+    }
+    readCallback_OnResourceLoadEvent_Void(isSync: boolean = false): ((parameter: OnResourceLoadEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnResourceLoadEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnResourceLoadEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(793995118, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(793995118, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readType_WebAttribute_onFileSelectorShow_callback(isSync: boolean = false): ((event?: Literal_Function_callback__Object_fileSelector) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event?: Literal_Function_callback__Object_fileSelector | undefined):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        const event_value_callback_  = event_value.callback_;
+        _argsSerializer.writeFunction(event_value_callback_);
+        const event_value_fileSelector  = event_value.fileSelector;
+        _argsSerializer.writeCustomObject("Object", event_value_fileSelector);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1962174977, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1962174977, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_Literal_Object_detail_Boolean(isSync: boolean = false): ((event?: Literal_Object_detail) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event?: Literal_Object_detail | undefined):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        const event_value_detail  = event_value.detail;
+        _argsSerializer.writeCustomObject("Object", event_value_detail);
+    }
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(222742448, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(222742448, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnShowFileSelectorEvent(): OnShowFileSelectorEvent {
+        let valueDeserializer : Deserializer = this
+        const result_result : FileSelectorResult = (valueDeserializer.readFileSelectorResult() as FileSelectorResult)
+        const fileSelector_result : FileSelectorParam = (valueDeserializer.readFileSelectorParam() as FileSelectorParam)
+        let value : OnShowFileSelectorEvent = ({result: result_result, fileSelector: fileSelector_result} as OnShowFileSelectorEvent)
+        return value
+    }
+    readCallback_OnShowFileSelectorEvent_Boolean(isSync: boolean = false): ((parameter: OnShowFileSelectorEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnShowFileSelectorEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnShowFileSelectorEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-636069598, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-636069598, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnRenderExitedEvent(): OnRenderExitedEvent {
+        let valueDeserializer : Deserializer = this
+        const renderExitReason_result : RenderExitReason = (valueDeserializer.readInt32() as RenderExitReason)
+        let value : OnRenderExitedEvent = ({renderExitReason: renderExitReason_result} as OnRenderExitedEvent)
+        return value
+    }
+    readCallback_OnRenderExitedEvent_Void(isSync: boolean = false): ((parameter: OnRenderExitedEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnRenderExitedEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnRenderExitedEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1413785559, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1413785559, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_Literal_Function_handler_Object_error_Void(isSync: boolean = false): ((event?: Literal_Function_handler_Object_error) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event?: Literal_Function_handler_Object_error | undefined):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        const event_value_handler  = event_value.handler;
+        _argsSerializer.writeFunction(event_value_handler);
+        const event_value_error  = event_value.error;
+        _argsSerializer.writeCustomObject("Object", event_value_error);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(361012115, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(361012115, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readType_WebAttribute_onUrlLoadIntercept_callback(isSync: boolean = false): ((event?: Literal_Union_String_WebResourceRequest_data) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event?: Literal_Union_String_WebResourceRequest_data | undefined):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        const event_value_data  = event_value.data;
+        let event_value_data_type : int32 = RuntimeType.UNDEFINED;
+        event_value_data_type = runtimeType(event_value_data);
+        if (RuntimeType.STRING == event_value_data_type) {
+            _argsSerializer.writeInt8(0 as int32);
+            const event_value_data_0  = event_value_data as string;
+            _argsSerializer.writeString(event_value_data_0);
+        }
+        else if (RuntimeType.OBJECT == event_value_data_type) {
+            _argsSerializer.writeInt8(1 as int32);
+            const event_value_data_1  = event_value_data as WebResourceRequest;
+            _argsSerializer.writeWebResourceRequest(event_value_data_1);
+        }
+    }
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-985284966, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-985284966, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnRefreshAccessedHistoryEvent(): OnRefreshAccessedHistoryEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const isRefreshed_result : boolean = valueDeserializer.readBoolean()
+        let value : OnRefreshAccessedHistoryEvent = ({url: url_result, isRefreshed: isRefreshed_result} as OnRefreshAccessedHistoryEvent)
+        return value
+    }
+    readCallback_OnRefreshAccessedHistoryEvent_Void(isSync: boolean = false): ((parameter: OnRefreshAccessedHistoryEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnRefreshAccessedHistoryEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnRefreshAccessedHistoryEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1978364344, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1978364344, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnDownloadStartEvent(): OnDownloadStartEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const userAgent_result : string = (valueDeserializer.readString() as string)
+        const contentDisposition_result : string = (valueDeserializer.readString() as string)
+        const mimetype_result : string = (valueDeserializer.readString() as string)
+        const contentLength_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnDownloadStartEvent = ({url: url_result, userAgent: userAgent_result, contentDisposition: contentDisposition_result, mimetype: mimetype_result, contentLength: contentLength_result} as OnDownloadStartEvent)
+        return value
+    }
+    readCallback_OnDownloadStartEvent_Void(isSync: boolean = false): ((parameter: OnDownloadStartEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnDownloadStartEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnDownloadStartEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1834611702, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1834611702, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnHttpErrorReceiveEvent(): OnHttpErrorReceiveEvent {
+        let valueDeserializer : Deserializer = this
+        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
+        const response_result : WebResourceResponse = (valueDeserializer.readWebResourceResponse() as WebResourceResponse)
+        let value : OnHttpErrorReceiveEvent = ({request: request_result, response: response_result} as OnHttpErrorReceiveEvent)
+        return value
+    }
+    readCallback_OnHttpErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnHttpErrorReceiveEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnHttpErrorReceiveEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnHttpErrorReceiveEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2066745559, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2066745559, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnErrorReceiveEvent(): OnErrorReceiveEvent {
+        let valueDeserializer : Deserializer = this
+        const request_result : WebResourceRequest = (valueDeserializer.readWebResourceRequest() as WebResourceRequest)
+        const error_result : WebResourceError = (valueDeserializer.readWebResourceError() as WebResourceError)
+        let value : OnErrorReceiveEvent = ({request: request_result, error: error_result} as OnErrorReceiveEvent)
+        return value
+    }
+    readCallback_OnErrorReceiveEvent_Void(isSync: boolean = false): ((parameter: OnErrorReceiveEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnErrorReceiveEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnErrorReceiveEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1792851375, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1792851375, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnConsoleEvent(): OnConsoleEvent {
+        let valueDeserializer : Deserializer = this
+        const message_result : ConsoleMessage = (valueDeserializer.readConsoleMessage() as ConsoleMessage)
+        let value : OnConsoleEvent = ({message: message_result} as OnConsoleEvent)
+        return value
+    }
+    readCallback_OnConsoleEvent_Boolean(isSync: boolean = false): ((parameter: OnConsoleEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnConsoleEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnConsoleEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(893367077, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(893367077, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnPromptEvent(): OnPromptEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const message_result : string = (valueDeserializer.readString() as string)
+        const value_result : string = (valueDeserializer.readString() as string)
+        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
+        let value : OnPromptEvent = ({url: url_result, message: message_result, value: value_result, result: result_result} as OnPromptEvent)
+        return value
+    }
+    readCallback_OnPromptEvent_Boolean(isSync: boolean = false): ((parameter: OnPromptEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnPromptEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnPromptEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1826742986, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1826742986, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnConfirmEvent(): OnConfirmEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const message_result : string = (valueDeserializer.readString() as string)
+        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
+        let value : OnConfirmEvent = ({url: url_result, message: message_result, result: result_result} as OnConfirmEvent)
+        return value
+    }
+    readCallback_OnConfirmEvent_Boolean(isSync: boolean = false): ((parameter: OnConfirmEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnConfirmEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnConfirmEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(317864672, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(317864672, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnBeforeUnloadEvent(): OnBeforeUnloadEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const message_result : string = (valueDeserializer.readString() as string)
+        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
+        let value : OnBeforeUnloadEvent = ({url: url_result, message: message_result, result: result_result} as OnBeforeUnloadEvent)
+        return value
+    }
+    readCallback_OnBeforeUnloadEvent_Boolean(isSync: boolean = false): ((parameter: OnBeforeUnloadEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnBeforeUnloadEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnBeforeUnloadEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-873162122, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-873162122, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnAlertEvent(): OnAlertEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const message_result : string = (valueDeserializer.readString() as string)
+        const result_result : JsResult = (valueDeserializer.readJsResult() as JsResult)
+        let value : OnAlertEvent = ({url: url_result, message: message_result, result: result_result} as OnAlertEvent)
+        return value
+    }
+    readCallback_OnAlertEvent_Boolean(isSync: boolean = false): ((parameter: OnAlertEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnAlertEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnAlertEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(806070428, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(806070428, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readOnGeolocationShowEvent(): OnGeolocationShowEvent {
+        let valueDeserializer : Deserializer = this
+        const origin_result : string = (valueDeserializer.readString() as string)
+        const geolocation_result : JsGeolocation = (valueDeserializer.readJsGeolocation() as JsGeolocation)
+        let value : OnGeolocationShowEvent = ({origin: origin_result, geolocation: geolocation_result} as OnGeolocationShowEvent)
+        return value
+    }
+    readCallback_OnGeolocationShowEvent_Void(isSync: boolean = false): ((parameter: OnGeolocationShowEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnGeolocationShowEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnGeolocationShowEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-941896815, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-941896815, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnTitleReceiveEvent(): OnTitleReceiveEvent {
+        let valueDeserializer : Deserializer = this
+        const title_result : string = (valueDeserializer.readString() as string)
+        let value : OnTitleReceiveEvent = ({title: title_result} as OnTitleReceiveEvent)
+        return value
+    }
+    readCallback_OnTitleReceiveEvent_Void(isSync: boolean = false): ((parameter: OnTitleReceiveEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnTitleReceiveEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnTitleReceiveEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-318085495, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-318085495, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnProgressChangeEvent(): OnProgressChangeEvent {
+        let valueDeserializer : Deserializer = this
+        const newProgress_result : number = (valueDeserializer.readNumber() as number)
+        let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
+        return value
+    }
+    readCallback_OnProgressChangeEvent_Void(isSync: boolean = false): ((parameter: OnProgressChangeEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnProgressChangeEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnProgressChangeEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1018740377, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1018740377, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnPageBeginEvent(): OnPageBeginEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        let value : OnPageBeginEvent = ({url: url_result} as OnPageBeginEvent)
+        return value
+    }
+    readCallback_OnPageBeginEvent_Void(isSync: boolean = false): ((parameter: OnPageBeginEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnPageBeginEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnPageBeginEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2040193994, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2040193994, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnPageEndEvent(): OnPageEndEvent {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        let value : OnPageEndEvent = ({url: url_result} as OnPageEndEvent)
+        return value
+    }
+    readCallback_OnPageEndEvent_Void(isSync: boolean = false): ((parameter: OnPageEndEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: OnPageEndEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeOnPageEndEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-130135362, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-130135362, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readWebOptions(): WebOptions {
         let valueDeserializer : Deserializer = this
         const src_buf_selector : int32 = valueDeserializer.readInt8()
@@ -15521,6 +15213,397 @@ export class Deserializer extends DeserializerBase {
         let value : Header = ({headerKey: headerKey_result, headerValue: headerValue_result} as Header)
         return value
     }
+    readOnContextMenuHideCallback(isSync: boolean = false): OnContextMenuHideCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return ():void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1788572278, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1788572278, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readFullScreenEnterEvent(): FullScreenEnterEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : FullScreenExitHandler = (valueDeserializer.readFullScreenExitHandler() as FullScreenExitHandler)
+        const videoWidth_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let videoWidth_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (videoWidth_buf_runtimeType))
+        {
+            videoWidth_buf = (valueDeserializer.readNumber() as number)
+        }
+        const videoWidth_result : number | undefined = videoWidth_buf
+        const videoHeight_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let videoHeight_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (videoHeight_buf_runtimeType))
+        {
+            videoHeight_buf = (valueDeserializer.readNumber() as number)
+        }
+        const videoHeight_result : number | undefined = videoHeight_buf
+        let value : FullScreenEnterEvent = ({handler: handler_result, videoWidth: videoWidth_result, videoHeight: videoHeight_result} as FullScreenEnterEvent)
+        return value
+    }
+    readOnFullScreenEnterCallback(isSync: boolean = false): OnFullScreenEnterCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: FullScreenEnterEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeFullScreenEnterEvent(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(81230317, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(81230317, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnSafeBrowsingCheckResultCallback(isSync: boolean = false): OnSafeBrowsingCheckResultCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (threatType: ThreatType):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(threatType.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1099824577, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1099824577, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readWebKeyboardOptions(): WebKeyboardOptions {
+        let valueDeserializer : Deserializer = this
+        const useSystemKeyboard_result : boolean = valueDeserializer.readBoolean()
+        const enterKeyType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enterKeyType_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (enterKeyType_buf_runtimeType))
+        {
+            enterKeyType_buf = (valueDeserializer.readNumber() as number)
+        }
+        const enterKeyType_result : number | undefined = enterKeyType_buf
+        const customKeyboard_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let customKeyboard_buf : CustomBuilder | undefined
+        if ((RuntimeType.UNDEFINED) != (customKeyboard_buf_runtimeType))
+        {
+            customKeyboard_buf = CallbackTransformer.transformToCustomBuilder(valueDeserializer.readCustomNodeBuilder())
+        }
+        const customKeyboard_result : CustomBuilder | undefined = customKeyboard_buf
+        let value : WebKeyboardOptions = ({useSystemKeyboard: useSystemKeyboard_result, enterKeyType: enterKeyType_result, customKeyboard: customKeyboard_result} as WebKeyboardOptions)
+        return value
+    }
+    readWebKeyboardCallbackInfo(): WebKeyboardCallbackInfo {
+        let valueDeserializer : Deserializer = this
+        const controller_result : WebKeyboardController = (valueDeserializer.readWebKeyboardController() as WebKeyboardController)
+        const attributes_buf_size : int32 = valueDeserializer.readInt32()
+        let attributes_buf : Map<string, string> = new Map<string, string>()
+        // TODO: TS map resize
+        for (let attributes_buf_i = 0; attributes_buf_i < attributes_buf_size; attributes_buf_i++) {
+            const attributes_buf_key : string = (valueDeserializer.readString() as string)
+            const attributes_buf_value : string = (valueDeserializer.readString() as string)
+            attributes_buf.set(attributes_buf_key, attributes_buf_value)
+        }
+        const attributes_result : Map<string, string> = attributes_buf
+        let value : WebKeyboardCallbackInfo = ({controller: controller_result, attributes: attributes_result} as WebKeyboardCallbackInfo)
+        return value
+    }
+    readWebKeyboardCallback(isSync: boolean = false): WebKeyboardCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (keyboardCallbackInfo: WebKeyboardCallbackInfo):WebKeyboardOptions => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeWebKeyboardCallbackInfo(keyboardCallbackInfo);
+    let _continuationValue : WebKeyboardOptions | undefined;
+    const _continuationCallback : ((value: WebKeyboardOptions) => void) = (value: WebKeyboardOptions):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1829763354, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1829763354, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as WebKeyboardOptions); }
+    }
+    readAdsBlockedDetails(): AdsBlockedDetails {
+        let valueDeserializer : Deserializer = this
+        const url_result : string = (valueDeserializer.readString() as string)
+        const adsBlocked_buf_length : int32 = valueDeserializer.readInt32()
+        let adsBlocked_buf : Array<string> = new Array<string>(adsBlocked_buf_length)
+        for (let adsBlocked_buf_i = 0; adsBlocked_buf_i < adsBlocked_buf_length; adsBlocked_buf_i++) {
+            adsBlocked_buf[adsBlocked_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const adsBlocked_result : Array<string> = adsBlocked_buf
+        let value : AdsBlockedDetails = ({url: url_result, adsBlocked: adsBlocked_result} as AdsBlockedDetails)
+        return value
+    }
+    readOnAdsBlockedCallback(isSync: boolean = false): OnAdsBlockedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (details: AdsBlockedDetails):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeAdsBlockedDetails(details);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1572284740, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1572284740, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnViewportFitChangedCallback(isSync: boolean = false): OnViewportFitChangedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (viewportFit: ViewportFit):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(viewportFit.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1847083191, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1847083191, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnRenderProcessRespondingCallback(isSync: boolean = false): OnRenderProcessRespondingCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return ():void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1334389194, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1334389194, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readRenderProcessNotRespondingData(): RenderProcessNotRespondingData {
+        let valueDeserializer : Deserializer = this
+        const jsStack_result : string = (valueDeserializer.readString() as string)
+        const pid_result : number = (valueDeserializer.readNumber() as number)
+        const reason_result : RenderProcessNotRespondingReason = (valueDeserializer.readInt32() as RenderProcessNotRespondingReason)
+        let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
+        return value
+    }
+    readOnRenderProcessNotRespondingCallback(isSync: boolean = false): OnRenderProcessNotRespondingCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (data: RenderProcessNotRespondingData):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeRenderProcessNotRespondingData(data);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(47282303, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(47282303, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readNativeEmbedVisibilityInfo(): NativeEmbedVisibilityInfo {
+        let valueDeserializer : Deserializer = this
+        const visibility_result : boolean = valueDeserializer.readBoolean()
+        const embedId_result : string = (valueDeserializer.readString() as string)
+        let value : NativeEmbedVisibilityInfo = ({visibility: visibility_result, embedId: embedId_result} as NativeEmbedVisibilityInfo)
+        return value
+    }
+    readOnNativeEmbedVisibilityChangeCallback(isSync: boolean = false): OnNativeEmbedVisibilityChangeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (nativeEmbedVisibilityInfo: NativeEmbedVisibilityInfo):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNativeEmbedVisibilityInfo(nativeEmbedVisibilityInfo);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1641338704, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1641338704, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readIntelligentTrackingPreventionDetails(): IntelligentTrackingPreventionDetails {
+        let valueDeserializer : Deserializer = this
+        const host_result : string = (valueDeserializer.readString() as string)
+        const trackerHost_result : string = (valueDeserializer.readString() as string)
+        let value : IntelligentTrackingPreventionDetails = ({host: host_result, trackerHost: trackerHost_result} as IntelligentTrackingPreventionDetails)
+        return value
+    }
+    readOnIntelligentTrackingPreventionCallback(isSync: boolean = false): OnIntelligentTrackingPreventionCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (details: IntelligentTrackingPreventionDetails):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeIntelligentTrackingPreventionDetails(details);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1377876844, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1377876844, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnOverrideUrlLoadingCallback(isSync: boolean = false): OnOverrideUrlLoadingCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (webResourceRequest: WebResourceRequest):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeWebResourceRequest(webResourceRequest);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(865258467, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(865258467, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readFirstMeaningfulPaint(): FirstMeaningfulPaint {
+        let valueDeserializer : Deserializer = this
+        const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let navigationStartTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
+        {
+            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const firstMeaningfulPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let firstMeaningfulPaintTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (firstMeaningfulPaintTime_buf_runtimeType))
+        {
+            firstMeaningfulPaintTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const firstMeaningfulPaintTime_result : number | undefined = firstMeaningfulPaintTime_buf
+        let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
+        return value
+    }
+    readOnFirstMeaningfulPaintCallback(isSync: boolean = false): OnFirstMeaningfulPaintCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (firstMeaningfulPaint: FirstMeaningfulPaint):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeFirstMeaningfulPaint(firstMeaningfulPaint);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(767275770, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(767275770, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readLargestContentfulPaint(): LargestContentfulPaint {
+        let valueDeserializer : Deserializer = this
+        const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let navigationStartTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
+        {
+            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const largestImagePaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let largestImagePaintTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (largestImagePaintTime_buf_runtimeType))
+        {
+            largestImagePaintTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const largestImagePaintTime_result : number | undefined = largestImagePaintTime_buf
+        const largestTextPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let largestTextPaintTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (largestTextPaintTime_buf_runtimeType))
+        {
+            largestTextPaintTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const largestTextPaintTime_result : number | undefined = largestTextPaintTime_buf
+        const imageBPP_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let imageBPP_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (imageBPP_buf_runtimeType))
+        {
+            imageBPP_buf = (valueDeserializer.readNumber() as number)
+        }
+        const imageBPP_result : number | undefined = imageBPP_buf
+        const largestImageLoadStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let largestImageLoadStartTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (largestImageLoadStartTime_buf_runtimeType))
+        {
+            largestImageLoadStartTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const largestImageLoadStartTime_result : number | undefined = largestImageLoadStartTime_buf
+        const largestImageLoadEndTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let largestImageLoadEndTime_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (largestImageLoadEndTime_buf_runtimeType))
+        {
+            largestImageLoadEndTime_buf = (valueDeserializer.readNumber() as number)
+        }
+        const largestImageLoadEndTime_result : number | undefined = largestImageLoadEndTime_buf
+        let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
+        return value
+    }
+    readOnLargestContentfulPaintCallback(isSync: boolean = false): OnLargestContentfulPaintCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (largestContentfulPaint: LargestContentfulPaint):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeLargestContentfulPaint(largestContentfulPaint);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1390640532, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1390640532, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSslErrorEvent(): SslErrorEvent {
+        let valueDeserializer : Deserializer = this
+        const handler_result : SslErrorHandler = (valueDeserializer.readSslErrorHandler() as SslErrorHandler)
+        const error_result : SslError = (valueDeserializer.readInt32() as SslError)
+        const url_result : string = (valueDeserializer.readString() as string)
+        const originalUrl_result : string = (valueDeserializer.readString() as string)
+        const referrer_result : string = (valueDeserializer.readString() as string)
+        const isFatalError_result : boolean = valueDeserializer.readBoolean()
+        const isMainFrame_result : boolean = valueDeserializer.readBoolean()
+        let value : SslErrorEvent = ({handler: handler_result, error: error_result, url: url_result, originalUrl: originalUrl_result, referrer: referrer_result, isFatalError: isFatalError_result, isMainFrame: isMainFrame_result} as SslErrorEvent)
+        return value
+    }
+    readOnSslErrorEventCallback(isSync: boolean = false): OnSslErrorEventCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (sslErrorEvent: SslErrorEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeSslErrorEvent(sslErrorEvent);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-399603614, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-399603614, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readLoadCommittedDetails(): LoadCommittedDetails {
+        let valueDeserializer : Deserializer = this
+        const isMainFrame_result : boolean = valueDeserializer.readBoolean()
+        const isSameDocument_result : boolean = valueDeserializer.readBoolean()
+        const didReplaceEntry_result : boolean = valueDeserializer.readBoolean()
+        const navigationType_result : WebNavigationType = (valueDeserializer.readInt32() as WebNavigationType)
+        const url_result : string = (valueDeserializer.readString() as string)
+        let value : LoadCommittedDetails = ({isMainFrame: isMainFrame_result, isSameDocument: isSameDocument_result, didReplaceEntry: didReplaceEntry_result, navigationType: navigationType_result, url: url_result} as LoadCommittedDetails)
+        return value
+    }
+    readOnNavigationEntryCommittedCallback(isSync: boolean = false): OnNavigationEntryCommittedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (loadCommittedDetails: LoadCommittedDetails):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeLoadCommittedDetails(loadCommittedDetails);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-398722176, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-398722176, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readPlaybackInfo(): PlaybackInfo {
         let valueDeserializer : Deserializer = this
         const time_result : number = (valueDeserializer.readNumber() as number)
@@ -15537,7 +15620,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePlaybackInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2058966418, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2058966418, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2058966418, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2058966418, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15557,7 +15640,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePreparedInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1300890372, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1300890372, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1300890372, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1300890372, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15577,7 +15660,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFullscreenInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(583294398, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(583294398, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(583294398, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(583294398, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15659,6 +15742,46 @@ export class Deserializer extends DeserializerBase {
         const imageAIOptions_result : ImageAIOptions | undefined = imageAIOptions_buf
         let value : VideoOptions = ({src: src_result, currentProgressRate: currentProgressRate_result, previewUri: previewUri_result, controller: controller_result, imageAIOptions: imageAIOptions_result} as VideoOptions)
         return value
+    }
+    readWithThemeAttribute(): WithThemeAttribute {
+        let value : WithThemeAttribute = ({} as WithThemeAttribute)
+        return value
+    }
+    readWithThemeOptions(): WithThemeOptions {
+        let valueDeserializer : Deserializer = this
+        const theme_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let theme_buf : CustomTheme | undefined
+        if ((RuntimeType.UNDEFINED) != (theme_buf_runtimeType))
+        {
+            theme_buf = valueDeserializer.readCustomTheme()
+        }
+        const theme_result : CustomTheme | undefined = theme_buf
+        const colorMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let colorMode_buf : ThemeColorMode | undefined
+        if ((RuntimeType.UNDEFINED) != (colorMode_buf_runtimeType))
+        {
+            colorMode_buf = (valueDeserializer.readInt32() as ThemeColorMode)
+        }
+        const colorMode_result : ThemeColorMode | undefined = colorMode_buf
+        let value : WithThemeOptions = ({theme: theme_result, colorMode: colorMode_result} as WithThemeOptions)
+        return value
+    }
+    readWithThemeInterface(isSync: boolean = false): WithThemeInterface {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (options: WithThemeOptions):WithThemeAttribute => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeWithThemeOptions(options);
+    let _continuationValue : WithThemeAttribute | undefined;
+    const _continuationCallback : ((value: WithThemeAttribute) => void) = (value: WithThemeAttribute):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as WithThemeAttribute); }
     }
     readSwitchStyle(): SwitchStyle {
         let valueDeserializer : Deserializer = this
@@ -15895,7 +16018,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeNumber(index_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1078223620, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1078223620, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1078223620, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1078223620, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15910,7 +16033,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(value);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-879490874, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-879490874, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-879490874, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-879490874, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16125,9 +16248,9 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
+    _argsSerializer.writeInt32(enterKey.valueOf());
     _argsSerializer.writeSubmitEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1961646162, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1961646162, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1961646162, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1961646162, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16230,28 +16353,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(value);
     _argsSerializer.writePasteEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-683652998, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-683652998, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readTextAreaSubmitCallback(isSync: boolean = false): TextAreaSubmitCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (enterKeyType: EnterKeyType, event?: SubmitEvent | undefined):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((enterKeyType as EnterKeyType) as int32));
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        _argsSerializer.writeSubmitEvent(event_value);
-    }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-401980571, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-401980571, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-683652998, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-683652998, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16264,8 +16366,29 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1802605016, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1802605016, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(enterKey.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1802605016, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1802605016, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readTextAreaSubmitCallback(isSync: boolean = false): TextAreaSubmitCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (enterKeyType: EnterKeyType, event?: SubmitEvent | undefined):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(enterKeyType.valueOf());
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        _argsSerializer.writeSubmitEvent(event_value);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16329,47 +16452,6 @@ export class Deserializer extends DeserializerBase {
         let value : TextOptions = ({controller: controller_result} as TextOptions)
         return value
     }
-    readOnTabsContentWillChangeCallback(isSync: boolean = false): OnTabsContentWillChangeCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (currentIndex: number, comingIndex: number):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(currentIndex);
-    _argsSerializer.writeNumber(comingIndex);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-349727249, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-349727249, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readTabContentTransitionProxy(): TabContentTransitionProxy {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TabContentTransitionProxyInternal.fromPtr(ptr)
-    }
-    readTabsCustomContentTransitionCallback(isSync: boolean = false): TabsCustomContentTransitionCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):TabContentAnimatedTransition | undefined => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(from);
-    _argsSerializer.writeNumber(to);
-    let _continuationValue : TabContentAnimatedTransition | undefined;
-    const _continuationCallback : ((value: TabContentAnimatedTransition | undefined) => void) = (value?: TabContentAnimatedTransition | undefined):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(221706282, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(221706282, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as TabContentAnimatedTransition | undefined); }
-    }
     readBarGridColumnOptions(): BarGridColumnOptions {
         let valueDeserializer : Deserializer = this
         const sm_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -16410,6 +16492,47 @@ export class Deserializer extends DeserializerBase {
         let value : BarGridColumnOptions = ({sm: sm_result, md: md_result, lg: lg_result, margin: margin_result, gutter: gutter_result} as BarGridColumnOptions)
         return value
     }
+    readOnTabsContentWillChangeCallback(isSync: boolean = false): OnTabsContentWillChangeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (currentIndex: number, comingIndex: number):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(currentIndex);
+    _argsSerializer.writeNumber(comingIndex);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-349727249, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-349727249, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readTabContentTransitionProxy(): TabContentTransitionProxy {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TabContentTransitionProxyInternal.fromPtr(ptr)
+    }
+    readTabsCustomContentTransitionCallback(isSync: boolean = false): TabsCustomContentTransitionCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (from: number, to: number):TabContentAnimatedTransition | undefined => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(from);
+    _argsSerializer.writeNumber(to);
+    let _continuationValue : TabContentAnimatedTransition | undefined;
+    const _continuationCallback : ((value: TabContentAnimatedTransition | undefined) => void) = (value?: TabContentAnimatedTransition | undefined):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(221706282, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(221706282, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as TabContentAnimatedTransition | undefined); }
+    }
     readOnTabsGestureSwipeCallback(isSync: boolean = false): OnTabsGestureSwipeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -16421,7 +16544,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(253696833, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(253696833, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(253696833, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(253696833, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16436,7 +16559,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1942856551, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1942856551, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1942856551, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1942856551, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16460,7 +16583,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(targetIndex);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-147408344, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-147408344, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-147408344, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-147408344, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16489,6 +16612,11 @@ export class Deserializer extends DeserializerBase {
         const controller_result : TabsController | undefined = controller_buf
         let value : TabsOptions = ({barPosition: barPosition_result, index: index_result, controller: controller_result} as TabsOptions)
         return value
+    }
+    readPulseSymbolEffect(): PulseSymbolEffect {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PulseSymbolEffectInternal.fromPtr(ptr)
     }
     readBounceSymbolEffect(): BounceSymbolEffect {
         let valueDeserializer : Deserializer = this
@@ -16523,7 +16651,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(position);
     _argsSerializer.writeNumber(mainAxisLength);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1532328438, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1532328438, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1532328438, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1532328438, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16545,6 +16673,11 @@ export class Deserializer extends DeserializerBase {
         let value : SwiperContentAnimatedTransition = ({timeout: timeout_result, transition: transition_result} as SwiperContentAnimatedTransition)
         return value
     }
+    readIndicatorComponentController(): IndicatorComponentController {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return IndicatorComponentControllerInternal.fromPtr(ptr)
+    }
     readOnSwiperGestureSwipeCallback(isSync: boolean = false): OnSwiperGestureSwipeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -16556,7 +16689,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(606029871, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(606029871, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(606029871, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(606029871, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16571,7 +16704,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-143686583, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143686583, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-143686583, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143686583, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16595,14 +16728,9 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(targetIndex);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(876602502, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(876602502, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(876602502, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(876602502, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readIndicatorComponentController(): IndicatorComponentController {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return IndicatorComponentControllerInternal.fromPtr(ptr)
     }
     readSwiperController(): SwiperController {
         let valueDeserializer : Deserializer = this
@@ -16681,8 +16809,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(value);
-    _argsSerializer.writeInt32(((mode as SliderChangeMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(88697971, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(88697971, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(88697971, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(88697971, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16739,6 +16867,21 @@ export class Deserializer extends DeserializerBase {
         const reverse_result : boolean | undefined = reverse_buf
         let value : SliderOptions = ({value: value_result, min: min_result, max: max_result, step: step_result, style: style_result, direction: direction_result, reverse: reverse_result} as SliderOptions)
         return value
+    }
+    readSliderTriggerChangeCallback(isSync: boolean = false): SliderTriggerChangeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: number, mode: SliderChangeMode):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(value);
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readViewportRect(): ViewportRect {
         let valueDeserializer : Deserializer = this
@@ -16828,7 +16971,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeString(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(794065478, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(794065478, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(794065478, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(794065478, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16873,83 +17016,6 @@ export class Deserializer extends DeserializerBase {
         const symbolIcon_result : SymbolGlyphModifier | undefined = symbolIcon_buf
         let value : SelectOption = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result} as SelectOption)
         return value
-    }
-    readCallback_DeleteValue_Void(isSync: boolean = false): ((parameter: DeleteValue) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: DeleteValue):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeDeleteValue(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-126251459, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-126251459, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readDeleteValue(): DeleteValue {
-        let valueDeserializer : Deserializer = this
-        const deleteOffset_result : number = (valueDeserializer.readNumber() as number)
-        const direction_result : TextDeleteDirection = (valueDeserializer.readInt32() as TextDeleteDirection)
-        const deleteValue_result : string = (valueDeserializer.readString() as string)
-        let value : DeleteValue = ({deleteOffset: deleteOffset_result, direction: direction_result, deleteValue: deleteValue_result} as DeleteValue)
-        return value
-    }
-    readCallback_DeleteValue_Boolean(isSync: boolean = false): ((parameter: DeleteValue) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: DeleteValue):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeDeleteValue(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1357792883, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1357792883, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readCallback_InsertValue_Void(isSync: boolean = false): ((parameter: InsertValue) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: InsertValue):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInsertValue(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1121207885, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1121207885, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readInsertValue(): InsertValue {
-        let valueDeserializer : Deserializer = this
-        const insertOffset_result : number = (valueDeserializer.readNumber() as number)
-        const insertValue_result : string = (valueDeserializer.readString() as string)
-        let value : InsertValue = ({insertOffset: insertOffset_result, insertValue: insertValue_result} as InsertValue)
-        return value
-    }
-    readCallback_InsertValue_Boolean(isSync: boolean = false): ((parameter: InsertValue) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: InsertValue):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInsertValue(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-383025085, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-383025085, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
     }
     readTextDecorationOptions(): TextDecorationOptions {
         let valueDeserializer : Deserializer = this
@@ -16999,7 +17065,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(content);
     _argsSerializer.writePasteEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1738363337, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1738363337, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1738363337, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1738363337, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17014,7 +17080,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(totalOffsetX);
     _argsSerializer.writeNumber(totalOffsetY);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-419979106, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-419979106, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-419979106, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-419979106, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17029,7 +17095,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(selectionStart);
     _argsSerializer.writeNumber(selectionEnd);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(695228737, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(695228737, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(695228737, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(695228737, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17050,28 +17116,7 @@ export class Deserializer extends DeserializerBase {
         const previewText_value  = previewText!;
         _argsSerializer.writePreviewText(previewText_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1729563209, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1729563209, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readSearchSubmitCallback(isSync: boolean = false): SearchSubmitCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (searchContent: string, event?: SubmitEvent | undefined):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeString(searchContent);
-    let event_type : int32 = RuntimeType.UNDEFINED;
-    event_type = runtimeType(event);
-    _argsSerializer.writeInt8(event_type as int32);
-    if ((RuntimeType.UNDEFINED) != (event_type)) {
-        const event_value  = event!;
-        _argsSerializer.writeSubmitEvent(event_value);
-    }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1717691617, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1717691617, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1729563209, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1729563209, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17110,6 +17155,104 @@ export class Deserializer extends DeserializerBase {
         const color_result : ResourceColor | undefined = color_buf
         let value : CaretStyle = ({width: width_result, color: color_result} as CaretStyle)
         return value
+    }
+    readCallback_DeleteValue_Void(isSync: boolean = false): ((parameter: DeleteValue) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: DeleteValue):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeDeleteValue(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-126251459, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-126251459, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readDeleteValue(): DeleteValue {
+        let valueDeserializer : Deserializer = this
+        const deleteOffset_result : number = (valueDeserializer.readNumber() as number)
+        const direction_result : TextDeleteDirection = (valueDeserializer.readInt32() as TextDeleteDirection)
+        const deleteValue_result : string = (valueDeserializer.readString() as string)
+        let value : DeleteValue = ({deleteOffset: deleteOffset_result, direction: direction_result, deleteValue: deleteValue_result} as DeleteValue)
+        return value
+    }
+    readCallback_DeleteValue_Boolean(isSync: boolean = false): ((parameter: DeleteValue) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: DeleteValue):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeDeleteValue(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1357792883, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1357792883, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readCallback_InsertValue_Void(isSync: boolean = false): ((parameter: InsertValue) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: InsertValue):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInsertValue(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1121207885, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1121207885, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readInsertValue(): InsertValue {
+        let valueDeserializer : Deserializer = this
+        const insertOffset_result : number = (valueDeserializer.readNumber() as number)
+        const insertValue_result : string = (valueDeserializer.readString() as string)
+        let value : InsertValue = ({insertOffset: insertOffset_result, insertValue: insertValue_result} as InsertValue)
+        return value
+    }
+    readCallback_InsertValue_Boolean(isSync: boolean = false): ((parameter: InsertValue) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: InsertValue):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInsertValue(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-383025085, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-383025085, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readSearchSubmitCallback(isSync: boolean = false): SearchSubmitCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (searchContent: string, event?: SubmitEvent | undefined):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeString(searchContent);
+    let event_type : int32 = RuntimeType.UNDEFINED;
+    event_type = runtimeType(event);
+    _argsSerializer.writeInt8(event_type as int32);
+    if ((RuntimeType.UNDEFINED) != (event_type)) {
+        const event_value  = event!;
+        _argsSerializer.writeSubmitEvent(event_value);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1717691617, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1717691617, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readSearchOptions(): SearchOptions {
         let valueDeserializer : Deserializer = this
@@ -17237,6 +17380,22 @@ export class Deserializer extends DeserializerBase {
         let value : ScrollSnapOptions = ({snapAlign: snapAlign_result, snapPagination: snapPagination_result, enableSnapToStart: enableSnapToStart_result, enableSnapToEnd: enableSnapToEnd_result} as ScrollSnapOptions)
         return value
     }
+    readScrollOnScrollCallback(isSync: boolean = false): ScrollOnScrollCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (xOffset: number, yOffset: number, scrollState: ScrollState):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(xOffset);
+    _argsSerializer.writeNumber(yOffset);
+    _argsSerializer.writeInt32(scrollState.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1265626662, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1265626662, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readOnScrollFrameBeginHandlerResult(): OnScrollFrameBeginHandlerResult {
         let valueDeserializer : Deserializer = this
         const offsetRemain_result : number = (valueDeserializer.readNumber() as number)
@@ -17253,11 +17412,11 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(offset);
-    _argsSerializer.writeInt32(((state as ScrollState) as int32));
+    _argsSerializer.writeInt32(state.valueOf());
     let _continuationValue : OnScrollFrameBeginHandlerResult | undefined;
     const _continuationCallback : ((value: OnScrollFrameBeginHandlerResult) => void) = (value: OnScrollFrameBeginHandlerResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2133791987, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2133791987, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2133791987, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2133791987, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as OnScrollFrameBeginHandlerResult); }
     }
@@ -17270,8 +17429,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((side as Edge) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1259214476, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1259214476, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(side.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1259214476, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1259214476, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17285,8 +17444,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32(((result as SaveButtonOnClickResult) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(846787331, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(846787331, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(result.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(846787331, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(846787331, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17360,99 +17519,6 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return EditMenuOptionsInternal.fromPtr(ptr)
     }
-    readCopyEvent(): CopyEvent {
-        let valueDeserializer : Deserializer = this
-        const preventDefault_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let preventDefault_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
-        {
-            preventDefault_buf = valueDeserializer.readCallback_Void()
-        }
-        const preventDefault_result : (() => void) | undefined = preventDefault_buf
-        let value : CopyEvent = ({preventDefault: preventDefault_result} as CopyEvent)
-        return value
-    }
-    readCallback_CopyEvent_Void(isSync: boolean = false): ((parameter: CopyEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: CopyEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeCopyEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCutEvent(): CutEvent {
-        let valueDeserializer : Deserializer = this
-        const preventDefault_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let preventDefault_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
-        {
-            preventDefault_buf = valueDeserializer.readCallback_Void()
-        }
-        const preventDefault_result : (() => void) | undefined = preventDefault_buf
-        let value : CutEvent = ({preventDefault: preventDefault_result} as CutEvent)
-        return value
-    }
-    readCallback_CutEvent_Void(isSync: boolean = false): ((parameter: CutEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: CutEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeCutEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1875695871, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1875695871, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readRichEditorChangeValue(): RichEditorChangeValue {
-        let valueDeserializer : Deserializer = this
-        const rangeBefore_result : TextRange = valueDeserializer.readTextRange()
-        const replacedSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSpans_buf_length)
-        for (let replacedSpans_buf_i = 0; replacedSpans_buf_i < replacedSpans_buf_length; replacedSpans_buf_i++) {
-            replacedSpans_buf[replacedSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
-        }
-        const replacedSpans_result : Array<RichEditorTextSpanResult> = replacedSpans_buf
-        const replacedImageSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedImageSpans_buf : Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>(replacedImageSpans_buf_length)
-        for (let replacedImageSpans_buf_i = 0; replacedImageSpans_buf_i < replacedImageSpans_buf_length; replacedImageSpans_buf_i++) {
-            replacedImageSpans_buf[replacedImageSpans_buf_i] = valueDeserializer.readRichEditorImageSpanResult()
-        }
-        const replacedImageSpans_result : Array<RichEditorImageSpanResult> = replacedImageSpans_buf
-        const replacedSymbolSpans_buf_length : int32 = valueDeserializer.readInt32()
-        let replacedSymbolSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSymbolSpans_buf_length)
-        for (let replacedSymbolSpans_buf_i = 0; replacedSymbolSpans_buf_i < replacedSymbolSpans_buf_length; replacedSymbolSpans_buf_i++) {
-            replacedSymbolSpans_buf[replacedSymbolSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
-        }
-        const replacedSymbolSpans_result : Array<RichEditorTextSpanResult> = replacedSymbolSpans_buf
-        let value : RichEditorChangeValue = ({rangeBefore: rangeBefore_result, replacedSpans: replacedSpans_result, replacedImageSpans: replacedImageSpans_result, replacedSymbolSpans: replacedSymbolSpans_result} as RichEditorChangeValue)
-        return value
-    }
-    readCallback_RichEditorChangeValue_Boolean(isSync: boolean = false): ((parameter: RichEditorChangeValue) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorChangeValue):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeRichEditorChangeValue(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1465860515, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1465860515, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
     readSubmitEvent(): SubmitEvent {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
@@ -17467,9 +17533,9 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((enterKey as EnterKeyType) as int32));
+    _argsSerializer.writeInt32(enterKey.valueOf());
     _argsSerializer.writeSubmitEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-712186065, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-712186065, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-712186065, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-712186065, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17550,9 +17616,102 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writePasteEvent(event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(919057028, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(919057028, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(919057028, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(919057028, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    readCopyEvent(): CopyEvent {
+        let valueDeserializer : Deserializer = this
+        const preventDefault_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let preventDefault_buf : (() => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
+        {
+            preventDefault_buf = valueDeserializer.readCallback_Void()
+        }
+        const preventDefault_result : (() => void) | undefined = preventDefault_buf
+        let value : CopyEvent = ({preventDefault: preventDefault_result} as CopyEvent)
+        return value
+    }
+    readCallback_CopyEvent_Void(isSync: boolean = false): ((parameter: CopyEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: CopyEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeCopyEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCutEvent(): CutEvent {
+        let valueDeserializer : Deserializer = this
+        const preventDefault_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let preventDefault_buf : (() => void) | undefined
+        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
+        {
+            preventDefault_buf = valueDeserializer.readCallback_Void()
+        }
+        const preventDefault_result : (() => void) | undefined = preventDefault_buf
+        let value : CutEvent = ({preventDefault: preventDefault_result} as CutEvent)
+        return value
+    }
+    readCallback_CutEvent_Void(isSync: boolean = false): ((parameter: CutEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: CutEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeCutEvent(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1875695871, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1875695871, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readRichEditorChangeValue(): RichEditorChangeValue {
+        let valueDeserializer : Deserializer = this
+        const rangeBefore_result : TextRange = valueDeserializer.readTextRange()
+        const replacedSpans_buf_length : int32 = valueDeserializer.readInt32()
+        let replacedSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSpans_buf_length)
+        for (let replacedSpans_buf_i = 0; replacedSpans_buf_i < replacedSpans_buf_length; replacedSpans_buf_i++) {
+            replacedSpans_buf[replacedSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
+        }
+        const replacedSpans_result : Array<RichEditorTextSpanResult> = replacedSpans_buf
+        const replacedImageSpans_buf_length : int32 = valueDeserializer.readInt32()
+        let replacedImageSpans_buf : Array<RichEditorImageSpanResult> = new Array<RichEditorImageSpanResult>(replacedImageSpans_buf_length)
+        for (let replacedImageSpans_buf_i = 0; replacedImageSpans_buf_i < replacedImageSpans_buf_length; replacedImageSpans_buf_i++) {
+            replacedImageSpans_buf[replacedImageSpans_buf_i] = valueDeserializer.readRichEditorImageSpanResult()
+        }
+        const replacedImageSpans_result : Array<RichEditorImageSpanResult> = replacedImageSpans_buf
+        const replacedSymbolSpans_buf_length : int32 = valueDeserializer.readInt32()
+        let replacedSymbolSpans_buf : Array<RichEditorTextSpanResult> = new Array<RichEditorTextSpanResult>(replacedSymbolSpans_buf_length)
+        for (let replacedSymbolSpans_buf_i = 0; replacedSymbolSpans_buf_i < replacedSymbolSpans_buf_length; replacedSymbolSpans_buf_i++) {
+            replacedSymbolSpans_buf[replacedSymbolSpans_buf_i] = valueDeserializer.readRichEditorTextSpanResult()
+        }
+        const replacedSymbolSpans_result : Array<RichEditorTextSpanResult> = replacedSymbolSpans_buf
+        let value : RichEditorChangeValue = ({rangeBefore: rangeBefore_result, replacedSpans: replacedSpans_result, replacedImageSpans: replacedImageSpans_result, replacedSymbolSpans: replacedSymbolSpans_result} as RichEditorChangeValue)
+        return value
+    }
+    readCallback_RichEditorChangeValue_Boolean(isSync: boolean = false): ((parameter: RichEditorChangeValue) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: RichEditorChangeValue):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeRichEditorChangeValue(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1465860515, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1465860515, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
     }
     readRichEditorDeleteValue(): RichEditorDeleteValue {
         let valueDeserializer : Deserializer = this
@@ -17592,7 +17751,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(667698748, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(667698748, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(667698748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(667698748, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17606,7 +17765,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextRange(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(811915501, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(811915501, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(811915501, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(811915501, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17620,7 +17779,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorTextSpanResult(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1980824326, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1980824326, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1980824326, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1980824326, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17651,7 +17810,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-319221262, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-319221262, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-319221262, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-319221262, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17665,7 +17824,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorRange(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-62253375, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-62253375, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-62253375, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-62253375, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17679,7 +17838,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorSelection(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-963852514, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-963852514, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-963852514, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-963852514, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17754,8 +17913,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((state as RefreshStatus) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(934309126, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(934309126, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(state.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(934309126, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(934309126, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18074,6 +18233,13 @@ export class Deserializer extends DeserializerBase {
         let value : PolygonOptions = ({width: width_result, height: height_result} as PolygonOptions)
         return value
     }
+    readPluginComponentOptions(): PluginComponentOptions {
+        let valueDeserializer : Deserializer = this
+        const template_result : PluginComponentTemplate = valueDeserializer.readPluginComponentTemplate()
+        const data_result : string = (valueDeserializer.readString() as string)
+        let value : PluginComponentOptions = ({template: template_result, data: data_result} as PluginComponentOptions)
+        return value
+    }
     readPluginErrorData(): PluginErrorData {
         let valueDeserializer : Deserializer = this
         const errcode_result : number = (valueDeserializer.readNumber() as number)
@@ -18091,16 +18257,9 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePluginErrorData(info);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1992671958, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1992671958, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1992671958, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1992671958, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readPluginComponentOptions(): PluginComponentOptions {
-        let valueDeserializer : Deserializer = this
-        const template_result : PluginComponentTemplate = valueDeserializer.readPluginComponentTemplate()
-        const data_result : string = (valueDeserializer.readString() as string)
-        let value : PluginComponentOptions = ({template: template_result, data: data_result} as PluginComponentOptions)
-        return value
     }
     readCallback_Array_Number_Void(isSync: boolean = false): ((input: Array<number>) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -18116,7 +18275,7 @@ export class Deserializer extends DeserializerBase {
         const input_element : number = input[i];
         _argsSerializer.writeNumber(input_element);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(582384234, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(582384234, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(582384234, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(582384234, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18183,8 +18342,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32(((result as PasteButtonOnClickResult) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(659292561, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(659292561, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(result.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(659292561, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(659292561, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18225,8 +18384,23 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(width);
     _argsSerializer.writeNumber(height);
-    _argsSerializer.writeInt32(((mode as PanelMode) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1613628570, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1613628570, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1613628570, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1613628570, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readPageTransitionCallback(isSync: boolean = false): PageTransitionCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (type: RouteType, progress: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(type.valueOf());
+    _argsSerializer.writeNumber(progress);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1627123591, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1627123591, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18238,6 +18412,68 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return NavigationTransitionProxyInternal.fromPtr(ptr)
+    }
+    readType_NavigationAttribute_customNavContentTransition_delegate(isSync: boolean = false): ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation):NavigationAnimatedTransition | undefined => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNavContentInfo(from);
+    _argsSerializer.writeNavContentInfo(to);
+    _argsSerializer.writeInt32(operation.valueOf());
+    let _continuationValue : NavigationAnimatedTransition | undefined;
+    const _continuationCallback : ((value: NavigationAnimatedTransition | undefined) => void) = (value?: NavigationAnimatedTransition | undefined):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1044833488, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1044833488, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as NavigationAnimatedTransition | undefined); }
+    }
+    readCallback_String_Unknown_Void(isSync: boolean = false): ((name: string,param: object) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (name: string, param: object):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeString(name);
+    _argsSerializer.writeCustomObject("Any", param);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1493806035, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1493806035, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_NavigationMode_Void(isSync: boolean = false): ((mode: NavigationMode) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (mode: NavigationMode):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(mode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(960690982, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(960690982, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_NavigationTitleMode_Void(isSync: boolean = false): ((titleMode: NavigationTitleMode) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (titleMode: NavigationTitleMode):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(titleMode.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1685437830, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1685437830, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readRouteInfo(): RouteInfo {
         let valueDeserializer : Deserializer = this
@@ -18333,20 +18569,6 @@ export class Deserializer extends DeserializerBase {
         let value : ToolbarItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, action: action_result, status: status_result, activeIcon: activeIcon_result, activeSymbolIcon: activeSymbolIcon_result} as ToolbarItem)
         return value
     }
-    readCallback_NavDestinationContext_Void(isSync: boolean = false): ((parameter: NavDestinationContext) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: NavDestinationContext):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNavDestinationContext(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1642725259, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1642725259, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readNavigationMenuItem(): NavigationMenuItem {
         let valueDeserializer : Deserializer = this
         const value_buf_selector : int32 = valueDeserializer.readInt8()
@@ -18403,6 +18625,20 @@ export class Deserializer extends DeserializerBase {
         let value : NavigationMenuItem = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, isEnabled: isEnabled_result, action: action_result} as NavigationMenuItem)
         return value
     }
+    readCallback_NavDestinationContext_Void(isSync: boolean = false): ((parameter: NavDestinationContext) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: NavDestinationContext):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNavDestinationContext(parameter);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1642725259, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1642725259, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readCallback_Boolean(isSync: boolean = false): (() => boolean) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -18415,7 +18651,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1541107680, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1541107680, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1541107680, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1541107680, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -18527,8 +18763,8 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    _argsSerializer.writeInt32(((result as LocationButtonOnClickResult) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189087745, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189087745, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeInt32(result.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189087745, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189087745, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18683,72 +18919,6 @@ export class Deserializer extends DeserializerBase {
         let value : ListItemOptions = ({style: style_result} as ListItemOptions)
         return value
     }
-    readCallback_Number_Number_Boolean(isSync: boolean = false): ((from: number,to: number) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(from);
-    _argsSerializer.writeNumber(to);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1427334496, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1427334496, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readCallback_Number_Boolean(isSync: boolean = false): ((index: number) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (index: number):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(index);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1054099324, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1054099324, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
-    readOnScrollVisibleContentChangeCallback(isSync: boolean = false): OnScrollVisibleContentChangeCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (start: VisibleListContentInfo, end: VisibleListContentInfo):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeVisibleListContentInfo(start);
-    _argsSerializer.writeVisibleListContentInfo(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(625641334, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(625641334, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Number_Number_Number_Void(isSync: boolean = false): ((start: number,end: number,center: number) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (start: number, end: number, center: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(start);
-    _argsSerializer.writeNumber(end);
-    _argsSerializer.writeNumber(center);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-352942292, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-352942292, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readChainAnimationOptions(): ChainAnimationOptions {
         let valueDeserializer : Deserializer = this
         const minSpace_result : Length = (valueDeserializer.readLength() as Length)
@@ -18791,6 +18961,57 @@ export class Deserializer extends DeserializerBase {
         let value : ChainAnimationOptions = ({minSpace: minSpace_result, maxSpace: maxSpace_result, conductivity: conductivity_result, intensity: intensity_result, edgeEffect: edgeEffect_result, stiffness: stiffness_result, damping: damping_result} as ChainAnimationOptions)
         return value
     }
+    readCallback_Number_Number_Boolean(isSync: boolean = false): ((from: number,to: number) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (from: number, to: number):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(from);
+    _argsSerializer.writeNumber(to);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1427334496, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1427334496, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readCallback_Number_Boolean(isSync: boolean = false): ((index: number) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (index: number):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(index);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1054099324, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1054099324, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readCallback_Number_Number_Number_Void(isSync: boolean = false): ((start: number,end: number,center: number) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (start: number, end: number, center: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(start);
+    _argsSerializer.writeNumber(end);
+    _argsSerializer.writeNumber(center);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-352942292, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-352942292, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readListOptions(): ListOptions {
         let valueDeserializer : Deserializer = this
         const initialIndex_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -18832,6 +19053,21 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return ListScrollerInternal.fromPtr(ptr)
+    }
+    readOnScrollVisibleContentChangeCallback(isSync: boolean = false): OnScrollVisibleContentChangeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (start: VisibleListContentInfo, end: VisibleListContentInfo):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeVisibleListContentInfo(start);
+    _argsSerializer.writeVisibleListContentInfo(end);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(625641334, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(625641334, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readLineOptions(): LineOptions {
         let valueDeserializer : Deserializer = this
@@ -18898,7 +19134,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeImageLoadResult(result);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1180567691, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1180567691, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1180567691, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1180567691, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19025,9 +19261,16 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeImageError(error);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1906248580, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1906248580, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1906248580, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1906248580, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    readImageSourceSize(): ImageSourceSize {
+        let valueDeserializer : Deserializer = this
+        const width_result : number = (valueDeserializer.readNumber() as number)
+        const height_result : number = (valueDeserializer.readNumber() as number)
+        let value : ImageSourceSize = ({width: width_result, height: height_result} as ImageSourceSize)
+        return value
     }
     readCallback_Type_ImageAttribute_onComplete_callback_event_Void(isSync: boolean = false): ((event?: Type_ImageAttribute_onComplete_callback_event) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -19062,16 +19305,9 @@ export class Deserializer extends DeserializerBase {
         const event_value_contentOffsetY  = event_value.contentOffsetY;
         _argsSerializer.writeNumber(event_value_contentOffsetY);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1352745727, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1352745727, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1352745727, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1352745727, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }
-    readImageSourceSize(): ImageSourceSize {
-        let valueDeserializer : Deserializer = this
-        const width_result : number = (valueDeserializer.readNumber() as number)
-        const height_result : number = (valueDeserializer.readNumber() as number)
-        let value : ImageSourceSize = ({width: width_result, height: height_result} as ImageSourceSize)
-        return value
     }
     readGridRowOptions(): GridRowOptions {
         let valueDeserializer : Deserializer = this
@@ -19275,11 +19511,11 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(offset);
-    _argsSerializer.writeInt32(((state as ScrollState) as int32));
+    _argsSerializer.writeInt32(state.valueOf());
     let _continuationValue : Literal_Number_offsetRemain | undefined;
     const _continuationCallback : ((value: Literal_Number_offsetRemain) => void) = (value: Literal_Number_offsetRemain):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2012829508, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2012829508, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2012829508, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2012829508, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as Literal_Number_offsetRemain); }
     }
@@ -19296,7 +19532,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(itemIndex);
     _argsSerializer.writeNumber(insertIndex);
     _argsSerializer.writeBoolean(isSuccess);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1627362945, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1627362945, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1627362945, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1627362945, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19311,7 +19547,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeItemDragInfo(event);
     _argsSerializer.writeNumber(itemIndex);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(296908152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(296908152, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(296908152, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(296908152, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19327,7 +19563,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeItemDragInfo(event);
     _argsSerializer.writeNumber(itemIndex);
     _argsSerializer.writeNumber(insertIndex);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-918805852, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-918805852, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-918805852, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-918805852, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19341,7 +19577,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeItemDragInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(137353252, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(137353252, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(137353252, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(137353252, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19366,7 +19602,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : CustomBuilder | undefined;
     const _continuationCallback : ((value: CustomBuilder) => void) = (value: CustomBuilder):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1340995650, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1340995650, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1340995650, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1340995650, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as CustomBuilder); }
     }
@@ -19391,7 +19627,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : ComputedBarAttribute | undefined;
     const _continuationCallback : ((value: ComputedBarAttribute) => void) = (value: ComputedBarAttribute):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-3987624, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-3987624, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-3987624, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-3987624, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as ComputedBarAttribute); }
     }
@@ -19660,7 +19896,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCustomObject("Any", info);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(197193081, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(197193081, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(197193081, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(197193081, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19677,7 +19913,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(info_errcode);
     const info_msg  = info.msg;
     _argsSerializer.writeString(info_msg);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1321277443, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1321277443, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1321277443, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1321277443, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19698,7 +19934,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFormCallbackInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(758395742, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(758395742, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(758395742, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(758395742, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19777,7 +20013,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeHoverEventParam(param);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(9040430, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(9040430, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(9040430, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(9040430, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19797,7 +20033,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnFoldStatusChangeInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2050387049, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2050387049, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2050387049, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2050387049, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19865,35 +20101,6 @@ export class Deserializer extends DeserializerBase {
         let value : FlexOptions = ({direction: direction_result, wrap: wrap_result, justifyContent: justifyContent_result, alignItems: alignItems_result, alignContent: alignContent_result, space: space_result} as FlexOptions)
         return value
     }
-    readBusinessError(): BusinessError {
-        let valueDeserializer : Deserializer = this
-        const name_result : string = (valueDeserializer.readString() as string)
-        const message_result : string = (valueDeserializer.readString() as string)
-        const stack_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let stack_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (stack_buf_runtimeType))
-        {
-            stack_buf = (valueDeserializer.readString() as string)
-        }
-        const stack_result : string | undefined = stack_buf
-        const code_result : number = (valueDeserializer.readNumber() as number)
-        let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
-        return value
-    }
-    readErrorCallback(isSync: boolean = false): ErrorCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (err: BusinessError):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeBusinessError(err);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1936519453, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1936519453, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readTerminationInfo(): TerminationInfo {
         let valueDeserializer : Deserializer = this
         const code_result : number = (valueDeserializer.readNumber() as number)
@@ -19917,7 +20124,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTerminationInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(691098197, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(691098197, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(691098197, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(691098197, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20687,19 +20894,33 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return ChildrenMainSizeInternal.fromPtr(ptr)
     }
-    readScrollOnScrollCallback(isSync: boolean = false): ScrollOnScrollCallback {
+    readOnMoveHandler(isSync: boolean = false): OnMoveHandler {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (xOffset: number, yOffset: number, scrollState: ScrollState):void => { 
+        return (from: number, to: number):void => { 
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(xOffset);
-    _argsSerializer.writeNumber(yOffset);
-    _argsSerializer.writeInt32(((scrollState as ScrollState) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1265626662, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1265626662, _argsSerializer.asArray(), _argsSerializer.length()));
+    _argsSerializer.writeNumber(from);
+    _argsSerializer.writeNumber(to);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readOnScrollCallback(isSync: boolean = false): OnScrollCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (scrollOffset: number, scrollState: ScrollState):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(scrollOffset);
+    _argsSerializer.writeInt32(scrollState.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-160015401, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-160015401, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20714,7 +20935,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(first);
     _argsSerializer.writeNumber(last);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1894574320, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1894574320, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1894574320, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1894574320, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20732,32 +20953,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return MeasurableInternal.fromPtr(ptr)
-    }
-    readSpringBackAction(): SpringBackAction {
-        let valueDeserializer : Deserializer = this
-        const springBack_result : (() => void) = valueDeserializer.readCallback_Void()
-        let value : SpringBackAction = ({springBack: springBack_result} as SpringBackAction)
-        return value
-    }
-    readDismissSheetAction(): DismissSheetAction {
-        let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissSheetAction = ({dismiss: dismiss_result, reason: reason_result} as DismissSheetAction)
-        return value
-    }
-    readSheetDismiss(): SheetDismiss {
-        let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        let value : SheetDismiss = ({dismiss: dismiss_result} as SheetDismiss)
-        return value
-    }
-    readDismissContentCoverAction(): DismissContentCoverAction {
-        let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissContentCoverAction = ({dismiss: dismiss_result, reason: reason_result} as DismissContentCoverAction)
-        return value
     }
     readMenuElement(): MenuElement {
         let valueDeserializer : Deserializer = this
@@ -20808,106 +21003,6 @@ export class Deserializer extends DeserializerBase {
         const action_result : (() => void) = valueDeserializer.readCallback_Void()
         let value : MenuElement = ({value: value_result, icon: icon_result, symbolIcon: symbolIcon_result, enabled: enabled_result, action: action_result} as MenuElement)
         return value
-    }
-    readDismissPopupAction(): DismissPopupAction {
-        let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
-        return value
-    }
-    readCallback_TouchEvent_HitTestMode(isSync: boolean = false): ((parameter: TouchEvent) => HitTestMode) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: TouchEvent):HitTestMode => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeTouchEvent(parameter);
-    let _continuationValue : HitTestMode | undefined;
-    const _continuationCallback : ((value: HitTestMode) => void) = (value: HitTestMode):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-274419246, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-274419246, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as HitTestMode); }
-    }
-    readShouldBuiltInRecognizerParallelWithCallback(isSync: boolean = false): ShouldBuiltInRecognizerParallelWithCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (current: GestureRecognizer, others: Array<GestureRecognizer>):GestureRecognizer => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeGestureRecognizer(current);
-    _argsSerializer.writeInt32(others.length as int32);
-    for (let i = 0; i < others.length; i++) {
-        const others_element : GestureRecognizer = others[i];
-        _argsSerializer.writeGestureRecognizer(others_element);
-    }
-    let _continuationValue : GestureRecognizer | undefined;
-    const _continuationCallback : ((value: GestureRecognizer) => void) = (value: GestureRecognizer):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-250780276, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-250780276, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as GestureRecognizer); }
-    }
-    readGestureRecognizer(): GestureRecognizer {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return GestureRecognizerInternal.fromPtr(ptr)
-    }
-    readFingerInfo(): FingerInfo {
-        let valueDeserializer : Deserializer = this
-        const id_result : number = (valueDeserializer.readNumber() as number)
-        const globalX_result : number = (valueDeserializer.readNumber() as number)
-        const globalY_result : number = (valueDeserializer.readNumber() as number)
-        const localX_result : number = (valueDeserializer.readNumber() as number)
-        const localY_result : number = (valueDeserializer.readNumber() as number)
-        const displayX_result : number = (valueDeserializer.readNumber() as number)
-        const displayY_result : number = (valueDeserializer.readNumber() as number)
-        let value : FingerInfo = ({id: id_result, globalX: globalX_result, globalY: globalY_result, localX: localX_result, localY: localY_result, displayX: displayX_result, displayY: displayY_result} as FingerInfo)
-        return value
-    }
-    readBaseGestureEvent(): BaseGestureEvent {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return BaseGestureEventInternal.fromPtr(ptr)
-    }
-    readGestureInfo(): GestureInfo {
-        let valueDeserializer : Deserializer = this
-        const tag_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let tag_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (tag_buf_runtimeType))
-        {
-            tag_buf = (valueDeserializer.readString() as string)
-        }
-        const tag_result : string | undefined = tag_buf
-        const type_result : GestureControl.GestureType = (valueDeserializer.readInt32() as GestureControl.GestureType)
-        const isSystemGesture_result : boolean = valueDeserializer.readBoolean()
-        let value : GestureInfo = ({tag: tag_result, type: type_result, isSystemGesture: isSystemGesture_result} as GestureInfo)
-        return value
-    }
-    readCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(isSync: boolean = false): ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (gestureInfo: GestureInfo, event: BaseGestureEvent):GestureJudgeResult => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeGestureInfo(gestureInfo);
-    _argsSerializer.writeBaseGestureEvent(event);
-    let _continuationValue : GestureJudgeResult | undefined;
-    const _continuationCallback : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1319043556, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1319043556, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as GestureJudgeResult); }
     }
     readBackgroundBrightnessOptions(): BackgroundBrightnessOptions {
         let valueDeserializer : Deserializer = this
@@ -21001,70 +21096,11 @@ export class Deserializer extends DeserializerBase {
         let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
         return value
     }
-    readCallback_PreDragStatus_Void(isSync: boolean = false): ((parameter: PreDragStatus) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: PreDragStatus):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(((parameter as PreDragStatus) as int32));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(463894668, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(463894668, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readUniformDataType(): UniformDataType {
         let valueDeserializer : Deserializer = this
         const _UniformDataTypeStub_result : string = (valueDeserializer.readString() as string)
         let value : UniformDataType = ({_UniformDataTypeStub: _UniformDataTypeStub_result} as UniformDataType)
         return value
-    }
-    readCallback_DragEvent_String_Void(isSync: boolean = false): ((event: DragEvent,extraParams?: string) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: DragEvent, extraParams?: string | undefined):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeDragEvent(event);
-    let extraParams_type : int32 = RuntimeType.UNDEFINED;
-    extraParams_type = runtimeType(extraParams);
-    _argsSerializer.writeInt8(extraParams_type as int32);
-    if ((RuntimeType.UNDEFINED) != (extraParams_type)) {
-        const extraParams_value  = extraParams!;
-        _argsSerializer.writeString(extraParams_value);
-    }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-17167687, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-17167687, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_DragEvent_String_Union_CustomBuilder_DragItemInfo(isSync: boolean = false): ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: DragEvent, extraParams?: string | undefined):CustomBuilder | DragItemInfo => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeDragEvent(event);
-    let extraParams_type : int32 = RuntimeType.UNDEFINED;
-    extraParams_type = runtimeType(extraParams);
-    _argsSerializer.writeInt8(extraParams_type as int32);
-    if ((RuntimeType.UNDEFINED) != (extraParams_type)) {
-        const extraParams_value  = extraParams!;
-        _argsSerializer.writeString(extraParams_value);
-    }
-    let _continuationValue : CustomBuilder | DragItemInfo | undefined;
-    const _continuationCallback : ((value: CustomBuilder | DragItemInfo) => void) = (value: CustomBuilder | DragItemInfo):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(480978023, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(480978023, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as CustomBuilder | DragItemInfo); }
     }
     readLocalizedAlignRuleOptions(): LocalizedAlignRuleOptions {
         let valueDeserializer : Deserializer = this
@@ -21186,21 +21222,6 @@ export class Deserializer extends DeserializerBase {
         let value : AlignRuleOption = ({left: left_result, right: right_result, middle: middle_result, top: top_result, bottom: bottom_result, center: center_result, bias: bias_result} as AlignRuleOption)
         return value
     }
-    readCallback_Area_Area_Void(isSync: boolean = false): ((oldValue: Area,newValue: Area) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (oldValue: Area, newValue: Area):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeArea(oldValue);
-    _argsSerializer.writeArea(newValue);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2024393616, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2024393616, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readMotionBlurOptions(): MotionBlurOptions {
         let valueDeserializer : Deserializer = this
         const radius_result : number = (valueDeserializer.readNumber() as number)
@@ -21234,23 +21255,6 @@ export class Deserializer extends DeserializerBase {
         let value : FocusBoxStyle = ({margin: margin_result, strokeColor: strokeColor_result, strokeWidth: strokeWidth_result} as FocusBoxStyle)
         return value
     }
-    readCallback_KeyEvent_Boolean(isSync: boolean = false): ((parameter: KeyEvent) => boolean) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (parameter: KeyEvent):boolean => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeKeyEvent(parameter);
-    let _continuationValue : boolean | undefined;
-    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
-    _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2061548092, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2061548092, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return (_continuationValue as boolean); }
-    }
     readAccessibilityCallback(isSync: boolean = false): AccessibilityCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -21262,22 +21266,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isHover);
     _argsSerializer.writeAccessibilityHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(589030517, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(589030517, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCallback_Boolean_HoverEvent_Void(isSync: boolean = false): ((isHover: boolean,event: HoverEvent) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (isHover: boolean, event: HoverEvent):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeBoolean(isHover);
-    _argsSerializer.writeHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-916602978, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-916602978, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(589030517, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(589030517, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22332,6 +22321,161 @@ export class Deserializer extends DeserializerBase {
         let value : ChainWeightOptions = ({horizontal: horizontal_result, vertical: vertical_result} as ChainWeightOptions)
         return value
     }
+    readCallback_TouchEvent_HitTestMode(isSync: boolean = false): ((parameter: TouchEvent) => HitTestMode) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: TouchEvent):HitTestMode => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeTouchEvent(parameter);
+    let _continuationValue : HitTestMode | undefined;
+    const _continuationCallback : ((value: HitTestMode) => void) = (value: HitTestMode):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-274419246, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-274419246, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as HitTestMode); }
+    }
+    readGestureInfo(): GestureInfo {
+        let valueDeserializer : Deserializer = this
+        const tag_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let tag_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (tag_buf_runtimeType))
+        {
+            tag_buf = (valueDeserializer.readString() as string)
+        }
+        const tag_result : string | undefined = tag_buf
+        const type_result : GestureControl.GestureType = (valueDeserializer.readInt32() as GestureControl.GestureType)
+        const isSystemGesture_result : boolean = valueDeserializer.readBoolean()
+        let value : GestureInfo = ({tag: tag_result, type: type_result, isSystemGesture: isSystemGesture_result} as GestureInfo)
+        return value
+    }
+    readCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(isSync: boolean = false): ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (gestureInfo: GestureInfo, event: BaseGestureEvent):GestureJudgeResult => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeGestureInfo(gestureInfo);
+    _argsSerializer.writeBaseGestureEvent(event);
+    let _continuationValue : GestureJudgeResult | undefined;
+    const _continuationCallback : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1319043556, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1319043556, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as GestureJudgeResult); }
+    }
+    readCallback_PreDragStatus_Void(isSync: boolean = false): ((parameter: PreDragStatus) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: PreDragStatus):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(parameter.valueOf());
+    (isSync) ? (InteropNativeModule._CallCallbackSync(463894668, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(463894668, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_DragEvent_String_Void(isSync: boolean = false): ((event: DragEvent,extraParams?: string) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: DragEvent, extraParams?: string | undefined):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeDragEvent(event);
+    let extraParams_type : int32 = RuntimeType.UNDEFINED;
+    extraParams_type = runtimeType(extraParams);
+    _argsSerializer.writeInt8(extraParams_type as int32);
+    if ((RuntimeType.UNDEFINED) != (extraParams_type)) {
+        const extraParams_value  = extraParams!;
+        _argsSerializer.writeString(extraParams_value);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-17167687, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-17167687, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_DragEvent_String_Union_CustomBuilder_DragItemInfo(isSync: boolean = false): ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: DragEvent, extraParams?: string | undefined):CustomBuilder | DragItemInfo => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeDragEvent(event);
+    let extraParams_type : int32 = RuntimeType.UNDEFINED;
+    extraParams_type = runtimeType(extraParams);
+    _argsSerializer.writeInt8(extraParams_type as int32);
+    if ((RuntimeType.UNDEFINED) != (extraParams_type)) {
+        const extraParams_value  = extraParams!;
+        _argsSerializer.writeString(extraParams_value);
+    }
+    let _continuationValue : CustomBuilder | DragItemInfo | undefined;
+    const _continuationCallback : ((value: CustomBuilder | DragItemInfo) => void) = (value: CustomBuilder | DragItemInfo):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(480978023, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(480978023, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as CustomBuilder | DragItemInfo); }
+    }
+    readCallback_Area_Area_Void(isSync: boolean = false): ((oldValue: Area,newValue: Area) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (oldValue: Area, newValue: Area):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeArea(oldValue);
+    _argsSerializer.writeArea(newValue);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2024393616, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2024393616, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCallback_KeyEvent_Boolean(isSync: boolean = false): ((parameter: KeyEvent) => boolean) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (parameter: KeyEvent):boolean => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeKeyEvent(parameter);
+    let _continuationValue : boolean | undefined;
+    const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2061548092, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2061548092, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as boolean); }
+    }
+    readCallback_Boolean_HoverEvent_Void(isSync: boolean = false): ((isHover: boolean,event: HoverEvent) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (isHover: boolean, event: HoverEvent):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(isHover);
+    _argsSerializer.writeHoverEvent(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-916602978, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-916602978, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readTouchResult(): TouchResult {
         let valueDeserializer : Deserializer = this
         const strategy_result : TouchTestStrategy = (valueDeserializer.readInt32() as TouchTestStrategy)
@@ -22375,9 +22519,42 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : TouchResult | undefined;
     const _continuationCallback : ((value: TouchResult) => void) = (value: TouchResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-547276916, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-547276916, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-547276916, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-547276916, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as TouchResult); }
+    }
+    readDismissPopupAction(): DismissPopupAction {
+        let valueDeserializer : Deserializer = this
+        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
+        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
+        return value
+    }
+    readSpringBackAction(): SpringBackAction {
+        let valueDeserializer : Deserializer = this
+        const springBack_result : (() => void) = valueDeserializer.readCallback_Void()
+        let value : SpringBackAction = ({springBack: springBack_result} as SpringBackAction)
+        return value
+    }
+    readDismissSheetAction(): DismissSheetAction {
+        let valueDeserializer : Deserializer = this
+        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
+        let value : DismissSheetAction = ({dismiss: dismiss_result, reason: reason_result} as DismissSheetAction)
+        return value
+    }
+    readSheetDismiss(): SheetDismiss {
+        let valueDeserializer : Deserializer = this
+        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        let value : SheetDismiss = ({dismiss: dismiss_result} as SheetDismiss)
+        return value
+    }
+    readDismissContentCoverAction(): DismissContentCoverAction {
+        let valueDeserializer : Deserializer = this
+        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
+        let value : DismissContentCoverAction = ({dismiss: dismiss_result, reason: reason_result} as DismissContentCoverAction)
+        return value
     }
     readKeyEvent(): KeyEvent {
         let valueDeserializer : Deserializer = this
@@ -22393,6 +22570,50 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return PixelMapMockInternal.fromPtr(ptr)
+    }
+    readShouldBuiltInRecognizerParallelWithCallback(isSync: boolean = false): ShouldBuiltInRecognizerParallelWithCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (current: GestureRecognizer, others: Array<GestureRecognizer>):GestureRecognizer => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeGestureRecognizer(current);
+    _argsSerializer.writeInt32(others.length as int32);
+    for (let i = 0; i < others.length; i++) {
+        const others_element : GestureRecognizer = others[i];
+        _argsSerializer.writeGestureRecognizer(others_element);
+    }
+    let _continuationValue : GestureRecognizer | undefined;
+    const _continuationCallback : ((value: GestureRecognizer) => void) = (value: GestureRecognizer):void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as GestureRecognizer); }
+    }
+    readGestureRecognizer(): GestureRecognizer {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return GestureRecognizerInternal.fromPtr(ptr)
+    }
+    readFingerInfo(): FingerInfo {
+        let valueDeserializer : Deserializer = this
+        const id_result : number = (valueDeserializer.readNumber() as number)
+        const globalX_result : number = (valueDeserializer.readNumber() as number)
+        const globalY_result : number = (valueDeserializer.readNumber() as number)
+        const localX_result : number = (valueDeserializer.readNumber() as number)
+        const localY_result : number = (valueDeserializer.readNumber() as number)
+        const displayX_result : number = (valueDeserializer.readNumber() as number)
+        const displayY_result : number = (valueDeserializer.readNumber() as number)
+        let value : FingerInfo = ({id: id_result, globalX: globalX_result, globalY: globalY_result, localX: localX_result, localY: localY_result, displayX: displayX_result, displayY: displayY_result} as FingerInfo)
+        return value
+    }
+    readBaseGestureEvent(): BaseGestureEvent {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BaseGestureEventInternal.fromPtr(ptr)
     }
     readHistoricalPoint(): HistoricalPoint {
         let valueDeserializer : Deserializer = this
@@ -22535,7 +22756,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCheckboxGroupResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1053064240, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1053064240, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1053064240, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1053064240, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22550,20 +22771,6 @@ export class Deserializer extends DeserializerBase {
         const group_result : string | undefined = group_buf
         let value : CheckboxGroupOptions = ({group: group_result} as CheckboxGroupOptions)
         return value
-    }
-    readOnCheckboxChangeCallback(isSync: boolean = false): OnCheckboxChangeCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (value: boolean):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeBoolean(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1198592337, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1198592337, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
     }
     readMarkStyle(): MarkStyle {
         let valueDeserializer : Deserializer = this
@@ -22607,6 +22814,20 @@ export class Deserializer extends DeserializerBase {
         const strokeWidth_result : Length | undefined = strokeWidth_buf
         let value : MarkStyle = ({strokeColor: strokeColor_result, size: size_result, strokeWidth: strokeWidth_result} as MarkStyle)
         return value
+    }
+    readOnCheckboxChangeCallback(isSync: boolean = false): OnCheckboxChangeCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(value);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1198592337, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1198592337, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readCheckboxOptions(): CheckboxOptions {
         let valueDeserializer : Deserializer = this
@@ -22684,52 +22905,6 @@ export class Deserializer extends DeserializerBase {
         const selected_result : Date | undefined = selected_buf
         let value : CalendarOptions = ({hintRadius: hintRadius_result, selected: selected_result} as CalendarOptions)
         return value
-    }
-    readCalendarRequestedData(): CalendarRequestedData {
-        let valueDeserializer : Deserializer = this
-        const year_result : number = (valueDeserializer.readNumber() as number)
-        const month_result : number = (valueDeserializer.readNumber() as number)
-        const currentYear_result : number = (valueDeserializer.readNumber() as number)
-        const currentMonth_result : number = (valueDeserializer.readNumber() as number)
-        const monthState_result : number = (valueDeserializer.readNumber() as number)
-        let value : CalendarRequestedData = ({year: year_result, month: month_result, currentYear: currentYear_result, currentMonth: currentMonth_result, monthState: monthState_result} as CalendarRequestedData)
-        return value
-    }
-    readCallback_CalendarRequestedData_Void(isSync: boolean = false): ((event: CalendarRequestedData) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: CalendarRequestedData):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeCalendarRequestedData(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1074619005, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1074619005, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
-    readCalendarSelectedDate(): CalendarSelectedDate {
-        let valueDeserializer : Deserializer = this
-        const year_result : number = (valueDeserializer.readNumber() as number)
-        const month_result : number = (valueDeserializer.readNumber() as number)
-        const day_result : number = (valueDeserializer.readNumber() as number)
-        let value : CalendarSelectedDate = ({year: year_result, month: month_result, day: day_result} as CalendarSelectedDate)
-        return value
-    }
-    readCallback_CalendarSelectedDate_Void(isSync: boolean = false): ((event: CalendarSelectedDate) => void) {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (event: CalendarSelectedDate):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeCalendarSelectedDate(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-289198976, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-289198976, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
     }
     readWorkStateStyle(): WorkStateStyle {
         let valueDeserializer : Deserializer = this
@@ -23326,6 +23501,52 @@ export class Deserializer extends DeserializerBase {
         let value : CurrentDayStyle = ({dayColor: dayColor_result, lunarColor: lunarColor_result, markLunarColor: markLunarColor_result, dayFontSize: dayFontSize_result, lunarDayFontSize: lunarDayFontSize_result, dayHeight: dayHeight_result, dayWidth: dayWidth_result, gregorianCalendarHeight: gregorianCalendarHeight_result, dayYAxisOffset: dayYAxisOffset_result, lunarDayYAxisOffset: lunarDayYAxisOffset_result, underscoreXAxisOffset: underscoreXAxisOffset_result, underscoreYAxisOffset: underscoreYAxisOffset_result, scheduleMarkerXAxisOffset: scheduleMarkerXAxisOffset_result, scheduleMarkerYAxisOffset: scheduleMarkerYAxisOffset_result, colSpace: colSpace_result, dailyFiveRowSpace: dailyFiveRowSpace_result, dailySixRowSpace: dailySixRowSpace_result, lunarHeight: lunarHeight_result, underscoreWidth: underscoreWidth_result, underscoreLength: underscoreLength_result, scheduleMarkerRadius: scheduleMarkerRadius_result, boundaryRowOffset: boundaryRowOffset_result, boundaryColOffset: boundaryColOffset_result} as CurrentDayStyle)
         return value
     }
+    readCalendarRequestedData(): CalendarRequestedData {
+        let valueDeserializer : Deserializer = this
+        const year_result : number = (valueDeserializer.readNumber() as number)
+        const month_result : number = (valueDeserializer.readNumber() as number)
+        const currentYear_result : number = (valueDeserializer.readNumber() as number)
+        const currentMonth_result : number = (valueDeserializer.readNumber() as number)
+        const monthState_result : number = (valueDeserializer.readNumber() as number)
+        let value : CalendarRequestedData = ({year: year_result, month: month_result, currentYear: currentYear_result, currentMonth: currentMonth_result, monthState: monthState_result} as CalendarRequestedData)
+        return value
+    }
+    readCallback_CalendarRequestedData_Void(isSync: boolean = false): ((event: CalendarRequestedData) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: CalendarRequestedData):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeCalendarRequestedData(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1074619005, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1074619005, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readCalendarSelectedDate(): CalendarSelectedDate {
+        let valueDeserializer : Deserializer = this
+        const year_result : number = (valueDeserializer.readNumber() as number)
+        const month_result : number = (valueDeserializer.readNumber() as number)
+        const day_result : number = (valueDeserializer.readNumber() as number)
+        let value : CalendarSelectedDate = ({year: year_result, month: month_result, day: day_result} as CalendarSelectedDate)
+        return value
+    }
+    readCallback_CalendarSelectedDate_Void(isSync: boolean = false): ((event: CalendarSelectedDate) => void) {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (event: CalendarSelectedDate):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeCalendarSelectedDate(event);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-289198976, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-289198976, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readCalendarDay(): CalendarDay {
         let valueDeserializer : Deserializer = this
         const index_result : number = (valueDeserializer.readNumber() as number)
@@ -23381,6 +23602,21 @@ export class Deserializer extends DeserializerBase {
         const role_result : ButtonRole | undefined = role_buf
         let value : ButtonOptions = ({type: type_result, stateEffect: stateEffect_result, buttonStyle: buttonStyle_result, controlSize: controlSize_result, role: role_result} as ButtonOptions)
         return value
+    }
+    readButtonTriggerClickCallback(isSync: boolean = false): ButtonTriggerClickCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (xPos: number, yPos: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(xPos);
+    _argsSerializer.writeNumber(yPos);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1964292933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1964292933, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readBadgeParamWithString(): BadgeParamWithString {
         let valueDeserializer : Deserializer = this
@@ -23459,20 +23695,6 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return SpringPropInternal.fromPtr(ptr)
     }
-    readOnAlphabetIndexerPopupSelectCallback(isSync: boolean = false): OnAlphabetIndexerPopupSelectCallback {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (index: number):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
-    _argsSerializer.writeInt32(_resource.resourceId);
-    _argsSerializer.writePointer(_call);
-    _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(726938390, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(726938390, _argsSerializer.asArray(), _argsSerializer.length()));
-    _argsSerializer.release();
-    return; }
-    }
     readOnAlphabetIndexerRequestPopupDataCallback(isSync: boolean = false): OnAlphabetIndexerRequestPopupDataCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -23486,9 +23708,23 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : Array<string> | undefined;
     const _continuationCallback : ((value: Array<string>) => void) = (value: Array<string>):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1956514817, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1956514817, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1956514817, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1956514817, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as Array<string>); }
+    }
+    readOnAlphabetIndexerPopupSelectCallback(isSync: boolean = false): OnAlphabetIndexerPopupSelectCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (index: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(index);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(726938390, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(726938390, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readOnAlphabetIndexerSelectCallback(isSync: boolean = false): OnAlphabetIndexerSelectCallback {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -23500,7 +23736,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189721220, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189721220, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189721220, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189721220, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -23610,13 +23846,6 @@ export class Deserializer extends DeserializerBase {
         let value : AlertDialogButtonOptions = ({enabled: enabled_result, defaultFocus: defaultFocus_result, style: style_result, value: value_result, fontColor: fontColor_result, backgroundColor: backgroundColor_result, action: action_result, primary: primary_result} as AlertDialogButtonOptions)
         return value
     }
-    readDismissDialogAction(): DismissDialogAction {
-        let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
-        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
-        return value
-    }
     readSheetInfo(): SheetInfo {
         let valueDeserializer : Deserializer = this
         const title_buf_selector : int32 = valueDeserializer.readInt8()
@@ -23651,6 +23880,13 @@ export class Deserializer extends DeserializerBase {
         const icon_result : string | Resource | undefined = icon_buf
         const action_result : VoidCallback = valueDeserializer.readVoidCallback()
         let value : SheetInfo = ({title: title_result, icon: icon_result, action: action_result} as SheetInfo)
+        return value
+    }
+    readDismissDialogAction(): DismissDialogAction {
+        let valueDeserializer : Deserializer = this
+        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
+        const reason_result : DismissReason = (valueDeserializer.readInt32() as DismissReason)
+        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
         return value
     }
     readReplaceSymbolEffect(): ReplaceSymbolEffect {
@@ -23716,12 +23952,75 @@ export class Deserializer extends DeserializerBase {
         let value : ShapeSize = ({width: width_result, height: height_result} as ShapeSize)
         return value
     }
+    readBusinessError(): BusinessError {
+        let valueDeserializer : Deserializer = this
+        const name_result : string = (valueDeserializer.readString() as string)
+        const message_result : string = (valueDeserializer.readString() as string)
+        const stack_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let stack_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (stack_buf_runtimeType))
+        {
+            stack_buf = (valueDeserializer.readString() as string)
+        }
+        const stack_result : string | undefined = stack_buf
+        const code_result : number = (valueDeserializer.readNumber() as number)
+        let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
+        return value
+    }
+    readErrorCallback(isSync: boolean = false): ErrorCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (err: BusinessError):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBusinessError(err);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1936519453, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1936519453, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readWebHeader(): WebHeader {
         let valueDeserializer : Deserializer = this
         const headerKey_result : string = (valueDeserializer.readString() as string)
         const headerValue_result : string = (valueDeserializer.readString() as string)
         let value : WebHeader = ({headerKey: headerKey_result, headerValue: headerValue_result} as WebHeader)
         return value
+    }
+    readAnimationOptions(): AnimationOptions {
+        let valueDeserializer : Deserializer = this
+        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let duration_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        {
+            duration_buf = (valueDeserializer.readNumber() as number)
+        }
+        const duration_result : number | undefined = duration_buf
+        const iterations_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let iterations_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (iterations_buf_runtimeType))
+        {
+            iterations_buf = (valueDeserializer.readNumber() as number)
+        }
+        const iterations_result : number | undefined = iterations_buf
+        let value : AnimationOptions = ({duration: duration_result, iterations: iterations_result} as AnimationOptions)
+        return value
+    }
+    readAnimatedDrawableDescriptor(): AnimatedDrawableDescriptor {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return AnimatedDrawableDescriptorInternal.fromPtr(ptr)
+    }
+    readPixelMapDrawableDescriptor(): PixelMapDrawableDescriptor {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return PixelMapDrawableDescriptorInternal.fromPtr(ptr)
+    }
+    readLayeredDrawableDescriptor(): LayeredDrawableDescriptor {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LayeredDrawableDescriptorInternal.fromPtr(ptr)
     }
     readLength(): Length | undefined {
         const valueType  = this.readInt8()

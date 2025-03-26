@@ -55,6 +55,22 @@ inline void releaseArgument(napi_env env, typename InteropTypeConverter<Type>::I
   InteropTypeConverter<Type>::release(env, arg, data);
 }
 
+
+napi_value makeString(napi_env env, KStringPtr value);
+napi_value makeString(napi_env env, const std::string& value);
+napi_value makeBoolean(napi_env env, KBoolean value);
+napi_value makeInt32(napi_env env, int32_t value);
+napi_value makeUInt32(napi_env env, uint32_t value);
+napi_value makeInt64(napi_env env, int64_t value);
+napi_value makeUInt64(napi_env env, uint64_t value);
+napi_value makeFloat32(napi_env env, float value);
+napi_value makePointer(napi_env env, void* value);
+napi_value makeVoid(napi_env env);
+// napi_value makeObject(napi_env env, napi_value object);
+
+void* getPointer(napi_env env, napi_value value);
+void* getSerializerBufferPointer(napi_env env, napi_value value);
+
 template<>
 struct InteropTypeConverter<KInteropBuffer> {
     using InteropType = napi_value;
@@ -131,6 +147,18 @@ struct InteropTypeConverter<KInteropNumber> {
       return result;
     }
     static void release(napi_env env, InteropType value, KInteropNumber converted) {}
+};
+
+template<>
+struct InteropTypeConverter<KSerializerBuffer> {
+    using InteropType = napi_value;
+    static KSerializerBuffer convertFrom(napi_env env, InteropType value) {
+        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // TODO we are receiving Uint8Array from the native side
+    }
+    static InteropType convertTo(napi_env env, KSerializerBuffer value) {
+      return makePointer(env, value);
+    }
+    static void release(napi_env env, InteropType value, KSerializerBuffer converted) {}
 };
 
 template<>
@@ -364,6 +392,10 @@ inline KNativePointer* getPointerElements(const CallbackInfo& info, int index) {
   return getTypedElements<KNativePointer>(info, index);
 }
 
+inline void* getSerializerBufferPointer(napi_env env, napi_value value) {
+  return getTypedElements<uint8_t>(env, value);
+}
+
 KInt getInt32(napi_env env, napi_value value);
 inline int32_t getInt32(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, 0);
@@ -389,7 +421,6 @@ inline KStringPtr getString(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, KStringPtr());
   return getString(info.Env(), info[index]);
 }
-void* getPointer(napi_env env, napi_value value);
 inline void* getPointer(const CallbackInfo& info, int index) {
     NAPI_ASSERT_INDEX(info, index, nullptr);
     return getPointer(info.Env(), info[index]);
@@ -438,6 +469,12 @@ template <>
 inline KInteropNumber getArgument<KInteropNumber>(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, { 0 });
   return getArgument<KInteropNumber>(info.Env(), info[index]);
+}
+
+template <>
+inline KSerializerBuffer getArgument<KSerializerBuffer>(const CallbackInfo& info, int index) {
+  NAPI_ASSERT_INDEX(info, index, nullptr);
+  return getArgument<KSerializerBuffer>(info.Env(), info[index]);
 }
 
 template <>
@@ -568,18 +605,6 @@ template <>
 inline KStringPtr getArgument<KStringPtr>(const CallbackInfo& info, int index) {
   return getString(info, index);
 }
-
-napi_value makeString(napi_env env, KStringPtr value);
-napi_value makeString(napi_env env, const std::string& value);
-napi_value makeBoolean(napi_env env, KBoolean value);
-napi_value makeInt32(napi_env env, int32_t value);
-napi_value makeUInt32(napi_env env, uint32_t value);
-napi_value makeInt64(napi_env env, int64_t value);
-napi_value makeUInt64(napi_env env, uint64_t value);
-napi_value makeFloat32(napi_env env, float value);
-napi_value makePointer(napi_env env, void* value);
-napi_value makeVoid(napi_env env);
-// napi_value makeObject(napi_env env, napi_value object);
 
 inline napi_value makeVoid(const CallbackInfo& info) {
   return makeVoid(info.Env());
@@ -1337,6 +1362,55 @@ public:
             napi_throw_error((env), NULL, error_message);                    \
         }                                                                    \
     } while (0)
+
+    #define KOALA_INTEROP_DIRECT_0(name, Ret) \
+    KOALA_INTEROP_0(name, Ret)
+#define KOALA_INTEROP_DIRECT_1(name, Ret, P0) \
+    KOALA_INTEROP_1(name, Ret, P0)
+#define KOALA_INTEROP_DIRECT_2(name, Ret, P0, P1) \
+    KOALA_INTEROP_2(name, Ret, P0, P1)
+#define KOALA_INTEROP_DIRECT_3(name, Ret, P0, P1, P2) \
+    KOALA_INTEROP_3(name, Ret, P0, P1, P2)
+#define KOALA_INTEROP_DIRECT_4(name, Ret, P0, P1, P2, P3) \
+    KOALA_INTEROP_4(name, Ret, P0, P1, P2, P3)
+#define KOALA_INTEROP_DIRECT_5(name, Ret, P0, P1, P2, P3, P4) \
+    KOALA_INTEROP_5(name, Ret, P0, P1, P2, P3, P4)
+#define KOALA_INTEROP_DIRECT_6(name, Ret, P0, P1, P2, P3, P4, P5) \
+    KOALA_INTEROP_6(name, Ret, P0, P1, P2, P3, P4, P5)
+#define KOALA_INTEROP_DIRECT_7(name, Ret, P0, P1, P2, P3, P4, P5, P6) \
+    KOALA_INTEROP_7(name, Ret, P0, P1, P2, P3, P4, P5, P6)
+#define KOALA_INTEROP_DIRECT_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7) \
+    KOALA_INTEROP_8(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7)
+#define KOALA_INTEROP_DIRECT_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    KOALA_INTEROP_9(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8)
+#define KOALA_INTEROP_DIRECT_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    KOALA_INTEROP_10(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9)
+#define KOALA_INTEROP_DIRECT_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    KOALA_INTEROP_11(name, Ret, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
+#define KOALA_INTEROP_DIRECT_V0(name) \
+    KOALA_INTEROP_V0(name)
+#define KOALA_INTEROP_DIRECT_V1(name, P0) \
+    KOALA_INTEROP_V1(name, P0)
+#define KOALA_INTEROP_DIRECT_V2(name, P0, P1) \
+    KOALA_INTEROP_V2(name, P0, P1)
+#define KOALA_INTEROP_DIRECT_V3(name, P0, P1, P2) \
+    KOALA_INTEROP_V3(name, P0, P1, P2)
+#define KOALA_INTEROP_DIRECT_V4(name, P0, P1, P2, P3) \
+    KOALA_INTEROP_V4(name, P0, P1, P2, P3)
+#define KOALA_INTEROP_DIRECT_V5(name, P0, P1, P2, P3, P4) \
+    KOALA_INTEROP_V5(name, P0, P1, P2, P3, P4)
+#define KOALA_INTEROP_DIRECT_V6(name, P0, P1, P2, P3, P4, P5) \
+    KOALA_INTEROP_V6(name, P0, P1, P2, P3, P4, P5)
+#define KOALA_INTEROP_DIRECT_V7(name, P0, P1, P2, P3, P4, P5, P6) \
+    KOALA_INTEROP_V7(name, P0, P1, P2, P3, P4, P5, P6)
+#define KOALA_INTEROP_DIRECT_V8(name, P0, P1, P2, P3, P4, P5, P6, P7) \
+    KOALA_INTEROP_V8(name, P0, P1, P2, P3, P4, P5, P6, P7)
+#define KOALA_INTEROP_DIRECT_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8) \
+    KOALA_INTEROP_V9(name, P0, P1, P2, P3, P4, P5, P6, P7, P8)
+#define KOALA_INTEROP_DIRECT_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9) \
+    KOALA_INTEROP_V10(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9)
+#define KOALA_INTEROP_DIRECT_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10) \
+    KOALA_INTEROP_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
 
 napi_value getKoalaNapiCallbackDispatcher(napi_env env);
 // TODO: can/shall we cache bridge reference?

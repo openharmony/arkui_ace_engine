@@ -42,11 +42,11 @@ export class ColorFilter implements MaterializedBase {
             const value_element : number = value[i]
             thisSerializer.writeNumber(value_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._ColorFilter_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ColorFilter_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: Array<number>) {
+    constructor(value?: Array<number>) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = ColorFilter.ctor_colorfilter((value)!)

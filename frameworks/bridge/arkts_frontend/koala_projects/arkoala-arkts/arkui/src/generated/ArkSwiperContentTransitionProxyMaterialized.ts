@@ -63,7 +63,7 @@ export class SwiperContentTransitionProxyInternal implements MaterializedBase,Sw
         const retval  = ArkUIGeneratedNativeModule._SwiperContentTransitionProxy_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = SwiperContentTransitionProxyInternal.ctor_swipercontenttransitionproxy()
         this.peer = new Finalizable(ctorPtr, SwiperContentTransitionProxyInternal.getFinalizer())
     }

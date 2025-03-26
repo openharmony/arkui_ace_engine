@@ -44,7 +44,7 @@ export class PixelMapInternal implements MaterializedBase,PixelMap {
         const retval  = ArkUIGeneratedNativeModule._PixelMap_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PixelMapInternal.ctor_pixelmap()
         this.peer = new Finalizable(ctorPtr, PixelMapInternal.getFinalizer())
     }
@@ -70,13 +70,13 @@ export class PixelMapInternal implements MaterializedBase,PixelMap {
     private readPixelsToBufferSync_serialize(dst: NativeBuffer): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBuffer(dst)
-        ArkUIGeneratedNativeModule._PixelMap_readPixelsToBufferSync(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._PixelMap_readPixelsToBufferSync(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private writeBufferToPixels_serialize(src: NativeBuffer): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBuffer(src)
-        ArkUIGeneratedNativeModule._PixelMap_writeBufferToPixels(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._PixelMap_writeBufferToPixels(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getIsEditable_serialize(): boolean {

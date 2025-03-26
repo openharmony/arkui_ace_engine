@@ -42,7 +42,7 @@ export class UrlStyle implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._UrlStyle_ctor(url)
         return retval
     }
-     constructor(url?: string) {
+    constructor(url?: string) {
         if ((url) !== (undefined))
         {
             const ctorPtr : KPointer = UrlStyle.ctor_urlstyle((url)!)

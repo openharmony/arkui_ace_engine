@@ -39,7 +39,7 @@ export class FullScreenExitHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._FullScreenExitHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = FullScreenExitHandler.ctor_fullscreenexithandler()
         this.peer = new Finalizable(ctorPtr, FullScreenExitHandler.getFinalizer())
     }

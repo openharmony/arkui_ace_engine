@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRelativeContainer")
-export declare function ArkRelativeContainer(
+@BuildLambda("RelativeContainer")
+export declare function RelativeContainer(
     
     @memo
     _content?: () => void,
 ): ArkRelativeContainerComponent
 
 @memo
-export declare function ArkRelativeContainerImpl(
+export declare function RelativeContainerImpl(
     @memo
     _style: ((attributes: ArkRelativeContainerComponent) => void) | undefined,
     

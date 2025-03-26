@@ -35,7 +35,7 @@ export class ICurveInternal implements MaterializedBase,ICurve {
         const retval  = ArkUIGeneratedNativeModule._ICurve_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = ICurveInternal.ctor_icurve()
         this.peer = new Finalizable(ctorPtr, ICurveInternal.getFinalizer())
     }

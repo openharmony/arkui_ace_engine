@@ -13,22 +13,13 @@
  * limitations under the License.
  */
 
-export type NodePointer = pointer // todo: move to NativeModule
-
-export type KStringPtr = string
-export type KStringPtrArray = byte[]
-export type KUint8ArrayPtr = byte[]
-export type KInt32ArrayPtr = int[]
-export type KFloat32ArrayPtr = float[]
-export type KInt = int
-export type KLong = long
-export type KUInt = KInt
-export type KBoolean = int
-export type KFloat = float
-export type KPointer = long // look once again
-export type pointer = KPointer
-export type KNativePointer = KPointer
-export type KInteropReturnBuffer = byte[]
-
-export const nullptr: pointer = 0
-
+export * from "./InteropTypes"
+export * from "./callback"
+export * from "./ResourceManager"
+export * from "./NativeBuffer"
+export * from "./InteropNativeModule"
+export * from "./SerializerBase"
+export * from "./DeserializerBase"
+export * from "./Finalizable"
+export * from "./loadLibraries"
+export * from "./MaterializedBase"

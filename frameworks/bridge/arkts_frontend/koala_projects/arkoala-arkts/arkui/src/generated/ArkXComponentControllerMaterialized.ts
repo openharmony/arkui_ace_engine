@@ -42,7 +42,7 @@ export class XComponentController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = XComponentController.ctor_xcomponentcontroller()
         this.peer = new Finalizable(ctorPtr, XComponentController.getFinalizer())
     }
@@ -114,13 +114,13 @@ export class XComponentController implements MaterializedBase {
         thisSerializer.writeNumber(value_surfaceWidth)
         const value_surfaceHeight  = value.surfaceHeight
         thisSerializer.writeNumber(value_surfaceHeight)
-        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceSize(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceSize(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setXComponentSurfaceRect_serialize(rect: SurfaceRect): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSurfaceRect(rect)
-        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRect(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRect(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getXComponentSurfaceRect_serialize(): SurfaceRect {
@@ -132,7 +132,7 @@ export class XComponentController implements MaterializedBase {
     private setXComponentSurfaceRotation_serialize(rotationOptions: SurfaceRotationOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSurfaceRotationOptions(rotationOptions)
-        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRotation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceRotation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getXComponentSurfaceRotation_serialize(): SurfaceRotationOptions {
@@ -147,7 +147,7 @@ export class XComponentController implements MaterializedBase {
     private onSurfaceChanged_serialize(surfaceId: string, rect: SurfaceRect): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSurfaceRect(rect)
-        ArkUIGeneratedNativeModule._XComponentController_onSurfaceChanged(this.peer!.ptr, surfaceId, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentController_onSurfaceChanged(this.peer!.ptr, surfaceId, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private onSurfaceDestroyed_serialize(surfaceId: string): void {
@@ -157,7 +157,7 @@ export class XComponentController implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeImageAnalyzerConfig(config)
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._XComponentController_startImageAnalyzer(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._XComponentController_startImageAnalyzer(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

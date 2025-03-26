@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTabContent")
-export declare function ArkTabContent(
+@BuildLambda("TabContent")
+export declare function TabContent(
     
     @memo
     _content?: () => void,
 ): ArkTabContentComponent
 
 @memo
-export declare function ArkTabContentImpl(
+export declare function TabContentImpl(
     @memo
     _style: ((attributes: ArkTabContentComponent) => void) | undefined,
     

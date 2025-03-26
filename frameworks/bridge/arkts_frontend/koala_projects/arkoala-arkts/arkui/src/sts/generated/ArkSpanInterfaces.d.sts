@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkBaseSpan")
-export declare function ArkBaseSpan(
+@BuildLambda("BaseSpan")
+export declare function BaseSpan(
     
     @memo
     _content?: () => void,
 ): ArkBaseSpanComponent
 
 @memo
-export declare function ArkBaseSpanImpl(
+export declare function BaseSpanImpl(
     @memo
     _style: ((attributes: ArkBaseSpanComponent) => void) | undefined,
     
@@ -33,15 +33,15 @@ export declare function ArkBaseSpanImpl(
     _content?: () => void,
 ): void
 @memo
-@BuildLambda("ArkSpan")
-export declare function ArkSpan(
+@BuildLambda("Span")
+export declare function Span(
     value: string | Resource, 
     @memo
     _content?: () => void,
 ): ArkSpanComponent
 
 @memo
-export declare function ArkSpanImpl(
+export declare function SpanImpl(
     @memo
     _style: ((attributes: ArkSpanComponent) => void) | undefined,
     value: string | Resource, 

@@ -174,11 +174,43 @@ int loadES2Panda(const char* appClassPath, const char* appLibPath) {
     return 0;
 }
 
-static int ArkMobileLog(int id, int level, const char *component, const char *fmt, const char *msg) {
-    LOGE("ArkMobileLog: %" LOG_PUBLIC "s", msg);
+#if defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
+namespace {
+
+enum PandaLog2MobileLog : int {
+    UNKNOWN = 0,
+    DEFAULT,
+    VERBOSE,
+    DEBUG,
+    INFO,
+    WARN,
+    ERROR,
+    FATAL,
+    SILENT,
+};
+
+int ArkMobileLog(int id, int level, const char *component, const char *fmt, const char *msg) {
+    switch (level) {
+        case PandaLog2MobileLog::DEFAULT:
+        case PandaLog2MobileLog::VERBOSE:
+        case PandaLog2MobileLog::DEBUG:
+        case PandaLog2MobileLog::INFO:
+        case PandaLog2MobileLog::SILENT:
+            LOGI("ArkRuntime [%" LOG_PUBLIC "s]: %" LOG_PUBLIC "s", component, msg);
+            break;
+        case PandaLog2MobileLog::UNKNOWN:
+        case PandaLog2MobileLog::WARN:
+        case PandaLog2MobileLog::ERROR:
+        case PandaLog2MobileLog::FATAL:
+        default:
+            LOGE("ArkRuntime [%" LOG_PUBLIC "s]: %" LOG_PUBLIC "s", component, msg);
+            break;
+    }
     return 0;
 }
 
+}
+#endif
 
 extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassPath, const char* appLibPath, const ForeignVMContext* foreignVMContext) {
     if (vmKind == ES2PANDA_KIND) {
@@ -350,11 +382,11 @@ const AppInfo pandaAppInfo = {
 const AppInfo harnessAppInfo = {
     "@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;Z:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
     "start",
-    ":J",
+    "J:J",
     "enter",
-    "II:Z",
+    "IIJ:Z",
     "emitEvent",
     "IIII:Lstd/core/String;",
     "restartWith",

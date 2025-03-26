@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCanvas")
-export declare function ArkCanvas(
+@BuildLambda("Canvas")
+export declare function Canvas(
     context?: CanvasRenderingContext2D | DrawingRenderingContext | undefined | CanvasRenderingContext2D | DrawingRenderingContext | undefined, imageAIOptions?: ImageAIOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkCanvasComponent
 
 @memo
-export declare function ArkCanvasImpl(
+export declare function CanvasImpl(
     @memo
     _style: ((attributes: ArkCanvasComponent) => void) | undefined,
     context?: CanvasRenderingContext2D | DrawingRenderingContext | undefined | CanvasRenderingContext2D | DrawingRenderingContext | undefined, imageAIOptions?: ImageAIOptions | undefined, 

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTextPicker")
-export declare function ArkTextPicker(
+@BuildLambda("TextPicker")
+export declare function TextPicker(
     options?: TextPickerOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTextPickerComponent
 
 @memo
-export declare function ArkTextPickerImpl(
+export declare function TextPickerImpl(
     @memo
     _style: ((attributes: ArkTextPickerComponent) => void) | undefined,
     options?: TextPickerOptions | undefined, 

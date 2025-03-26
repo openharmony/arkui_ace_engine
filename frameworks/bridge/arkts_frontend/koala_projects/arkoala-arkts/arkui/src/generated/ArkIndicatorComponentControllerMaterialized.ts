@@ -39,7 +39,7 @@ export class IndicatorComponentController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._IndicatorComponentController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = IndicatorComponentController.ctor_indicatorcomponentcontroller()
         this.peer = new Finalizable(ctorPtr, IndicatorComponentController.getFinalizer())
     }
@@ -75,7 +75,7 @@ export class IndicatorComponentController implements MaterializedBase {
             const useAnimation_value  = useAnimation!
             thisSerializer.writeBoolean(useAnimation_value)
         }
-        ArkUIGeneratedNativeModule._IndicatorComponentController_changeIndex(this.peer!.ptr, index, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._IndicatorComponentController_changeIndex(this.peer!.ptr, index, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

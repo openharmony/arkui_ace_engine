@@ -111,7 +111,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = MouseEventInternal.ctor_mouseevent()
         this.peer = new Finalizable(ctorPtr, MouseEventInternal.getFinalizer())
@@ -212,14 +212,14 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         throw new Error("Object deserialization is not implemented.")
     }
     private setButton_serialize(button: MouseButton): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setButton(this.peer!.ptr, ((button as MouseButton) as int32))
+        ArkUIGeneratedNativeModule._MouseEvent_setButton(this.peer!.ptr, button.valueOf())
     }
     private getAction_serialize(): MouseAction {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getAction(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
     private setAction_serialize(action: MouseAction): void {
-        ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, ((action as MouseAction) as int32))
+        ArkUIGeneratedNativeModule._MouseEvent_setAction(this.peer!.ptr, action.valueOf())
     }
     private getDisplayX_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getDisplayX(this.peer!.ptr)
@@ -284,7 +284,7 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): MouseEventInternal {

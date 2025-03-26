@@ -38,7 +38,7 @@ export class TextPickerDialog {
             const options_value  = options!
             thisSerializer.writeTextPickerDialogOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._TextPickerDialog_show(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TextPickerDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

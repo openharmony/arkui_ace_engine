@@ -40,7 +40,7 @@ export class WaterFlowSections implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WaterFlowSections.ctor_waterflowsections()
         this.peer = new Finalizable(ctorPtr, WaterFlowSections.getFinalizer())
     }
@@ -88,21 +88,21 @@ export class WaterFlowSections implements MaterializedBase {
                 thisSerializer.writeSectionOptions(sections_value_element)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_splice(this.peer!.ptr, start, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private push_serialize(section: SectionOptions): boolean {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSectionOptions(section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_push(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_push(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private update_serialize(sectionIndex: number, section: SectionOptions): boolean {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSectionOptions(section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_update(this.peer!.ptr, sectionIndex, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_update(this.peer!.ptr, sectionIndex, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

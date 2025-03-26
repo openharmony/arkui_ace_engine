@@ -40,7 +40,7 @@ export class TabsController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TabsController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TabsController.ctor_tabscontroller()
         this.peer = new Finalizable(ctorPtr, TabsController.getFinalizer())
     }
@@ -83,14 +83,14 @@ export class TabsController implements MaterializedBase {
             }
         }
         const retval  = thisSerializer.holdAndWriteCallbackForPromiseVoid()[0]
-        ArkUIGeneratedNativeModule._TabsController_preloadItems(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TabsController_preloadItems(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     private setTabBarTranslate_serialize(translate: TranslateOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTranslateOptions(translate)
-        ArkUIGeneratedNativeModule._TabsController_setTabBarTranslate(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TabsController_setTabBarTranslate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setTabBarOpacity_serialize(opacity: number): void {

@@ -42,7 +42,7 @@ export class PinchGestureInterfaceInternal implements MaterializedBase,GestureIn
         const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PinchGestureInterfaceInternal.ctor_pinchgestureinterface()
         this.peer = new Finalizable(ctorPtr, PinchGestureInterfaceInternal.getFinalizer())
     }
@@ -68,7 +68,7 @@ export class PinchGestureInterfaceInternal implements MaterializedBase,GestureIn
     private onActionStart_serialize(event: ((event: GestureEvent) => void)): PinchGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PinchGestureInterface = PinchGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -76,7 +76,7 @@ export class PinchGestureInterfaceInternal implements MaterializedBase,GestureIn
     private onActionUpdate_serialize(event: ((event: GestureEvent) => void)): PinchGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionUpdate(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PinchGestureInterface = PinchGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -84,7 +84,7 @@ export class PinchGestureInterfaceInternal implements MaterializedBase,GestureIn
     private onActionEnd_serialize(event: ((event: GestureEvent) => void)): PinchGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PinchGestureInterface = PinchGestureInterfaceInternal.fromPtr(retval)
         return obj
@@ -92,7 +92,7 @@ export class PinchGestureInterfaceInternal implements MaterializedBase,GestureIn
     private onActionCancel_serialize(event: (() => void)): PinchGestureInterface {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(event)
-        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._PinchGestureInterface_onActionCancel(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : PinchGestureInterface = PinchGestureInterfaceInternal.fromPtr(retval)
         return obj

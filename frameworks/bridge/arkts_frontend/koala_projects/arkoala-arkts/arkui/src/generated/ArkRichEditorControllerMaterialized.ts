@@ -47,7 +47,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const retval  = ArkUIGeneratedNativeModule._RichEditorController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = RichEditorController.ctor_richeditorcontroller()
         this.peer = new Finalizable(ctorPtr, RichEditorController.getFinalizer())
@@ -118,7 +118,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const options_value  = options!
             thisSerializer.writeRichEditorTextSpanOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addTextSpan(this.peer!.ptr, value, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addTextSpan(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -154,7 +154,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const options_value  = options!
             thisSerializer.writeRichEditorImageSpanOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addImageSpan(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addImageSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -168,7 +168,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const options_value  = options!
             thisSerializer.writeRichEditorBuilderSpanOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addBuilderSpan(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addBuilderSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -182,7 +182,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const options_value  = options!
             thisSerializer.writeRichEditorSymbolSpanOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addSymbolSpan(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addSymbolSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -205,13 +205,13 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const value_2  = value as RichEditorUpdateSymbolSpanStyleOptions
             thisSerializer.writeRichEditorUpdateSymbolSpanStyleOptions(value_2)
         }
-        ArkUIGeneratedNativeModule._RichEditorController_updateSpanStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorController_updateSpanStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private updateParagraphStyle_serialize(value: RichEditorParagraphStyleOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeRichEditorParagraphStyleOptions(value)
-        ArkUIGeneratedNativeModule._RichEditorController_updateParagraphStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorController_updateParagraphStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private deleteSpans_serialize(value?: RichEditorRange): void {
@@ -223,7 +223,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const value_value  = value!
             thisSerializer.writeRichEditorRange(value_value)
         }
-        ArkUIGeneratedNativeModule._RichEditorController_deleteSpans(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorController_deleteSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getSpans_serialize(value?: RichEditorRange): Array<RichEditorImageSpanResult | RichEditorTextSpanResult> {
@@ -235,7 +235,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const value_value  = value!
             thisSerializer.writeRichEditorRange(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getSpans(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_length : int32 = retvalDeserializer.readInt32()
@@ -266,7 +266,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const value_value  = value!
             thisSerializer.writeRichEditorRange(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_length : int32 = retvalDeserializer.readInt32()
@@ -308,7 +308,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     private toStyledString_serialize(value: RichEditorRange): StyledString {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeRichEditorRange(value)
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_toStyledString(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_toStyledString(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : StyledString = StyledStringInternal.fromPtr(retval)
         return obj

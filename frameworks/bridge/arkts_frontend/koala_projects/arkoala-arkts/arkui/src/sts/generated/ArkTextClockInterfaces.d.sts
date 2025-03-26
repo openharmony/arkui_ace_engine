@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTextClock")
-export declare function ArkTextClock(
+@BuildLambda("TextClock")
+export declare function TextClock(
     options?: TextClockOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTextClockComponent
 
 @memo
-export declare function ArkTextClockImpl(
+export declare function TextClockImpl(
     @memo
     _style: ((attributes: ArkTextClockComponent) => void) | undefined,
     options?: TextClockOptions | undefined, 

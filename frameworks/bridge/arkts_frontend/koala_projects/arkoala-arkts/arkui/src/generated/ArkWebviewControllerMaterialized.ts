@@ -41,7 +41,7 @@ export class WebviewController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebviewController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
@@ -89,7 +89,7 @@ export class WebviewController implements MaterializedBase {
                 thisSerializer.writeWebHeader(headers_value_element)
             }
         }
-        ArkUIGeneratedNativeModule._WebviewController_loadUrl(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._WebviewController_loadUrl(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

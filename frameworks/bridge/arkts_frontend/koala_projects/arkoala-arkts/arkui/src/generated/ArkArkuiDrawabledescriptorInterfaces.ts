@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-export * from "./InteropTypes"
-export * from "./callback"
-export * from "./buffer"
-export * from "./ResourceManager"
-export * from "./NativeBuffer"
-export * from "./InteropNativeModule"
-export * from "./SerializerBase"
-export * from "./DeserializerBase"
-export * from "./Finalizable"
-export * from "./loadLibraries"
-export * from "./MaterializedBase"
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+import { int32, int64, float32 } from "@koalaui/common"
+import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { NodeAttach, remember } from "@koalaui/runtime"
+export interface AnimationOptions {
+    duration?: number;
+    iterations?: number;
+}

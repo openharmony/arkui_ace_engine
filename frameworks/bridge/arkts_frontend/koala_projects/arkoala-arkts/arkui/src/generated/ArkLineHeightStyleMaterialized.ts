@@ -43,7 +43,7 @@ export class LineHeightStyle implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._LineHeightStyle_ctor(toPeerPtr(lineHeight))
         return retval
     }
-     constructor(lineHeight?: LengthMetrics) {
+    constructor(lineHeight?: LengthMetrics) {
         if ((lineHeight) !== (undefined))
         {
             const ctorPtr : KPointer = LineHeightStyle.ctor_lineheightstyle((lineHeight)!)

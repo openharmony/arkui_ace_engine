@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SymbolEffect } from "./ArkArkuiExternalInterfaces"
+import { SymbolEffect, SymbolEffectInternal } from "./ArkSymbolEffectMaterialized"
 import { EffectFillStyle } from "./ArkSymbolglyphInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
@@ -32,11 +32,7 @@ export class HierarchicalSymbolEffectInternal {
         return obj
     }
 }
-export class HierarchicalSymbolEffect implements MaterializedBase,SymbolEffect {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
+export class HierarchicalSymbolEffect extends SymbolEffect implements MaterializedBase {
     get fillStyle(): EffectFillStyle | undefined {
         return this.getFillStyle()
     }
@@ -51,13 +47,14 @@ export class HierarchicalSymbolEffect implements MaterializedBase,SymbolEffect {
         thisSerializer.writeInt8(fillStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (fillStyle_type)) {
             const fillStyle_value  = (fillStyle as EffectFillStyle)
-            thisSerializer.writeInt32(((fillStyle_value as EffectFillStyle) as int32))
+            thisSerializer.writeInt32(fillStyle_value.valueOf())
         }
-        const retval  = ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(fillStyle?: EffectFillStyle) {
+    constructor(fillStyle?: EffectFillStyle) {
+        super()
         const ctorPtr : KPointer = HierarchicalSymbolEffect.ctor_hierarchicalsymboleffect((fillStyle)!)
         this.peer = new Finalizable(ctorPtr, HierarchicalSymbolEffect.getFinalizer())
     }
@@ -77,6 +74,6 @@ export class HierarchicalSymbolEffect implements MaterializedBase,SymbolEffect {
         throw new Error("Object deserialization is not implemented.")
     }
     private setFillStyle_serialize(fillStyle: EffectFillStyle): void {
-        ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_setFillStyle(this.peer!.ptr, ((fillStyle as EffectFillStyle) as int32))
+        ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_setFillStyle(this.peer!.ptr, fillStyle.valueOf())
     }
 }

@@ -38,7 +38,7 @@ export class Path2D extends CanvasPath implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._Path2D_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = Path2D.ctor_path2d()
         this.peer = new Finalizable(ctorPtr, Path2D.getFinalizer())
@@ -61,7 +61,7 @@ export class Path2D extends CanvasPath implements MaterializedBase {
             const transform_value  = transform!
             thisSerializer.writeMatrix2D(transform_value)
         }
-        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

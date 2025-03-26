@@ -17,20 +17,17 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
 import { SecurityComponentLayoutDirection } from "./../ArkSecurityComponentInterfaces"
 import { FontStyle, FontWeight, BorderStyle, Color } from "./../ArkEnumsInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -50,18 +47,18 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_iconSize(this.peer.ptr, value)
     }
     layoutDirectionAttribute(value: SecurityComponentLayoutDirection): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_layoutDirection(this.peer.ptr, ((value as SecurityComponentLayoutDirection) as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_layoutDirection(this.peer.ptr, value.valueOf())
     }
     positionAttribute(value: Position): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(value)
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_position(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_position(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     markAnchorAttribute(value: Position): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePosition(value)
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_markAnchor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_markAnchor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     offsetAttribute(value: Position | Edges | LocalizedEdges): void {
@@ -83,14 +80,14 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_2  = value as LocalizedEdges
             thisSerializer.writeLocalizedEdges(value_2)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_offset(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_offset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontSizeAttribute(value: Dimension): void {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_fontSize(this.peer.ptr, value)
     }
     fontStyleAttribute(value: FontStyle): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontStyle(this.peer.ptr, ((value as FontStyle) as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontStyle(this.peer.ptr, value.valueOf())
     }
     fontWeightAttribute(value: number | FontWeight | string): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -104,14 +101,14 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         else if (TypeChecker.isFontWeight(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FontWeight
-            thisSerializer.writeInt32(((value_1 as FontWeight) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(2 as int32)
             const value_2  = value as string
             thisSerializer.writeString(value_2)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontWeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontFamilyAttribute(value: string | Resource): void {
@@ -128,7 +125,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_1  = value as Resource
             thisSerializer.writeResource(value_1)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontFamily(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontColorAttribute(value: ResourceColor): void {
@@ -138,7 +135,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -155,7 +152,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_fontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     iconColorAttribute(value: ResourceColor): void {
@@ -165,7 +162,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -182,7 +179,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_iconColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_iconColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     backgroundColorAttribute(value: ResourceColor): void {
@@ -192,7 +189,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -209,11 +206,11 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_backgroundColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_backgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderStyleAttribute(value: BorderStyle): void {
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderStyle(this.peer.ptr, ((value as BorderStyle) as int32))
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderStyle(this.peer.ptr, value.valueOf())
     }
     borderWidthAttribute(value: Dimension): void {
         ArkUIGeneratedNativeModule._SecurityComponentMethod_borderWidth(this.peer.ptr, value)
@@ -225,7 +222,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -242,7 +239,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_borderColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     borderRadiusAttribute(value: Dimension): void {
@@ -293,7 +290,7 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
             const value_1  = value as Dimension
             thisSerializer.writeLength(value_1)
         }
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_padding(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_padding(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     textIconSpaceAttribute(value: Dimension): void {
@@ -311,13 +308,13 @@ export class ArkSecurityComponentMethodPeer extends PeerNode {
     sizeAttribute(value: SizeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeSizeOptions(value)
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_size(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_size(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     constraintSizeAttribute(value: ConstraintSizeOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeConstraintSizeOptions(value)
-        ArkUIGeneratedNativeModule._SecurityComponentMethod_constraintSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SecurityComponentMethod_constraintSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

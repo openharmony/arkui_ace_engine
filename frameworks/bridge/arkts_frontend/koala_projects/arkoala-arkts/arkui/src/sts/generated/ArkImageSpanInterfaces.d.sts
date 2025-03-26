@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkImageSpan")
-export declare function ArkImageSpan(
+@BuildLambda("ImageSpan")
+export declare function ImageSpan(
     value: ResourceStr | PixelMap, 
     @memo
     _content?: () => void,
 ): ArkImageSpanComponent
 
 @memo
-export declare function ArkImageSpanImpl(
+export declare function ImageSpanImpl(
     @memo
     _style: ((attributes: ArkImageSpanComponent) => void) | undefined,
     value: ResourceStr | PixelMap, 

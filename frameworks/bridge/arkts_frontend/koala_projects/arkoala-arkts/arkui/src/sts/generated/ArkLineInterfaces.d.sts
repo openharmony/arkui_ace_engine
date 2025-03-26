@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkLine")
-export declare function ArkLine(
+@BuildLambda("Line")
+export declare function Line(
     options?: LineOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkLineComponent
 
 @memo
-export declare function ArkLineImpl(
+export declare function LineImpl(
     @memo
     _style: ((attributes: ArkLineComponent) => void) | undefined,
     options?: LineOptions | undefined, 

@@ -36,7 +36,7 @@ export interface KeyEvent {
     timestamp: number
     stopPropagation: (() => void)
     intentionCode: IntentionCode
-    unicode?: number
+    unicode?: number | undefined
     getModifierKeyState(keys: Array<string>): boolean
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
@@ -109,7 +109,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = KeyEventInternal.ctor_keyevent()
         this.peer = new Finalizable(ctorPtr, KeyEventInternal.getFinalizer())
     }
@@ -184,6 +184,9 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setStopPropagation_serialize(stopPropagation_casted)
         return
     }
+    private getIntentionCode(): IntentionCode {
+        return this.getIntentionCode_serialize()
+    }
     private setIntentionCode(intentionCode: IntentionCode): void {
         const intentionCode_casted = intentionCode as (IntentionCode)
         this.setIntentionCode_serialize(intentionCode_casted)
@@ -204,7 +207,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             const keys_element : string = keys[i]
             thisSerializer.writeString(keys_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -213,7 +216,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: KeyType): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, ((type as KeyType) as int32))
+        ArkUIGeneratedNativeModule._KeyEvent_setType(this.peer!.ptr, type.valueOf())
     }
     private getKeyCode_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getKeyCode(this.peer!.ptr)
@@ -234,7 +237,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setKeySource_serialize(keySource: KeySource): void {
-        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, ((keySource as KeySource) as int32))
+        ArkUIGeneratedNativeModule._KeyEvent_setKeySource(this.peer!.ptr, keySource.valueOf())
     }
     private getDeviceId_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getDeviceId(this.peer!.ptr)
@@ -264,13 +267,19 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     private setStopPropagation_serialize(stopPropagation: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._KeyEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._KeyEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private getIntentionCode_serialize(): IntentionCode {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : IntentionCode = retvalDeserializer.readIntentionCode()
+        return returnResult
     }
     private setIntentionCode_serialize(intentionCode: IntentionCode): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeIntentionCode(intentionCode)
-        ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getUnicode_serialize(): number {

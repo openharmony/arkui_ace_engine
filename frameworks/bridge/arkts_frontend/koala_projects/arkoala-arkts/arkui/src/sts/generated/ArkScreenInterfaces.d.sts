@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkScreen")
-export declare function ArkScreen(
+@BuildLambda("Screen")
+export declare function Screen(
     screenId: number, 
     @memo
     _content?: () => void,
 ): ArkScreenComponent
 
 @memo
-export declare function ArkScreenImpl(
+export declare function ScreenImpl(
     @memo
     _style: ((attributes: ArkScreenComponent) => void) | undefined,
     screenId: number, 

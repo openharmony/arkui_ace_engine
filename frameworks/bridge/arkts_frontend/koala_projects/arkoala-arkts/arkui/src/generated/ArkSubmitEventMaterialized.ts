@@ -42,7 +42,7 @@ export class SubmitEventInternal implements MaterializedBase,SubmitEvent {
         const retval  = ArkUIGeneratedNativeModule._SubmitEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = SubmitEventInternal.ctor_submitevent()
         this.peer = new Finalizable(ctorPtr, SubmitEventInternal.getFinalizer())
     }

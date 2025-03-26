@@ -17,13 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { PointerStyle } from "./ArkArkuiCustomInterfaces"
-import { GlobalScope } from "./peers/GlobalScope"
+import { GlobalScope } from "./GlobalScope"
 export namespace cursorControl {
     export function setCursor(value: PointerStyle): void {
         GlobalScope.cursorControl_setCursor(value)
     }
-}
-export namespace cursorControl {
     export function restoreDefault(): void {
         GlobalScope.cursorControl_restoreDefault()
     }

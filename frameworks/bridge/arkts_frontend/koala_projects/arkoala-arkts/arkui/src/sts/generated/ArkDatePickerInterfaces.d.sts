@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkDatePicker")
-export declare function ArkDatePicker(
+@BuildLambda("DatePicker")
+export declare function DatePicker(
     options?: DatePickerOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkDatePickerComponent
 
 @memo
-export declare function ArkDatePickerImpl(
+export declare function DatePickerImpl(
     @memo
     _style: ((attributes: ArkDatePickerComponent) => void) | undefined,
     options?: DatePickerOptions | undefined, 

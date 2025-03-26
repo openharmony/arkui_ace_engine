@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, SymbolGlyphModifier, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -62,8 +61,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -91,23 +88,23 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
     onShownAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onShown(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onShown(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onHiddenAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onHidden(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onHidden(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onBackPressedAttribute(value: (() => boolean)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onBackPressed(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onBackPressed(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     modeAttribute(value: NavDestinationMode): void {
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_mode(this.peer.ptr, ((value as NavDestinationMode) as int32))
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_mode(this.peer.ptr, value.valueOf())
     }
     backButtonIconAttribute(value: ResourceStr | PixelMap | SymbolGlyphModifier): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -139,7 +136,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_2  = value as SymbolGlyphModifier
             thisSerializer.writeSymbolGlyphModifier(value_2)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_backButtonIcon(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_backButtonIcon(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     menusAttribute(value: Array<NavigationMenuItem> | CustomBuilder): void {
@@ -160,37 +157,37 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_1  = value as CustomBuilder
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_1))
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_menus(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_menus(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onReadyAttribute(value: ((parameter: NavDestinationContext) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onReady(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillAppearAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillAppear(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillDisappearAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillDisappear(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillDisappear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillShowAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillShow(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillShow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onWillHideAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillHide(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_onWillHide(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     systemBarStyleAttribute(value?: SystemBarStyle): void {
@@ -202,7 +199,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeSystemBarStyle(value_value)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemBarStyle(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemBarStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     recoverableAttribute(value?: boolean): void {
@@ -214,11 +211,11 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_recoverable(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_recoverable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     systemTransitionAttribute(value: NavigationSystemTransitionType): void {
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemTransition(this.peer.ptr, ((value as NavigationSystemTransitionType) as int32))
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_systemTransition(this.peer.ptr, value.valueOf())
     }
     titleAttribute(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource, options?: NavigationTitleOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -256,7 +253,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeNavigationTitleOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_title(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_title(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     toolbarConfigurationAttribute(toolbarParam: Array<ToolbarItem> | CustomBuilder, options?: NavigationToolbarOptions): void {
@@ -284,7 +281,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const options_value  = options!
             thisSerializer.writeNavigationToolbarOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_toolbarConfiguration(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_toolbarConfiguration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     hideToolBarAttribute(hide: boolean, animated?: boolean): void {
@@ -296,7 +293,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             const animated_value  = animated!
             thisSerializer.writeBoolean(animated_value)
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_hideToolBar(this.peer.ptr, hide ? 1 : 0, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_hideToolBar(this.peer.ptr, hide ? 1 : 0, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     ignoreLayoutSafeAreaAttribute(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): void {
@@ -309,7 +306,7 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32(types_value.length as int32)
             for (let i = 0; i < types_value.length; i++) {
                 const types_value_element : LayoutSafeAreaType = types_value[i]
-                thisSerializer.writeInt32(((types_value_element as LayoutSafeAreaType) as int32))
+                thisSerializer.writeInt32(types_value_element.valueOf())
             }
         }
         let edges_type : int32 = RuntimeType.UNDEFINED
@@ -320,10 +317,10 @@ export class ArkNavDestinationPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32(edges_value.length as int32)
             for (let i = 0; i < edges_value.length; i++) {
                 const edges_value_element : LayoutSafeAreaEdge = edges_value[i]
-                thisSerializer.writeInt32(((edges_value_element as LayoutSafeAreaEdge) as int32))
+                thisSerializer.writeInt32(edges_value_element.valueOf())
             }
         }
-        ArkUIGeneratedNativeModule._NavDestinationAttribute_ignoreLayoutSafeArea(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NavDestinationAttribute_ignoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

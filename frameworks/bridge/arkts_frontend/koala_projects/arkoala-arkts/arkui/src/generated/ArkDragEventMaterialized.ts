@@ -66,7 +66,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = DragEventInternal.ctor_dragevent()
         this.peer = new Finalizable(ctorPtr, DragEventInternal.getFinalizer())
     }
@@ -181,7 +181,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return returnResult
     }
     private setResult_serialize(dragResult: DragResult): void {
-        ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, ((dragResult as DragResult) as int32))
+        ArkUIGeneratedNativeModule._DragEvent_setResult(this.peer!.ptr, dragResult.valueOf())
     }
     private getResult_serialize(): DragResult {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getResult(this.peer!.ptr)
@@ -212,7 +212,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
             const keys_element : string = keys[i]
             thisSerializer.writeString(keys_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getModifierKeyState(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -221,7 +221,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         throw new Error("Object deserialization is not implemented.")
     }
     private setDragBehavior_serialize(dragBehavior: DragBehavior): void {
-        ArkUIGeneratedNativeModule._DragEvent_setDragBehavior(this.peer!.ptr, ((dragBehavior as DragBehavior) as int32))
+        ArkUIGeneratedNativeModule._DragEvent_setDragBehavior(this.peer!.ptr, dragBehavior.valueOf())
     }
     private getUseCustomDropAnimation_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getUseCustomDropAnimation(this.peer!.ptr)

@@ -39,7 +39,7 @@ export class WebCookie implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebCookie_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebCookie.ctor_webcookie()
         this.peer = new Finalizable(ctorPtr, WebCookie.getFinalizer())
     }

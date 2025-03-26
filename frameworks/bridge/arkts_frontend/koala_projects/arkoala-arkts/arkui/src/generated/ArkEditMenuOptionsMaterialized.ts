@@ -37,7 +37,7 @@ export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions
         const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = EditMenuOptionsInternal.ctor_editmenuoptions()
         this.peer = new Finalizable(ctorPtr, EditMenuOptionsInternal.getFinalizer())
     }
@@ -60,7 +60,7 @@ export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions
             const menuItems_element : TextMenuItem = menuItems[i]
             thisSerializer.writeTextMenuItem(menuItems_element)
         }
-        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onCreateMenu(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onCreateMenu(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_length : int32 = retvalDeserializer.readInt32()
@@ -75,7 +75,7 @@ export class EditMenuOptionsInternal implements MaterializedBase,EditMenuOptions
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeTextMenuItem(menuItem)
         thisSerializer.writeTextRange(range)
-        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onMenuItemClick(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._EditMenuOptions_onMenuItemClick(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

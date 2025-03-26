@@ -10,7 +10,7 @@ export class Indicator<T> {
     _bottom?: Length | undefined
     _start?: LengthMetrics | undefined
     _end?: LengthMetrics | undefined
-     constructor() {
+    constructor() {
     }
     static dot(): DotIndicator {
         return new DotIndicator()

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 import { float32, int32, int64 } from "@koalaui/common"
-import { pointer, KPointer } from "./InteropTypes"
+import { pointer, KPointer, KSerializerBuffer } from "./InteropTypes"
 import { wrapCallback } from "./InteropOps"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { ResourceHolder, ResourceId } from "../arkts/ResourceManager"
 import { MaterializedBase } from "./MaterializedBase"
 import { nullptr } from "./Wrapper"
+import { NativeBuffer } from "./NativeBuffer"
 
 // imports required interfaces (now generation is disabled)
 // import { Resource } from "@arkoala/arkui"
@@ -123,11 +124,17 @@ export class SerializerBase {
         this.releaseResources()
         this.position = 0
     }
-    asArray(): Uint8Array {
+    asBuffer(): KSerializerBuffer {
         return new Uint8Array(this.buffer)
     }
     length(): int32 {
         return this.position
+    }
+    getByte(offset: int32): int32 {
+        return this.view.getUint8(offset) as int32
+    }
+    toArray(): Uint8Array {
+        return new Uint8Array(this.buffer.slice(0, this.currentPosition()))
     }
     currentPosition(): int32 { return this.position }
 
@@ -141,6 +148,7 @@ export class SerializerBase {
             const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2))
             let resizedBuffer = new ArrayBuffer(resizedSize)
             // TODO: can we grow without new?
+            // TODO: check the status of ArrayBuffer.transfer function implementation in STS
             new Uint8Array(resizedBuffer).set(new Uint8Array(this.buffer))
             this.buffer = resizedBuffer
             this.view = new DataView(resizedBuffer)
@@ -187,6 +195,14 @@ export class SerializerBase {
         this.writeInt32(resource.resourceId)
         this.writePointer(resource.hold)
         this.writePointer(resource.release)
+    }
+    holdAndWriteObject(obj:any, hold: KPointer = 0, release: KPointer = 0): ResourceId {
+        const resourceId = ResourceHolder.instance().registerAndHold(obj)
+        this.heldResources.push(resourceId)
+        this.writeInt32(resourceId)
+        this.writePointer(hold)
+        this.writePointer(release)
+        return resourceId
     }
     private releaseResources() {
         for (const resourceId of this.heldResources)
@@ -263,16 +279,14 @@ export class SerializerBase {
         this.view.setInt32(this.position, encodedLength, true)
         this.position += encodedLength + 4
     }
-    writeBuffer(buffer: ArrayBuffer) {
-        const resourceId = ResourceHolder.instance().registerAndHold(buffer)
+    writeBuffer(buffer: NativeBuffer) {
         this.writeCallbackResource({
-            resourceId,
-            hold: 0,
-            release: 0
+            resourceId: buffer.resourceId,
+            hold: buffer.hold,
+            release: buffer.release,
         })
-        const ptr = InteropNativeModule._GetNativeBufferPointer(buffer)
-        this.writePointer(ptr)
-        this.writeInt64(buffer.byteLength)
+        this.writePointer(buffer.data)
+        this.writeInt64(buffer.length)
     }
 }
 

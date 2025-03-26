@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCheckboxGroup")
-export declare function ArkCheckboxGroup(
+@BuildLambda("CheckboxGroup")
+export declare function CheckboxGroup(
     options?: CheckboxGroupOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkCheckboxGroupComponent
 
 @memo
-export declare function ArkCheckboxGroupImpl(
+export declare function CheckboxGroupImpl(
     @memo
     _style: ((attributes: ArkCheckboxGroupComponent) => void) | undefined,
     options?: CheckboxGroupOptions | undefined, 

@@ -40,7 +40,7 @@ export class DrawModifier implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._DrawModifier_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = DrawModifier.ctor_drawmodifier()
         this.peer = new Finalizable(ctorPtr, DrawModifier.getFinalizer())
     }
@@ -69,19 +69,19 @@ export class DrawModifier implements MaterializedBase {
     private drawBehind_serialize(drawContext: DrawContext): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawBehind(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._DrawModifier_drawBehind(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private drawContent_serialize(drawContext: DrawContext): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawContent(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._DrawModifier_drawContent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private drawFront_serialize(drawContext: DrawContext): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeDrawContext(drawContext)
-        ArkUIGeneratedNativeModule._DrawModifier_drawFront(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._DrawModifier_drawFront(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private invalidate_serialize(): void {

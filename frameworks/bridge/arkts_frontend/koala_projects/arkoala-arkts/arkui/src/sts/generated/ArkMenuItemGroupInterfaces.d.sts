@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkMenuItemGroup")
-export declare function ArkMenuItemGroup(
+@BuildLambda("MenuItemGroup")
+export declare function MenuItemGroup(
     value?: MenuItemGroupOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkMenuItemGroupComponent
 
 @memo
-export declare function ArkMenuItemGroupImpl(
+export declare function MenuItemGroupImpl(
     @memo
     _style: ((attributes: ArkMenuItemGroupComponent) => void) | undefined,
     value?: MenuItemGroupOptions | undefined, 

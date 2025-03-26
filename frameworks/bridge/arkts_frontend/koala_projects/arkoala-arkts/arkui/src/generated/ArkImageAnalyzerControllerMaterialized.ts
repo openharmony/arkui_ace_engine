@@ -40,7 +40,7 @@ export class ImageAnalyzerController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ImageAnalyzerController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = ImageAnalyzerController.ctor_imageanalyzercontroller()
         this.peer = new Finalizable(ctorPtr, ImageAnalyzerController.getFinalizer())
     }

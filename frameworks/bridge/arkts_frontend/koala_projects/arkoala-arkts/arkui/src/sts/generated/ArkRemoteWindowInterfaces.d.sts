@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRemoteWindow")
-export declare function ArkRemoteWindow(
+@BuildLambda("RemoteWindow")
+export declare function RemoteWindow(
     target: WindowAnimationTarget, 
     @memo
     _content?: () => void,
 ): ArkRemoteWindowComponent
 
 @memo
-export declare function ArkRemoteWindowImpl(
+export declare function RemoteWindowImpl(
     @memo
     _style: ((attributes: ArkRemoteWindowComponent) => void) | undefined,
     target: WindowAnimationTarget, 

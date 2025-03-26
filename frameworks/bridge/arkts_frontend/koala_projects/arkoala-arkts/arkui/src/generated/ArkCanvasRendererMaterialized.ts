@@ -164,7 +164,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = CanvasRenderer.ctor_canvasrenderer()
         this.peer = new Finalizable(ctorPtr, CanvasRenderer.getFinalizer())
@@ -501,10 +501,16 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         this.setGlobalCompositeOperation_serialize(globalCompositeOperation_casted)
         return
     }
+    private getFillStyle(): string | number | CanvasGradient | CanvasPattern {
+        return this.getFillStyle_serialize()
+    }
     private setFillStyle(fillStyle: string | number | CanvasGradient | CanvasPattern): void {
         const fillStyle_casted = fillStyle as (string | number | CanvasGradient | CanvasPattern)
         this.setFillStyle_serialize(fillStyle_casted)
         return
+    }
+    private getStrokeStyle(): string | number | CanvasGradient | CanvasPattern {
+        return this.getStrokeStyle_serialize()
     }
     private setStrokeStyle(strokeStyle: string | number | CanvasGradient | CanvasPattern): void {
         const strokeStyle_casted = strokeStyle as (string | number | CanvasGradient | CanvasPattern)
@@ -653,7 +659,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), dx, dy)
+        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
     }
     private drawImage1_serialize(image: ImageBitmap | PixelMap, dx: number, dy: number, dw: number, dh: number): void {
@@ -670,7 +676,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), dx, dy, dw, dh)
+        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
     }
     private drawImage2_serialize(image: ImageBitmap | PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
@@ -687,7 +693,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const image_1  = image as PixelMap
             thisSerializer.writePixelMap(image_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
+        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
         thisSerializer.release()
     }
     private beginPath_serialize(): void {
@@ -702,7 +708,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_clip0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_clip0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private clip1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
@@ -714,7 +720,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_clip1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_clip1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private fill0_serialize(fillRule?: CanvasFillRule): void {
@@ -726,7 +732,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_fill0(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_fill0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private fill1_serialize(path: Path2D, fillRule?: CanvasFillRule): void {
@@ -738,7 +744,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillRule_value  = fillRule!
             thisSerializer.writeString(fillRule_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_fill1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_fill1(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private stroke0_serialize(): void {
@@ -761,15 +767,9 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const repetition_value  = repetition!
             thisSerializer.writeString(repetition_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createPattern(this.peer!.ptr, toPeerPtr(image), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length);
-        let retval_type : int32 = retvalDeserializer.readInt8() as int32
-        if ((RuntimeType.UNDEFINED) != (retval_type)) {
-            const pattern = retvalDeserializer.readCanvasPattern();
-            return pattern;
-        }
-        return undefined;
+        throw new Error("Object deserialization is not implemented.")
     }
     private createRadialGradient_serialize(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createRadialGradient(this.peer!.ptr, x0, y0, r0, x1, y1, r1)
@@ -827,7 +827,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const dy_1  = dy as string
             thisSerializer.writeString(dy_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData0(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private putImageData1_serialize(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
@@ -904,7 +904,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const dirtyHeight_1  = dirtyHeight as string
             thisSerializer.writeString(dirtyHeight_1)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_putImageData1(this.peer!.ptr, toPeerPtr(imagedata), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getLineDash_serialize(): Array<number> {
@@ -925,7 +925,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const segments_element : number = segments[i]
             thisSerializer.writeNumber(segments_element)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_setLineDash(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_setLineDash(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private clearRect_serialize(x: number, y: number, w: number, h: number): void {
@@ -952,7 +952,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const maxWidth_value  = maxWidth!
             thisSerializer.writeNumber(maxWidth_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_fillText(this.peer!.ptr, text, x, y, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_fillText(this.peer!.ptr, text, x, y, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private measureText_serialize(text: string): TextMetrics {
@@ -970,7 +970,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const maxWidth_value  = maxWidth!
             thisSerializer.writeNumber(maxWidth_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_strokeText(this.peer!.ptr, text, x, y, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_strokeText(this.peer!.ptr, text, x, y, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getTransform_serialize(): Matrix2D {
@@ -999,7 +999,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const transform_value  = transform!
             thisSerializer.writeMatrix2D(transform_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_setTransform1(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_setTransform1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private transform_serialize(a: number, b: number, c: number, d: number, e: number, f: number): void {
@@ -1017,7 +1017,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const value_value  = value!
             thisSerializer.writePixelMap(value_value)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_setPixelMap(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_setPixelMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private transferFromImageBitmap_serialize(bitmap: ImageBitmap): void {
@@ -1046,6 +1046,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private setGlobalCompositeOperation_serialize(globalCompositeOperation: string): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_setGlobalCompositeOperation(this.peer!.ptr, globalCompositeOperation)
     }
+    private getFillStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getFillStyle(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
     private setFillStyle_serialize(fillStyle: string | number | CanvasGradient | CanvasPattern): void {
         const thisSerializer : Serializer = Serializer.hold()
         let fillStyle_type : int32 = RuntimeType.UNDEFINED
@@ -1070,8 +1074,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const fillStyle_3  = fillStyle as CanvasPattern
             thisSerializer.writeCanvasPattern(fillStyle_3)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_setFillStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    private getStrokeStyle_serialize(): string | number | CanvasGradient | CanvasPattern {
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getStrokeStyle(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
     }
     private setStrokeStyle_serialize(strokeStyle: string | number | CanvasGradient | CanvasPattern): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -1097,7 +1105,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             const strokeStyle_3  = strokeStyle as CanvasPattern
             thisSerializer.writeCanvasPattern(strokeStyle_3)
         }
-        ArkUIGeneratedNativeModule._CanvasRenderer_setStrokeStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasRenderer_setStrokeStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private getFilter_serialize(): string {

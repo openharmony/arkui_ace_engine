@@ -37,7 +37,7 @@ export class SearchController extends TextContentControllerBase implements Mater
         const retval  = ArkUIGeneratedNativeModule._SearchController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = SearchController.ctor_searchcontroller()
         this.peer = new Finalizable(ctorPtr, SearchController.getFinalizer())
@@ -76,7 +76,7 @@ export class SearchController extends TextContentControllerBase implements Mater
             const options_value  = options!
             thisSerializer.writeSelectionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._SearchController_setTextSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SearchController_setTextSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

@@ -53,11 +53,11 @@ export class DrawingRenderingContext implements MaterializedBase {
             const unit_value  = unit!
             thisSerializer.writeLengthMetricsUnit(unit_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(unit?: LengthMetricsUnit) {
+    constructor(unit?: LengthMetricsUnit) {
         const ctorPtr : KPointer = DrawingRenderingContext.ctor_drawingrenderingcontext((unit)!)
         this.peer = new Finalizable(ctorPtr, DrawingRenderingContext.getFinalizer())
     }
@@ -68,11 +68,20 @@ export class DrawingRenderingContext implements MaterializedBase {
         this.invalidate_serialize()
         return
     }
+    private getSize(): Size {
+        return this.getSize_serialize()
+    }
     private getCanvas(): DrawingCanvas {
         return this.getCanvas_serialize()
     }
     private invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
+    }
+    private getSize_serialize(): Size {
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getSize(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : Size = retvalDeserializer.readSize()
+        return returnResult
     }
     private getCanvas_serialize(): DrawingCanvas {
         const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)

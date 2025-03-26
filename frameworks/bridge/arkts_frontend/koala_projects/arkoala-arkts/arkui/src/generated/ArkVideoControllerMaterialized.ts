@@ -40,7 +40,7 @@ export class VideoController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._VideoController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = VideoController.ctor_videocontroller()
         this.peer = new Finalizable(ctorPtr, VideoController.getFinalizer())
     }
@@ -106,7 +106,7 @@ export class VideoController implements MaterializedBase {
         return retval
     }
     private setCurrentTime1_serialize(value: number, seekMode: SeekMode): undefined {
-        const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime1(this.peer!.ptr, value, ((seekMode as SeekMode) as int32))
+        const retval  = ArkUIGeneratedNativeModule._VideoController_setCurrentTime1(this.peer!.ptr, value, seekMode.valueOf())
         return retval
     }
     private reset_serialize(): void {

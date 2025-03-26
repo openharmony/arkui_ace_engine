@@ -82,7 +82,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = AccessibilityHoverEventInternal.ctor_accessibilityhoverevent()
         this.peer = new Finalizable(ctorPtr, AccessibilityHoverEventInternal.getFinalizer())
@@ -151,7 +151,7 @@ export class AccessibilityHoverEventInternal extends BaseEventInternal implement
         throw new Error("Object deserialization is not implemented.")
     }
     private setType_serialize(type: AccessibilityHoverType): void {
-        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, ((type as AccessibilityHoverType) as int32))
+        ArkUIGeneratedNativeModule._AccessibilityHoverEvent_setType(this.peer!.ptr, type.valueOf())
     }
     private getX_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._AccessibilityHoverEvent_getX(this.peer!.ptr)

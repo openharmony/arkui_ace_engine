@@ -39,7 +39,7 @@ export class ClientAuthenticationHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ClientAuthenticationHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = ClientAuthenticationHandler.ctor_clientauthenticationhandler()
         this.peer = new Finalizable(ctorPtr, ClientAuthenticationHandler.getFinalizer())
     }

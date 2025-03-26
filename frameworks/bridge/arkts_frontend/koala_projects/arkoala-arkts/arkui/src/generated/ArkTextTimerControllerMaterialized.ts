@@ -39,7 +39,7 @@ export class TextTimerController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TextTimerController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TextTimerController.ctor_texttimercontroller()
         this.peer = new Finalizable(ctorPtr, TextTimerController.getFinalizer())
     }

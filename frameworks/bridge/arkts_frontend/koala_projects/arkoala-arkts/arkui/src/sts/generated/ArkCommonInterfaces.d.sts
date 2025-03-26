@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkCommonMethod")
-export declare function ArkCommonMethod(
+@BuildLambda("CommonMethod")
+export declare function CommonMethod(
     
     @memo
     _content?: () => void,
 ): ArkCommonMethodComponent
 
 @memo
-export declare function ArkCommonMethodImpl(
+export declare function CommonMethodImpl(
     @memo
     _style: ((attributes: ArkCommonMethodComponent) => void) | undefined,
     
@@ -33,15 +33,15 @@ export declare function ArkCommonMethodImpl(
     _content?: () => void,
 ): void
 @memo
-@BuildLambda("ArkCommonShapeMethod")
-export declare function ArkCommonShapeMethod(
+@BuildLambda("CommonShapeMethod")
+export declare function CommonShapeMethod(
     
     @memo
     _content?: () => void,
 ): ArkCommonShapeMethodComponent
 
 @memo
-export declare function ArkCommonShapeMethodImpl(
+export declare function CommonShapeMethodImpl(
     @memo
     _style: ((attributes: ArkCommonShapeMethodComponent) => void) | undefined,
     
@@ -49,15 +49,15 @@ export declare function ArkCommonShapeMethodImpl(
     _content?: () => void,
 ): void
 @memo
-@BuildLambda("ArkCommon")
-export declare function ArkCommon(
+@BuildLambda("Common")
+export declare function Common(
     
     @memo
     _content?: () => void,
 ): ArkCommonComponent
 
 @memo
-export declare function ArkCommonImpl(
+export declare function CommonImpl(
     @memo
     _style: ((attributes: ArkCommonComponent) => void) | undefined,
     
@@ -65,15 +65,15 @@ export declare function ArkCommonImpl(
     _content?: () => void,
 ): void
 @memo
-@BuildLambda("ArkScrollableCommonMethod")
-export declare function ArkScrollableCommonMethod(
+@BuildLambda("ScrollableCommonMethod")
+export declare function ScrollableCommonMethod(
     
     @memo
     _content?: () => void,
 ): ArkScrollableCommonMethodComponent
 
 @memo
-export declare function ArkScrollableCommonMethodImpl(
+export declare function ScrollableCommonMethodImpl(
     @memo
     _style: ((attributes: ArkScrollableCommonMethodComponent) => void) | undefined,
     

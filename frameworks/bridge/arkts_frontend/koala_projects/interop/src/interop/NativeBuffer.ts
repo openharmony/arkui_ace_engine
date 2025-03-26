@@ -15,6 +15,35 @@
 
 import { pointer } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
+import { InteropNativeModule } from "./InteropNativeModule"
 
 // stub wrapper for KInteropBuffer
-export type NativeBuffer = ArrayBuffer
+// export type NativeBuffer = ArrayBuffer
+
+export class NativeBuffer {
+    public data: pointer = 0
+    public length: int64 = 0
+    public resourceId: int32 = 0
+    public hold: pointer = 0
+    public release: pointer = 0
+
+    constructor(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer) {
+        this.data = data
+        this.length = length
+        this.resourceId = resourceId
+        this.hold = hold
+        this.release = release
+    }
+
+    public readByte(index: int32): int32 {
+        return InteropNativeModule._ReadByte(this.data, index, BigInt(this.length))
+    }
+
+    public writeByte(index: int32, value: int32): void {
+        InteropNativeModule._WriteByte(this.data, index, BigInt(this.length), value)
+    }
+
+    static wrap(data: pointer, length: int64, resourceId: int32, hold: pointer, release: pointer): NativeBuffer {
+        return new NativeBuffer(data, length, resourceId, hold, release)
+    }
+}

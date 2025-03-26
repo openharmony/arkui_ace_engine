@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { pointer } from './InteropTypes'
+import { pointer, KSerializerBuffer, nullptr } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
 import { InteropNativeModule } from "./InteropNativeModule"
 
@@ -43,5 +43,43 @@ export final class NativeBuffer {
 
     static wrap(data:pointer, length: int64, resourceId: int32, hold:pointer, release: pointer): NativeBuffer {
         return new NativeBuffer(data, length, resourceId, hold, release)
+    }
+}
+
+export class KBuffer {
+    private _buffer: KSerializerBuffer
+    private readonly _length: int64
+    private readonly _owned: boolean
+    constructor(length: int64) {
+       this._buffer = InteropNativeModule._Malloc(length)
+       this._length = length
+       this._owned = true
+    }
+    constructor(buffer: KSerializerBuffer, length: int64) {
+        this._buffer = buffer
+        this._length = length
+        this._owned = false
+    }
+
+    dispose(): void {
+        if (this._owned && this._buffer != nullptr) {
+            InteropNativeModule._Free(this._buffer)
+            this._buffer = nullptr
+        }
+    }
+
+    public get buffer(): KSerializerBuffer {
+        return this._buffer
+    }
+
+    public get length(): int64 {
+        return this._length
+    }
+
+    public get(index: int64): byte {
+        return InteropNativeModule._ReadByte(this._buffer, index, this._length) as byte
+    }
+    public set(index: int64, value: byte): void {
+        InteropNativeModule._WriteByte(this._buffer, index, this._length, value)
     }
 }

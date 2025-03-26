@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkNavigator")
-export declare function ArkNavigator(
+@BuildLambda("Navigator")
+export declare function Navigator(
     value?: Literal_String_target_NavigationType_type | undefined, 
     @memo
     _content?: () => void,
 ): ArkNavigatorComponent
 
 @memo
-export declare function ArkNavigatorImpl(
+export declare function NavigatorImpl(
     @memo
     _style: ((attributes: ArkNavigatorComponent) => void) | undefined,
     value?: Literal_String_target_NavigationType_type | undefined, 

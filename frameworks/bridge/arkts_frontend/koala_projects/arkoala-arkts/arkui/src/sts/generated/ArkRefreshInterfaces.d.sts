@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRefresh")
-export declare function ArkRefresh(
+@BuildLambda("Refresh")
+export declare function Refresh(
     value: RefreshOptions, 
     @memo
     _content?: () => void,
 ): ArkRefreshComponent
 
 @memo
-export declare function ArkRefreshImpl(
+export declare function RefreshImpl(
     @memo
     _style: ((attributes: ArkRefreshComponent) => void) | undefined,
     value: RefreshOptions, 

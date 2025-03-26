@@ -54,11 +54,11 @@ export class ImageData implements MaterializedBase {
             const data_value  = data!
             thisSerializer.writeBuffer(data_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._ImageData_ctor(width, height, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ImageData_ctor(width, height, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(width?: number, height?: number, data?: NativeBuffer) {
+    constructor(width?: number, height?: number, data?: NativeBuffer) {
         if (((width) !== (undefined)) || ((height) !== (undefined)) || ((data) !== (undefined)))
         {
             const ctorPtr : KPointer = ImageData.ctor_imagedata((width)!, (height)!, (data)!)
@@ -68,11 +68,18 @@ export class ImageData implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ImageData_getFinalizer()
     }
+    private getData(): NativeBuffer {
+        return this.getData_serialize()
+    }
     private getHeight(): number {
         return this.getHeight_serialize()
     }
     private getWidth(): number {
         return this.getWidth_serialize()
+    }
+    private getData_serialize(): NativeBuffer {
+        const retval  = ArkUIGeneratedNativeModule._ImageData_getData(this.peer!.ptr)
+        return new Deserializer(retval, retval.length).readBuffer()
     }
     private getHeight_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._ImageData_getHeight(this.peer!.ptr)

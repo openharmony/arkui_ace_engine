@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRoot")
-export declare function ArkRoot(
+@BuildLambda("Root")
+export declare function Root(
     
     @memo
     _content?: () => void,
 ): ArkRootComponent
 
 @memo
-export declare function ArkRootImpl(
+export declare function RootImpl(
     @memo
     _style: ((attributes: ArkRootComponent) => void) | undefined,
     
@@ -33,15 +33,15 @@ export declare function ArkRootImpl(
     _content?: () => void,
 ): void
 @memo
-@BuildLambda("ArkComponentRoot")
-export declare function ArkComponentRoot(
+@BuildLambda("ComponentRoot")
+export declare function ComponentRoot(
     
     @memo
     _content?: () => void,
 ): ArkComponentRootComponent
 
 @memo
-export declare function ArkComponentRootImpl(
+export declare function ComponentRootImpl(
     @memo
     _style: ((attributes: ArkComponentRootComponent) => void) | undefined,
     

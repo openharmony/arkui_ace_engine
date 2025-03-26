@@ -53,13 +53,13 @@ export class GlobalScope_ohos_arkui_performanceMonitor {
             const note_value  = note!
             thisSerializer.writeString(note_value)
         }
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, ((startInputType as PerfMonitorActionType) as int32), thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_begin(scene, startInputType.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static end_serialize(scene: string): void {
         ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_end(scene)
     }
     private static recordInputEventTime_serialize(actionType: PerfMonitorActionType, sourceType: PerfMonitorSourceType, time: number): void {
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(((actionType as PerfMonitorActionType) as int32), ((sourceType as PerfMonitorSourceType) as int32), time)
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_arkui_performanceMonitor_recordInputEventTime(actionType.valueOf(), sourceType.valueOf(), time)
     }
 }

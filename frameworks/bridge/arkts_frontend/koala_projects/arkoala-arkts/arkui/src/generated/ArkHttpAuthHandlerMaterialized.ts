@@ -39,7 +39,7 @@ export class HttpAuthHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._HttpAuthHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = HttpAuthHandler.ctor_httpauthhandler()
         this.peer = new Finalizable(ctorPtr, HttpAuthHandler.getFinalizer())
     }

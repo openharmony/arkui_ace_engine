@@ -49,12 +49,13 @@ node_api_headers = run_command('node', '-p', 'require.resolve("node-api-headers/
 
 is_node = get_option('vm_kind') == 'node'
 is_hzvm = get_option('vm_kind') == 'hzvm'
-is_etsapi = get_option('vm_kind') == 'panda'
-is_ani = get_option('vm_kind') == 'panda-ani'
+
+is_panda = get_option('vm_kind') == 'panda'
+is_ani = is_panda
+is_etsapi = is_panda
 is_jvm = get_option('vm_kind') == 'jvm'
 is_msvc = meson.get_compiler('cpp').get_id() == 'msvc'
 is_napi = is_node or is_hzvm
-is_panda = is_etsapi or is_ani
 is_jni = is_jvm
 # To control if we use dummy or libace based implementation
 is_dummy_impl = is_node
@@ -76,12 +77,6 @@ endif
 
 if is_jni
     library_use_name += '_jni'
-endif
-if is_etsapi
-    library_use_name += '_ark'
-endif
-if is_ani
-    library_use_name += '_ani'
 endif
 
 cflags = []
@@ -158,28 +153,28 @@ if is_napi
     ]
 endif
 if is_etsapi
-    sources += [
+    sources_ets = [
         interop_src / 'ets/convertors-ets.cc',
         interop_src / 'types/signatures.cc',
     ]
-    include_dirs += [
+    include_dirs_ets = [
         interop_src / 'ets',
         interop_src / 'types',
     ]
-    cflags += [
+    cflags_ets = [
         '-DKOALA_ETS_NAPI',
     ]
 endif
 if is_ani
-    sources += [
+    sources_ani = [
         interop_src / 'ani/convertors-ani.cc',
         interop_src / 'types/signatures.cc',
     ]
-    include_dirs += [
+    include_dirs_ani = [
         interop_src / 'ani',
         interop_src / 'types',
     ]
-    cflags += [
+    cflags_ani = [
         '-DKOALA_ANI',
     ]
 endif
@@ -275,6 +270,40 @@ if get_option('arkoala') and not is_ohos
     )
 endif
 
+if is_panda
+library_use_name_ani = library_use_name + '_ani'
+library_use_name_ets = library_use_name + '_ets'
+shared_library(library_use_name_ani,
+    sources + sources_ani,
+    override_options: [
+        # So that ArkJS build can refer NAPI symbols.
+        'b_lundef=false',
+    ],
+    install: true,
+    name_prefix: module_prefix,
+    name_suffix: module_suffix,
+    include_directories: include_dirs + include_dirs_ani,
+    install_dir: source_dir / '..' / 'build',
+    cpp_args: cflags + cflags_ani,
+    link_args: ldflags,
+    dependencies: deps
+)
+shared_library(library_use_name_ets,
+    sources + sources_ets,
+    override_options: [
+        # So that ArkJS build can refer NAPI symbols.
+        'b_lundef=false',
+    ],
+    install: true,
+    name_prefix: module_prefix,
+    name_suffix: module_suffix,
+    include_directories: include_dirs + include_dirs_ets,
+    install_dir: source_dir / '..' / 'build',
+    cpp_args: cflags + cflags_ets,
+    link_args: ldflags,
+    dependencies: deps
+)
+else
 shared_library(library_use_name,
     sources,
     override_options: [
@@ -290,6 +319,7 @@ shared_library(library_use_name,
     link_args: ldflags,
     dependencies: deps
 )
+endif
 
 if get_option('vmloader') == true
 

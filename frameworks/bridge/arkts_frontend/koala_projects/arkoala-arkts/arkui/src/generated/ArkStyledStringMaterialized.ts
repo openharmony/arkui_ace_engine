@@ -71,11 +71,11 @@ export class StyledString implements MaterializedBase {
                 thisSerializer.writeStyleOptions(styles_value_element)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._StyledString_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._StyledString_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
+    constructor(value?: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
         if (((value) !== (undefined)) || ((styles) !== (undefined)))
         {
             const ctorPtr : KPointer = StyledString.ctor_styledstring((value)!, (styles)!)
@@ -133,9 +133,9 @@ export class StyledString implements MaterializedBase {
         thisSerializer.writeInt8(styledKey_type as int32)
         if ((RuntimeType.UNDEFINED) != (styledKey_type)) {
             const styledKey_value  = (styledKey as StyledStringKey)
-            thisSerializer.writeInt32(((styledKey_value as StyledStringKey) as int32))
+            thisSerializer.writeInt32(styledKey_value.valueOf())
         }
-        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const buffer_length : int32 = retvalDeserializer.readInt32()
@@ -159,7 +159,7 @@ export class StyledString implements MaterializedBase {
             const length_value  = length!
             thisSerializer.writeNumber(length_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._StyledString_subStyledString(this.peer!.ptr, start, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._StyledString_subStyledString(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : StyledString = StyledStringInternal.fromPtr(retval)
         return obj
@@ -167,7 +167,7 @@ export class StyledString implements MaterializedBase {
     private static fromHtml_serialize(html: string): Promise<StyledString> {
         const thisSerializer : Serializer = Serializer.hold()
         const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
-        ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StyledString_fromHtml(html, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -183,7 +183,7 @@ export class StyledString implements MaterializedBase {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBuffer(buffer)
         const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
-        ArkUIGeneratedNativeModule._StyledString_unmarshalling(thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

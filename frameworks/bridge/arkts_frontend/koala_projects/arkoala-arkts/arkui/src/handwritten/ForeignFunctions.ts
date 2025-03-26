@@ -33,7 +33,7 @@ export function setTimeoutForeign(code: () => void, delay: int32): int32 {
     serializer.writeInt32(1)
     serializer.holdAndWriteCallback(code)
     serializer.writeInt32(delay)
-    let rv = InteropNativeModule._CallForeignVM(foreignContext, 3, serializer.asArray(), serializer.length())
+    let rv = InteropNativeModule._CallForeignVM(foreignContext, 3, serializer.asBuffer(), serializer.length())
     serializer.release()
     return rv
 }

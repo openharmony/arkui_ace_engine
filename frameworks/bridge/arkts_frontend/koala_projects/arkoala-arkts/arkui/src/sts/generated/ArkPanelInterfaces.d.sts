@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPanel")
-export declare function ArkPanel(
+@BuildLambda("Panel")
+export declare function Panel(
     show: boolean, 
     @memo
     _content?: () => void,
 ): ArkPanelComponent
 
 @memo
-export declare function ArkPanelImpl(
+export declare function PanelImpl(
     @memo
     _style: ((attributes: ArkPanelComponent) => void) | undefined,
     show: boolean, 

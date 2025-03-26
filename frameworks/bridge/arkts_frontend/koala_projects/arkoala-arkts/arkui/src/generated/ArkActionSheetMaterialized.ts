@@ -32,7 +32,7 @@ export class ActionSheet {
     private static show_serialize(value: ActionSheetOptions): undefined {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeActionSheetOptions(value)
-        const retval  = ArkUIGeneratedNativeModule._ActionSheet_show(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._ActionSheet_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

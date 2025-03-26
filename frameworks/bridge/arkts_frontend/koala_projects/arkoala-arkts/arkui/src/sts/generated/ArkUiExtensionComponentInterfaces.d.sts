@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkUIExtensionComponent")
-export declare function ArkUIExtensionComponent(
+@BuildLambda("UIExtensionComponent")
+export declare function UIExtensionComponent(
     want: Want, options?: UIExtensionOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkUIExtensionComponentComponent
 
 @memo
-export declare function ArkUIExtensionComponentImpl(
+export declare function UIExtensionComponentImpl(
     @memo
     _style: ((attributes: ArkUIExtensionComponentComponent) => void) | undefined,
     want: Want, options?: UIExtensionOptions | undefined, 

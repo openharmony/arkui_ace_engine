@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPatternLock")
-export declare function ArkPatternLock(
+@BuildLambda("PatternLock")
+export declare function PatternLock(
     controller?: PatternLockController | undefined, 
     @memo
     _content?: () => void,
 ): ArkPatternLockComponent
 
 @memo
-export declare function ArkPatternLockImpl(
+export declare function PatternLockImpl(
     @memo
     _style: ((attributes: ArkPatternLockComponent) => void) | undefined,
     controller?: PatternLockController | undefined, 

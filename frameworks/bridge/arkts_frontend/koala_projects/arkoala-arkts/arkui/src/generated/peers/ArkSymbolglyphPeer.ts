@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -51,7 +50,7 @@ import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./../
 import { BaseGestureEvent } from "./../ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { SymbolEffectStrategy, SymbolRenderingStrategy, SymbolGlyphAttribute } from "./../ArkSymbolglyphInterfaces"
-import { SymbolEffect } from "./../ArkArkuiExternalInterfaces"
+import { SymbolEffect } from "./../ArkSymbolEffectMaterialized"
 import { TapGestureInterface } from "./../ArkTapGestureInterfaceMaterialized"
 import { LongPressGestureInterface } from "./../ArkLongPressGestureInterfaceMaterialized"
 import { PanGestureInterface } from "./../ArkPanGestureInterfaceMaterialized"
@@ -61,8 +60,6 @@ import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMateri
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -87,7 +84,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.writeResource(value_value)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphInterface_setSymbolGlyphOptions(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphInterface_setSymbolGlyphOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontSizeAttribute(value: number | string | Resource): void {
@@ -109,7 +106,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             const value_2  = value as Resource
             thisSerializer.writeResource(value_2)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontColorAttribute(value: Array<ResourceColor>): void {
@@ -122,7 +119,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             if (TypeChecker.isColor(value_element)) {
                 thisSerializer.writeInt8(0 as int32)
                 const value_element_0  = value_element as Color
-                thisSerializer.writeInt32(((value_element_0 as Color) as int32))
+                thisSerializer.writeInt32(value_element_0.valueOf())
             }
             else if (RuntimeType.NUMBER == value_element_type) {
                 thisSerializer.writeInt8(1 as int32)
@@ -140,7 +137,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(value_element_3)
             }
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     fontWeightAttribute(value: number | FontWeight | string): void {
@@ -155,25 +152,24 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isFontWeight(value)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as FontWeight
-            thisSerializer.writeInt32(((value_1 as FontWeight) as int32))
+            thisSerializer.writeInt32(value_1.valueOf())
         }
         else if (RuntimeType.STRING == value_type) {
             thisSerializer.writeInt8(2 as int32)
             const value_2  = value as string
             thisSerializer.writeString(value_2)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontWeight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_fontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     effectStrategyAttribute(value: SymbolEffectStrategy): void {
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_effectStrategy(this.peer.ptr, ((value as SymbolEffectStrategy) as int32))
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_effectStrategy(this.peer.ptr, value.valueOf())
     }
     renderingStrategyAttribute(value: SymbolRenderingStrategy): void {
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_renderingStrategy(this.peer.ptr, ((value as SymbolRenderingStrategy) as int32))
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_renderingStrategy(this.peer.ptr, value.valueOf())
     }
     symbolEffect0Attribute(symbolEffect: SymbolEffect, isActive?: boolean): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeSymbolEffect(symbolEffect)
         let isActive_type : int32 = RuntimeType.UNDEFINED
         isActive_type = runtimeType(isActive)
         thisSerializer.writeInt8(isActive_type as int32)
@@ -181,12 +177,11 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             const isActive_value  = isActive!
             thisSerializer.writeBoolean(isActive_value)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_symbolEffect0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_symbolEffect0(this.peer.ptr, toPeerPtr(symbolEffect), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     symbolEffect1Attribute(symbolEffect: SymbolEffect, triggerValue?: number): void {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeSymbolEffect(symbolEffect)
         let triggerValue_type : int32 = RuntimeType.UNDEFINED
         triggerValue_type = runtimeType(triggerValue)
         thisSerializer.writeInt8(triggerValue_type as int32)
@@ -194,7 +189,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
             const triggerValue_value  = triggerValue!
             thisSerializer.writeNumber(triggerValue_value)
         }
-        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_symbolEffect1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._SymbolGlyphAttribute_symbolEffect1(this.peer.ptr, toPeerPtr(symbolEffect), thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

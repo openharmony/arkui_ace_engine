@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkAbilityComponent")
-export declare function ArkAbilityComponent(
+@BuildLambda("AbilityComponent")
+export declare function AbilityComponent(
     value: Literal_Want_want, 
     @memo
     _content?: () => void,
 ): ArkAbilityComponentComponent
 
 @memo
-export declare function ArkAbilityComponentImpl(
+export declare function AbilityComponentImpl(
     @memo
     _style: ((attributes: ArkAbilityComponentComponent) => void) | undefined,
     value: Literal_Want_want, 

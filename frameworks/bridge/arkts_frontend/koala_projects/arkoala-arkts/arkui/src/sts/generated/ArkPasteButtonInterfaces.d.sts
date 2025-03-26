@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPasteButton")
-export declare function ArkPasteButton(
+@BuildLambda("PasteButton")
+export declare function PasteButton(
     options?: PasteButtonOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkPasteButtonComponent
 
 @memo
-export declare function ArkPasteButtonImpl(
+export declare function PasteButtonImpl(
     @memo
     _style: ((attributes: ArkPasteButtonComponent) => void) | undefined,
     options?: PasteButtonOptions | undefined, 

@@ -143,4 +143,8 @@ typedef struct InteropAsyncWorker {
 } InteropAsyncWorker;
 typedef const InteropAsyncWorker* InteropAsyncWorkerPtr;
 
+typedef struct InteropObject {
+  InteropCallbackResource resource;
+} InteropObject;
+
 #endif // _INTEROP_TYPES_H_

@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { float32, float64, int8, int32, int64, int32BitsFromFloat } from "@koalaui/common"
-import { pointer, nullptr, KUint8ArrayPtr } from "./InteropTypes"
+import { float32, float64, int8, int32, int64, uint8, int32BitsFromFloat } from "@koalaui/common"
+import { pointer, nullptr, KSerializerBuffer } from "./InteropTypes"
 import { ResourceId, ResourceHolder } from "./ResourceManager"
-import { KBuffer } from "./buffer"
 import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { MaterializedBase } from "./MaterializedBase"
@@ -108,8 +107,9 @@ class DateSerializer extends CustomSerializer {
 SerializerBase.registerCustomSerializer(new DateSerializer())
 
 export class SerializerBase {
-    private position = 0
-    private buffer: KBuffer
+    private position: int32 = 0
+    private _buffer: KSerializerBuffer
+    private _length: int32
 
     private static customSerializers: CustomSerializer | undefined = new DateSerializer()
     static registerCustomSerializer(serializer: CustomSerializer) {
@@ -124,41 +124,89 @@ export class SerializerBase {
         }
     }
 
-    final resetCurrentPosition(): void { this.position = 0 }
-
     constructor() {
-        this.buffer = new KBuffer(96)
+        let length = 96
+        this._buffer = InteropNativeModule._Malloc(length as int64)
+        this._length = length
     }
     public release() {
         this.releaseResources()
         this.position = 0
     }
-    final asArray(): KUint8ArrayPtr {
-        return this.buffer.buffer
+    final asBuffer(): KSerializerBuffer {
+        return this._buffer
     }
     final length(): int32 {
         return this.position
     }
-    currentPosition(): int32 { return this.position }
+    final currentPosition(): int32 {
+        return this.position
+    }
+    // TODO: get rid of length.
+    private static writeu8(buffer: KSerializerBuffer, offset: int32, length: int32, value: int32) {
+        InteropNativeModule._WriteByte(buffer, offset as int64, length as int64, value as uint8)
+    }
+    // TODO: get rid of length.
+    private static readu8(buffer: KSerializerBuffer, offset: int32, length: int32): int32 {
+        return InteropNativeModule._ReadByte(buffer, offset as int64, length as int64)
+    }
+    private static writeu32(buffer: KSerializerBuffer, offset: int32, length: int32, value: int32) {
+        InteropNativeModule._WriteByte(buffer, offset,     length as int64, (value & 0xff) as uint8)
+        InteropNativeModule._WriteByte(buffer, offset + 1, length as int64, ((value >> 8) & 0xff) as uint8)
+        InteropNativeModule._WriteByte(buffer, offset + 2, length as int64, ((value >> 16) & 0xff) as uint8)
+        InteropNativeModule._WriteByte(buffer, offset + 3, length as int64, ((value >> 24) & 0xff) as uint8)
+    }
+    private writeu32(position: int32, value: int32): void {
+        SerializerBase.writeu8(this._buffer,  position + 0, this._length, ((value      ) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  position + 1, this._length, ((value >>  8) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  position + 2, this._length, ((value >> 16) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  position + 3, this._length, ((value >> 24) & 0xff) as int8)
+    }
+    // TODO: get rid of length.
+    private static readu32(buffer: KSerializerBuffer, offset: int32, length: int32): int32 {
+        return InteropNativeModule._ReadByte(buffer, offset as int64, length as int64)
+    }
+
+    final getByte(offset: int32): byte {
+        return SerializerBase.readu8(this._buffer, offset, this._length) as byte
+    }
+    final toArray(): byte[] {
+        let result = new byte[this.currentPosition()]
+        for (let i = 0; i < this.currentPosition(); i++) {
+            result[i] = this.getByte(i) as byte
+        }
+        return result
+    }
     private checkCapacity(value: int32) {
         if (value < 1) {
             throw new Error(`${value} is less than 1`)
         }
-        let buffSize = this.buffer.length
+        let buffSize = this._length
         if (this.position > buffSize - value) {
             const minSize = this.position + value
-            const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2))
-            let resizedBuffer = new KBuffer(resizedSize as int32)
-            for (let i = 0; i < this.buffer.length; i++) {
-                resizedBuffer.set(i, this.buffer.get(i))
+            const resizedSize = Math.max(minSize, Math.round(3 * buffSize / 2)) as int32
+            let resizedBuffer = InteropNativeModule._Malloc(resizedSize)
+            let oldBuffer = this._buffer
+            for (let i = 0; i < this.position; i++) {
+                SerializerBase.writeu8(resizedBuffer, i, resizedSize, SerializerBase.readu8(oldBuffer, i, this.position))
             }
-            this.buffer = resizedBuffer
+            this._buffer = resizedBuffer
+            this._length = resizedSize
+            InteropNativeModule._Free(oldBuffer)
         }
     }
     private heldResources: Array<ResourceId> = new Array<ResourceId>()
+    private heldResourcesCount: int32 = 0
+    private addHeldResource(resourceId: ResourceId) {
+        if (this.heldResourcesCount == this.heldResources.length)
+            this.heldResources.push(resourceId)
+        else
+            this.heldResources[this.heldResourcesCount] = resourceId
+        this.heldResourcesCount++
+    }
     holdAndWriteCallback(callback: object, hold: pointer = 0, release: pointer = 0, call: pointer = 0, callSync: pointer = 0): ResourceId {
         const resourceId = ResourceHolder.instance().registerAndHold(callback)
-        this.heldResources.push(resourceId)
+        this.addHeldResource(resourceId)
         this.writeInt32(resourceId)
         this.writePointer(hold)
         this.writePointer(release)
@@ -192,6 +240,14 @@ export class SerializerBase {
         })
         return [promise, resourceId]
     }
+    holdAndWriteObject(obj:object, hold: pointer = 0, release: pointer = 0): ResourceId {
+        const resourceId = ResourceHolder.instance().registerAndHold(obj)
+        this.addHeldResource(resourceId)
+        this.writeInt32(resourceId)
+        this.writePointer(hold)
+        this.writePointer(release)
+        return resourceId
+    }
     final writeCallbackResource(resource: CallbackResource) {
         this.writeInt32(resource.resourceId)
         this.writePointer(resource.hold)
@@ -199,16 +255,17 @@ export class SerializerBase {
     }
     final writeResource(resource: object) {
         const resourceId = ResourceHolder.instance().registerAndHold(resource)
-        this.heldResources.push(resourceId)
+        this.addHeldResource(resourceId)
         this.writeInt32(resourceId)
     }
     private releaseResources() {
-        for (const resourceId of this.heldResources)
-            InteropNativeModule._ReleaseCallbackResource(resourceId)
-        // todo think about effective array clearing/pushing
-        this.heldResources = new Array<ResourceId>()
+        if (this.heldResourcesCount == 0) return
+        for (let i = 0; i < this.heldResourcesCount; i++) {
+            InteropNativeModule._ReleaseCallbackResource(this.heldResources[i])
+        }
+        this.heldResourcesCount = 0
     }
-    writeCustomObject(kind: string, value: object) {
+    final writeCustomObject(kind: string, value: object) {
         let current = SerializerBase.customSerializers
         while (current) {
             if (current!.supports(kind)) {
@@ -224,7 +281,7 @@ export class SerializerBase {
         this.writeInt32(registerCallback(value))
     }
     final writeTag(tag: int32): void {
-        this.buffer.set(this.position, tag as int8)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, tag as int8)
         this.position++
     }
     final writeNumber(value: number|undefined) {
@@ -245,14 +302,11 @@ export class SerializerBase {
     }
     final writeInt8(value: int32) {
         this.checkCapacity(1)
-        this.buffer.set(this.position, value as int8)
+        SerializerBase.writeu8(this._buffer, this.position, this._length, value as int8)
         this.position += 1
     }
     private setInt32(position: int32, value: int32): void {
-        this.buffer.set(position + 0, ((value      ) & 0xff) as int8)
-        this.buffer.set(position + 1, ((value >>  8) & 0xff) as int8)
-        this.buffer.set(position + 2, ((value >> 16) & 0xff) as int8)
-        this.buffer.set(position + 3, ((value >> 24) & 0xff) as int8)
+        SerializerBase.writeu32(this._buffer, this.position, this._length, value)
     }
     final writeInt32(value: int32) {
         this.checkCapacity(4)
@@ -261,23 +315,20 @@ export class SerializerBase {
     }
     final writeInt64(value: int64) {
         this.checkCapacity(8)
-        this.buffer.set(this.position + 0, ((value      ) & 0xff) as int8)
-        this.buffer.set(this.position + 1, ((value >>  8) & 0xff) as int8)
-        this.buffer.set(this.position + 2, ((value >> 16) & 0xff) as int8)
-        this.buffer.set(this.position + 3, ((value >> 24) & 0xff) as int8)
-        this.buffer.set(this.position + 4, ((value >> 32) & 0xff) as int8)
-        this.buffer.set(this.position + 5, ((value >> 40) & 0xff) as int8)
-        this.buffer.set(this.position + 6, ((value >> 48) & 0xff) as int8)
-        this.buffer.set(this.position + 7, ((value >> 56) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 0, this._length, ((value      ) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 1, this._length, ((value >>  8) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 2, this._length, ((value >> 16) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 3, this._length, ((value >> 24) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 4, this._length, ((value >> 32) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 5, this._length, ((value >> 40) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 6, this._length, ((value >> 48) & 0xff) as int8)
+        SerializerBase.writeu8(this._buffer,  this.position + 7, this._length, ((value >> 56) & 0xff) as int8)
         this.position += 8
     }
     final writeFloat32(value: float32) {
         let bits = int32BitsFromFloat(value)
         this.checkCapacity(4)
-        this.buffer.set(this.position + 0, ((bits      ) & 0xff) as int8)
-        this.buffer.set(this.position + 1, ((bits >>  8) & 0xff) as int8)
-        this.buffer.set(this.position + 2, ((bits >> 16) & 0xff) as int8)
-        this.buffer.set(this.position + 3, ((bits >> 24) & 0xff) as int8)
+        SerializerBase.writeu32(this._buffer, this.position + 0, this._length, bits)
         this.position += 4
     }
     final writePointer(value: pointer) {
@@ -286,15 +337,15 @@ export class SerializerBase {
     final writeBoolean(value: boolean|undefined) {
         this.checkCapacity(1)
         if (value == undefined) {
-            this.buffer.set(this.position, RuntimeType.UNDEFINED as int32 as int8)
+            SerializerBase.writeu8(this._buffer, this.position, this._length, RuntimeType.UNDEFINED as int32 as int8)
         } else {
-            this.buffer.set(this.position, (value ? 1 : 0) as int8)
+            SerializerBase.writeu8(this._buffer, this.position, this._length, (value ? 1 : 0) as int8)
         }
         this.position++
     }
     final writeString(value: string) {
         this.checkCapacity((4 + value.length * 4 + 1) as int32) // length, data
-        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asArray(), this.position + 4)
+        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this.position + 4)
         this.setInt32(this.position, encodedLength)
         this.position += encodedLength + 4
     }

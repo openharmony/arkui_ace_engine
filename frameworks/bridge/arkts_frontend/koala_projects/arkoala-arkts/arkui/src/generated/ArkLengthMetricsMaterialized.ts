@@ -53,7 +53,7 @@ export class LengthMetrics implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
@@ -131,7 +131,7 @@ export class LengthMetrics implements MaterializedBase {
     private static resource_serialize(value: Resource): LengthMetrics {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResource(value)
-        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_resource(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._LengthMetrics_resource(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         const obj : LengthMetrics = LengthMetricsInternal.fromPtr(retval)
         return obj
@@ -141,7 +141,7 @@ export class LengthMetrics implements MaterializedBase {
         throw new Error("Object deserialization is not implemented.")
     }
     private setUnit_serialize(unit: LengthUnit): void {
-        ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, ((unit as LengthUnit) as int32))
+        ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, unit.valueOf())
     }
     private getValue_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._LengthMetrics_getValue(this.peer!.ptr)

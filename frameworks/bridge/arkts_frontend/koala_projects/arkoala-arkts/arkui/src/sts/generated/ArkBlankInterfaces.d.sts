@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkBlank")
-export declare function ArkBlank(
+@BuildLambda("Blank")
+export declare function Blank(
     min?: number | string | undefined, 
     @memo
     _content?: () => void,
 ): ArkBlankComponent
 
 @memo
-export declare function ArkBlankImpl(
+export declare function BlankImpl(
     @memo
     _style: ((attributes: ArkBlankComponent) => void) | undefined,
     min?: number | string | undefined, 

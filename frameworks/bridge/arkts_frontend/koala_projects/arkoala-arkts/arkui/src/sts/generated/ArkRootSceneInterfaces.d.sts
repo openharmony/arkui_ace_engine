@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRootScene")
-export declare function ArkRootScene(
+@BuildLambda("RootScene")
+export declare function RootScene(
     session: RootSceneSession, 
     @memo
     _content?: () => void,
 ): ArkRootSceneComponent
 
 @memo
-export declare function ArkRootSceneImpl(
+export declare function RootSceneImpl(
     @memo
     _style: ((attributes: ArkRootSceneComponent) => void) | undefined,
     session: RootSceneSession, 

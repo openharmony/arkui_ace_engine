@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSwiper")
-export declare function ArkSwiper(
+@BuildLambda("Swiper")
+export declare function Swiper(
     controller?: SwiperController | undefined, 
     @memo
     _content?: () => void,
 ): ArkSwiperComponent
 
 @memo
-export declare function ArkSwiperImpl(
+export declare function SwiperImpl(
     @memo
     _style: ((attributes: ArkSwiperComponent) => void) | undefined,
     controller?: SwiperController | undefined, 

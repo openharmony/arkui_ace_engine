@@ -45,7 +45,7 @@ export class RichEditorBaseController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = RichEditorBaseController.ctor_richeditorbasecontroller()
         this.peer = new Finalizable(ctorPtr, RichEditorBaseController.getFinalizer())
     }
@@ -111,7 +111,7 @@ export class RichEditorBaseController implements MaterializedBase {
     private setTypingStyle_serialize(value: RichEditorTextStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeRichEditorTextStyle(value)
-        ArkUIGeneratedNativeModule._RichEditorBaseController_setTypingStyle(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorBaseController_setTypingStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setSelection_serialize(selectionStart: number, selectionEnd: number, options?: SelectionOptions): void {
@@ -123,7 +123,7 @@ export class RichEditorBaseController implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeSelectionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._RichEditorBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._RichEditorBaseController_setSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private isEditing_serialize(): boolean {

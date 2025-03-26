@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkAlphabetIndexer")
-export declare function ArkAlphabetIndexer(
+@BuildLambda("AlphabetIndexer")
+export declare function AlphabetIndexer(
     options: AlphabetIndexerOptions, 
     @memo
     _content?: () => void,
 ): ArkAlphabetIndexerComponent
 
 @memo
-export declare function ArkAlphabetIndexerImpl(
+export declare function AlphabetIndexerImpl(
     @memo
     _style: ((attributes: ArkAlphabetIndexerComponent) => void) | undefined,
     options: AlphabetIndexerOptions, 

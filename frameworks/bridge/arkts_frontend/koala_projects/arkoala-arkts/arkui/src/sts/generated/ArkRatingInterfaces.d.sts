@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRating")
-export declare function ArkRating(
+@BuildLambda("Rating")
+export declare function Rating(
     options?: RatingOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkRatingComponent
 
 @memo
-export declare function ArkRatingImpl(
+export declare function RatingImpl(
     @memo
     _style: ((attributes: ArkRatingComponent) => void) | undefined,
     options?: RatingOptions | undefined, 

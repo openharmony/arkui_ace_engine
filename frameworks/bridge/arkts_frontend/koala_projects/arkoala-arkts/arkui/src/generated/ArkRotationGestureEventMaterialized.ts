@@ -41,7 +41,7 @@ export class RotationGestureEventInternal extends BaseGestureEventInternal imple
         const retval  = ArkUIGeneratedNativeModule._RotationGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = RotationGestureEventInternal.ctor_rotationgestureevent()
         this.peer = new Finalizable(ctorPtr, RotationGestureEventInternal.getFinalizer())

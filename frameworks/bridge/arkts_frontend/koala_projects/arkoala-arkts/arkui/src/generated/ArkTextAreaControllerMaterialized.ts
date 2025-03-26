@@ -37,7 +37,7 @@ export class TextAreaController extends TextContentControllerBase implements Mat
         const retval  = ArkUIGeneratedNativeModule._TextAreaController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = TextAreaController.ctor_textareacontroller()
         this.peer = new Finalizable(ctorPtr, TextAreaController.getFinalizer())
@@ -73,7 +73,7 @@ export class TextAreaController extends TextContentControllerBase implements Mat
             const options_value  = options!
             thisSerializer.writeSelectionOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._TextAreaController_setTextSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._TextAreaController_setTextSelection(this.peer!.ptr, selectionStart, selectionEnd, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private stopEditing_serialize(): void {

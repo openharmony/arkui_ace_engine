@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkFlex")
-export declare function ArkFlex(
+@BuildLambda("Flex")
+export declare function Flex(
     value?: FlexOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkFlexComponent
 
 @memo
-export declare function ArkFlexImpl(
+export declare function FlexImpl(
     @memo
     _style: ((attributes: ArkFlexComponent) => void) | undefined,
     value?: FlexOptions | undefined, 

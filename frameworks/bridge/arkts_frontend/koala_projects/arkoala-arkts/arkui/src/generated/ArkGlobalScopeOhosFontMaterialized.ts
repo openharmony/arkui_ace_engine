@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FontOptions } from "./ArkArkuiExternalInterfaces"
+import { FontOptions, FontInfo } from "./ArkArkuiExternalInterfaces"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
@@ -33,10 +33,14 @@ export class GlobalScope_ohos_font {
     public static getSystemFontList(): Array<string> {
         return GlobalScope_ohos_font.getSystemFontList_serialize()
     }
+    public static getFontByName(fontName: string): FontInfo {
+        const fontName_casted = fontName as (string)
+        return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
+    }
     private static registerFont_serialize(options: FontOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFontOptions(options)
-        ArkUIGeneratedNativeModule._GlobalScope_ohos_font_registerFont(thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._GlobalScope_ohos_font_registerFont(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static getSystemFontList_serialize(): Array<string> {
@@ -48,6 +52,12 @@ export class GlobalScope_ohos_font {
             buffer[buffer_i] = (retvalDeserializer.readString() as string)
         }
         const returnResult : Array<string> = buffer
+        return returnResult
+    }
+    private static getFontByName_serialize(fontName: string): FontInfo {
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getFontByName(fontName)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        const returnResult : FontInfo = retvalDeserializer.readFontInfo()
         return returnResult
     }
 }

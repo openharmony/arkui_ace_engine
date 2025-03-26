@@ -45,7 +45,7 @@ export class ChildrenMainSize implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ChildrenMainSize_ctor(childDefaultSize)
         return retval
     }
-     constructor(childDefaultSize?: number) {
+    constructor(childDefaultSize?: number) {
         if ((childDefaultSize) !== (undefined))
         {
             const ctorPtr : KPointer = ChildrenMainSize.ctor_childrenmainsize((childDefaultSize)!)
@@ -96,7 +96,7 @@ export class ChildrenMainSize implements MaterializedBase {
                 thisSerializer.writeNumber(childrenSize_value_element)
             }
         }
-        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ChildrenMainSize_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private update_serialize(index: number, childSize: number): void {

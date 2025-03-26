@@ -51,7 +51,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         const retval  = ArkUIGeneratedNativeModule._UICommonEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = UICommonEventInternal.ctor_uicommonevent()
         this.peer = new Finalizable(ctorPtr, UICommonEventInternal.getFinalizer())
     }
@@ -123,7 +123,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnClick(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnClick(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnTouch_serialize(callback_?: ((event: TouchEvent) => void)): void {
@@ -135,7 +135,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnTouch(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnTouch(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnAppear_serialize(callback_?: (() => void)): void {
@@ -147,7 +147,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnAppear(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnAppear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnDisappear_serialize(callback_?: (() => void)): void {
@@ -159,7 +159,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnDisappear(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnDisappear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnKeyEvent_serialize(callback_?: ((event: KeyEvent) => void)): void {
@@ -171,7 +171,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnKeyEvent(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnKeyEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnFocus_serialize(callback_?: (() => void)): void {
@@ -183,7 +183,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnFocus(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnFocus(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnBlur_serialize(callback_?: (() => void)): void {
@@ -195,7 +195,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnBlur(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnBlur(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnHover_serialize(callback_?: HoverCallback): void {
@@ -207,7 +207,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnHover(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnHover(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnMouse_serialize(callback_?: ((event: MouseEvent) => void)): void {
@@ -219,7 +219,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnMouse(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnMouse(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnSizeChange_serialize(callback_?: SizeChangeCallback): void {
@@ -231,7 +231,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnSizeChange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnSizeChange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private setOnVisibleAreaApproximateChange_serialize(options: VisibleAreaEventOptions, event?: VisibleAreaChangeCallback): void {
@@ -244,7 +244,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
             const event_value  = event!
             thisSerializer.holdAndWriteCallback(event_value)
         }
-        ArkUIGeneratedNativeModule._UICommonEvent_setOnVisibleAreaApproximateChange(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._UICommonEvent_setOnVisibleAreaApproximateChange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): UICommonEventInternal {

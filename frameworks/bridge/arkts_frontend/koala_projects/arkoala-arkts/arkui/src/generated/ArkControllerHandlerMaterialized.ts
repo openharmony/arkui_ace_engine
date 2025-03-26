@@ -40,7 +40,7 @@ export class ControllerHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ControllerHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = ControllerHandler.ctor_controllerhandler()
         this.peer = new Finalizable(ctorPtr, ControllerHandler.getFinalizer())
     }

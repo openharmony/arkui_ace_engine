@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPolygon")
-export declare function ArkPolygon(
+@BuildLambda("Polygon")
+export declare function Polygon(
     options?: PolygonOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkPolygonComponent
 
 @memo
-export declare function ArkPolygonImpl(
+export declare function PolygonImpl(
     @memo
     _style: ((attributes: ArkPolygonComponent) => void) | undefined,
     options?: PolygonOptions | undefined, 

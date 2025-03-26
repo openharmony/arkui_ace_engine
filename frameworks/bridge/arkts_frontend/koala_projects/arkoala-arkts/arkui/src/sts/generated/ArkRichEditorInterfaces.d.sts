@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkRichEditor")
-export declare function ArkRichEditor(
+@BuildLambda("RichEditor")
+export declare function RichEditor(
     value: RichEditorOptions | RichEditorStyledStringOptions, 
     @memo
     _content?: () => void,
 ): ArkRichEditorComponent
 
 @memo
-export declare function ArkRichEditorImpl(
+export declare function RichEditorImpl(
     @memo
     _style: ((attributes: ArkRichEditorComponent) => void) | undefined,
     value: RichEditorOptions | RichEditorStyledStringOptions, 

@@ -66,7 +66,7 @@ export class LazyForEachOps {
     private static OnRangeUpdate_serialize(node: KPointer, totalCount: int32, updater: Callback_RangeUpdate): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(updater)
-        ArkUIGeneratedNativeModule._LazyForEachOps_OnRangeUpdate(node, totalCount, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._LazyForEachOps_OnRangeUpdate(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private static SetCurrentIndex_serialize(node: KPointer, index: int32): void {

@@ -39,7 +39,7 @@ export class SslErrorHandler implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._SslErrorHandler_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = SslErrorHandler.ctor_sslerrorhandler()
         this.peer = new Finalizable(ctorPtr, SslErrorHandler.getFinalizer())
     }

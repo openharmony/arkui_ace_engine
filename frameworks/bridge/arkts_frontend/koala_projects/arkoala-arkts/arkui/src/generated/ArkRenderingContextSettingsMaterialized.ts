@@ -51,11 +51,11 @@ export class RenderingContextSettings implements MaterializedBase {
             const antialias_value  = antialias!
             thisSerializer.writeBoolean(antialias_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RenderingContextSettings_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RenderingContextSettings_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(antialias?: boolean) {
+    constructor(antialias?: boolean) {
         const ctorPtr : KPointer = RenderingContextSettings.ctor_renderingcontextsettings((antialias)!)
         this.peer = new Finalizable(ctorPtr, RenderingContextSettings.getFinalizer())
     }

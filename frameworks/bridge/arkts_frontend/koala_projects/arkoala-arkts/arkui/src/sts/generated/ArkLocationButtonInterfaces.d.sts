@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkLocationButton")
-export declare function ArkLocationButton(
+@BuildLambda("LocationButton")
+export declare function LocationButton(
     options?: LocationButtonOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkLocationButtonComponent
 
 @memo
-export declare function ArkLocationButtonImpl(
+export declare function LocationButtonImpl(
     @memo
     _style: ((attributes: ArkLocationButtonComponent) => void) | undefined,
     options?: LocationButtonOptions | undefined, 

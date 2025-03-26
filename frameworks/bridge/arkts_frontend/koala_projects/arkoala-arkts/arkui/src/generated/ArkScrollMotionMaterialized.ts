@@ -40,7 +40,7 @@ export class ScrollMotion implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ScrollMotion_ctor(position, velocity, min, max, toPeerPtr(prop))
         return retval
     }
-     constructor(position?: number, velocity?: number, min?: number, max?: number, prop?: SpringProp) {
+    constructor(position?: number, velocity?: number, min?: number, max?: number, prop?: SpringProp) {
         if (((position) !== (undefined)) || ((velocity) !== (undefined)) || ((min) !== (undefined)) || ((max) !== (undefined)) || ((prop) !== (undefined)))
         {
             const ctorPtr : KPointer = ScrollMotion.ctor_scrollmotion((position)!, (velocity)!, (min)!, (max)!, (prop)!)

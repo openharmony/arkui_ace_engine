@@ -37,10 +37,10 @@ export class ConsoleMessage implements MaterializedBase {
         return this.peer
     }
     static ctor_consolemessage(message: string, sourceId: string, lineNumber: number, messageLevel: MessageLevel): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, ((messageLevel as MessageLevel) as int32))
+        const retval  = ArkUIGeneratedNativeModule._ConsoleMessage_ctor(message, sourceId, lineNumber, messageLevel.valueOf())
         return retval
     }
-     constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
+    constructor(message?: string, sourceId?: string, lineNumber?: number, messageLevel?: MessageLevel) {
         if (((message) !== (undefined)) || ((sourceId) !== (undefined)) || ((lineNumber) !== (undefined)) || ((messageLevel) !== (undefined)))
         {
             const ctorPtr : KPointer = ConsoleMessage.ctor_consolemessage((message)!, (sourceId)!, (lineNumber)!, (messageLevel)!)

@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSelect")
-export declare function ArkSelect(
+@BuildLambda("Select")
+export declare function Select(
     options: Array<SelectOption>, 
     @memo
     _content?: () => void,
 ): ArkSelectComponent
 
 @memo
-export declare function ArkSelectImpl(
+export declare function SelectImpl(
     @memo
     _style: ((attributes: ArkSelectComponent) => void) | undefined,
     options: Array<SelectOption>, 

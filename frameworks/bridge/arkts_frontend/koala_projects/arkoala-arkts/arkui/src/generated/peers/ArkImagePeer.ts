@@ -17,12 +17,11 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { Serializer } from "./Serializer"
-import { ComponentBase } from "../../ComponentBase"
-import { PeerNode } from "../../PeerNode"
-import { ArkUIGeneratedNativeModule } from "#components"
+import { ComponentBase } from "./../../ComponentBase"
+import { PeerNode } from "./../../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./ArkCommonPeer"
 import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, PointLightStyle } from "./../ArkCommonInterfaces"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage } from "./../ArkUnitsInterfaces"
@@ -30,7 +29,7 @@ import { DrawModifier } from "./../ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./../ArkEnumsInterfaces"
 import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event } from "./../SyntheticDeclarations"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
-import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, ImageErrorCallback, ResolutionQuality, DrawableDescriptor, ImageAttribute, ImageContent } from "./../ArkImageInterfaces"
+import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, ImageErrorCallback, ResolutionQuality, ImageAttribute, ImageContent } from "./../ArkImageInterfaces"
 import { Resource } from "./../ArkResourceInterfaces"
 import { ClickEvent } from "./../ArkClickEventMaterialized"
 import { HoverEvent } from "./../ArkHoverEventMaterialized"
@@ -59,10 +58,9 @@ import { PinchGestureInterface } from "./../ArkPinchGestureInterfaceMaterialized
 import { SwipeGestureInterface } from "./../ArkSwipeGestureInterfaceMaterialized"
 import { RotationGestureInterface } from "./../ArkRotationGestureInterfaceMaterialized"
 import { GestureGroupInterface } from "./../ArkGestureGroupInterfaceMaterialized"
+import { DrawableDescriptor } from "./../ArkDrawableDescriptorMaterialized"
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { TypeChecker } from "#components"
-import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
 import { DotIndicator } from "./../ArkDotIndicatorBuilder"
 import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
 import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
@@ -103,12 +101,12 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(src_1_1)
             }
         }
-        else if (TypeChecker.isDrawableDescriptor(src, false)) {
+        else if (TypeChecker.isDrawableDescriptor(src)) {
             thisSerializer.writeInt8(2 as int32)
             const src_2  = src as DrawableDescriptor
             thisSerializer.writeDrawableDescriptor(src_2)
         }
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setImageOptions1Attribute(src: PixelMap | ResourceStr | DrawableDescriptor | ImageContent): void {
@@ -136,7 +134,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(src_1_1)
             }
         }
-        else if (TypeChecker.isDrawableDescriptor(src, false)) {
+        else if (TypeChecker.isDrawableDescriptor(src)) {
             thisSerializer.writeInt8(2 as int32)
             const src_2  = src as DrawableDescriptor
             thisSerializer.writeDrawableDescriptor(src_2)
@@ -144,9 +142,9 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         else if (TypeChecker.isImageContent(src)) {
             thisSerializer.writeInt8(3 as int32)
             const src_3  = src as ImageContent
-            thisSerializer.writeInt32(((src_3 as ImageContent) as int32))
+            thisSerializer.writeInt32(src_3.valueOf())
         }
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setImageOptions2Attribute(src: PixelMap | ResourceStr | DrawableDescriptor, imageAIOptions: ImageAIOptions): void {
@@ -174,13 +172,13 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(src_1_1)
             }
         }
-        else if (TypeChecker.isDrawableDescriptor(src, false)) {
+        else if (TypeChecker.isDrawableDescriptor(src)) {
             thisSerializer.writeInt8(2 as int32)
             const src_2  = src as DrawableDescriptor
             thisSerializer.writeDrawableDescriptor(src_2)
         }
         thisSerializer.writeImageAIOptions(imageAIOptions)
-        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     altAttribute(value: string | Resource | PixelMap): void {
@@ -202,7 +200,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             const value_2  = value as PixelMap
             thisSerializer.writePixelMap(value_2)
         }
-        ArkUIGeneratedNativeModule._ImageAttribute_alt(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_alt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     matchTextDirectionAttribute(value: boolean): void {
@@ -218,7 +216,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         if (TypeChecker.isColor(value)) {
             thisSerializer.writeInt8(0 as int32)
             const value_0  = value as Color
-            thisSerializer.writeInt32(((value_0 as Color) as int32))
+            thisSerializer.writeInt32(value_0.valueOf())
         }
         else if (RuntimeType.NUMBER == value_type) {
             thisSerializer.writeInt8(1 as int32)
@@ -235,31 +233,31 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             const value_3  = value as Resource
             thisSerializer.writeResource(value_3)
         }
-        ArkUIGeneratedNativeModule._ImageAttribute_fillColor(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_fillColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     objectFitAttribute(value: ImageFit): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_objectFit(this.peer.ptr, ((value as ImageFit) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_objectFit(this.peer.ptr, value.valueOf())
     }
     objectRepeatAttribute(value: ImageRepeat): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_objectRepeat(this.peer.ptr, ((value as ImageRepeat) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_objectRepeat(this.peer.ptr, value.valueOf())
     }
     autoResizeAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._ImageAttribute_autoResize(this.peer.ptr, value ? 1 : 0)
     }
     renderModeAttribute(value: ImageRenderMode): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_renderMode(this.peer.ptr, ((value as ImageRenderMode) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_renderMode(this.peer.ptr, value.valueOf())
     }
     dynamicRangeModeAttribute(value: DynamicRangeMode): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_dynamicRangeMode(this.peer.ptr, ((value as DynamicRangeMode) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_dynamicRangeMode(this.peer.ptr, value.valueOf())
     }
     interpolationAttribute(value: ImageInterpolation): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_interpolation(this.peer.ptr, ((value as ImageInterpolation) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_interpolation(this.peer.ptr, value.valueOf())
     }
     sourceSizeAttribute(value: ImageSourceSize): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeImageSourceSize(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_sourceSize(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_sourceSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     syncLoadAttribute(value: boolean): void {
@@ -279,11 +277,11 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
             const value_1  = value as DrawingColorFilter
             thisSerializer.writeDrawingColorFilter(value_1)
         }
-        ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_colorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     copyOptionAttribute(value: CopyOptions): void {
-        ArkUIGeneratedNativeModule._ImageAttribute_copyOption(this.peer.ptr, ((value as CopyOptions) as int32))
+        ArkUIGeneratedNativeModule._ImageAttribute_copyOption(this.peer.ptr, value.valueOf())
     }
     draggableAttribute(value: boolean): void {
         ArkUIGeneratedNativeModule._ImageAttribute_draggable(this.peer.ptr, value ? 1 : 0)
@@ -291,7 +289,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     pointLightAttribute(value: PointLightStyle): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writePointLightStyle(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_pointLight(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_pointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     edgeAntialiasingAttribute(value: number): void {
@@ -300,19 +298,19 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     onCompleteAttribute(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_onComplete(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_onComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onErrorAttribute(value: ImageErrorCallback): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_onError(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onFinishAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_onFinish(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_onFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     enableAnalyzerAttribute(value: boolean): void {
@@ -321,13 +319,13 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     analyzerConfigAttribute(value: ImageAnalyzerConfig): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeImageAnalyzerConfig(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_analyzerConfig(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_analyzerConfig(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     resizableAttribute(value: ResizableOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResizableOptions(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_resizable(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_resizable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     privacySensitiveAttribute(value: boolean): void {
@@ -336,7 +334,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
     enhancedImageQualityAttribute(value: ResolutionQuality): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeResolutionQuality(value)
-        ArkUIGeneratedNativeModule._ImageAttribute_enhancedImageQuality(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._ImageAttribute_enhancedImageQuality(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

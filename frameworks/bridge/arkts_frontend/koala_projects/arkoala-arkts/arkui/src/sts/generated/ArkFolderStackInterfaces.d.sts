@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkFolderStack")
-export declare function ArkFolderStack(
+@BuildLambda("FolderStack")
+export declare function FolderStack(
     options?: FolderStackOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkFolderStackComponent
 
 @memo
-export declare function ArkFolderStackImpl(
+export declare function FolderStackImpl(
     @memo
     _style: ((attributes: ArkFolderStackComponent) => void) | undefined,
     options?: FolderStackOptions | undefined, 

@@ -28,7 +28,7 @@ import { HorizontalAlign, VerticalAlign, GradientDirection, HitTestMode, Alignme
 import { TransitionEffect } from "./ArkTransitionEffectMaterialized"
 import { GestureJudgeResult, GestureInfo, PanDirection, SwipeDirection } from "./ArkGestureInterfaces"
 import { GestureRecognizer } from "./ArkGestureRecognizerMaterialized"
-import { DismissContentCoverAction, SheetSize, SheetDismiss, DismissSheetAction, SpringBackAction, SheetType, DismissPopupAction, TouchResult, TouchTestInfo, CustomBuilder, DragItemInfo, PreDragStatus, ItemDragInfo, ScrollResult } from "./ArkCommonInterfaces"
+import { DismissContentCoverAction, SheetSize, SheetDismiss, DismissSheetAction, SpringBackAction, SheetType, DismissPopupAction, TouchResult, TouchTestInfo, CustomBuilder, DragItemInfo, PreDragStatus, ItemDragInfo } from "./ArkCommonInterfaces"
 import { Length, ResourceColor, Area, Dimension, ResourceStr } from "./ArkUnitsInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
@@ -324,7 +324,6 @@ export interface Literal_Boolean_next_Axis_direction {
 }
 export type Callback_OnScrollFrameBeginHandlerResult_Void = (value: OnScrollFrameBeginHandlerResult) => void;
 export type Callback_OffsetResult_Void = (value: OffsetResult) => void;
-export type Callback_ScrollResult_Void = (value: ScrollResult) => void;
 export type Callback_InsertValue_Boolean = (parameter: InsertValue) => boolean;
 export type Callback_InsertValue_Void = (parameter: InsertValue) => void;
 export type Callback_DeleteValue_Boolean = (parameter: DeleteValue) => boolean;

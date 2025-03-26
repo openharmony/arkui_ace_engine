@@ -43,7 +43,7 @@ export class BaselineOffsetStyle implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._BaselineOffsetStyle_ctor(toPeerPtr(value))
         return retval
     }
-     constructor(value?: LengthMetrics) {
+    constructor(value?: LengthMetrics) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = BaselineOffsetStyle.ctor_baselineoffsetstyle((value)!)

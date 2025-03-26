@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkAnimator")
-export declare function ArkAnimator(
+@BuildLambda("Animator")
+export declare function Animator(
     value: string, 
     @memo
     _content?: () => void,
 ): ArkAnimatorComponent
 
 @memo
-export declare function ArkAnimatorImpl(
+export declare function AnimatorImpl(
     @memo
     _style: ((attributes: ArkAnimatorComponent) => void) | undefined,
     value: string, 

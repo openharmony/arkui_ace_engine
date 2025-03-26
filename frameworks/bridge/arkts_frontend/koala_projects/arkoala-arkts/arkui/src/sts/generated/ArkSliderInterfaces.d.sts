@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkSlider")
-export declare function ArkSlider(
+@BuildLambda("Slider")
+export declare function Slider(
     options?: SliderOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkSliderComponent
 
 @memo
-export declare function ArkSliderImpl(
+export declare function SliderImpl(
     @memo
     _style: ((attributes: ArkSliderComponent) => void) | undefined,
     options?: SliderOptions | undefined, 

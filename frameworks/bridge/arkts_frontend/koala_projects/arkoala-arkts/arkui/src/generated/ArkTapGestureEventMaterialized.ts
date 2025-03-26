@@ -34,7 +34,7 @@ export class TapGestureEventInternal extends BaseGestureEventInternal implements
         const retval  = ArkUIGeneratedNativeModule._TapGestureEvent_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         super()
         const ctorPtr : KPointer = TapGestureEventInternal.ctor_tapgestureevent()
         this.peer = new Finalizable(ctorPtr, TapGestureEventInternal.getFinalizer())

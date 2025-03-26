@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkBadge")
-export declare function ArkBadge(
+@BuildLambda("Badge")
+export declare function Badge(
     value: BadgeParamWithNumber | BadgeParamWithString, 
     @memo
     _content?: () => void,
 ): ArkBadgeComponent
 
 @memo
-export declare function ArkBadgeImpl(
+export declare function BadgeImpl(
     @memo
     _style: ((attributes: ArkBadgeComponent) => void) | undefined,
     value: BadgeParamWithNumber | BadgeParamWithString, 

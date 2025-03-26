@@ -22,7 +22,7 @@
             "#common/wrappers/*": ["./src/napi/wrappers/*", "./src/wasm/wrappers/*"]
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/interop/**/*", "src/napi/**/*", "src/wasm/**/*", "src/arkts/ResourceManager.ts"],
     "references": [
         { "path": "../incremental/compiler-plugin" },
         { "path": "../incremental/compat" },

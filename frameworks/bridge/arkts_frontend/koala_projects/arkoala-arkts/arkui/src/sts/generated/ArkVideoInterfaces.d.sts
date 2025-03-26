@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkVideo")
-export declare function ArkVideo(
+@BuildLambda("Video")
+export declare function Video(
     value: VideoOptions, 
     @memo
     _content?: () => void,
 ): ArkVideoComponent
 
 @memo
-export declare function ArkVideoImpl(
+export declare function VideoImpl(
     @memo
     _style: ((attributes: ArkVideoComponent) => void) | undefined,
     value: VideoOptions, 

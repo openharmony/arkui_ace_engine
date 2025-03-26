@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { GlobalScope } from "./peers/GlobalScope"
+import { GlobalScope } from "./GlobalScope"
 export namespace focusControl {
     export function requestFocus(value: string): boolean {
         return GlobalScope.focusControl_requestFocus(value)

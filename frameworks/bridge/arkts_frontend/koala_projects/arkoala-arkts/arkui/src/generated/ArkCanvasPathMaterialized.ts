@@ -39,7 +39,7 @@ export class CanvasPath implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._CanvasPath_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CanvasPath.ctor_canvaspath()
         this.peer = new Finalizable(ctorPtr, CanvasPath.getFinalizer())
     }
@@ -128,7 +128,7 @@ export class CanvasPath implements MaterializedBase {
             const counterclockwise_value  = counterclockwise!
             thisSerializer.writeBoolean(counterclockwise_value)
         }
-        ArkUIGeneratedNativeModule._CanvasPath_arc(this.peer!.ptr, x, y, radius, startAngle, endAngle, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasPath_arc(this.peer!.ptr, x, y, radius, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private arcTo_serialize(x1: number, y1: number, x2: number, y2: number, radius: number): void {
@@ -149,7 +149,7 @@ export class CanvasPath implements MaterializedBase {
             const counterclockwise_value  = counterclockwise!
             thisSerializer.writeBoolean(counterclockwise_value)
         }
-        ArkUIGeneratedNativeModule._CanvasPath_ellipse(this.peer!.ptr, x, y, radiusX, radiusY, rotation, startAngle, endAngle, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasPath_ellipse(this.peer!.ptr, x, y, radiusX, radiusY, rotation, startAngle, endAngle, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private lineTo_serialize(x: number, y: number): void {

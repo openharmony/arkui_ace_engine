@@ -39,7 +39,7 @@ export class UnifiedData implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._UnifiedData_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = UnifiedData.ctor_unifieddata()
         this.peer = new Finalizable(ctorPtr, UnifiedData.getFinalizer())
     }

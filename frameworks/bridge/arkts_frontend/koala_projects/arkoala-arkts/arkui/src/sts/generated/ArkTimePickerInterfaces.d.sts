@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkTimePicker")
-export declare function ArkTimePicker(
+@BuildLambda("TimePicker")
+export declare function TimePicker(
     options?: TimePickerOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkTimePickerComponent
 
 @memo
-export declare function ArkTimePickerImpl(
+export declare function TimePickerImpl(
     @memo
     _style: ((attributes: ArkTimePickerComponent) => void) | undefined,
     options?: TimePickerOptions | undefined, 

@@ -39,7 +39,7 @@ export class PermissionRequest implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._PermissionRequest_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = PermissionRequest.ctor_permissionrequest()
         this.peer = new Finalizable(ctorPtr, PermissionRequest.getFinalizer())
     }
@@ -86,7 +86,7 @@ export class PermissionRequest implements MaterializedBase {
             const resources_element : string = resources[i]
             thisSerializer.writeString(resources_element)
         }
-        ArkUIGeneratedNativeModule._PermissionRequest_grant(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._PermissionRequest_grant(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

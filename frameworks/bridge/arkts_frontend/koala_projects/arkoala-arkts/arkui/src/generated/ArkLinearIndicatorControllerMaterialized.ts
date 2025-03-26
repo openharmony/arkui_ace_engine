@@ -40,7 +40,7 @@ export class LinearIndicatorController implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._LinearIndicatorController_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = LinearIndicatorController.ctor_linearindicatorcontroller()
         this.peer = new Finalizable(ctorPtr, LinearIndicatorController.getFinalizer())
     }
@@ -78,7 +78,7 @@ export class LinearIndicatorController implements MaterializedBase {
             const options_value  = options!
             thisSerializer.writeLinearIndicatorStartOptions(options_value)
         }
-        ArkUIGeneratedNativeModule._LinearIndicatorController_start(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._LinearIndicatorController_start(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private pause_serialize(): void {

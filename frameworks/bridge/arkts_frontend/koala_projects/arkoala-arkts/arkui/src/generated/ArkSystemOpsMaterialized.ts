@@ -41,6 +41,12 @@ export class SystemOps {
         SystemOps.restoreInstanceId_serialize()
         return
     }
+    public static getResourceId(bundleName: string, moduleName: string, params: Array<string>): int32 {
+        const bundleName_casted = bundleName as (string)
+        const moduleName_casted = moduleName as (string)
+        const params_casted = params as (Array<string>)
+        return SystemOps.getResourceId_serialize(bundleName_casted, moduleName_casted, params_casted)
+    }
     private static StartFrame_serialize(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._SystemOps_StartFrame()
         return retval
@@ -53,5 +59,16 @@ export class SystemOps {
     }
     private static restoreInstanceId_serialize(): void {
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId()
+    }
+    private static getResourceId_serialize(bundleName: string, moduleName: string, params: Array<string>): int32 {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeInt32(params.length as int32)
+        for (let i = 0; i < params.length; i++) {
+            const params_element : string = params[i]
+            thisSerializer.writeString(params_element)
+        }
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleName, moduleName, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
     }
 }

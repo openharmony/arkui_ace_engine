@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkLoadingProgress")
-export declare function ArkLoadingProgress(
+@BuildLambda("LoadingProgress")
+export declare function LoadingProgress(
     
     @memo
     _content?: () => void,
 ): ArkLoadingProgressComponent
 
 @memo
-export declare function ArkLoadingProgressImpl(
+export declare function LoadingProgressImpl(
     @memo
     _style: ((attributes: ArkLoadingProgressComponent) => void) | undefined,
     

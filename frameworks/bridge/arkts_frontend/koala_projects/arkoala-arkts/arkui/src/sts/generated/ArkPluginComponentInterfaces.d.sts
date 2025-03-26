@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkPluginComponent")
-export declare function ArkPluginComponent(
+@BuildLambda("PluginComponent")
+export declare function PluginComponent(
     options: PluginComponentOptions, 
     @memo
     _content?: () => void,
 ): ArkPluginComponentComponent
 
 @memo
-export declare function ArkPluginComponentImpl(
+export declare function PluginComponentImpl(
     @memo
     _style: ((attributes: ArkPluginComponentComponent) => void) | undefined,
     options: PluginComponentOptions, 

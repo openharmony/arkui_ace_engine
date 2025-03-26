@@ -57,11 +57,11 @@ export class TextShadowStyle implements MaterializedBase {
                 thisSerializer.writeShadowOptions(value_1_element)
             }
         }
-        const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_ctor(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-     constructor(value?: ShadowOptions | Array<ShadowOptions>) {
+    constructor(value?: ShadowOptions | Array<ShadowOptions>) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = TextShadowStyle.ctor_textshadowstyle((value)!)

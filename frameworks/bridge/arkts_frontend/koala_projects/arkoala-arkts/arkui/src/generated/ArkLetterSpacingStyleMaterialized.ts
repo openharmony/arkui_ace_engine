@@ -43,7 +43,7 @@ export class LetterSpacingStyle implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._LetterSpacingStyle_ctor(toPeerPtr(value))
         return retval
     }
-     constructor(value?: LengthMetrics) {
+    constructor(value?: LengthMetrics) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = LetterSpacingStyle.ctor_letterspacingstyle((value)!)

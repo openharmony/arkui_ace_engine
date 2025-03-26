@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <link.h>
 #include <string.h>
 
 #include <map>
@@ -22,7 +21,7 @@
 #include "interop-types.h"
 
 static const char* callCallbackFromNative = "callCallbackFromNative";
-static const char* callCallbackFromNativeSig = "I[BI:I";
+static const char* callCallbackFromNativeSig = "IJI:I";
 
 const bool registerByOne = true;
 
@@ -72,6 +71,7 @@ bool registerAllModules(ani_env *aniEnv) {
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result) {
+    LOGE("Use ANI")
     ani_env* aniEnv = nullptr;
     *result = 1;
     vm->GetEnv(/* version */ 1, (ani_env**)&aniEnv);

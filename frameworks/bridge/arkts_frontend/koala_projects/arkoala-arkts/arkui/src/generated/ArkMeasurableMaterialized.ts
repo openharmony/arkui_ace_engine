@@ -40,7 +40,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const retval  = ArkUIGeneratedNativeModule._Measurable_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = MeasurableInternal.ctor_measurable()
         this.peer = new Finalizable(ctorPtr, MeasurableInternal.getFinalizer())
     }
@@ -63,7 +63,7 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     private measure_serialize(constraint: ConstraintSizeOptions): MeasureResult {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeConstraintSizeOptions(constraint)
-        const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()

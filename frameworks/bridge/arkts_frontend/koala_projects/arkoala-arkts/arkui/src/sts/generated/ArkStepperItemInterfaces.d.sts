@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkStepperItem")
-export declare function ArkStepperItem(
+@BuildLambda("StepperItem")
+export declare function StepperItem(
     
     @memo
     _content?: () => void,
 ): ArkStepperItemComponent
 
 @memo
-export declare function ArkStepperItemImpl(
+export declare function StepperItemImpl(
     @memo
     _style: ((attributes: ArkStepperItemComponent) => void) | undefined,
     

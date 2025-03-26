@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 @memo
-@BuildLambda("ArkComponent3D")
-export declare function ArkComponent3D(
+@BuildLambda("Component3D")
+export declare function Component3D(
     sceneOptions?: SceneOptions | undefined, 
     @memo
     _content?: () => void,
 ): ArkComponent3DComponent
 
 @memo
-export declare function ArkComponent3DImpl(
+export declare function Component3DImpl(
     @memo
     _style: ((attributes: ArkComponent3DComponent) => void) | undefined,
     sceneOptions?: SceneOptions | undefined, 

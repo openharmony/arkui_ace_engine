@@ -38,7 +38,7 @@ export class DatePickerDialog {
             const options_value  = options!
             thisSerializer.writeDatePickerDialogOptions(options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._DatePickerDialog_show(thisSerializer.asArray(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._DatePickerDialog_show(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

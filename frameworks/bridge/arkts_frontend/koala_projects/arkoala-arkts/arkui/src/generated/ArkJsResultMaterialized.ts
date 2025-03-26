@@ -39,7 +39,7 @@ export class JsResult implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._JsResult_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = JsResult.ctor_jsresult()
         this.peer = new Finalizable(ctorPtr, JsResult.getFinalizer())
     }

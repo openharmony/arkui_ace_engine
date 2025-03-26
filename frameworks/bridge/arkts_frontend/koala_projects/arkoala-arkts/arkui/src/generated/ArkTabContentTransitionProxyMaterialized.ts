@@ -49,7 +49,7 @@ export class TabContentTransitionProxyInternal implements MaterializedBase,TabCo
         const retval  = ArkUIGeneratedNativeModule._TabContentTransitionProxy_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = TabContentTransitionProxyInternal.ctor_tabcontenttransitionproxy()
         this.peer = new Finalizable(ctorPtr, TabContentTransitionProxyInternal.getFinalizer())
     }

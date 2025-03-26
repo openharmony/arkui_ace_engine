@@ -39,7 +39,7 @@ export class WebResourceError implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebResourceError_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = WebResourceError.ctor_webresourceerror()
         this.peer = new Finalizable(ctorPtr, WebResourceError.getFinalizer())
     }

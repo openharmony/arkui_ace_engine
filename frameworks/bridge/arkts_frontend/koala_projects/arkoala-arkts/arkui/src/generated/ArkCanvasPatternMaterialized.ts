@@ -25,7 +25,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 export interface CanvasPattern {
-    setTransform(transform: Matrix2D): void
+    setTransform(transform?: Matrix2D): void
 }
 export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
     peer?: Finalizable | undefined = undefined
@@ -36,7 +36,7 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
         const retval  = ArkUIGeneratedNativeModule._CanvasPattern_ctor()
         return retval
     }
-     constructor() {
+    constructor() {
         const ctorPtr : KPointer = CanvasPatternInternal.ctor_canvaspattern()
         this.peer = new Finalizable(ctorPtr, CanvasPatternInternal.getFinalizer())
     }
@@ -57,7 +57,7 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
             const transform_value  = transform!
             thisSerializer.writeMatrix2D(transform_value)
         }
-        ArkUIGeneratedNativeModule._CanvasPattern_setTransform(this.peer!.ptr, thisSerializer.asArray(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CanvasPattern_setTransform(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     public static fromPtr(ptr: KPointer): CanvasPatternInternal {

@@ -29,7 +29,7 @@ import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./ArkEnumsInterfaces"
 import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event } from "./SyntheticDeclarations"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
-import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, ImageErrorCallback, ResolutionQuality, DrawableDescriptor, ImageAttribute, ImageContent } from "./ArkImageInterfaces"
+import { ResizableOptions, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, DrawingColorFilter, ImageErrorCallback, ResolutionQuality, ImageAttribute, ImageContent } from "./ArkImageInterfaces"
 import { Resource } from "./ArkResourceInterfaces"
 import { ClickEvent } from "./ArkClickEventMaterialized"
 import { HoverEvent } from "./ArkHoverEventMaterialized"
@@ -51,6 +51,7 @@ import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ColorFilter } from "./ArkColorFilterMaterialized"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./ArkImageCommonInterfaces"
+import { DrawableDescriptor } from "./ArkDrawableDescriptorMaterialized"
 /** @memo:stable */
 export class ArkImageComponent extends ArkCommonMethodComponent {
     getPeer(): ArkImagePeer {
@@ -61,18 +62,18 @@ export class ArkImageComponent extends ArkCommonMethodComponent {
         if (this.checkPriority("setImageOptions")) {
             const src_type = runtimeType(src)
             const imageAIOptions_type = runtimeType(imageAIOptions)
-            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src, false))) && (RuntimeType.UNDEFINED == imageAIOptions_type)) {
+            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) && (RuntimeType.UNDEFINED == imageAIOptions_type)) {
                 const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
                 this.getPeer()?.setImageOptions0Attribute(src_casted)
                 return this
             }
-            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src, false))) && (RuntimeType.OBJECT == imageAIOptions_type)) {
+            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src))) && (RuntimeType.OBJECT == imageAIOptions_type)) {
                 const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor)
                 const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
                 this.getPeer()?.setImageOptions2Attribute(src_casted, imageAIOptions_casted)
                 return this
             }
-            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src, false)) || (TypeChecker.isImageContent(src))) && (RuntimeType.UNDEFINED == imageAIOptions_type)) {
+            if (((TypeChecker.isPixelMap(src, false, false)) || ((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type)) || (TypeChecker.isDrawableDescriptor(src)) || (TypeChecker.isImageContent(src))) && (RuntimeType.UNDEFINED == imageAIOptions_type)) {
                 const src_casted = src as (PixelMap | ResourceStr | DrawableDescriptor | ImageContent)
                 this.getPeer()?.setImageOptions1Attribute(src_casted)
                 return this
