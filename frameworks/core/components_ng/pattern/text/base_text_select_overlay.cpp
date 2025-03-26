@@ -1622,11 +1622,11 @@ std::optional<SelectOverlayInfo> BaseTextSelectOverlay::GetSelectOverlayInfos()
 bool BaseTextSelectOverlay::IsEnableSelectionMenu()
 {
     auto host = GetOwner();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(host, true);
     auto pipelineContext = host->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
+    CHECK_NULL_RETURN(pipelineContext, true);
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(textOverlayTheme, false);
+    CHECK_NULL_RETURN(textOverlayTheme, true);
     return textOverlayTheme->GetEnableSelectionMenu();
 }
 } // namespace OHOS::Ace::NG
