@@ -882,10 +882,6 @@ float OverlengthDotIndicatorModifier::CalcRealPadding(
     float unselectedIndicatorRadius, float selectedIndicatorRadius, OverlongType overlongType) const
 {
     auto padding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
-    if (!isBindIndicator_) {
-        return padding;
-    }
-
     auto indicatorTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_RETURN(indicatorTheme, padding);
     auto indicatorDotItemSpace = indicatorTheme->GetIndicatorDotItemSpace();
