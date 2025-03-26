@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include "grid_test_ng.h"
-#include "test/mock/core/pattern/mock_koala_lazy_for_each.h"
-#include "test/mock/core/common/mock_frontend.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_frontend.h"
+#include "test/mock/core/pattern/mock_koala_lazy_for_each.h"
 
 namespace OHOS::Ace::NG {
 class GridArkoalaTest : public GridTestNg {
@@ -30,14 +30,16 @@ private:
     {
         lazy_ = MockKoalaLazyForEach(frameNode_.GetRawPtr(), itemCnt, [](int32_t idx) {
             auto node = GridItemModelNG::CreateGridItem(-1);
-            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(450.0f)));
+            node->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+                CalcSize(CalcLength(1, DimensionUnit::PERCENT), CalcLength(450.0f)));
             return node;
         });
         lazy_.Register();
     }
 
     static RefPtr<MockFrontend> frontend_;
-    static void SetUpTestSuite() {
+    static void SetUpTestSuite()
+    {
         TestNG::SetUpTestSuite();
         auto pipeline = PipelineContext::GetCurrentContext();
         ASSERT_TRUE(pipeline);
@@ -92,7 +94,7 @@ HWTEST_F(GridArkoalaTest, Basic001, TestSize.Level1)
     UpdateCurrentOffset(-51.0f);
     EXPECT_FALSE(lazy_.NeedRecompose());
     UpdateCurrentOffset(2.0f);
-    EXPECT_EQ(pattern_->info_.startIndex_, 0); 
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(GetChildRect(frameNode_, 3).ToString(), "RectT (240.00, 1.00) - [240.00 x 450.00]");
     EXPECT_TRUE(lazy_.NeedRecompose()); // to be optimized
 
@@ -179,7 +181,9 @@ HWTEST_F(GridArkoalaTest, LargeOffset001, TestSize.Level1)
     UpdateCurrentOffset(4000.0f);
     IncrementAndLayout(__LINE__);
     EXPECT_EQ(lazy_.GetRange(), std::pair(42, 48));
-    EXPECT_EQ(pattern_->info_.ToString(), "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
+    EXPECT_EQ(
+        pattern_->info_.ToString(), "startMainLine = 21, offset = -0.000000, endMainLine = 23, startIndex = 42, "
+                                    "endIndex = 47, jumpIndex = -2, gridMatrix size = 50, lineHeightMap size = 16");
 }
 
 /**
