@@ -376,17 +376,14 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     CHECK_NULL_VOID(geometryNode);
     TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, itemContentSizeH:%{public}f, item marginFrameSizeH:%{public}f",
         geometryNode->GetContentSize().Height(), geometryNode->GetMarginFrameSize().Height());
-    if (geometryNode->GetContentSize().Height() > geometryNode->GetMarginFrameSize().Height()) {
-        geometryNode->SetFrameHeight(geometryNode->GetContentSize().Height());
-    }
 }
 
 float MenuItemLayoutAlgorithm::CalcSelfHeight(float itemHeight, float bordersHeight)
 {
     if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        return itemHeight;
+        return std::max(itemHeight, minItemHeight_);
     }
-    return itemHeight - bordersHeight;
+    return std::max(itemHeight - bordersHeight, minItemHeight_);
 }
 
 float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
