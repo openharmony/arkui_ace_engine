@@ -969,13 +969,24 @@ void FormPattern::UpdateTimeLimitFontCfg()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto isNeedUpdate = false;
+    auto currentColor = textLayoutProperty->GetTextColor();
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color(FONT_COLOR_DARK) : Color(FONT_COLOR_LIGHT);
+    if (currentColor != newColor) {
+        textLayoutProperty->UpdateTextColor(newColor);
+        isNeedUpdate = true;
+    }
     Dimension fontSize(GetTimeLimitFontSize());
     if (!textLayoutProperty->GetFontSize().has_value() ||
         !NearEqual(textLayoutProperty->GetFontSize().value(), fontSize)) {
         TAG_LOGD(AceLogTag::ACE_FORM, "bundleName = %{public}s, id: %{public}" PRId64 ", UpdateFontSize:%{public}f.",
             cardInfo_.bundleName.c_str(), cardInfo_.id, fontSize.Value());
         textLayoutProperty->UpdateFontSize(fontSize);
+        isNeedUpdate = true;
+    }
+    if (isNeedUpdate) {
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -988,11 +999,17 @@ void FormPattern::UpdateAppLockCfg()
     auto imageLayoutProperty = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    CHECK_NULL_VOID(sourceInfo);
     auto currentColor = sourceInfo->GetFillColor();
-    auto newColor = Container::CurrentColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
     if (currentColor != newColor) {
         sourceInfo->SetFillColor(newColor);
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        auto imageRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateSvgFillColor(newColor);
         node->MarkModifyDone();
         node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -1228,8 +1245,14 @@ RefPtr<FrameNode> FormPattern::CreateAppLockNode()
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     auto info = ImageSourceInfo("");
     info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(Container::CurrentColorMode() == ColorMode::DARK ? Color::BLACK:Color::WHITE);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto newColor = context->GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    info.SetFillColor(newColor);
     imageLayoutProperty->UpdateImageSourceInfo(info);
+    auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(imageRenderProperty, nullptr);
+    imageRenderProperty->UpdateSvgFillColor(newColor);
     CalcSize idealSize = { CalcLength(32, DimensionUnit::VP), CalcLength(32, DimensionUnit::VP) };
     imageLayoutProperty->UpdateUserDefinedIdealSize(idealSize);
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
