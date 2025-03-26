@@ -252,7 +252,7 @@ DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
         case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
             return DragRet::DRAG_CANCEL;
         default:
-            return DragRet::DRAG_SUCCESS;
+            return DragRet::DRAG_FAIL;
     }
 }
 
