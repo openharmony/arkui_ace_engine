@@ -325,13 +325,11 @@ void OnScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScroll = [frameNode](const CalcDimension& scrollOffset, const ScrollState& scrollState) {
-#ifdef WRON_INTERFACE
+    auto onScroll = [arkCallback = CallbackHelper(*value)]
+    (const CalcDimension& scrollOffset, const ScrollState& scrollState) {
         auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
-        auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
-        GetFullAPI()->getEventsAPI()->getListEventsReceiver()->
-            onScroll(frameNode->GetId(), arkScrollOffset, arkScrollState);
-#endif
+        auto arkScrollState = Converter::ArkValue<Ark_Number>(static_cast<int>(scrollState));
+        arkCallback.Invoke(arkScrollOffset, arkScrollState);
     };
     ListModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
