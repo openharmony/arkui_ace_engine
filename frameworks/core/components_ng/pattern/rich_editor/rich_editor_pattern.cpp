@@ -1198,9 +1198,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
 
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    auto spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
 
     int32_t spanIndex = 0;
     int32_t offset = -1;
@@ -1345,9 +1343,8 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
 
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
+    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId());
 
     int32_t insertIndex = options.offset.value_or(GetTextContentLength());
     int32_t spanIndex = TextSpanSplit(insertIndex);
@@ -1796,8 +1793,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
     spanNode->UpdateContent(spanItemContent.substr(0, offsetInSpan));
     spanItem->position = spanStart + offsetInSpan;
 
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    auto newSpanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    auto newSpanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(newSpanNode, -1);
 
     CopyTextSpanStyle(spanNode, newSpanNode, needLeadingMargin);
@@ -5673,8 +5669,8 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             TextInsertValueInfo infoAfter;
             infoAfter.SetSpanIndex(host->GetChildIndex(spanNodeBefore) + 1);
             infoAfter.SetOffsetInSpan(0);
-            auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-            RefPtr<SpanNode> spanNodeAfter = SpanNode::GetOrCreateSpanNode(nodeId);
+            RefPtr<SpanNode> spanNodeAfter =
+                SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
             spanNodeAfter->MountToParent(host, infoAfter.GetSpanIndex());
             spanNodeAfter->UpdateContent(textAfter);
             CopyTextSpanStyle(spanNodeBefore, spanNodeAfter);
@@ -5698,8 +5694,7 @@ void RichEditorPattern::CreateTextSpanNode(
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    spanNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
@@ -9932,10 +9927,7 @@ bool RichEditorPattern::SetPlaceholder(std::vector<std::list<RefPtr<SpanItem>>>&
         return false;
     }
     auto placeholderValue = layoutProperty->GetPlaceholder().value();
-    auto* stack = ViewStackProcessor::GetInstance();
-    CHECK_NULL_RETURN(stack, false);
-    auto nodeId = stack->ClaimNodeId();
-    auto placeholderNode = SpanNode::GetOrCreateSpanNode(nodeId);
+    auto placeholderNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(placeholderNode, false);
     if (layoutProperty->HasPlaceholderFontSize()) {
         placeholderNode->UpdateFontSize(layoutProperty->GetPlaceholderFontSize().value());
