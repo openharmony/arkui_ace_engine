@@ -34,6 +34,17 @@ const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL };
 const std::vector<SliderModel::SliderMode> SLIDER_MODES_NG = { SliderModel::SliderMode::OUTSET,
     SliderModel::SliderMode::INSET, SliderModel::SliderMode::NONE };
 
+void CreateSolidGradient(uint32_t& color, NG::Gradient& gradient)
+{
+    NG::GradientColor gradientColorBegin;
+    gradientColorBegin.SetLinearColor(LinearColor(Color(color)));
+    gradientColorBegin.SetDimension(Dimension(0.0f));
+    gradient.AddColor(gradientColorBegin);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(Color(color)));
+    gradientColorEnd.SetDimension(Dimension(1.0f));
+    gradient.AddColor(gradientColorEnd);
+}
 } // namespace
 
 extern "C" {
@@ -62,20 +73,17 @@ void FfiOHOSAceFrameworkSliderBlockColor(uint32_t color)
 void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color)
 {
     NG::Gradient gradient;
-    NG::GradientColor gradientColorBegin;
-    gradientColorBegin.SetLinearColor(LinearColor(Color(color)));
-    gradientColorBegin.SetDimension(Dimension(0.0f));
-    gradient.AddColor(gradientColorBegin);
-    OHOS::Ace::NG::GradientColor gradientColorEnd;
-    gradientColorEnd.SetLinearColor(LinearColor(Color(color)));
-    gradientColorEnd.SetDimension(Dimension(1.0f));
-    gradient.AddColor(gradientColorEnd);
+    CreateSolidGradient(color, gradient);
+    SliderModel::GetInstance()->SetTrackBackgroundColor(Color(color));
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, true);
 }
 
 void FfiOHOSAceFrameworkSliderSelectedColor(uint32_t color)
 {
+    NG::Gradient gradient;
+    CreateSolidGradient(color, gradient);
     SliderModel::GetInstance()->SetSelectColor(Color(color));
+    SliderModel::GetInstance()->SetSelectColor(gradient, true);
 }
 
 void FfiOHOSAceFrameworkSliderShowSteps(bool isShow)
