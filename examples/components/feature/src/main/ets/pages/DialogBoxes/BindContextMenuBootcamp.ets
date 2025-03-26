@@ -29,6 +29,8 @@ export struct BindContextMenuBootcamp {
   @State labelNum: number = 2
   @State enableLabelNum: boolean = false
   @State showSecondaryMenu: boolean = false
+  @State enableCompHapticFeedbackMode: boolean = false;
+  @State compHapticFeedbackMode: HapticFeedbackMode = HapticFeedbackMode.DISABLED;
 
   build(){
     NavDestination() {
@@ -99,7 +101,9 @@ export struct BindContextMenuBootcamp {
       Button(
         this.enableLabelNum ? '弹出菜单'.repeat(this.labelNum / 2) : '弹出菜单',
       )
-        .bindContextMenu(this.MyMenu(), ResponseType.LongPress)
+        .bindContextMenu(this.MyMenu(), ResponseType.LongPress, {
+          hapticFeedbackMode: useEnabled(this.enableCompHapticFeedbackMode, this.compHapticFeedbackMode)
+        })
     }
     .onDragStart(()=>{
       ContextMenu.close()
@@ -140,6 +144,17 @@ export struct BindContextMenuBootcamp {
           title: '是否显示后缀图标',
           isEnabled: this.enableEndIcon,
           icon: this.endIcon,
+        })
+
+        RadioBlock({
+          title: 'hapticFeedbackMode',
+          isEnabled: this.enableCompHapticFeedbackMode,
+          value: this.compHapticFeedbackMode,
+          dataSource: [
+            { label: 'DISABLED', value: HapticFeedbackMode.DISABLED },
+            { label: 'ENABLED', value: HapticFeedbackMode.ENABLED },
+            { label: 'AUTO', value: HapticFeedbackMode.AUTO },
+          ]
         })
 
       }.width('100%')
