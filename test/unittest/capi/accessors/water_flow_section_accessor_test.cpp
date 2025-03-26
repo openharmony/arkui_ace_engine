@@ -100,7 +100,7 @@ HWTEST_F(WaterFlowSectionAccessorTest, ValuesTest, TestSize.Level1)
     const CalcLength length(123.0_vp);
     Ark_Padding arkPadding = {
         .left = Converter::ArkValue<Opt_Length>(length.GetDimension()),
-        .top = Converter:: ArkValue<Opt_Length>(length.GetDimension()),
+        .top = Converter::ArkValue<Opt_Length>(length.GetDimension()),
         .right = Converter::ArkValue<Opt_Length>(length.GetDimension()),
         .bottom = Converter::ArkValue<Opt_Length>(length.GetDimension()),
     };
