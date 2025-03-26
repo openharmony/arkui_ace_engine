@@ -139,7 +139,7 @@ public:
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
             theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
-            theme->menuPasteText_ = pattern->GetAttr<std::string>("textoverlay_paste", "");
+            theme->pasteText_ = pattern->GetAttr<std::string>("textoverlay_paste", "");
             theme->cancelText_ = pattern->GetAttr<std::string>("common_cancel_text", "");
         }
     };
@@ -408,7 +408,7 @@ public:
 
     const std::string& GetPasteText() const
     {
-        return menuPasteText_;
+        return pasteText_;
     }
 
     const std::string& GetCancelText() const

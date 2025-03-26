@@ -15,6 +15,7 @@
 
 #include "core/components/dialog/dialog_component.h"
 
+#include "base/i18n/localization.h"
 #include "core/components/dialog/action_sheet/action_sheet_component.h"
 #include "core/components/dialog/alert_dialog_component.h"
 #include "core/components/dialog/dialog_element.h"
@@ -45,6 +46,8 @@ const char CALLBACK_CANCEL[] = "cancel";
 const char CALLBACK_COMPLETE[] = "complete";
 const char DIALOG_TWEEN_NAME[] = "tween";
 const int32_t DIALOG_BUTTONS_COUNT_WATCH = 2;
+const char DIALOG_OK[] = "common.ok";
+const char DIALOG_CANCEL[] = "common.cancel";
 const char SEPARATE[] = " ";
 
 DialogComponent::DialogComponent()
@@ -778,10 +781,10 @@ void DialogBuilder::BuildButtonsForWatch(
         buttonPadding->SetPadding(buttonTheme->GetMinCircleButtonPadding());
         RefPtr<ImageComponent> buttonIcon;
         if (i == 1) {
-            buttonText = dialogTheme->GetCancelText();
+            buttonText = Localization::GetInstance()->GetEntryLetters(DIALOG_CANCEL);
             buttonIcon = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::WRONG_SVG);
         } else {
-            buttonText = dialogTheme->GetConfirmText();
+            buttonText = Localization::GetInstance()->GetEntryLetters(DIALOG_OK);
             buttonIcon = AceType::MakeRefPtr<ImageComponent>(InternalResource::ResourceId::CORRECT_SVG);
         }
         data += buttonText + SEPARATE;
