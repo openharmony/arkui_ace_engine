@@ -3550,7 +3550,10 @@ ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> arrowHeightArg = runtimeCallInfo->GetCallArgRef(NUM_9);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
-    std::string message = messageArg->ToString(vm)->ToString(vm);
+    std::string message;
+    if (!ArkTSUtils::ParseJsString(vm, messageArg, message)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     ArkUIBindTipsOptionsTime tipsOptionsTime {
         .appearingTime = 700.0f,    // 700.0f : Default appearing time for BindTips,

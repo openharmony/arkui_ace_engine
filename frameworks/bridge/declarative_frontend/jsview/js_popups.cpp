@@ -27,6 +27,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 
 #include "bridge/declarative_frontend/jsview/js_popups.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -1294,8 +1295,17 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     }
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(tipsParam);
+    std::string value;
+    if (info[0]->IsString()) {
+        value = info[0]->ToString();
+    } else {
+        auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+        if (!spanString) {
+            JSViewAbstract::ParseJsString(info[0], value);
+        }
+    }
     // Set message to tipsParam
-    tipsParam->SetMessage(info[0]->ToString());
+    tipsParam->SetMessage(value);
     // Set bindTipsOptions to tipsParam
     JSRef<JSObject> tipsObj;
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
