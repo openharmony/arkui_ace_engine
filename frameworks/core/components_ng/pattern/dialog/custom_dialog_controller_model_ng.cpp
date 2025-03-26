@@ -154,10 +154,6 @@ RefPtr<UINode> CustomDialogControllerModelNG::SetOpenDialogWithNode(DialogProper
             Maskarg.isMask = true;
             Maskarg.autoCancel = dialogProperties.autoCancel;
             Maskarg.maskColor = dialogProperties.maskColor;
-            Maskarg.onWillAppear = dialogProperties.onWillAppear;
-            Maskarg.onDidAppear = dialogProperties.onDidAppear;
-            Maskarg.onWillDisappear = dialogProperties.onWillDisappear;
-            Maskarg.onDidDisappear = dialogProperties.onDidDisappear;
             auto mask = overlayManager->ShowDialogWithNode(Maskarg, nullptr, false);
             CHECK_NULL_RETURN(mask, dialog);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());

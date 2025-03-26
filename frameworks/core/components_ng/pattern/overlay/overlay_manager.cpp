@@ -2736,10 +2736,6 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     Maskarg.autoCancel = dialogProps.autoCancel;
     Maskarg.onWillDismiss = dialogProps.onWillDismiss;
     Maskarg.maskColor = dialogProps.maskColor;
-    Maskarg.onWillAppear = dialogProps.onWillAppear;
-    Maskarg.onDidAppear = dialogProps.onDidAppear;
-    Maskarg.onWillDisappear = dialogProps.onWillDisappear;
-    Maskarg.onDidDisappear = dialogProps.onDidDisappear;
     Maskarg.focusable = dialogProps.focusable;
     return ShowDialog(Maskarg, nullptr, false);
 }
