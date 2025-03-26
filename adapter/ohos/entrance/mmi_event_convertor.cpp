@@ -64,7 +64,7 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     auto inputTime = pointerEvent->GetSensorInputTime();
     if (inputTime == 0) {
         // inject event has no sensor time.
-        inputTime = pointerEvent->GetActionTime();
+        inputTime = static_cast<uint64_t>(pointerEvent->GetActionTime());
     }
     return inputTime;
 }
