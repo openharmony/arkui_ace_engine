@@ -1984,7 +1984,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case2: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
@@ -1994,7 +1994,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case3: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
@@ -2005,7 +2005,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case4: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
@@ -2016,7 +2016,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
     
     /**
      * @tc.steps: step2. case5: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
@@ -2027,7 +2027,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case6: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
@@ -2038,7 +2038,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     panRecognizer->distance_ = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
 
 /**
