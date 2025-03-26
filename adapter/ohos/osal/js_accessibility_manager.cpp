@@ -2971,6 +2971,7 @@ void JsAccessibilityManager::InitializeCallback()
     CHECK_NULL_VOID(client);
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
+    client->IsScreenReaderEnabled(isScreenReaderEnabled_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
