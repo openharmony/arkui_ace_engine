@@ -91,7 +91,7 @@ using namespace Converter;
 void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
     CHECK_NULL_VOID(peer);
-    peer->imageSpan = nullptr;
+    peer->span = nullptr;
     delete peer;
 }
 Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
@@ -100,7 +100,7 @@ Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
     CHECK_NULL_RETURN(value, peer);
     auto imageSpan = OptConvert<RefPtr<ImageSpan>>(*value);
     CHECK_NULL_RETURN(imageSpan, peer);
-    peer->imageSpan = *imageSpan;
+    peer->span = *imageSpan;
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -111,8 +111,8 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
 #if defined(PIXEL_MAP_SUPPORTED) || defined(PIXEL_MAP_TEST_SUPPORTED)
     auto arkPixelMap = GetPixelMapAccessor()->ctor();
-    CHECK_NULL_RETURN(peer && peer->imageSpan, arkPixelMap);
-    auto pixelMap = peer->imageSpan->GetImageSpanOptions().imagePixelMap;
+    CHECK_NULL_RETURN(peer && peer->span, arkPixelMap);
+    auto pixelMap = peer->span->GetImageSpanOptions().imagePixelMap;
     CHECK_NULL_RETURN(pixelMap, arkPixelMap);
     arkPixelMap->pixelMap = *pixelMap;
     return arkPixelMap;
@@ -128,29 +128,29 @@ Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
         .height = ArkValue<Opt_Length>(),
     };
     CHECK_NULL_RETURN(peer, size);
-    CHECK_NULL_RETURN(peer->imageSpan, size);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), size);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->size, size);
-    if (peer->imageSpan->GetImageAttribute()->size->width) {
-        size.width = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->width);
+    CHECK_NULL_RETURN(peer->span, size);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), size);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute()->size, size);
+    if (peer->span->GetImageAttribute()->size->width) {
+        size.width = ArkValue<Opt_Length>(*peer->span->GetImageAttribute()->size->width);
     }
-    if (peer->imageSpan->GetImageAttribute()->size->height) {
-        size.height = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->height);
+    if (peer->span->GetImageAttribute()->size->height) {
+        size.height = ArkValue<Opt_Length>(*peer->span->GetImageAttribute()->size->height);
     }
     return size;
 }
 Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     CHECK_NULL_RETURN(
-        peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
-    auto aligment = peer->imageSpan->GetImageAttribute()->verticalAlign;
+        peer && peer->span && peer->span->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
+    auto aligment = peer->span->GetImageAttribute()->verticalAlign;
     CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
     return ArkValue<Ark_ImageSpanAlignment>(*aligment);
 }
 Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageFit>);
-    auto objectFit = peer->imageSpan->GetImageAttribute()->objectFit;
+    CHECK_NULL_RETURN(peer && peer->span && peer->span->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageFit>);
+    auto objectFit = peer->span->GetImageAttribute()->objectFit;
     CHECK_NULL_RETURN(objectFit, INVALID_ENUM_VAL<Ark_ImageFit>);
     return ArkValue<Ark_ImageFit>(*objectFit);
 }
@@ -162,9 +162,9 @@ Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
         .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
     };
     CHECK_NULL_RETURN(peer, style);
-    CHECK_NULL_RETURN(peer->imageSpan, style);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), style);
-    style = ArkValue<Ark_ImageAttachmentLayoutStyle>(*peer->imageSpan->GetImageAttribute());
+    CHECK_NULL_RETURN(peer->span, style);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), style);
+    style = ArkValue<Ark_ImageAttachmentLayoutStyle>(*peer->span->GetImageAttribute());
     return style;
 }
 } // ImageAttachmentAccessor

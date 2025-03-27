@@ -274,6 +274,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
     void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
     void AssignArkValue(Ark_SourceType& dst, const SourceType& src);
+    void AssignArkValue(Ark_SpanStyle& span, const RefPtr<OHOS::Ace::SpanBase>& baseSpan);
     void AssignArkValue(Ark_SslError& dst, const SslError& src);
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);

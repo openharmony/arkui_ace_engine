@@ -29,6 +29,7 @@
 #include "core/interfaces/native/implementation/text_shadow_style_peer.h"
 #include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
 #include "core/interfaces/native/implementation/url_style_peer.h"
+#include "core/interfaces/native/implementation/styled_string.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #include "adapter/ohos/capability/html/html_to_span.h"
 #include "test/mock/base/mock_task_executor.h"
@@ -38,6 +39,22 @@
 #include "gmock/gmock.h"
 
 namespace OHOS::Ace::NG {
+
+namespace Converter {
+template<>
+std::vector<uint8_t> Convert(const Ark_Buffer& src)
+{
+    std::vector<uint8_t> dataArray;
+    auto array = (src.data != nullptr) ? static_cast<uint8_t*>(src.data) : nullptr;
+    auto size = src.length / sizeof(uint8_t);
+    if (array && size > 0) {
+        for (size_t idx = 0; idx < size; idx++) {
+            dataArray.push_back(array[idx]);
+        }
+    }
+    return dataArray;
+}
+}
 
 constexpr int TEST_LENGTH = 2;
 constexpr int TEST_START_STR = 1;
@@ -805,13 +822,21 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetString, TestSize.Le
 }
 
 /**
- * @tc.name:DISABLED_styledStringStyles
+ * @tc.name:styledStringGetStyles
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringStyles, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetStyles, TestSize.Level1)
 {
-    // not implement
+    auto start = Converter::ArkValue<Ark_Number>(TEST_START_TSH);
+    auto length = Converter::ArkValue<Ark_Number>(TEST_LENGTH);
+    auto key = Converter::ArkValue<Opt_StyledStringKey>(Ace::SpanType::ParagraphStyle);
+    auto resultArk = accessor_->getStyles(vmContext_, peer_, &start, &length, &key);
+    auto result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
+    EXPECT_EQ(result.size(), 0);
+    resultArk = accessor_->getStyles(vmContext_, peer_, &start, &length, nullptr);
+    result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
+    EXPECT_EQ(result.size(), 1);
 }
 
 /**
@@ -851,13 +876,20 @@ HWTEST_F(StyledStringAccessorUnionStringTest, toHtmlTest, TestSize.Level1)
 }
 
 /**
- * @tc.name:DISABLED_styledStringMarshalling
+ * @tc.name:styledStringMarshalling
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringMarshalling, TestSize.Level1)
+HWTEST_F(StyledStringAccessorUnionStringTest, styledStringMarshalling, TestSize.Level1)
 {
-    // not implement
+    ASSERT_NE(accessor_->marshalling, nullptr);
+
+    std::vector<uint8_t> tlvData;
+    peer_->spanString->EncodeTlv(tlvData);
+    ASSERT_FALSE(tlvData.empty());
+    Ark_Buffer arkBuffer = accessor_->marshalling(peer_);
+    auto buffer = Converter::Convert<std::vector<uint8_t>>(arkBuffer);
+    EXPECT_EQ(buffer, tlvData);
 }
 
 /**

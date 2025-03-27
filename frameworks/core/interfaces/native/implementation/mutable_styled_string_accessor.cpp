@@ -21,19 +21,6 @@
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<>
-RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
-{
-    return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
-        .start = ArkValue<Opt_Number>(src.start),
-        .length = ArkValue<Opt_Number>(src.length),
-        .styledKey = src.styledKey,
-        .styledValue = src.styledValue,
-    });
-}
-} // namespace OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
 
@@ -76,8 +63,8 @@ Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSp
             },
             [&peer](const Ark_ImageAttachment& arkImageAttachment) {
                 ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
-                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->imageSpan);
-                auto options = peerImageAttachment->imageSpan->GetImageSpanOptions();
+                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->span);
+                auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<MutableSpanString>(options);
             },
             [](const Ark_CustomSpan& arkCustomSpan) {
