@@ -65,7 +65,7 @@ public:
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
-    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click) override;
+    void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;

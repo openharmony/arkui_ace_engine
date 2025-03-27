@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
+#include <limits>
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -552,7 +553,12 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    ButtonModel::GetInstance()->OnClick(std::move(onTap), std::move(onClick), distanceThreshold);
 }
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)

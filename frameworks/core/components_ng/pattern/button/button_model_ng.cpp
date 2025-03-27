@@ -314,9 +314,9 @@ void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddi
     pattern->SetHasCustomPadding(true);
 }
 
-void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc)
+void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
 {
-    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
 }
 
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)

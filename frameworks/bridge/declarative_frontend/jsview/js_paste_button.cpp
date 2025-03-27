@@ -142,7 +142,12 @@ void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
 #endif
     };
 
-    NG::ViewAbstract::SetOnClick(std::move(onTap));
+    double distanceThreshold = std::numeric_limits<double>::infinity();
+    if (info.Length() > 1 && info[1]->IsNumber()) {
+        distanceThreshold = info[1]->ToNumber<double>();
+        distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
+    }
+    NG::ViewAbstract::SetOnClick(std::move(onTap), distanceThreshold);
 }
 
 void JSPasteButton::JSBind(BindingTarget globalObj)

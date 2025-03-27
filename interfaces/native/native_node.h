@@ -1676,6 +1676,16 @@ typedef enum {
      * .value[0].f32: allowed moving distance of a finger, in vp. \n
      *
      */
+    NODE_CLICK_DISTANCE = 97,
+
+    /**
+     * @brief Defines the moving distance limit for the component-bound tap gesture.
+     * This attribute can be set as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: allowed moving distance of a finger, in vp. \n
+     *
+     */
     NODE_TAB_STOP = 98,
 
     /**
