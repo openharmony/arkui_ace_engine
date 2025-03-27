@@ -24,3 +24,7 @@ export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
 
 export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'
+
+export { RowModifier } from './handwritten/modifiers/ArkRowModifier'
+
+export { StackModifier } from './handwritten/modifiers/ArkStackModifier'

@@ -49,12 +49,25 @@ import { GestureModifier } from "./ArkGestureModifierMaterialized"
 import { GestureInfo, GestureJudgeResult, GestureType, GestureMask } from "./ArkGestureInterfaces"
 import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
-import { StackOptions, StackAttribute } from "./ArkStackInterfaces"
+import { StackOptions, StackAttribute, StackInterface } from "./ArkStackInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkStackNode } from "../handwritten/modifiers/ArkStackNode"
+import { ArkStackAttributeSet,StackModifier } from "../handwritten/modifiers/ArkStackModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 /** @memo:stable */
 export class ArkStackComponent extends ArkCommonMethodComponent {
     getPeer(): ArkStackPeer {
         return (this.peer as ArkStackPeer)
     }
+
+    getModifierHost(): ArkStackNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkStackNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkStackNode
+    }
+
     /** @memo */
     public setStackOptions(options?: StackOptions): this {
         if (this.checkPriority("setStackOptions")) {
@@ -64,6 +77,33 @@ export class ArkStackComponent extends ArkCommonMethodComponent {
         }
         return this
     }
+
+    attributeModifier(modifier: AttributeModifier<StackAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<StackAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkStackAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as StackAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<StackAttribute>);
+            let stackModifier = (attributeModifier as Object) as StackModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkStackAttributeSet();
+                attributeSet._modifiersWithKeys = stackModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
+    }
+
     /** @memo */
     public alignContent(value: Alignment): this {
         if (this.checkPriority("alignContent")) {
