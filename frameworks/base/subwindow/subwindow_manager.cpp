@@ -45,10 +45,11 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto result = containerMap_.try_emplace(windowId, containerId);
-    if (!result.second) {
+    auto result = containerMap_.find(windowId);
+    if (result != containerMap_.end()) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Already have container of this windowId, windowId: %{public}u", windowId);
     }
+    containerMap_.emplace(windowId, containerId);
 }
 
 void SubwindowManager::RemoveContainerId(uint32_t windowId)
