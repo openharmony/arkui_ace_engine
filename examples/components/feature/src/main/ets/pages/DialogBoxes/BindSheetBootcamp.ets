@@ -97,6 +97,9 @@ export struct BindSheetBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -358,6 +361,11 @@ export struct BindSheetBootcamp {
 
       }.width('100%')
     }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 
