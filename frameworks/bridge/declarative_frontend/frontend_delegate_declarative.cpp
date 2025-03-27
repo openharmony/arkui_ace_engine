@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -74,6 +73,23 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 
+struct DialogStrings {
+    std::string confirm;
+    std::string cancel;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.confirm = dialogTheme->GetConfirmText();
+    strs.cancel = dialogTheme->GetCancelText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
@@ -2218,14 +2234,15 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }
