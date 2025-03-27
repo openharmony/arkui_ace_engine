@@ -4,7 +4,9 @@
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/jiangdayuan",
             "https://gitee.com/tsj_2020",
-            "https://gitee.com/cheng-feiwang"
+            "https://gitee.com/cheng-feiwang",
+            "https://gitee.com/huangxiaolinabc123",
+            "https://gitee.com/h-xinwei"
         ],
         "https://gitee.com/arkuiabilitygroup": [
             "https://gitee.com/lmleon",
@@ -118,8 +120,16 @@
             "info": "[导航类组件 tongshijia]",
             "group": "https://gitee.com/arkui_superman"
         },
+        "https://gitee.com/huangxiaolinabc123": {
+            "info": "[导航类组件 huangxiaolin]",
+            "group": "https://gitee.com/arkui_superman"
+        },
         "https://gitee.com/cheng-feiwang": {
             "info": "[模态类组件 chenfeiwang]",
+            "group": "https://gitee.com/arkui_superman"
+        },
+        "https://gitee.com/h-xinwei": {
+            "info": "[模态类组件 huangxinwei]",
             "group": "https://gitee.com/arkui_superman"
         },
         "https://gitee.com/lmleon": {
