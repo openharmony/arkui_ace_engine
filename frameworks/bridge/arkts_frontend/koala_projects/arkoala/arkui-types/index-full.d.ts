@@ -2503,8 +2503,6 @@ declare class ScrollableCommonMethod<T> extends CommonMethod<T> {
     enableScrollInteraction(value: boolean): T;
     friction(value: (number|Resource)): T;
     onScroll(value: ((first: number, last: number) => void)): T;
-    onWillScroll(value: ScrollOnWillScrollCallback | undefined): T;
-    onDidScroll(value: ScrollOnScrollCallback): T;
     onReachStart(value: (() => void)): T;
     onReachEnd(value: (() => void)): T;
     onScrollStart(value: (() => void)): T;
@@ -2517,9 +2515,7 @@ declare class ScrollableCommonMethod<T> extends CommonMethod<T> {
 declare class ScrollResult {
     offsetRemain: number;
 }
-declare interface OnWillScrollCallback {
-    stub: string;
-}
+declare type OnWillScrollCallback = (scrollOffset: number, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult;
 declare type OnScrollCallback = ((scrollOffset: number, scrollState: ScrollState) => void);
 declare type OnMoveHandler = ((from: number, to: number) => void);
 declare class DynamicNode<T> {
@@ -4102,6 +4098,8 @@ declare class GridAttribute extends ScrollableCommonMethod<GridAttribute> {
     friction(value: (number|Resource)): GridAttribute;
     alignItems(value: GridItemAlignment | undefined): GridAttribute;
     onScroll(value: ((first: number, last: number) => void)): GridAttribute;
+    onWillScroll(value: OnWillScrollCallback | undefined): GridAttribute;
+    onDidScroll(value: OnScrollCallback | undefined): GridAttribute;
     onReachStart(value: (() => void)): GridAttribute;
     onReachEnd(value: (() => void)): GridAttribute;
     onScrollStart(value: (() => void)): GridAttribute;
@@ -4553,6 +4551,8 @@ declare class ListAttribute extends ScrollableCommonMethod<ListAttribute> {
     onScroll(value: ((first: number, last: number) => void)): ListAttribute;
     onScrollIndex(value: ((start: number, end: number, center: number) => void)): ListAttribute;
     onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback): ListAttribute;
+    onWillScroll(value: OnWillScrollCallback | undefined): ListAttribute;
+    onDidScroll(value: OnScrollCallback | undefined): ListAttribute;
     onReachStart(value: (() => void)): ListAttribute;
     onReachEnd(value: (() => void)): ListAttribute;
     onScrollStart(value: (() => void)): ListAttribute;
@@ -8656,6 +8656,8 @@ declare class WaterFlowAttribute extends ScrollableCommonMethod<WaterFlowAttribu
     enableScrollInteraction(value: boolean): WaterFlowAttribute;
     friction(value: (number|Resource)): WaterFlowAttribute;
     cachedCount(value: number): WaterFlowAttribute;
+    onWillScroll(value: OnWillScrollCallback | undefined): WaterFlowAttribute;
+    onDidScroll(value: OnScrollCallback | undefined): WaterFlowAttribute;
     onReachStart(value: (() => void)): WaterFlowAttribute;
     onReachEnd(value: (() => void)): WaterFlowAttribute;
     onScrollFrameBegin(value: ((offset: number, state: ScrollState) => { offsetRemain: number })): WaterFlowAttribute;
