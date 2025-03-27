@@ -28,10 +28,11 @@ void DestroyPeerImpl(Ark_ReplaceSymbolEffect peer)
 }
 Ark_ReplaceSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
+    std::optional<OHOS::Ace::ScopeType> convScore = scope ?
+        Converter::OptConvert<OHOS::Ace::ScopeType>(*scope) : std::nullopt;
     auto peer = new ReplaceSymbolEffectPeer();
+    peer->effectOptions.SetScopeType(convScore.value_or(OHOS::Ace::ScopeType::LAYER));
     peer->effectOptions.SetEffectType(OHOS::Ace::SymbolEffectType::REPLACE);
-    peer->effectOptions.SetScopeType(convScore.value());
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

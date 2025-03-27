@@ -29,12 +29,14 @@ void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                const Opt_EffectDirection* direction)
 {
-    auto convScore = Converter::Convert<std::optional<OHOS::Ace::ScopeType>>(*scope);
-    auto convDirection = Converter::Convert<std::optional<OHOS::Ace::CommonSubType>>(*direction);
+    std::optional<OHOS::Ace::ScopeType> convScore = scope ?
+        Converter::OptConvert<OHOS::Ace::ScopeType>(*scope) : std::nullopt;
+    std::optional<OHOS::Ace::CommonSubType> convDirection = direction ?
+        Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction) : std::nullopt;
     auto peer = new ScaleSymbolEffectPeer();
     peer->effectOptions.SetEffectType(OHOS::Ace::SymbolEffectType::SCALE);
-    peer->effectOptions.SetScopeType(convScore.value());
-    peer->effectOptions.SetCommonSubType(convDirection.value());
+    peer->effectOptions.SetScopeType(convScore.value_or(OHOS::Ace::ScopeType::LAYER));
+    peer->effectOptions.SetCommonSubType(convDirection.value_or(OHOS::Ace::CommonSubType::DOWN));
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
