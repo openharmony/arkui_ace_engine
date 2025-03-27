@@ -448,4 +448,10 @@ void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src
     dst.radius = ArkUnion<Opt_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(src.backgroundRadius);
     dst.color = ArkUnion<Opt_ResourceColor, Ark_String>(src.backgroundColor, ctx);
 }
+
+void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src)
+{
+    dst.start = ArkValue<Opt_Number>(src.GetSelection().selection[0]);
+    dst.end = ArkValue<Opt_Number>(src.GetSelection().selection[1]);
+}
 } // namespace OHOS::Ace::NG::Converter

@@ -2192,4 +2192,19 @@ ImageSpanSize Convert(const Ark_SizeOptions& value)
         .height = height,
     };
 }
+
+template<>
+TextRange Convert(const Ark_TextRange& src)
+{
+    TextRange dst; // intialized by default
+    auto start = Converter::OptConvert<int32_t>(src.start);
+    auto end = Converter::OptConvert<int32_t>(src.end);
+    if (start.has_value()) {
+        dst.start = start.value();
+    }
+    if (end.has_value()) {
+        dst.end = end.value();
+    }
+    return dst;
+}
 } // namespace OHOS::Ace::NG::Converter

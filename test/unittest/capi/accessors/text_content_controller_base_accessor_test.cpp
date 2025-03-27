@@ -35,6 +35,9 @@ public:
     MOCK_METHOD(int32_t, GetTextContentLinesNum, (), (override));
     MOCK_METHOD(Rect, GetTextContentRect, (), (override));
     MOCK_METHOD(NG::OffsetF, GetCaretPosition, (), (override));
+    MOCK_METHOD(void, DeleteText, (int32_t, int32_t), (override));
+    MOCK_METHOD(SelectionInfo, GetSelection, (), (override));
+    MOCK_METHOD(int32_t, AddText, (std::u16string, int32_t), (override));
 };
 } // namespace
 
@@ -105,4 +108,91 @@ HWTEST_F(TextContentControllerBaseAccessorTest, DISABLED_GetTextContentRectTest,
     auto checkValue = accessor_->getTextContentRect(peer_);
     EXPECT_EQ(&checkValue, nullptr); // fix after updating return value
 }
+
+/**
+ * @tc.name: DeleteTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, DeleteTextTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSelection, nullptr);
+    const auto defaultStart = -1;
+    const auto defaultEnd = -1;
+    const auto start = 1;
+    const auto end = 2;
+
+    EXPECT_CALL(*mockTextContentControllerBase_, DeleteText(defaultStart, defaultEnd)).Times(0);
+    accessor_->deleteText(peer_, nullptr);
+
+    Ark_TextRange range = {
+        .start = Converter::ArkValue<Opt_Number>(Ark_Empty()),
+        .end = Converter::ArkValue<Opt_Number>(Ark_Empty())
+    };
+    auto rangeOpt = Converter::ArkValue<Opt_TextRange>(range);
+    EXPECT_CALL(*mockTextContentControllerBase_, DeleteText(defaultStart, defaultEnd)).Times(1);
+    accessor_->deleteText(peer_, &rangeOpt);
+
+    range = {
+        .start = Converter::ArkValue<Opt_Number>(start),
+        .end = Converter::ArkValue<Opt_Number>(end)
+    };
+    rangeOpt = Converter::ArkValue<Opt_TextRange>(range);
+    EXPECT_CALL(*mockTextContentControllerBase_, DeleteText(start, end)).Times(1);
+    accessor_->deleteText(peer_, &rangeOpt);
+}
+
+/**
+ * @tc.name: GetSelectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, GetSelectionTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSelection, nullptr);
+    const auto start = 1;
+    const auto end = 2;
+    SelectionInfo info;
+    info.SetSelectionStart(start);
+    info.SetSelectionEnd(end);
+    EXPECT_CALL(*mockTextContentControllerBase_, GetSelection()).Times(1).WillOnce(Return(info));
+    auto checkValue = Converter::Convert<TextRange>(accessor_->getSelection(peer_));
+    EXPECT_EQ(checkValue.start, start);
+    EXPECT_EQ(checkValue.end, end);
+}
+
+/**
+ * @tc.name: AddTextTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextContentControllerBaseAccessorTest, AddTextTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->addText, nullptr);
+    const auto errorValue = 0;
+    const std::string text = "Hello";
+    const auto offset = 1;
+    const auto defaultOffset = -1;
+    auto arkOptions = Converter::ArkValue<Opt_TextContentControllerOptions>(Ark_Empty());
+
+    EXPECT_CALL(*mockTextContentControllerBase_, AddText(UtfUtils::Str8ToStr16(text), offset)).Times(0);
+    auto checkValue = Converter::Convert<int32_t>(accessor_->addText(peer_, nullptr, &arkOptions));
+    EXPECT_EQ(checkValue, errorValue);
+
+    auto arkText = Converter::ArkValue<Ark_String>(text);
+    EXPECT_CALL(*mockTextContentControllerBase_,
+        AddText(UtfUtils::Str8ToStr16(text), defaultOffset)).Times(1).WillOnce(Return(offset));
+    checkValue = Converter::Convert<int32_t>(accessor_->addText(peer_, &arkText, nullptr));
+    EXPECT_EQ(checkValue, offset);
+
+    Ark_TextContentControllerOptions options {
+        .offset = Converter::ArkValue<Opt_Number>(offset)
+    };
+    arkOptions = Converter::ArkValue<Opt_TextContentControllerOptions>(options);
+    EXPECT_CALL(*mockTextContentControllerBase_,
+        AddText(UtfUtils::Str8ToStr16(text), offset)).Times(1).WillOnce(Return(offset));
+    checkValue = Converter::Convert<int32_t>(accessor_->addText(peer_, &arkText, &arkOptions));
+    EXPECT_EQ(checkValue, offset);
+}
+
 } // namespace OHOS::Ace::NG
