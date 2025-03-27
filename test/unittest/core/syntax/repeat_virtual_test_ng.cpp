@@ -55,7 +55,7 @@ constexpr int32_t COUNT_3 = 3;
 
 using CacheItem = RepeatVirtualScrollCaches::CacheItem;
 
-class RepeatNodeCacheSyntaxTest : public testing::Test {
+class RepeatVirtualTestNg : public testing::Test {
 public:
 
     void SetUp() override
@@ -180,7 +180,7 @@ const std::map<std::string, std::pair<bool, uint32_t>> templateCachedCountMap = 
     {"elmt2", { true, 2 } }
 };
 
-RefPtr<RepeatVirtualScrollNode> RepeatNodeCacheSyntaxTest::GetOrCreateRepeatNode(bool createItems)
+RefPtr<RepeatVirtualScrollNode> RepeatVirtualTestNg::GetOrCreateRepeatNode(bool createItems)
 {
     RefPtr<RepeatVirtualScrollNode> node;
     if (createItems) {
@@ -198,7 +198,7 @@ RefPtr<RepeatVirtualScrollNode> RepeatNodeCacheSyntaxTest::GetOrCreateRepeatNode
  * @tc.desc: Test GetKey4Index without fetch.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest001, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest001, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -220,7 +220,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest001, TestSize.Level1)
  * @tc.desc: Test GetKey4Index with fetch.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest002, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest002, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -248,7 +248,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest002, TestSize.Level1)
  * @tc.desc: Test UpdateFromL2
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest003, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest003, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -269,7 +269,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest003, TestSize.Level1)
  * @tc.desc: Test GetDistanceFromRange
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest004, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest004, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -290,7 +290,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest004, TestSize.Level1)
  * @tc.desc: Test creation of GetOrCreateRepeatNode
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest005, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest005, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -316,7 +316,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest005, TestSize.Level1)
  * @tc.desc: Test FrameCount
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest006, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest006, TestSize.Level1)
 {
     auto repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
                           1,
@@ -347,7 +347,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest006, TestSize.Level1)
  * @tc.desc: Test GetChildren
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest007, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest007, TestSize.Level1)
 {
     auto repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
                           1,
@@ -372,7 +372,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest007, TestSize.Level1)
  * @tc.desc: Test Multiple functions when onCreate lambda really creates node.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest008, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype, onCreateNode,
                                      g_onUpdateNode, g_onGetKeys4Range,
@@ -449,7 +449,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest008, TestSize.Level1)
  * @tc.desc: Test FrameCount
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest009, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest009, TestSize.Level1)
 {
     const uint32_t totalCount = 10;
     const uint32_t updatedCount = 5;
@@ -488,7 +488,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest009, TestSize.Level1)
  * @tc.desc: Test GetL1KeyToUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest010, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest010, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -511,7 +511,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest010, TestSize.Level1)
  * @tc.desc: Test UiNodeHasBeenUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest011, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest011, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -532,7 +532,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest011, TestSize.Level1)
  * @tc.desc: Test FindUnusedKeys
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest012, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest012, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -554,7 +554,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest012, TestSize.Level1)
  * @tc.desc: Test DumpL1
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest013, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest013, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -577,7 +577,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest013, TestSize.Level1)
  * @tc.desc: Test DumpL2
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest014, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest014, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -599,7 +599,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest014, TestSize.Level1)
  * @tc.desc: Test DumpKey4Index
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest015, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest015, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -621,7 +621,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest015, TestSize.Level1)
  * @tc.desc: Test DumpTType4Index
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest016, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest016, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -643,7 +643,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest016, TestSize.Level1)
  * @tc.desc: Test DumpUINode4Key
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest017, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest017, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -665,7 +665,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest017, TestSize.Level1)
  * @tc.desc: Test DumpUINode4Key4TType
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest018, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest018, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -688,7 +688,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest018, TestSize.Level1)
  * @tc.desc: Test DumpUINodeWithKey
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest019, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest019, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -710,7 +710,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest019, TestSize.Level1)
  * @tc.desc: Test DumpUINode
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest020, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest020, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -732,7 +732,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest020, TestSize.Level1)
  * @tc.desc: Test OnConfigurationUpdate function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest021, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest021, TestSize.Level1)
 {
     auto repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
                           1,
@@ -773,7 +773,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest021, TestSize.Level1)
  * @tc.desc: Test FetchMoreKeysTTypes with invalid values.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest022, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest022, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      g_onCreateNode,
@@ -794,7 +794,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest022, TestSize.Level1)
  * @tc.desc: Test FetchMoreKeysTTypes with special MaxTo5 lambda.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest023, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create caches object with Keys function that limits keys to 5 (for unit testing)
@@ -820,7 +820,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest023, TestSize.Level1)
  * @tc.desc: Test GetKey4Index with fetch and creating new node.
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest024, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest024, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      onCreateNode,
@@ -851,7 +851,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest024, TestSize.Level1)
  * @tc.desc: Test GetDistanceFromRange
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest025, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest025, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -883,7 +883,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest025, TestSize.Level1)
  * @tc.desc: Test GetCachedNode4Key4Ttype
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest026, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest026, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -914,7 +914,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest026, TestSize.Level1)
  * @tc.desc: Test GetCachedNode4Key
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest027, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest027, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -932,7 +932,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest027, TestSize.Level1)
  * @tc.desc: Test GetTType4Index
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest028, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest028, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -951,7 +951,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest028, TestSize.Level1)
  * @tc.desc: Test GetIndex4Key
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest029, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest029, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -971,7 +971,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest029, TestSize.Level1)
  * @tc.desc: Test FindUnusedKeys
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest030, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest030, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -997,7 +997,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest030, TestSize.Level1)
  * @tc.desc: Test UINodeHasBeenUpdated
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest031, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create cached object with Keys function that limits keys to 5 (for unit testing)
@@ -1024,7 +1024,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest031, TestSize.Level1)
  * @tc.desc: Test GetL1KeyToUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest032, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest032, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1055,7 +1055,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest032, TestSize.Level1)
  * @tc.desc: Test GetL2KeyToUpdate
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest033, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest033, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1087,7 +1087,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest033, TestSize.Level1)
  * @tc.desc: Test GetFrameNodeIndex
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest034, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest034, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1129,7 +1129,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest034, TestSize.Level1)
  * @tc.desc: Test Multiple functions
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest035, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest035, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(cacheCountL24ttype,
                                      onCreateNode,
@@ -1189,7 +1189,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest035, TestSize.Level1)
  * @tc.desc: Call functions that are currently empty implementations
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest036, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest036, TestSize.Level1)
 {
     auto repeatNode = RepeatVirtualScrollNode::GetOrCreateRepeatNode(
                           1,
@@ -1221,7 +1221,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest036, TestSize.Level1)
  * @tc.desc: Test CheckNode4IndexInL1 function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest037, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest037, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(true);
     ASSERT_NE(repeatNode, nullptr);
@@ -1246,7 +1246,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest037, TestSize.Level1)
  * @tc.desc: Test for DropFromL1
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest038, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest038, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1264,7 +1264,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest038, TestSize.Level1)
  * @tc.desc: Test for UpdateRenderState
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest039, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest039, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1288,7 +1288,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest039, TestSize.Level1)
  * @tc.desc: Test for GetFrameChildByIndex
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest040, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest040, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1335,7 +1335,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest040, TestSize.Level1)
  * @tc.desc: Test for GetFrameChildByIndex
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest041, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest041, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1371,7 +1371,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest041, TestSize.Level1)
  * @tc.desc: Test for GetChildren
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest042, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest042, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1396,7 +1396,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest042, TestSize.Level1)
  * @tc.desc: Test UpdateChildrenFreezeState function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest043, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest043, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
     ASSERT_NE(repeatNode, nullptr);
@@ -1430,7 +1430,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest043, TestSize.Level1)
  * @tc.desc: Test OnConfigurationUpdate function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest044, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest044, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(false);
 
@@ -1453,7 +1453,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest044, TestSize.Level1)
  * @tc.desc: Test HasOverlapWithLastActiveRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest045, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest045, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1474,7 +1474,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest045, TestSize.Level1)
  * @tc.desc: Test AddKeyToL1 function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest046, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest046, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1504,7 +1504,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest046, TestSize.Level1)
  * @tc.desc: Test UpdateFromL2 function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest047, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest047, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1538,7 +1538,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest047, TestSize.Level1)
  * @tc.desc: Test CreateNewNode function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest048, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest048, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1566,7 +1566,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest048, TestSize.Level1)
  * @tc.desc: Test RecycleItemsByIndex function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest049, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest049, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1592,7 +1592,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest049, TestSize.Level1)
  * @tc.desc: Test RebuildL1 function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest050, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest050, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1628,7 +1628,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest050, TestSize.Level1)
  * @tc.desc: Test SetLastActiveRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest051, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest051, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1652,7 +1652,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest051, TestSize.Level1)
  * @tc.desc: Test SetLastActiveRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest052, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest052, TestSize.Level1)
 {
     RepeatVirtualScrollCaches caches(
         cacheCountL24ttype, g_onCreateNode, g_onUpdateNode, g_onGetKeys4Range, g_onGetTypes4Range);
@@ -1671,7 +1671,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest052, TestSize.Level1)
  * @tc.desc: Test DoSetActiveChildRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest053, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest053, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(true);
 
@@ -1710,7 +1710,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest053, TestSize.Level1)
  * @tc.desc: Test DoSetActiveChildRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest054, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest054, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(true);
 
@@ -1748,7 +1748,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest054, TestSize.Level1)
  * @tc.desc: Test DoSetActiveChildRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest055, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest055, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(true);
 
@@ -1790,7 +1790,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest055, TestSize.Level1)
  * @tc.desc: Test DoSetActiveChildRange function
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest056, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest056, TestSize.Level1)
 {
     auto repeatNode = GetOrCreateRepeatNode(true);
 
@@ -1836,7 +1836,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest056, TestSize.Level1)
  * @tc.desc: Test for GetOrCreateRepeatNode
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest057, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest057, TestSize.Level1)
 {
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
@@ -1859,7 +1859,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest057, TestSize.Level1)
  * @tc.desc: Test for FinishRepeatRender
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest058, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest058, TestSize.Level1)
 {
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
@@ -1889,7 +1889,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest058, TestSize.Level1)
  * @tc.desc: Test for FinishRepeatRender
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest059, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest059, TestSize.Level1)
 {
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
@@ -1921,7 +1921,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest059, TestSize.Level1)
  * @tc.desc: Test for MoveChild
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest060, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest060, TestSize.Level1)
 {
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
@@ -1949,7 +1949,7 @@ HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest060, TestSize.Level1)
  * @tc.desc: Test for GetFrameChildByIndex
  * @tc.type: FUNC
  */
-HWTEST_F(RepeatNodeCacheSyntaxTest, RepeatNodeCacheTest061, TestSize.Level1)
+HWTEST_F(RepeatVirtualTestNg, RepeatNodeCacheTest061, TestSize.Level1)
 {
     auto onGetTypes4Range = [](uint32_t from, uint32_t to) -> std::list<std::string> {
         std::list<std::string> types;
