@@ -1000,4 +1000,156 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressStartAnimationTest002, TestSize.L
     EXPECT_FALSE(loadingProgressPattern->enableLoading_);
     EXPECT_TRUE(loadingProgressPattern->isShow_);
 }
+
+/**
+ * @tc.name: LoadingProgressHandleFocusEventTest001
+ * @tc.desc: Test LoadingProgress focus event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create LoadingProgress.
+    */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+    * @tc.steps: step2. handle focus event.
+    */
+    loadingProgressPattern->HandleFocusEvent();
+    EXPECT_TRUE(loadingProgressPattern->isFocusColorSet_);
+}
+
+/**
+* @tc.name: LoadingProgressHandleFocusEventTest002
+* @tc.desc: Test LoadingProgress focus event.
+* @tc.type: FUNC
+*/
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleFocusEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create LoadingProgress.
+    */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    */
+    loadingProgressPattern->HandleFocusEvent();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(loadingProgressPattern->isFocusColorSet_);
+}
+
+/**
+* @tc.name: LoadingProgressHandleBlurEventTest001
+* @tc.desc: Test LoadingProgress focus event.
+* @tc.type: FUNC
+*/
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create LoadingProgress.
+    */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    */
+    loadingProgressPattern->HandleBlurEvent();
+    EXPECT_FALSE(loadingProgressPattern->isFocusColorSet_);
+}
+
+/**
+* @tc.name: LoadingProgressHandleBlurEventTest002
+* @tc.desc: Test LoadingProgress focus event.
+* @tc.type: FUNC
+*/
+HWTEST_F(LoadingProgressTestNg, LoadingProgressHandleBlurEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create LoadingProgress.
+    */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+    auto paintMethod =
+        AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->loadingProgressModifier_, nullptr);
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    loadingProgressPattern->OnModifyDone();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetContentSize(SizeF());
+    geometryNode->SetContentOffset(OffsetF());
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    */
+    loadingProgressPattern->isFocusColorSet_ = true;
+    loadingProgressPattern->HandleBlurEvent();
+    EXPECT_FALSE(loadingProgressPattern->isFocusColorSet_);
+}
 } // namespace OHOS::Ace::NG

@@ -985,4 +985,168 @@ HWTEST_F(ProgressBuilderTestNg, ProgressConPatternTest019, TestSize.Level1)
     pattern_->SetBuilderFunc(node);
     pattern_->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: ProgressHandleFocusEventTest001
+ * @tc.desc: SetBuilderFunc and get value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ false
+    */
+    pattern->HandleFocusEvent();
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleFocusEventTest002
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ true
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    pattern->HandleFocusEvent();
+    EXPECT_TRUE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleFocusEventTest003
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest003, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set isFocusActive_ true and handle focus event.
+    * @tc.expected: step2. isFocusTextColorSet_ true
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    pattern->focusShadowStyle_ = ShadowStyle::OuterDefaultSM;
+    pattern->HandleFocusEvent();
+    EXPECT_TRUE(pattern->isFocusTextColorSet_);
+}
+
+/**
+* @tc.name: ProgressHandleBlurEventTest001
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. set true and call HandleBlurEvent.
+    * @tc.expected: step2. isFocusScaleSet_, isFocusShadowSet_, isFocusShadowSet_ is false.
+    */
+    pattern->isFocusScaleSet_ = true;
+    pattern->isFocusTextColorSet_ = true;
+    pattern->isFocusShadowSet_ = true;
+    pattern->HandleBlurEvent();
+    EXPECT_FALSE(pattern->isFocusScaleSet_);
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern->isFocusShadowSet_);
+}
+
+/**
+* @tc.name: ProgressHandleBlurEventTest002
+* @tc.desc: SetBuilderFunc and get value
+* @tc.type: FUNC
+*/
+HWTEST_F(ProgressBuilderTestNg, ProgressHandleBlurEventTest002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create progress.
+    */
+    CreateProgress(MAX_VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_MOON);
+    CreateDone();
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(true);
+
+    auto progressPaintProperty = frameNode_->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
+    auto pattern = frameNode_->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+    * @tc.steps: step2. call HandleBlurEvent.
+    * @tc.expected: step2. isFocusScaleSet_, isFocusShadowSet_, isFocusShadowSet_ is false.
+    */
+    pattern->HandleBlurEvent();
+    EXPECT_FALSE(pattern->isFocusScaleSet_);
+    EXPECT_FALSE(pattern->isFocusTextColorSet_);
+    EXPECT_FALSE(pattern->isFocusShadowSet_);
+}
 } // namespace OHOS::Ace::NG
