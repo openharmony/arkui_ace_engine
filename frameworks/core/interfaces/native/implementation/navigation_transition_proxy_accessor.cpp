@@ -103,10 +103,11 @@ void SetToImpl(Ark_NavigationTransitionProxy peer,
     Converter::Convert<Converter::NavContentInfo>(*to);
     LOGE("NavigationTransitionProxyAccessor::SetToImpl, modifying from attribute isn't supported");
 }
-Ark_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
+Opt_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, false);
-    return Converter::ArkValue<Ark_Boolean>(peer->handler->GetInteractive());
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer && peer->handler, invalid);
+    return Converter::ArkValue<Opt_Boolean>(peer->handler->GetInteractive());
 }
 void SetIsInteractiveImpl(Ark_NavigationTransitionProxy peer,
                           Ark_Boolean isInteractive)

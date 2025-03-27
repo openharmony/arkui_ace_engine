@@ -94,7 +94,7 @@ void SetYImpl(Ark_AxisEvent peer,
               const Ark_Number* y)
 {
 }
-Ark_Number GetScrollStepImpl(Ark_AxisEvent peer)
+Opt_Number GetScrollStepImpl(Ark_AxisEvent peer)
 {
     return {};
 }

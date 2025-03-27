@@ -31,12 +31,16 @@ using namespace testing;
 using namespace testing::ext;
 
 class SwipeGestureIntrfaceAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUISwipeGestureInterfaceAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUISwipeGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getSwipeGestureInterfaceAccessor, SwipeGestureInterfacePeer> {
 public:
+    void *CreatePeerInstance() override {
+        auto value = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>();
+        return accessor_->ctor(&value);
+    }
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
 
         int32_t fingersNum = DEFAULT_SLIDE_FINGER;
         double speedNum = DEFAULT_SLIDE_SPEED;

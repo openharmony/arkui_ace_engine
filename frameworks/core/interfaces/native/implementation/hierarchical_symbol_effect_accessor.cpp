@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -30,7 +31,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
+Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
     return {};
 }

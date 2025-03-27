@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr auto DEFAULT_COLOR = "#FFFFFFFF";
     constexpr auto COLORS_RES_0_ID = 100001;
     constexpr auto COLORS_RES_0_STR = "COLORS_RES_0_STR";
 
@@ -40,7 +39,7 @@ namespace {
     };
 
     const std::vector<std::tuple<std::string, TextDecorationStyle,
-        Ark_TextDecorationStyle>> testFixtureTextDecorationStyleValues = {
+        std::optional<Ark_TextDecorationStyle>>> testFixtureTextDecorationStyleValues = {
         { "TextDecorationStyle::SOLID", TextDecorationStyle::SOLID,
             Ark_TextDecorationStyle::ARK_TEXT_DECORATION_STYLE_SOLID },
         { "TextDecorationStyle::DOUBLE", TextDecorationStyle::DOUBLE,
@@ -51,12 +50,9 @@ namespace {
             Ark_TextDecorationStyle::ARK_TEXT_DECORATION_STYLE_DASHED },
         { "TextDecorationStyle::WAVY", TextDecorationStyle::WAVY,
             Ark_TextDecorationStyle::ARK_TEXT_DECORATION_STYLE_WAVY },
-        { "TextDecorationStyle::INITIAL", TextDecorationStyle::INITIAL,
-            static_cast<Ark_TextDecorationStyle>(-1) },
-        { "TextDecorationStyle::INHERIT", TextDecorationStyle::INHERIT,
-            static_cast<Ark_TextDecorationStyle>(-1) },
-        { "-1", static_cast<TextDecorationStyle>(-1),
-            static_cast<Ark_TextDecorationStyle>(-1) },
+        { "TextDecorationStyle::INITIAL", TextDecorationStyle::INITIAL, std::nullopt },
+        { "TextDecorationStyle::INHERIT", TextDecorationStyle::INHERIT, std::nullopt },
+        { "-1", static_cast<TextDecorationStyle>(-1), std::nullopt },
     };
 
     std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureColorsStrValidValues = {
@@ -105,7 +101,7 @@ namespace {
     };
 
 }
- 
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -129,7 +125,7 @@ public:
         peer = nullptr;
     }
 };
- 
+
 /**
  * @tc.name: getTypeTest
  * @tc.desc:
@@ -157,14 +153,14 @@ HWTEST_F(DecorationStyleAccessorTest, getTypeTest, TestSize.Level1)
 HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getStyle, nullptr);
-    Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
-    stylePtr->type = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
+    Ark_DecorationStyleInterface stylePtr;
+    stylePtr.type = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
     for (auto& [input, value, expected] : testFixtureTextDecorationStyleValues) {
         DestroyPeer(peer_);
-        stylePtr->style = Converter::ArkValue<Opt_TextDecorationStyle>(value);
-        peer_ = accessor_->ctor(stylePtr);
+        stylePtr.style = Converter::ArkValue<Opt_TextDecorationStyle>(value);
+        peer_ = accessor_->ctor(&stylePtr);
         auto style = accessor_->getStyle(peer_);
-        EXPECT_EQ(expected, style) <<
+        EXPECT_EQ(expected, Converter::GetOpt(style)) <<
             "Input value is: " << input << ", method: getStyle";
     }
 }
@@ -174,7 +170,7 @@ HWTEST_F(DecorationStyleAccessorTest, getStyleTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DecorationStyleAccessorTest, getColorTest, TestSize.Level1)
+HWTEST_F(DecorationStyleAccessorTest, getColorTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getColor, nullptr);
     Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
@@ -196,10 +192,6 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTest, TestSize.Level1)
         checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value, &ctx), expected);
     }
 
-    for (auto& [input, value] : testFixtureColorsStrInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value, &ctx), DEFAULT_COLOR);
-    }
-
     for (auto& [input, value, expected] : testFixtureColorsResValidValues) {
         checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(value), expected);
     }
@@ -207,9 +199,30 @@ HWTEST_F(DecorationStyleAccessorTest, getColorTest, TestSize.Level1)
     for (auto& [input, value, expected] : testFixtureColorsEnumValidValues) {
         checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), expected);
     }
+}
+
+HWTEST_F(DecorationStyleAccessorTest, getColorTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getColor, nullptr);
+    Ark_DecorationStyleInterface* stylePtr = new Ark_DecorationStyleInterface();
+    stylePtr->type = Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE;
+    auto checkValue =
+        [this, stylePtr](const std::string& input, const Opt_ResourceColor& value) {
+        DestroyPeer(peer_);
+        stylePtr->color = value;
+        peer_ = accessor_->ctor(stylePtr);
+        auto arkResColor = accessor_->getColor(peer_);
+        auto colorOpt = Converter::OptConvert<Color>(arkResColor);
+        EXPECT_EQ(colorOpt, std::nullopt) <<
+            "Input value is: " << input << ", method: getColor";
+    };
+
+    for (auto& [input, value] : testFixtureColorsStrInvalidValues) {
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_String>(value));
+    }
 
     for (auto& [input, value] : testFixtureColorsEnumInvalidValues) {
-        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value), DEFAULT_COLOR);
+        checkValue(input, Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(value));
     }
 }
 

@@ -98,7 +98,8 @@ void SetKeySourceImpl(Ark_KeyEvent peer,
 }
 Ark_Number GetDeviceIdImpl(Ark_KeyEvent peer)
 {
-    return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getDeviceId(peer);
+    auto id = GetFullAPI()->getAccessors()->getBaseEventAccessor()->getDeviceId(peer);
+    return Converter::GetOpt(id).value_or(Converter::ArkValue<Ark_Number>(-1));
 }
 void SetDeviceIdImpl(Ark_KeyEvent peer,
                      const Ark_Number* deviceId)
@@ -123,12 +124,12 @@ void SetMetaKeyImpl(Ark_KeyEvent peer,
     const auto convMetaKey = Converter::Convert<int32_t>(*metaKey);
     info->SetMetaKey(convMetaKey);
 }
-Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
 {
     return GetFullAPI()->getAccessors()->getBaseEventAccessor()->getTimestamp(peer);
 }
 void SetTimestampImpl(Ark_KeyEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
     GetFullAPI()->getAccessors()->getBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
@@ -152,17 +153,18 @@ Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
     return {};
 }
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
-                          const Ark_IntentionCode* intentionCode)
+                          Ark_IntentionCode intentionCode)
 {
     LOGW("ARKOALA KeyEventAccessor::SetIntentionCodeImpl doesn't have sense.");
 }
-Ark_Number GetUnicodeImpl(Ark_KeyEvent peer)
+Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
-    CHECK_NULL_RETURN(peer, DefaultValueInt32);
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalid);
     const auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, DefaultValueInt32);
+    CHECK_NULL_RETURN(info, invalid);
     const auto unicode = info->GetUnicode();
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(unicode));
+    return Converter::ArkValue<Opt_Number>(unicode);
 }
 void SetUnicodeImpl(Ark_KeyEvent peer,
                     const Ark_Number* unicode)

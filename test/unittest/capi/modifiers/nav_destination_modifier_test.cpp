@@ -386,8 +386,6 @@ HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, Tes
     std::string resultStr;
     std::string expectedStr;
     std::unique_ptr<JsonValue> jsonValue;
-    auto realInputValue0 = Converter::ArkValue<Opt_Array_LayoutSafeAreaType>(Array_LayoutSafeAreaType{});
-    auto realInputValue1 = Converter::ArkValue<Opt_Array_LayoutSafeAreaEdge>(Array_LayoutSafeAreaEdge{});
 
     Ark_LayoutSafeAreaType typeVal = ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM;
     Ark_LayoutSafeAreaEdge edgeVal = ARK_LAYOUT_SAFE_AREA_EDGE_TOP;
@@ -395,8 +393,8 @@ HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, Tes
     Array_LayoutSafeAreaType initValueType = {.array = &typeVal, .length = 1};
     Array_LayoutSafeAreaEdge initValueEdge = {.array = &edgeVal, .length = 1};
 
-    realInputValue0.value = initValueType;
-    realInputValue1.value = initValueEdge;
+    auto realInputValue0 = Converter::ArkValue<Opt_Array_LayoutSafeAreaType>(initValueType);
+    auto realInputValue1 = Converter::ArkValue<Opt_Array_LayoutSafeAreaEdge>(initValueEdge);
 
     modifier_->setIgnoreLayoutSafeArea(node_, &realInputValue0, &realInputValue1);
     jsonValue = GetJsonValue(node_);

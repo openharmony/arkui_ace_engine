@@ -29,7 +29,7 @@ void EndImpl(const Ark_String* scene)
 }
 void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
                               Ark_PerfMonitorSourceType sourceType,
-                              const Ark_Number* time)
+                              Ark_Int64 time)
 {
 }
 } // GlobalScope_ohos_arkui_performanceMonitorAccessor

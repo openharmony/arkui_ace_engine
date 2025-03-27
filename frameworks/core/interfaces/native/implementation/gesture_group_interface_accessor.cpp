@@ -26,7 +26,8 @@ void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
     delete peer;
 }
-Ark_GestureGroupInterface CtorImpl()
+Ark_GestureGroupInterface CtorImpl(Ark_GestureMode mode,
+                                   const Array_GestureType* gesture)
 {
     auto gestureMode = GestureMode::Sequence;
     auto peer = new GestureGroupInterfacePeer();

@@ -1059,7 +1059,7 @@ HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
         CallbackHelper(continuation).Invoke(builder);
     };
     auto arkCallback =
-        ArkValue<onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+        ArkValue<ListAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
     modifier_->setOnItemDragStart(node_, &arkCallback);
 
     // imitate the test case

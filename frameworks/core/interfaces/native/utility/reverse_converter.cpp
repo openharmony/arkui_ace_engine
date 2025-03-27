@@ -238,13 +238,6 @@ void AssignArkValue(Ark_Number& dst, const long& src)
     dst.i32 = static_cast<int32_t>(src);
 }
 
-void AssignArkValue(Ark_Number& dst, const long long& src)
-{
-    LOGE("Ark_Number doesn`t support long long");
-    dst.tag = INTEROP_TAG_INT32;
-    dst.i32 = static_cast<int32_t>(src);
-}
-
 void AssignArkValue(Ark_Number& dst, const uint32_t& src)
 {
     dst.tag = INTEROP_TAG_INT32;

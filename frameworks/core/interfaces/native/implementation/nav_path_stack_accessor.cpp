@@ -132,7 +132,7 @@ void PushDestination1Impl(Ark_VMContext vmContext,
 }
 void PushPathByName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
-                         const Ark_CustomObject* param,
+                         const Ark_Object* param,
                          const Opt_Boolean* animated)
 {
     CHECK_NULL_VOID(peer);
@@ -166,7 +166,12 @@ void PushPathByName1Impl(Ark_NavPathStack peer,
     }
 
     auto convName = Converter::Convert<std::string>(*name);
+#ifdef WRONG_GEN
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
+#else
+    static_assert(std::is_same_v<decltype(param), const Ark_CustomObject*>);
+    auto convParam = Converter::Convert<Nav::ExternalData>(Ark_Object{});
+#endif
     auto convOnPop = Converter::Convert<Callback_PopInfo_Void>(*onPop);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushPathByName(convName, convParam, convOnPop, convAnimated);
@@ -191,7 +196,12 @@ void PushDestinationByName0Impl(Ark_VMContext vmContext,
     }
 
     auto convName = Converter::Convert<std::string>(*name);
+#ifdef WRONG_GEN
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
+#else
+    static_assert(std::is_same_v<decltype(param), const Ark_CustomObject*>);
+    auto convParam = Converter::Convert<Nav::ExternalData>(Ark_Object{});
+#endif
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushDestinationByName(convName, convParam, Nav::OnPopCallback(), convAnimated);
 }
@@ -216,7 +226,12 @@ void PushDestinationByName1Impl(Ark_VMContext vmContext,
     }
 
     auto convName = Converter::Convert<std::string>(*name);
+#ifdef WRONG_GEN
     auto convParam = Converter::Convert<Nav::ExternalData>(*param);
+#else
+    static_assert(std::is_same_v<decltype(param), const Ark_CustomObject*>);
+    auto convParam = Converter::Convert<Nav::ExternalData>(Ark_Object{});
+#endif
     auto convOnPop = Converter::Convert<Callback_PopInfo_Void>(*onPop);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushDestinationByName(convName, convParam, convOnPop, convAnimated);
@@ -292,7 +307,12 @@ Opt_NavPathInfo Pop1Impl(Ark_NavPathStack peer,
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalid);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
+#ifdef WRONG_GEN
     auto convResult = Converter::Convert<Nav::ExternalData>(*result);
+#else
+    static_assert(std::is_same_v<decltype(result), const Ark_CustomObject*>);
+    auto convResult = Converter::Convert<Nav::ExternalData>(Ark_Object{});
+#endif
     auto pathInfo = navStack->Nav::PathStack::Pop(convResult, convAnimated);
     return Converter::ArkValue<Opt_NavPathInfo>(pathInfo);
 }
@@ -339,17 +359,17 @@ Array_String GetAllPathNameImpl(Ark_NavPathStack peer)
 {
     return {};
 }
-Opt_CustomObject GetParamByIndexImpl(Ark_NavPathStack peer,
-                                     const Ark_Number* index)
+Opt_Object GetParamByIndexImpl(Ark_NavPathStack peer,
+                               const Ark_Number* index)
 {
-    auto invalid = Converter::ArkValue<Opt_CustomObject>();
+    auto invalid = Converter::ArkValue<Opt_Object>();
     CHECK_NULL_RETURN(peer, invalid);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalid);
     return invalid;
 }
-Array_CustomObject GetParamByNameImpl(Ark_NavPathStack peer,
-                                      const Ark_String* name)
+Array_Object GetParamByNameImpl(Ark_NavPathStack peer,
+                                const Ark_String* name)
 {
     return {};
 }

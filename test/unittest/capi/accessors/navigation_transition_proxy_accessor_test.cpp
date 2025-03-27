@@ -43,7 +43,7 @@ class NavigationTransitionProxyAccessorTest : public AccessorTestBase<
 HWTEST_F(NavigationTransitionProxyAccessorTest, initialStateTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
-    EXPECT_FALSE(accessor_->getIsInteractive(peer_));
+    EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), std::nullopt);
 }
 
 /**
@@ -55,7 +55,7 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, nothingHandlerStateTest, TestSiz
 {
     ASSERT_NE(accessor_->getIsInteractive, nullptr);
     peer_->SetHandler(nullptr);
-    EXPECT_FALSE(accessor_->getIsInteractive(peer_));
+    EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), std::nullopt);
 }
 
 /**
@@ -70,7 +70,7 @@ HWTEST_F(NavigationTransitionProxyAccessorTest, settersGettersTest, TestSize.Lev
     auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
     peer_->SetHandler(proxy);
     accessor_->setIsInteractive(peer_, ArkValue<Ark_Boolean>(true));
-    EXPECT_TRUE(accessor_->getIsInteractive(peer_));
+    EXPECT_EQ(Converter::GetOpt(accessor_->getIsInteractive(peer_)), true);
 }
 
 /**

@@ -28,7 +28,7 @@ void DestroyPeerImpl(Ark_TapGestureInterface peer)
     CHECK_NULL_VOID(peer);
     delete peer;
 }
-Ark_TapGestureInterface CtorImpl()
+Ark_TapGestureInterface CtorImpl(const Opt_TapGestureParameters* value)
 {
     auto peer = new TapGestureInterfacePeer();
     peer->gesture = Referenced::MakeRefPtr<TapGesture>();

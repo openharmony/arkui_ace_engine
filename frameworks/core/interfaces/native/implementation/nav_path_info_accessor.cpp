@@ -22,7 +22,7 @@
 namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const Nav::ExternalData& src)
+void AssignArkValue(Ark_Object& dst, const Nav::ExternalData& src)
 {
     if (src) {
         dst = src->data_;
@@ -36,7 +36,7 @@ void AssignArkValue(Ark_NavPathInfo& dst, const Nav::PathInfo& src)
 }
 
 template<>
-Nav::ExternalData Convert(const Ark_CustomObject& src)
+Nav::ExternalData Convert(const Ark_Object& src)
 {
     return Referenced::MakeRefPtr<Nav::ExternalDataKeeper>(src);
 }
@@ -57,7 +57,7 @@ void DestroyPeerImpl(Ark_NavPathInfo peer)
     delete peer;
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
-                         const Ark_CustomObject* param,
+                         const Ark_Object* param,
                          const Opt_Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* isEntry)
 {
@@ -96,21 +96,22 @@ void SetNameImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(name);
     peer->data.name_ = Convert<std::string>(*name);
 }
-Ark_CustomObject GetParamImpl(Ark_NavPathInfo peer)
+Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 {
     return {};
 }
 void SetParamImpl(Ark_NavPathInfo peer,
-                  const Ark_CustomObject* param)
+                  const Ark_Object* param)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(param);
     peer->data.param_ = Convert<Nav::ExternalData>(*param);
 }
-Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
+Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
-    CHECK_NULL_RETURN(peer, Callback_PopInfo_Void());
-    return peer->data.onPop_.GetCallback();
+    auto invalid = Converter::ArkValue<Opt_Callback_PopInfo_Void>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_Callback_PopInfo_Void>(peer->data.onPop_.GetCallback());
 }
 void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Callback_PopInfo_Void* onPop)
@@ -119,10 +120,11 @@ void SetOnPopImpl(Ark_NavPathInfo peer,
     CHECK_NULL_VOID(onPop);
     peer->data.onPop_ = CallbackHelper(*onPop);
 }
-Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    return ArkValue<Ark_Boolean>(peer->data.isEntry_);
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return ArkValue<Opt_Boolean>(peer->data.isEntry_);
 }
 void SetIsEntryImpl(Ark_NavPathInfo peer,
                     Ark_Boolean isEntry)

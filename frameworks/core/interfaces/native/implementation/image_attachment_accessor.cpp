@@ -139,56 +139,43 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
     return nullptr;
 #endif
 }
-Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
+Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
-    Ark_SizeOptions size = {
-        .width = ArkValue<Opt_Length>(),
-        .height = ArkValue<Opt_Length>(),
-    };
-    CHECK_NULL_RETURN(peer, size);
-    CHECK_NULL_RETURN(peer->imageSpan, size);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), size);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->size, size);
-    if (peer->imageSpan->GetImageAttribute()->size->width) {
-        size.width = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->width);
-    }
-    if (peer->imageSpan->GetImageAttribute()->size->height) {
-        size.height = ArkValue<Opt_Length>(*peer->imageSpan->GetImageAttribute()->size->height);
-    }
-    return size;
+    auto invalid = Converter::ArkValue<Opt_SizeOptions>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->imageSpan, invalid);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), invalid);
+    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->size, invalid);
+    Ark_SizeOptions size;
+    size.width = ArkValue<Opt_Length>(peer->imageSpan->GetImageAttribute()->size->width);
+    size.height = ArkValue<Opt_Length>(peer->imageSpan->GetImageAttribute()->size->height);
+    return Converter::ArkValue<Opt_SizeOptions>(size);
 }
-Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
+Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
+    auto invalid = Converter::ArkValue<Opt_ImageSpanAlignment>();
     CHECK_NULL_RETURN(
-        peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
-    auto aligment = peer->imageSpan->GetImageAttribute()->verticalAlign;
-    CHECK_NULL_RETURN(aligment, INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
-    return ArkValue<Ark_ImageSpanAlignment>(*aligment);
+        peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), invalid);
+    auto alignment = peer->imageSpan->GetImageAttribute()->verticalAlign;
+    return ArkValue<Opt_ImageSpanAlignment>(alignment);
 }
-Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
+Opt_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
-    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), INVALID_ENUM_VAL<Ark_ImageFit>);
+    auto invalid = Converter::ArkValue<Opt_ImageFit>();
+    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), invalid);
     auto objectFit = peer->imageSpan->GetImageAttribute()->objectFit;
-    CHECK_NULL_RETURN(objectFit, INVALID_ENUM_VAL<Ark_ImageFit>);
-    return ArkValue<Ark_ImageFit>(*objectFit);
+    return ArkValue<Opt_ImageFit>(objectFit);
 }
-Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
+Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
-    Ark_ImageAttachmentLayoutStyle style = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
-    };
-    CHECK_NULL_RETURN(peer, style);
-    CHECK_NULL_RETURN(peer->imageSpan, style);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), style);
-    style = ArkValue<Ark_ImageAttachmentLayoutStyle>(*peer->imageSpan->GetImageAttribute());
-    return style;
+    auto invalid = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->imageSpan, invalid);
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->imageSpan->GetImageAttribute());
 }
-Ark_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
+Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
-    Ark_ColorFilter emptyFilter = nullptr;
-    auto empty = ArkUnion<Ark_ColorFilterType, Ark_ColorFilter>(emptyFilter);
+    auto empty = Converter::ArkValue<Opt_ColorFilterType>();
     CHECK_NULL_RETURN(peer, empty);
     CHECK_NULL_RETURN(peer->imageSpan, empty);
     CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), empty);
@@ -199,7 +186,7 @@ Ark_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
         ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
         auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->ctor(&arrayNumber);
-        return ArkUnion<Ark_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
+        return ArkUnion<Opt_ColorFilterType, Ark_ColorFilter>(colorFilterPeer);
     } else {
         LOGE("Arkoala: ImageAttachmentAccessor.GetColorFilter: DrawinColorFilter doesn't supported");
     }

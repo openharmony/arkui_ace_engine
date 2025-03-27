@@ -41,7 +41,7 @@ private:
 
 namespace {
     const double EPSILON = 0.001;
-    
+
     const std::vector<std::tuple<std::string, Ark_Number, double>> testFixtureNumberValues = {
         { "1.24", Converter::ArkValue<Ark_Number>(1.24), 1.24 },
         { "0", Converter::ArkValue<Ark_Number>(0), 0 },
@@ -65,7 +65,7 @@ namespace {
         { MouseAction::PULL_UP, static_cast<Ark_MouseAction>(-1) },
         { MouseAction::CANCEL, static_cast<Ark_MouseAction>(-1) },
     };
-    
+
     const std::vector<std::pair<MouseButton, Ark_MouseButton>> getMouseButtonTestPlan = {
         { MouseButton::NONE_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_NONE },
         { MouseButton::LEFT_BUTTON, Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT },
@@ -524,7 +524,7 @@ HWTEST_F(MouseEventAccessorTest, GetRawDeltaXTest, TestSize.Level1)
         ASSERT_NE(info, nullptr);
         info->SetRawDeltaX(value);
         auto arkRes = accessor_->getRawDeltaX(peer_);
-        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
+        EXPECT_EQ(Converter::OptConvert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetRawDeltaX";
     }
 }
@@ -562,7 +562,7 @@ HWTEST_F(MouseEventAccessorTest, GetRawDeltaYTest, TestSize.Level1)
         ASSERT_NE(info, nullptr);
         info->SetRawDeltaY(value);
         auto arkRes = accessor_->getRawDeltaY(peer_);
-        EXPECT_EQ(Converter::Convert<float>(arkRes), Converter::Convert<float>(expected)) <<
+        EXPECT_EQ(Converter::OptConvert<float>(arkRes), Converter::Convert<float>(expected)) <<
             "Input value is: " << input << ", method: GetRawDeltaY";
     }
 }
@@ -580,8 +580,10 @@ HWTEST_F(MouseEventAccessorTest, GetPressedButtonsTest, TestSize.Level1)
     buttons.push_back(MouseButton::LEFT_BUTTON);
     buttons.push_back(MouseButton::RIGHT_BUTTON);
     eventInfo->SetPressedButtons(buttons);
-    Array_MouseButton pressedButtons = accessor_->getPressedButtons(peer_);
-    EXPECT_EQ(static_cast<int32_t>(pressedButtons.length), 2);
+    auto optPressedButtons = Converter::GetOpt(accessor_->getPressedButtons(peer_));
+    ASSERT_NE(optPressedButtons, std::nullopt);
+    auto pressedButtons = *optPressedButtons;
+    EXPECT_EQ(pressedButtons.length, 2);
     ASSERT_NE(pressedButtons.array, nullptr);
     EXPECT_EQ(pressedButtons.array[0], Ark_MouseButton::ARK_MOUSE_BUTTON_LEFT);
     EXPECT_EQ(pressedButtons.array[1], Ark_MouseButton::ARK_MOUSE_BUTTON_RIGHT);

@@ -45,12 +45,17 @@ public:
 };
 
 class GestureGroupInterfaceAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIGestureGroupInterfaceAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUIGestureGroupInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getGestureGroupInterfaceAccessor, GestureGroupInterfacePeer> {
 public:
+    void *CreatePeerInstance() override {
+        Ark_GestureMode mode = ARK_GESTURE_MODE_SEQUENCE;
+        Array_GestureType gesture{};
+        return accessor_->ctor(mode, &gesture);
+    }
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         gesture_ = AceType::MakeRefPtr<MockGestureGroup>(GestureMode::Sequence);
         peer_->gesture = gesture_;
     }

@@ -31,7 +31,7 @@ void DestroyPeerImpl(Ark_PanGestureInterface peer)
 {
     delete peer;
 }
-Ark_PanGestureInterface CtorImpl()
+Ark_PanGestureInterface CtorImpl(const Opt_Type_PanGestureInterface_value* value)
 {
     auto peer = new PanGestureInterfacePeer();
     peer->gesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_FINGERS, DEFAULT_PAN_DIRECTION, DEFAULT_DISTANCE);

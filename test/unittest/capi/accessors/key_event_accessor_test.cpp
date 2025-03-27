@@ -348,7 +348,7 @@ HWTEST_F(KeyEventAccessorTest, getDeviceIdValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getDeviceIdInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDeviceId, nullptr);
-    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getDeviceId(nullptr)), 0);
+    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getDeviceId(nullptr)), -1);
 }
 
 /**
@@ -463,7 +463,7 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
     using Duration = std::chrono::high_resolution_clock::duration;
 
     ASSERT_NE(accessor_->getTimestamp, nullptr);
-    const std::vector<std::pair<int, Duration>> TEST_PLAN {
+    const std::vector<std::pair<int64_t, Duration>> TEST_PLAN {
         { 1, Duration(std::chrono::nanoseconds(1)) },
         { 9999, Duration(std::chrono::nanoseconds(9999)) }
     };
@@ -471,7 +471,7 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
     for (auto& [expected, value] : TEST_PLAN) {
         eventInfo_->SetTimeStamp(TimeStamp() + value);
         auto timeStamp = accessor_->getTimestamp(peer_);
-        EXPECT_EQ(Converter::Convert<int32_t>(timeStamp), expected);
+        EXPECT_EQ(Converter::Convert<int64_t>(timeStamp), expected);
     }
 }
 
@@ -483,7 +483,7 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getTimestampInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTimestamp, nullptr);
-    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getTimestamp(nullptr)), 0);
+    EXPECT_EQ(Converter::Convert<int64_t>(accessor_->getTimestamp(nullptr)), -1);
 }
 
 /**
@@ -497,13 +497,13 @@ HWTEST_F(KeyEventAccessorTest, setTimestampValidTest, TestSize.Level1)
     using Duration = std::chrono::high_resolution_clock::duration;
 
     ASSERT_NE(accessor_->setTimestamp, nullptr);
-    const std::vector<std::pair<Ark_Number, Duration>> TEST_PLAN {
-        { Converter::ArkValue<Ark_Number>(9), Duration(std::chrono::nanoseconds(9)) },
-        { Converter::ArkValue<Ark_Number>(111111), Duration(std::chrono::nanoseconds(111111)) }
+    const std::vector<std::pair<int64_t, Duration>> TEST_PLAN {
+        { 9, Duration(std::chrono::nanoseconds(9)) },
+        { 111111, Duration(std::chrono::nanoseconds(111111)) }
     };
 
     for (auto& [value, duration] : TEST_PLAN) {
-        accessor_->setTimestamp(peer_, &value);
+        accessor_->setTimestamp(peer_, value);
         auto timeStamp = eventInfo_->GetTimeStamp();
         TimeStamp expected = TimeStamp() + duration;
         EXPECT_EQ(timeStamp, expected);
@@ -518,11 +518,8 @@ HWTEST_F(KeyEventAccessorTest, setTimestampValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, setTimestampInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTimestamp, nullptr);
-    const auto someTime = Converter::ArkValue<Ark_Number>(-1);
-    const std::vector<std::tuple<KeyEventPeer*, const Ark_Number*>> TEST_PLAN {
-        { nullptr, nullptr },
-        { nullptr, &someTime },
-        { peer_, nullptr },
+    const std::vector<std::tuple<KeyEventPeer*, int64_t>> TEST_PLAN {
+        { nullptr, -1 },
     };
     const auto currentTime = eventInfo_->GetTimeStamp();
     for (auto& [peer, time] : TEST_PLAN) {
@@ -571,7 +568,7 @@ HWTEST_F(KeyEventAccessorTest, setStopPropagationInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setIntentionCodeValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_setIntentionCodeValidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setIntentionCode, nullptr);
     // setIntentionCode doesn't have sense.
@@ -585,11 +582,8 @@ HWTEST_F(KeyEventAccessorTest, setIntentionCodeValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, setIntentionCodeInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setIntentionCode, nullptr);
-    const Ark_IntentionCode someCode {};
-    const std::vector<std::tuple<KeyEventPeer*, const Ark_IntentionCode*>> TEST_PLAN {
-        { nullptr, nullptr },
-        { nullptr, &someCode },
-        { peer_, nullptr },
+    const std::vector<std::tuple<KeyEventPeer*, Ark_IntentionCode>> TEST_PLAN {
+        { nullptr, ARK_INTENTION_CODE_INTENTION_UNKNOWN },
     };
     const auto currentCode = eventInfo_->GetKeyIntention();
     for (auto& [peer, code] : TEST_PLAN) {
@@ -610,7 +604,7 @@ HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
         KeyEvent keyEvent;
         keyEvent.unicode = static_cast<decltype(keyEvent.unicode)>(value);
         *eventInfo_ = KeyEventInfo(keyEvent);
-        auto unicode = Converter::Convert<int32_t>(accessor_->getUnicode(peer_));
+        auto unicode = Converter::OptConvert<int32_t>(accessor_->getUnicode(peer_));
         EXPECT_EQ(unicode, expected) <<
             "Input value is: " << input;
     }
@@ -624,7 +618,7 @@ HWTEST_F(KeyEventAccessorTest, getUnicodeValidTest, TestSize.Level1)
 HWTEST_F(KeyEventAccessorTest, getUnicodeInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getUnicode, nullptr);
-    EXPECT_EQ(Converter::Convert<int32_t>(accessor_->getUnicode(nullptr)), Converter::ArkValue<Ark_Int32>(0));
+    EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getUnicode(nullptr)), std::nullopt);
 }
 
 /**

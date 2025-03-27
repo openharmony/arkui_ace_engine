@@ -22,7 +22,23 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
-Ark_Context GetContextImpl(const Opt_CustomObject* component)
+Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
+{
+    return {};
+}
+Ark_Edges EdgeColorsImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_Want GetContextImpl(const Opt_CustomObject* component)
 {
     return {};
 }
@@ -31,7 +47,7 @@ void PostCardActionImpl(const Ark_CustomObject* component,
 {
 }
 Ark_Resource Dollar_rImpl(const Ark_String* value,
-                          const Array_CustomObject* params)
+                          const Array_Object* params)
 {
     return {};
 }
@@ -227,6 +243,10 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
+        GlobalScopeAccessor::GetRectangleByIdImpl,
+        GlobalScopeAccessor::EdgeColorsImpl,
+        GlobalScopeAccessor::EdgeWidthsImpl,
+        GlobalScopeAccessor::BorderRadiusesImpl,
         GlobalScopeAccessor::GetContextImpl,
         GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Dollar_rImpl,

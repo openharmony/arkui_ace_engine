@@ -30,7 +30,7 @@ void DestroyPeerImpl(Ark_PinchGestureInterface peer)
 {
     delete peer;
 }
-Ark_PinchGestureInterface CtorImpl()
+Ark_PinchGestureInterface CtorImpl(const Opt_Literal_Number_distance_fingers* value)
 {
     auto fingers = DEFAULT_PINCH_FINGER;
     auto distance = DEFAULT_PINCH_DISTANCE;

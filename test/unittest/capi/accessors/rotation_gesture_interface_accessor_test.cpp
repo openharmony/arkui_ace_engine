@@ -55,17 +55,23 @@ struct RotationEvent {
 
 static const int RES_ID = 123;
 
-class RotationGestureInterfaceAccessorTest : public AccessorTestBase<GENERATED_ArkUIRotationGestureInterfaceAccessor,
+class RotationGestureInterfaceAccessorTest :
+    public AccessorTestCtorBase<GENERATED_ArkUIRotationGestureInterfaceAccessor,
     &GENERATED_ArkUIAccessors::getRotationGestureInterfaceAccessor, RotationGestureInterfacePeer> {
-        void SetUp() override
-        {
-            AccessorTestBase::SetUp();
+public:
+    void *CreatePeerInstance() override {
+        auto value = Converter::ArkValue<Opt_Literal_Number_angle_fingers>();
+        return accessor_->ctor(&value);
+    }
+    void SetUp() override
+    {
+        AccessorTestCtorBase::SetUp();
 
-            int32_t fingersNum = DEFAULT_SLIDE_FINGER;
-            double angleNum = 0;
-            peer_->gesture = AceType::MakeRefPtr<MockRotationGesture>(fingersNum, angleNum);
-        }
-    };
+        int32_t fingersNum = DEFAULT_SLIDE_FINGER;
+        double angleNum = 0;
+        peer_->gesture = AceType::MakeRefPtr<MockRotationGesture>(fingersNum, angleNum);
+    }
+};
 
 /**
  * @tc.name: onActionStartTest

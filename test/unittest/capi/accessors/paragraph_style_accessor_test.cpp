@@ -89,7 +89,7 @@ HWTEST_F(ParagraphStyleAccessorTest, getTextAlignTest, TestSize.Level1)
     ASSERT_NE(accessor_->getTextAlign, nullptr);
     auto testVal = accessor_->getTextAlign(peer_);
     auto converted = Converter::ArkValue<Ark_TextAlign>(TEST_TEXT_ALIGN);
-    EXPECT_EQ(testVal, converted);
+    EXPECT_EQ(Converter::GetOpt(testVal), converted);
 }
 
 /**
@@ -101,7 +101,7 @@ HWTEST_F(ParagraphStyleAccessorTest, getTextIndentTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTextIndent, nullptr);
     auto testVal = accessor_->getTextIndent(peer_);
-    auto converted = Converter::Convert<int>(testVal);
+    auto converted = Converter::OptConvert<int>(testVal);
     EXPECT_EQ(converted, TEST_MARGIN);
 }
 
@@ -114,7 +114,7 @@ HWTEST_F(ParagraphStyleAccessorTest, getMaxLinesTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getMaxLines, nullptr);
     auto testVal = accessor_->getMaxLines(peer_);
-    auto converted = Converter::Convert<int>(testVal);
+    auto converted = Converter::OptConvert<int>(testVal);
     EXPECT_EQ(converted, TEST_LINES_NUM);
 }
 
@@ -128,7 +128,7 @@ HWTEST_F(ParagraphStyleAccessorTest, getOverflowTest, TestSize.Level1)
     ASSERT_NE(accessor_->getOverflow, nullptr);
     auto testVal = accessor_->getOverflow(peer_);
     auto converted = Converter::ArkValue<Ark_TextOverflow>(TEST_TEXT_OVERFLOW);
-    EXPECT_EQ(testVal, converted);
+    EXPECT_EQ(Converter::GetOpt(testVal), converted);
 }
 
 /**
@@ -141,7 +141,7 @@ HWTEST_F(ParagraphStyleAccessorTest, getWordBreakTest, TestSize.Level1)
     ASSERT_NE(accessor_->getWordBreak, nullptr);
     auto testVal = accessor_->getWordBreak(peer_);
     auto converted = Converter::ArkValue<Ark_WordBreak>(TEST_WORD_BREAK);
-    EXPECT_EQ(testVal, converted);
+    EXPECT_EQ(Converter::GetOpt(testVal), converted);
 }
 
 /**

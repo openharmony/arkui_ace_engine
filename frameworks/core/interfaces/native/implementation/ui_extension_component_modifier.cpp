@@ -139,7 +139,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_ReceiveCallback* value)
+                   const Callback_Map_String_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -147,7 +147,7 @@ void OnReceiveImpl(Ark_NativePointer node,
     LOGE("UIExtensionComponentInterfaceModifier::OnReceiveImpl - is not supported");
 }
 void OnResultImpl(Ark_NativePointer node,
-                  const Callback_Literal_Number_code_Want_want_Void* value)
+                  const Callback_Literal_Number_code__want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -179,7 +179,7 @@ void OnResultImpl(Ark_NativePointer node,
             auto moduleName = want.GetModuleName();
             arkWant.moduleName = Converter::ArkValue<Opt_String>(moduleName);
 
-            Ark_Literal_Number_code_Want_want parameter;
+            Ark_Literal_Number_code__want parameter;
             parameter.code = Converter::ArkValue<Ark_Number>(code);
             parameter.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(parameter);
