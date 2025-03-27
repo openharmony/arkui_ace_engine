@@ -36,6 +36,71 @@ import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, Gesture
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
 import { ArkTabContentComponent } from "./../generated/ArkTabContent"
 import { ArkTabContentPeer } from "./../generated/peers/ArkTabContentPeer"
+import { IndicatorStyle } from "./swiper"
+import { LabelStyle } from "./button"
+import { VerticalAlign } from "./enums"
+
+export class SubTabBarStyle {
+    _content?: ResourceStr | ResourceStr | ComponentContent | undefined
+    _indicator?: IndicatorStyle | undefined
+    _selectedMode?: SelectedMode | undefined
+    _board?: BoardStyle | undefined
+    _labelStyle?: LabelStyle | undefined
+    _padding?: Padding | Dimension | LocalizedPadding | undefined
+    _id?: string | undefined
+     constructor(content: ResourceStr | ResourceStr | ComponentContent) {
+        this._content = content
+    }
+    public static of(content: ResourceStr | ResourceStr | ComponentContent): SubTabBarStyle {
+        return new SubTabBarStyle(content)
+    }
+    indicator(value: IndicatorStyle): this {
+        this._indicator = value
+        return this
+    }
+    selectedMode(value: SelectedMode): this {
+        this._selectedMode = value
+        return this
+    }
+    board(value: BoardStyle): this {
+        this._board = value
+        return this
+    }
+    labelStyle(value: LabelStyle): this {
+        this._labelStyle = value
+        return this
+    }
+    public padding(value: Padding | Dimension | LocalizedPadding): this {
+        this._padding = value
+        return this
+    }
+    id(value: string): this {
+        this._id = value
+        return this
+    }
+}
+
+export declare class BottomTabBarStyle {
+    _icon?: ResourceStr | TabBarSymbol | undefined;
+    _text?: ResourceStr | undefined;
+    _labelStyle?: LabelStyle | undefined;
+    _padding?: Padding | Dimension | LocalizedPadding | undefined;
+    _layoutMode?: LayoutMode | undefined;
+    _verticalAlign?: VerticalAlign | undefined;
+    _symmetricExtensible?: boolean | undefined;
+    _id?: string | undefined;
+    _iconStyle?: TabBarIconStyle | undefined;
+    constructor(icon: ResourceStr | TabBarSymbol, text: ResourceStr);
+    static of(icon: ResourceStr | TabBarSymbol, text: ResourceStr): BottomTabBarStyle;
+    labelStyle(value: LabelStyle): this;
+    padding(value: Padding | Dimension | LocalizedPadding): this;
+    layoutMode(value: LayoutMode): this;
+    verticalAlign(value: VerticalAlign): this;
+    symmetricExtensible(value: boolean): this;
+    id(value: string): this;
+    iconStyle(style: TabBarIconStyle): this;
+}
+
 export enum SelectedMode {
     INDICATOR = 0,
     BOARD = 1

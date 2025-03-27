@@ -102,7 +102,7 @@ class ColumnEndModifier extends ModifierWithKey<number> {
     }
 }
 
-export class ArkGridItemAttributeSet extends ArkCommonAttributeSet implements GridItemAttribute {
+export class ArkGridItemAttributeSet extends ArkCommonAttributeSet /* implements GridItemAttribute */ {
 
     rowStart(value: number): this {
         if (value) {

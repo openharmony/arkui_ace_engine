@@ -19,16 +19,19 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-/** @memo:stable */
-export interface Root {
-}
-/** @memo:stable */
-export interface ComponentRoot {
-}
+import { ArkComponentRootComponent, ArkRootComponent } from "./ArkStaticComponents"
+import { ArkComponentRootPeer, ArkRootPeer } from "./peers/ArkStaticComponentsPeer"
+
+// /** @memo:stable */
+// export interface Root {
+// }
+// /** @memo:stable */
+// export interface ComponentRoot {
+// }
 /** @memo */
 export function Root(
   /** @memo */
-  style: ((attributes: RootAttribute) => void) | undefined,
+  style: ((attributes: ArkRootComponent) => void) | undefined,
   
   /** @memo */
   content_?: () => void,
@@ -46,7 +49,7 @@ export function Root(
 /** @memo */
 export function ComponentRoot(
   /** @memo */
-  style: ((attributes: ComponentRootAttribute) => void) | undefined,
+  style: ((attributes: ArkComponentRootComponent) => void) | undefined,
   
   /** @memo */
   content_?: () => void,

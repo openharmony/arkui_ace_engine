@@ -20,8 +20,8 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ThemeColorMode } from "./common"
-import { ArkWithThemeComponent } from "./../generated/ArkWithTheme"
-import { ArkWithThemePeer } from "./../generated/peers/ArkWithThemePeer"
+// import { ArkWithThemeComponent } from "./../generated/ArkWithTheme"
+// import { ArkWithThemePeer } from "./../generated/peers/ArkWithThemePeer"
 export interface CustomTheme {
     _CustomThemeStub: string;
 }

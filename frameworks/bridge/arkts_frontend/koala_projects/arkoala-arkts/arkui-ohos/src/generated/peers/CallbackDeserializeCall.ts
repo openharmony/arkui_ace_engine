@@ -80,10 +80,6 @@ import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicat
 import { OnNativeLoadCallback } from "./../../component/xcomponent"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
 import { PluginErrorCallback, PluginErrorData } from "./../../component/pluginComponent"
-import { DotIndicator } from "./../ArkDotIndicatorBuilder"
-import { DigitIndicator } from "./../ArkDigitIndicatorBuilder"
-import { SubTabBarStyle } from "./../ArkSubTabBarStyleBuilder"
-import { BottomTabBarStyle } from "./../ArkBottomTabBarStyleBuilder"
 
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()

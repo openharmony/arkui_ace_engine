@@ -176,7 +176,7 @@ class SymbolGlyphEffectModifier extends ModifierWithKey<ArkSymbolEffect> {
     }
 }
 
-export class ArkSymbolGlyphAttributeSet extends ArkCommonAttributeSet implements SymbolGlyphAttribute {
+export class ArkSymbolGlyphAttributeSet extends ArkCommonAttributeSet /* implements SymbolGlyphAttribute */ {
     fontSize(value: number | string | Resource | undefined): this {
         if (value) {
             modifierWithKey(this._modifiersWithKeys, SymbolGlyphFontSizeModifier.identity, SymbolGlyphFontSizeModifier.factory, value!);

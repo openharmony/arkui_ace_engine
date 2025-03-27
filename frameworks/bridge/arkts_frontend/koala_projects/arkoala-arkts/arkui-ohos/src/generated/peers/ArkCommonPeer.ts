@@ -44,7 +44,9 @@ import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"
 import { MaterializedBase, toPeerPtr, wrapCallback } from "@koalaui/interop"
+import { ArkCommonAttributeSet } from "../../handwritten/modifiers/ArkCommonModifier"
 export class ArkCommonMethodPeer extends PeerNode {
+    _attributeSet?: ArkCommonAttributeSet
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

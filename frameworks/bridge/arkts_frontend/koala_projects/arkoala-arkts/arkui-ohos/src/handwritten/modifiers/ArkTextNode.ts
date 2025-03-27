@@ -17,7 +17,7 @@ import { TextAttribute, TextAlign } from "../../generated";
 import { ArkTextPeer } from "../../generated/peers/ArkTextPeer";
 import { ArkBaseNode } from "./ArkBaseNode";
 
-export class ArkTextNode extends ArkBaseNode implements TextAttribute {
+export class ArkTextNode extends ArkBaseNode /* implements TextAttribute */ {
     textAlign(value : TextAlign | undefined) : this {
         if (value) {
             this.getPeer().textAlignAttribute(value);

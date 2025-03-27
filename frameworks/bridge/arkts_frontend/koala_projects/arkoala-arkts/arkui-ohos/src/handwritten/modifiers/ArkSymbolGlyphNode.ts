@@ -23,7 +23,7 @@ import { ResourceColor } from "../../generated";
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "../../generated";
 import { SymbolEffect } from "../../generated";
 
-export class ArkSymbolGlyphNode extends ArkBaseNode implements SymbolGlyphAttribute {
+export class ArkSymbolGlyphNode extends ArkBaseNode /* implements SymbolGlyphAttribute */ {
     fontSize(value: number | string | Resource | undefined): this {
         if (value) {
             this.getPeer().fontSizeAttribute(value!);

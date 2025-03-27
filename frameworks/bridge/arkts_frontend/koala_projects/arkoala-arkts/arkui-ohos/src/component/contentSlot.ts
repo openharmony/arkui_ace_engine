@@ -19,8 +19,7 @@
 import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ArkContentSlotComponent } from "./../generated/ArkContentSlot"
-import { ArkContentSlotPeer } from "./../generated/peers/ArkContentSlotPeer"
+
 export interface Content {
     _ContentStub: string;
 }

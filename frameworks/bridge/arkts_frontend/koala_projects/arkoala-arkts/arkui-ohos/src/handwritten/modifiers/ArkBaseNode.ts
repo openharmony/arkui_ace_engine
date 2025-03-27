@@ -17,7 +17,7 @@ import { ComponentBase } from "../../ComponentBase";
 import { CommonAttribute, CommonMethod, Length } from "../../generated";
 import { ArkCommonMethodPeer } from "../../generated/peers/ArkCommonPeer";
 
-export class ArkBaseNode extends ComponentBase implements CommonAttribute {
+export class ArkBaseNode extends ComponentBase /* implements CommonAttribute */ {
     getPeer() : ArkCommonMethodPeer {
         return this.peer as ArkCommonMethodPeer
     }

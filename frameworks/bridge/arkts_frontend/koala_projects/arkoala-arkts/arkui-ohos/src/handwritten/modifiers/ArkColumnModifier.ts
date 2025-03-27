@@ -47,7 +47,7 @@ class AlignItemsModifier extends ModifierWithKey<HorizontalAlign | undefined> {
     }
 }
 
-export class ArkColumnAttributeSet extends ArkCommonAttributeSet implements ColumnAttribute {
+export class ArkColumnAttributeSet extends ArkCommonAttributeSet /* implements ColumnAttribute */ {
     
     alignItems(value: HorizontalAlign|undefined): this {
         modifierWithKey(this._modifiersWithKeys, AlignItemsModifier.identity, AlignItemsModifier.factory, value);

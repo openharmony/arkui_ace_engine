@@ -15,9 +15,9 @@
 
 import { remember } from "@koalaui/runtime"
 import { ArkCustomComponentImpl } from "./ArkCustomComponent"
-import { ArkCommonMethodComponent } from "./generated"
+import { ArkCommonMethodComponent } from "./generated/ArkCommon"
 import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/ArkPageTransition";
-import { PageTransitionOptions } from "./generated/ArkPageTransitionInterfaces";
+import { PageTransitionOptions } from "./component/pageTransition";
 import { ArkComponentRoot } from "./ArkComponentRoot"
 
 /** base class for user's structs */

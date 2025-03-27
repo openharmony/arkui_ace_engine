@@ -19,7 +19,7 @@
 import { int32, float32 } from "@koalaui/common"
 import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentBase } from "./ComponentBase"
+import { ComponentBase } from "../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkBaseSpanPeer, ArkSpanPeer } from "./peers/ArkSpanPeer"
@@ -41,7 +41,7 @@ import { PixelMap } from "./ArkPixelMapMaterialized"
 import { TextBackgroundStyle, BaseSpan, SpanAttribute } from "./../component/span"
 import { DecorationStyleInterface } from "./../component/styledString"
 /** @memo:stable */
-export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements BaseSpanAttribute {
+export class ArkBaseSpanComponent extends ArkCommonMethodComponent implements BaseSpan {
     getPeer(): ArkBaseSpanPeer {
         return (this.peer as ArkBaseSpanPeer)
     }

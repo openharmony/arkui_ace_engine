@@ -75,24 +75,24 @@ export interface SpanAttribute extends BaseSpan {
     /** @memo */
     textShadow(value: ShadowOptions | Array<ShadowOptions>): this
 }
-/** @memo */
-export function BaseSpan(
-  /** @memo */
-  style: ((attributes: BaseSpanAttribute) => void) | undefined,
+// /** @memo */
+// export function BaseSpan(
+//   /** @memo */
+//   style: ((attributes: BaseSpanAttribute) => void) | undefined,
   
-  /** @memo */
-  content_?: () => void,
-) {
-    const receiver = remember(() => {
-        return new ArkBaseSpanComponent()
-    })
-    NodeAttach<ArkBaseSpanPeer>((): ArkBaseSpanPeer => ArkBaseSpanPeer.create(receiver), (_: ArkBaseSpanPeer) => {
+//   /** @memo */
+//   content_?: () => void,
+// ) {
+//     const receiver = remember(() => {
+//         return new ArkBaseSpanComponent()
+//     })
+//     NodeAttach<ArkBaseSpanPeer>((): ArkBaseSpanPeer => ArkBaseSpanPeer.create(receiver), (_: ArkBaseSpanPeer) => {
         
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
+//         style?.(receiver)
+//         content_?.()
+//         receiver.applyAttributesFinish()
+//     })
+// }
 /** @memo */
 export function Span(
   /** @memo */

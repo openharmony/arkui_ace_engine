@@ -223,7 +223,7 @@ export function modifierNullWithKey(modifiers: ObservedMap, identity: string) {
     }
 }
 
-export class ArkCommonAttributeSet implements CommonAttribute {
+export class ArkCommonAttributeSet /* implements CommonAttribute */ {
     _modifiersWithKeys: ObservedMap = new ObservedMap();
     _instanceId: number = -1;
 

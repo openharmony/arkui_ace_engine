@@ -1261,41 +1261,7 @@ export class GestureGroupInterfaceInternal implements MaterializedBase,GestureGr
         return obj
     }
 }
-export class ScrollableTargetInfoInternal {
-    public static fromPtr(ptr: KPointer): ScrollableTargetInfo {
-        const obj : ScrollableTargetInfo = new ScrollableTargetInfo()
-        obj.peer = new Finalizable(ptr, ScrollableTargetInfo.getFinalizer())
-        return obj
-    }
-}
-export class ScrollableTargetInfo extends EventTargetInfo implements MaterializedBase {
-    static ctor_scrollabletargetinfo(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_ctor()
-        return retval
-    }
-    constructor() {
-        super()
-        const ctorPtr : KPointer = ScrollableTargetInfo.ctor_scrollabletargetinfo()
-        this.peer = new Finalizable(ctorPtr, ScrollableTargetInfo.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ScrollableTargetInfo_getFinalizer()
-    }
-    public isBegin(): boolean {
-        return this.isBegin_serialize()
-    }
-    public isEnd(): boolean {
-        return this.isEnd_serialize()
-    }
-    private isBegin_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_isBegin(this.peer!.ptr)
-        return retval
-    }
-    private isEnd_serialize(): boolean {
-        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_isEnd(this.peer!.ptr)
-        return retval
-    }
-}
+
 export class EventTargetInfoInternal {
     public static fromPtr(ptr: KPointer): EventTargetInfo {
         const obj : EventTargetInfo = new EventTargetInfo()
@@ -1409,6 +1375,44 @@ export class GestureRecognizer implements MaterializedBase {
         return retval
     }
 }
+
+export class ScrollableTargetInfoInternal {
+    public static fromPtr(ptr: KPointer): ScrollableTargetInfo {
+        const obj : ScrollableTargetInfo = new ScrollableTargetInfo()
+        obj.peer = new Finalizable(ptr, ScrollableTargetInfo.getFinalizer())
+        return obj
+    }
+}
+
+export class ScrollableTargetInfo extends EventTargetInfo implements MaterializedBase {
+    static ctor_scrollabletargetinfo(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_ctor()
+        return retval
+    }
+    constructor() {
+        super()
+        const ctorPtr : KPointer = ScrollableTargetInfo.ctor_scrollabletargetinfo()
+        this.peer = new Finalizable(ctorPtr, ScrollableTargetInfo.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ScrollableTargetInfo_getFinalizer()
+    }
+    public isBegin(): boolean {
+        return this.isBegin_serialize()
+    }
+    public isEnd(): boolean {
+        return this.isEnd_serialize()
+    }
+    private isBegin_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_isBegin(this.peer!.ptr)
+        return retval
+    }
+    private isEnd_serialize(): boolean {
+        const retval  = ArkUIGeneratedNativeModule._ScrollableTargetInfo_isEnd(this.peer!.ptr)
+        return retval
+    }
+}
+
 export class PanRecognizerInternal {
     public static fromPtr(ptr: KPointer): PanRecognizer {
         const obj : PanRecognizer = new PanRecognizer()

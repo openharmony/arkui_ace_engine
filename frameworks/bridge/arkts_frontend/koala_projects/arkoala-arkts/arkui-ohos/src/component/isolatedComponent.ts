@@ -35,8 +35,8 @@ import { RectShape } from "./../generated/ArkRectShapeMaterialized"
 import { AttributeModifier } from "./../handwritten"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkIsolatedComponentComponent } from "./../generated/ArkIsolatedComponent"
-import { ArkIsolatedComponentPeer } from "./../generated/peers/ArkIsolatedComponentPeer"
+// import { ArkIsolatedComponentComponent } from "./../generated/ArkIsolatedComponent"
+// import { ArkIsolatedComponentPeer } from "./../generated/peers/ArkIsolatedComponentPeer"
 export interface RestrictedWorker {
     _RestrictedWorkerStub: string;
 }
@@ -45,6 +45,6 @@ export interface IsolatedOptions {
     worker: RestrictedWorker;
 }
 export type IsolatedComponentInterface = (options: IsolatedOptions) => IsolatedComponentAttribute;
-export interface IsolatedComponentAttribute extends CommonMethod<IsolatedComponentAttribute> {
-    onError: ErrorCallback;
+export interface IsolatedComponentAttribute extends CommonMethod {
+    onError(value: ErrorCallback): this
 }

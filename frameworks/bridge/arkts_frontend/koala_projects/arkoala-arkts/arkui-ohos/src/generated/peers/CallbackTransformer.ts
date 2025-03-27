@@ -15,7 +15,7 @@
 
 import { KPointer } from "@koalaui/interop"
 import { PeerNode } from "../../PeerNode"
-import { CustomBuilder } from "../ArkCommonInterfaces"
+import { CustomBuilder } from "../../component/common"
 import { CustomNodeBuilder } from "../ArkCustomBuilderInterfaces"
 import { ArkComponentRootPeer } from "./ArkStaticComponentsPeer"
 

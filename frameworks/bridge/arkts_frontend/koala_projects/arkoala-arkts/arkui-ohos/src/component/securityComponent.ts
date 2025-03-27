@@ -75,21 +75,21 @@ export interface SecurityComponentMethod {
     /** @memo */
     constraintSize(value: ConstraintSizeOptions): this
 }
-/** @memo */
-export function SecurityComponentMethod(
-  /** @memo */
-  style: ((attributes: SecurityComponentMethodAttribute) => void) | undefined,
+// /** @memo */
+// export function SecurityComponentMethod(
+//   /** @memo */
+//   style: ((attributes: SecurityComponentMethodAttribute) => void) | undefined,
   
-  /** @memo */
-  content_?: () => void,
-) {
-    const receiver = remember(() => {
-        return new ArkSecurityComponentMethodComponent()
-    })
-    NodeAttach<ArkSecurityComponentMethodPeer>((): ArkSecurityComponentMethodPeer => ArkSecurityComponentMethodPeer.create(receiver), (_: ArkSecurityComponentMethodPeer) => {
+//   /** @memo */
+//   content_?: () => void,
+// ) {
+//     const receiver = remember(() => {
+//         return new ArkSecurityComponentMethodComponent()
+//     })
+//     NodeAttach<ArkSecurityComponentMethodPeer>((): ArkSecurityComponentMethodPeer => ArkSecurityComponentMethodPeer.create(receiver), (_: ArkSecurityComponentMethodPeer) => {
         
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
-}
+//         style?.(receiver)
+//         content_?.()
+//         receiver.applyAttributesFinish()
+//     })
+// }

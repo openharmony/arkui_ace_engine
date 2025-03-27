@@ -19,15 +19,15 @@
 import { int32, float32 } from "@koalaui/common"
 import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentBase } from "./ComponentBase"
+import { ComponentBase } from "../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkSecurityComponentMethodPeer } from "./peers/ArkSecurityComponentPeer"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./../component/units"
-import { SecurityComponentLayoutDirection } from "./../component/securityComponent"
+import { SecurityComponentLayoutDirection, SecurityComponentMethod } from "./../component/securityComponent"
 import { FontStyle, FontWeight, BorderStyle } from "./../component/enums"
 import { Resource } from "./ArkResourceInterfaces"
 /** @memo:stable */
-export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethodAttribute {
+export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {
         return (this.peer as ArkSecurityComponentMethodPeer)
     }

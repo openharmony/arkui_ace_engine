@@ -17,7 +17,7 @@ import { GridItemAttribute } from "../../generated";
 import { ArkGridItemPeer } from "../../generated/peers/ArkGridItemPeer";
 import { ArkBaseNode } from "./ArkBaseNode";
 
-export class ArkGridItemNode extends ArkBaseNode implements GridItemAttribute {
+export class ArkGridItemNode extends ArkBaseNode /* implements GridItemAttribute */ {
     
     rowStart(value : number) : this {
         if (value) {

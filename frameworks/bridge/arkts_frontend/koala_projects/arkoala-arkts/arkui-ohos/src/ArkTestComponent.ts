@@ -16,7 +16,7 @@
 import { NodeAttach, remember  } from "@koalaui/runtime"
 import { ArkCommonMethodComponent } from "./generated/ArkCommon"
 import { ArkTestComponentPeer } from "./peers/ArkTestComponentPeer"
-import { CommonMethod } from "./generated/ArkCommonInterfaces"
+import { CommonMethod } from "./component/common"
 import { InteropNativeModule } from "@koalaui/interop"
 
 /** @memo:stable */
@@ -78,7 +78,7 @@ export interface TestComponentOptions {
     id?: number;
 }
 export type TestComponentInterface = (options?: TestComponentOptions) => TestComponentAttribute;
-export interface TestComponentAttribute extends CommonMethod<TestComponentAttribute> {
+export interface TestComponentAttribute extends CommonMethod {
     onChange?: Function0<void>;
     log?: string
 }

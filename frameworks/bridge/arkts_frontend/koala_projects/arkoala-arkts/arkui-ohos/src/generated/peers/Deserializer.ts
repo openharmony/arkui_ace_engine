@@ -1012,7 +1012,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeGestureEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1143194492, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1143194492, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1026,7 +1026,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1097178637, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1097178637, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1040,7 +1040,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePopInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(624053870, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(624053870, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1054,7 +1054,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(state.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-301561698, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-301561698, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1067,7 +1067,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1867723152, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1867723152, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1084,7 +1084,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : KPointer | undefined;
     const _continuationCallback : ((value: KPointer) => void) = (value: KPointer):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1766817632, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as KPointer); }
     }
@@ -1305,7 +1305,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissPopupAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2004166751, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2004166751, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1328,7 +1328,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2038961969, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2038961969, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1342,7 +1342,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNavigationTransitionProxy(transitionProxy);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1375731066, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1375731066, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1356,7 +1356,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(313269291, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(313269291, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1378,7 +1378,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : number | undefined;
     const _continuationCallback : ((index: number) => void) = (value: number):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2076995110, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2076995110, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2076995110, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2076995110, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as number); }
     }
@@ -1418,7 +1418,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(breakpoints);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1438,7 +1438,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTimePickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1557859605, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1557859605, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1557859605, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1557859605, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1701,7 +1701,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextPickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1290504509, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1290504509, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1290504509, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1290504509, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -1727,7 +1727,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(start);
     _argsSerializer.writeNumber(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-614475458, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-614475458, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-614475458, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-614475458, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2000,7 +2000,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTabContentTransitionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1223938478, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1223938478, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1223938478, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1223938478, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2290,7 +2290,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextRange(rangeBefore);
     _argsSerializer.writeTextRange(rangeAfter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1648184341, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1648184341, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1648184341, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1648184341, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2307,7 +2307,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2116745428, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2116745428, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2116745428, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2116745428, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -2554,7 +2554,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1502213270, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1502213270, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1502213270, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1502213270, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2593,7 +2593,7 @@ export class Deserializer extends DeserializerBase {
     }
     _argsSerializer.writeInt32(operation.valueOf());
     _argsSerializer.writeBoolean(isAnimated);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1852781814, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1852781814, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1852781814, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1852781814, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2798,7 +2798,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt64((parameter.getTime() as int64));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1405382363, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1405382363, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1405382363, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1405382363, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2812,7 +2812,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDatePickerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1280920532, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1280920532, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1280920532, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1280920532, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2923,7 +2923,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(parameter.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-224451112, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-224451112, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-224451112, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-224451112, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2937,7 +2937,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(36519084, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(36519084, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(36519084, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(36519084, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2951,7 +2951,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSpringBackAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1536231691, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1536231691, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1536231691, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1536231691, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2965,7 +2965,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissSheetAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(889549796, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(889549796, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(889549796, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(889549796, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2979,7 +2979,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSheetDismiss(sheetDismiss);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(22609082, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(22609082, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(22609082, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(22609082, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -2993,7 +2993,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissContentCoverAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1283506641, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1283506641, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1283506641, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1283506641, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3038,7 +3038,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const event_isVisible  = event.isVisible;
     _argsSerializer.writeBoolean(event_isVisible);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1561407084, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1561407084, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1561407084, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1561407084, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3475,7 +3475,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDismissDialogAction(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2095828093, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2095828093, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2095828093, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2095828093, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3649,7 +3649,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-733525640, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-733525640, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-733525640, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-733525640, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3663,7 +3663,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFloat32(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1264236374, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1264236374, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1264236374, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1264236374, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3809,7 +3809,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(info);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(814634522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(814634522, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3824,7 +3824,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(progress);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-968773856, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-968773856, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-968773856, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-968773856, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -3984,7 +3984,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeUIExtensionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1063506522, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1063506522, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1063506522, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1063506522, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -4319,7 +4319,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const selectedText_plainText  = selectedText.plainText;
     _argsSerializer.writeString(selectedText_plainText);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-122223466, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-122223466, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-122223466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-122223466, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5075,7 +5075,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(value_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-720435526, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-720435526, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-720435526, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-720435526, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5104,7 +5104,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeNumber(selected_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1111620998, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1111620998, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1111620998, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1111620998, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5179,7 +5179,7 @@ export class Deserializer extends DeserializerBase {
         const value_1  = value as Resource;
         _argsSerializer.writeResource(value_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(188373904, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(188373904, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(188373904, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(188373904, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5754,7 +5754,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSwiperContentTransitionProxy(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-416053361, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-416053361, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-416053361, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-416053361, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5785,7 +5785,7 @@ export class Deserializer extends DeserializerBase {
         const selected_1  = selected as Resource;
         _argsSerializer.writeResource(selected_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-956455499, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-956455499, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-956455499, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-956455499, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5972,7 +5972,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : OffsetResult | undefined;
     const _continuationCallback : ((value: OffsetResult) => void) = (value: OffsetResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-721521596, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721521596, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-721521596, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721521596, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as OffsetResult); }
     }
@@ -6860,7 +6860,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(388680218, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(388680218, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(388680218, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(388680218, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7434,7 +7434,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : [ number, number, number, number ] | undefined;
     const _continuationCallback : ((value: [ number, number, number, number ]) => void) = (value: [ number, number, number, number ]):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1618565120, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1618565120, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1618565120, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1618565120, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as [ number, number, number, number ]); }
     }
@@ -7451,7 +7451,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : [ number, number ] | undefined;
     const _continuationCallback : ((value: [ number, number ]) => void) = (value: [ number, number ]):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1602877440, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1602877440, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1602877440, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1602877440, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as [ number, number ]); }
     }
@@ -7841,7 +7841,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isExpanding);
     _argsSerializer.writeNumber(currentRatio);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(541663396, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(541663396, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(541663396, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(541663396, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7874,7 +7874,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSizeOptions(oldValue);
     _argsSerializer.writeSizeOptions(newValue);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1716637992, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1716637992, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1716637992, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1716637992, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7888,7 +7888,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeMouseEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1382640094, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1382640094, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1382640094, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1382640094, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7903,7 +7903,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isHover);
     _argsSerializer.writeHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(68560477, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(68560477, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(68560477, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(68560477, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7917,7 +7917,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeKeyEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(707696468, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(707696468, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(707696468, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(707696468, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -7931,7 +7931,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTouchEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1676021850, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1676021850, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1676021850, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1676021850, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -8028,7 +8028,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : GestureJudgeResult | undefined;
     const _continuationCallback : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2119548940, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2119548940, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2119548940, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2119548940, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as GestureJudgeResult); }
     }
@@ -9832,7 +9832,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(transitionIn);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1878458553, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1878458553, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1878458553, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1878458553, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12487,7 +12487,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(name);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-588228933, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -12988,7 +12988,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePixelMap(result);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1289587365, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1289587365, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1289587365, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1289587365, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13004,7 +13004,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(index);
     _argsSerializer.writePointer(mark);
     _argsSerializer.writeInt32(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13079,7 +13079,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : WithThemeAttribute | undefined;
     const _continuationCallback : ((value: WithThemeAttribute) => void) = (value: WithThemeAttribute):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(219587748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(219587748, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as WithThemeAttribute); }
     }
@@ -13098,7 +13098,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : NavigationAnimatedTransition | undefined;
     const _continuationCallback : ((value: NavigationAnimatedTransition | undefined) => void) = (value?: NavigationAnimatedTransition | undefined):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1044833488, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1044833488, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1044833488, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1044833488, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as NavigationAnimatedTransition | undefined); }
     }
@@ -13113,7 +13113,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(value);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13128,7 +13128,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(type.valueOf());
     _argsSerializer.writeNumber(progress);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1627123591, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1627123591, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1627123591, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1627123591, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13143,7 +13143,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(scrollOffset);
     _argsSerializer.writeInt32(scrollState.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-160015401, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-160015401, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-160015401, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-160015401, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13158,7 +13158,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(from);
     _argsSerializer.writeNumber(to);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1200281222, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1200281222, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13182,7 +13182,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : IsolatedComponentAttribute | undefined;
     const _continuationCallback : ((value: IsolatedComponentAttribute) => void) = (value: IsolatedComponentAttribute):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2139680213, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2139680213, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2139680213, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2139680213, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as IsolatedComponentAttribute); }
     }
@@ -13200,7 +13200,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWithThemeAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1436479104, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1436479104, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1436479104, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1436479104, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13214,7 +13214,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWebResourceResponse(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(831645046, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(831645046, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(831645046, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(831645046, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13228,7 +13228,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeWebKeyboardOptions(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1376223390, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1376223390, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1376223390, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1376223390, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13253,7 +13253,7 @@ export class Deserializer extends DeserializerBase {
         const value_1  = value as DragItemInfo;
         _argsSerializer.writeDragItemInfo(value_1);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-620935067, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-620935067, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-620935067, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-620935067, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13270,7 +13270,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(value_0);
     const value_1  = value[1];
     _argsSerializer.writeNumber(value_1);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-607365481, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-607365481, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-607365481, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-607365481, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13291,7 +13291,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(value_2);
     const value_3  = value[3];
     _argsSerializer.writeNumber(value_3);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(148489367, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(148489367, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(148489367, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(148489367, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13305,7 +13305,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTouchResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1943507619, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1943507619, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1943507619, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1943507619, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13320,7 +13320,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(name);
     _argsSerializer.writeCustomObject("Any", param);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1493806035, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1493806035, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1493806035, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1493806035, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13334,7 +13334,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePointer(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(721562324, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(721562324, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(721562324, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(721562324, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13354,7 +13354,7 @@ export class Deserializer extends DeserializerBase {
         const value_value  = value!;
         _argsSerializer.writeTabContentAnimatedTransition(value_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-143931627, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143931627, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-143931627, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143931627, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13385,7 +13385,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(error_value_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-756319131, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-756319131, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-756319131, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-756319131, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13405,7 +13405,7 @@ export class Deserializer extends DeserializerBase {
         const value_value  = value!;
         _argsSerializer.writeNavigationAnimatedTransition(value_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2035339519, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2035339519, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2035339519, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2035339519, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13429,7 +13429,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeString(error_value_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-543655128, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-543655128, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-543655128, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-543655128, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13443,7 +13443,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnScrollFrameBeginHandlerResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1637092936, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1637092936, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1637092936, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1637092936, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13457,7 +13457,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOffsetResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1295952075, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1295952075, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1295952075, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13471,7 +13471,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(titleMode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1685437830, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1685437830, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1685437830, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1685437830, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13485,7 +13485,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(960690982, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(960690982, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(960690982, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(960690982, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13500,7 +13500,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     const value_offsetRemain  = value.offsetRemain;
     _argsSerializer.writeNumber(value_offsetRemain);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-251706058, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-251706058, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-251706058, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-251706058, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13517,7 +13517,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeIsolatedComponentAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(719029905, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(719029905, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(719029905, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(719029905, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13531,7 +13531,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(value.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1755111025, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1755111025, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1755111025, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1755111025, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13545,7 +13545,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeGestureRecognizer(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(776202910, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(776202910, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(776202910, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(776202910, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13559,7 +13559,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(value.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-684588584, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-684588584, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-684588584, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-684588584, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13573,7 +13573,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value));
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-721106019, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721106019, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-721106019, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-721106019, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13587,7 +13587,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeComputedBarAttribute(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1270343661, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1270343661, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1270343661, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1270343661, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13605,7 +13605,7 @@ export class Deserializer extends DeserializerBase {
         const value_element : string = value[i];
         _argsSerializer.writeString(value_element);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-440782244, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-440782244, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-440782244, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-440782244, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13620,7 +13620,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(xPos);
     _argsSerializer.writeNumber(yPos);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1964292933, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1964292933, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1964292933, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1964292933, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -13906,7 +13906,7 @@ export class Deserializer extends DeserializerBase {
         const parameter_want_value  = parameter_want!;
         _argsSerializer.writeWant(parameter_want_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-582934742, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-582934742, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-582934742, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14060,7 +14060,7 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writeCustomObject("Object", event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-823037763, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-823037763, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-823037763, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-823037763, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14100,7 +14100,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeAdsBlockedDetails(details);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1572284740, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1572284740, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1572284740, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1572284740, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14152,7 +14152,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : WebKeyboardOptions | undefined;
     const _continuationCallback : ((value: WebKeyboardOptions) => void) = (value: WebKeyboardOptions):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1829763354, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1829763354, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1829763354, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1829763354, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as WebKeyboardOptions); }
     }
@@ -14166,7 +14166,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(viewportFit.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1847083191, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1847083191, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1847083191, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1847083191, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14215,7 +14215,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1334389194, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1334389194, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1334389194, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1334389194, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14237,7 +14237,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRenderProcessNotRespondingData(data);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(47282303, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(47282303, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(47282303, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(47282303, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14261,7 +14261,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(865258467, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(865258467, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(865258467, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(865258467, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -14301,7 +14301,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNativeEmbedTouchInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1090303858, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1090303858, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1090303858, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1090303858, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14322,7 +14322,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNativeEmbedVisibilityInfo(nativeEmbedVisibilityInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1641338704, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1641338704, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1641338704, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1641338704, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14369,7 +14369,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNativeEmbedDataInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(477481563, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(477481563, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(477481563, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(477481563, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14402,7 +14402,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeIntelligentTrackingPreventionDetails(details);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1377876844, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1377876844, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1377876844, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1377876844, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14426,7 +14426,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeLoadCommittedDetails(loadCommittedDetails);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-398722176, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-398722176, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-398722176, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-398722176, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14440,7 +14440,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(threatType.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1099824577, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1099824577, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1099824577, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1099824577, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14461,7 +14461,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnOverScrollEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-860386431, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-860386431, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-860386431, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-860386431, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14484,7 +14484,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1231444306, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1231444306, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1231444306, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1231444306, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -14545,7 +14545,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeLargestContentfulPaint(largestContentfulPaint);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1390640532, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1390640532, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1390640532, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1390640532, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14578,7 +14578,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFirstMeaningfulPaint(firstMeaningfulPaint);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(767275770, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(767275770, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(767275770, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(767275770, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14599,7 +14599,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnFirstContentfulPaintEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1852060212, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1852060212, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1852060212, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1852060212, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14619,7 +14619,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnAudioStateChangedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1559789631, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1559789631, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1559789631, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1559789631, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14639,7 +14639,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnDataResubmittedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(118631204, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(118631204, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(118631204, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(118631204, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14659,7 +14659,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnPageVisibleEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1805946367, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1805946367, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1805946367, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1805946367, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14679,7 +14679,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnFaviconReceivedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-243916553, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-243916553, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-243916553, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-243916553, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14700,7 +14700,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnTouchIconUrlReceivedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1657893064, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1657893064, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1657893064, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1657893064, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14723,7 +14723,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnWindowNewEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2052382574, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2052382574, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2052382574, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2052382574, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14757,7 +14757,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnClientAuthenticationEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(608991355, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(608991355, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(608991355, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(608991355, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14783,7 +14783,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeSslErrorEvent(sslErrorEvent);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-399603614, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-399603614, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-399603614, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-399603614, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14816,7 +14816,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnSslErrorEventReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1624791665, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1624791665, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1624791665, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1624791665, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14837,7 +14837,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnScrollEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-172908881, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-172908881, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-172908881, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-172908881, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14859,7 +14859,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnSearchResultReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1495570, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1495570, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1495570, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1495570, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14872,7 +14872,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1788572278, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1788572278, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1788572278, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1788572278, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14896,7 +14896,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(332449533, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(332449533, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(332449533, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(332449533, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -14916,7 +14916,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnScreenCaptureRequestEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1972321573, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1972321573, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1972321573, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1972321573, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14936,7 +14936,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnPermissionRequestEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(529980696, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(529980696, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(529980696, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(529980696, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -14959,7 +14959,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : WebResourceResponse | undefined;
     const _continuationCallback : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1442698200, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1442698200, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1442698200, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1442698200, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as WebResourceResponse); }
     }
@@ -14984,7 +14984,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(780282803, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(780282803, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(780282803, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(780282803, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15005,7 +15005,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnScaleChangeEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1782102148, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1782102148, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1782102148, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1782102148, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15039,7 +15039,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFullScreenEnterEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(81230317, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(81230317, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(81230317, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(81230317, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15059,7 +15059,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnResourceLoadEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(793995118, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(793995118, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(793995118, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(793995118, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15082,7 +15082,7 @@ export class Deserializer extends DeserializerBase {
         const event_value_fileSelector  = event_value.fileSelector;
         _argsSerializer.writeCustomObject("Object", event_value_fileSelector);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1962174977, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1962174977, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1962174977, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1962174977, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15106,7 +15106,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(222742448, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(222742448, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(222742448, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(222742448, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15130,7 +15130,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-636069598, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-636069598, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-636069598, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-636069598, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15150,7 +15150,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnRenderExitedEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1413785559, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1413785559, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1413785559, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1413785559, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15173,7 +15173,7 @@ export class Deserializer extends DeserializerBase {
         const event_value_error  = event_value.error;
         _argsSerializer.writeCustomObject("Object", event_value_error);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(361012115, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(361012115, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(361012115, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(361012115, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15208,7 +15208,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-985284966, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-985284966, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-985284966, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-985284966, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15229,7 +15229,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnRefreshAccessedHistoryEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1978364344, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1978364344, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1978364344, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1978364344, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15253,7 +15253,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnDownloadStartEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1834611702, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1834611702, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1834611702, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1834611702, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15274,7 +15274,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnHttpErrorReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2066745559, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2066745559, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2066745559, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2066745559, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15295,7 +15295,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnErrorReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1792851375, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1792851375, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1792851375, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1792851375, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15318,7 +15318,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(893367077, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(893367077, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(893367077, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(893367077, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15344,7 +15344,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1826742986, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1826742986, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1826742986, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1826742986, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15369,7 +15369,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(317864672, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(317864672, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(317864672, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(317864672, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15394,7 +15394,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-873162122, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-873162122, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-873162122, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-873162122, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15419,7 +15419,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(806070428, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(806070428, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(806070428, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(806070428, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -15440,7 +15440,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnGeolocationShowEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-941896815, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-941896815, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-941896815, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-941896815, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15460,7 +15460,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnTitleReceiveEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-318085495, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-318085495, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-318085495, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-318085495, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15480,7 +15480,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnProgressChangeEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1018740377, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1018740377, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1018740377, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1018740377, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15500,7 +15500,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnPageBeginEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2040193994, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2040193994, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2040193994, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2040193994, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15520,7 +15520,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnPageEndEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-130135362, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-130135362, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-130135362, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-130135362, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15660,7 +15660,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePlaybackInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2058966418, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2058966418, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2058966418, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2058966418, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15680,7 +15680,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePreparedInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1300890372, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1300890372, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1300890372, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1300890372, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -15700,7 +15700,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFullscreenInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(583294398, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(583294398, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(583294398, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(583294398, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16018,7 +16018,7 @@ export class Deserializer extends DeserializerBase {
             _argsSerializer.writeNumber(index_1_element);
         }
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1078223620, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1078223620, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1078223620, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1078223620, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16033,7 +16033,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(value);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-879490874, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-879490874, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-879490874, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-879490874, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16250,7 +16250,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(enterKey.valueOf());
     _argsSerializer.writeSubmitEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1961646162, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1961646162, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1961646162, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1961646162, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16353,7 +16353,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(value);
     _argsSerializer.writePasteEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-683652998, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-683652998, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-683652998, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-683652998, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16374,7 +16374,7 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writeSubmitEvent(event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-401980571, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-401980571, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16388,7 +16388,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(enterKey.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1802605016, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1802605016, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1802605016, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1802605016, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16466,7 +16466,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-349727249, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-349727249, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-349727249, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-349727249, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -16489,7 +16489,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : TabContentAnimatedTransition | undefined;
     const _continuationCallback : ((value: TabContentAnimatedTransition | undefined) => void) = (value?: TabContentAnimatedTransition | undefined):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(221706282, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(221706282, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(221706282, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(221706282, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as TabContentAnimatedTransition | undefined); }
     }
@@ -16544,7 +16544,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(253696833, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(253696833, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(253696833, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(253696833, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16559,7 +16559,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1942856551, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1942856551, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1942856551, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1942856551, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16583,7 +16583,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(targetIndex);
     _argsSerializer.writeTabsAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-147408344, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-147408344, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-147408344, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-147408344, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16646,7 +16646,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(position);
     _argsSerializer.writeNumber(mainAxisLength);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1532328438, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1532328438, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1532328438, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1532328438, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16679,7 +16679,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(606029871, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(606029871, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(606029871, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(606029871, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16694,7 +16694,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-143686583, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143686583, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-143686583, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-143686583, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16718,7 +16718,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeNumber(targetIndex);
     _argsSerializer.writeSwiperAnimationEvent(extraInfo);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(876602502, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(876602502, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(876602502, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(876602502, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16805,7 +16805,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(value);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(88697971, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(88697971, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(88697971, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(88697971, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -16951,7 +16951,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
     _argsSerializer.writeString(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(794065478, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(794065478, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(794065478, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(794065478, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17007,7 +17007,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeDeleteValue(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-126251459, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-126251459, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-126251459, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-126251459, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17032,7 +17032,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1357792883, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1357792883, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1357792883, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1357792883, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17046,7 +17046,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInsertValue(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1121207885, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1121207885, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1121207885, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1121207885, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17070,7 +17070,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-383025085, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-383025085, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-383025085, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-383025085, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17122,7 +17122,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeString(content);
     _argsSerializer.writePasteEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1738363337, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1738363337, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1738363337, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1738363337, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17137,7 +17137,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(totalOffsetX);
     _argsSerializer.writeNumber(totalOffsetY);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-419979106, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-419979106, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-419979106, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-419979106, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17152,7 +17152,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(selectionStart);
     _argsSerializer.writeNumber(selectionEnd);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(695228737, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(695228737, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(695228737, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(695228737, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17173,7 +17173,7 @@ export class Deserializer extends DeserializerBase {
         const previewText_value  = previewText!;
         _argsSerializer.writePreviewText(previewText_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1729563209, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1729563209, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1729563209, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1729563209, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17194,7 +17194,7 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writeSubmitEvent(event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1717691617, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1717691617, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1717691617, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1717691617, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17380,7 +17380,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : OnScrollFrameBeginHandlerResult | undefined;
     const _continuationCallback : ((value: OnScrollFrameBeginHandlerResult) => void) = (value: OnScrollFrameBeginHandlerResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2133791987, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2133791987, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2133791987, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2133791987, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as OnScrollFrameBeginHandlerResult); }
     }
@@ -17394,7 +17394,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(side.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1259214476, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1259214476, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1259214476, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1259214476, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17409,7 +17409,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
     _argsSerializer.writeInt32(result.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(846787331, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(846787331, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(846787331, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(846787331, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17505,7 +17505,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCopyEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17531,7 +17531,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCutEvent(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1875695871, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1875695871, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1875695871, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1875695871, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17572,7 +17572,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1465860515, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1465860515, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1465860515, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1465860515, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17592,7 +17592,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(enterKey.valueOf());
     _argsSerializer.writeSubmitEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-712186065, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-712186065, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-712186065, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-712186065, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17673,7 +17673,7 @@ export class Deserializer extends DeserializerBase {
         const event_value  = event!;
         _argsSerializer.writePasteEvent(event_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(919057028, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(919057028, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(919057028, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(919057028, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17715,7 +17715,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(667698748, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(667698748, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(667698748, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(667698748, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17729,7 +17729,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTextRange(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(811915501, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(811915501, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(811915501, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(811915501, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17743,7 +17743,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorTextSpanResult(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1980824326, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1980824326, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1980824326, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1980824326, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17774,7 +17774,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-319221262, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-319221262, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-319221262, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-319221262, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -17788,7 +17788,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorRange(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-62253375, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-62253375, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-62253375, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-62253375, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17802,7 +17802,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeRichEditorSelection(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-963852514, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-963852514, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-963852514, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-963852514, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -17878,7 +17878,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(state.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(934309126, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(934309126, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(934309126, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(934309126, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18214,7 +18214,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writePluginErrorData(info);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1992671958, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1992671958, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1992671958, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1992671958, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18239,7 +18239,7 @@ export class Deserializer extends DeserializerBase {
         const input_element : number = input[i];
         _argsSerializer.writeNumber(input_element);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(582384234, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(582384234, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(582384234, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(582384234, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18307,7 +18307,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
     _argsSerializer.writeInt32(result.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(659292561, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(659292561, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(659292561, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(659292561, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18349,7 +18349,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(width);
     _argsSerializer.writeNumber(height);
     _argsSerializer.writeInt32(mode.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1613628570, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1613628570, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1613628570, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1613628570, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18466,7 +18466,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNavDestinationContext(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1642725259, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1642725259, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1642725259, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1642725259, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18538,7 +18538,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1541107680, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1541107680, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1541107680, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1541107680, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -18651,7 +18651,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeClickEvent(event);
     _argsSerializer.writeInt32(result.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189087745, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189087745, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189087745, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189087745, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18820,7 +18820,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1427334496, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1427334496, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1427334496, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1427334496, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -18837,7 +18837,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1054099324, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1054099324, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1054099324, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1054099324, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -18852,7 +18852,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeVisibleListContentInfo(start);
     _argsSerializer.writeVisibleListContentInfo(end);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(625641334, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(625641334, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(625641334, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(625641334, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -18868,7 +18868,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(start);
     _argsSerializer.writeNumber(end);
     _argsSerializer.writeNumber(center);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-352942292, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-352942292, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-352942292, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-352942292, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19021,7 +19021,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeImageLoadResult(result);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1180567691, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1180567691, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1180567691, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1180567691, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19148,7 +19148,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeImageError(error);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1906248580, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1906248580, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1906248580, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1906248580, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19185,7 +19185,7 @@ export class Deserializer extends DeserializerBase {
         const event_value_contentOffsetY  = event_value.contentOffsetY;
         _argsSerializer.writeNumber(event_value_contentOffsetY);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1352745727, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1352745727, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1352745727, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1352745727, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19402,7 +19402,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : Literal_Number_offsetRemain | undefined;
     const _continuationCallback : ((value: Literal_Number_offsetRemain) => void) = (value: Literal_Number_offsetRemain):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2012829508, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2012829508, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2012829508, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2012829508, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as Literal_Number_offsetRemain); }
     }
@@ -19419,7 +19419,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(itemIndex);
     _argsSerializer.writeNumber(insertIndex);
     _argsSerializer.writeBoolean(isSuccess);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1627362945, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1627362945, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1627362945, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1627362945, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19434,7 +19434,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeItemDragInfo(event);
     _argsSerializer.writeNumber(itemIndex);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(296908152, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(296908152, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(296908152, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(296908152, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19450,7 +19450,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeItemDragInfo(event);
     _argsSerializer.writeNumber(itemIndex);
     _argsSerializer.writeNumber(insertIndex);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-918805852, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-918805852, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-918805852, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-918805852, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19464,7 +19464,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeItemDragInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(137353252, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(137353252, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(137353252, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(137353252, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19489,7 +19489,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : CustomBuilder | undefined;
     const _continuationCallback : ((value: CustomBuilder) => void) = (value: CustomBuilder):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1340995650, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1340995650, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1340995650, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1340995650, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as CustomBuilder); }
     }
@@ -19514,7 +19514,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : ComputedBarAttribute | undefined;
     const _continuationCallback : ((value: ComputedBarAttribute) => void) = (value: ComputedBarAttribute):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-3987624, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-3987624, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-3987624, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-3987624, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as ComputedBarAttribute); }
     }
@@ -19783,7 +19783,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCustomObject("Any", info);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(197193081, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(197193081, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(197193081, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(197193081, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19800,7 +19800,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(info_errcode);
     const info_msg  = info.msg;
     _argsSerializer.writeString(info_msg);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1321277443, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1321277443, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1321277443, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1321277443, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19821,7 +19821,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeFormCallbackInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(758395742, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(758395742, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(758395742, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(758395742, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19900,7 +19900,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeHoverEventParam(param);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(9040430, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(9040430, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(9040430, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(9040430, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -19920,7 +19920,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeOnFoldStatusChangeInfo(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(2050387049, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2050387049, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2050387049, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2050387049, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20013,7 +20013,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBusinessError(err);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1936519453, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1936519453, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1936519453, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1936519453, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20040,7 +20040,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeTerminationInfo(parameter);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(691098197, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(691098197, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(691098197, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(691098197, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20822,7 +20822,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(xOffset);
     _argsSerializer.writeNumber(yOffset);
     _argsSerializer.writeInt32(scrollState.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1265626662, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1265626662, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1265626662, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1265626662, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20837,7 +20837,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(first);
     _argsSerializer.writeNumber(last);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1894574320, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1894574320, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1894574320, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1894574320, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -20952,7 +20952,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : HitTestMode | undefined;
     const _continuationCallback : ((value: HitTestMode) => void) = (value: HitTestMode):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-274419246, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-274419246, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-274419246, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-274419246, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as HitTestMode); }
     }
@@ -20974,7 +20974,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : GestureRecognizer | undefined;
     const _continuationCallback : ((value: GestureRecognizer) => void) = (value: GestureRecognizer):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-250780276, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-250780276, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as GestureRecognizer); }
     }
@@ -21028,7 +21028,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : GestureJudgeResult | undefined;
     const _continuationCallback : ((value: GestureJudgeResult) => void) = (value: GestureJudgeResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1319043556, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1319043556, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1319043556, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1319043556, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as GestureJudgeResult); }
     }
@@ -21134,7 +21134,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeInt32(parameter.valueOf());
-    (isSync) ? (InteropNativeModule._CallCallbackSync(463894668, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(463894668, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(463894668, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(463894668, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -21161,7 +21161,7 @@ export class Deserializer extends DeserializerBase {
         const extraParams_value  = extraParams!;
         _argsSerializer.writeString(extraParams_value);
     }
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-17167687, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-17167687, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-17167687, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-17167687, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -21185,7 +21185,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : CustomBuilder | DragItemInfo | undefined;
     const _continuationCallback : ((value: CustomBuilder | DragItemInfo) => void) = (value: CustomBuilder | DragItemInfo):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(480978023, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(480978023, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(480978023, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(480978023, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as CustomBuilder | DragItemInfo); }
     }
@@ -21320,7 +21320,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeArea(oldValue);
     _argsSerializer.writeArea(newValue);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2024393616, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2024393616, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2024393616, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2024393616, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -21370,7 +21370,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : boolean | undefined;
     const _continuationCallback : ((parameter: boolean) => void) = (value: boolean):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-2061548092, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2061548092, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2061548092, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2061548092, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as boolean); }
     }
@@ -21385,7 +21385,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isHover);
     _argsSerializer.writeAccessibilityHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(589030517, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(589030517, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(589030517, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(589030517, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -21400,7 +21400,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(isHover);
     _argsSerializer.writeHoverEvent(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-916602978, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-916602978, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-916602978, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-916602978, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22498,7 +22498,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : TouchResult | undefined;
     const _continuationCallback : ((value: TouchResult) => void) = (value: TouchResult):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-547276916, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-547276916, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-547276916, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-547276916, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as TouchResult); }
     }
@@ -22658,7 +22658,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCheckboxGroupResult(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1053064240, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1053064240, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1053064240, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1053064240, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22684,7 +22684,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeBoolean(value);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1198592337, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1198592337, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1198592337, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1198592337, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22828,7 +22828,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCalendarRequestedData(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(1074619005, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1074619005, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1074619005, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1074619005, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -22850,7 +22850,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeCalendarSelectedDate(event);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-289198976, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-289198976, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-289198976, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-289198976, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -23592,7 +23592,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(726938390, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(726938390, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(726938390, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(726938390, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -23609,7 +23609,7 @@ export class Deserializer extends DeserializerBase {
     let _continuationValue : Array<string> | undefined;
     const _continuationCallback : ((value: Array<string>) => void) = (value: Array<string>):void => {     _continuationValue = value; }
     _argsSerializer.holdAndWriteCallback(_continuationCallback);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1956514817, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1956514817, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1956514817, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1956514817, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as Array<string>); }
     }
@@ -23623,7 +23623,7 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
     _argsSerializer.writeNumber(index);
-    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189721220, _argsSerializer.asArray(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189721220, _argsSerializer.asArray(), _argsSerializer.length()));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1189721220, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1189721220, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }

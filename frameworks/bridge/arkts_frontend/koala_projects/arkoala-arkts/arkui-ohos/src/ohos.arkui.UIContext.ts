@@ -17,43 +17,9 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterialized"
-import { ArkUIGeneratedNativeModule, Inspector, ComponentObserver } from "#components"
+import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
-import { nullptr, KNativePointer } from "@koalaui/interop"
-
-interface FrameRaterRangeOptions {
-    min: number
-    max: number
-    expected: number
-}
-
-class DynamicSyncScene {
-    frameRateRange_: FrameRaterRangeOptions
-    nodePtr_: KNativePointer
-    type_: number = 0
-
-    constructor(nodePtr: KNativePointer, frameRateRange: FrameRaterRangeOptions) {
-        this.nodePtr_ = nodePtr;
-        this.frameRateRange_ = frameRateRange;
-    }
-
-    getFrameRateRange(): FrameRaterRangeOptions {
-        return this.frameRateRange_;
-    }
-}
-
-export class UIInspector {
-    instanceId_: int32 = 100000;
-    constructor(instanceId: int32) {
-        this.instanceId_ = instanceId;
-    }
-    public createComponentObserver(id: string): ComponentObserver {
-        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
-        let componentObserver = Inspector.createComponentObserver(id);
-        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
-        return componentObserver;
-    }
-}
+import { nullptr } from "@koalaui/interop"
 
 export class UIContext {
     instanceId_: int32 = 10001;
@@ -72,10 +38,6 @@ export class UIContext {
         }
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return null;
-    }
-    public getUIInspector(): UIInspector {
-        let uiInspector = new UIInspector(this.instanceId_);
-        return uiInspector;
     }
 }
 export abstract class FrameCallback {

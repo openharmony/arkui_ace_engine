@@ -48,7 +48,7 @@ class TextAlignModifier extends ModifierWithKey<int32> {
     }
 }
 
-export class ArkTextAttributeSet extends ArkCommonAttributeSet implements TextAttribute {
+export class ArkTextAttributeSet extends ArkCommonAttributeSet /* implements TextAttribute */ {
     textAlign(value: TextAlign | undefined): this {
         if (value) {
             modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier.factory, value as TextAlign as int32);

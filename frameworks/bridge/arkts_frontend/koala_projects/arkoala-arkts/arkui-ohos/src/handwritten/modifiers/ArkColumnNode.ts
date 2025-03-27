@@ -17,7 +17,7 @@ import { ColumnAttribute, HorizontalAlign } from "../../generated";
 import { ArkColumnPeer } from "../../generated/peers/ArkColumnPeer";
 import { ArkBaseNode } from "./ArkBaseNode";
 
-export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
+export class ArkColumnNode extends ArkBaseNode /* implements ColumnAttribute */ {
     alignItems(value: HorizontalAlign | undefined): this {
         if (value) {
             this.getPeer().alignItemsAttribute(value);

@@ -19,7 +19,7 @@
 import { int32, float32 } from "@koalaui/common"
 import { KStringPtr, KBoolean, RuntimeType, runtimeType } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentBase } from "./ComponentBase"
+import { ComponentBase } from "../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkCommonMethodComponent } from "./ArkCommon"
 import { ArkMarqueePeer } from "./peers/ArkMarqueePeer"
