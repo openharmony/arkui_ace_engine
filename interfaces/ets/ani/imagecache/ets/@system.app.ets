@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-loadLibrary("imagecache_ani") 
-export default namespace app {
-    export default class App {
-        native static setImageCacheCount(value: number): void;
-        native static setImageRawDataCacheSize(value: number): void;
+export class App {
+    static {
+        loadLibrary("imagecache_ani") 
     }
+    native static setImageCacheCount(value: number): void;
+    native static setImageRawDataCacheSize(value: number): void;
 }
