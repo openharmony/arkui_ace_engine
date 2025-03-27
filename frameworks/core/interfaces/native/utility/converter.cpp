@@ -896,6 +896,23 @@ Font Convert(const Ark_Font& src)
 }
 
 template<>
+FontInfo Convert(const Ark_FontInfo& src)
+{
+    return {
+        .path = Convert<std::string>(src.path),
+        .postScriptName = Convert<std::string>(src.postScriptName),
+        .fullName = Convert<std::string>(src.fullName),
+        .family = Convert<std::string>(src.family),
+        .subfamily = Convert<std::string>(src.subfamily),
+        .weight = Convert<uint32_t>(src.weight),
+        .width = Convert<uint32_t>(src.width),
+        .italic = Convert<bool>(src.italic),
+        .monoSpace = Convert<bool>(src.monoSpace),
+        .symbolic = Convert<bool>(src.symbolic),
+    };
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient& value)
 {
     Gradient gradient;
