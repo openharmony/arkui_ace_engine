@@ -18,6 +18,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <unordered_map>
 
 #include "base/memory/referenced.h"
@@ -64,6 +65,7 @@ private:
 
     // key: theme id, value: theme instance
     std::map<int32_t, RefPtr<TokenTheme>> themeCache_;
+    std::mutex themeCacheMutex_;
 
     std::vector<bool> darkThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
     std::vector<bool> lightThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
