@@ -256,7 +256,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     const auto& targetOrigin = info.GetTarget().origin;
     // width height x y globalx globaly
     touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
-    touchEvent.targetGlobalPositionY = targetLocalOffset.GetY().ConvertToPx();
+    touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
     touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
     touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
     touchEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
