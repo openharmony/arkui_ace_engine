@@ -10,6 +10,11 @@
     "pages/Tabs/TabsHeightAdaptive",
     "pages/Tabs/TabsSubTabBarStyle",
     "pages/waterflow/WaterFlowMainPage",
-    "pages/waterflow/demo01/WaterFlowDemo"
+    "pages/waterflow/demo01/WaterFlowDemo",
+    "pages/Swiper/SwiperMainPage",
+    "pages/Swiper/OnContentWillScrollNormal",
+    "pages/Swiper/OnContentWillScrollNestList",
+    "pages/Swiper/OnContentWillScrollListNest",
+    "pages/Swiper/CachedCountIsShownNormal"
   ]
 }
