@@ -92,7 +92,4 @@ const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     return &ScaleSymbolEffectAccessorImpl;
 }
 
-struct ScaleSymbolEffectPeer {
-    virtual ~ScaleSymbolEffectPeer() = default;
-};
 }
