@@ -7834,6 +7834,14 @@ void WebDelegate::MaximizeResize()
     }
 }
 
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetNativeInnerWeb(isInnerWeb);
+    }
+}
+
 void WebDelegate::RestoreRenderFit()
 {
     auto webPattern = webPattern_.Upgrade();
