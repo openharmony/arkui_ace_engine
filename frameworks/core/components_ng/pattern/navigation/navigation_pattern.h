@@ -465,6 +465,7 @@ public:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
     void HandleTouchUp();
+    void ClearRecoveryList();
 
     void SetEnableDragBar(bool enabled)
     {
