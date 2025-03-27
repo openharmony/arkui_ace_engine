@@ -286,8 +286,8 @@ HWTEST_F(TextFieldPatternTestNine, CalcAutoScrollStepOffset001, TestSize.Level0)
     Offset localOffset(1, 2);
     pattern_->axis_ = Axis::HORIZONTAL;
     pattern_->contentRect_.width_ = 10;
-    pattern_->CalcAutoScrollStepOffset(localOffset);
-    EXPECT_TRUE(LessOrEqual(pattern_->GetContentRect().Width(), 26));
+    auto ret = pattern_->CalcAutoScrollStepOffset(localOffset);
+    EXPECT_EQ(static_cast<int>(ret.value()), 28);
 }
 
 /**
@@ -391,9 +391,10 @@ HWTEST_F(TextFieldPatternTestNine, GetOriginCaretPosition001, TestSize.Level0)
     GetFocus();
 
     OffsetF offset(0, 0);
+    OffsetF offset2(1, 1);
     pattern_->originCaretPosition_ = offset;
-    auto ret = pattern_->GetOriginCaretPosition(offset);
-    EXPECT_TRUE(ret);
+    pattern_->GetOriginCaretPosition(offset2);
+    EXPECT_TRUE(pattern_->originCaretPosition_ == offset2);
 }
 
 /**
@@ -412,8 +413,8 @@ HWTEST_F(TextFieldPatternTestNine, GetFocusPattern001, TestSize.Level0)
     auto pipelineContext = host->GetContext();
     auto theme = pipelineContext->GetTheme<TextFieldTheme>();
     theme->needFocusBox_ = true;
-    pattern_->GetFocusPattern();
-    EXPECT_TRUE(theme->NeedFocusBox());
+    auto FocusPattern = pattern_->GetFocusPattern();
+    EXPECT_EQ(FocusPattern.styleType_, FocusStyleType::OUTER_BORDER);
 }
 
 /**
