@@ -20,5 +20,5 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 
 struct ImageAttachmentPeer final {
-    OHOS::Ace::RefPtr<OHOS::Ace::ImageSpan> imageSpan;
+    OHOS::Ace::RefPtr<OHOS::Ace::ImageSpan> span;
 };
