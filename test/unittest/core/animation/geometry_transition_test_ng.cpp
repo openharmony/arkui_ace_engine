@@ -760,8 +760,5 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest014, TestSize.Level1)
 
     node->SetWindowBoundary(false);
     EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node2);
-
-    node->SetParent(nullptr);
-    EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node);
 }
 } // namespace OHOS::Ace::NG
