@@ -2254,7 +2254,9 @@ void SearchModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     bool isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto radius = renderContext->GetBorderRadius().value();
+    auto optRadius = renderContext->GetBorderRadius();
+    CHECK_NULL_VOID(optRadius);
+    auto radius = optRadius.value();
 
     radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
         (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);

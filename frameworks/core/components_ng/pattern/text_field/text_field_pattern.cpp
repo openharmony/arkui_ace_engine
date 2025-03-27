@@ -6883,14 +6883,16 @@ std::string TextFieldPattern::GetMinFontSize() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetAdaptMinFontSize()->ToString();
+    auto minFontSize = layoutProperty->GetAdaptMinFontSize();
+    return minFontSize.has_value() ? minFontSize->ToString() : "";
 }
 
 std::string TextFieldPattern::GetMaxFontSize() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetAdaptMaxFontSize()->ToString();
+    auto maxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    return maxFontSize.has_value() ? maxFontSize->ToString() : "";
 }
 
 std::string TextFieldPattern::GetMinFontScale() const
@@ -6919,7 +6921,8 @@ std::string TextFieldPattern::GetTextIndent() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetTextIndent()->ToString();
+    auto textIndent = layoutProperty->GetTextIndent();
+    return textIndent.has_value() ? textIndent->ToString() : "";
 }
 
 Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
