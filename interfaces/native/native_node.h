@@ -6613,7 +6613,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      *
-     *@since 18
+     *@since 17
      */
     NODE_ON_HOVER_EVENT = 27,
 

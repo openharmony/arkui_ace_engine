@@ -410,7 +410,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     // width height x y globalx globaly
     mouseEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
     mouseEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
-    mouseEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    mouseEvent.targetPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
     mouseEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
     mouseEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
     mouseEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
