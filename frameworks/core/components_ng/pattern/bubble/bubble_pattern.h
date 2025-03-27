@@ -166,6 +166,11 @@ public:
         messageNode_ = messageNode;
     }
 
+    RefPtr<FrameNode> GetMessageNode()
+    {
+        return messageNode_;
+    }
+
     void SetCustomPopupTag(bool isCustomPopup)
     {
         isCustomPopup_ = isCustomPopup;
