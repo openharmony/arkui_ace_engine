@@ -251,6 +251,19 @@ HWTEST_F(DragEventAccessorTest, GetDataTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetDataInvalidTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetDataInvalidTest, TestSize.Level1)
+{
+    auto dataPeer = accessor_->getData(vmContext_, nullptr);
+    ASSERT_NE(dataPeer, nullptr);
+    ASSERT_EQ(dataPeer->unifiedData, nullptr);
+    GeneratedModifier::GetUnifiedDataAccessor()->destroyPeer(dataPeer);
+}
+
+/**
  * @tc.name: GetUseCustomDropAnimationTest
  * @tc.desc:
  * @tc.type: FUNC
