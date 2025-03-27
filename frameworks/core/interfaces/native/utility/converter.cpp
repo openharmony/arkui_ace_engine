@@ -92,6 +92,55 @@ namespace {
     }
     static const int32_t MIN_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W100);
     static const int32_t MAX_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W900);
+    const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+
+    std::string GetReplaceContentStr(
+        int32_t pos, const std::string& type, std::vector<std::string>& params, int32_t containCount)
+    {
+        auto index = pos + containCount;
+        if (index < 0) {
+            return std::string();
+        }
+        return params.at(index);
+    }
+    void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)
+    {
+        auto size = static_cast<int32_t>(params.size());
+        if (containCount == size) {
+            return;
+        }
+        std::string::const_iterator start = originStr.begin();
+        std::string::const_iterator end = originStr.end();
+        std::smatch matches;
+        bool shortHolderType = false;
+        bool firstMatch = true;
+        int searchTime = 0;
+        while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+            std::string pos = matches[2];
+            std::string type = matches[4];
+            if (firstMatch) {
+                firstMatch = false;
+                shortHolderType = pos.length() == 0;
+            } else {
+                if (shortHolderType ^ (pos.length() == 0)) {
+                    return;
+                }
+            }
+    
+            std::string replaceContentStr;
+            if (shortHolderType) {
+                replaceContentStr = GetReplaceContentStr(searchTime, type, params, containCount);
+            } else {
+                replaceContentStr =
+                    GetReplaceContentStr(OHOS::Ace::Framework::StringToInt(pos) - 1, type, params, containCount);
+            }
+    
+            originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+            start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
+            end = originStr.end();
+            searchTime++;
+        }
+    }
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -242,8 +291,10 @@ std::optional<std::string> ResourceConverter::ToString()
         case ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
+                ReplaceHolder(result.value(), params_, 0);
             } else if (!params_.empty()) {
                 result = themeConstants_->GetStringByName(params_.front());
+                ReplaceHolder(result.value(), params_, 1);
             } else {
                 LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
             }
