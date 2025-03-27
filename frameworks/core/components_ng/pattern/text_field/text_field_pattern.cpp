@@ -10528,7 +10528,7 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!HasFocus()) {
+    if (!HasFocus() && reason != InputReason::PASTE) {
         int32_t frameId = host->GetId();
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
         int32_t depth = host->GetDepth();
