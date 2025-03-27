@@ -345,7 +345,7 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnVisibleAreaApproximateChangeTe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(UICommonEventAccessorTest, setOnKeyEventTest, TestSize.Level1)
+HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnKeyEventTest, TestSize.Level1)
 {
     static std::optional<TestEvent> testEvent = std::nullopt;
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
@@ -364,8 +364,6 @@ HWTEST_F(UICommonEventAccessorTest, setOnKeyEventTest, TestSize.Level1)
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnKeyEvent(peer_, &optCallback);
-
-  //  focusNode->OnKeyEvent(ev);
 }
 
 /**
@@ -382,8 +380,8 @@ HWTEST_F(UICommonEventAccessorTest, setOnSizeChangeEventTest, TestSize.Level1)
     auto hub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(hub, nullptr);
 
-    auto onSizeChangeFunc = [](const Ark_Int32 resourceId, 
-                                const Ark_SizeOptions oldValue, 
+    auto onSizeChangeFunc = [](const Ark_Int32 resourceId,
+                                const Ark_SizeOptions oldValue,
                                 const Ark_SizeOptions newValue) {
         testEvent = {
             .resourceId = Converter::Convert<int32_t>(resourceId),

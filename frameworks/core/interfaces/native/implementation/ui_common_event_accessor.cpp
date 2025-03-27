@@ -111,12 +111,12 @@ void SetOnKeyEventImpl(Ark_UICommonEvent peer,
     auto rawPtr = Referenced::RawPtr(refPtr);
     auto arkOnKey = Converter::OptConvert<Callback_KeyEvent_Void>(*callback_);
     if (arkOnKey) {
-        auto OnKey = [arkCallback = CallbackHelper(arkOnKey.value())](KeyEventInfo& info) {
+        auto onKey = [arkCallback = CallbackHelper(arkOnKey.value())](KeyEventInfo& info) {
             auto keyEvent = Converter::ArkKeyEventSync(info);
             arkCallback.InvokeSync(keyEvent.ArkValue());
             return true;
         };
-        ViewAbstract::SetOnKeyEvent(rawPtr, std::move(OnKey));
+        ViewAbstract::SetOnKeyEvent(rawPtr, std::move(onKey));
     }
 }
 void SetOnFocusImpl(Ark_UICommonEvent peer,
