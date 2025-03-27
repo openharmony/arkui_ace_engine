@@ -3181,6 +3181,14 @@
     },
     {
         "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundEffect"
+    },
+    {
+        "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_RegisterOnWillDismissCallback"
     },
     {
