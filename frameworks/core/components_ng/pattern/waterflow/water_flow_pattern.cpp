@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "core/common/frontend.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -27,6 +28,15 @@
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
 namespace OHOS::Ace::NG {
+void WaterFlowPattern::OnAttachToFrameNode()
+{
+    auto* context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::SLIDING_WINDOW);
+    }
+}
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -670,6 +680,11 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
 
 void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
+    auto* context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetFrontendType() == FrontendType::ARK_TS) {
+        return; // fix layout mode to SLIDING_WINDOW in ArkTS
+    }
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
         MarkDirtyNodeSelf();
