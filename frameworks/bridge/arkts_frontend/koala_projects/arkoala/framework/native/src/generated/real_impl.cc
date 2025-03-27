@@ -3054,6 +3054,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                       const Callback_Number_Number_Void* value)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -3567,6 +3575,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
                                           const OnScrollVisibleContentChangeCallback* value)
+    {
+    }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
     {
     }
     void OnReachStartImpl(Ark_NativePointer node,
@@ -7824,6 +7840,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                           Ark_Boolean show)
     {
     }
+    void OnWillScrollImpl(Ark_NativePointer node,
+                          const Opt_OnWillScrollCallback* value)
+    {
+    }
+    void OnDidScrollImpl(Ark_NativePointer node,
+                         const Opt_OnScrollCallback* value)
+    {
+    }
     void OnReachStartImpl(Ark_NativePointer node,
                           const Callback_Void* value)
     {
@@ -8622,6 +8646,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GridAttributeModifier::FrictionImpl,
             GridAttributeModifier::AlignItemsImpl,
             GridAttributeModifier::OnScrollImpl,
+            GridAttributeModifier::OnWillScrollImpl,
+            GridAttributeModifier::OnDidScrollImpl,
             GridAttributeModifier::OnReachStartImpl,
             GridAttributeModifier::OnReachEndImpl,
             GridAttributeModifier::OnScrollStartImpl,
@@ -8803,6 +8829,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ListAttributeModifier::OnScrollImpl,
             ListAttributeModifier::OnScrollIndexImpl,
             ListAttributeModifier::OnScrollVisibleContentChangeImpl,
+            ListAttributeModifier::OnWillScrollImpl,
+            ListAttributeModifier::OnDidScrollImpl,
             ListAttributeModifier::OnReachStartImpl,
             ListAttributeModifier::OnReachEndImpl,
             ListAttributeModifier::OnScrollStartImpl,
@@ -10215,6 +10243,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WaterFlowAttributeModifier::FrictionImpl,
             WaterFlowAttributeModifier::CachedCount0Impl,
             WaterFlowAttributeModifier::CachedCount1Impl,
+            WaterFlowAttributeModifier::OnWillScrollImpl,
+            WaterFlowAttributeModifier::OnDidScrollImpl,
             WaterFlowAttributeModifier::OnReachStartImpl,
             WaterFlowAttributeModifier::OnReachEndImpl,
             WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
