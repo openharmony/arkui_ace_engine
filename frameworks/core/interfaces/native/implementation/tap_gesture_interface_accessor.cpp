@@ -22,7 +22,7 @@ namespace TapGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_TapGestureInterface peer)
 {
 }
-Ark_TapGestureInterface CtorImpl()
+Ark_TapGestureInterface CtorImpl(const Opt_TapGestureParameters* value)
 {
     return nullptr;
 }

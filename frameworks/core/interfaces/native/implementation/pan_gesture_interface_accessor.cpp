@@ -22,7 +22,7 @@ namespace PanGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_PanGestureInterface peer)
 {
 }
-Ark_PanGestureInterface CtorImpl()
+Ark_PanGestureInterface CtorImpl(const Opt_Type_PanGestureInterface_value* value)
 {
     return nullptr;
 }

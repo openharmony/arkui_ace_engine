@@ -22,7 +22,7 @@ namespace SwipeGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
 {
 }
-Ark_SwipeGestureInterface CtorImpl()
+Ark_SwipeGestureInterface CtorImpl(const Opt_Literal_Number_fingers_speed_SwipeDirection_direction* value)
 {
     return nullptr;
 }

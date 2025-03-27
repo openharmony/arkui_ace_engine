@@ -211,7 +211,6 @@ const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescri
 const GENERATED_ArkUIPixelMapDrawableDescriptorAccessor* GetPixelMapDrawableDescriptorAccessor();
 const GENERATED_ArkUIAnimatedDrawableDescriptorAccessor* GetAnimatedDrawableDescriptorAccessor();
 const GENERATED_ArkUIDrawingCanvasAccessor* GetDrawingCanvasAccessor();
-const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
 const GENERATED_ArkUIColorMetricsAccessor* GetColorMetricsAccessor();
 const GENERATED_ArkUIWebviewControllerAccessor* GetWebviewControllerAccessor();
 const GENERATED_ArkUIGlobalScope_ohos_arkui_componentSnapshotAccessor* GetGlobalScope_ohos_arkui_componentSnapshotAccessor();
@@ -228,7 +227,14 @@ const GENERATED_ArkUISymbolEffectAccessor* GetSymbolEffectAccessor();
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor();
 const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor();
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor();
+const GENERATED_ArkUILengthMetricsAccessor* GetLengthMetricsAccessor();
+const GENERATED_ArkUIShapeMaskAccessor* GetShapeMaskAccessor();
+const GENERATED_ArkUIShapeClipAccessor* GetShapeClipAccessor();
+const GENERATED_ArkUIMatrix4TransitAccessor* GetMatrix4TransitAccessor();
 const GENERATED_ArkUIPixelMapAccessor* GetPixelMapAccessor();
+const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
+const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
+const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
@@ -239,6 +245,9 @@ const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor();
 const GENERATED_ArkUIScrollMotionAccessor* GetScrollMotionAccessor();
 const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor();
 const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor();
+const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor();
+const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
+const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor();
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
 const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor();
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
@@ -305,9 +314,6 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
 const GENERATED_ArkUIListScrollerAccessor* GetListScrollerAccessor();
 const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAccessor();
-const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor();
-const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
-const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIVirtualScrollOptionsAccessor* GetVirtualScrollOptionsAccessor();
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor();
@@ -333,7 +339,6 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
 const GENERATED_ArkUIStyledStringControllerAccessor* GetStyledStringControllerAccessor();
 const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor();
-const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor();
 const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
 const GENERATED_ArkUITextInputControllerAccessor* GetTextInputControllerAccessor();
 const GENERATED_ArkUITextPickerDialogAccessor* GetTextPickerDialogAccessor();
@@ -516,7 +521,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPixelMapDrawableDescriptorAccessor,
         GetAnimatedDrawableDescriptorAccessor,
         GetDrawingCanvasAccessor,
-        GetLengthMetricsAccessor,
         GetColorMetricsAccessor,
         GetWebviewControllerAccessor,
         GetGlobalScope_ohos_arkui_componentSnapshotAccessor,
@@ -533,7 +537,14 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetScaleSymbolEffectAccessor,
         GetReplaceSymbolEffectAccessor,
         GetFrameNodeAccessor,
+        GetLengthMetricsAccessor,
+        GetShapeMaskAccessor,
+        GetShapeClipAccessor,
+        GetMatrix4TransitAccessor,
         GetPixelMapAccessor,
+        GetRenderNodeAccessor,
+        GetFilterAccessor,
+        GetVisualEffectAccessor,
         GetNavExtenderAccessor,
         GetEventEmulatorAccessor,
         GetActionSheetAccessor,
@@ -544,6 +555,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetScrollMotionAccessor,
         GetCalendarControllerAccessor,
         GetCalendarPickerDialogAccessor,
+        GetNavPathInfoAccessor,
+        GetNavPathStackAccessor,
+        GetNavigationTransitionProxyAccessor,
         GetCanvasGradientAccessor,
         GetCanvasPathAccessor,
         GetPath2DAccessor,
@@ -610,9 +624,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetListScrollerAccessor,
         GetMatrix2DAccessor,
         GetNavDestinationContextAccessor,
-        GetNavPathInfoAccessor,
-        GetNavPathStackAccessor,
-        GetNavigationTransitionProxyAccessor,
         GetPatternLockControllerAccessor,
         GetVirtualScrollOptionsAccessor,
         GetRichEditorBaseControllerAccessor,
@@ -638,7 +649,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetStyledStringControllerAccessor,
         GetLayoutManagerAccessor,
         GetTextMenuItemIdAccessor,
-        GetEditMenuOptionsAccessor,
         GetSubmitEventAccessor,
         GetTextInputControllerAccessor,
         GetTextPickerDialogAccessor,

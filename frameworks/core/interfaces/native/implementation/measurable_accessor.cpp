@@ -47,7 +47,7 @@ Ark_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
 {
     return {};
 }
-Ark_Number GetUniqueIdImpl(Ark_Measurable peer)
+Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
 {
     return {};
 }

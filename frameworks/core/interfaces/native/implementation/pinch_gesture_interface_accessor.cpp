@@ -22,7 +22,7 @@ namespace PinchGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_PinchGestureInterface peer)
 {
 }
-Ark_PinchGestureInterface CtorImpl()
+Ark_PinchGestureInterface CtorImpl(const Opt_Literal_Number_distance_fingers* value)
 {
     return nullptr;
 }

@@ -56,7 +56,7 @@ void SetToImpl(Ark_NavigationTransitionProxy peer,
                const Ark_NavContentInfo* to)
 {
 }
-Ark_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
+Opt_Boolean GetIsInteractiveImpl(Ark_NavigationTransitionProxy peer)
 {
     return {};
 }

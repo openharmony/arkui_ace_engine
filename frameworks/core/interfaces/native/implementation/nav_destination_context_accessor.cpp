@@ -50,7 +50,7 @@ void SetPathStackImpl(Ark_NavDestinationContext peer,
                       Ark_NavPathStack pathStack)
 {
 }
-Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
     return {};
 }

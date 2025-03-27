@@ -38,7 +38,7 @@ Ark_Number OnTotalCountImpl(Ark_VirtualScrollOptions peer)
 {
     return {};
 }
-Ark_Number GetTotalCountImpl(Ark_VirtualScrollOptions peer)
+Opt_Number GetTotalCountImpl(Ark_VirtualScrollOptions peer)
 {
     return {};
 }
@@ -46,7 +46,7 @@ void SetTotalCountImpl(Ark_VirtualScrollOptions peer,
                        const Ark_Number* totalCount)
 {
 }
-Ark_Boolean GetReusableImpl(Ark_VirtualScrollOptions peer)
+Opt_Boolean GetReusableImpl(Ark_VirtualScrollOptions peer)
 {
     return {};
 }

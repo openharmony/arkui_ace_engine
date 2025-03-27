@@ -31,7 +31,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectScope GetScopeImpl(Ark_BounceSymbolEffect peer)
+Opt_EffectScope GetScopeImpl(Ark_BounceSymbolEffect peer)
 {
     return {};
 }
@@ -39,7 +39,7 @@ void SetScopeImpl(Ark_BounceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
 }
-Ark_EffectDirection GetDirectionImpl(Ark_BounceSymbolEffect peer)
+Opt_EffectDirection GetDirectionImpl(Ark_BounceSymbolEffect peer)
 {
     return {};
 }

@@ -71,16 +71,16 @@ Ark_Buffer Marshalling0Impl(Ark_StyledString styledString,
 {
     return {};
 }
+Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
+{
+    return {};
+}
 void Unmarshalling0Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
                         const Ark_Buffer* buffer,
                         const StyledStringUnmarshallCallback* callback_,
                         const Callback_Opt_StyledString_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-}
-Ark_Buffer Marshalling1Impl(Ark_StyledString styledString)
-{
-    return {};
 }
 void Unmarshalling1Impl(Ark_VMContext vmContext,
                         Ark_AsyncWorkerPtr asyncWorker,
@@ -106,8 +106,8 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::FromHtmlImpl,
         StyledStringAccessor::ToHtmlImpl,
         StyledStringAccessor::Marshalling0Impl,
-        StyledStringAccessor::Unmarshalling0Impl,
         StyledStringAccessor::Marshalling1Impl,
+        StyledStringAccessor::Unmarshalling0Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
     };

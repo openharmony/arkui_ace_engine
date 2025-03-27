@@ -48,7 +48,7 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnRemoteReady(frameNode, convValue);
 }
 void OnReceiveImpl(Ark_NativePointer node,
-                   const Ark_ReceiveCallback* value)
+                   const Callback_Map_String_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -57,7 +57,7 @@ void OnReceiveImpl(Ark_NativePointer node,
     //UIExtensionComponentModelNG::SetOnReceive(frameNode, convValue);
 }
 void OnResultImpl(Ark_NativePointer node,
-                  const Callback_Literal_Number_code_Want_want_Void* value)
+                  const Callback_Literal_Number_code__want_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

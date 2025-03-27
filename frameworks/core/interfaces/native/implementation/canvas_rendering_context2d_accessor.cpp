@@ -51,14 +51,14 @@ void OnOnAttachImpl(Ark_VMContext vmContext,
                     const Callback_Void* callback_)
 {
 }
-void OffOnAttachImpl(Ark_VMContext vmContext,
-                     Ark_CanvasRenderingContext2D peer,
-                     const Opt_Callback_Void* callback_)
-{
-}
 void OnOnDetachImpl(Ark_VMContext vmContext,
                     Ark_CanvasRenderingContext2D peer,
                     const Callback_Void* callback_)
+{
+}
+void OffOnAttachImpl(Ark_VMContext vmContext,
+                     Ark_CanvasRenderingContext2D peer,
+                     const Opt_Callback_Void* callback_)
 {
 }
 void OffOnDetachImpl(Ark_VMContext vmContext,
@@ -89,8 +89,8 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::StopImageAnalyzerImpl,
         CanvasRenderingContext2DAccessor::OnOnAttachImpl,
-        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
         CanvasRenderingContext2DAccessor::OnOnDetachImpl,
+        CanvasRenderingContext2DAccessor::OffOnAttachImpl,
         CanvasRenderingContext2DAccessor::OffOnDetachImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,

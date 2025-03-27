@@ -84,12 +84,12 @@ void SetMetaKeyImpl(Ark_KeyEvent peer,
                     const Ark_Number* metaKey)
 {
 }
-Ark_Number GetTimestampImpl(Ark_KeyEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_KeyEvent peer)
 {
     return {};
 }
 void SetTimestampImpl(Ark_KeyEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
 }
 Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
@@ -105,10 +105,10 @@ Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
     return {};
 }
 void SetIntentionCodeImpl(Ark_KeyEvent peer,
-                          const Ark_IntentionCode* intentionCode)
+                          Ark_IntentionCode intentionCode)
 {
 }
-Ark_Number GetUnicodeImpl(Ark_KeyEvent peer)
+Opt_Number GetUnicodeImpl(Ark_KeyEvent peer)
 {
     return {};
 }

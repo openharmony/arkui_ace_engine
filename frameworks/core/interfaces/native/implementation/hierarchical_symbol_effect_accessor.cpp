@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
+Opt_EffectFillStyle GetFillStyleImpl(Ark_HierarchicalSymbolEffect peer)
 {
     return {};
 }

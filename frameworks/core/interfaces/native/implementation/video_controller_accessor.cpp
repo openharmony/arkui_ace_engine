@@ -43,16 +43,16 @@ void SetCurrentTime0Impl(Ark_VideoController peer,
                          const Ark_Number* value)
 {
 }
+void SetCurrentTime1Impl(Ark_VideoController peer,
+                         const Ark_Number* value,
+                         Ark_SeekMode seekMode)
+{
+}
 void RequestFullscreenImpl(Ark_VideoController peer,
                            Ark_Boolean value)
 {
 }
 void ExitFullscreenImpl(Ark_VideoController peer)
-{
-}
-void SetCurrentTime1Impl(Ark_VideoController peer,
-                         const Ark_Number* value,
-                         Ark_SeekMode seekMode)
 {
 }
 void ResetImpl(Ark_VideoController peer)
@@ -69,9 +69,9 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
         VideoControllerAccessor::PauseImpl,
         VideoControllerAccessor::StopImpl,
         VideoControllerAccessor::SetCurrentTime0Impl,
+        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::RequestFullscreenImpl,
         VideoControllerAccessor::ExitFullscreenImpl,
-        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::ResetImpl,
     };
     return &VideoControllerAccessorImpl;

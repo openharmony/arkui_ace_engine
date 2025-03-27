@@ -292,7 +292,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemMove(frameNode, convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const onItemDragStart_event_type* value)
+                         const ListAttribute_onItemDragStart_event_type* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

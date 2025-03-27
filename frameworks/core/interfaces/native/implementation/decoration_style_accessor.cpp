@@ -34,11 +34,11 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
 {
     return {};
 }
-Ark_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
+Opt_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 {
     return {};
 }
-Ark_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
+Opt_TextDecorationStyle GetStyleImpl(Ark_DecorationStyle peer)
 {
     return {};
 }

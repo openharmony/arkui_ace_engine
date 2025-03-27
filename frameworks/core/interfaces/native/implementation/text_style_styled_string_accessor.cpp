@@ -30,23 +30,23 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
+Opt_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
+Opt_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
+Opt_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
+Opt_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }
-Ark_FontStyle GetFontStyleImpl(Ark_TextStyle_styled_string peer)
+Opt_FontStyle GetFontStyleImpl(Ark_TextStyle_styled_string peer)
 {
     return {};
 }

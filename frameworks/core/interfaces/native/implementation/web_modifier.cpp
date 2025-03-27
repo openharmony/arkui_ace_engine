@@ -1067,12 +1067,12 @@ void KeyboardAvoidModeImpl(Ark_NativePointer node,
     //WebModelNG::SetKeyboardAvoidMode(frameNode, convValue);
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         Ark_EditMenuOptions value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //WebModelNG::SetEditMenuOptions(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,

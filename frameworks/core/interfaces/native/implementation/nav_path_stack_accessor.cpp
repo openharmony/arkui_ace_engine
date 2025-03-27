@@ -58,7 +58,7 @@ void PushDestination1Impl(Ark_VMContext vmContext,
 }
 void PushPathByName0Impl(Ark_NavPathStack peer,
                          const Ark_String* name,
-                         const Ark_CustomObject* param,
+                         const Ark_Object* param,
                          const Opt_Boolean* animated)
 {
 }
@@ -181,13 +181,13 @@ Array_String GetAllPathNameImpl(Ark_NavPathStack peer)
 {
     return {};
 }
-Opt_CustomObject GetParamByIndexImpl(Ark_NavPathStack peer,
-                                     const Ark_Number* index)
+Opt_Object GetParamByIndexImpl(Ark_NavPathStack peer,
+                               const Ark_Number* index)
 {
     return {};
 }
-Array_CustomObject GetParamByNameImpl(Ark_NavPathStack peer,
-                                      const Ark_String* name)
+Array_Object GetParamByNameImpl(Ark_NavPathStack peer,
+                                const Ark_String* name)
 {
     return {};
 }

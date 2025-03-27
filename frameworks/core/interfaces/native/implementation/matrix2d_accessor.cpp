@@ -68,7 +68,7 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
 {
     return {};
 }
-Ark_Number GetScaleXImpl(Ark_Matrix2D peer)
+Opt_Number GetScaleXImpl(Ark_Matrix2D peer)
 {
     return {};
 }
@@ -76,7 +76,7 @@ void SetScaleXImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleX)
 {
 }
-Ark_Number GetRotateYImpl(Ark_Matrix2D peer)
+Opt_Number GetRotateYImpl(Ark_Matrix2D peer)
 {
     return {};
 }
@@ -84,7 +84,7 @@ void SetRotateYImpl(Ark_Matrix2D peer,
                     const Ark_Number* rotateY)
 {
 }
-Ark_Number GetRotateXImpl(Ark_Matrix2D peer)
+Opt_Number GetRotateXImpl(Ark_Matrix2D peer)
 {
     return {};
 }
@@ -92,7 +92,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
                     const Ark_Number* rotateX)
 {
 }
-Ark_Number GetScaleYImpl(Ark_Matrix2D peer)
+Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     return {};
 }
@@ -100,7 +100,7 @@ void SetScaleYImpl(Ark_Matrix2D peer,
                    const Ark_Number* scaleY)
 {
 }
-Ark_Number GetTranslateXImpl(Ark_Matrix2D peer)
+Opt_Number GetTranslateXImpl(Ark_Matrix2D peer)
 {
     return {};
 }
@@ -108,7 +108,7 @@ void SetTranslateXImpl(Ark_Matrix2D peer,
                        const Ark_Number* translateX)
 {
 }
-Ark_Number GetTranslateYImpl(Ark_Matrix2D peer)
+Opt_Number GetTranslateYImpl(Ark_Matrix2D peer)
 {
     return {};
 }

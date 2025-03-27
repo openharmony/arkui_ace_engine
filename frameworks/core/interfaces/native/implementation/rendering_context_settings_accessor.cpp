@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
+Opt_Boolean GetAntialiasImpl(Ark_RenderingContextSettings peer)
 {
     return {};
 }

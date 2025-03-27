@@ -44,12 +44,12 @@ void SetTargetImpl(Ark_BaseEvent peer,
                    const Ark_EventTarget* target)
 {
 }
-Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
 {
     return {};
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
 }
 Ark_SourceType GetSourceImpl(Ark_BaseEvent peer)
@@ -60,7 +60,7 @@ void SetSourceImpl(Ark_BaseEvent peer,
                    Ark_SourceType source)
 {
 }
-Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     return {};
 }
@@ -68,7 +68,7 @@ void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)
 {
 }
-Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     return {};
 }
@@ -108,7 +108,7 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
                        Ark_SourceTool sourceTool)
 {
 }
-Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
     return {};
 }
@@ -116,7 +116,7 @@ void SetDeviceIdImpl(Ark_BaseEvent peer,
                      const Ark_Number* deviceId)
 {
 }
-Ark_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
 {
     return {};
 }

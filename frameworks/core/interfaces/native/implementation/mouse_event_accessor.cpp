@@ -118,7 +118,7 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
                             const Callback_Void* stopPropagation)
 {
 }
-Ark_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
     return {};
 }
@@ -126,7 +126,7 @@ void SetRawDeltaXImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaX)
 {
 }
-Ark_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
     return {};
 }
@@ -134,7 +134,7 @@ void SetRawDeltaYImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaY)
 {
 }
-Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
+Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
 {
     return {};
 }

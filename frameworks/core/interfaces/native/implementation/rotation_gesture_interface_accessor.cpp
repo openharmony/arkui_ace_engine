@@ -22,7 +22,7 @@ namespace RotationGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_RotationGestureInterface peer)
 {
 }
-Ark_RotationGestureInterface CtorImpl()
+Ark_RotationGestureInterface CtorImpl(const Opt_Literal_Number_angle_fingers* value)
 {
     return nullptr;
 }

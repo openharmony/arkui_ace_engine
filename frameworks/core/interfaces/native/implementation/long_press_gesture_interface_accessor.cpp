@@ -22,7 +22,7 @@ namespace LongPressGestureInterfaceAccessor {
 void DestroyPeerImpl(Ark_LongPressGestureInterface peer)
 {
 }
-Ark_LongPressGestureInterface CtorImpl()
+Ark_LongPressGestureInterface CtorImpl(const Opt_Literal_Number_duration_fingers_Boolean_repeat* value)
 {
     return nullptr;
 }

@@ -109,12 +109,12 @@ void ObjectFitImpl(Ark_NativePointer node,
     //ImageModelNG::SetObjectFit(frameNode, convValue);
 }
 void ImageMatrixImpl(Ark_NativePointer node,
-                     const Ark_ImageMatrix* value)
+                     Ark_Matrix4Transit value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ImageModelNG::SetImageMatrix(frameNode, convValue);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
@@ -284,12 +284,12 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     //ImageModelNG::SetPrivacySensitive(frameNode, convValue);
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
-                              const Ark_ResolutionQuality* value)
+                              Ark_ResolutionQuality value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
 }
 void OrientationImpl(Ark_NativePointer node,

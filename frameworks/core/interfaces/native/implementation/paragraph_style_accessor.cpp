@@ -30,27 +30,27 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
+Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
+Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
+Opt_Number GetMaxLinesImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
+Opt_TextOverflow GetOverflowImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
+Opt_WordBreak GetWordBreakImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }
-Ark_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
+Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyle peer)
 {
     return {};
 }

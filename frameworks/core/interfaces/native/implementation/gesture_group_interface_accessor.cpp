@@ -22,7 +22,8 @@ namespace GestureGroupInterfaceAccessor {
 void DestroyPeerImpl(Ark_GestureGroupInterface peer)
 {
 }
-Ark_GestureGroupInterface CtorImpl()
+Ark_GestureGroupInterface CtorImpl(Ark_GestureMode mode,
+                                   const Array_GestureType* gesture)
 {
     return nullptr;
 }

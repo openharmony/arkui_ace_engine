@@ -23,7 +23,7 @@ void DestroyPeerImpl(Ark_NavPathInfo peer)
 {
 }
 Ark_NavPathInfo CtorImpl(const Ark_String* name,
-                         const Ark_CustomObject* param,
+                         const Ark_Object* param,
                          const Opt_Callback_PopInfo_Void* onPop,
                          const Opt_Boolean* isEntry)
 {
@@ -41,15 +41,15 @@ void SetNameImpl(Ark_NavPathInfo peer,
                  const Ark_String* name)
 {
 }
-Ark_CustomObject GetParamImpl(Ark_NavPathInfo peer)
+Opt_Object GetParamImpl(Ark_NavPathInfo peer)
 {
     return {};
 }
 void SetParamImpl(Ark_NavPathInfo peer,
-                  const Ark_CustomObject* param)
+                  const Ark_Object* param)
 {
 }
-Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
+Opt_Callback_PopInfo_Void GetOnPopImpl(Ark_NavPathInfo peer)
 {
     return {};
 }
@@ -57,7 +57,7 @@ void SetOnPopImpl(Ark_NavPathInfo peer,
                   const Callback_PopInfo_Void* onPop)
 {
 }
-Ark_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
+Opt_Boolean GetIsEntryImpl(Ark_NavPathInfo peer)
 {
     return {};
 }

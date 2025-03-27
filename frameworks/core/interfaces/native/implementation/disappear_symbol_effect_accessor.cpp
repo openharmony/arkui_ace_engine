@@ -30,7 +30,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
+Opt_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
 {
     return {};
 }

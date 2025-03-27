@@ -94,7 +94,7 @@ void SetYImpl(Ark_ClickEvent peer,
               const Ark_Number* y)
 {
 }
-Ark_InteractionHand GetHandImpl(Ark_ClickEvent peer)
+Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
 {
     return {};
 }

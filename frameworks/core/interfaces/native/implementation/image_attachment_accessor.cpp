@@ -34,23 +34,23 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
+Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
+Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
+Opt_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
+Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
-Ark_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
+Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
     return {};
 }
