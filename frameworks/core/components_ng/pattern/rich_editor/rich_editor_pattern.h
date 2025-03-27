@@ -217,6 +217,11 @@ public:
         {
             return !previewContent.empty() && previewTextHasStarted && startOffset >= 0 && endOffset >= startOffset;
         }
+
+        bool NeedReplace() const
+        {
+            return needReplacePreviewText || needReplaceText;
+        }
     };
 
     struct TouchAndMoveCaretState {
