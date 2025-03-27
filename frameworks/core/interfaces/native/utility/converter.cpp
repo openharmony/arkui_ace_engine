@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "bridge/common/utils/utils.h"
 #include "converter.h"
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
@@ -26,7 +27,6 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "frameworks/bridge/common/utils/utils.h"
 
 namespace {
     constexpr int32_t NUM_0 = 0;
@@ -40,6 +40,7 @@ namespace {
     constexpr double NUM_DOUBLE_1 = 1.;
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
+    const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -272,6 +273,52 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     }
     return result;
 }
+std::string GetReplaceContentStr(
+    int32_t pos, const std::string& type, std::vector<std::string>& params, int32_t containCount)
+{
+    auto index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+    return params.at(index);
+}
+void ReplaceHolder(std::string& originStr, std::vector<std::string>& params, int32_t containCount)
+{
+    auto size = static_cast<int32_t>(params.size());
+    if (containCount == size) {
+        return;
+    }
+    std::string::const_iterator start = originStr.begin();
+    std::string::const_iterator end = originStr.end();
+    std::smatch matches;
+    bool shortHolderType = false;
+    bool firstMatch = true;
+    int searchTime = 0;
+    while (std::regex_search(start, end, matches, RESOURCE_APP_STRING_PLACEHOLDER)) {
+        std::string pos = matches[2];
+        std::string type = matches[4];
+        if (firstMatch) {
+            firstMatch = false;
+            shortHolderType = pos.length() == 0;
+        } else {
+            if (shortHolderType ^ (pos.length() == 0)) {
+                return;
+            }
+        }
+
+        std::string replaceContentStr;
+        if (shortHolderType) {
+            replaceContentStr = GetReplaceContentStr(searchTime, type, params, containCount);
+        } else {
+            replaceContentStr = GetReplaceContentStr(Framework::StringToInt(pos) - 1, type, params, containCount);
+        }
+
+        originStr.replace(matches[0].first - originStr.begin(), matches[0].length(), replaceContentStr);
+        start = originStr.begin() + matches.prefix().length() + replaceContentStr.length();
+        end = originStr.end();
+        searchTime++;
+    }
+}
 
 ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
@@ -306,8 +353,10 @@ std::optional<std::string> ResourceConverter::ToString()
         case ResourceType::STRING:
             if (id_ != -1) {
                 result = themeConstants_->GetString(id_);
+                ReplaceHolder(result.value(), params_, 0);
             } else if (!params_.empty()) {
                 result = themeConstants_->GetStringByName(params_.front());
+                ReplaceHolder(result.value(), params_, 1);
             } else {
                 LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
             }
