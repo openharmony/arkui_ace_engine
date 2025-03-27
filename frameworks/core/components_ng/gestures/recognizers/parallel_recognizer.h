@@ -71,11 +71,19 @@ private:
     {
         RecognizerGroup::OnResetStatus();
         currentBatchRecognizer_.Reset();
-        succeedBlockRecognizer_.Reset();
+        succeedBlockRecognizers_.clear();
+    }
+
+    void AddSucceedBlockRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+    {
+        if (std::find(succeedBlockRecognizers_.begin(), succeedBlockRecognizers_.end(),
+            currentBatchRecognizer_) == succeedBlockRecognizers_.end()) {
+            succeedBlockRecognizers_.push_back(recognizer);
+        }
     }
 
     RefPtr<NGGestureRecognizer> currentBatchRecognizer_;
-    RefPtr<NGGestureRecognizer> succeedBlockRecognizer_;
+    std::vector<RefPtr<NGGestureRecognizer>> succeedBlockRecognizers_;
 };
 
 } // namespace OHOS::Ace::NG
