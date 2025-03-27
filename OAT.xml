@@ -119,9 +119,6 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="examples/ScrollableComponentTest/entry/src/main/resources/base/media/background.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/ScrollableComponentTest/entry/src/main/resources/base/media/foreground.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/ScrollableComponentTest/entry/src/main/resources/base/media/startIcon.png" desc="测试应用工程自带的二进制图片"/>
-                <filteritem type="filepath" name="examples/ScrollableModifier/entry/src/main/resources/base/media/background.png" desc="测试应用工程自带的二进制图片"/>
-                <filteritem type="filepath" name="examples/ScrollableModifier/entry/src/main/resources/base/media/foreground.png" desc="测试应用工程自带的二进制图片"/>
-                <filteritem type="filepath" name="examples/ScrollableModifier/entry/src/main/resources/base/media/startIcon.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/TextComponentTest/AppScope/resources/base/media/background.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/TextComponentTest/AppScope/resources/base/media/foreground.png" desc="测试应用工程自带的二进制图片"/>
                 <filteritem type="filepath" name="examples/TextComponentTest/entry/src/main/resources/base/media/background.png" desc="测试应用工程自带的二进制图片"/>
