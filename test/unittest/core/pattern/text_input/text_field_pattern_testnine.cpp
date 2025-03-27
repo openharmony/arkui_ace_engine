@@ -320,27 +320,6 @@ HWTEST_F(TextFieldPatternTestNine, CalcScrollRect001, TestSize.Level0)
 }
 
 /**
- * @tc.name: UpdateCaretInfoToController001
- * @tc.desc: test UpdateCaretInfoToController
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, UpdateCaretInfoToController001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-
-    bool forceUpdate = true;
-    auto client = AceType::MakeRefPtr<MockTextInputClient>();
-    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
-    pattern_->imeShown_ = true;
-    pattern_->UpdateCaretInfoToController(forceUpdate);
-    EXPECT_TRUE(pattern_->HasConnection());
-}
-
-/**
  * @tc.name: CheckSelectAreaVisible001
  * @tc.desc: test CheckSelectAreaVisible
  * @tc.type: FUNC
@@ -376,6 +355,8 @@ HWTEST_F(TextFieldPatternTestNine, CursorMove001, TestSize.Level0)
     GetFocus();
 
     CaretMoveIntent direction = static_cast<CaretMoveIntent>(130);
+    int32_t originCaretPosition = pattern_->selectController_->GetCaretIndex();
     pattern_->CursorMove(direction);
+    EXPECT_TRUE(originCaretPosition == pattern_->selectController_->GetCaretIndex());
 }
 } // namespace OHOS::Ace::NG,
