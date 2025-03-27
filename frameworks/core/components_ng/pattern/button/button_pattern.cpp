@@ -875,7 +875,7 @@ void ButtonPattern::DumpInfo()
     }
     if (layoutProperty->HasHeightAdaptivePolicy()) {
         DumpLog::GetInstance().AddDesc(
-            "HeightAdaptivePolicy: " + StringUtils::ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
+            "HeightAdaptivePolicy: " + ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
     }
     if (layoutProperty->HasBorderRadius()) {
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
@@ -896,7 +896,7 @@ void ButtonPattern::DumpInfo()
 
     auto eventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(eventHub);
-    DumpLog::GetInstance().AddDesc("StateEffect: " + eventHub->GetStateEffect());
+    DumpLog::GetInstance().AddDesc("StateEffect: " + std::string(eventHub->GetStateEffect() ? "true" : "false"));
 }
 
 void ButtonPattern::UpdateTexOverflow(bool isMarqueeStart)
