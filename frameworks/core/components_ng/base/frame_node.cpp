@@ -1310,7 +1310,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
     }
-    bool forceMeasure = GetPattern()->ReusedNodeSkipMeasure();
+    bool forceMeasure = !GetPattern()->ReusedNodeSkipMeasure();
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess() && forceMeasure) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
