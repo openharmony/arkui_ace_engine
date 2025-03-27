@@ -54,8 +54,9 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     auto valueModuleName = Converter::Convert<std::string>(*moduleName);
     auto paramsStr = Converter::Convert<std::vector<std::string>>(*params);
     std::string resourceStr = "";
-    resourceStr = std::accumulate(paramsStr.begin(), paramsStr.end(), std::string(),
-        [](const std::string& a, const std::string& b) { return a + b; });
+    if (paramsStr.size() > 0) {
+        resourceStr = paramsStr[0];
+    }
     auto resourceObject = AceType::MakeRefPtr<Ace::ResourceObject>(valueBundleName, valueModuleName);
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     CHECK_NULL_RETURN(resourceAdapter, -1);
