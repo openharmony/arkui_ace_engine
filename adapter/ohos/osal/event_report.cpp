@@ -620,8 +620,8 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_NOTE, note,
         EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
     ACE_SCOPED_TRACE("INTERACTION_APP_JANK: sceneId =%s, startTime=%lld(ms),"
-        "maxFrameTime=%lld(ms)", sceneId.c_str(),
-        static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
+        "maxFrameTime=%lld(ms)， pageName=%s", sceneId.c_str(), static_cast<long long>(startTime),
+        static_cast<long long>(maxFrameTime), data.baseInfo.pageName.c_str());
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     if (isDisplayAnimator && maxFrameTime > MAX_JANK_FRAME_TIME) {
         ReportAppFrameDropToRss(true, bundleName, maxFrameTime);
