@@ -10,6 +10,8 @@
     "pages/Tabs/TabsHeightAdaptive",
     "pages/Tabs/TabsSubTabBarStyle",
     "pages/waterflow/WaterFlowMainPage",
-    "pages/waterflow/demo01/WaterFlowDemo"
+    "pages/waterflow/demo01/WaterFlowDemo",
+    "pages/List/ListMainPage",
+    "pages/List/childrenMainSize/ListItemGroupScenario"
   ]
 }
