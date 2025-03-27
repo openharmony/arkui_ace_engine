@@ -1190,7 +1190,7 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
         FireNavigationInner(node, isOnShow);
         return;
     }
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren(true);
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         FireNavigationInner(child, isOnShow);
