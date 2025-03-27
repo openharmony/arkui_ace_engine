@@ -105,25 +105,26 @@ void SetOnKeyEventImpl(Ark_UICommonEvent peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
     auto rawPtr = Referenced::RawPtr(refPtr);
-    auto arkOnKey = Converter::OptConvert<Callback_KeyEvent_Void>(*callback_);
+
+    std::optional<Callback_KeyEvent_Void> arkOnKey = callback_ ? Converter::GetOpt(*callback_) : std::nullopt;
+    std::function<bool(KeyEventInfo& info)> onKey = nullptr;
     if (arkOnKey) {
         auto onKey = [arkCallback = CallbackHelper(arkOnKey.value())](KeyEventInfo& info) {
             auto keyEvent = Converter::ArkKeyEventSync(info);
             arkCallback.InvokeSync(keyEvent.ArkValue());
-            return true;
+            LOGW("arkCallback does not return value");
+            return false;
         };
-        ViewAbstract::SetOnKeyEvent(rawPtr, std::move(onKey));
     }
+    ViewAbstract::SetOnKeyEvent(rawPtr, std::move(onKey));        
 }
 void SetOnFocusImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_Void* callback_)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
     auto rawPtr = Referenced::RawPtr(refPtr);
@@ -190,13 +191,13 @@ void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
                          const Opt_SizeChangeCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback_);
     auto refPtr = peer->node.Upgrade();
     CHECK_NULL_VOID(refPtr);
     auto rawPtr = Referenced::RawPtr(refPtr);
-    auto arkOnSizeChanged = Converter::OptConvert<SizeChangeCallback>(*callback_);
+    std::optional<SizeChangeCallback> arkOnSizeChanged = callback_ ? Converter::GetOpt(*callback_) : std::nullopt;
+    std::function<void(const RectF &oldRect, const RectF &rect)> onSizeChanged = nullptr;
     if (arkOnSizeChanged) {
-        auto onSizeChanged = [arkCallback = CallbackHelper(arkOnSizeChanged.value())]
+        onSizeChanged = [arkCallback = CallbackHelper(arkOnSizeChanged.value())]
             (const RectF& oldRect, const RectF& rect) {
             Ark_SizeOptions oldValue;
             oldValue.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
@@ -206,8 +207,8 @@ void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
             newValue.width = Converter::ArkValue<Opt_Length>(rect.Width());
             arkCallback.Invoke(oldValue, newValue);
         };
-        ViewAbstract::SetOnSizeChanged(rawPtr, std::move(onSizeChanged));
     }
+    ViewAbstract::SetOnSizeChanged(rawPtr, std::move(onSizeChanged));
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_UICommonEvent peer,
                                            const Ark_VisibleAreaEventOptions* options,

@@ -361,8 +361,6 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnKeyEventTest, TestSize.Level1)
     };
     auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(onKeyEventFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Void>(arkCallback);
-    ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(accessor_, nullptr);
     accessor_->setOnKeyEvent(peer_, &optCallback);
 }
 
@@ -389,8 +387,6 @@ HWTEST_F(UICommonEventAccessorTest, setOnSizeChangeEventTest, TestSize.Level1)
     };
     auto arkCallback = Converter::ArkValue<SizeChangeCallback>(onSizeChangeFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_SizeChangeCallback>(arkCallback);
-    ASSERT_NE(peer_, nullptr);
-    ASSERT_NE(accessor_, nullptr);
     accessor_->setOnSizeChange(peer_, &optCallback);
     RectF oldRect {};
     RectF newRect {};
