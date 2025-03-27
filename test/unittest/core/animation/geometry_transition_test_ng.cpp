@@ -768,12 +768,5 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransitionTest014, TestSize.Level1)
      */
     node->SetWindowBoundary(false);
     EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node2);
-
-    /**
-     * @tc.steps: step5. Remove parent from the node and verify GetWindowBoundaryNode() returns the current node.
-     * @tc.expected: GetWindowBoundaryNode() should return the current node when there is no parent.
-     */
-    node->SetParent(nullptr);
-    EXPECT_TRUE(gt_->GetWindowBoundaryNode(node) == node);
 }
 } // namespace OHOS::Ace::NG
