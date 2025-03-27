@@ -104,6 +104,20 @@ void SetOnDisappearImpl(Ark_UICommonEvent peer,
 void SetOnKeyEventImpl(Ark_UICommonEvent peer,
                        const Opt_Callback_KeyEvent_Void* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto refPtr = peer->node.Upgrade();
+    CHECK_NULL_VOID(refPtr);
+    auto rawPtr = Referenced::RawPtr(refPtr);
+    auto arkOnKey = Converter::OptConvert<Callback_KeyEvent_Void>(*callback_);
+    if (arkOnKey) {
+        auto OnKey = [arkCallback = CallbackHelper(arkOnKey.value())](KeyEventInfo& info) {
+            auto keyEvent = Converter::ArkKeyEventSync(info);
+            arkCallback.InvokeSync(keyEvent.ArkValue());
+            return true;
+        };
+        ViewAbstract::SetOnKeyEvent(rawPtr, std::move(OnKey));
+    }
 }
 void SetOnFocusImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_Void* callback_)
@@ -175,6 +189,25 @@ void SetOnMouseImpl(Ark_UICommonEvent peer,
 void SetOnSizeChangeImpl(Ark_UICommonEvent peer,
                          const Opt_SizeChangeCallback* callback_)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(callback_);
+    auto refPtr = peer->node.Upgrade();
+    CHECK_NULL_VOID(refPtr);
+    auto rawPtr = Referenced::RawPtr(refPtr);
+    auto arkOnSizeChanged = Converter::OptConvert<SizeChangeCallback>(*callback_);
+    if (arkOnSizeChanged) {
+        auto onSizeChanged = [arkCallback = CallbackHelper(arkOnSizeChanged.value())]
+            (const RectF& oldRect, const RectF& rect) {
+            Ark_SizeOptions oldValue;
+            oldValue.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
+            oldValue.width = Converter::ArkValue<Opt_Length>(oldRect.Width());
+            Ark_SizeOptions newValue;
+            newValue.height = Converter::ArkValue<Opt_Length>(rect.Height());
+            newValue.width = Converter::ArkValue<Opt_Length>(rect.Width());
+            arkCallback.Invoke(oldValue, newValue);
+        };
+        ViewAbstract::SetOnSizeChanged(rawPtr, std::move(onSizeChanged));
+    }
 }
 void SetOnVisibleAreaApproximateChangeImpl(Ark_UICommonEvent peer,
                                            const Ark_VisibleAreaEventOptions* options,

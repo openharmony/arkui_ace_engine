@@ -339,5 +339,67 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnVisibleAreaApproximateChangeTe
     Ark_VisibleAreaEventOptions options {};
     accessor_->setOnVisibleAreaApproximateChange(peer_, &options, &optCallback);
 }
+
+/**
+ * @tc.name: setOnKeyEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(UICommonEventAccessorTest, setOnKeyEventTest, TestSize.Level1)
+{
+    static std::optional<TestEvent> testEvent = std::nullopt;
+    const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+
+    auto focusHub = frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+
+    auto onKeyEventFunc = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+        testEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(onKeyEventFunc, RES_ID);
+    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Void>(arkCallback);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(accessor_, nullptr);
+    accessor_->setOnKeyEvent(peer_, &optCallback);
+
+  //  focusNode->OnKeyEvent(ev);
+}
+
+/**
+ * @tc.name: setOnSizeChangeEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(UICommonEventAccessorTest, setOnSizeChangeEventTest, TestSize.Level1)
+{
+    static std::optional<TestEvent> testEvent = std::nullopt;
+    const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+    auto hub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+
+    auto onSizeChangeFunc = [](const Ark_Int32 resourceId, 
+                                const Ark_SizeOptions oldValue, 
+                                const Ark_SizeOptions newValue) {
+        testEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<SizeChangeCallback>(onSizeChangeFunc, RES_ID);
+    auto optCallback = Converter::ArkValue<Opt_SizeChangeCallback>(arkCallback);
+    ASSERT_NE(peer_, nullptr);
+    ASSERT_NE(accessor_, nullptr);
+    accessor_->setOnSizeChange(peer_, &optCallback);
+    RectF oldRect {};
+    RectF newRect {};
+    hub->FireOnSizeChanged(oldRect, newRect);
+    ASSERT_TRUE(testEvent);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
+}
+
 } // namespace OHOS::Ace::NG
  
