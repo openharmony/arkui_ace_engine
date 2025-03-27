@@ -150,9 +150,7 @@ const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
 const RECOVER_ITEM_SCALE: number = 1;
 const CLEAR_SHADOW: ShadowStyle = -1;
 const OPERATE_ITEM_RADIUS: number = 50;
-const OPERATE_ITEM_BACKGROUND_COLOR: ResourceColor = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR: ResourceColor = $r('sys.color.ohos_id_color_switch_outline_off');
-const OPERATE_ITEM_COLOR: ResourceColor = '#99000000';
 const TEXT_SUPPORT_MARQUEE: number = 1;
 const IS_MARQUEE_OR_ELLIPSIS: number = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
 const UNUSUAL: number = -1;
@@ -509,13 +507,6 @@ struct OperateItemStruct {
     }
   }
 
-  getUnselectedColor(): ResourceColor {
-    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
-      return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-    }
-    return this.isFocus ? OPERATE_ITEM_COLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-  }
-
   aboutToAppear(): void {
     this.onPropChange();
     this.onFocusChange();
@@ -755,10 +746,9 @@ struct OperateItemStruct {
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
       .radioStyle({
-        uncheckedBorderColor: this.getUnselectedColor()
+        uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
       })
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .backgroundColor(Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
@@ -798,9 +788,8 @@ struct OperateItemStruct {
   createCheckBox() {
     Checkbox()
       .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-      .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR)
+      .backgroundColor(Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
@@ -842,10 +831,7 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-        Color.Transparent)
-        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR :
-          UNUSUAL)
+        .backgroundColor(Color.Transparent)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
           if (this.switch?.onChange) {
