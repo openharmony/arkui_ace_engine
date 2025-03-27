@@ -780,6 +780,34 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
 
+void FrontendDelegateDeclarativeNG::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
+{
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
+    }
+}
+
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
     DialogProperties dialogProperties = {
@@ -807,29 +835,7 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
-#if defined(PREVIEW)
-    if (dialogProperties.isShowInSubWindow) {
-        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-             "emulator or a real device instead.");
-        dialogProperties.isShowInSubWindow = false;
-    }
-#endif
-    if (dialogAttr.alignment.has_value()) {
-        dialogProperties.alignment = dialogAttr.alignment.value();
-    }
-    if (dialogAttr.offset.has_value()) {
-        dialogProperties.offset = dialogAttr.offset.value();
-    }
-    if (dialogAttr.hoverModeArea.has_value()) {
-        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        dialogProperties.isSysBlurStyle = false;
-    } else {
-        if (dialogAttr.backgroundBlurStyle.has_value()) {
-            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
-        }
-    }
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 

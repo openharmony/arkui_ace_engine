@@ -1809,4 +1809,221 @@ HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance004, TestSize.Level1)
         EXPECT_EQ(columnPattern->optionProperties_[i].nextDistance, expectedValues[i].second);
     }
 }
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject001
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ is true and isColumnChange is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create TextPicker framenode and columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+     * @tc.step: step2. cover branch GetIsDeclarative() is true.
+     */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(false, 0);
+    std::string expectValue = R"({"value":"text1","index":0,"status":0})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject002
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ and isColumnChange are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject002, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is true.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(true, 1);
+    std::string expectValue = R"({"value":"text2","index":1,"status":1})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject003
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ and isColumnChange are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject003, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(false, 0);
+    std::string expectValue = R"({"newValue":"text1","newSelected":0,"status":0})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject004
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ is false and isColumnChange are true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject004, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(true, 1);
+    std::string expectValue = R"({"newValue":"text2","newSelected":1,"status":1})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject005
+ * @tc.desc: Test GetSelectedObject when status is default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject005, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is true.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject without status.
+    */
+    std::string result = columnPattern->GetSelectedObject(true);
+    std::string expectValue = R"({"value":"text2","index":1,"status":0})";
+    EXPECT_EQ(result, expectValue);
+
+    /**
+    * @tc.step: step4. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    /**
+    * @tc.step: step5. call method GetSelectedObject without status.
+    */
+    result = columnPattern->GetSelectedObject(true);
+    expectValue = R"({"newValue":"text2","newSelected":1,"status":0})";
+    EXPECT_EQ(result, expectValue);
+}
 } // namespace OHOS::Ace::NG

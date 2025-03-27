@@ -35,7 +35,8 @@ struct IndexPage {
     new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
     new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
     new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
-    new TextList(4, 'ListMainPage', 'pages/List/ListMainPage'),
+    new TextList(4, 'SwiperMainPage', 'pages/Swiper/SwiperMainPage'),
+    new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
