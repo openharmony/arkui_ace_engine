@@ -1,6 +1,6 @@
 import { Resource } from "../generated";
 
-export function _r(bundleName: string, moduleName: string, name: string): Resource {
+export function _r(bundleName: string, moduleName: string, name: string, ...args: Object[]): Resource {
     const param: string = name.split(".")[1];
     let res_type = 20000;
 
