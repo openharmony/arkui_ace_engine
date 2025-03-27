@@ -174,6 +174,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
+    void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);

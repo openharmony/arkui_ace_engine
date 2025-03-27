@@ -92,4 +92,10 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
 {
     fontList = fontNames_;
 }
+
+bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    fontInfo.fullName = fontName;
+    return false;
+}
 } // namespace OHOS::Ace
