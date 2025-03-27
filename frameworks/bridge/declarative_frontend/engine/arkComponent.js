@@ -5123,6 +5123,73 @@ class UICommonEvent {
   }
 }
 
+class UIScrollableCommonEvent extends UICommonEvent {
+  setOnReachStart(callback) {
+    this._onReachStartEvent = callback;
+    getUINativeModule().frameNode.setOnReachStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnReachEnd(callback) {
+    this._onReachEndEvent = callback;
+    getUINativeModule().frameNode.setOnReachEnd(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStart(callback) {
+    this._onScrollStartEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStop(callback) {
+    this._onScrollStopEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStop(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollFrameBegin(callback) {
+    this._onScrollFrameBeginEvent = callback;
+    getUINativeModule().frameNode.setOnScrollFrameBegin(this._nodePtr, callback, this._instanceId);
+  }
+  setOnWillScroll(callback) {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback) {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIListEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnListScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollVisibleContentChange(callback){
+    this._onScrollVisibleContentEvent = callback;
+    getUINativeModule().frameNode.setOnScrollVisibleContentChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIScrollEvent extends UIScrollableCommonEvent {
+  setOnWillScroll(callback) {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback) {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIGridEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onGridScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnGridScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIWaterFlowEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnWaterFlowScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
     ArkLogConsole.info("custom modifier is undefined");

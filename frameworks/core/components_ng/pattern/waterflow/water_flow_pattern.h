@@ -224,8 +224,8 @@ private:
     void OnScrollEndCallback() override;
     bool ScrollToTargetIndex(int32_t index);
     bool NeedRender();
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
     void DumpInfoAddSections();
 

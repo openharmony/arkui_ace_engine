@@ -41,6 +41,11 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -6055,5 +6060,240 @@ void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableData
     CHECK_NULL_VOID(eventHub);
 
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnReachStart(std::move(onReachStart));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnReachStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnReachStart();
+}
+
+void ViewAbstract::SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnReachEnd(std::move(onReachEnd));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnReachEnd(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnReachEnd();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollStart(std::move(onScrollStart));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollStart();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollStop(std::move(onScrollStop));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollStop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollStop();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollFrameBegin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollFrameBegin();
+}
+
+void ViewAbstract::SetJSFrameNodeOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnWillScroll(std::move(onWillScroll));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnWillScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnWillScroll();
+}
+
+void ViewAbstract::SetJSFrameNodeOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnDidScroll(std::move(onDidScroll));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnDidScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnDidScroll();
+}
+
+void ViewAbstract::SetJSFrameNodeOnListScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnListScrollIndex(std::move(onScrollIndex));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnListScrollIndex(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnListScrollIndex();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode,
+    OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollVisibleContentChange(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollVisibleContentChange();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollWillScroll(FrameNode* frameNode, ScrollEventWithReturn&& onWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollWillScroll(std::move(onWillScroll));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollWillScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollWillScroll();
+}
+
+void ViewAbstract::SetJSFrameNodeOnScrollDidScroll(FrameNode* frameNode, ScrollEventWithState&& onDidScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnScrollDidScroll(std::move(onDidScroll));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnScrollDidScroll(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnScrollDidScroll();
+}
+
+void ViewAbstract::SetJSFrameNodeOnGridScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnGridScrollIndex(std::move(onScrollIndex));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnGridScrollIndex(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnGridScrollIndex();
+}
+
+void ViewAbstract::SetJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetJSFrameNodeOnWaterFlowScrollIndex(std::move(onScrollIndex));
+}
+
+void ViewAbstract::ClearJSFrameNodeOnWaterFlowScrollIndex(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->ClearJSFrameNodeOnWaterFlowScrollIndex();
 }
 } // namespace OHOS::Ace::NG

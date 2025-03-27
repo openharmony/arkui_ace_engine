@@ -502,7 +502,7 @@ HWTEST_F(GridScrollerEventTestNg, GridOnReachEnd001, TestSize.Level1)
      * @tc.steps: step3. Modify the repeatDifference_ of Grid.
      * @tc.expected: the OnReachEnd event can not be triggered.
      */
-    pattern_->FireOnReachEnd(event);
+    pattern_->FireOnReachEnd(event, nullptr);
     EXPECT_FALSE(isTrigger);
 }
 

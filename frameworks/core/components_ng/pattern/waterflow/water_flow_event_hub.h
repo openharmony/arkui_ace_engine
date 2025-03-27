@@ -35,8 +35,26 @@ public:
         return onScrollIndexEvent_;
     }
 
+    void SetJSFrameNodeOnWaterFlowScrollIndex(ScrollIndexFunc&& onScroll)
+    {
+        onJSFrameNodeScrollIndexEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnWaterFlowScrollIndex()
+    {
+        if (onJSFrameNodeScrollIndexEvent_) {
+            onJSFrameNodeScrollIndexEvent_ = nullptr;
+        }
+    }
+
+    const ScrollIndexFunc& GetJSFrameNodeOnWaterFlowScrollIndex() const
+    {
+        return onJSFrameNodeScrollIndexEvent_;
+    }
+
 private:
     ScrollIndexFunc onScrollIndexEvent_;
+    ScrollIndexFunc onJSFrameNodeScrollIndexEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_EVENT_HUB_H

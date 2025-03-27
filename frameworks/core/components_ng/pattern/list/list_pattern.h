@@ -470,8 +470,8 @@ protected:
     bool isStackFromEnd_ = true;
 private:
     void OnScrollEndCallback() override;
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);

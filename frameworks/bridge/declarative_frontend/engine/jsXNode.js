@@ -1634,6 +1634,58 @@ const __attributeMap__ = new Map([
             return node._componentAttribute;
         }],
 ]);
+const __eventMap__ = new Map(
+    [
+      ['List', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIListEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['Scroll', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['Grid', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIGridEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['WaterFlow', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }]
+    ]
+  )
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1655,6 +1707,16 @@ class typeNode {
         }
         return attribute(node);
     }
+    static getEvent(node, nodeType) {
+        if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+          return undefined;
+        }
+        let event = __eventMap__.get(nodeType);
+        if (event === undefined || event === null) {
+          return undefined;
+        }
+        return event(node);
+      } 
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
