@@ -218,7 +218,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
-    void CleanContent();
+    void CleanContent(bool cleanDirectly = false, bool allowTransition = false);
     bool IsNeedContentTransition();
     bool TransitionContentInValid();
     bool IsNeedTitleTransition();

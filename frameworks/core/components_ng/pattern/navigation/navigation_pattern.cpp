@@ -1280,7 +1280,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     if (newTopNavDestination && preTopNavDestination) {
         if (isPopPage) {
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
-            preTopNavDestination->CleanContent();
+            preTopNavDestination->CleanContent(false, true);
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
             parent->RemoveChild(preTopNavDestination, true);
@@ -1291,7 +1291,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
             newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
             DealTransitionVisibility(preTopNavDestination, needVisible, false);
             if (preTopNavDestination->NeedRemoveInPush()) {
-                preTopNavDestination->CleanContent();
+                preTopNavDestination->CleanContent(false, true);
                 auto parent = preTopNavDestination->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preTopNavDestination, true);
@@ -1320,7 +1320,7 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
 
     // navDestination pop to navBar
     if (preTopNavDestination) {
-        preTopNavDestination->CleanContent();
+        preTopNavDestination->CleanContent(false, true);
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
         parent->RemoveChild(preTopNavDestination, true);
@@ -1350,9 +1350,7 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
             // remove preTopNavDestination node in pop
             auto parent = preTopNavDestination->GetParent();
             CHECK_NULL_VOID(parent);
-            if (preTopNavDestination->GetContentNode()) {
-                preTopNavDestination->GetContentNode()->Clean();
-            }
+            preTopNavDestination->CleanContent();
             parent->RemoveChild(preTopNavDestination);
             parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
