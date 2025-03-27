@@ -164,7 +164,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level1
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
-
     EXPECT_EQ(subComponentInfos.size(), 0);
 }
 
@@ -202,7 +201,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level1
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
-
     EXPECT_EQ(subComponentInfos.size(), 1);
 }
 
@@ -334,7 +332,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
-
     EXPECT_EQ(subComponentInfos.size(), 1);
 }
 
@@ -451,7 +448,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
      */
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
-
     EXPECT_EQ(subComponentInfos.size(), 1);
 
     /**
