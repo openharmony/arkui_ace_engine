@@ -84,7 +84,7 @@ export class PeerNode extends IncrementalNode {
         if (!PeerNode._reusePool)
             PeerNode._reusePool = new Map<string, Array<Disposable>>()
         if (!PeerNode._reusePool!.has(reuseKey)) {
-            PeerNode!._reusePool!.set(reuseKey, new Array<Disposable>());
+            PeerNode._reusePool!.set(reuseKey, new Array<Disposable>());
         }
         PeerNode._reusePool!.get(reuseKey)!.push(child);
         return true
