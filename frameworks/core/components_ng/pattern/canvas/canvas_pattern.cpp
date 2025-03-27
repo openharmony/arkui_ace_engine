@@ -35,6 +35,7 @@ CanvasPattern::~CanvasPattern()
 
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", GetId());
     DetachRenderContext();
 }
 
@@ -85,6 +86,7 @@ void CanvasPattern::FireOnContext2DDetach()
 
 void CanvasPattern::OnAttachToFrameNode()
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", GetId());
 #ifndef ACE_UNITTEST
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -106,7 +108,7 @@ RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 
 bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    ACE_SCOPED_TRACE("CanvasPattern::OnDirtyLayoutWrapperSwap");
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDirtyLayoutWrapperSwap", GetId());
     bool needReset = !(config.skipMeasure || dirty->SkipMeasureContent());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
