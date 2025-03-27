@@ -1189,6 +1189,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
+    void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
