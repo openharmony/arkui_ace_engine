@@ -1273,16 +1273,15 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
                 return;
             }
         }
+        RefPtr<NG::UINode> customNode;
         if (popupParam->IsShow() && !IsPopupCreated()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
             CHECK_NULL_VOID(builderFunc);
-            ViewStackModel::GetInstance()->NewScope();
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
             builderFunc->Execute();
-            auto customNode = ViewStackModel::GetInstance()->Finish();
-            ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
-        } else {
-            ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
     } else {
         return;
     }
