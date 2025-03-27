@@ -3419,6 +3419,7 @@ void WebPattern::OnModifyDone()
         CHECK_NULL_VOID(webPattern);
         if (webPattern->IsRootNeedExportTexture() && webPattern->delegate_) {
             webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
+            webPattern->delegate_->SetNativeInnerWeb(true);
         }
     };
     PostTaskToUI(std::move(embedEnabledTask), "ArkUIWebUpdateNativeEmbedModeEnabled");
