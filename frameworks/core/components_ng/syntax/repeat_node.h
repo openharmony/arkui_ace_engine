@@ -65,6 +65,9 @@ public:
 
     void AfterAddChild();
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
+
     void MoveData(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;
     void InitDragManager(const RefPtr<UINode>& childNode);

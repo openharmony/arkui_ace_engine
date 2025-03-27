@@ -130,6 +130,9 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
     if (lastPoint.tiltY.has_value()) {
         eventInfo.SetTiltY(lastPoint.tiltY.value());
     }
+    if (lastPoint.rollAngle.has_value()) {
+        eventInfo.SetRollAngle(lastPoint.rollAngle.value());
+    }
     eventInfo.SetSourceTool(lastPoint.sourceTool);
     eventInfo.SetPressedKeyCodes(lastPoint.pressedKeyCodes_);
     eventInfo.SetOperatingHand(lastPoint.operatingHand);

@@ -174,6 +174,8 @@ declare class ArkSelectComponent extends ArkComponent {}
 
 declare class ArkToggleComponent extends ArkComponent {}
 
+declare class ArkLazyVGridLayoutComponent extends ArkComponent {}
+
 declare class Scroller {}
 
 declare class UICommonEvent {

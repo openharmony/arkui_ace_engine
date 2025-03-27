@@ -367,7 +367,7 @@ public:
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
-    void FinishTextPreviewOperation();
+    void FinishTextPreviewOperation(bool triggerOnWillChange = true);
     TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
@@ -492,6 +492,8 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoCapitalizationMode, AutoCapitalizationMode)
 
     const RefPtr<Paragraph>& GetParagraph() const
     {
@@ -687,6 +689,7 @@ public:
     void AdjustSelectedBlankLineWidth(RectF& rect);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
@@ -828,7 +831,7 @@ public:
         return contentRect_.GetY() == textRect_.GetY();
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return contentRect_.GetY() + contentRect_.Height() == textRect_.GetY() + textRect_.Height();
     }
@@ -914,6 +917,7 @@ public:
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
+    std::string AutoCapTypeToString() const;
     std::string TextContentTypeToString() const;
     std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
@@ -1508,6 +1512,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHapticFeedback_;
+    }
+
     void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
     {
         isFocusedBeforeClick_ = isFocusedBeforeClick;
@@ -1556,6 +1565,10 @@ public:
     void SetIsFilterChanged(bool isFilterChanged)
     {
         isFilterChanged_ = isFilterChanged;
+    }
+    bool GetCancelButtonTouchInfo()
+    {
+        return cancelButtonTouched_;
     }
 protected:
     virtual void InitDragEvent();
@@ -1709,6 +1722,7 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
+    void OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value);
     void Delete(int32_t start, int32_t end);
     void CheckAndUpdateRecordBeforeOperation();
     void BeforeCreateLayoutWrapper() override;
@@ -1860,6 +1874,8 @@ private:
     void ProcessAutoFillOnFocus();
     bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
+    void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
+    void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
 
     RectF frameRect_;
     RectF textRect_;
@@ -2075,6 +2091,8 @@ private:
     std::u16string callbackOldContent_;
     PreviewText callbackOldPreviewText_;
     bool isFilterChanged_ = false;
+    std::optional<bool> showPasswordState_;
+    bool cancelButtonTouched_ = false;
 };
 } // namespace OHOS::Ace::NG
 

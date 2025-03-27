@@ -2008,13 +2008,16 @@ HWTEST_F(NavigationModelTestNg, SetEnableToolBarAdaptation, TestSize.Level1)
     navigationModel.SetTitle("navigationModel", false);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     ASSERT_NE(navBarNode, nullptr);
     EXPECT_FALSE(navBarNode->GetPrevToolBarIsCustom().value_or(false));
-    auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
-    EXPECT_TRUE(toolbarNode->enableToolBarAdaptation_);
+    auto navigatonLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigatonLayoutProperty, nullptr);
+    EXPECT_TRUE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(true));
     navigationModel.SetEnableToolBarAdaptation(false);
-    EXPECT_FALSE(toolbarNode->enableToolBarAdaptation_);
+    EXPECT_FALSE(navigatonLayoutProperty->GetEnableToolBarAdaptationValue(false));
 }
 } // namespace OHOS::Ace::NG

@@ -89,6 +89,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_utils.cpp",
     "node/progress_option.cpp",
     "node/style_modifier.cpp",
+    "node/textpicker_option.cpp",
     "node/waterflow_section_option.cpp",
   ]
   external_deps = [ "bounds_checking_function:libsec_shared" ]

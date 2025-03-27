@@ -569,4 +569,195 @@ HWTEST_F(TextAreaTestTwo, HandleTouchMove003, TestSize.Level1)
     EXPECT_TRUE(pattern_->selectOverlay_->SelectOverlayIsOn());
 }
 
+/**
+ * @tc.name: UpdateHoverStyle001
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case hoverAndPressBgColorEnabled_ = (false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    pattern_->hoverAndPressBgColorEnabled_ = false;
+    bool isHover = true;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdateHoverStyle002
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case theme bgColor == defaultThemeBgColor, branch 1-2, branch 2-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::BLACK, false); });
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = true;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdateHoverStyle003
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case theme bgColor != defaultThemeBgColor,branch 1-2, branch 2-2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::RED, false); });
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = true;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdateHoverStyle004
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case hasFocus,branch 1-2, branch 2-1, branch 3-1, branch 4-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::RED, false); });
+    GetFocus();
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = true;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+}
+
+/**
+ * @tc.name: UpdateHoverStyle005
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case on blur, branch 1-2, branch 2-1, branch 3-2, branch 4-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::RED, false); });
+    auto focushHub = pattern_->GetFocusHub();
+    focushHub->currentFocus_ = false;
+    pattern_->HandleBlurEvent();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = true;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdateHoverStyle006
+ * @tc.desc: Test is textarea, UpdateHoverStyle(), case not hover, branch 1-2, branch 2-1, branch 3-1, branch 4-2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdateHoverStyle006, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetBackgroundColor(Color::RED, false); });
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isHover = false;
+    pattern_->UpdateHoverStyle(isHover);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+}
+
+/**
+ * @tc.name: UpdatePressStyle001
+ * @tc.desc: Test is textarea, UpdatePressStyle(), case hoverAndPressBgColorEnabled_ = false, branch 1-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdatePressStyle001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBackgroundColor(Color::RED, false);
+        model.SetShowUnderline(true);
+    });
+
+    pattern_->hoverAndPressBgColorEnabled_ = false;
+    bool isPressed = true;
+    pattern_->UpdatePressStyle(isPressed);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+}
+
+/**
+ * @tc.name: UpdatePressStyle002
+ * @tc.desc: Test is textarea, UpdatePressStyle(), case hoverAndPressBgColorEnabled_ = true, branch 1-2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdatePressStyle002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBackgroundColor(Color::RED, false);
+        model.SetShowUnderline(true);
+    });
+
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isPressed = true;
+    pattern_->UpdatePressStyle(isPressed);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdatePressStyle003
+ * @tc.desc: Test is textarea, UpdatePressStyle(), case bgColor = defaultThemeBgColor, branch 2-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdatePressStyle003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBackgroundColor(Color::BLACK, false);
+        model.SetShowUnderline(true);
+    });
+
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isPressed = true;
+    pattern_->UpdatePressStyle(isPressed);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdatePressStyle004
+ * @tc.desc: Test is textarea, UpdatePressStyle(), case bgColor != defaultThemeBgColor, branch 2-2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdatePressStyle004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBackgroundColor(Color::RED, false);
+        model.SetShowUnderline(true);
+    });
+
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isPressed = true;
+    pattern_->UpdatePressStyle(isPressed);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
+}
+
+/**
+ * @tc.name: UpdatePressStyle005
+ * @tc.desc: Test is textarea, UpdatePressStyle(), case isPressed = false, branch 4-2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaTestTwo, UpdatePressStyle005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBackgroundColor(Color::RED, false);
+        model.SetShowUnderline(true);
+    });
+
+    pattern_->hoverAndPressBgColorEnabled_ = true;
+    bool isPressed = false;
+    pattern_->UpdatePressStyle(isPressed);
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+}
+
 } // namespace OHOS::Ace::NG

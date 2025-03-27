@@ -40,7 +40,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -92,6 +92,12 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     // don't need to add animation id when routeType is none
     if (type == RouteType::NONE) {
         return;
+    }
+    if (srcPage) {
+        srcPage->SetNodeFreeze(true);
+    }
+    if (destPage) {
+        destPage->SetNodeFreeze(false);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -638,7 +644,7 @@ void StageManager::SyncPageSafeArea(bool keyboardSafeArea)
 bool StageManager::CheckPageFocus()
 {
     auto pageNode = GetLastPage();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         pageNode = GetLastPageWithTransition();
     }
     CHECK_NULL_RETURN(pageNode, true);

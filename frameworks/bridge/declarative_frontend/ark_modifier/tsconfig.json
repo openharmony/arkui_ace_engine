@@ -84,7 +84,8 @@
         "src/symbol_span_modifier.ts",
         "src/container_span_modifier.ts",
         "src/linear_indicator_modifitr.ts",
-        "src/indicator_component_modifier.ts"
+        "src/indicator_component_modifier.ts",
+        "src/lazy_grid_layout_modifier.ts"
     ],
     "compilerOptions": {
         "module": "none",

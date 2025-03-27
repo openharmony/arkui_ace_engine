@@ -23,6 +23,7 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
 namespace OHOS::Ace::NG {
+enum class PanGestureState : int32_t;
 
 class PanRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(PanRecognizer, MultiFingersRecognizer);
@@ -70,7 +71,6 @@ public:
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
     void ForceCleanRecognizer() override;
-    void CheckCallbackState() override;
     void DumpVelocityInfo(int32_t fingerId);
 
     double GetDistance() const
@@ -81,6 +81,14 @@ public:
     PanDirection GetDirection() const
     {
         return direction_;
+    }
+
+    void HandlePanGestureAccept(
+        const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
+    
+    void SetPanEndCallback(const GestureEventFunc& panEndCallback)
+    {
+        panEndOnDisableState_ = std::make_unique<GestureEventFunc>(panEndCallback);
     }
 
 private:
@@ -129,7 +137,7 @@ private:
     void UpdateTouchEventInfo(const TouchEvent& event);
     Offset GetRawGlobalLocation(int32_t postEventNodeId);
 
-    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     GestureJudgeResult TriggerGestureJudgeCallback();
     void ChangeFingers(int32_t fingers);
     void ChangeDirection(const PanDirection& direction);
@@ -137,6 +145,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
 
     void OnResetStatus() override;
@@ -176,6 +185,8 @@ private:
     bool isForDrag_ = false;
     bool isAllowMouse_ = true;
     bool isStartTriggered_ = false;
+    // this callback will be triggered when pan end, but the enable state is false
+    std::unique_ptr<GestureEventFunc> panEndOnDisableState_;
 };
 
 } // namespace OHOS::Ace::NG

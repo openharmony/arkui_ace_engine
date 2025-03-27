@@ -1657,4 +1657,94 @@ HWTEST_F(EventManagerTestNg, EventManagerTest091, TestSize.Level1)
     bool result = eventManager->DispatchMouseEventNG(event);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: EventManagerTest092
+ * @tc.desc: Test CheckAndLogLastReceivedTouchEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest092, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto type = TouchType::MOVE;
+    eventManager->CheckAndLogLastReceivedTouchEventInfo(eventId, type);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest093
+ * @tc.desc: Test CheckAndLogLastConsumedTouchEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest093, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto type = TouchType::MOVE;
+    eventManager->CheckAndLogLastConsumedTouchEventInfo(eventId, type);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest094
+ * @tc.desc: Test CheckAndLogLastReceivedMouseEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest094, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = MouseAction::MOVE;
+    eventManager->CheckAndLogLastReceivedMouseEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest095
+ * @tc.desc: Test CheckAndLogLastConsumedMouseEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest095, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = MouseAction::MOVE;
+    eventManager->CheckAndLogLastConsumedMouseEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest096
+ * @tc.desc: Test CheckAndLogLastReceivedAxisEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest096, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = AxisAction::NONE;
+    eventManager->CheckAndLogLastReceivedAxisEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastReceivedEvent_.eventId, eventId);
+}
+
+/**
+ * @tc.name: EventManagerTest097
+ * @tc.desc: Test CheckAndLogLastConsumedAxisEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest097, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    int32_t eventId = 1;
+    auto action = AxisAction::NONE;
+    eventManager->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
+    EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
+}
 } // namespace OHOS::Ace::NG

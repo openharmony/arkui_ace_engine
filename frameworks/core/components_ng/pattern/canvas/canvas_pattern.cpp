@@ -1054,6 +1054,7 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto directionCommon = layoutProperty->GetLayoutDirection();
     if (directionCommon == TextDirection::AUTO) {
         directionCommon = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;

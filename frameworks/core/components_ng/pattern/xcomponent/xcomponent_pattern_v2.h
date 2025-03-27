@@ -60,6 +60,7 @@ private:
     void DumpInfo() override;
 
     void InitSurface();
+    void DisposeSurface();
     int32_t HandleSurfaceCreated();
     int32_t HandleSurfaceDestroyed();
     void InitializeRenderContext();
@@ -68,12 +69,22 @@ private:
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
 
+    void UpdateUsesSuperMethod()
+    {
+        if (usesSuperMethod_) {
+            return;
+        }
+        usesSuperMethod_ = (isCNode_ && !isLifecycleInterfaceCalled_ && !surfaceHolder_);
+    }
+
     bool autoInitialize_ = true;
     bool isInitialized_ = false;
     bool isLifecycleInterfaceCalled_ = false;
     bool usesSuperMethod_ = false;
+    bool needNotifySizeChanged_ = false;
     OH_ArkUI_SurfaceHolder* surfaceHolder_ = nullptr;
     XComponentNodeType nodeType_ = XComponentNodeType::UNKNOWN;
+    Color bkColor_ = Color::BLACK;
 };
 } // namespace OHOS::Ace::NG
 

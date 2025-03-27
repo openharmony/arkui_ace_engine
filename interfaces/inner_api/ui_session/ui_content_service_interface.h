@@ -49,6 +49,8 @@ public:
         END_WEB_TRANSLATE,
         GET_CURRENT_SHOWING_IMAGE,
         GET_CURRENT_PAGE_NAME,
+        SENDCOMMAND_ASYNC_EVENT,
+        SENDCOMMAND_EVENT,
     };
 
     /**
@@ -93,6 +95,24 @@ public:
      */
     virtual int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) = 0;
+
+    /**
+     * @description: define register a callback on SendCommand event occur to execute interface
+     * @return: result number
+     *          0: Node execution is successful.
+     */
+    virtual int32_t SendCommand(int32_t id, const std::string& command) = 0;
+
+    /**
+     * @description: define register a callback on SendCommand Async event occur to execute interface
+     * @return: result number
+     *          0: Node execution is successful.
+     *          10: SendCommand Pipeline context is null.
+     *          11: SendCommand Task executor is null.
+     *          12: Error occurred during self handling of SendCommand.
+     *          13: Failure due to no nodes.
+     */
+    virtual int32_t SendCommandAsync(int32_t id, const std::string& command) = 0;
 
     /**
      * @description: define unregister the click event occur callback last register interface

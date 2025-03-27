@@ -16,12 +16,18 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "transaction/rs_transaction_proxy.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
 namespace {
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 inline std::string BoolToString(bool value)
 {
     return value ? "true" : "false";
@@ -54,24 +60,32 @@ OH_ArkUI_SurfaceHolder* XComponentPatternV2::GetSurfaceHolder()
 
 void XComponentPatternV2::OnAttachToFrameNode()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE) {
+    if (isCNode_) {
         XComponentPattern::OnAttachToFrameNode();
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    renderContext->SetClipToFrame(true);
+    renderContext->SetClipToBounds(true);
     InitSurface();
-    InitNativeWindow(0.0, 0.0);
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
+    UpdateTransformHint();
 }
 
 void XComponentPatternV2::OnAttachToMainTree()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE && !isLifecycleInterfaceCalled_ && !surfaceHolder_) {
-        usesSuperMethod_ = true;
+    UpdateUsesSuperMethod();
+    if (usesSuperMethod_) {
         XComponentPattern::OnAttachToMainTree();
         return;
     }
+    isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
     }
@@ -79,13 +93,12 @@ void XComponentPatternV2::OnAttachToMainTree()
 
 void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
 {
+    UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::BeforeSyncGeometryProperties(config);
         return;
     }
-    if (config.skipMeasure) {
-        return;
-    }
+    CHECK_EQUAL_VOID(config.skipMeasure, true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -97,6 +110,9 @@ void XComponentPatternV2::BeforeSyncGeometryProperties(const DirtySwapConfig& co
         return;
     }
     localPosition_ = geometryNode->GetContentOffset();
+    if (IsSupportImageAnalyzerFeature()) {
+        UpdateAnalyzerUIConfig(geometryNode);
+    }
     const auto& [offsetChanged, sizeChanged] = UpdateSurfaceRect();
     HandleSurfaceChangeEvent(offsetChanged, sizeChanged, config.frameOffsetChange);
     AddAfterLayoutTaskForExportTexture();
@@ -150,6 +166,7 @@ void XComponentPatternV2::XComponentSizeChange(const RectF& surfaceRect)
     CHECK_NULL_VOID(renderSurface_);
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
+    needNotifySizeChanged_ = true;
     renderSurface_->UpdateSurfaceSizeInUserData(
         static_cast<uint32_t>(width), static_cast<uint32_t>(height));
     renderSurface_->AdjustNativeWindowSize(
@@ -170,6 +187,7 @@ void XComponentPatternV2::OnSurfaceChanged(const RectF& surfaceRect)
             callback(surfaceHolder_, surfaceRect.Width(), surfaceRect.Height());
         }
     }
+    needNotifySizeChanged_ = false;
 }
 
 void XComponentPatternV2::OnDetachFromMainTree()
@@ -178,6 +196,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
+    isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
     }
@@ -185,6 +204,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
 
 void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::OnDetachFromFrameNode(frameNode);
         return;
@@ -208,40 +228,78 @@ void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void XComponentPatternV2::InitSurface()
 {
+    if (renderSurface_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    renderContext->SetClipToFrame(true);
-    renderContext->SetClipToBounds(true);
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         renderSurface_->SetRenderContext(renderContextForSurface_);
     } else if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
+        renderContext->OnNodeNameUpdate(GetId());
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->RegisterBufferCallback();
     }
+    auto width = paintRect_.Width();
+    auto height = paintRect_.Height();
+    if (!paintRect_.IsEmpty()) {
+        renderSurface_->UpdateSurfaceSizeInUserData(
+            static_cast<uint32_t>(width), static_cast<uint32_t>(height));
+        renderSurface_->SetSurfaceDefaultSize(
+            static_cast<int32_t>(width), static_cast<int32_t>(height));
+    }
+    renderSurface_->RegisterSurface();
+    InitNativeWindow(width, height);
+    if (surfaceHolder_) {
+        surfaceHolder_->nativeWindow_ = reinterpret_cast<OHNativeWindow*>(nativeWindow_);
+    }
     surfaceId_ = renderSurface_->GetUniqueId();
+}
 
-    UpdateTransformHint();
+void XComponentPatternV2::DisposeSurface()
+{
+    if (renderSurface_) {
+        renderSurface_->ReleaseSurfaceBuffers();
+        renderSurface_->UnregisterSurface();
+        renderSurface_ = nullptr;
+    }
+    if (surfaceHolder_) {
+        surfaceHolder_->nativeWindow_ = nullptr;
+    }
+    nativeWindow_ = nullptr;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    // for surface type
+    CHECK_NULL_VOID(renderContextForSurface_);
+    renderContext->RemoveChild(renderContextForSurface_);
+    renderContextForSurface_ = nullptr;
+#ifdef ENABLE_ROSEN_BACKEND
+    auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+    if (transactionProxy != nullptr) {
+        transactionProxy->FlushImplicitTransaction();
+    }
+#endif
 }
 
 int32_t XComponentPatternV2::HandleSurfaceCreated()
 {
-    if (isInitialized_) {
-        return ERROR_CODE_XCOMPONENT_STATE_INVALID;
-    }
+    CHECK_EQUAL_RETURN(isInitialized_, true, ERROR_CODE_XCOMPONENT_STATE_INVALID);
+    InitSurface();
     CHECK_NULL_RETURN(renderSurface_, ERROR_CODE_PARAM_INVALID);
-    renderSurface_->RegisterSurface();
-    surfaceId_ = renderSurface_->GetUniqueId();
     isInitialized_ = true;
     if (surfaceHolder_) {
         auto callbackList = surfaceHolder_->surfaceCallbackList_;
@@ -254,18 +312,16 @@ int32_t XComponentPatternV2::HandleSurfaceCreated()
             }
         }
     }
+    if (needNotifySizeChanged_) {
+        OnSurfaceChanged(paintRect_);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t XComponentPatternV2::HandleSurfaceDestroyed()
 {
-    if (!isInitialized_) {
-        return ERROR_CODE_XCOMPONENT_STATE_INVALID;
-    }
+    CHECK_EQUAL_RETURN(isInitialized_, false, ERROR_CODE_XCOMPONENT_STATE_INVALID);
     isInitialized_ = false;
-    CHECK_NULL_RETURN(renderSurface_, ERROR_CODE_PARAM_INVALID);
-    renderSurface_->ReleaseSurfaceBuffers();
-    renderSurface_->UnregisterSurface();
     if (surfaceHolder_) {
         auto callbackList = surfaceHolder_->surfaceCallbackList_;
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] surfaceHolder OnSurfaceDestroyed", GetId().c_str());
@@ -277,32 +333,27 @@ int32_t XComponentPatternV2::HandleSurfaceDestroyed()
             }
         }
     }
+    DisposeSurface();
     return ERROR_CODE_NO_ERROR;
 }
 
 int32_t XComponentPatternV2::Initialize()
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     return HandleSurfaceCreated();
 }
 
 int32_t XComponentPatternV2::Finalize()
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     return HandleSurfaceDestroyed();
 }
 
 int32_t XComponentPatternV2::SetAutoInitialize(bool autoInitialize)
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     autoInitialize_ = autoInitialize;
     return ERROR_CODE_NO_ERROR;
@@ -310,9 +361,7 @@ int32_t XComponentPatternV2::SetAutoInitialize(bool autoInitialize)
 
 int32_t XComponentPatternV2::IsInitialized(bool& isInitialized)
 {
-    if (usesSuperMethod_) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_EQUAL_RETURN(usesSuperMethod_, true, ERROR_CODE_PARAM_INVALID);
     isLifecycleInterfaceCalled_ = true;
     isInitialized = isInitialized_;
     return ERROR_CODE_NO_ERROR;
@@ -324,9 +373,7 @@ void XComponentPatternV2::OnWindowHide()
         XComponentPattern::OnWindowHide();
         return;
     }
-    if (hasReleasedSurface_) {
-        return;
-    }
+    CHECK_EQUAL_VOID(hasReleasedSurface_, true);
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(false);
     }
@@ -339,9 +386,7 @@ void XComponentPatternV2::OnWindowShow()
         XComponentPattern::OnWindowShow();
         return;
     }
-    if (!hasReleasedSurface_) {
-        return;
-    }
+    CHECK_EQUAL_VOID(hasReleasedSurface_, false);
     if (renderSurface_) {
         renderSurface_->OnWindowStateChange(true);
     }
@@ -357,6 +402,7 @@ void XComponentPatternV2::OnRebuildFrame()
     if (type_ != XComponentType::SURFACE) {
         return;
     }
+    CHECK_NULL_VOID(renderSurface_);
     if (!renderSurface_->IsSurfaceValid()) {
         return;
     }
@@ -370,16 +416,28 @@ void XComponentPatternV2::OnRebuildFrame()
 
 void XComponentPatternV2::InitializeRenderContext()
 {
+    if (renderContextForSurface_) {
+        return;
+    }
     renderContextForSurface_ = RenderContext::Create();
-    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
-                                          GetId() + "Surface", RenderContext::PatternType::XCOM };
+    RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, GetId() + "Surface",
+        RenderContext::PatternType::XCOM };
     renderContextForSurface_->InitContext(false, param);
-    renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+    if (!paintRect_.IsEmpty()) {
+        renderContextForSurface_->SetBounds(
+            paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+    }
+    renderContextForSurface_->UpdateBackgroundColor(bkColor_);
+    renderContextForSurface_->SetHDRBrightness(hdrBrightness_);
+    renderContextForSurface_->SetTransparentLayer(isTransparentLayer_);
+    renderContextForSurface_->SetSecurityLayer(isEnableSecure_);
+    renderContextForSurface_->SetSurfaceRotation(isSurfaceLock_);
+    renderContextForSurface_->SetRenderFit(renderFit_);
 }
 
 void XComponentPatternV2::OnModifyDone()
 {
-    if (nodeType_ ==  XComponentNodeType::CNODE) {
+    if (usesSuperMethod_) {
         XComponentPattern::OnModifyDone();
         return;
     }
@@ -392,10 +450,9 @@ void XComponentPatternV2::OnModifyDone()
     auto bkColor = renderContext->GetBackgroundColor();
     if (bkColor.has_value()) {
         bool isTransparent = bkColor.value().GetAlpha() < UINT8_MAX;
-        renderContextForSurface_->UpdateBackgroundColor(isTransparent ? Color::TRANSPARENT : bkColor.value());
-    } else {
-        renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+        bkColor_ = isTransparent ? Color::TRANSPARENT : bkColor.value();
     }
+    renderContextForSurface_->UpdateBackgroundColor(bkColor_);
 }
 
 void XComponentPatternV2::DumpInfo()

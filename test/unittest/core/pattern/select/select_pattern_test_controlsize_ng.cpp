@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -737,5 +738,445 @@ HWTEST_F(SelectPatternTestControlSizeNg, SelectPatternExTest007, TestSize.Level1
     auto childnode = selectNode->GetFirstChild();
     EXPECT_EQ(selectNode->GetFirstChild()->GetTag(), V2::ROW_ETS_TAG);
     EXPECT_EQ(childnode->GetFirstChild()->GetTag(), V2::TEXT_ETS_TAG);
+}
+/**
+ * @tc.name: SetTextModifierApply001
+ * @tc.desc: Test SelectPattern SetTextModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    std::function<void(WeakPtr<FrameNode>)> applyFunc = nullptr;
+    /**
+     * @tc.steps: step2. Get frameNode and pattern and set applyFunc eq nullptr.
+     */
+    selectModelInstance.SetTextModifierApply(applyFunc);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call ApplyTextModifier without callback and maxlines dont change.
+     */
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetMaxLines(), 1);
+    /**
+     * @tc.steps: step4. set applyFunc dont eq nullptr and set maxLines.
+     */
+    applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateMaxLines(2);
+        property->UpdateFontSize(Dimension(80));
+    };
+    selectModelInstance.SetTextModifierApply(std::move(applyFunc));
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetMaxLines(), 2);
+}
+/**
+ * @tc.name: SetTextModifierApply002
+ * @tc.desc: Test SelectPattern SetTextModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set text with maxLines and fontize.
+     */
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMaxLines(10);
+    property->UpdateFontSize(Dimension(100));
+    /**
+     * @tc.steps: step3. set applyFunc dont eq nullptr and just set fontSize.
+     */
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+    };
+    selectModelInstance.SetTextModifierApply(applyFunc);
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetMaxLines(), 10);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+}
+/**
+ * @tc.name: SetTextModifierApply003
+ * @tc.desc: Test SelectPattern SetTextModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextModifierApply003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set text and init some props.
+     */
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateMaxLines(10);
+    property->UpdateFontSize(Dimension(100));
+    property->UpdateTextAlign(TextAlign::LEFT);
+    /**
+     * @tc.steps: step3. set applyFunc dont eq nullptr and set some props.
+     */
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::RED);
+        property->UpdateFontWeight(Ace::FontWeight::BOLD);
+        property->UpdateTextAlign(TextAlign::JUSTIFY);
+    };
+    selectModelInstance.SetTextModifierApply(applyFunc);
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetMaxLines(), 10);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    EXPECT_EQ(property->GetTextColor(), Color::RED);
+    EXPECT_EQ(property->GetFontWeight(), Ace::FontWeight::BOLD);
+    EXPECT_EQ(property->GetTextAlign(), TextAlign::JUSTIFY);
+}
+/**
+ * @tc.name: SetArrowModifierApplyTest001
+ * @tc.desc: Test SetArrowModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetArrowModifierApply001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select and set apiVersion.
+     */
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    EXPECT_TRUE(AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN));
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto symbolNode = weakNode.Upgrade();
+        auto property = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+    };
+    /**
+     * @tc.steps: step2. Get frameNode and pattern and SetArrowModifierApply.
+     */
+    selectModelInstance.SetArrowModifierApply(applyFunc);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto frameNode = selectPattern->spinner_;
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+}
+/**
+ * @tc.name: SetArrowModifierApply002
+ * @tc.desc: Test SelectPattern SetTextModifierApply with symbol color list
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetArrowModifierApply002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step2. Set initial symbol color list.
+     */
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    std::vector<Color> initialColorList = { Color::WHITE };
+    std::vector<Color> newColorList = { Color::RED };
+    property->UpdateSymbolColorList(initialColorList);
+    /**
+     * @tc.steps: step3. Define applyFunc to modify symbol color list.
+     */
+    auto applyFunc = [&newColorList](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateSymbolColorList(newColorList);
+    };
+    selectModelInstance.SetTextModifierApply(std::move(applyFunc));
+    /**
+     * @tc.steps: step4. Verify the updated symbol color list.
+     */
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto colorList = property->GetSymbolColorList();
+    ASSERT_EQ(colorList->size(), 1);
+    EXPECT_EQ(colorList, newColorList);
+}
+/**
+ * @tc.name: SetArrowModifierApply003
+ * @tc.desc: Test SetArrowModifierApply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetArrowModifierApply003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial font size.
+     */
+    auto frameNode = selectPattern->text_;
+    ASSERT_NE(frameNode, nullptr);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    property->UpdateFontSize(Dimension(80));
+
+    /**
+     * @tc.steps: step3. Define applyFunc to modify symbol color list.
+     */
+    std::vector<Color> newColorList = { Color::RED };
+    auto applyFunc = [&newColorList](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateSymbolColorList(newColorList);
+    };
+    selectModelInstance.SetTextModifierApply(std::move(applyFunc));
+
+    /**
+     * @tc.steps: step4. Verify the font size remains and symbol color list is updated.
+     */
+    property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    auto colorList = property->GetSymbolColorList();
+    EXPECT_EQ(colorList, newColorList);
+}
+/**
+ * @tc.name: SetTextAndArrowModifierApplyCombinedTest001
+ * @tc.desc: Test SelectPattern SetTextModifierApply and SetArrowModifierApply together
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetTextAndArrowModifierApplyCombinedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a Select instance and initialize it
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set initial properties for text and arrow
+     */
+    auto textFrameNode = selectPattern->text_;
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    textProperty->UpdateMaxLines(3);
+    textProperty->UpdateTextColor(Color::BLUE);
+
+    auto arrowFrameNode = selectPattern->spinner_;
+    ASSERT_NE(arrowFrameNode, nullptr);
+    auto arrowProperty = arrowFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(arrowProperty, nullptr);
+    arrowProperty->UpdateTextColor(Color::GREEN);
+
+    /**
+     * @tc.steps: step3. Define and apply the text modifier
+     */
+    auto textApplyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        ASSERT_NE(textNode, nullptr);
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateMaxLines(5);
+        property->UpdateFontSize(Dimension(100));
+        property->UpdateTextColor(Color::RED);
+    };
+    selectModelInstance.SetTextModifierApply(std::move(textApplyFunc));
+
+    /**
+     * @tc.steps: step4. Define and apply the arrow modifier
+     */
+    auto arrowApplyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto arrowNode = weakNode.Upgrade();
+        ASSERT_NE(arrowNode, nullptr);
+        auto property = arrowNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(70));
+    };
+    selectModelInstance.SetArrowModifierApply(std::move(arrowApplyFunc));
+    /**
+     * @tc.steps: step5. Verify that the text properties have been correctly updated
+     */
+    textProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_EQ(textProperty->GetMaxLines(), 5);
+    EXPECT_EQ(textProperty->GetFontSize(), Dimension(100));
+    EXPECT_EQ(textProperty->GetTextColor(), Color::RED);
+    /**
+     * @tc.steps: step6. Verify that the arrow properties have been correctly updated
+     */
+    arrowProperty = arrowFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(arrowProperty, nullptr);
+    EXPECT_EQ(arrowProperty->GetFontSize(), Dimension(70));
+}
+/**
+ * @tc.name: SetOptionTextModifier001
+ * @tc.desc: Test SelectPattern SetOptionTextModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetOptionTextModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a Select instance and initialize it
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.FontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateFontSize(Dimension(80));
+        property->UpdateTextColor(Color::RED);
+        property->UpdateFontWeight(Ace::FontWeight::BOLD);
+        property->UpdateTextAlign(TextAlign::JUSTIFY);
+    };
+    /**
+     * @tc.steps: step2. Set initial properties for text of option
+     */
+    pattern->SetSelected(-1);
+    pattern->SetOptionTextModifier(applyFunc);
+    auto option = pattern->options_[0];
+    ASSERT_NE(option, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto text = menuItemPattern->text_;
+    ASSERT_NE(text, nullptr);
+    auto property = text->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetFontSize(), Dimension(80));
+    EXPECT_EQ(property->GetTextColor(), Color::RED);
+    EXPECT_EQ(property->GetFontWeight(), Ace::FontWeight::BOLD);
+    EXPECT_EQ(property->GetTextAlign(), TextAlign::JUSTIFY);
+}
+/**
+ * @tc.name: SetSelectedOptionTextModifier001
+ * @tc.desc: Test SelectPattern SetSelectedOptionTextModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, SetSelectedOptionTextModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a Select instance and initialize it
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    testProperty.FontStyle = std::make_optional(ITALIC_FONT_STYLE_VALUE);
+    testProperty.FontWeight = std::make_optional(FONT_WEIGHT_VALUE);
+    testProperty.FontColor = std::make_optional(TEXT_COLOR_VALUE);
+    testProperty.FontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto applySelectedFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateTextColor(Color::BLUE);
+    };
+    auto applyFunc = [](WeakPtr<FrameNode> weakNode) {
+        auto textNode = weakNode.Upgrade();
+        auto property = textNode->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(property, nullptr);
+        property->UpdateTextColor(Color::RED);
+    };
+    /**
+     * @tc.steps: step2. Set initial properties for text of option and selected option
+     */
+    pattern->SetOptionTextModifier(applyFunc);
+    pattern->SetSelectedOptionTextModifier(applySelectedFunc);
+    pattern->UpdateSelectedProps(1);
+    auto option = pattern->options_[0];
+    ASSERT_NE(option, nullptr);
+    auto optionSelected = pattern->options_[1];
+    ASSERT_NE(optionSelected, nullptr);
+    auto menuItemPattern = option->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto menuItemSelectedPattern = optionSelected->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemSelectedPattern, nullptr);
+    auto text = menuItemPattern->text_;
+    ASSERT_NE(text, nullptr);
+    auto textSelected = menuItemSelectedPattern->text_;
+    ASSERT_NE(textSelected, nullptr);
+    auto property = text->GetLayoutProperty<TextLayoutProperty>();
+    auto propertySelectd = textSelected->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_EQ(property->GetTextColor(), Color::RED);
+    EXPECT_EQ(propertySelectd->GetTextColor(), Color::BLUE);
 }
 } // namespace OHOS::Ace::NG

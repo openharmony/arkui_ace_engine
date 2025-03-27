@@ -627,6 +627,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
+        if (!frameNode) {
+            frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        }
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
@@ -3071,5 +3074,135 @@ void MenuItemPattern::UpdateDividerPressStatus(bool isPress)
         topPaintProperty->UpdateTopPress(isPress);
         topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void MenuItemPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    if (optionApply_ && !optionApply) {
+        ResetSelectTextProps();
+        ApplyOptionThemeStyles();
+        return;
+    }
+    optionApply_ = optionApply;
+    if (optionApply_) {
+        ResetSelectTextProps();
+        ApplyOptionThemeStyles();
+        ApplyTextModifier(optionApply_);
+    }
+}
+
+void MenuItemPattern::SetSelectedOptionTextModifier(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    if (optionSelectedApply_ && !optionSelectedApply) {
+        ResetSelectTextProps();
+        ApplySelectedThemeStyles();
+        return;
+    }
+    optionSelectedApply_ = optionSelectedApply;
+    if (optionSelectedApply_) {
+        ResetSelectTextProps();
+        ApplySelectedThemeStyles();
+        ApplyTextModifier(optionSelectedApply_);
+    }
+}
+
+void MenuItemPattern::ApplyTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    if (!optionApply) {
+        return;
+    }
+    auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    std::optional<Dimension> backupFontSize;
+    std::optional<Dimension> backupMaxFontSize;
+    std::optional<Dimension> backupMinFontSize;
+    if (textLayoutProperty->HasFontSize()) {
+        backupFontSize = textLayoutProperty->GetFontSizeValue(Dimension());
+    }
+    if (textLayoutProperty->HasAdaptMaxFontSize()) {
+        backupMaxFontSize = textLayoutProperty->GetAdaptMaxFontSizeValue(Dimension());
+    }
+    if (textLayoutProperty->HasAdaptMinFontSize()) {
+        backupMinFontSize = textLayoutProperty->GetAdaptMinFontSizeValue(Dimension());
+    }
+    textLayoutProperty->ResetFontSize();
+    textLayoutProperty->ResetAdaptMaxFontSize();
+    textLayoutProperty->ResetAdaptMinFontSize();
+    optionApply(AceType::WeakClaim(AceType::RawPtr(text_)));
+    if (!textLayoutProperty->HasFontSize() && !textLayoutProperty->HasAdaptMinFontSize() &&
+        !textLayoutProperty->HasAdaptMaxFontSize()) {
+        if (backupFontSize.has_value()) {
+            textLayoutProperty->UpdateFontSize(backupFontSize.value());
+        }
+        if (backupMaxFontSize.has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(backupMaxFontSize.value());
+        }
+        if (backupMinFontSize.has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(backupMinFontSize.value());
+        }
+    }
+    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    text_->MarkModifyDone();
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& MenuItemPattern::GetOptionTextModifier()
+{
+    return optionApply_;
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& MenuItemPattern::GetSelectedOptionTextModifier()
+{
+    return optionSelectedApply_;
+}
+
+void MenuItemPattern::ResetSelectTextProps()
+{
+    auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto row = AceType::DynamicCast<FrameNode>(text_->GetParent());
+    CHECK_NULL_VOID(row);
+    auto textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
+    row->RemoveChild(text_);
+    text_ = MenuView::CreateText(textContent, row);
+}
+
+void MenuItemPattern::ApplySelectedThemeStyles()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(selectTheme);
+    auto selectedColorText = selectTheme->GetSelectedColorText();
+    auto selectedFontSizeText = selectTheme->GetSelectFontSizeText();
+    auto selectedColor = selectTheme->GetSelectedColor();
+    auto selectedBorderColor = selectTheme->GetOptionSelectedBorderColor();
+    auto selectedBorderWidth = selectTheme->GetOptionSelectedBorderWidth();
+    SetFontColor(selectedColorText);
+    SetFontSize(selectedFontSizeText);
+    SetBgColor(selectedColor);
+    SetBorderColor(selectedBorderColor);
+    SetBorderWidth(selectedBorderWidth);
+}
+
+void MenuItemPattern::ApplyOptionThemeStyles()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(selectTheme && textTheme);
+    SetFontColor(selectTheme->GetMenuFontColor());
+    SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SetFontSize(selectTheme->GetMenuFontSize());
+    SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    SetBorderColor(GetBorderColor());
+    SetBorderWidth(GetBorderWidth());
+    SetBgColor(selectTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG

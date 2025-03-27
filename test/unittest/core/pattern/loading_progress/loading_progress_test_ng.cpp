@@ -84,6 +84,44 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameNodeCreator001, TestSize.Lev
 }
 
 /**
+ * @tc.name: LoadingProgressModel001
+ * @tc.desc: Test the Reset function of loadingProgress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModel001, TestSize.Level1)
+{
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LoadingProgressPaintProperty> paintProperty = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(COLOR_DEFAULT);
+    EXPECT_EQ(paintProperty->GetColorValue(), COLOR_DEFAULT);
+    modelNg.ResetColor();
+    EXPECT_EQ(paintProperty->HasColor(), false);
+}
+
+/**
+ * @tc.name: LoadingProgressModel002
+ * @tc.desc: Test the Reset function of loadingProgress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModel002, TestSize.Level1)
+{
+    LoadingProgressModelNG modelNg;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    modelNg.Create();
+    RefPtr<LoadingProgressPaintProperty> paintProperty = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    modelNg.SetColor(frameNode, COLOR_DEFAULT);
+    EXPECT_EQ(paintProperty->GetColorValue(), COLOR_DEFAULT);
+    modelNg.ResetColor(frameNode);
+    EXPECT_EQ(paintProperty->HasColor(), false);
+}
+
+/**
  * @tc.name: LoadingProgressLayoutAlgorithm001
  * @tc.desc: Test MeasureContent function of loadingProgressNode.
  * @tc.type: FUNC
@@ -331,6 +369,27 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest005, TestSize.Level1)
      */
     loadingProgressPattern->SetBuilderFunc(node);
     loadingProgressPattern->BuildContentModifierNode();
+}
+
+/**
+ * @tc.name: LoadingProgressPatternTest006
+ * @tc.desc: Test Pattern OnThemeScopeUpdate function of loadingProgress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest006, TestSize.Level1)
+{
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LoadingProgressPaintProperty> paintProperty = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    modelNg.SetColor(COLOR_DEFAULT);
+    EXPECT_FALSE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
+    modelNg.ResetColor();
+    EXPECT_TRUE(pattern->OnThemeScopeUpdate(frameNode->GetThemeScopeId()));
 }
 
 /**

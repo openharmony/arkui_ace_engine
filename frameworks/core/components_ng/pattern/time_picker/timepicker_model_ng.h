@@ -46,6 +46,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
     void HasUserDefinedOpacity() override;
+    void UpdateUserSetSelectColor() override;
     static void SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 

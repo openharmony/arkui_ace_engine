@@ -170,8 +170,7 @@ private:
         const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
     void InitFocusEvent();
     RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
-    void SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
-        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index);
+    void InitAccessibilityZIndex();
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
@@ -187,6 +186,7 @@ private:
     AnimationEndEventPtr animationEndEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
+    BarPosition barPosition_ = BarPosition::START;
 };
 
 } // namespace OHOS::Ace::NG

@@ -32,24 +32,15 @@ public:
 
     ~PixelmapDrawableDescriptor() override = default;
 
-    std::shared_ptr<Media::PixelMap> GetPixelMap() override
-    {
-        return pixelMap_->GetPixelMapSharedPtr();
-    }
+    std::shared_ptr<Media::PixelMap> GetPixelMap() override;
+
+    void SetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     int32_t GetOriginalWidth() const override;
 
     int32_t GetOriginalHeight() const override;
 
-    DrawableType GetDrawableType() const override
-    {
-        return DrawableType::PIXELMAP;
-    }
-
-    void SetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap) override
-    {
-        pixelMap_ = PixelMap::Create(pixelMap);
-    }
+    DrawableType GetDrawableType() const override;
 
     DrawableInfo FetchSync() override;
 
@@ -72,4 +63,4 @@ protected:
 } // namespace Ace
 } // namespace OHOS
 
-#endif // FOUNDATION_ACE_INTERFACE_DRAWABLE_DESCRIPTOR_PIXELMAP_DRAWABLE_DESCRIPTOR_H
+#endif // FOUNDATION_ACE_INTERFACE_DRAWABLE_DESCRIPTOR_PIXELMAP_DRAWABLE_DESCRIPTOR_H

@@ -25,11 +25,13 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_popups.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_properties.h"
@@ -120,6 +122,7 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
     JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
     JSClass<JSSelect>::StaticMethod("menuAlign", &JSSelect::SetMenuAlign, opt);
+    JSClass<JSSelect>::StaticMethod("avoidance", &JSSelect::SetAvoidance, opt);
 
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
@@ -138,6 +141,11 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("controlSize", &JSSelect::SetControlSize);
     JSClass<JSSelect>::StaticMethod("direction", &JSSelect::SetDirection, opt);
     JSClass<JSSelect>::StaticMethod("dividerStyle", &JSSelect::SetDividerStyle);
+    JSClass<JSSelect>::StaticMethod("menuOutline", &JSSelect::SetMenuOutline, opt);
+    JSClass<JSSelect>::StaticMethod("arrowModifier", &JSSelect::SetArrowModifier, opt);
+    JSClass<JSSelect>::StaticMethod("textModifier", &JSSelect::SetTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("optionTextModifier", &JSSelect::SetOptionTextModifier, opt);
+    JSClass<JSSelect>::StaticMethod("selectedOptionTextModifier", &JSSelect::SetSelectedOptionTextModifier, opt);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -714,6 +722,31 @@ void JSSelect::SetMenuAlign(const JSCallbackInfo& info)
     SelectModel::GetInstance()->SetMenuAlign(menuAlignObj);
 }
 
+void JSSelect::SetAvoidance(const JSCallbackInfo& info)
+{
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        SelectModel::GetInstance()->SetAvoidance(mode);
+        return;
+    }
+
+    int32_t value = info[0]->ToNumber<int32_t>();
+    switch (value) {
+        case static_cast<int32_t>(AvoidanceMode::COVER_TARGET):
+            mode = AvoidanceMode::COVER_TARGET;
+            break;
+        case static_cast<int32_t>(AvoidanceMode::AVOID_AROUND_TARGET):
+            mode = AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            break;
+    }
+    SelectModel::GetInstance()->SetAvoidance(mode);
+}
+
 bool JSSelect::IsPercentStr(std::string& percent)
 {
     if (percent.find("%") != std::string::npos) {
@@ -953,5 +986,75 @@ void JSSelect::SetDirection(const std::string& dir)
         direction = TextDirection::AUTO;
     }
     SelectModel::GetInstance()->SetLayoutDirection(direction);
+}
+
+void JSSelect::SetMenuOutline(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto menuTheme = GetTheme<NG::MenuTheme>();
+    NG::MenuParam menuParam;
+    MenuDefaultParam(menuParam);
+    if (info[0]->IsNull() || info[0]->IsUndefined()) {
+        NG::BorderWidthProperty outlineWidth;
+        outlineWidth.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        menuParam.outlineWidth = outlineWidth;
+        NG::BorderColorProperty outlineColor;
+        outlineColor.SetColor(menuTheme->GetOuterBorderColor());
+        menuParam.outlineColor = outlineColor;
+    } else {
+        auto menuOptions = JSRef<JSObject>::Cast(info[0]);
+        auto outlineWidthValue = menuOptions->GetProperty("width");
+        JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
+        auto outlineColorValue = menuOptions->GetProperty("color");
+        JSViewPopups::ParseMenuOutlineColor(outlineColorValue, menuParam);
+    }
+    SelectModel::GetInstance()->SetMenuOutline(menuParam);
+}
+
+void JSSelect::SetArrowModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject() ||
+        !SystemProperties::IsNeedSymbol()) {
+        SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetSymbolOptionApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetArrowModifierApply(applyFunc);
+}
+
+void JSSelect::SetTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetTextModifierApply(applyFunc);
+}
+
+void JSSelect::SetOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetOptionTextModifier(applyFunc);
+}
+
+void JSSelect::SetSelectedOptionTextModifier(const JSCallbackInfo& info)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> applyFunc = nullptr;
+    if (info.Length() < 1 || info[0]->IsNull() || info[0]->IsUndefined() || !info[0]->IsObject()) {
+        SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
+        return;
+    }
+    JSViewAbstract::SetTextStyleApply(info, applyFunc, info[0]);
+    SelectModel::GetInstance()->SetSelectedOptionTextModifier(applyFunc);
 }
 } // namespace OHOS::Ace::Framework

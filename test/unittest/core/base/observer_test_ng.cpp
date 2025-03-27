@@ -339,4 +339,19 @@ HWTEST_F(ObserverTestNg, ObserverTestNg012, TestSize.Level1)
     ASSERT_EQ(info->navigationId, "");
     ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
 }
+
+/**
+ * @tc.name: ObserverTestNg013
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg013, TestSize.Level1)
+{
+    GestureEvent gestureEventInfo;
+    RefPtr<FrameNode> frameNode = nullptr;
+    const RefPtr<PanRecognizer> current = nullptr;
+    PanGestureInfo panGestureInfo = { PanGestureState::AFTER, CurrentCallbackState::START };
+    UIObserverHandler::GetInstance().NotifyPanGestureStateChange(gestureEventInfo, current, frameNode, panGestureInfo);
+    ASSERT_EQ(UIObserverHandler::GetInstance().panGestureHandleFunc_, nullptr);
+}
 }

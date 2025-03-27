@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_CONTROLLER_H
 
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {

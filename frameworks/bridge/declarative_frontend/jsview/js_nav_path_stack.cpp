@@ -33,6 +33,17 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr char JS_NAV_PATH_STACK_CLASS_NAME[] = "NavPathStack";
 constexpr char JS_SET_NATIVESTACK_FUNC[] = "setNativeStack";
+constexpr char JS_NAV_PATH_ARRAY_NAME[] = "pathArray";
+constexpr char JS_NAV_PATH_ANIMATE_NAME[] = "animated";
+constexpr char JS_NAV_PATH_ISREPLACE_NAME[] = "isReplace";
+
+constexpr char JS_NAV_PATH_ISFORCESET_NAME[] = "isForceSet";
+constexpr char JS_NAV_PATH_NAME_NAME[] = "name";
+constexpr char JS_NAV_PATH_PARAM_NAME[] = "param";
+constexpr char JS_NAV_PATH_ONPOP_NAME[] = "onPop";
+constexpr char JS_NAV_PATH_ISENTRY_NAME[] = "isEntry";
+constexpr char JS_NAV_PATH_NAVDESTINATIONID_NAME[] = "navDestinationId";
+constexpr int32_t ARGC_COUNT_THREE = 3;
 }
 
 void JSNavPathStack::JSBind(BindingTarget globalObj)
@@ -40,6 +51,8 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
     JSClass<JSNavPathStack>::Declare("NativeNavPathStack");
     JSClass<JSNavPathStack>::Method("onStateChanged", &JSNavPathStack::OnStateChanged);
     JSClass<JSNavPathStack>::CustomMethod("onPopCallback", &JSNavPathStack::OnPopCallback);
+    JSClass<JSNavPathStack>::CustomMethod("getPathStack", &JSNavPathStack::GetPathStack);
+    JSClass<JSNavPathStack>::CustomMethod("setPathStack", &JSNavPathStack::SetPathStack);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -131,6 +144,146 @@ bool JSNavPathStack::CheckIsValid(JSValueWrapper object)
     napi_value stack = nativeEngine->ValueToNapiValue(object);
     napi_instanceof(env, stack, constructor, &isInstance);
     return isInstance;
+}
+
+void JSNavPathStack::GetPathStack(const JSCallbackInfo& info)
+{
+    JSRef<JSArray> empty;
+    if (info.Length() < 1) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input length");
+        info.SetReturnValue(empty);
+        return;
+    }
+    auto navPathStack = JSRef<JSObject>::Cast(info[0]);
+    if (navPathStack->IsEmpty() || navPathStack->IsUndefined()) {
+        info.SetReturnValue(empty);
+        return;
+    }
+    auto pathArrayValue = navPathStack->GetProperty(JS_NAV_PATH_ARRAY_NAME);
+    if (pathArrayValue->IsEmpty() || !pathArrayValue->IsArray()) {
+        info.SetReturnValue(empty);
+        return;
+    }
+    auto pathArray = JSRef<JSArray>::Cast(pathArrayValue);
+    auto arrayLength = pathArray->Length();
+    JSRef<JSArray> copyInfo = JSRef<JSArray>::New(arrayLength);
+    for (size_t index = 0; index < arrayLength; index++) {
+        CopyPathInfo(pathArray, copyInfo, index);
+    }
+    info.SetReturnValue(std::move(copyInfo));
+    return;
+}
+
+void JSNavPathStack::CopyPathInfo(const JSRef<JSArray>& origin, JSRef<JSArray>& dest, size_t index)
+{
+    auto originObj = JSRef<JSObject>::Cast(origin->GetValueAt(index));
+    if (originObj->IsEmpty() || originObj->IsUndefined()) {
+        return;
+    }
+    auto dstObj = JSRef<JSObject>::New();
+    auto name = originObj->GetProperty(JS_NAV_PATH_NAME_NAME);
+    auto param = originObj->GetProperty(JS_NAV_PATH_PARAM_NAME);
+    auto onPop = originObj->GetProperty(JS_NAV_PATH_ONPOP_NAME);
+    auto isEntry = originObj->GetProperty(JS_NAV_PATH_ISENTRY_NAME);
+    auto id = originObj->GetProperty(JS_NAV_PATH_NAVDESTINATIONID_NAME);
+    dstObj->SetPropertyObject(JS_NAV_PATH_NAME_NAME, name);
+    dstObj->SetPropertyObject(JS_NAV_PATH_PARAM_NAME, param);
+    dstObj->SetPropertyObject(JS_NAV_PATH_ONPOP_NAME, onPop);
+    dstObj->SetPropertyObject(JS_NAV_PATH_ISENTRY_NAME, isEntry);
+    dstObj->SetPropertyObject(JS_NAV_PATH_NAVDESTINATIONID_NAME, id);
+    dest->SetValueAt(index, dstObj);
+}
+
+void JSNavPathStack::SetPathStack(const JSCallbackInfo& info)
+{
+    if (info.Length() < ARGC_COUNT_THREE) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "invalid input length");
+        return;
+    }
+    auto navPathStack = JSRef<JSObject>::Cast(info[0]);
+    auto setPathArray = JSRef<JSArray>::Cast(info[1]);
+    auto animated = info[2];
+    if (navPathStack->IsEmpty() || navPathStack->IsUndefined()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "navpathStack is invalid");
+        return;
+    }
+    auto curPathArrayValue = navPathStack->GetProperty(JS_NAV_PATH_ARRAY_NAME);
+    if (curPathArrayValue->IsEmpty() || !curPathArrayValue->IsArray()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current navpathInfo is invalid");
+        return;
+    }
+    auto curPathArray = JSRef<JSArray>::Cast(curPathArrayValue);
+    if (setPathArray->IsEmpty() || !setPathArray->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "invalid pathInfo is set");
+        return;
+    }
+    auto setPathLength = setPathArray->Length();
+
+    JSRef<JSArray> newPathArray = JSRef<JSArray>::New(setPathLength);
+    for (size_t index = 0; index < setPathLength; index++) {
+        /**
+         * step1. copy user set path info.
+         * step2. check if name and id is valid or not.
+         * step3. if valid, find existing node that name and id is same, and update param info;
+         *  otherwise, set id as undefined.
+         * step4. set isForceSet flag as true.
+         */
+        auto setPathInfo = JSRef<JSObject>::Cast(setPathArray->GetValueAt(index));
+        JSRef<JSObject> pathInfo = JSRef<JSObject>::Make(setPathInfo.Get());
+        auto navDestinationId = setPathInfo->GetProperty(JS_NAV_PATH_NAVDESTINATIONID_NAME);
+        auto name = setPathInfo->GetProperty(JS_NAV_PATH_NAME_NAME);
+        if (!navDestinationId->IsEmpty() && navDestinationId->IsString() &&
+            !name->IsEmpty() && name->IsString()) {
+            auto navIdStr = navDestinationId->ToString();
+            auto nameStr = name->ToString();
+            bool findInCurArray = FindNavInfoInPreArray(pathInfo, curPathArray, navIdStr, nameStr);
+            if (findInCurArray) {
+                auto param = setPathInfo->GetProperty(JS_NAV_PATH_PARAM_NAME);
+                auto onPop = setPathInfo->GetProperty(JS_NAV_PATH_ONPOP_NAME);
+                auto isEntry = setPathInfo->GetProperty(JS_NAV_PATH_ISENTRY_NAME);
+                pathInfo->SetPropertyObject(JS_NAV_PATH_PARAM_NAME, param);
+                pathInfo->SetPropertyObject(JS_NAV_PATH_ONPOP_NAME, onPop);
+                pathInfo->SetPropertyObject(JS_NAV_PATH_ISENTRY_NAME, isEntry);
+            }
+        }
+        pathInfo->SetProperty<bool>(JS_NAV_PATH_ISFORCESET_NAME, true);
+        newPathArray->SetValueAt(index, pathInfo);
+    }
+    navPathStack->SetPropertyObject(JS_NAV_PATH_ARRAY_NAME, std::move(newPathArray));
+    bool finalAnimate = true;
+    if (!animated->IsEmpty() && animated->IsBoolean()) {
+        finalAnimate = animated->ToBoolean();
+    }
+    navPathStack->SetProperty<bool>(JS_NAV_PATH_ANIMATE_NAME, finalAnimate);
+    navPathStack->SetProperty<uint32_t>(JS_NAV_PATH_ISREPLACE_NAME, 0);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set path stack, new size :%{public}zu, animated %{public}d",
+        setPathLength, finalAnimate);
+    OnStateChanged();
+}
+
+bool JSNavPathStack::FindNavInfoInPreArray(
+    JSRef<JSObject>& destInfo, JSRef<JSArray>& originArray, std::string& navIdStr, std::string& nameStr)
+{
+    auto curPathLength = originArray->Length();
+    for (size_t i = 0; i < curPathLength; i++) {
+        auto curPathInfo = JSRef<JSObject>::Cast(originArray->GetValueAt(i));
+        auto curNavDestinationId = curPathInfo->GetProperty(JS_NAV_PATH_NAVDESTINATIONID_NAME);
+        std::string curNavIdStr;
+        if (!curNavDestinationId->IsEmpty() && curNavDestinationId->IsString()) {
+            curNavIdStr = curNavDestinationId->ToString();
+        }
+        auto curName = curPathInfo->GetProperty(JS_NAV_PATH_NAME_NAME);
+        std::string curNameStr;
+        if (!curName->IsEmpty() && curName->IsString()) {
+            curNameStr = curName->ToString();
+        }
+        if (navIdStr == curNavIdStr && nameStr == curNameStr) {
+            destInfo = JSRef<JSObject>::Make(curPathInfo.Get());
+            return true;
+        }
+    }
+    destInfo->SetPropertyObject(JS_NAV_PATH_NAVDESTINATIONID_NAME, JsiValue::Undefined());
+    return false;
 }
 
 void JSNavPathStack::OnPopCallback(const JSCallbackInfo& info)

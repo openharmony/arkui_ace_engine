@@ -296,6 +296,28 @@ ParseResult ParseCalcDimensionsNG(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
     return res;
 }
 
+void ParseTipsOptionsTime(
+    EcmaVM* vm, ArkUIBindTipsOptionsTime& options, Local<JSValueRef> arg, ArkUI_Float32& targetField)
+{
+    if (!arg->IsUndefined() && !arg->IsNull() && arg->IsNumber()) {
+        ArkUI_Float32 value = arg->ToNumber(vm)->Value();
+        if (value >= 0) {
+            targetField = value;
+        }
+    }
+}
+
+void ParseTipsOptionsArrowSize(EcmaVM* vm, Local<JSValueRef> arg, ArkUI_Float64& targetValue, ArkUI_Int32& targetUnit)
+{
+    CalcDimension dimension;
+    if (!arg->IsUndefined() && !arg->IsNull() && ArkTSUtils::ParseJsDimensionVp(vm, arg, dimension, true)) {
+        if (dimension.Value() > 0 && dimension.Unit() != DimensionUnit::PERCENT) {
+            targetValue = dimension.Value();
+            targetUnit = static_cast<ArkUI_Int32>(dimension.Unit());
+        }
+    }
+}
+
 void ResetCalcDimensions(std::vector<std::optional<CalcDimension>>& optDimensions)
 {
     for (uint32_t index = 0; index < optDimensions.size(); index++) {
@@ -898,46 +920,6 @@ void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim
         options.push_back(0);
         options.push_back(0);
     }
-}
-
-void ParseOuterBorderWidth(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized = false)
-{
-    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-
-    std::optional<CalcDimension> leftDim;
-    std::optional<CalcDimension> rightDim;
-    std::optional<CalcDimension> topDim;
-    std::optional<CalcDimension> bottomDim;
-    std::optional<CalcDimension> startDim;
-    std::optional<CalcDimension> endDim;
-
-    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
-    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
-    if (needLocalized) {
-        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
-        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
-    } else {
-        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
-        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
-    }
-
-    if (startDim.has_value() || endDim.has_value()) {
-        PushOuterBorderDimensionVector(startDim, values);
-        PushOuterBorderDimensionVector(endDim, values);
-    } else {
-        PushOuterBorderDimensionVector(leftDim, values);
-        PushOuterBorderDimensionVector(rightDim, values);
-    }
-    PushOuterBorderDimensionVector(topDim, values);
-    PushOuterBorderDimensionVector(bottomDim, values);
 }
 
 void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
@@ -1615,6 +1597,46 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
+void CommonBridge::ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+    std::optional<CalcDimension> startDim;
+    std::optional<CalcDimension> endDim;
+
+    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+    } else {
+        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
+    }
+
+    if (startDim.has_value() || endDim.has_value()) {
+        PushOuterBorderDimensionVector(startDim, values);
+        PushOuterBorderDimensionVector(endDim, values);
+    } else {
+        PushOuterBorderDimensionVector(leftDim, values);
+        PushOuterBorderDimensionVector(rightDim, values);
+    }
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
 ArkUINativeModuleValue CommonBridge::ResetBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -2237,6 +2259,7 @@ ArkUINativeModuleValue CommonBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     double blur = 0.0;
@@ -2248,8 +2271,12 @@ ArkUINativeModuleValue CommonBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runti
     if (blurOptionArg->IsArray(vm)) {
         ParseBlurOption(vm, blurOptionArg, blurOption);
     }
+    bool disableSystemAdaptation = false;
+    if (disableSystemAdaptationArg->IsBoolean()) {
+        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setBackdropBlur(
-        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size(), disableSystemAdaptation);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2511,6 +2538,7 @@ ArkUINativeModuleValue CommonBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallIn
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> blurArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> blurOptionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double blur = 0.0;
     if (!ArkTSUtils::ParseJsDouble(vm, blurArg, blur)) {
@@ -2521,8 +2549,12 @@ ArkUINativeModuleValue CommonBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallIn
     if (blurOptionArg->IsArray(vm)) {
         ParseBlurOption(vm, blurOptionArg, blurOption);
     }
+    bool disableSystemAdaptation = false;
+    if (disableSystemAdaptationArg->IsBoolean()) {
+        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setBlur(
-        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size());
+        nativeNode, blur, blurOption.grayscale.data(), blurOption.grayscale.size(), disableSystemAdaptation);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2759,6 +2791,7 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo
     auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto blurOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_6);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t blurStyle = -1;
     if (blurStyleArg->IsNumber()) {
@@ -2784,8 +2817,12 @@ ArkUINativeModuleValue CommonBridge::SetForegroundBlurStyle(ArkUIRuntimeCallInfo
     intArray[NUM_0] = blurStyle;
     intArray[NUM_1] = colorMode;
     intArray[NUM_2] = adaptiveColor;
-    GetArkUINodeModifiers()->getCommonModifier()->setForegroundBlurStyle(
-        nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size());
+    bool disableSystemAdaptation = false;
+    if (disableSystemAdaptationArg->IsBoolean()) {
+        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCommonModifier()->setForegroundBlurStyle(nativeNode, &intArray, scale,
+        blurOption.grayscale.data(), blurOption.grayscale.size(), disableSystemAdaptation);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2876,6 +2913,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     auto adaptiveColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     auto scaleArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto blurOptionsArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    auto disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_9);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     int32_t blurStyle = -1;
     if (blurStyleArg->IsNumber()) {
@@ -2911,9 +2949,13 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundBlurStyle(ArkUIRuntimeCallInfo
     intArray[NUM_2] = adaptiveColor;
     intArray[NUM_3] = policy;
     intArray[NUM_4] = blurType;
+    bool disableSystemAdaptation = false;
+    if (disableSystemAdaptationArg->IsBoolean()) {
+        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
         nativeNode, &intArray, scale, blurOption.grayscale.data(), blurOption.grayscale.size(),
-        isValidColor, inactiveColor.GetValue());
+        isValidColor, inactiveColor.GetValue(), disableSystemAdaptation);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3489,6 +3531,72 @@ ArkUINativeModuleValue CommonBridge::SetBindMenu(ArkUIRuntimeCallInfo* runtimeCa
         std::vector<NG::OptionParam> optionsParam = JSViewPopups::ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> messageArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> appearingTimeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> disappearingTimeArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> appearingTimeWithContinuousOperationArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> disappearingTimeWithContinuousOperationArg = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> enableArrowArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    Local<JSValueRef> arrowPointPositionArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    Local<JSValueRef> arrowWidthArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    Local<JSValueRef> arrowHeightArg = runtimeCallInfo->GetCallArgRef(NUM_9);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    std::string message;
+    if (!ArkTSUtils::ParseJsString(vm, messageArg, message)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    ArkUIBindTipsOptionsTime tipsOptionsTime {
+        .appearingTime = 700.0f,    // 700.0f : Default appearing time for BindTips,
+        .disappearingTime = 300.0f, // 300.0f : Default disappearing time for BindTips
+        .appearingTimeWithContinuousOperation =
+            300.0f, // 300.0f : Default appearing time with continuous operation for BindTips
+        .disappearingTimeWithContinuousOperation =
+            0.0f // 0.0f : Default disappearing time with continuous operation for BindTips
+    };
+    ParseTipsOptionsTime(vm, tipsOptionsTime, appearingTimeArg, tipsOptionsTime.appearingTime);
+    ParseTipsOptionsTime(vm, tipsOptionsTime, disappearingTimeArg, tipsOptionsTime.disappearingTime);
+    ParseTipsOptionsTime(vm, tipsOptionsTime, appearingTimeWithContinuousOperationArg,
+        tipsOptionsTime.appearingTimeWithContinuousOperation);
+    ParseTipsOptionsTime(vm, tipsOptionsTime, disappearingTimeWithContinuousOperationArg,
+        tipsOptionsTime.disappearingTimeWithContinuousOperation);
+
+    ArkUIBindTipsOptionsArrow bindTipsOptionsArrow;
+
+    bindTipsOptionsArrow.enableArrow = (enableArrowArg->IsBoolean()) ? enableArrowArg->ToBoolean(vm)->Value() : true;
+
+    std::string arrowPointPosition;
+    if (arrowPointPositionArg->IsString(vm)) {
+        arrowPointPosition = arrowPointPositionArg->ToString(vm)->ToString(vm);
+        bindTipsOptionsArrow.arrowPointPosition = arrowPointPosition.c_str();
+    }
+
+    ParseTipsOptionsArrowSize(
+        vm, arrowWidthArg, bindTipsOptionsArrow.arrowWidthValue, bindTipsOptionsArrow.arrowWidthUnit);
+        
+    ParseTipsOptionsArrowSize(
+        vm, arrowHeightArg, bindTipsOptionsArrow.arrowHeightValue, bindTipsOptionsArrow.arrowHeightUnit);
+    GetArkUINodeModifiers()->getCommonModifier()->setBindTips(
+        nativeNode, message.c_str(), tipsOptionsTime, bindTipsOptionsArrow);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBindTips(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBindTips(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5247,6 +5355,7 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> brightnessArg = runtimeCallInfo->GetCallArgRef(3);    // 3:index of parameter brightness
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(4);         // 4:index of parameter color
     Local<JSValueRef> blurOptionsArg = runtimeCallInfo->GetCallArgRef(6);   // 6:index of parameter blurOptions
+    Local<JSValueRef> disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_10);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     CalcDimension radius;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
@@ -5277,10 +5386,14 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* r
     Color inactiveColor = Color::TRANSPARENT;
     bool isValidColor = false;
     SetBackgroundEffectParam(runtimeCallInfo, policy, blurType, inactiveColor, isValidColor);
+    bool disableSystemAdaptation = false;
+    if (disableSystemAdaptationArg->IsBoolean()) {
+        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
+    }
     GetArkUINodeModifiers()->getCommonModifier()->setBackgroundEffect(nativeNode,
         static_cast<ArkUI_Float32>(radius.Value()), saturation, brightness, color.GetValue(),
         static_cast<ArkUI_Int32>(adaptiveColor), blurOption.grayscale.data(), blurOption.grayscale.size(), policy,
-        blurType, isValidColor, inactiveColor.GetValue());
+        blurType, isValidColor, inactiveColor.GetValue(), disableSystemAdaptation);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5416,6 +5529,12 @@ void ParseDragPreViewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Local<JSValu
         preViewOptions.modeArray = modeIntArray;
         preViewOptions.modeArrayLength = static_cast<ArkUI_Int32>(arrLength);
     }
+
+    auto sizeChangeEffect = obj->Get(vm, "sizeChangeEffect");
+    if (sizeChangeEffect->IsNumber()) {
+        preViewOptions.sizeChangeEffect = sizeChangeEffect->Int32Value(vm);
+    }
+
     auto numberBadge = obj->Get(vm, "numberBadge");
     if (numberBadge->IsBoolean()) {
         preViewOptions.isBadgeNumber = false;
@@ -5466,7 +5585,7 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
 
     Local<JSValueRef> valueObj = runtimeCallInfo->GetCallArgRef(NUM_1);
-    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
+    struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, 0, nullptr, false, true, false };
     struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false, false };
     int32_t* modeIntArray = nullptr;
     ParseDragPreViewOptions(runtimeCallInfo, valueObj, preViewOptions, modeIntArray);
@@ -6551,6 +6670,10 @@ Local<panda::ObjectRef> CommonBridge::CreateGestureEventInfo(
     if (info->GetTiltY().has_value()) {
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"), panda::NumberRef::New(vm, info->GetTiltY().value()));
     }
+    if (info->GetRollAngle().has_value()) {
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+            panda::NumberRef::New(vm, info->GetRollAngle().value()));
+    }
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sourceTool"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetSourceTool())));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "deviceId"),
@@ -7065,6 +7188,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))));
     auto fingerArr = CreateFingerListArray(vm, info);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "fingerList"), fingerArr);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), FrameNodeBridge::CreateEventTargetObject(vm, info));
@@ -7795,6 +7920,8 @@ ArkUINativeModuleValue CommonBridge::SetOnHover(ArkUIRuntimeCallInfo* runtimeCal
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltX().value_or(0.0f))));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltY"),
             panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetTiltY().value_or(0.0f))));
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, 0.0f));
         obj->Set(
             vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, 0.0f));
@@ -8284,11 +8411,7 @@ ArkUINativeModuleValue CommonBridge::AddGestureGroup(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    int32_t mode = 2;
-    // when version >= 16, default mode is 0
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        mode = 0;
-    }
+    int32_t mode = 0;
     GetGestureModeValue(runtimeCallInfo, mode, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createGestureGroup(mode);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
@@ -8485,7 +8608,9 @@ ArkUINativeModuleValue CommonBridge::GetWindowName(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, panda::JSValueRef::Undefined(vm));
-    std::string windowName = context->GetWindow()->GetWindowName();
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    std::string windowName = window->GetWindowName();
     return panda::StringRef::NewFromUtf8(vm, windowName.c_str());
 }
 
@@ -8944,14 +9069,15 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, info.GetAbsHat0XValue()));
     axisMap->Set(vm, panda::NumberRef::New(vm, static_cast<int>(NG::AxisModel::ABS_HAT0Y)),
         panda::NumberRef::New(vm, info.GetAbsHat0YValue()));
-    const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "sourceTool",
-        "deviceId", "getModifierKeyState", "stopPropagation", "targetDisplayId" };
+    const char* keys[] = { "axisMap", "target", "timestamp", "source", "pressure", "tiltX", "tiltY", "rollAngle",
+        "sourceTool", "deviceId", "getModifierKeyState", "stopPropagation", "targetDisplayId" };
     Local<JSValueRef> values[] = { axisMap, FrameNodeBridge::CreateEventTargetObject(vm, info),
         panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))),
         panda::NumberRef::New(vm, info.GetDeviceId()), panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::FunctionRef::New(vm, Framework::JsStopPropagation),
@@ -9038,7 +9164,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "target", "timestamp", "source", "pressure",
-        "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState" };
+        "tiltX", "tiltY", "rollAngle", "sourceTool", "deviceId", "getModifierKeyState" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -9055,6 +9181,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
         panda::NumberRef::New(vm, info.GetForce()),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value_or(0.0f))),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltY().value_or(0.0f))),
+        panda::NumberRef::New(vm, static_cast<int32_t>(info.GetRollAngle().value_or(0.0f))),
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))),
         panda::NumberRef::New(vm, info.GetDeviceId()), panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);

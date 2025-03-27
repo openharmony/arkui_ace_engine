@@ -142,6 +142,9 @@ ClickInfo ClickRecognizer::GetClickInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
     return info;
 }
@@ -160,7 +163,7 @@ void ClickRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
@@ -495,6 +498,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     if (touchPoint.tiltY.has_value()) {
         info.SetTiltY(touchPoint.tiltY.value());
     }
+    if (touchPoint.rollAngle.has_value()) {
+        info.SetRollAngle(touchPoint.rollAngle.value());
+    }
     info.SetSourceTool(touchPoint.sourceTool);
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetDisplayX(touchPoint.screenX);
@@ -574,6 +580,9 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     }
     if (touchPoint.tiltY.has_value()) {
         info->SetTiltY(touchPoint.tiltY.value());
+    }
+    if (touchPoint.rollAngle.has_value()) {
+        info->SetRollAngle(touchPoint.rollAngle.value());
     }
     info->SetSourceTool(touchPoint.sourceTool);
     if (sysJudge_) {

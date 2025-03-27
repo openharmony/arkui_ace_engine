@@ -52,6 +52,14 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             RegisterComponentChangeEventCallbackInner(data, reply, option);
             break;
         }
+        case SENDCOMMAND_ASYNC_EVENT: {
+            SendCommandInnerAsync(data, reply, option);
+            break;
+        }
+        case SENDCOMMAND_EVENT: {
+            SendCommandInner(data, reply, option);
+            break;
+        }
         case UNREGISTER_CLICK_EVENT: {
             UnregisterClickEventCallbackInner(data, reply, option);
             break;
@@ -110,6 +118,7 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
         }
         case GET_CURRENT_SHOWING_IMAGE: {
             GetCurrentImagesShowingInner(data, reply, option);
+            break;
         }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
@@ -170,6 +179,22 @@ int32_t UiContentStub::RegisterWebUnfocusEventCallbackInner(
 {
     reply.WriteInt32(RegisterWebUnfocusEventCallback(nullptr));
     return NO_ERROR;
+}
+
+int32_t UiContentStub::SendCommandInner(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    std::string command = data.ReadString();
+    reply.WriteInt32(SendCommand(id, command));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::SendCommandInnerAsync(
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    int32_t id = data.ReadInt32();
+    return SendCommandAsync(id, data.ReadString());
 }
 
 int32_t UiContentStub::UnregisterClickEventCallbackInner(

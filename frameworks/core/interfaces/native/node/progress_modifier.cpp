@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/select/select_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
@@ -251,14 +252,14 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
         ProgressModelNG::SetBorderWidth(
             node, Dimension(value->borderWidthValue, static_cast<DimensionUnit>(value->borderWidthUnit)));
     }
+    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
+    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
+    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     if (value->content == nullptr) {
         ProgressModelNG::SetText(node, std::nullopt);
     } else {
         ProgressModelNG::SetText(node, std::string(value->content));
     }
-    ProgressModelNG::SetBorderColor(node, Color(value->borderColor));
-    ProgressModelNG::SetSweepingEffect(node, value->enableScanEffect);
-    ProgressModelNG::SetShowText(node, value->showDefaultPercentage);
     ProgressModelNG::SetFontColor(node, Color(value->fontColor));
     ProgressModelNG::SetFontSize(node, Dimension(fontSizeNumber, static_cast<DimensionUnit>(fontSizeUnit)));
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));

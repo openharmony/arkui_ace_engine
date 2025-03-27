@@ -47,6 +47,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override;
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
+    void UpdateUserSetSelectColor() override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);

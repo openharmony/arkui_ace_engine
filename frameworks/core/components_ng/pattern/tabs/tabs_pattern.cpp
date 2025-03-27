@@ -303,6 +303,7 @@ void TabsPattern::OnModifyDone()
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();
     InitFocusEvent();
+    InitAccessibilityZIndex();
 
     if (onChangeEvent_) {
         return;
@@ -568,6 +569,33 @@ RefPtr<FocusHub> TabsPattern::GetCurrentFocusNode(FocusIntension intension)
     return nullptr;
 }
 
+void TabsPattern::InitAccessibilityZIndex()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    BarPosition barPosition = tabsLayoutProperty->GetTabBarPositionValue(BarPosition::START);
+    if (barPosition != barPosition_) {
+        barPosition_ = barPosition;
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto swiperAccessibilityProperty = swiperNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(swiperAccessibilityProperty);
+        auto tabBarAccessibilityProperty = tabBarNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_VOID(tabBarAccessibilityProperty);
+        if (barPosition == BarPosition::START) {
+            swiperAccessibilityProperty->SetAccessibilityZIndex(1);
+            tabBarAccessibilityProperty->SetAccessibilityZIndex(0);
+        } else {
+            swiperAccessibilityProperty->SetAccessibilityZIndex(0);
+            tabBarAccessibilityProperty->SetAccessibilityZIndex(1);
+        }
+    }
+}
+
 void TabsPattern::BeforeCreateLayoutWrapper()
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
@@ -623,51 +651,29 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto indexSetByUser = tabsLayoutProperty->GetIndexSetByUser().value();
+    auto index = indexSetByUser;
     tabsLayoutProperty->ResetIndexSetByUser();
     auto tabContentNum = swiperNode->TotalChildCount();
-    if (indexSetByUser >= tabContentNum) {
-        indexSetByUser = 0;
+    if (index >= tabContentNum) {
+        index = 0;
     }
-    SetLastWeakFocusNode(tabsNode, tabBarNode, tabsLayoutProperty, indexSetByUser);
     if (!tabsLayoutProperty->GetIndex().has_value()) {
-        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
+        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
+        tabsLayoutProperty->UpdateIndex(indexSetByUser);
     } else {
         auto preIndex = tabsLayoutProperty->GetIndex().value();
-        if (preIndex == indexSetByUser || indexSetByUser < 0) {
+        if (preIndex == index || index < 0) {
             return;
         }
         if (tabsPattern->GetInterceptStatus()) {
-            auto ret = tabsPattern->OnContentWillChange(preIndex, indexSetByUser);
+            auto ret = tabsPattern->OnContentWillChange(preIndex, index);
             if (ret.has_value() && !ret.value()) {
                 return;
             }
         }
         AceAsyncTraceBeginCommercial(0, APP_TABS_NO_ANIMATION_SWITCH);
         tabBarPattern->SetMaskAnimationByCreate(true);
-        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
-    }
-}
-
-void TabsPattern::SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
-    const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index)
-{
-    auto tabsFocusNode = tabsNode->GetFocusHub();
-    CHECK_NULL_VOID(tabsFocusNode);
-    auto tabBarFocusNode = tabBarNode->GetFocusHub();
-    CHECK_NULL_VOID(tabBarFocusNode);
-    if (!tabsFocusNode->IsCurrentFocus() && !tabsFocusNode->GetLastWeakFocusNode().Upgrade()) {
-        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
-        if (tabBarPosition == BarPosition::START) {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
-        if (!tabBarFocusNode->IsCurrentFocus() && !tabBarFocusNode->GetLastWeakFocusNode().Upgrade()) {
-            auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
-            CHECK_NULL_VOID(childNode);
-            auto childFocusNode = childNode->GetFocusHub();
-            CHECK_NULL_VOID(childFocusNode);
-            childFocusNode->SetFocusDependence(FocusDependence::SELF);
-            tabBarFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(childFocusNode)));
-        }
+        UpdateSelectedState(swiperNode, tabBarPattern, tabsLayoutProperty, index);
     }
 }
 

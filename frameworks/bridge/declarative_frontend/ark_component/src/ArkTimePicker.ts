@@ -47,8 +47,8 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     return this;
   }
   onChange(callback: (value: TimePickerResult) => void): this {
-    modifierWithKey(this._modifiersWithKeys,TimepickerOnChangeModifier.identity,
-      TimepickerOnChangeModifier,callback);
+    modifierWithKey(this._modifiersWithKeys, TimepickerOnChangeModifier.identity,
+      TimepickerOnChangeModifier, callback);
     return this;
   }
   dateTimeOptions(value: DateTimeOptions): this {

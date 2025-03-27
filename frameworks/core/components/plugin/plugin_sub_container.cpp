@@ -40,6 +40,7 @@ const char* GetDeclarativeSharedLibrary()
 
 void PluginSubContainer::Initialize()
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize start.");
     ContainerScope scope(instanceId_);
 
     auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
@@ -90,10 +91,12 @@ void PluginSubContainer::Initialize()
     EngineHelper::AddEngine(instanceId_, jsEngine);
     frontend_->SetJsEngine(jsEngine);
     frontend_->Initialize(FrontendType::JS_PLUGIN, taskExecutor_);
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
 }
 
 void PluginSubContainer::Destroy()
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer Destroy.");
     ContainerScope scope(instanceId_);
     ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
     if (frontend_) {
@@ -172,6 +175,7 @@ void PluginSubContainer::UpdateSurfaceSize()
 void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const std::string& module,
     const std::string& source, const std::string& moduleResPath, const std::string& data)
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "RunDecompressedPlugin hapPath: %{public}s.", hapPath.c_str());
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();
@@ -235,6 +239,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
 void PluginSubContainer::RunPlugin(const std::string& path, const std::string& module, const std::string& source,
     const std::string& moduleResPath, const std::string& data)
 {
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "RunPlugin hapPath: %{public}s.", path.c_str());
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(frontend_);
     frontend_->ResetPageLoadState();

@@ -2005,6 +2005,37 @@ bool DialogPattern::IsShowInFreeMultiWindow()
     return container->IsFreeMultiWindow();
 }
 
+bool DialogPattern::IsWaterfallWindowMode()
+{
+    if (!SystemProperties::IsSuperFoldDisplayDevice()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, false);
+
+    auto currentId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+
+    auto halfFoldStatus = container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD;
+    auto isWaterfallWindow = container->IsWaterfallWindow();
+    return halfFoldStatus && isWaterfallWindow;
+}
+
 bool DialogPattern::IsShowInFloatingWindow()
 {
     auto currentId = Container::CurrentId();

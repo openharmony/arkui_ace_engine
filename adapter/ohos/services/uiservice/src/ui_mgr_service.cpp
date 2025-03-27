@@ -24,7 +24,9 @@ namespace Ace {
 namespace {
 constexpr int32_t UI_MGR_SERVICE_SA_ID = 7001;
 constexpr uint32_t WATCHDOG_TIMEVAL = 5000;
+#ifndef UI_SERVICE_WITH_IDL
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(DelayedSingleton<UIMgrService>::GetInstance().get());
+#endif
 } // namespace
 
 // UiservicePluginDialog UIMgrService::dialogPlugin_;
@@ -32,10 +34,13 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(DelayedSingle
 UIMgrService::UIMgrService()
     : SystemAbility(UI_MGR_SERVICE_SA_ID, true), eventLoop_(nullptr), handler_(nullptr),
       state_(UIServiceRunningState::STATE_NOT_START)
-{}
+{
+    LOGI("Ace UIServcie is created");
+}
 
 UIMgrService::~UIMgrService()
 {
+    LOGI("Ace UIServcie is destroyed");
     std::lock_guard<std::recursive_mutex> lock(uiMutex_);
     callbackMap_.clear();
 }

@@ -941,8 +941,8 @@ HWTEST_F(TextPickerModelTestNg, getTextPickerRange001, TestSize.Level1)
     auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(node, nullptr);
 
-    textPickerModelNG.options_.clear();
-    textPickerModelNG.rangeValue_.clear();
+    textPickerModelNG.SetCascadeColumns({});
+    textPickerModelNG.SetRange({});
     textPickerModelNG.isSingleRange_ = false;
 
     auto result = textPickerModelNG.getTextPickerRange(node);
@@ -1067,5 +1067,62 @@ HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetEnableHapticFeedback001, Tes
     EXPECT_FALSE(textPickerPattern->isEnableHaptic_);
     auto result = TextPickerModelNG::GetEnableHapticFeedback(AceType::RawPtr(frameNode));
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SetIsCascade001
+ * @tc.desc: Test SetIsCascade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetIsCascade001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetIsCascade(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isCascade_);
+}
+
+/**
+ * @tc.name: SetColumnKind001
+ * @tc.desc: Test SetColumnKind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnKind001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), TEXT);
+    EXPECT_EQ(textPickerPattern->columnsKind_, TEXT);
+    TextPickerModelNG::SetColumnKind(AceType::RawPtr(frameNode), MIXTURE);
+    EXPECT_EQ(textPickerPattern->columnsKind_, MIXTURE);
+}
+
+/**
+ * @tc.name: TextPickerModelNGSetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, TextPickerModelNGSetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. The default value of isDisableTextStyleAnimation_ is false.
+     */
+    EXPECT_FALSE(textPickerPattern->isDisableTextStyleAnimation_);
+
+    /**
+     * @tc.cases: case2. Set the value of isDisableTextStyleAnimation_ to true.
+     */
+    TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(textPickerPattern->isDisableTextStyleAnimation_);
 }
 } // namespace OHOS::Ace::NG

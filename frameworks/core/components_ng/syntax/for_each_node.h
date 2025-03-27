@@ -20,6 +20,7 @@
 #include <list>
 #include <string>
 #include <type_traits>
+#include <unordered_set>
 
 #include "base/utils/macros.h"
 #include "core/components_ng/base/ui_node.h"
@@ -68,6 +69,8 @@ public:
         ids_ = std::move(ids);
     }
 
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
+        std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void MoveData(int32_t from, int32_t to) override;
     RefPtr<FrameNode> GetFrameNode(int32_t index) override;

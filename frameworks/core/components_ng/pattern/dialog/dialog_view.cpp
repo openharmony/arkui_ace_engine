@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(

@@ -382,10 +382,10 @@ HWTEST_F(WaterFlowSWTest, OverScroll001, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, 0);
 
     UpdateCurrentOffset(-35000.0f);
-    EXPECT_EQ(info_->startIndex_, 11);
+    EXPECT_EQ(info_->startIndex_, 12);
     EXPECT_EQ(info_->endIndex_, 22);
-    EXPECT_LT(info_->StartPos(), 0.0f);
-    EXPECT_GT(info_->EndPos(), 800.0f);
+    EXPECT_EQ(info_->StartPos(), 0.0f);
+    EXPECT_EQ(info_->EndPos(), 800.0f);
 }
 
 /**
@@ -425,10 +425,10 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     EXPECT_EQ(info_->endIndex_, 49);
 
     UpdateCurrentOffset(35000.0f);
-    EXPECT_EQ(info_->startIndex_, 28);
-    EXPECT_EQ(info_->endIndex_, 41);
-    EXPECT_LT(info_->StartPos(), 0.0f);
-    EXPECT_GT(info_->EndPos(), 800.0f);
+    EXPECT_EQ(info_->startIndex_, 32);
+    EXPECT_EQ(info_->endIndex_, 42);
+    EXPECT_EQ(info_->StartPos(), 0.0f);
+    EXPECT_EQ(info_->EndPos(), 800.0f);
 }
 
 /**

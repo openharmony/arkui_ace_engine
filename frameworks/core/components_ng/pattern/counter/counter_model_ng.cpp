@@ -335,4 +335,40 @@ void CounterModelNG::ResetBackgroundColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, BackgroundColor, frameNode);
 }
+
+void CounterModelNG::SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(counterPattern);
+    auto addId = counterPattern->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto gestureHub = addNode->GetOrCreateGestureEventHub();
+    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
+        if (clickEvent) {
+            clickEvent();
+        }
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
+    };
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
+
+void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto counterPattern = frameNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(counterPattern);
+    auto subId = counterPattern->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto gestureHub = subNode->GetOrCreateGestureEventHub();
+    GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
+        if (clickEvent) {
+            clickEvent();
+        }
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
+    };
+    gestureHub->SetUserOnClick(std::move(gestureEventFunc));
+}
 } // namespace OHOS::Ace::NG

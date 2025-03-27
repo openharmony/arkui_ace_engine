@@ -139,10 +139,10 @@ void FfiOHOSAceFrameworkImageSpanSetColorFilter(void* vectorHandle)
     ImageModel::GetInstance()->SetColorFilterMatrix(matrix);
 }
 
-void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageComplete completeInfo))
+void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageCompleteV2 completeInfo))
 {
     auto onComplete = [ffiOnComplete = CJLambda::Create(callback)](const LoadImageSuccessEvent& newInfo) -> void {
-        CJImageComplete ffiCompleteInfo {};
+        CJImageCompleteV2 ffiCompleteInfo {};
         ffiCompleteInfo.width = newInfo.GetWidth();
         ffiCompleteInfo.height = newInfo.GetHeight();
         ffiCompleteInfo.componentWidth = newInfo.GetComponentWidth();
@@ -157,10 +157,10 @@ void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageComplete com
     ImageModel::GetInstance()->SetOnComplete(onComplete);
 }
 
-void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo))
+void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageErrorV2 errorInfo))
 {
     auto onError = [ffiOnError = CJLambda::Create(callback)](const LoadImageFailEvent& newInfo) -> void {
-        CJImageError ffiErrorInfo {};
+        CJImageErrorV2 ffiErrorInfo {};
         ffiErrorInfo.componentWidth = newInfo.GetComponentWidth();
         ffiErrorInfo.componentHeight = newInfo.GetComponentHeight();
         ffiErrorInfo.message = newInfo.GetErrorMessage().c_str();

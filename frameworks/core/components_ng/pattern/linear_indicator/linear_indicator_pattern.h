@@ -28,22 +28,9 @@ class LinearIndicatorPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(LinearIndicatorPattern, LinearLayoutPattern);
 
 public:
-    LinearIndicatorPattern()
-        : LinearLayoutPattern(false), direction_(TextDirection::AUTO), hasVisibleChangeRegistered_(false),
-          isVisibleChangePause_(false)
-    {
-        controller_ = AceType::MakeRefPtr<LinearIndicatorController>(AceType::WeakClaim(this));
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        theme_ = pipeline->GetThemeManager()->GetTheme<LinearIndicatorTheme>();
-        CHECK_NULL_VOID(theme_);
-        strokeWidth_ = theme_->GetDefaultStrokeWidth();
-        strokeRadius_ = theme_->GetDefaultStrokeRadius();
-        trackBackgroundColor_ = theme_->GetTrackBackgroundColor();
-        trackColor_ = theme_->GetTrackColor();
-    };
+    LinearIndicatorPattern();
 
-    ~LinearIndicatorPattern() override = default;
+    ~LinearIndicatorPattern() override;
 
     const RefPtr<LinearIndicatorController>& GetController() const
     {

@@ -42,6 +42,13 @@ enum class DragPreviewMode : int32_t {
     ENABLE_DEFAULT_RADIUS = 4,
     ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
     ENABLE_MULTI_TILE_EFFECT  = 6,
+    ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW = 7,
+};
+
+enum class DraggingSizeChangeEffect : int32_t {
+    DEFAULT = 0,
+    SIZE_TRANSITION = 1,
+    SIZE_CONTENT_TRANSITION = 2,
 };
 
 struct BlurBackGroundInfo {
@@ -87,6 +94,8 @@ struct DragPreviewOption {
     bool enableHapticFeedback = false;
     bool isMultiTiled = false;
     bool isLiftingDisabled = false;
+    bool isTouchPointCalculationBasedOnFinalPreviewEnable = false;
+    NG::DraggingSizeChangeEffect sizeChangeEffect = DraggingSizeChangeEffect::DEFAULT;
     union {
         int32_t badgeNumber;
         bool isShowBadge = true;

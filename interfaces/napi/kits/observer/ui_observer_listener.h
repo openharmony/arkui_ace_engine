@@ -44,6 +44,8 @@ public:
         const RefPtr<NG::FrameNode> frameNode);
     void OnDidClick(const GestureEvent& gestureEventInfo, const ClickInfo& clickInfo,
         const RefPtr<NG::FrameNode> frameNode);
+    void OnPanGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::PanRecognizer>& current,
+        const RefPtr<NG::FrameNode> frameNode);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);
     bool NapiEqual(napi_value cb);
@@ -55,14 +57,16 @@ private:
     napi_value GetNapiCallback();
     static napi_valuetype GetValueType(napi_env env, napi_value value);
     static napi_value GetNamedProperty(napi_env env, napi_value object, const std::string& propertyName);
-    void AddBaseEventInfo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
-    void AddGestureEventInfoOne(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
-    void AddGestureEventInfoTwo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
-    void AddGestureEventInfoThree(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
+    void AddBaseEventInfo(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
+    void AddGestureEventInfoOne(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
+    void AddGestureEventInfoTwo(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
+    void AddGestureEventInfoThree(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
+    void AddGestureEventInfoFour(napi_value objValueEvent, const GestureEvent& gestureEventInfo);
     void AddFingerListInfo(napi_value objValueClickEvent, const GestureEvent& gestureEventInfo);
     void AddClickEventInfoOne(napi_value objValueClickEvent, const ClickInfo& clickInfo);
     void AddClickEventInfoTwo(napi_value objValueClickEvent, const ClickInfo& clickInfo);
-    void AddTargetObject(napi_value objValueClickEvent, const ClickInfo& clickInfo);
+    void AddGestureRecognizerInfo(napi_value objValueGestureRecognizer, const RefPtr<NG::PanRecognizer>& current);
+    void AddTargetObject(napi_value objValueEvent, const BaseEventInfo& baseEventInfo);
     napi_env env_ = nullptr;
     napi_ref callback_ = nullptr;
 };

@@ -257,26 +257,6 @@ public:
         return isShowHoverImagePreviewStartDrag_;
     }
 
-    void SetOnMenuDisappear(bool isDisappear)
-    {
-        onMenuDisappear_ = isDisappear;
-    }
-
-    bool GetOnMenuDisappear() const
-    {
-        return onMenuDisappear_;
-    }
-
-    void SetOnPreviewDisappear(bool isDisappear)
-    {
-        onPreviewDisappear_ = isDisappear;
-    }
-
-    bool GetOnPreviewDisappear() const
-    {
-        return onPreviewDisappear_;
-    }
-
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -411,7 +391,29 @@ public:
         return dumpInfo_;
     }
 
-    void SetDumpInfo(const MenuDumpInfo& dumpInfo);
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
+    {
+        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+        dumpInfo_.menuType = dumpInfo.menuType;
+        dumpInfo_.enableArrow = dumpInfo.enableArrow;
+        dumpInfo_.offset = dumpInfo.offset;
+        dumpInfo_.targetNode = dumpInfo.targetNode;
+        dumpInfo_.targetOffset = dumpInfo.targetOffset;
+        dumpInfo_.targetSize = dumpInfo.targetSize;
+        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
+        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
+        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+        dumpInfo_.top = dumpInfo.top;
+        dumpInfo_.bottom = dumpInfo.bottom;
+        dumpInfo_.left = dumpInfo.left;
+        dumpInfo_.right = dumpInfo.right;
+        dumpInfo_.globalLocation = dumpInfo.globalLocation;
+        dumpInfo_.originPlacement = dumpInfo.originPlacement;
+        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
+        dumpInfo_.finalPosition = dumpInfo.finalPosition;
+        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+    }
 
     bool GetHasCustomRadius() const
     {
@@ -468,31 +470,6 @@ public:
     bool HasStackSubMenu();
     void ClearAllSubMenu();
     int embeddedSubMenuCount_ = 0;
-    void StopPreviewMenuAnimation();
-    void GetPreviewRenderContexts(RefPtr<RenderContext>& previewPositionContext,
-        RefPtr<RenderContext>& previewScaleContext, RefPtr<RenderContext>& previewDisappearContext);
-    void AnimatePreviewMenu(RefPtr<RenderContext> previewPositionContext, RefPtr<RenderContext> previewScaleContext,
-        RefPtr<RenderContext> menuContext, RefPtr<RenderContext> previewDisappearContext);
-
-    void SetAnimationPreviewScale(float scale)
-    {
-        animationInfo_.previewScale = scale;
-    }
-
-    void SetAnimationMenuScale(float scale)
-    {
-        animationInfo_.menuScale = scale;
-    }
-
-    void SetAnimationPreviewOffset(OffsetF offset)
-    {
-        animationInfo_.previewOffset = offset;
-    }
-
-    void SetAnimationMenuOffset(OffsetF offset)
-    {
-        animationInfo_.menuOffset = offset;
-    }
 
     void SetAnimationClipRate(float rate)
     {
@@ -581,6 +558,25 @@ public:
         isSelectOverlaySubWindowWrapper_ = isSelectOverlaySubWindowWrapper;
     }
 
+    bool GetHasCustomOutlineWidth() const
+    {
+        return hasCustomOutlineWidth_;
+    }
+
+    void SetHasCustomOutlineWidth(bool hasCustomOutlineWidth)
+    {
+        hasCustomOutlineWidth_ = hasCustomOutlineWidth;
+    }
+
+    bool GetHasCustomOutlineColor() const
+    {
+        return hasCustomOutlineColor_;
+    }
+
+    void SetHasCustomOutlineColor(bool hasCustomOutlineColor)
+    {
+        hasCustomOutlineColor_ = hasCustomOutlineColor;
+    }
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -638,8 +634,6 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
-    bool onMenuDisappear_ = false;
-    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
@@ -656,6 +650,8 @@ private:
     std::optional<bool> enableFold_;
     // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
     bool isSelectOverlaySubWindowWrapper_ = false;
+    bool hasCustomOutlineWidth_ = false;
+    bool hasCustomOutlineColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -57,6 +57,10 @@ constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 constexpr int32_t SHEET_SHADOW_NONE = 6;
 constexpr Dimension SHEET_TITLE_TEXT_HORIZONTAL_MARGIN = 16.0_vp;
 constexpr double SHEET_TITLE_FONT_WEIGHT = 9.0;
+// button style : NORMAL(0) EMPHASIZE(1)
+constexpr int SHEET_CLOSE_ICON_BUTTON_STYLE = 1;
+// sheet height mode : LARGE(1) AUTO(2)
+constexpr int SHEET_HEIGHT_DEFAULT_MODE = 1;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -141,6 +145,16 @@ public:
                 SHEET_DOUBLE_TITLE_TOP_PADDING);
             theme->sheetTitleAreaMargin_ = sheetPattern->GetAttr<Dimension>("sheet_title_area_margin",
                 SHEET_TITLE_AREA_MARGIN);
+            theme->closeIconButtonWidth_ =
+                sheetPattern->GetAttr<Dimension>("sheet_close_icon_button_width", SHEET_CLOSE_ICON_WIDTH);
+            theme->centerDefaultWidth_ =
+                sheetPattern->GetAttr<Dimension>("sheet_center_default_width", SHEET_LANDSCAPE_WIDTH);
+            theme->sheetCloseIconTitleSpaceNew_ =
+                sheetPattern->GetAttr<Dimension>("sheet_close_icon_title_space", SHEET_CLOSE_ICON_TITLE_SPACE_NEW);
+            theme->sheetHeightDefaultMode_ =
+                sheetPattern->GetAttr<int>("sheet_height_default_mode", SHEET_HEIGHT_DEFAULT_MODE);
+            theme->closeIconButtonStyle_ =
+                sheetPattern->GetAttr<int>("sheet_close_icon_button_style", SHEET_CLOSE_ICON_BUTTON_STYLE);
         }
     };
     ~SheetTheme() override = default;
@@ -275,6 +289,14 @@ public:
         return sheetInnerBorderColor_;
     }
 
+    /**
+     * Now the switch is enabled on 2in1 and tv devices.
+     * When this switch is on, it affects
+     * the shadow config、
+     * outer border、
+     * inner border、
+     * enableHoverMode.
+     */
     bool IsOuterBorderEnable() const
     {
         return isOuterBorderEnable_;
@@ -293,6 +315,31 @@ public:
     const Dimension& GetOperationAreaHeight() const
     {
         return operationAreaHeight_;
+    }
+
+    const Dimension& GetCloseIconButtonWidth() const
+    {
+        return closeIconButtonWidth_;
+    }
+
+    const Dimension& GetCenterDefaultWidth() const
+    {
+        return centerDefaultWidth_;
+    }
+
+    const Dimension& GetSheetCloseIconTitleSpaceNew() const
+    {
+        return sheetCloseIconTitleSpaceNew_;
+    }
+
+    const int& GetCloseIconButtonStyle() const
+    {
+        return closeIconButtonStyle_;
+    }
+
+    const int& GetSheetHeightDefaultMode() const
+    {
+        return sheetHeightDefaultMode_;
     }
 
     double GetLargePercent() const
@@ -371,6 +418,11 @@ private:
     Dimension titleTextHorizMargin_;
     Dimension closeIconRadius_;
     Dimension operationAreaHeight_;
+    Dimension closeIconButtonWidth_;
+    Dimension centerDefaultWidth_;
+    Dimension sheetCloseIconTitleSpaceNew_;
+    int closeIconButtonStyle_;
+    int sheetHeightDefaultMode_;
     double largePercent_ = 1.0; // 1.0 is default value
     double mediumPercent_ = 0.6; // 0.6 is default value
     bool heightApplyFullScreen_ = false;

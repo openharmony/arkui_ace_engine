@@ -369,4 +369,46 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutGetHeightForDigit001, TestSize.Level1)
     float height = swiperLayoutAlgorithm->GetHeightForDigit(&layoutWrapper, geometryNode->GetFrameSize().Height());
     EXPECT_EQ(height, 20.f);
 }
+
+/**
+ * @tc.name: CalcCurrentPageStatusOnRTL001
+ * @tc.desc: Test CalcCurrentPageStatusOnRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatusOnRTL001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    pattern_->itemPosition_.clear();
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -240.0f;
+    swiperItemInfo1.endPos = 240.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = 240.0f;
+    swiperItemInfo2.endPos = 720.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
+    auto additionalOffset = 0.0f;
+    auto isTouchBottom = false;
+    pattern_->currentFirstIndex_ = 0;
+    auto pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
+
+    isTouchBottom = true;
+    pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
+
+    layoutProperty_->UpdateItemSpace(Dimension(50.0f, DimensionUnit::PX));
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = -240.0f;
+    swiperItemInfo1.endPos = 240.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    swiperItemInfo2.startPos = 290.0f;
+    swiperItemInfo2.endPos = 770.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
+    pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
+}
 } // namespace OHOS::Ace::NG

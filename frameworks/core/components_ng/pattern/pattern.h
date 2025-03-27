@@ -682,6 +682,11 @@ public:
     virtual void EndTranslate() {};
     virtual void SendTranslateResult(std::string results) {};
 
+    virtual bool BorderUnoccupied() const
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

@@ -818,4 +818,82 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
 
     EXPECT_EQ(info.startIndex_, 13);
 }
+
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 1;
+    EXPECT_TRUE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 3 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 3;
+    EXPECT_FALSE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 3 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 3;
+    EXPECT_TRUE(info.CheckGridMatrix(0));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 5 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 4 } } },
+    };
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 1;
+    info.endIndex_ = 4;
+    EXPECT_FALSE(info.CheckGridMatrix(2));
+}
+
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 5 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 4 } } },
+    };
+    info.startMainLineIndex_ = 1;
+    info.endMainLineIndex_ = 3;
+    info.startIndex_ = 1;
+    info.endIndex_ = 4;
+    EXPECT_TRUE(info.CheckGridMatrix(0));
+}
 } // namespace OHOS::Ace::NG

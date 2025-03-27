@@ -294,7 +294,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
@@ -303,81 +303,81 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
      * @tc.steps: case1: no active, no recognizers
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.OnAccepted();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case2: has active, recognizers has nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.OnAccepted();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case3: has active, recognizers has ptr not same
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtrNotSame);
-    exclusiveRecognizer.OnAccepted();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtrNotSame);
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case4: has active, recognizers has ptr same
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnAccepted();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnAccepted();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
      * @tc.steps: case1: no recognizers
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
      * @tc.steps: case2: recognizers has nullptr
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
      * @tc.steps: case3: recognizers has ptr, referee is not FAIL
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
      * @tc.steps: case4: recognizers has ptr, referee is FAIL
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -391,7 +391,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. create touchEvent and call HandleEvent function and compare result.
@@ -401,19 +401,19 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
     bool result = false;
     TouchEvent touchEvent;
     touchEvent.type = TouchType::MOVE;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
     touchEvent.type = TouchType::DOWN;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
     touchEvent.type = TouchType::UP;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
     touchEvent.type = TouchType::CANCEL;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
     touchEvent.type = TouchType::UNKNOWN;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -422,9 +422,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
     touchEvent.type = TouchType::DOWN;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -433,8 +433,8 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     clickRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -442,10 +442,10 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.steps: case4: active is nullptr, recognizers have nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -454,9 +454,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     clickRecognizerPtr->touchPoints_.clear();
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -466,9 +466,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      */
     clickRecognizerPtr->touchPoints_.clear();
     clickRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.HandleEvent(touchEvent);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
     EXPECT_EQ(result, true);
 }
 
@@ -483,7 +483,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. call CheckNeedBlocked function and compare result.
@@ -491,7 +491,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    auto result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
+    auto result = exclusiveRecognizer->CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -499,9 +499,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.steps: case2: recognizers is not empty, child == recognizer
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = exclusiveRecognizer->CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -509,9 +509,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.steps: case3: recognizers is not empty, child is nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    result = exclusiveRecognizer->CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -521,9 +521,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      */
     RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtrNotSame->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtrNotSame);
-    result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtrNotSame);
+    result = exclusiveRecognizer->CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -532,9 +532,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     clickRecognizerPtrNotSame->refereeState_ = RefereeState::PENDING;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtrNotSame);
-    result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtrNotSame);
+    result = exclusiveRecognizer->CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, true);
 }
 
@@ -549,19 +549,19 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest004, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. call UnBlockGesture function and compare result.
      * @tc.expected: step2. result equals.
      */
-    auto result = exclusiveRecognizer.UnBlockGesture();
+    auto result = exclusiveRecognizer->UnBlockGesture();
     EXPECT_EQ(result, nullptr);
 
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.UnBlockGesture();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = exclusiveRecognizer->UnBlockGesture();
     EXPECT_EQ(result, true);
 }
 
@@ -576,7 +576,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
@@ -584,49 +584,49 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
      * @tc.steps: case1: refereeState_ is SUCCESS, return
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->refereeState_ = RefereeState::SUCCEED;
+    exclusiveRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case2: GestureDisposal::ACCEPT, recognizer is SUCCESS
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case3: GestureDisposal::PENDING, recognizer is PENDING
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
-    exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case4: GestureDisposal::REJECT, recognizer is FAIL
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::NONE);
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::NONE);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case4: GestureDisposal::REJECT, recognizer is FAIL
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.refereeState_ = RefereeState::PENDING;
+    exclusiveRecognizer->refereeState_ = RefereeState::PENDING;
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->BatchAdjudicate(clickRecognizerPtr, GestureDisposal::REJECT);
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
 }
 
 /**
@@ -640,7 +640,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: step1. create ClickRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
@@ -648,7 +648,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case1: normal case
      * @tc.expected: step2. result equals.
      */
-    auto result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    auto result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, true);
 
     /**
@@ -656,7 +656,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case2: recognizerPtr is nullptr
      * @tc.expected: step2. result equals.
      */
-    result = exclusiveRecognizer.ReconcileFrom(nullptr);
+    result = exclusiveRecognizer->ReconcileFrom(nullptr);
     EXPECT_EQ(result, false);
 
     /**
@@ -664,8 +664,8 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case3: recognizerPtr size not same
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -673,8 +673,8 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case4: recognizerPtr size not same, priorityMask not same
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.priorityMask_ = GestureMask::End;
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    exclusiveRecognizer->priorityMask_ = GestureMask::End;
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -682,9 +682,9 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case5: recognizerPtr size same, priorityMask not same
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     exclusiveRecognizerPtr->recognizers_.clear();
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -692,12 +692,12 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case6: recognizerPtr same, child is nullptr
      * @tc.expected: step2. result equals.
      */
-    exclusiveRecognizer.priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
+    exclusiveRecognizer->priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
     exclusiveRecognizerPtr->recognizers_.clear();
     exclusiveRecognizerPtr->recognizers_.push_back(nullptr);
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, false);
 
     /**
@@ -706,12 +706,12 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    exclusiveRecognizer.priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizerPtr->recognizers_.clear();
     exclusiveRecognizerPtr->recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, true);
 
     /**
@@ -721,12 +721,12 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      */
     RefPtr<ClickRecognizer> clickRecognizerPtrNotSame =
         AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER - 1, COUNT - 1);
-    exclusiveRecognizer.priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
     exclusiveRecognizerPtr->recognizers_.clear();
     exclusiveRecognizerPtr->recognizers_.push_back(clickRecognizerPtrNotSame);
-    result = exclusiveRecognizer.ReconcileFrom(exclusiveRecognizerPtr);
+    result = exclusiveRecognizer->ReconcileFrom(exclusiveRecognizerPtr);
     EXPECT_EQ(result, false);
 }
 
@@ -741,7 +741,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest007, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
@@ -750,79 +750,79 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest007, TestSize.Level1)
      * @tc.steps: case4: recognizers has ptr, referee is FAIL
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.recognizers_.clear();
+    exclusiveRecognizer->recognizers_.clear();
     clickRecognizerPtr->refereeState_ = RefereeState::FAIL;
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    exclusiveRecognizer.OnRejected();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::FAIL);
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    exclusiveRecognizer->OnRejected();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::FAIL);
 
     /**
      * @tc.steps: step4. call OnPending function and compare result.
      * @tc.steps: case1: no active
      * @tc.expected: step4. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.OnPending();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::PENDING);
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->OnPending();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step4. call OnPending function and compare result.
      * @tc.steps: case2: has active
      * @tc.expected: step4. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.OnPending();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::PENDING);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->OnPending();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step5. call OnBlocked function and compare result.
      * @tc.steps: case1: ACCEPT, no active
      * @tc.expected: step5. result equals.
      */
-    exclusiveRecognizer.disposal_ = GestureDisposal::ACCEPT;
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.OnBlocked();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
+    exclusiveRecognizer->disposal_ = GestureDisposal::ACCEPT;
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->OnBlocked();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED_BLOCKED);
 
     /**
      * @tc.steps: step5. call OnBlocked function and compare result.
      * @tc.steps: case2: ACCEPT, active
      * @tc.expected: step5. result equals.
      */
-    exclusiveRecognizer.disposal_ = GestureDisposal::ACCEPT;
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.OnBlocked();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
+    exclusiveRecognizer->disposal_ = GestureDisposal::ACCEPT;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->OnBlocked();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::SUCCEED_BLOCKED);
 
     /**
      * @tc.steps: step5. call OnBlocked function and compare result.
      * @tc.steps: case3: PENDING, no active
      * @tc.expected: step5. result equals.
      */
-    exclusiveRecognizer.disposal_ = GestureDisposal::PENDING;
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.OnBlocked();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::PENDING_BLOCKED);
+    exclusiveRecognizer->disposal_ = GestureDisposal::PENDING;
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->OnBlocked();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::PENDING_BLOCKED);
 
     /**
      * @tc.steps: step5. call OnBlocked function and compare result.
      * @tc.steps: case3: PENDING, active
      * @tc.expected: step5. result equals.
      */
-    exclusiveRecognizer.disposal_ = GestureDisposal::REJECT;
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.OnBlocked();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::PENDING_BLOCKED);
+    exclusiveRecognizer->disposal_ = GestureDisposal::REJECT;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->OnBlocked();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::PENDING_BLOCKED);
 
     /**
      * @tc.steps: step5. call OnBlocked function and compare result.
      * @tc.steps: case3: PENDING, active
      * @tc.expected: step5. result equals.
      */
-    exclusiveRecognizer.disposal_ = GestureDisposal::PENDING;
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    exclusiveRecognizer.OnBlocked();
-    EXPECT_EQ(exclusiveRecognizer.refereeState_, RefereeState::PENDING_BLOCKED);
+    exclusiveRecognizer->disposal_ = GestureDisposal::PENDING;
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    exclusiveRecognizer->OnBlocked();
+    EXPECT_EQ(exclusiveRecognizer->refereeState_, RefereeState::PENDING_BLOCKED);
 }
 
 /**
@@ -836,7 +836,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
     bool result = false;
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
@@ -847,16 +847,16 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
      */
     AxisEvent axisEvent;
     axisEvent.action = AxisAction::BEGIN;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
     axisEvent.action = AxisAction::UPDATE;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
     axisEvent.action = AxisAction::END;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
     axisEvent.action = AxisAction::NONE;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -864,8 +864,8 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
      * @tc.steps: case2: active is ptr
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    exclusiveRecognizer->activeRecognizer_ = clickRecognizerPtr;
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -873,10 +873,10 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
      * @tc.steps: case3: active is nullptr, recognizers have nullptr
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(nullptr);
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(nullptr);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 
     /**
@@ -884,20 +884,20 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
      * @tc.steps: case4: active is nullptr, recognizers have ptr
      * @tc.expected: step3. result equals.
      */
-    exclusiveRecognizer.activeRecognizer_ = nullptr;
-    exclusiveRecognizer.recognizers_.clear();
-    exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    exclusiveRecognizer->activeRecognizer_ = nullptr;
+    exclusiveRecognizer->recognizers_.clear();
+    exclusiveRecognizer->recognizers_.push_back(clickRecognizerPtr);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 
     /**
      * @tc.steps: step4. call OnResetStatus function and compare result.
      * @tc.expected: step4. result equals.
      */
-    exclusiveRecognizer.OnResetStatus();
-    EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
+    exclusiveRecognizer->OnResetStatus();
+    EXPECT_EQ(exclusiveRecognizer->activeRecognizer_, nullptr);
     axisEvent.action = AxisAction::CANCEL;
-    result = exclusiveRecognizer.HandleEvent(axisEvent);
+    result = exclusiveRecognizer->HandleEvent(axisEvent);
     EXPECT_EQ(result, true);
 }
 
@@ -913,7 +913,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest009, TestSize.Level1)
      */
     RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizerPtr};
-    ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step3. set child recognizer state and call cleanRecognizerState function and compare result.
@@ -921,7 +921,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest009, TestSize.Level1)
      * @tc.expected: step3. clickRecognizer state set ready.
      */
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.CleanRecognizerState();
+    exclusiveRecognizer->CleanRecognizerState();
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
 
     /**
@@ -932,7 +932,7 @@ HWTEST_F(ExclusiveRecognizerTestNg, ExclusiveRecognizerTest009, TestSize.Level1)
     clickRecognizerPtr->touchPoints_[0] = {};
     clickRecognizerPtr->touchPoints_[1] = {};
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
-    exclusiveRecognizer.CleanRecognizerState();
+    exclusiveRecognizer->CleanRecognizerState();
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 }
 } // namespace OHOS::Ace::NG

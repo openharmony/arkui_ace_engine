@@ -35,6 +35,7 @@
 #endif
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -274,7 +275,6 @@ void* createRootNode(ArkUI_Int32 nodeId)
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
     return AceType::RawPtr(stageNode);
 }
 
@@ -284,7 +284,6 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     frameNode->IncRefCount();
-    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createComponentRootNode: frameNode %{public}p", AceType::RawPtr(frameNode));
     return AceType::RawPtr(frameNode);
 }
 

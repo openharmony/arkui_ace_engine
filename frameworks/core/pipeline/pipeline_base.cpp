@@ -274,8 +274,9 @@ bool PipelineBase::NeedTouchInterpolation()
     auto container = Container::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto uIContentType = container->GetUIContentType();
-    return uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION;
+    return SystemProperties::IsNeedResampleTouchPoints() &&
+        (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+        uIContentType == UIContentType::MODAL_UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -1058,7 +1059,7 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     formLinkInfoMap_.clear();
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
-        "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",
+        "Pipeline destroyed, %{public}zu finish callbacks unexecuted, count: %{public}s",
         finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
     finishCount_.clear();

@@ -247,7 +247,7 @@ public:
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
             theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_cancel_icon_size", 16.0_vp);
             }
         }
@@ -845,6 +845,11 @@ public:
         return errorTextAlign_;
     }
 
+    const Dimension& GetContentHoverPadding() const
+    {
+        return contentHoverPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
     TextStyle textStyle_;
@@ -925,6 +930,7 @@ private:
     Dimension passwordIconSize_ = 20.0_vp;
     Dimension cancelIconPadding_ = 14.0_vp;
     Dimension passwordIconPadding_ = 10.0_vp;
+    Dimension contentHoverPadding_ = 8.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;

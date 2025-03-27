@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "frameworks/core/event/pointer_event.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,9 +50,15 @@ public:
     RefPtr<DynamicPattern> CreateDynamicComponent();
 };
 
-void DynamicPatternTestNg::SetUp() {}
+void DynamicPatternTestNg::SetUp()
+{
+    MockPipelineContext::SetUp();
+}
 
-void DynamicPatternTestNg::TearDown() {}
+void DynamicPatternTestNg::TearDown()
+{
+    MockPipelineContext::TearDown();
+}
 
 RefPtr<DynamicPattern> DynamicPatternTestNg::CreateDynamicComponent()
 {
@@ -85,7 +92,7 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest001, TestSize.Level1)
     dynamicPattern->InitializeDynamicComponent("", "", MOCK_ABC_ENTRY_POINT, runtime);
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.abcPath.empty());
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.entryPoint.empty());
-    EXPECT_TRUE(dynamicPattern->curDynamicInfo_.reourcePath.empty());
+    EXPECT_TRUE(dynamicPattern->curDynamicInfo_.resourcePath.empty());
     EXPECT_TRUE(dynamicPattern->curDynamicInfo_.registerComponents.empty());
 
      /**
@@ -627,6 +634,193 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest015, TestSize.Level1)
     EXPECT_TRUE(dynamicPattern->adaptiveHeight_);
     dynamicPattern->SetAdaptiveHeight(false);
     EXPECT_FALSE(dynamicPattern->adaptiveHeight_);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest016
+ * @tc.desc: Test HandleErrorCallback case DC_WORKER_HAS_USED_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest016, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCWORKERHASUSEDERROR.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest017
+ * @tc.desc: Test HandleErrorCallback case DC_ONLY_RUN_ON_SCB
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest017, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCONLYRUNONSCB.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_ONLY_RUN_ON_SCB);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest018
+ * @tc.desc: Test HandleErrorCallback case DC_INTERNAL_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest018, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with DCINTERNALERROR.
+     * @tc.expected: expect FireOnErrorCallbackOnUI is called with the correct parameters.
+     */
+    dynamicPattern->HandleErrorCallback(DCResultCode::DC_INTERNAL_ERROR);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest019
+ * @tc.desc: Test HandleErrorCallback case default
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest019, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. get DynamicPattern.
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    ASSERT_NE(dynamicPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleErrorCallback with an invalid code.
+     * @tc.expected: expect PLATFORMLOGI is called with the correct message.
+     */
+    DCResultCode invalidCode = static_cast<DCResultCode>(99999);
+    dynamicPattern->HandleErrorCallback(invalidCode);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest020
+ * @tc.desc: Test OnAttachContext with null context
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest020, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. Create DynamicPattern and set initial instanceId.
+     */
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    int oldInstanceId = 123;
+    pattern->instanceId_ = oldInstanceId;
+
+    /**
+     * @tc.steps: step2. Call OnAttachContext with nullptr context.
+     */
+    pattern->OnAttachContext(nullptr);
+
+    /**
+     * @tc.expected: instanceId_ remains unchanged.
+     */
+    EXPECT_EQ(pattern->instanceId_, oldInstanceId);
+#endif
+}
+
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest021, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+    EXPECT_NE(dynamicNode, nullptr);
+    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    auto code = static_cast<DCResultCode>(-1);
+    dynamicPattern->HandleErrorCallback(code);
+    IsolatedInfo curDynamicInfo;
+    void* handRuntime = nullptr;
+    auto pattern = AceType::MakeRefPtr<DynamicPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+    dynamicPattern->dynamicComponentRenderer_ =
+        DynamicComponentRenderer::Create(frameNode, handRuntime, curDynamicInfo);
+    auto host = dynamicPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+
+    dynamicPattern->DumpDynamicRenderer(1, false);
+    dynamicPattern->DumpDynamicRenderer(0, true);
+    dynamicPattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    dynamicPattern->OnAccessibilityChildTreeDeregister();
+    std::vector<std::string> params = { "param1", "param2", "param3" };
+    std::vector<std::string> info;
+    dynamicPattern->OnAccessibilityDumpChildInfo(params, info);
+    dynamicPattern->HandleFocusEvent();
+    auto pipeline = host->GetContext();
+    EXPECT_NE(pipeline, nullptr);
+    pipeline->isFocusActive_ = true;
+    dynamicPattern->HandleFocusEvent();
+    EXPECT_EQ(pipeline->isFocusActive_, true);
+#endif
+}
+
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest022, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
+        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+    EXPECT_NE(dynamicNode, nullptr);
+    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
+    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
+    EXPECT_NE(dynamicPattern, nullptr);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    PipelineContext* rawContext = AceType::RawPtr(context);
+    dynamicPattern->OnAttachContext(rawContext);
+    EXPECT_EQ(dynamicPattern->instanceId_, rawContext->GetInstanceId());
+    dynamicPattern->OnAttachContext(rawContext);
+
+    int dummyObject = 42;
+    void* runtime = &dummyObject;
+    dynamicPattern->InitializeDynamicComponent("", "", "", runtime);
+    dynamicPattern->InitializeDynamicComponent("", "", "entryPoint", runtime);
+    RefPtr<LayoutWrapperNode> layoutWrapper;
+    DirtySwapConfig dirtySwapConfig;
+    dirtySwapConfig.skipMeasure = true;
+    dirtySwapConfig.skipLayout = false;
+    auto reuslt = dynamicPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(reuslt, false);
+    dirtySwapConfig.skipLayout = true;
+    reuslt = dynamicPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
+    EXPECT_EQ(reuslt, false);
 #endif
 }
 } // namespace OHOS::Ace::NG

@@ -369,7 +369,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest006, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     EXPECT_EQ(layoutWrapper->GetPageCurrentOffset(), -70.0f);
     EXPECT_EQ(layoutWrapper1->GetPageCurrentOffset(), -70.0f);
@@ -400,7 +400,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest007, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     pipeline->safeAreaManager_->UpdateKeyboardOffset(50.0f);
 
@@ -447,7 +447,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest008, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
 
     EXPECT_FALSE(layoutWrapper->CheckValidSafeArea());
@@ -492,7 +492,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
         NG::SafeAreaInsets({10.0f, 40.0f}, {20.0f, 50.0f}, {680.0f, 710.0f}, {1230.0f, 1260.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({0.0f, 30.0f}, {0.0f, 30.0f}, {690.0f, 720.0f}, {1250.0f, 1280.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({20.0f, 50.0f}, {40.0f, 70.0f}, {670.0f, 700.0f}, {1210.0f, 1240.0f}));
     pipeline->safeAreaManager_->SetIgnoreSafeArea(true);
     layoutWrapper->AdjustNotExpandNode();
@@ -502,7 +502,7 @@ HWTEST_F(LayoutWrapperTestTwoNg, LayoutWrapperTest009, TestSize.Level1)
         NG::SafeAreaInsets({40.0f, 10.0f}, {50.0f, 20.0f}, {710.0f, 680.0f}, {1260.0f, 1230.0f}));
     pipeline->safeAreaManager_->UpdateSystemSafeArea(
         NG::SafeAreaInsets({30.0f, 0.0f}, {30.0f, 0.0f}, {720.0f, 690.0f}, {1280.0f, 1250.0f}));
-    pipeline->safeAreaManager_->UpdateNavArea(
+    pipeline->safeAreaManager_->UpdateNavSafeArea(
         NG::SafeAreaInsets({50.0f, 20.0f}, {70.0f, 40.0f}, {700.0f, 670.0f}, {1240.0f, 1210.0f}));
     pipeline->safeAreaManager_->SetIgnoreSafeArea(true);
     layoutWrapper->AdjustNotExpandNode();

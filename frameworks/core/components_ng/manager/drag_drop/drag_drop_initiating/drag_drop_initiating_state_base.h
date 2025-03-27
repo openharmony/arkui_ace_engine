@@ -34,6 +34,7 @@ struct DragDropInitiatingParams {
     float preScaleValue = 1.0f;
     bool isThumbnailCallbackTriggered = false;
     bool isNeedGather = false;
+    bool hasGatherNode = false;
     RefPtr<PixelMap> preScaledPixelMap;
     std::function<void(Offset)> getTextThumbnailPixelMapCallback;
     CancelableCallback<void()> getThumbnailPixelMapCallback;
@@ -42,7 +43,7 @@ struct DragDropInitiatingParams {
     CancelableCallback<void()> preDragStatusCallback;
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
-    SourceType triggeredSourceType;
+    SourceType triggeredSourceType = SourceType::TOUCH;
     Offset touchOffset { 0.0, 0.0 };
 
     RefPtr<FrameNode> GetFrameNode()
@@ -58,7 +59,7 @@ struct DragDropInitiatingParams {
         triggeredSourceType = SourceType::TOUCH;
         isThumbnailCallbackTriggered = false;
         isNeedGather = false;
-        getTextThumbnailPixelMapCallback = nullptr;
+        hasGatherNode = false;
         getThumbnailPixelMapCallback.Cancel();
         notifyPreDragCallback.Cancel();
         showGatherCallback.Cancel();
@@ -114,6 +115,7 @@ protected:
     void SetTextPixelMap();
     void HideTextAnimation(bool startDrag = false, double globalX = 0, double globalY = 0);
     void HandleTextDragCallback();
+    void HandleTextDragStart(const RefPtr<FrameNode>& frameNode, const GestureEvent& info);
 
 private:
     WeakPtr<DragDropInitiatingStateMachine> stateMachine_;

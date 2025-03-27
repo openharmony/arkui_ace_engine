@@ -55,6 +55,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
+#include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -344,6 +345,7 @@ constexpr int32_t ZOOM_ERROR_COUNT_MAX = 5;
 constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
+constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -457,6 +459,7 @@ WebPattern::WebPattern()
     renderMode_ = RenderMode::ASYNC_RENDER;
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -467,6 +470,7 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
@@ -477,6 +481,7 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    RegisterSurfaceDensityCallback();
 }
 
 WebPattern::~WebPattern()
@@ -509,6 +514,11 @@ WebPattern::~WebPattern()
     UninitializeAccessibility();
     HideMagnifier();
     OnTooltip("");
+
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
+    }
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -579,6 +589,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         return;
     }
     previewSelectionMenuMap_[key] = param;
+    TAG_LOGD(AceLogTag::ACE_WEB, "muneParam hapticFeedbackMode:%{public}d", param->menuParam.hapticFeedbackMode);
 }
 
 std::shared_ptr<WebPreviewSelectionMenuParam> WebPattern::GetPreviewSelectionMenuParams(
@@ -766,6 +777,7 @@ bool WebPattern::NeedSoftKeyboard() const
 void WebPattern::OnAttachToMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnAttachToMainTree WebId %{public}d", GetWebId());
+    isAttachedToMainTree_ = true;
     InitSlideUpdateListener();
     // report component is in foreground.
     delegate_->OnRenderToForeground();
@@ -774,6 +786,7 @@ void WebPattern::OnAttachToMainTree()
 void WebPattern::OnDetachFromMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "OnDetachFromMainTree WebId %{public}d", GetWebId());
+    isAttachedToMainTree_ = false;
     // report component is in background.
     delegate_->OnRenderToBackground();
 }
@@ -1416,6 +1429,16 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
+    if (info.GetAction() != MouseAction::MOVE) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebPattern::HandleMouseEvent, web id %{public}d, Action %{public}d, Button %{public}d",
+            GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+    }
+
+    ACE_SCOPED_TRACE(
+        "WebPattern::HandleMouseEvent, web id %d, Action %d, Button %d",
+        GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
+
     isMouseEvent_ = true;
     WebOnMouseEvent(info);
 
@@ -1682,6 +1705,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
+        UdmfClient::GetInstance()->SetTagProperty(aceUnifiedData, "records_to_entries_data_format");
         info->SetData(aceUnifiedData);
         HandleOnDragEnter(info);
         return dragDropInfo;
@@ -1913,7 +1937,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     // received web kernel drag callback, enable drag
     frameNode->SetDraggable(true);
     gestureHub->SetPixelMap(delegate_->GetDragPixelMap());
-    if (IsPreviewImageNodeExist()) {
+    if (!IsPreviewImageNodeExist()) {
         StartVibraFeedback("longPress.light");
     }
     if (!isMouseEvent_) {
@@ -1922,7 +1946,11 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop enable drag and start drag task for web,"
         "is mouse event: %{public}d", isMouseEvent_);
-    gestureHub->StartDragTaskForWeb();
+    bool result = gestureHub->StartDragTaskForWeb();
+    if (!result && isMouseEvent_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start drag task for web fail, reset drag action");
+        ResetDragAction();
+    }
     return true;
 }
 
@@ -2049,7 +2077,7 @@ void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
     // hyperlink
     std::string linkUrl;
     std::string linkTitle;
-    UdmfClient::GetInstance()->GetLinkRecord(aceData, linkUrl, linkTitle);
+    UdmfClient::GetInstance()->GetLinkEntry(aceData, linkUrl, linkTitle);
     if (!linkUrl.empty()) {
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
@@ -2068,7 +2096,7 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     CHECK_NULL_VOID(delegate_->dragData_);
     // file
     std::vector<std::string> urlVec;
-    UdmfClient::GetInstance()->GetFileUriRecord(aceData, urlVec);
+    UdmfClient::GetInstance()->GetFileUriEntry(aceData, urlVec);
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
         "url array size is:%{public}zu", urlVec.size());
     delegate_->dragData_->ClearImageFileNames();
@@ -2118,9 +2146,8 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
-        std::vector<std::string> plains = UdmfClient::GetInstance()->GetPlainTextRecords(aceData);
-        if (!plains.empty() && !plains[0].empty()) {
-            std::string plain = plains[0];
+        std::string plain = UdmfClient::GetInstance()->GetPlainTextEntry(aceData);
+        if (!plain.empty()) {
             delegate_->dragData_->SetFragmentText(plain);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
@@ -2128,14 +2155,14 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
         // html
         std::string htmlContent;
         std::string plainContent;
-        UdmfClient::GetInstance()->GetHtmlRecord(aceData, htmlContent, plainContent);
+        UdmfClient::GetInstance()->GetHtmlEntry(aceData, htmlContent, plainContent);
         if (!htmlContent.empty()) {
             delegate_->dragData_->SetFragmentHtml(htmlContent);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
         }
         // spanstring
-        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringRecord(aceData);
+        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringEntry(aceData);
         if (!spanString.empty()) {
             std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
             delegate_->dragData_->SetFragmentHtml(htmlStr);
@@ -2517,7 +2544,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             CHECK_NULL_RETURN(pipeline, false);
             ProcessVirtualKeyBoard(pipeline->GetRootWidth(), pipeline->GetRootHeight(), lastKeyboardHeight_);
         }
-        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
+        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_ || keyboardGetready_);
         IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
     } else {
@@ -2633,7 +2660,6 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(geometryNode);
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
-    delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
@@ -3004,6 +3030,13 @@ void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateIntrinsicSizeEnabled(value);
+    }
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     if (delegate_) {
@@ -3248,7 +3281,9 @@ void WebPattern::OnModifyDone()
             popupRenderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
             popupRenderSurface_->SetRenderContext(renderContextForPopupSurface_);
             renderContext->AddChild(renderContextForSurface_, 0);
-            renderContext->AddChild(renderContextForPopupSurface_, 1);
+            if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+                renderContext->AddChild(renderContextForPopupSurface_, 1);
+            }
             popupRenderSurface_->InitSurface();
             popupRenderSurface_->SetTransformHint(rotation_);
             popupRenderSurface_->UpdateSurfaceConfig();
@@ -3348,6 +3383,7 @@ void WebPattern::OnModifyDone()
         isAllowWindowOpenMethod_ = SystemProperties::GetAllowWindowOpenMethodEnabled();
         delegate_->UpdateAllowWindowOpenMethod(GetAllowWindowOpenMethodValue(isAllowWindowOpenMethod_));
         delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
+        delegate_->UpdateIntrinsicSizeEnabled(GetIntrinsicSizeEnabledValue(false));
         delegate_->UpdateNativeEmbedRuleTag(GetNativeEmbedRuleTagValue(""));
         delegate_->UpdateNativeEmbedRuleType(GetNativeEmbedRuleTypeValue(""));
 
@@ -3396,6 +3432,14 @@ void WebPattern::OnModifyDone()
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
         InitInOfflineMode();
     }
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density_);
+    }
+}
+
+void WebPattern::SetSurfaceDensity(double density)
+{
+    density_ = density;
 }
 
 extern "C" {
@@ -3442,20 +3486,6 @@ void WebPattern::RecordWebEvent(bool isInit)
         };
         delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
         EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-        return;
-    }
-    auto cacheJsCode = EventRecorder::Get().GetCacheJsCode();
-    if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB) || cacheJsCode.empty()) {
-        return;
-    }
-    delegate_->ExecuteTypeScript(cacheJsCode, [](std::string result) {});
-    EventRecorder::Get().HandleJavascriptItems(onDocumentEndScriptItems_, onDocumentEndScriptItemsByOrder_);
-    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
-        UpdateJavaScriptOnDocumentEndByOrder();
-        delegate_->JavaScriptOnDocumentEndByOrder();
-    } else if (onDocumentEndScriptItems_.has_value()) {
-        UpdateJavaScriptOnDocumentEnd();
-        delegate_->JavaScriptOnDocumentEnd();
     }
 #endif
 }
@@ -3594,6 +3624,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     lastKeyboardHeight_ = keyboard;
+    keyboardGetready_ = true;
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), width, height]() {
             auto webPattern = weak.Upgrade();
@@ -3604,6 +3635,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
                                                       height,
                                                       webPattern->lastKeyboardHeight_,
                                                       webPattern->GetDrawSize().Height());
+            webPattern->keyboardGetready_ = false;
         }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
     return true;
 }
@@ -3749,6 +3781,14 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         }
         touchPointX = touchPoint.x;
         touchPointY = touchPoint.y;
+        if (info.GetSourceTool() == SourceTool::PEN &&
+            delegate_->SetFocusByPosition(touchPointX, touchPointY) &&
+            StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEventForWeb(touchPointX, touchPointY)) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "stylus touch down is editable.");
+            isNeedInterceptedTouchEvent_ = true;
+            WebRequestFocus();
+            return;
+        }
         delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
@@ -3763,6 +3803,10 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
     isTouchUpEvent_ = true;
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     if (!isReceivedArkDrag_) {
         ResetDragAction();
@@ -3798,6 +3842,7 @@ void WebPattern::OnMagnifierHandleMove(const RectF& handleRect, bool isFirst)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
+    CHECK_EQUAL_VOID(isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN, true);
     if (isDragging_) {
         return;
     }
@@ -3855,6 +3900,10 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 {
     UninitTouchEventListener();
+    if (isNeedInterceptedTouchEvent_ && info.GetSourceTool() == SourceTool::PEN) {
+        isNeedInterceptedTouchEvent_ = false;
+        return;
+    }
     if (IsRootNeedExportTexture()) {
         HandleTouchUp(info, false);
     }
@@ -4076,7 +4125,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 
 void WebPattern::HideMagnifier()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "HideMagnifier");
+    TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -4672,6 +4721,14 @@ void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleW
     visibleHeight = visibleInnerRect.Height();
 }
 
+void WebPattern::RestoreRenderFit()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+    }
+}
+
 void WebPattern::AttachCustomKeyboard()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
@@ -4870,7 +4927,6 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 
 void WebPattern::NotifyForNextTouchEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::NotifyForNextTouchEvent");
     CHECK_NULL_VOID(delegate_);
     delegate_->NotifyForNextTouchEvent();
 }
@@ -5217,6 +5273,15 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 {
     CHECK_NULL_VOID(delegate_);
     TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
+    if (type == WindowSizeChangeReason::MAXIMIZE) {
+        WindowMaximize();
+        return;
+    }
+    if (type == WindowSizeChangeReason::ROTATION) {
+        if (delegate_) {
+            delegate_->MaximizeResize();
+        }
+    }
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
                 return;
@@ -5262,6 +5327,32 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
             }
             delegate_->SetDragResizePreSize(pre_height * ADJUST_RATIO, pre_width * ADJUST_RATIO);
         }
+    }
+}
+
+void WebPattern::WindowMaximize()
+{
+    if (!SystemProperties::GetWebDebugMaximizeResizeOptimize()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not enabled");
+        return;
+    }
+    WebInfoType webInfoType = GetWebInfoType();
+    if (webInfoType != WebInfoType::TYPE_2IN1) {
+        return;
+    }
+    if (layoutMode_ != WebLayoutMode::NONE || renderMode_ != RenderMode::ASYNC_RENDER) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize not support");
+        return;
+    }
+    if (!isAttachedToMainTree_ || !isVisible_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::WindowMaximize, webId: %{public}d", GetWebId());
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
+    }
+    if (delegate_) {
+        delegate_->MaximizeResize();
     }
 }
 
@@ -5992,6 +6083,7 @@ void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
+        UpdateJavaScriptOnDocumentStartByOrder();
         delegate_->JavaScriptOnDocumentStartByOrder();
     }
 }
@@ -6001,7 +6093,6 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
-    EventRecorder::Get().SaveJavascriptItems(scriptItems, scriptItemsByOrder);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEndByOrder();
@@ -6024,7 +6115,6 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::nullopt;
-    EventRecorder::Get().SaveJavascriptItems(scriptItems);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
@@ -6175,8 +6265,13 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         return;
     }
     if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
-        renderContext->UpdateAccessibilityFocusRect(rect);
-        renderContext->UpdateAccessibilityFocus(true);
+        if (rect.Width() <= MIN_ACCESSIBILITY_FOCUS_SIZE || rect.Height() <= MIN_ACCESSIBILITY_FOCUS_SIZE) {
+            renderContext->ResetAccessibilityFocusRect();
+            renderContext->UpdateAccessibilityFocus(false);
+        } else {
+            renderContext->UpdateAccessibilityFocusRect(rect);
+            renderContext->UpdateAccessibilityFocus(true);
+        }
     } else {
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
@@ -6481,8 +6576,8 @@ void WebPattern::OnShowAutofillPopupV2(
 
 void WebPattern::OnHideAutofillPopup()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
     if (!isShowAutofillPopup_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup isShowAutofillPopup_ is null");
         return;
     }
     auto host = GetHost();
@@ -6556,7 +6651,7 @@ void WebPattern::RemoveDataListNode()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DeleteMenu(dataListNode->GetId());
-    
+
     auto parent = dataListNode->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(dataListNode);
@@ -6784,7 +6879,9 @@ void WebPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContext->AddChild(renderContextForSurface_, 0);
     CHECK_NULL_VOID(renderContextForPopupSurface_);
-    renderContext->AddChild(renderContextForPopupSurface_, 1);
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        renderContext->AddChild(renderContextForPopupSurface_, 1);
+    }
 }
 
 void WebPattern::CreateOverlay(const RefPtr<OHOS::Ace::PixelMap>& pixelMap, int offsetX, int offsetY, int rectWidth,
@@ -7127,6 +7224,19 @@ void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateEnableFollowSystemFontWeight(value);
+    }
+}
+
+void WebPattern::RegisterSurfaceDensityCallback()
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        density_ = pipeline->GetDensity();
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SetSurfaceDensity(density);
+        });
     }
 }
 } // namespace OHOS::Ace::NG

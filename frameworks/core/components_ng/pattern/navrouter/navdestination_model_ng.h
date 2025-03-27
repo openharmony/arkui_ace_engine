@@ -29,7 +29,8 @@ public:
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src,
-        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
+        bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
@@ -96,6 +97,14 @@ public:
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
     void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;
+    void SetPreferredOrientation(const std::optional<Orientation>& ori) override;
+    static void SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori);
+    void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) override;
+    static void SetEnableStatusBar(
+        FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
+    void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
+    static void SetEnableNavigationIndicator(
+        FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

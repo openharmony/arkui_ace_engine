@@ -585,7 +585,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
         } else {
             TextFieldModel::GetInstance()->SetCancelIconColor(Color());
         }
-        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetIconSize());
+        TextFieldModel::GetInstance()->SetCancelIconSize(theme->GetCancelIconSize());
         TextFieldModel::GetInstance()->SetCanacelIconSrc(std::string(), std::string(), std::string());
         return;
     }
@@ -594,7 +594,7 @@ void FfiOHOSAceFrameworkTextFieldCancelButton(int32_t style, double size, int32_
     if (LessNotEqual(iconSize.Value(), 0.0) || iconSize.Unit() == DimensionUnit::PERCENT) {
         auto theme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(theme);
-        iconSize = theme->GetIconSize();
+        iconSize = theme->GetCancelIconSize();
     }
     TextFieldModel::GetInstance()->SetCancelIconSize(iconSize);
     // set color

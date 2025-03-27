@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -146,7 +147,12 @@ bool IsSnapshotRegionInRange(LocalizedSnapshotRegion& snapshotRegion, float& nod
 bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
     Rosen::Drawing::Rect& specifiedAreaRect)
 {
-    RectF nodeRect = node->GetGeometryNode()->GetFrameRect();
+    auto context = node->GetRenderContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get the render context of target node.");
+        return false;
+    }
+    RectF nodeRect = context->GetPaintRectWithoutTransform();
     float nodeWidth = nodeRect.Width();
     float nodeHeight = nodeRect.Height();
     if (options.regionMode == NG::SnapshotRegionMode::NO_REGION) {

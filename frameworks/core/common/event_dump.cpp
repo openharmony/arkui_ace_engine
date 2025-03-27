@@ -44,6 +44,11 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     for (const auto& rect : responseRegionList) {
         oss << rect.ToString().c_str();
     }
+#else
+    oss << "responseRegionSize: ";
+    for (const auto& rect : responseRegionList) {
+        oss << rect.GetSize().ToString().c_str();
+    }
 #endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }

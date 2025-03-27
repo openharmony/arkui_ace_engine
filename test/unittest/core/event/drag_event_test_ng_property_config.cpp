@@ -1457,49 +1457,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
 }
 
 /**
- * @tc.name: DragEventActuatorMountGatherNodeTest020
- * @tc.desc: Test MountPixelMap.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    ASSERT_NE(frameNode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(gestureEventHub, nullptr);
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    auto overlayManager = pipeline->GetOverlayManager();
-    ASSERT_NE(overlayManager, nullptr);
-    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    gestureHub->SetPixelMap(pixelMap);
-    ASSERT_NE(frameNode->GetDragPixelMap(), nullptr);
-    RefPtr<FrameNode> imageNode = nullptr;
-    dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
-    ASSERT_NE(imageNode, nullptr);
-    MockContainer::SetUp();
-    auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    container->isScenceBoardWindow_ = false;
-    dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    MockContainer::TearDown();
-    EXPECT_EQ(container->isScenceBoardWindow_, false);
-}
-
-/**
  * @tc.name: DragEventActuatorMountGatherNodeTest021
  * @tc.desc: Test SetPixelMap.
  * @tc.type: FUNC

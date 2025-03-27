@@ -22,15 +22,10 @@
 #include <unordered_map>
 #include <utility>
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
@@ -59,8 +54,10 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void GetSuitableSize(SizeF& maxSize, LayoutWrapper* layoutWrapper) override {};
-    bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::u16string& content,
+    bool CreateParagraphAndLayout(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout = true) override;
+    bool ReLayoutParagraphs(const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const SizeF& maxSize);
+    bool LayoutParagraphs(float maxWidth);
 
     float GetBaselineOffset() const override;
 
@@ -116,9 +113,9 @@ private:
     bool AdaptMaxTextSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     void UpdateSensitiveContent(std::u16string& content);
-    void CheckNeedReCreateParagraph(
-        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern);
-    void ResetNeedReCreateParagraph(const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain);
+    void CheckNeedReCreateParagraph(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
+    void ResetNeedReCreateParagraph(LayoutWrapper* layoutWrapper);
+    bool AlwaysReCreateParagraph(LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     std::pair<bool, double> GetSuitableSizeLD(TextStyle& textStyle, const std::u16string& content,

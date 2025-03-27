@@ -21,20 +21,37 @@
 #include "pointer_event.h"
 #include "session/host/include/session.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/image/image_source_info.h"
+
+#include "core/components_ng/pattern/window_scene/helper/starting_window_layout_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/window_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class WindowPattern : public StackPattern {
     DECLARE_ACE_TYPE(WindowPattern, StackPattern);
 
 public:
-    WindowPattern() = default;
-    ~WindowPattern() override = default;
+    WindowPattern()
+    {
+        startingWindowLayoutHelper_ = AceType::MakeRefPtr<StartingWindowLayoutHelper>();
+    }
+    ~WindowPattern()
+    {
+        startingWindowLayoutHelper_.Reset();
+    }
 
+    bool BorderUnoccupied() const override;
     std::vector<Rosen::Rect> GetHotAreas();
     sptr<Rosen::Session> GetSession();
+    void CheckAndMeasureStartingWindow(const SizeF& currentParentSize);
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<WindowLayoutAlgorithm>();
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -82,6 +99,8 @@ protected:
     virtual void OnAppRemoveStartingWindow() {}
 
     RefPtr<FrameNode> startingWindow_;
+    RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;
+    SizeF lastParentSize_ = { 0.0f, 0.0f };
     RefPtr<FrameNode> appWindow_;
     RefPtr<FrameNode> snapshotWindow_;
     RefPtr<FrameNode> blankWindow_;

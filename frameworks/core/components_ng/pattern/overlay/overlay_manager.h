@@ -61,6 +61,8 @@ struct PopupInfo {
     OffsetF targetOffset;
     bool focusable = false;
     bool isAvoidKeyboard = false;
+    bool isTips = false;
+    int32_t disappearingTimeWithContinuousOperation = 700;
 };
 
 struct GatherNodeChildInfo {
@@ -99,6 +101,7 @@ struct CustomKeyboardOffsetInfo {
 
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
+    bool enableBackPressedEvent = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -112,10 +115,16 @@ public:
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap = false);
-    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
+    RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo,
+        bool isForceClear = false);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
+    void HideTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t disappearingTime);
+    void ShowTips(int32_t targetId, const PopupInfo& tipsInfo, int32_t appearingTime,
+        int32_t appearingTimeWithContinuousOperation, bool isSubwindow);
     void ErasePopup(int32_t targetId);
+    void EraseTipsInfo(int32_t targetId);
+    PopupInfo GetTipsInfo(int32_t targetId);
     void HideAllPopups();
     void HideCustomPopups();
     void SetPopupHotAreas(RefPtr<FrameNode> popupNode);
@@ -123,6 +132,16 @@ public:
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
     PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
+    void UpdateTipsEnterAndLeaveInfo(int32_t targetId);
+    void UpdateTipsEnterAndLeaveInfoBool(int32_t targetId);
+    bool GetBoolFromTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
+    int32_t GetTipsEnterAndLeaveInfo(int32_t targetId);
+    void EraseTipsEnterAndLeaveInfo(int32_t targetId, int32_t times);
+    void UpdateTipsInfo(int32_t targetId, const PopupInfo& popupInfo);
+    void UpdateTipsStatus(int32_t targetId, bool isInContinus);
+    void EraseTipsStatus(int32_t targetId);
+    bool GetTipsStatus(int32_t targetId);
+    bool TipsInfoListIsEmpty();
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -166,9 +185,10 @@ public:
     void CleanMenuInSubWindow(int32_t targetId);
     void CleanPreviewInSubWindow();
     void CleanHoverImagePreviewInSubWindow(const RefPtr<FrameNode>& flexNode);
-    void CleanPopupInSubWindow();
+    void CleanPopupInSubWindow(bool isForceClear = false);
     void CleanMenuInSubWindowWithAnimation();
     void HideAllMenus();
+    void UpdatePreviousDisappearingTime(int32_t targetId);
 
     void ClearToastInSubwindow();
     void ClearToast();
@@ -256,7 +276,6 @@ public:
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
-    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
     bool RemoveNonKeyboardOverlay(const RefPtr<FrameNode>& overlay);
 
     void RegisterOnHideDialog(std::function<void()> callback)
@@ -319,6 +338,8 @@ public:
     RefPtr<FrameNode> GetPixelMapContentNodeForSubwindow() const;
 
     RefPtr<FrameNode> GetDragPixelMapContentNode() const;
+
+    RefPtr<FrameNode> GetRelativeContainerNode() const;
 
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
@@ -688,6 +709,9 @@ public:
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     bool IsCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal);
     static Rect GetDisplayAvailableRect(const RefPtr<FrameNode>& frameNode);
+    void SkipMenuShow(int32_t targetId);
+    void ResumeMenuShow(int32_t targetId);
+    bool CheckSkipMenuShow(int32_t targetId);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -785,6 +809,7 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
+    void ShowTipsInSubwindow(int32_t targetId, const PopupInfo& popupInfo, int32_t times);
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
@@ -879,11 +904,15 @@ private:
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
+    int32_t RemoveOverlayManagerNode();
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
     std::unordered_map<int32_t, int32_t> frameNodeMapOnOverlay_;
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;
+    std::unordered_map<int32_t, std::list<std::pair<int32_t, bool>>> tipsEnterAndLeaveInfoMap_;
+    std::list<std::pair<int32_t, NG::PopupInfo>> tipsInfoList_;
+    std::list<std::pair<int32_t, bool>> tipsStatusList_;
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> dialogMap_;
@@ -951,6 +980,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::set<int32_t> skipTargetIds_;
     std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG

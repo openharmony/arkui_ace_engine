@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -73,6 +75,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
+    if (dialogPattern->IsWaterfallWindowMode()) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "enableHoverMode for waterfallMode, isShowInSubWindow: %{public}d",
+            isShowInSubWindow_);
+        isHoverMode_ = true;
+        hoverModeArea_ = HoverModeAreaType::TOP_SCREEN;
+    }
+
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
@@ -98,6 +107,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
     embeddedDialogOffsetY_ = 0.0f;
+    stackRootDialogOffsetY_ = 0.0f;
     if (IsEmbeddedDialog(hostNode)) {
         if (!realSize.IsValid()) {
             realSize.UpdateIllegalSizeWithCheck(layoutConstraint->maxSize);
@@ -108,6 +118,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             dialogProp->UpdateSafeAreaExpandOpts(opts);
         }
         embeddedDialogOffsetY_ = GetEmbeddedDialogOffsetY(hostNode);
+    } else {
+        stackRootDialogOffsetY_ = GetStackRootDialogOffsetY(hostNode);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
@@ -908,7 +920,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     auto childOffset = topLeftPoint + dialogOffset;
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
-    auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_;
+    auto childBottom = childOffset.GetY() + childSize.Height() + embeddedDialogOffsetY_ + stackRootDialogOffsetY_;
     auto paddingBottom = static_cast<float>(GetPaddingBottom());
     if (needAvoidKeyboard && keyboardInsert.Length() > 0 && childBottom > (keyboardInsert.start - paddingBottom)) {
         auto limitPos = std::min(childOffset.GetY(),
@@ -964,9 +976,12 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
     CHECK_NULL_VOID(maskNodePtr);
     auto maskNode = AceType::DynamicCast<FrameNode>(maskNodePtr);
     CHECK_NULL_VOID(maskNode);
+    auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(maskNodeLayoutProp);
+    auto maskGeometryNode = maskNode->GetGeometryNode();
+    CHECK_NULL_VOID(maskGeometryNode);
     if (expandDisplay_) {
-        auto maskGeometryNode = maskNode->GetGeometryNode();
-        CHECK_NULL_VOID(maskGeometryNode);
+        maskNodeLayoutProp->ClearUserDefinedIdealSize(true, true);
         SizeF realSize;
         realSize.SetWidth(hostWindowRect_.Width());
         realSize.SetHeight(hostWindowRect_.Height());
@@ -981,10 +996,9 @@ void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNo
             maskNodeContext->UpdateBorderRadius(NG::BorderRadiusPropertyT<Dimension>(CONTAINER_OUTER_RADIUS));
         }
     } else {
-        auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
-        CHECK_NULL_VOID(maskNodeLayoutProp);
         maskNodeLayoutProp->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+        maskGeometryNode->SetFrameOffset(OffsetF(0, 0));
         maskNode->Measure(dialog->GetLayoutConstraint());
     }
     maskNode->Layout();
@@ -1024,6 +1038,16 @@ float DialogLayoutAlgorithm::GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& f
     }
     if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         return parent->GetGeometryNode()->GetParentAdjust().GetY();
+    }
+    return 0.0f;
+}
+
+float DialogLayoutAlgorithm::GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode)
+{
+    auto parent = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(parent, 0.0f);
+    if (parent->GetTag() == V2::STACK_ETS_TAG && expandDisplay_ == true) {
+        return parent->GetOffsetRelativeToWindow().GetY();
     }
     return 0.0f;
 }

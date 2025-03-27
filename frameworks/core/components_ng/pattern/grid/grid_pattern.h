@@ -146,9 +146,9 @@ public:
         return info_.reachStart_;
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
-        return info_.offsetEnd_;
+        return considerRepeat ? (info_.offsetEnd_ && info_.repeatDifference_ == 0) : info_.offsetEnd_;
     }
 
     bool IsAtTopWithDelta() const override
@@ -238,6 +238,8 @@ public:
     void StopAnimate() override;
 
     bool IsPredictOutOfRange(int32_t index) const;
+
+    bool IsPredictInRange(int32_t index) const;
 
     bool IsReverse() const override;
 

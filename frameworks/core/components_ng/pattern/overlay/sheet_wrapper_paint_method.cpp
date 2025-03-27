@@ -84,7 +84,7 @@ RefPtr<FrameNode> SheetWrapperPaintMethod::GetSheetNode(PaintWrapper* paintWrapp
 void SheetWrapperPaintMethod::GetBorderDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode,
     const RefPtr<SheetTheme>& sheetTheme, float borderWidth, const BorderRadiusProperty& sheetRadius)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         GetBorderDrawPathNew(path, sheetNode, borderWidth, sheetRadius);
         return;
     }

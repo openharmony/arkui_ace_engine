@@ -654,4 +654,534 @@ HWTEST_F(DragAndDropTest, DragAndDropTest021, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_DragEvent_GetDropOperation(nullptr, &operation), ARKUI_ERROR_CODE_PARAM_INVALID);
     EXPECT_EQ(OH_ArkUI_DragEvent_GetDropOperation(drag_Event, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: DragAndDropTest0022
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetModifierKeyStates.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    uint64_t pressedKeys = 0;
+    ArkUIDragEvent dragEvent;
+    dragEvent.modifierKeyState = (1 << 0);
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    auto ret1 = OH_ArkUI_DragEvent_GetModifierKeyStates(drag_Event, &pressedKeys);
+
+    /**
+     * @tc.steps: step2.set DragEvent is nullptr, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragEvent_GetModifierKeyStates(nullptr, nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(pressedKeys, (1 << 0));
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0023
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetDataTypeCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    int32_t count = 0;
+    ArkUIDragEvent dragEvent;
+    dragEvent.dataTypesCount = 2;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    auto ret1 = OH_ArkUI_DragEvent_GetDataTypeCount(drag_Event, &count);
+
+    /**
+     * @tc.steps: step2.set DragEvent is nullptr, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragEvent_GetDataTypeCount(nullptr, nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(count, 2);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0024
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetDataTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent is nullptr, related function is called.
+     */
+    int32_t length = 2;
+    int32_t maxStrLen = 128;
+    auto ret2 = OH_ArkUI_DragEvent_GetDataTypes(nullptr, nullptr, length, maxStrLen);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0025
+ * @tc.desc: Test the OH_ArkUI_CreateDragActionWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set null ArkUI_NodeHandle, related function is called.
+     */
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(dragAction, nullptr);
+}
+
+/**
+ * @tc.name: DragAndDropTest0026
+ * @tc.desc: Test the OH_ArkUI_CreateDragActionWithContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set null ArkUI_ContextHandle, related function is called.
+     */
+    auto* dragAction = OH_ArkUI_CreateDragActionWithContext(nullptr);
+    OH_ArkUI_DragAction_Dispose(dragAction);
+    EXPECT_EQ(OH_ArkUI_DragAction_SetTouchPointX(dragAction, 1.0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_DragAction_SetTouchPointY(dragAction, 1.0), ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(dragAction, nullptr);
+}
+
+/**
+ * @tc.name: DragAndDropTest0027
+ * @tc.desc: Test the OH_ArkUI_CreateDragActionWithContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto uiContext = new ArkUI_Context({ .id = 1 });
+    auto dragAction = OH_ArkUI_CreateDragActionWithContext(uiContext);
+    EXPECT_NE(dragAction, nullptr);
+
+    /**
+     * @tc.steps: step2.set pointer is smaller than MIN_POINTID, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragAction_SetPointerId(dragAction, -1);
+
+    /**
+     * @tc.steps: step2.set dragAction is null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragAction_SetPointerId(nullptr, 1);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0028
+ * @tc.desc: Test the OH_ArkUI_DragAction_SetDragPreviewOption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction.
+     */
+    auto uiContext = new ArkUI_Context({ .id = 1 });
+    auto dragAction = OH_ArkUI_CreateDragActionWithContext(uiContext);
+    EXPECT_NE(dragAction, nullptr);
+    auto *previewOptions = OH_ArkUI_CreateDragPreviewOption();
+    OH_ArkUI_DragPreviewOption_SetDefaultShadowEnabled(previewOptions, true);
+    auto ret1 = OH_ArkUI_DragAction_SetDragPreviewOption(dragAction, previewOptions);
+
+    /**
+     * @tc.steps: step2.set dragAction is null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragAction_SetDragPreviewOption(nullptr, previewOptions);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0029
+ * @tc.desc: Test the OH_ArkUI_DragAction_RegisterStatusListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set dragAction is null, related function is called.
+     */
+    auto ret = OH_ArkUI_DragAction_RegisterStatusListener(
+        nullptr, nullptr, [](ArkUI_DragAndDropInfo* dragAndDropInfo, void* userData) -> void {
+            EXPECT_NE(
+                OH_ArkUI_DragAndDropInfo_GetDragStatus(dragAndDropInfo), ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN);
+            EXPECT_NE(OH_ArkUI_DragAndDropInfo_GetDragEvent(dragAndDropInfo), nullptr);
+        });
+    OH_ArkUI_DragAction_UnregisterStatusListener(nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0030
+ * @tc.desc: Test the OH_ArkUI_DragAndDropInfo_GetDragStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set dragAction is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragAndDropInfo_GetDragStatus(nullptr);
+    auto ret2 = OH_ArkUI_DragAndDropInfo_GetDragEvent(nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ArkUI_DragStatus::ARKUI_DRAG_STATUS_UNKNOWN);
+    EXPECT_EQ(ret2, nullptr);
+}
+
+/**
+ * @tc.name: DragAndDropTest0031
+ * @tc.desc: Test the OH_ArkUI_SetNodeDragPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_SetNodeDragPreview(nullptr, nullptr);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0032
+ * @tc.desc: Test the OH_ArkUI_SetNodeAllowedDropDataTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_SetNodeAllowedDropDataTypes(nullptr, nullptr, -1);
+
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle and typesArray, related function is called.
+     */
+    ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+    auto dragNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    std::vector<const char *> strlist;
+    strlist.push_back("general.text");
+    strlist.push_back("general.plain-text");
+    auto ret2 = OH_ArkUI_SetNodeAllowedDropDataTypes(dragNode, strlist.data(), strlist.size());
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0033
+ * @tc.desc: Test the OH_ArkUI_SetDragEventStrictReportWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_SetDragEventStrictReportWithNode(nullptr, false);
+
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle and typesArray, related function is called.
+     */
+    ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+    auto dragNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto ret2 = OH_ArkUI_SetDragEventStrictReportWithNode(dragNode, true);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0034
+ * @tc.desc: Test the OH_ArkUI_SetDragEventStrictReportWithContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_SetDragEventStrictReportWithContext(nullptr, false);
+
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle and typesArray, related function is called.
+     */
+    auto uiContext = new ArkUI_Context({ .id = 1 });
+    auto ret2 = OH_ArkUI_SetDragEventStrictReportWithContext(uiContext, true);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0035
+ * @tc.desc: Test the OH_ArkUI_DisallowNodeAnyDropDataTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_ContextHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DisallowNodeAnyDropDataTypes(nullptr);
+
+    /**
+     * @tc.steps: step1.set ArkUI_ContextHandle, related function is called.
+     */
+    ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+    auto dragNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto ret2 = OH_ArkUI_DisallowNodeAnyDropDataTypes(dragNode);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0036
+ * @tc.desc: Test the OH_ArkUI_AllowNodeAllDropDataTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_ContextHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_AllowNodeAllDropDataTypes(nullptr);
+
+    /**
+     * @tc.steps: step1.set ArkUI_ContextHandle, related function is called.
+     */
+    ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+    auto dragNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto ret2 = OH_ArkUI_AllowNodeAllDropDataTypes(dragNode);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0037
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetDragResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_GetDragResult(nullptr, nullptr);
+
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent and DragResult, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ArkUI_DragResult result;
+    auto ret2 = OH_ArkUI_DragEvent_GetDragResult(drag_Event, &result);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0038
+ * @tc.desc: Test the OH_ArkUI_DragEvent_SetDragResult.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_SetDragResult(nullptr, ArkUI_DragResult::ARKUI_DRAG_RESULT_SUCCESSFUL);
+
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent and DragResult, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    auto ret2 = OH_ArkUI_DragEvent_SetDragResult(drag_Event, ArkUI_DragResult::ARKUI_DRAG_RESULT_SUCCESSFUL);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0039
+ * @tc.desc: Test the OH_ArkUI_DragEvent_SetSuggestedDropOperation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_SetSuggestedDropOperation(nullptr,
+        ArkUI_DropOperation::ARKUI_DROP_OPERATION_COPY);
+
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent and DropOperation, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    auto ret2 = OH_ArkUI_DragEvent_SetSuggestedDropOperation(drag_Event,
+        ArkUI_DropOperation::ARKUI_DROP_OPERATION_COPY);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0040
+ * @tc.desc: Test the OH_ArkUI_CancelDataLoading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_ContextHandle is null, related function is called.
+     */
+    const char* key = "testKey";
+    auto ret1 = OH_ArkUI_CancelDataLoading(nullptr, key);
+    
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0041
+ * @tc.desc: Test the OH_ArkUI_DisableDropDataPrefetchOnNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DisableDropDataPrefetchOnNode(nullptr, false);
+
+    /**
+     * @tc.steps: step1.set ArkUI_NodeHandle, related function is called.
+     */
+    ArkUI_NativeNodeAPI_1 *nodeAPI = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, nodeAPI);
+    auto dragNode = nodeAPI->createNode(ARKUI_NODE_COLUMN);
+    auto ret2 = OH_ArkUI_DisableDropDataPrefetchOnNode(dragNode, false);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0042
+ * @tc.desc: Test the OH_ArkUI_DragEvent_RequestDragEndPending.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent is null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_RequestDragEndPending(nullptr, nullptr);
+
+    /**
+     * @tc.steps: step1.set ArkUI_DragEvent and requestIdentify, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    int32_t requestIdentify = 0;
+    auto ret2 = OH_ArkUI_DragEvent_RequestDragEndPending(drag_Event, &requestIdentify);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_DRAG_DROP_OPERATION_NOT_ALLOWED);
+    EXPECT_EQ(dragEvent.isDragEndPending, false);
+}
 } // namespace OHOS::Ace

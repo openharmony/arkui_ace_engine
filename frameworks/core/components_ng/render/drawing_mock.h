@@ -54,6 +54,7 @@
 #include "test/mock/core/rosen/testing_typography.h"
 #include "test/mock/core/rosen/testing_typography_create.h"
 #include "test/mock/core/rosen/testing_typography_style.h"
+#include "test/mock/core/rosen/testing_picture_recorder.h"
 
 namespace OHOS::Ace {
 namespace RSDrawing = Testing;
@@ -125,16 +126,15 @@ using RSSaveLayerOps = Testing::TestingSaveLayerOps;
 using RSSrcRectConstraint = Testing::SrcRectConstraint;
 using RSImageBlurType = Testing::ImageBlurType;
 using RSSurface = Testing::TestingSurface;
+using RSPictureRecorder =Testing::TestingPictureRecorder;
 #ifdef USE_ROSEN_DRAWING
 using RSRecordingColorFilter = Testing::TestingColorFilter;
 using RSRecordingImageFilter = Testing::TestingImageFilter;
 using RSRecordingShaderEffect = Testing::TestingShaderEffect;
 using RSPicture = Testing::TestingPicture;
 #endif
-#ifdef USE_GRAPHIC_TEXT_GINE
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
 using RSTextRect = Testing::TestingTypographyProperties::TextRect;
-#endif
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

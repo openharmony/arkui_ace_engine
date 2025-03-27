@@ -16,6 +16,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "text_base.h"
 #include "ui/base/geometry/dimension.h"
@@ -23,6 +24,9 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -61,75 +65,6 @@ void ConstructGestureStyle(GestureStyle& gestureInfo)
 class TextTestNg : public TextBases {
 public:
 };
-
-/**
- * @tc.name: TextFrameNodeCreator001
- * @tc.desc: Test all the properties of text.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextFrameNodeCreator001, TestSize.Level1)
-{
-    TestProperty testProperty;
-    testProperty.fontSizeValue = std::make_optional(FONT_SIZE_VALUE);
-    testProperty.textColorValue = std::make_optional(TEXT_COLOR_VALUE);
-    testProperty.italicFontStyleValue = std::make_optional(ITALIC_FONT_STYLE_VALUE);
-    testProperty.fontWeightValue = std::make_optional(FONT_WEIGHT_VALUE);
-    testProperty.fontFamilyValue = std::make_optional(FONT_FAMILY_VALUE);
-    testProperty.textAlignValue = std::make_optional(TEXT_ALIGN_VALUE);
-    testProperty.textOverflowValue = std::make_optional(TEXT_OVERFLOW_VALUE);
-    testProperty.maxLinesValue = std::make_optional(MAX_LINES_VALUE);
-    testProperty.lineHeightValue = std::make_optional(LINE_HEIGHT_VALUE);
-    testProperty.lineSpacingValue = std::make_optional(LINE_SPACING_VALUE);
-    testProperty.textDecorationValue = std::make_optional(TEXT_DECORATION_VALUE);
-    testProperty.textDecorationColorValue = std::make_optional(TEXT_DECORATION_COLOR_VALUE);
-    testProperty.baselineOffsetValue = std::make_optional(BASELINE_OFFSET_VALUE);
-    testProperty.textCaseValue = std::make_optional(TEXT_CASE_VALUE);
-    testProperty.adaptMinFontSize = std::make_optional(ADAPT_MIN_FONT_SIZE_VALUE);
-    testProperty.adaptMaxFontSize = std::make_optional(ADAPT_MAX_FONT_SIZE_VALUE);
-    testProperty.textIndent = std::make_optional(TEXT_INDENT);
-    testProperty.wordBreak = std::make_optional(TEXT_WORD_BREAK);
-    testProperty.lineBreakStrategy = std::make_optional(TEXT_LINE_BREAK_STRATEGY);
-
-    RefPtr<FrameNode> frameNode = CreateTextParagraph(CREATE_VALUE_W, testProperty);
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
-    ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(), CREATE_VALUE_W);
-    const std::unique_ptr<FontStyle>& fontStyle = textLayoutProperty->GetFontStyle();
-    ASSERT_NE(fontStyle, nullptr);
-    const std::unique_ptr<TextLineStyle>& textLineStyle = textLayoutProperty->GetTextLineStyle();
-    ASSERT_NE(textLineStyle, nullptr);
-    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, textLineStyle, nullptr);
-    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
-    EXPECT_EQ(textStyle.GetTextColor(), TEXT_COLOR_VALUE);
-    EXPECT_EQ(textStyle.GetFontStyle(), ITALIC_FONT_STYLE_VALUE);
-    EXPECT_EQ(textStyle.GetFontWeight(), FONT_WEIGHT_VALUE);
-    EXPECT_EQ(textStyle.GetFontFamilies(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(textStyle.GetTextAlign(), TEXT_ALIGN_VALUE);
-    EXPECT_EQ(textStyle.GetTextOverflow(), TEXT_OVERFLOW_VALUE);
-    EXPECT_EQ(textStyle.GetMaxLines(), MAX_LINES_VALUE);
-    EXPECT_EQ(textStyle.GetLineHeight(), LINE_HEIGHT_VALUE);
-    EXPECT_EQ(textStyle.GetLineSpacing(), LINE_SPACING_VALUE);
-    EXPECT_EQ(textStyle.GetTextDecoration(), TEXT_DECORATION_VALUE);
-    EXPECT_EQ(textStyle.GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
-    EXPECT_EQ(textStyle.GetBaselineOffset(), BASELINE_OFFSET_VALUE);
-    EXPECT_EQ(textStyle.GetTextCase(), TEXT_CASE_VALUE);
-    EXPECT_EQ(textStyle.GetAdaptMinFontSize(), ADAPT_MIN_FONT_SIZE_VALUE);
-    EXPECT_EQ(textStyle.GetAdaptMaxFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
-    EXPECT_EQ(textStyle.GetAdaptTextSize(),
-        testProperty.adaptMinFontSize.has_value() || testProperty.adaptMaxFontSize.has_value());
-    EXPECT_EQ(textStyle.GetWordBreak(), TEXT_WORD_BREAK);
-    EXPECT_EQ(textStyle.GetLineBreakStrategy(), TEXT_LINE_BREAK_STRATEGY);
-
-    /**
-     * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
-     */
-    frameNode->GetRenderContext()->UpdateForegroundColor(Color::RED);
-    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, nullptr);
-    EXPECT_EQ(textStyle.GetTextColor(), FOREGROUND_COLOR_VALUE);
-}
 
 /**
  * @tc.name: TextFrameNodeCreator002
@@ -1641,7 +1576,15 @@ HWTEST_F(TextTestNg, TextLayoutTest002, TestSize.Level1)
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
 
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    /**
+     * @tc.steps: step4. create textLayoutAlgorithm.
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
@@ -1832,8 +1775,8 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
-    EXPECT_CALL(*paragraph, AddText).Times(2);
-    EXPECT_CALL(*paragraph, Layout).Times(3);
+    EXPECT_CALL(*paragraph, AddText).Times(1);
+    EXPECT_CALL(*paragraph, Layout).Times(2);
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -1859,8 +1802,17 @@ HWTEST_F(TextTestNg, TextLayoutTest006, TestSize.Level1)
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
 
+
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    /**
+     * @tc.steps: step4. create textLayoutAlgorithm.
      */
 
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
@@ -2633,6 +2585,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE, textStyle);
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE, textStyle);
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->onShow_ = true;
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -2640,6 +2593,18 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     // call onDraw function(textRacing_ = true)
     // call onDraw function(MarqueeState::RUNNING == marqueeState_)
     MarqueeOption option;
+    textPattern->GetHost()->onMainTree_ = true;
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    textPattern->GetHost()->renderContext_ = mockRenderContext;
+    auto mockParent = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<TextPattern>());
+    mockParent->isActive_ = true;
+    textPattern->GetHost()->isActive_ = true;
+    textPattern->GetHost()->parent_ = mockParent;
+    textPattern->GetHost()->isCalculateInnerVisibleRectClip_ = false;
+    auto mockParentRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockParentRenderContext->SetPaintRectWithTransform(RectF(0, 0, 100, 100));
+    mockParent->renderContext_ = mockParentRenderContext;
     textContentModifier.StartTextRace(option);
     EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::RUNNING);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
@@ -2978,7 +2943,7 @@ HWTEST_F(TextTestNg, TextContentModifier008, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, GetLongestLineWithIndent).WillOnce(Return(100.0f));
+    EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(100.0f));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
@@ -3070,9 +3035,9 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
 HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
 {
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    EXPECT_CALL(*paragraph, PushStyle).Times(2);
-    EXPECT_CALL(*paragraph, AddText).Times(2);
-    EXPECT_CALL(*paragraph, Build).Times(2);
+    EXPECT_CALL(*paragraph, PushStyle).Times(1);
+    EXPECT_CALL(*paragraph, AddText).Times(1);
+    EXPECT_CALL(*paragraph, Build).Times(1);
     EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(2));
     EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100));
 
@@ -3121,7 +3086,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
     EXPECT_EQ(
         textLayoutAlgorithm->AdaptMaxTextSize(textStyle, u"abc", parentLayoutConstraint,
         AceType::RawPtr(textFrameNode)),
-        false);
+        true);
     MockParagraph::enabled_ = true;
 
     // increase font size

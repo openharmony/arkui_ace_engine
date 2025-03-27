@@ -22,6 +22,9 @@ ResSchedReport& ResSchedReport::GetInstance()
     return instance;
 }
 
+ResSchedReport::ResSchedReport()
+{}
+
 void ResSchedReport::ResSchedDataReport(
     const char* /* name */, const std::unordered_map<std::string, std::string>& /* param */)
 {

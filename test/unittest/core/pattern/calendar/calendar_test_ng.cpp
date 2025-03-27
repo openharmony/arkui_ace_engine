@@ -709,26 +709,16 @@ HWTEST_F(CalendarTestNg, CalendarTest007, TestSize.Level1)
 
     paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[0]);
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(dateTextStyle.color_, RSColor(0xffffffff));
-    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xffffffff));
-#else
     EXPECT_EQ(dateTextStyle.color, RSColor(0xffffffff));
     EXPECT_EQ(lunarTextStyle.color, RSColor(0xffffffff));
-#endif
 
     /**
      * @tc.steps: step3. Set the first day focused, check the second day text style.
      * @tc.expected: step3. The text color is 0xff000000.
      */
     paintMethod->SetDayTextStyle(dateTextStyle, lunarTextStyle, obtainedMonth.days[1]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(dateTextStyle.color_, RSColor(0xff000000));
-    EXPECT_EQ(lunarTextStyle.color_, RSColor(0xff000000));
-#else
     EXPECT_EQ(dateTextStyle.color, RSColor(0xff000000));
     EXPECT_EQ(lunarTextStyle.color, RSColor(0xff000000));
-#endif
 }
 
 /**
@@ -1665,66 +1655,42 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
      * @tc.expected: step3. The focused text color is same as text color, expected 0xff00ff00.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[0]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff00ff00));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xff00ff00));
-#endif
 
     /**
      * @tc.steps: step4. Check the offWork color.
      * @tc.expected: step4. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[2]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
-#endif
 
     /**
      * @tc.steps: step5. Check the offWork color.
      * @tc.expected: step5. The text color expected 0xffff0000, it is off.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[5]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xff0000ff));
-#endif
 
     /**
      * @tc.steps: step6. Check the offWork color.
      * @tc.expected: step6. The text color expected 0xffff0000, it is off.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[6]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xff0000ff));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xff0000ff));
-#endif
 
     /**
      * @tc.steps: step7. Check the offWork color.
      * @tc.expected: step7. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[7]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
-#endif
 
     /**
      * @tc.steps: step8. Check the offWork color.
      * @tc.expected: step8. The text color expected 0xffff0000, it is work.
      */
     paintMethod->SetOffWorkTextStyle(workOffTextStyle, obtainedMonth.days[9]);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    EXPECT_EQ(workOffTextStyle.color_, RSColor(0xffff0000));
-#else
     EXPECT_EQ(workOffTextStyle.color, RSColor(0xffff0000));
-#endif
 }
 
 /**

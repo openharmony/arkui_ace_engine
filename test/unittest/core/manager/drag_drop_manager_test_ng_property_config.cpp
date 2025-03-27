@@ -1136,9 +1136,10 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
     auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode2, nullptr);
     auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
-    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
+    PreparedInfoForDrag drag;
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     dragDropManager->TransDragWindowToDragFwk(111);
-    bool retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
+    bool retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub, drag);
     EXPECT_FALSE(retFlag);
 
     /**
@@ -1147,10 +1148,12 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     std::list<RefPtr<UINode>> children = { customNode };
+    RefPtr<FrameNode> customNodeChild = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->AddChild(customNodeChild);
     frameNode->children_ = children;
     overlayManager->hasDragPixelMap_ = true;
     overlayManager->dragPixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
-    retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
+    retFlag = dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub, drag);
     EXPECT_TRUE(retFlag);
 
     /**
@@ -1158,7 +1161,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest042, TestSize.Level1)
      * @tc.expected: retFlag is false.
      */
     dragDropManager->info_.scale = -1.0f;
-    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub);
+    dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     retFlag = dragDropManager->IsNeedScaleDragPreview();
     EXPECT_FALSE(retFlag);
 }
@@ -1257,7 +1260,8 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest045, TestSize.Level1)
     auto frameNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
     ASSERT_NE(frameNode2, nullptr);
     auto guestureEventHub = frameNode2->GetOrCreateGestureEventHub();
-    dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub);
+    PreparedInfoForDrag drag;
+    dragDropManager->GetDragPreviewInfo(overlayManager, dragDropManager->info_, guestureEventHub, drag);
     auto imageNode = overlayManager->GetPixelMapContentNode();
     ASSERT_EQ(imageNode, nullptr);
 }
@@ -2268,5 +2272,122 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest076, TestSize.Level1)
     auto scaleLarge = DragDropManager::GetScaleInfo(WIDTH_LARGE, HEIGHT_LARGE, false);
     ASSERT_NE(scaleLarge, nullptr);
     EXPECT_NE(scaleLarge->scale, 1);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit001
+ * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ Is False
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest077, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    dragDropManager->SetIsAnyDraggableHit(false);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit002
+ * @tc.desc: Test IsAnyDraggableHit Funcition When isAnyDraggableHit_ is True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest078, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    dragDropManager->SetIsAnyDraggableHit(true);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit003
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is False AND iter->second.empty() Is
+ * Fasle
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest079, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(AceType::MakeRefPtr<OHOS::Ace::NG::Scrollable>());
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit004
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is False AND iter->second.empty() Is
+ * True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest080, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit005
+ * @tc.desc: Test IsAnyDraggableHit Funcition When iter == touchTestResults.end() Is True AND iter->second.empty() Is
+ * True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest081, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, -1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsAnyDraggableHit006
+ * @tc.desc: Test IsAnyDraggableHit Funcition When recognizer Is Not NULL
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest082, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto eventManager = pipelineContext->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+    TouchTestResult hitTestResult;
+    hitTestResult.emplace_back(AceType::MakeRefPtr<OHOS::Ace::NG::Scrollable>());
+    eventManager->touchTestResults_[0] = hitTestResult;
+    bool result = dragDropManager->IsAnyDraggableHit(pipelineContext, 0);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

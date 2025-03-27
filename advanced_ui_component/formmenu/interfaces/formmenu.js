@@ -61,6 +61,7 @@ async function querySnapshotAsync(want, componentId, uiContext) {
  * @since 12
  */
 export function AddFormMenuItem(want, componentId, options, parent = null) {
+  hilog.info(0x0000, tag, 'Add form menu item.');
   this.observeComponentCreation2((elmtId, isInitialRender) => {
     FormMenuItem.create(options?.style?.options ? options.style.options : {
       startIcon: {

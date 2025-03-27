@@ -20,9 +20,11 @@
 #include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,6 +34,10 @@ const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemS
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
+    if (!IsEnableSelectionMenu()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The selectoverlay is not displayed cause enableSelectionMenu is false");
+        return;
+    }
     UpdateTransformFlag();
     if (!PreProcessOverlay(request) || AnimationUtils::IsImplicitAnimationOpen()) {
         return;
@@ -1190,7 +1196,11 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
+            auto isOverTheParentBottom = GreatNotEqual(contentRect.Top(), parentContentRect.Bottom());
             contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (isOverTheParentBottom) {
+                contentRect.SetTop(parentContentRect.Bottom());
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
         contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
@@ -1588,5 +1598,35 @@ void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
         }
     }
+}
+
+void BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+    auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetSelectIndex(start, end);
+    };
+    selectInfo.onCreateCallback.textRangeCallback = textRange;
+}
+
+std::optional<SelectOverlayInfo> BaseTextSelectOverlay::GetSelectOverlayInfos()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+    return manager->GetSelectOverlayInfo();
+}
+
+bool BaseTextSelectOverlay::IsEnableSelectionMenu()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, true);
+    return textOverlayTheme->GetEnableSelectionMenu();
 }
 } // namespace OHOS::Ace::NG

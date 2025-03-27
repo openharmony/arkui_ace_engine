@@ -16,27 +16,15 @@
 #include "core/components/track/rosen_render_arc_track.h"
 
 #ifndef USE_ROSEN_DRAWING
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "include/core/SkCanvas.h"
-#include "include/core/SkClipOp.h"
-#include "include/core/SkPaint.h"
-#include "include/core/SkPath.h"
-#else
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkClipOp.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
-#endif
 #else
 #include "core/components_ng/render/drawing.h"
 #endif
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
-#else
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography.h"
-#endif
 
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -115,41 +103,19 @@ void SetTextStyle(RSCanvas* canvas, const RenderRingInfo& trackInfo, const std::
     }
     double pathStartVertexX = trackInfo.center.GetX();
     double pathStartVertexY = trackInfo.center.GetY() - trackInfo.radius + (trackInfo.thickness / 2);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txt::ParagraphStyle style;
-    txt::TextStyle txtStyle;
-    txtStyle.font_size = 80;
-    txtStyle.font_weight = txt::FontWeight::w400;
-#else
     Rosen::TypographyStyle style;
     Rosen::TextStyle txtStyle;
     txtStyle.fontSize = 80;
     txtStyle.fontWeight = Rosen::FontWeight::W400;
-#endif
     txtStyle.color = markedColor.GetValue();
-#ifndef USE_GRAPHIC_TEXT_GINE
-    std::unique_ptr<txt::ParagraphBuilder> builder;
-    style.max_lines = 1;
-    builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
-#else
     std::unique_ptr<Rosen::TypographyCreate> builder;
     style.maxLines = 1;
     builder = Rosen::TypographyCreate::Create(style, fontCollection);
-#endif
     builder->PushStyle(txtStyle);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    builder->AddText(StringUtils::Str8ToStr16(markedText));
-    auto paragraph = builder->Build();
-#else
     builder->AppendText(StringUtils::Str8ToStr16(markedText));
     auto paragraph = builder->CreateTypography();
-#endif
     paragraph->Layout(dataRegion.Width());
-#ifndef USE_GRAPHIC_TEXT_GINE
-    paragraph->Paint(canvas, pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
-#else
     paragraph->Paint(canvas, pathStartVertexX - txtStyle.fontSize, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
-#endif
 }
 
 void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, const std::string& markedText,

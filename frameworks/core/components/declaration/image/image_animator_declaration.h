@@ -19,37 +19,11 @@
 #include <string>
 #include "core/components/common/properties/border.h"
 #include "core/components/declaration/common/declaration.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/animation/animator.h"
 
 namespace OHOS::Ace {
-
-struct ImageProperties {
-    std::string src;
-    RefPtr<PixelMap> pixelMap;
-    std::string bundleName;
-    std::string moduleName;
-    CalcDimension width;
-    CalcDimension height;
-    CalcDimension top;
-    CalcDimension left;
-    int32_t duration = 0;
-    
-    bool operator==(const ImageProperties& info) const
-    {
-        return src == info.src &&
-            ((!pixelMap && !info.pixelMap) ||
-                (pixelMap->GetPixels() == info.pixelMap->GetPixels() &&
-                pixelMap->GetRawPixelMapPtr() == info.pixelMap->GetRawPixelMapPtr())) &&
-            bundleName == info.bundleName &&
-            moduleName == info.moduleName &&
-            width == info.width &&
-            height == info.height &&
-            top == info.top &&
-            left == info.left &&
-            duration == info.duration;
-    }
-};
 
 struct ImageAnimatorAttribute : Attribute {
     FillMode fillMode = FillMode::FORWARDS;

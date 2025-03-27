@@ -15,8 +15,10 @@
 
 const hilog = requireNapi('hilog');
 const Want = requireNapi('app.ability.Want');
+const emitter = requireNapi('events.emitter');
 
 const tag = 'AddFormMenuItem::js::';
+const ERR_DEVICE_NOT_SUPPORTED = 801;
 
 /**
  * Build function of AddFormMenuItem.
@@ -28,7 +30,8 @@ const tag = 'AddFormMenuItem::js::';
  * @since 12
  */
 export function AddFormMenuItem(want, componentId, options, parent = null) {
-  hilog.error(0x3900, tag, 'form menu not supported.');
+  hilog.error(0x3900, tag, 'Form menu not supported.');
+  emitter.emit({eventId: ERR_DEVICE_NOT_SUPPORTED});
 }
 
 export default { AddFormMenuItem };

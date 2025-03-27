@@ -18,6 +18,9 @@
 
 #include <optional>
 
+#include "interfaces/inner_api/ace/serialized_gesture.h"
+
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -62,13 +65,7 @@ public:
 
     void NotifyAccessibilityChildTreeRegister();
 
-    int32_t GetImageId()
-    {
-        if (!imageId_.has_value()) {
-            imageId_ = ElementRegister::GetInstance()->MakeUniqueId();
-        }
-        return imageId_.value();
-    }
+    int32_t GetImageId();
 
     void ClearAccessibilityChildTreeRegisterFlag();
 private:

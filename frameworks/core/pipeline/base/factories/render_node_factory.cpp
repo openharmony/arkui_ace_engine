@@ -46,7 +46,7 @@ RefPtr<RenderNode> RenderNodeFactory::GetNodeFromCache()
     if (!nodeCache_.empty()) {
         auto node = *(nodeCache_.rbegin());
         nodeCache_.pop_back();
-        return Referenced::Claim(node);
+        return Referenced::Claim<RenderNode, true>(node);
     }
     return nullptr;
 }

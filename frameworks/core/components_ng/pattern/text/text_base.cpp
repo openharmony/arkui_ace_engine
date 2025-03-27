@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/text_base.h"
-#include "core/text/text_emoji_processor.h"
 #include <cstdint>
+
+#include "core/components_ng/pattern/text/text_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,15 +71,11 @@ void TextBase::CalculateSelectedRect(std::vector<RectF>& selectedRect, float lon
     float lastLineBottom = firstRect.Top();
     auto end = *(lineGroup.rbegin());
     for (const auto& line : lineGroup) {
-        if (line == end) {
-            break;
-        }
-        auto rect = RectF(line.second.Left(), lastLineBottom, longestLine - line.second.Left(),
-                line.second.Bottom() - lastLineBottom);
+        auto width = (line == end) ? line.second.Width() : longestLine - line.second.Left();
+        auto rect = RectF(line.second.Left(), lastLineBottom, width, line.second.Bottom() - lastLineBottom);
         selectedRect.emplace_back(rect);
         lastLineBottom = line.second.Bottom();
     }
-    selectedRect.emplace_back(RectF(end.second.Left(), lastLineBottom, end.second.Width(), end.second.Height()));
 }
 
 float TextBase::GetSelectedBlankLineWidth()
@@ -280,5 +278,23 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
     OnTextGestureSelectionUpdate(start, end, info);
+}
+
+void TextGestureSelector::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+{
+    start_ = start;
+    end_ = end;
+    isStarted_ = start_ <= end_;
+    startOffset_ = startOffset;
+}
+
+void TextGestureSelector::ResetGestureSelection()
+{
+    start_ = -1;
+    end_ = -1;
+    isStarted_ = false;
+    startOffset_.Reset();
+    isSelecting_ = false;
+    selectingFingerId_ = -1;
 }
 }

@@ -246,4 +246,97 @@ HWTEST_F(WithThemeTestNg, WithThemeTest005, TestSize.Level1)
     EXPECT_EQ(colors->InteractiveSelect(), Color(gColors[TokenColors::INTERACTIVE_SELECT]));
     EXPECT_EQ(colors->InteractiveClick(), Color(gColors[TokenColors::INTERACTIVE_CLICK]));
 }
+
+/**
+ * @tc.name: WithThemeTestNg006
+ * @tc.desc: Obtain System Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest006, TestSize.Level1)
+{
+    // container is not inited, can not obtain system theme
+    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    EXPECT_FALSE(basisTheme);
+}
+
+/**
+ * @tc.name: WithThemeTestNg007
+ * @tc.desc: Set Default Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest007, TestSize.Level1)
+{
+    auto theme = TokenThemeStorage::GetInstance()->CacheGet(TOKEN_THEME_ID);
+    EXPECT_TRUE(theme);
+    TokenThemeStorage::GetInstance()->SetDefaultTheme(theme, ColorMode::DARK);
+    theme->SetColorMode(ColorMode::LIGHT);
+    TokenThemeStorage::GetInstance()->SetDefaultTheme(theme, ColorMode::LIGHT);
+    auto defaultTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
+    EXPECT_TRUE(defaultTheme);
+}
+
+/**
+ * @tc.name: WithThemeTestNg008
+ * @tc.desc: Get Default Theme Colors
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest008, TestSize.Level1)
+{
+    auto defaultTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
+    EXPECT_TRUE(defaultTheme);
+    auto colors = defaultTheme->Colors();
+    EXPECT_TRUE(colors);
+    auto gColors = g_testProperty.colors_;
+    EXPECT_EQ(colors->Brand(), Color(gColors[TokenColors::BRAND]));
+    EXPECT_EQ(colors->Warning(), Color(gColors[TokenColors::WARNING]));
+    EXPECT_EQ(colors->Alert(), Color(gColors[TokenColors::ALERT]));
+    EXPECT_EQ(colors->Confirm(), Color(gColors[TokenColors::CONFIRM]));
+    EXPECT_EQ(colors->FontPrimary(), Color(gColors[TokenColors::FONT_PRIMARY]));
+    EXPECT_EQ(colors->FontSecondary(), Color(gColors[TokenColors::FONT_SECONDARY]));
+    EXPECT_EQ(colors->FontTertiary(), Color(gColors[TokenColors::FONT_TERTIARY]));
+    EXPECT_EQ(colors->FontFourth(), Color(gColors[TokenColors::FONT_FOURTH]));
+    EXPECT_EQ(colors->FontEmphasize(), Color(gColors[TokenColors::FONT_EMPHASIZE]));
+    EXPECT_EQ(colors->FontOnPrimary(), Color(gColors[TokenColors::FONT_ON_PRIMARY]));
+    EXPECT_EQ(colors->FontOnSecondary(), Color(gColors[TokenColors::FONT_ON_SECONDARY]));
+    EXPECT_EQ(colors->FontOnTertiary(), Color(gColors[TokenColors::FONT_ON_TERTIARY]));
+    EXPECT_EQ(colors->FontOnFourth(), Color(gColors[TokenColors::FONT_ON_FOURTH]));
+    EXPECT_EQ(colors->IconPrimary(), Color(gColors[TokenColors::ICON_PRIMARY]));
+    EXPECT_EQ(colors->IconSecondary(), Color(gColors[TokenColors::ICON_SECONDARY]));
+    EXPECT_EQ(colors->IconTertiary(), Color(gColors[TokenColors::ICON_TERTIARY]));
+    EXPECT_EQ(colors->IconFourth(), Color(gColors[TokenColors::ICON_FOURTH]));
+    EXPECT_EQ(colors->IconEmphasize(), Color(gColors[TokenColors::ICON_EMPHASIZE]));
+    EXPECT_EQ(colors->IconSubEmphasize(), Color(gColors[TokenColors::ICON_SUB_EMPHASIZE]));
+    EXPECT_EQ(colors->IconOnPrimary(), Color(gColors[TokenColors::ICON_ON_PRIMARY]));
+    EXPECT_EQ(colors->IconOnSecondary(), Color(gColors[TokenColors::ICON_ON_SECONDARY]));
+    EXPECT_EQ(colors->IconOnTertiary(), Color(gColors[TokenColors::ICON_ON_TERTIARY]));
+    EXPECT_EQ(colors->IconOnFourth(), Color(gColors[TokenColors::ICON_ON_FOURTH]));
+    EXPECT_EQ(colors->BackgroundPrimary(), Color(gColors[TokenColors::BACKGROUND_PRIMARY]));
+    EXPECT_EQ(colors->BackgroundSecondary(), Color(gColors[TokenColors::BACKGROUND_SECONDARY]));
+    EXPECT_EQ(colors->BackgroundTertiary(), Color(gColors[TokenColors::BACKGROUND_TERTIARY]));
+    EXPECT_EQ(colors->BackgroundFourth(), Color(gColors[TokenColors::BACKGROUND_FOURTH]));
+    EXPECT_EQ(colors->BackgroundEmphasize(), Color(gColors[TokenColors::BACKGROUND_EMPHASIZE]));
+    EXPECT_EQ(colors->CompForegroundPrimary(), Color(gColors[TokenColors::COMP_FOREGROUND_PRIMARY]));
+    EXPECT_EQ(colors->CompBackgroundPrimary(), Color(gColors[TokenColors::COMP_BACKGROUND_PRIMARY]));
+    EXPECT_EQ(colors->CompBackgroundPrimaryTran(), Color(gColors[TokenColors::COMP_BACKGROUND_PRIMARY_TRAN]));
+    EXPECT_EQ(colors->CompBackgroundPrimaryContrary(), Color(gColors[TokenColors::COMP_BACKGROUND_PRIMARY_CONTRARY]));
+    EXPECT_EQ(colors->CompBackgroundGray(), Color(gColors[TokenColors::COMP_BACKGROUND_GRAY]));
+    EXPECT_EQ(colors->CompBackgroundSecondary(), Color(gColors[TokenColors::COMP_BACKGROUND_SECONDARY]));
+    EXPECT_EQ(colors->CompBackgroundTertiary(), Color(gColors[TokenColors::COMP_BACKGROUND_TERTIARY]));
+    EXPECT_EQ(colors->CompBackgroundEmphasize(), Color(gColors[TokenColors::COMP_BACKGROUND_EMPHASIZE]));
+    EXPECT_EQ(colors->CompBackgroundNeutral(), Color(gColors[TokenColors::COMP_BACKGROUND_NEUTRAL]));
+    EXPECT_EQ(colors->CompEmphasizeSecondary(), Color(gColors[TokenColors::COMP_EMPHASIZE_SECONDARY]));
+    EXPECT_EQ(colors->CompEmphasizeTertiary(), Color(gColors[TokenColors::COMP_EMPHASIZE_TERTIARY]));
+    EXPECT_EQ(colors->CompDivider(), Color(gColors[TokenColors::COMP_DIVIDER]));
+    EXPECT_EQ(colors->CompCommonContrary(), Color(gColors[TokenColors::COMP_COMMON_CONTRARY]));
+    EXPECT_EQ(colors->CompBackgroundFocus(), Color(gColors[TokenColors::COMP_BACKGROUND_FOCUS]));
+    EXPECT_EQ(colors->CompFocusedPrimary(), Color(gColors[TokenColors::COMP_FOCUSED_PRIMARY]));
+    EXPECT_EQ(colors->CompFocusedSecondary(), Color(gColors[TokenColors::COMP_FOCUSED_SECONDARY]));
+    EXPECT_EQ(colors->CompFocusedTertiary(), Color(gColors[TokenColors::COMP_FOCUSED_TERTIARY]));
+    EXPECT_EQ(colors->InteractiveHover(), Color(gColors[TokenColors::INTERACTIVE_HOVER]));
+    EXPECT_EQ(colors->InteractivePressed(), Color(gColors[TokenColors::INTERACTIVE_PRESSED]));
+    EXPECT_EQ(colors->InteractiveFocus(), Color(gColors[TokenColors::INTERACTIVE_FOCUS]));
+    EXPECT_EQ(colors->InteractiveActive(), Color(gColors[TokenColors::INTERACTIVE_ACTIVE]));
+    EXPECT_EQ(colors->InteractiveSelect(), Color(gColors[TokenColors::INTERACTIVE_SELECT]));
+    EXPECT_EQ(colors->InteractiveClick(), Color(gColors[TokenColors::INTERACTIVE_CLICK]));
+}
 } //namespace OHOS::Ace::NG

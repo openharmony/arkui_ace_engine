@@ -18,24 +18,27 @@
 
 namespace OHOS {
 namespace Rosen {
-RSSurfaceNode::SharedPtr RSSurfaceNode::Create(const RSSurfaceNodeConfig& surfaceNodeConfig, bool isWindow)
+RSSurfaceNode::SharedPtr RSSurfaceNode::Create(
+    const RSSurfaceNodeConfig& surfaceNodeConfig, bool isWindow, std::shared_ptr<RSUIContext> rsUIContext)
 {
     return nullptr;
 }
 
-RSSurfaceNode::SharedPtr RSSurfaceNode::Create(
-    const RSSurfaceNodeConfig& surfaceNodeConfig, RSSurfaceNodeType type, bool isWindow, bool unobscured)
+RSSurfaceNode::SharedPtr RSSurfaceNode::Create(const RSSurfaceNodeConfig& surfaceNodeConfig, RSSurfaceNodeType type,
+    bool isWindow, bool unobscured, std::shared_ptr<RSUIContext> rsUIContext)
 {
     return nullptr;
 }
 
 void RSSurfaceNode::CreateNodeInRenderThread() {}
 
-RSSurfaceNode::RSSurfaceNode(const RSSurfaceNodeConfig& config, bool isRenderServiceNode)
+RSSurfaceNode::RSSurfaceNode(
+    const RSSurfaceNodeConfig& config, bool isRenderServiceNode, std::shared_ptr<RSUIContext> rsUIContext)
     : RSNode(isRenderServiceNode), name_(config.SurfaceNodeName)
 {}
 
-RSSurfaceNode::RSSurfaceNode(const RSSurfaceNodeConfig& config, bool isRenderServiceNode, NodeId id)
+RSSurfaceNode::RSSurfaceNode(
+    const RSSurfaceNodeConfig& config, bool isRenderServiceNode, NodeId id, std::shared_ptr<RSUIContext> rsUIContext)
     : RSNode(isRenderServiceNode, id), name_(config.SurfaceNodeName)
 {}
 

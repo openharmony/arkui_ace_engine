@@ -40,7 +40,11 @@ public:
     void CreateNewChildStart(const std::string& key) override;
     void CreateNewChildFinish(const std::string& key) override;
     void AfterAddChild() override;
+    
     void OnMove(std::function<void(int32_t, int32_t)>&& onMove) override;
+    void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+        std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+        std::function<void(int32_t)>&& onDrop) override;
 };
 } // namespace OHOS::Ace::NG
 

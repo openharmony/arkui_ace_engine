@@ -2597,4 +2597,53 @@ HWTEST_F(BubbleTestOneNg, InitWrapperRect, TestSize.Level1)
     EXPECT_EQ(bubblePattern->enableHoverMode_, true);
 }
 
+/**
+ * @tc.name: CreateBubbleNode001
+ * @tc.desc: Test CreateBubbleNode with istips Offset, Radius, ArrowHeight, ArrowWidth and Shadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set popup value to popupParam.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
+
+    Dimension radius = 20.0_px;
+    Dimension arrowHeight = 20.0_px;
+    Dimension arrowWidth = 20.0_px;
+    Shadow shadow = ShadowConfig::DefaultShadowL;
+    popupParam->SetRadius(radius);
+    popupParam->SetTipsFlag(true);
+    popupParam->SetArrowHeight(arrowHeight);
+    popupParam->SetArrowWidth(arrowWidth);
+    popupParam->SetShadow(shadow);
+
+    /**
+     * @tc.steps: step2. create BubbleNode with position offset
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(targetNode, nullptr);
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    ASSERT_NE(firstTextNode, nullptr);
+
+    /**
+     * @tc.steps: step3. use BubbleLayoutProperty to check PositionOffset.
+     * @tc.expected: check whether GetPositionOffset value is correct.
+     */
+    auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
+    EXPECT_EQ(property->GetRadius().value(), radius);
+    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
+    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+}
 } // namespace OHOS::Ace::NG

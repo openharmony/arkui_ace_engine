@@ -129,7 +129,7 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
-static bool isCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
+static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
     return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
 }
@@ -137,14 +137,14 @@ static bool isCanUpdate(UIState subscribers, UIState handlingState, UIState curr
 void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
 {
     std::function<void(UIState)> onStateStyleChange;
-    if (isCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
         onStateStyleChange = innerStateStyleSubscribers_.second;
         if (onStateStyleChange) {
             ScopedViewStackProcessor processor;
             onStateStyleChange(currentState);
         }
     }
-    if (isCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState)) {
         auto node = GetFrameNode();
         CHECK_NULL_VOID(node);
         auto nodeId = node->GetId();
@@ -167,7 +167,7 @@ void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState
         customNode->FireNodeUpdateFunc(nodeId);
         return;
     }
-    if (isCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
+    if (IsCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
         onStateStyleChange = userStateStyleSubscribers_.second;
         if (onStateStyleChange) {
             ScopedViewStackProcessor processor;
@@ -201,6 +201,7 @@ void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr
         if (GetCustomNodeFromSelf(node, customNode, nodeId)) {
             return;
         }
+        CHECK_NULL_VOID(node);
         node = node->GetParent();
     }
 }

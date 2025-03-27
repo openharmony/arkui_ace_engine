@@ -18,6 +18,7 @@
 
 #include "gmock/gmock.h"
 
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -29,7 +30,7 @@ class PartiallyMockedScrollable : public ScrollablePattern {
 private:
     MOCK_METHOD(bool, UpdateCurrentOffset, (float delta, int32_t source), (override));
     MOCK_METHOD(bool, IsAtTop, (), (const, override));
-    MOCK_METHOD(bool, IsAtBottom, (), (const, override));
+    MOCK_METHOD(bool, IsAtBottom, (bool considerRepeat), (const, override));
     MOCK_METHOD(void, UpdateScrollBarOffset, (), (override));
     MOCK_METHOD(bool, IsScrollable, (), (const, override));
     MOCK_METHOD(OverScrollOffset, GetOverScrollOffset, (double delta), (const, override));

@@ -254,7 +254,7 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination(bool isReplace = false);
+    void RemoveDialogDestination(bool isReplace = false, bool isTriggerByInteractiveCancel = false);
     void AddDestinationNode(const RefPtr<UINode>& parent);
     WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
     {
@@ -314,6 +314,7 @@ public:
     bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
 
     std::string ToDumpString();
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -764,13 +765,6 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
-    CHECK_NULL_VOID(switchTheme);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);

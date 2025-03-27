@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,7 +86,7 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
     }
 
     int32_t idx = host->GetChildTrueIndex(current->GetFrameNode()) + diff;
-    while (idx >= 0 && idx < info_.childrenCount_) {
+    while (idx >= 0 && idx < info_.GetChildrenCount()) {
         if (idx < info_.startIndex_ || idx > info_.endIndex_) {
             grid_.ScrollToIndex(idx);
             ctx->FlushUITaskWithSingleDirtyNode(host);
@@ -208,7 +208,7 @@ std::pair<int32_t, int32_t> GridFocus::GetNextIndexByStep(
     auto curMainEnd = info_.endMainLineIndex_;
     auto curChildStartIndex = info_.startIndex_;
     auto curChildEndIndex = info_.endIndex_;
-    auto childrenCount = info_.childrenCount_;
+    auto childrenCount = info_.GetChildrenCount();
     auto hasIrregularItems = info_.hasBigItem_;
     if (info_.gridMatrix_.find(curMainIndex) == info_.gridMatrix_.end()) {
         TAG_LOGW(AceLogTag::ACE_GRID, "Can not find current main index: %{public}d", curMainIndex);
@@ -678,7 +678,7 @@ int32_t GridFocus::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
         if (tarMainIndex == 0) {
             return 0;
         }
-        return info_.childrenCount_ - 1;
+        return info_.GetChildrenCount() - 1;
     }
     auto cell = it->second.find(tarCrossIndex);
     if (cell == it->second.end()) {
@@ -686,7 +686,7 @@ int32_t GridFocus::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
         if (tarMainIndex == 0) {
             return 0;
         }
-        return info_.childrenCount_ - 1;
+        return info_.GetChildrenCount() - 1;
     }
     return cell->second;
 }
@@ -774,12 +774,11 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
         needTriggerFocus_ = true;
         
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
-        if (focusIndex < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP &&
-            focusIndex - info_.crossCount_ >= 0) {
+        if (focusIndex < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP && focusIndex - info_.crossCount_ >= 0) {
             grid_.UpdateStartIndex(focusIndex - info_.crossCount_);
             // If focused item is below viewport and the current keyCode type is DOWN, scroll backward one more line
         } else if (focusIndex > info_.endIndex_ && keyCode == KeyCode::KEY_DPAD_DOWN &&
-                   focusIndex + info_.crossCount_ < info_.childrenCount_) {
+                   focusIndex + info_.crossCount_ < info_.GetChildrenCount()) {
             grid_.UpdateStartIndex(focusIndex + info_.crossCount_);
         } else {
             grid_.UpdateStartIndex(focusIndex);

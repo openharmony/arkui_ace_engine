@@ -1079,7 +1079,7 @@ HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary001, TestSize.Level1)
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     ASSERT_NE(listLayoutAlgorithm, nullptr);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_EQ(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), 34.5);
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
 }
 
 /**
@@ -1117,7 +1117,7 @@ HWTEST_F(ArcListLayoutTestNg, HandleScrollBarOutBoundary002, TestSize.Level1)
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     ASSERT_NE(listLayoutAlgorithm, nullptr);
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
-    EXPECT_FALSE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
+    EXPECT_TRUE(NearEqual(listLayoutAlgorithm->GetPredictSnapEndPosition().value_or(-0.001), -0.001));
 }
 
 /**
@@ -1185,11 +1185,11 @@ HWTEST_F(ArcListLayoutTestNg, GetItemDisplayInfo001, TestSize.Level1)
 
 #ifdef SUPPORT_DIGITAL_CROWN
 /**
- * @tc.name: StartVibrator001
- * @tc.desc: Test ArcListPattern::StartVibrator
+ * @tc.name: OnMidIndexChanged001
+ * @tc.desc: Test ArcListPattern::OnMidIndexChanged
  * @tc.type: FUNC
  */
-HWTEST_F(ArcListLayoutTestNg, StartVibrator001, TestSize.Level1)
+HWTEST_F(ArcListLayoutTestNg, OnMidIndexChanged001, TestSize.Level1)
 {
     CreateList();
     CreateListItems(ARC_ITEM_COUNT);
@@ -1199,7 +1199,7 @@ HWTEST_F(ArcListLayoutTestNg, StartVibrator001, TestSize.Level1)
     scrollable->SetCrownEventDragging(true);
     pattern_->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     pattern_->scrollableEvent_->SetScrollable(scrollable);
-    pattern_->StartVibrator(true);
+    pattern_->OnMidIndexChanged();
     RefPtr<ArcListLayoutAlgorithm> listLayoutAlgorithm =
         AceType::DynamicCast<ArcListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);

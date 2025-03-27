@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,23 @@
 
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {} // namespace
 
 class ScrollEffectTestNg : public ScrollTestNg {
 public:
+    RefPtr<ScrollPaintMethod> UpdateContentModifier();
 };
+
+RefPtr<ScrollPaintMethod> ScrollEffectTestNg::UpdateContentModifier()
+{
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ScrollPaintMethod> paintMethod = AceType::DynamicCast<ScrollPaintMethod>(paintWrapper->nodePaintImpl_);
+    paintMethod->UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    return paintMethod;
+}
 
 /**
  * @tc.name: SpringEffect001
@@ -680,5 +690,81 @@ HWTEST_F(ScrollEffectTestNg, ContentClip001, TestSize.Level1)
     paintProperty_->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
     FlushUITasks();
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to scroll
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateContent(2000.f);
+    CreateScrollDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
+
+    /**
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to scroll
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateContent(2000.f);
+    CreateScrollDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The scroll at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The scroll at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The scroll at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
 } // namespace OHOS::Ace::NG

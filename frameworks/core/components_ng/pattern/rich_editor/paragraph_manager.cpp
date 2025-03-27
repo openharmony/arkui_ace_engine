@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include "core/components_ng/base/distributed_ui.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MIN_RECT_TOP = -0.4f;
@@ -379,6 +381,19 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHe
     return res;
 }
 
+ParagraphManager::ParagraphInfo ParagraphManager::GetParagrahInfo(int32_t position) const
+{
+    CHECK_EQUAL_RETURN(paragraphs_.empty(), true, {});
+    auto it = std::find_if(paragraphs_.begin(), paragraphs_.end(), [position](const ParagraphInfo& info) {
+        return (info.start <= position) && (position < info.end);
+    });
+    if (position == paragraphs_.back().end) {
+        --it;
+    }
+    CHECK_EQUAL_RETURN(it == paragraphs_.end(), true, {});
+    return (*it);
+}
+
 std::vector<std::pair<std::vector<RectF>, TextDirection>> ParagraphManager::GetParagraphsRects(
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
@@ -425,6 +440,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
             std::vector<RectF> rects;
             selectData.relativeStart = std::max(0, start - info.start);
             selectData.relativeEnd = end - info.start;
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
             if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
                 info.paragraph->GetTightRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
             } else {
@@ -451,7 +467,9 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
     const int32_t realEnd = info.end - info.start;
     const bool isLastParagraph = (selectData.relativeEnd == 0) || (selectData.relativeEnd < realEnd);
     if (isLastParagraph && !result.empty() && IsRectOutByHandler(result.back(), selectData)) {
+        auto lastRect = result.back();
         result.pop_back();
+        AddParagraphPacingBlankRect(result, lastRect, selectData);
         return;
     }
     CHECK_NULL_VOID(info.paragraph);
@@ -466,7 +484,7 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
         }
         CaretMetricsF caretMetrics;
         bool res = info.paragraph->CalcCaretMetricsByPosition(index, caretMetrics, TextAffinity::UPSTREAM);
-        CHECK_NULL_BREAK(res)
+        CHECK_NULL_BREAK(res);
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         if (GreatNotEqual(rect.Bottom(), height) || (isLastParagraph && IsRectOutByHandler(rect, selectData))) {
             continue;
@@ -474,6 +492,7 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
         if (LessNotEqual(rect.Top(), lastBottom)) {
             break;
         }
+        AddParagraphPacingBlankRect(result, rect, selectData);
         height = rect.Top();
         rects.emplace_back(rect);
     }
@@ -481,11 +500,21 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
     result.insert(result.end(), rects.begin(), rects.end());
 }
 
+void ParagraphManager::AddParagraphPacingBlankRect(
+    std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData)
+{
+    if (!Positive(selectData.paragraphSpacing) || rects.empty() || NearEqual(rects.back().Top(), lastRect.Top())) {
+        return;
+    }
+    rects.emplace_back(
+        RectF(lastRect.Left(), lastRect.Top() - selectData.paragraphSpacing, 0.0f, selectData.paragraphSpacing));
+}
+
 std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::GetRichEditorBoxesForSelect(
     int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     SelectData selectData;
-    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::UPSTREAM);
+    selectData.secondResult = CalcCaretMetricsByPosition(end, selectData.secondMetrics, TextAffinity::DOWNSTREAM);
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
     selectData.y = 0.0f;
     for (auto&& info : paragraphs_) {
@@ -507,6 +536,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
                 rect.SetTop(rect.Top() + selectData.y);
             }
             paragraphsRects.emplace_back(std::make_pair(rects, info.paragraphStyle));
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
         }
         selectData.y += info.paragraph->GetHeight();
     }
@@ -542,6 +572,9 @@ void ParagraphManager::MakeBlankRectsInRichEditor(std::vector<RectF>& result, co
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         height  = rect.Top();
         rects.emplace_back(rect);
+        if (auto spacing = selectData.paragraphSpacing; index == 0 && !NearZero(spacing)) {
+            rects.emplace_back(caretMetrics.offset.GetX(), caretMetrics.offset.GetY() - spacing, 0, spacing);
+        }
     }
     std::reverse(rects.begin(), rects.end());
     result.insert(result.end(), rects.begin(), rects.end());
@@ -566,16 +599,16 @@ bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
 {
     for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {
         auto curParagraph = *iter;
-        if (curParagraph.paragraph && curParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-            curParagraph.start == start) {
-            return true;
+        if (auto paragraph = curParagraph.paragraph; curParagraph.start == start && paragraph) {
+            auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+            CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
         }
         auto next = std::next(iter);
         if (next != paragraphs_.end()) {
             auto nextParagraph = *next;
-            if (nextParagraph.paragraph && nextParagraph.paragraph->GetParagraphStyle().leadingMargin &&
-                nextParagraph.start == start + 1) {
-                return true;
+            if (auto paragraph = nextParagraph.paragraph; nextParagraph.start == start + 1) {
+                auto leadingMargin = paragraph->GetParagraphStyle().leadingMargin;
+                CHECK_EQUAL_RETURN(leadingMargin && leadingMargin.value().IsValid(), true, true);
             }
         }
     }

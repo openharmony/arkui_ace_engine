@@ -40,8 +40,6 @@ protected:
     double ParseUnitsAttr(const Dimension& attr, double value);
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
     void DrawChildren(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
-    SvgLengthScaleRule TransformForCurrentOBB(RSCanvas& canvas,
-        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
 
 private:
     Dimension x_ = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value

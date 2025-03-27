@@ -84,6 +84,24 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     }
     return this.progressNode.getFrameNode();
   }
+  privacySensitive(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ProgressPrivacySensitiveModifier.identity, ProgressPrivacySensitiveModifier, value);
+    return this;
+  }
+}
+
+class ProgressPrivacySensitiveModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('progressPrivacySensitive');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().progress.resetProgressPrivacySensitive(node);
+    } else {
+      getUINativeModule().progress.setProgressPrivacySensitive(node, this.value);
+    }
+  }
 }
 
 class ProgressInitializeModifier extends ModifierWithKey<ProgressParam> {

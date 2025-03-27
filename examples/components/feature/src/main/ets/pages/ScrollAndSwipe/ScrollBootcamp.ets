@@ -944,6 +944,9 @@ export struct ScrollBootcamp {
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
+  @State enableBackToTop: boolean = true;
+  @State backToTop: boolean = false;
+
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
   }
@@ -1991,6 +1994,7 @@ export struct ScrollBootcamp {
           .onScrollStop(()=>{
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+          .backToTop(useEnabled(this.enableBackToTop, this.backToTop))          
         }.tabBar(this.tabBuilder(0, '竖直布局'))
 
         TabContent() {
@@ -2971,6 +2975,7 @@ export struct ScrollBootcamp {
           .onScrollStop(()=>{
             this.compEventTriggeredLog('滚动停止时触发,onScrollStop事件')
           })
+          .backToTop(useEnabled(this.enableBackToTop, this.backToTop))
         }.tabBar(this.tabBuilder(1, '水平布局'))
       }
       .scrollable(false)
@@ -4035,6 +4040,16 @@ export struct ScrollBootcamp {
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false },
+          ]
+        })
+        
+        RadioBlock({
+          title: 'backToTop',
+          isEnabled: $enableBackToTop,
+          value: $backToTop,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
       }

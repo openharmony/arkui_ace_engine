@@ -282,9 +282,6 @@ public:
             return focusOptionStyle_;
         }
 
-        if (IsCircleDial()) {
-            return normalOptionStyle_;
-        }
         return selectedOptionStyle_;
     }
     void SetOptionStyle(bool selected, bool focus, const TextStyle& value)

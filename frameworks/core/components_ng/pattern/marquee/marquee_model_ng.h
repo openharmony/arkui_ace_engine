@@ -48,6 +48,8 @@ public:
     static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onChange);
     static void SetOnBounce(FrameNode* frameNode, std::function<void()>&& onChange);
     static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange);
+    static void SetMarqueeFrameRateRange(
+        FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
     static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void ResetValue(FrameNode* frameNode);
     static void SetPlayerStatus(FrameNode* frameNode, const std::optional<bool>& playerStatus);
@@ -58,8 +60,6 @@ public:
     static void ResetLoop(FrameNode* frameNode);
     static void SetDirection(FrameNode* frameNode, const std::optional<MarqueeDirection>& direction);
     static void ResetDirection(FrameNode* frameNode);
-    static void SetMarqueeFrameRateRange(
-        FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
 };
 } // namespace OHOS::Ace::NG
 

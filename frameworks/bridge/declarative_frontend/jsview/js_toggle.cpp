@@ -477,10 +477,9 @@ void JSToggle::JsBorder(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-    CalcDimension borderRadius;
-    auto valueRadius = object->GetProperty("radius");
     if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+        auto valueRadius = object->GetProperty("radius");
         JSButton::JsRadius(valueRadius);
     }
 }

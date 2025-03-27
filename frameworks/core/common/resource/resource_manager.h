@@ -104,6 +104,9 @@ public:
         auto key = MakeCacheKey(bundleName, moduleName, instanceId);
         auto mapIter = resourceAdapters_.find(key);
         if (mapIter != resourceAdapters_.end()) {
+            if (instanceId == -1) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get resourceAdapter without UI!");
+            }
             return mapIter->second;
         } else if (bundleName.empty() && moduleName.empty()) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE,

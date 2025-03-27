@@ -30,6 +30,7 @@ from src.utils.value_parser import get_value_as_int, pack_string_until_next_keyw
 class EventScope(BaseBean):
     finger = 0
     event_nodes = []
+    isNeedParentId = False
 
     def __init__(self, input_str):
         super().__init__()
@@ -70,6 +71,7 @@ class EventScope(BaseBean):
         while current_index < len(spliced_lines):
             if current_index < start_index:
                 current_index += 1
+                self.isNeedParentId = True
                 continue
             current_line = spliced_lines[current_index]
             if current_line.find('frameNodeId') != -1:
@@ -80,7 +82,8 @@ class EventScope(BaseBean):
                     current_index += 1
                     continue
                 current_index = packed_result[1]
-                event_node = EventNode(packed_str)
+                event_node = EventNode(packed_str, self.isNeedParentId)
+                self.isNeedParentId = False
                 if event_node is not None:
                     self.event_nodes.append(event_node)
             else:

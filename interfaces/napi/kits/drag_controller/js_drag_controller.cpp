@@ -992,6 +992,8 @@ void StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t&
         std::make_shared<OHOS::Ace::StartDragListenerImpl>(callback));
 #endif
     if (ret == 0) {
+        asyncCtxData = {asyncCtx->instanceId, asyncCtx->hasTouchPoint, asyncCtx->dragPointerEvent,
+            asyncCtx->dragPreviewOption, asyncCtx->touchPoint, asyncCtx->pixelMapList};
         if (NG::DragControllerFuncWrapper::TryDoDragStartAnimation(subWindow, data, asyncCtxData)) {
             asyncCtx->isSwitchedToSubWindow = true;
         }
@@ -1184,6 +1186,7 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     };
     NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->instanceId);
+    LogDragInfoInner(asyncCtx, dragData);
 #ifdef CROSS_PLATFORM
     int32_t result = StartDrag(asyncCtx, dragData, false);
 #else
@@ -1841,6 +1844,7 @@ static bool CheckDragging(const RefPtr<Container>& container)
 
 static napi_value JSExecuteDrag(napi_env env, napi_callback_info info)
 {
+    TAG_LOGI(AceLogTag::ACE_DRAG, "executeDrag fuction called.");
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(env, &scope);
 

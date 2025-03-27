@@ -32,6 +32,7 @@ public:
     std::optional<std::string> libraryName = std::nullopt;
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     void* aiOptions = nullptr;
+    std::optional<uint64_t> screenId = std::nullopt;
 };
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
@@ -61,6 +62,7 @@ public:
     void EnableSecure(bool isSecure) override;
     void HdrBrightness(float hdrBrightness) override;
     void EnableTransparentLayer(bool isTransparentLayer) override;
+    void SetScreenId(uint64_t screenId) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
@@ -94,6 +96,7 @@ public:
     static void GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,
         float& surfaceWidth, float& surfaceHeight);
     static bool GetXComponentEnableAnalyzer(FrameNode* frameNode);
+    static void SetScreenId(FrameNode* frameNode, uint64_t screenId);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

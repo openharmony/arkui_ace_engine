@@ -1179,6 +1179,7 @@ void JSText::ParseMenuParam(
     }
     menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
     menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
+    menuParam.previewMenuOptions = ParsePreviewMenuOptions(menuOptions);
 }
 
 std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
@@ -1202,6 +1203,22 @@ std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG
         return onMenuCallback;
     }
     return nullptr;
+}
+
+NG::PreviewMenuOptions JSText::ParsePreviewMenuOptions(const JSRef<JSObject>& menuOptions)
+{
+    NG::PreviewMenuOptions previewMenuOptions;
+    auto jsPreviewMenuOp = menuOptions->GetProperty("previewMenuOptions");
+    CHECK_EQUAL_RETURN(jsPreviewMenuOp->IsObject(), false, previewMenuOptions);
+    auto jsPreviewMenuOpObj = JSRef<JSObject>::Cast(jsPreviewMenuOp);
+    CHECK_EQUAL_RETURN(jsPreviewMenuOpObj->IsUndefined(), true, previewMenuOptions);
+    JSRef<JSVal> jsHapticFeedbackMode = jsPreviewMenuOpObj->GetProperty("hapticFeedbackMode");
+    CHECK_EQUAL_RETURN(jsHapticFeedbackMode->IsNumber(), false, previewMenuOptions);
+    auto hapticFeedbackMode = static_cast<HapticFeedbackMode>(jsHapticFeedbackMode->ToNumber<int32_t>());
+    if (hapticFeedbackMode >= HapticFeedbackMode::DISABLED && hapticFeedbackMode <= HapticFeedbackMode::AUTO) {
+        previewMenuOptions.hapticFeedbackMode = hapticFeedbackMode;
+    }
+    return previewMenuOptions;
 }
 
 void JSText::SetMarqueeOptions(const JSCallbackInfo& info)

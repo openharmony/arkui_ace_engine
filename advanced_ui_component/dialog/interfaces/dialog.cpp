@@ -20,8 +20,8 @@
 extern const char _binary_dialog_abc_start[];
 extern const char _binary_dialog_abc_end[];
 
-extern const char _binary_dialog_v16_abc_start[];
-extern const char _binary_dialog_v16_abc_end[];
+extern const char _binary_dialog_v18_abc_start[];
+extern const char _binary_dialog_v18_abc_end[];
 
 namespace OHOS::Ace::Napi {
 
@@ -29,12 +29,12 @@ namespace OHOS::Ace::Napi {
 extern "C" ACE_FORCE_EXPORT void NAPI_arkui_advanced_Dialog_GetABCCode(
     const char** buf, int* buflen)
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (buf != nullptr) {
-            *buf = _binary_dialog_v16_abc_start;
+            *buf = _binary_dialog_v18_abc_start;
         }
         if (buflen != nullptr) {
-            *buflen = _binary_dialog_v16_abc_end - _binary_dialog_v16_abc_start;
+            *buflen = _binary_dialog_v18_abc_end - _binary_dialog_v18_abc_start;
         }
     } else {
         if (buf != nullptr) {

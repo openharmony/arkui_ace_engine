@@ -30,19 +30,23 @@ public:
 
     void Stop();
 
+    void StopInner();
+
     void Init();
+
+    void Clear();
 
     std::function<bool()> GetFrameDumpFunc() const
     {
         return frameDumpFunc_;
     }
 
-    bool IsRecoding() const
+    bool IsRecording() const
     {
         return frameDumpFunc_ != nullptr;
     }
 
-    void Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json, WeakPtr<TaskExecutor> taskExecutor);
+    void Record(int64_t timestamp, std::unique_ptr<JsonValue>&& json);
 
     void Diff(int64_t timestamp);
 
@@ -53,6 +57,7 @@ public:
     void Output(const std::string& content);
 
 private:
+    uint32_t fileSize_ = 0;
     std::function<bool()> frameDumpFunc_;
     std::unique_ptr<JsonValue> recordTree_;
     std::map<int64_t, std::unique_ptr<JsonValue>> records_;

@@ -29,6 +29,7 @@ if (is_ohos_standard_system) {
 
 build_component_ng("window_scene") {
   sources = [
+    "helper/starting_window_layout_helper.cpp",
     "helper/window_scene_helper.cpp",
     "root/root_scene_model.cpp",
     "scene/input_scene.cpp",
@@ -36,6 +37,7 @@ build_component_ng("window_scene") {
     "scene/system_window_scene.cpp",
     "scene/transform_scene.cpp",
     "scene/window_event_process.cpp",
+    "scene/window_layout_algorithm.cpp",
     "scene/window_node.cpp",
     "scene/window_pattern.cpp",
     "scene/window_scene.cpp",

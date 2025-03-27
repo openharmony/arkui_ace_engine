@@ -19,17 +19,13 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
-#include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,28 +38,6 @@ constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
 constexpr float OBSCURED_ALPHA = 0.2f;
-const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::W700,       // FontWeight::BOLD
-    FontWeight::W400,       // FontWeight::NORMAL
-    FontWeight::W900,       // FontWeight::BOLDER,
-    FontWeight::W100,       // FontWeight::LIGHTER
-    FontWeight::W500,       // FontWeight::MEDIUM
-    FontWeight::W400,       // FontWeight::REGULAR
-};
-
-inline FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
-}
 } // namespace
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
@@ -171,7 +145,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
 {
     fontWeightFloat_ =
-        MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
+        MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(V2::ConvertFontWeight(textStyle.GetFontWeight())));
     AttachProperty(fontWeightFloat_);
 }
 
@@ -200,10 +174,6 @@ LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const s
 void TextContentModifier::SetDefaultTextShadow(const TextStyle& textStyle)
 {
     auto&& textShadows = textStyle.GetTextShadows();
-    if (textShadows.empty()) {
-        AddDefaultShadow();
-        return;
-    }
     shadows_.clear();
     shadows_.reserve(textShadows.size());
     for (auto&& textShadow : textShadows) {
@@ -222,6 +192,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     textShadow.SetOffset(shadow.GetOffset());
     textShadow.SetColor(shadow.GetColor());
     shadows_.emplace_back(ShadowProp { .shadow = textShadow,
+        .lastShadow = textShadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
@@ -236,8 +207,9 @@ void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
     textDecoration_ = textStyle.GetTextDecoration();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
-    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
-        textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
+    auto alpha = textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha();
+    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(alpha);
+    lastTextDecorationColorAlpha_ = alpha;
     AttachProperty(textDecorationColorAlpha_);
 }
 void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
@@ -446,10 +418,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
-                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
-            textPattern->DumpRecord(logTag);
-            textPattern->LogForFormRender(logTag);
             DrawText(canvas, pManager);
         } else {
             // Racing
@@ -810,9 +778,6 @@ void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
-        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
     }
 }
 
@@ -881,12 +846,12 @@ void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, const Text
 void TextContentModifier::SetFontWeight(const FontWeight& value, bool isReset)
 {
     if (!isReset) {
-        fontWeight_ = ConvertFontWeight(value);
+        fontWeight_ = V2::ConvertFontWeight(value);
     } else {
         fontWeight_ = std::nullopt;
     }
     CHECK_NULL_VOID(fontWeightFloat_);
-    fontWeightFloat_->Set(static_cast<int>(ConvertFontWeight(value)));
+    fontWeightFloat_->Set(static_cast<int>(V2::ConvertFontWeight(value)));
 }
 
 void TextContentModifier::SetTextColor(const Color& value, bool isReset)
@@ -1029,6 +994,10 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 
     marqueeSet_ = true;
     ResumeTextRace(false);
+
+    if (!IsMarqueeVisible()) {
+        PauseAnimation();
+    }
 }
 
 void TextContentModifier::StopTextRace()
@@ -1046,7 +1015,7 @@ void TextContentModifier::StopTextRace()
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED) || !IsMarqueeVisible()) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
@@ -1457,5 +1426,18 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     canvas.DrawRect(clipInnerRect);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+bool TextContentModifier::IsMarqueeVisible() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, true);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    return Positive(visibleInnerRect.Width()) && Positive(visibleInnerRect.Height());
 }
 } // namespace OHOS::Ace::NG

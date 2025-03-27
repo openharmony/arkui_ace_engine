@@ -207,6 +207,14 @@ void NavToolbarPattern::HandleLongPressEvent(const GestureEvent& info)
     RefPtr<BarItemNode> barItemNode = AceType::DynamicCast<BarItemNode>(toolBarItem->GetFirstChild());
     CHECK_NULL_VOID(barItemNode);
     ShowDialogWithNode(barItemNode);
+    moveIndex_ = containerNode->GetChildIndex(toolBarItem);
+    auto pipeline = hostNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto buttonPattern = toolBarItem->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
 }
 
 void NavToolbarPattern::HandleLongPressActionEnd()
@@ -306,4 +314,10 @@ bool NavToolbarPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     return false;
 }
 
+bool NavToolbarPattern::CustomizeExpandSafeArea()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return RunCustomizeExpandIfNeeded(host);
+}
 } // namespace OHOS::Ace::NG

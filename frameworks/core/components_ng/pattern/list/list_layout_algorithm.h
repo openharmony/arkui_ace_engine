@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,7 +323,23 @@ public:
 
     float GetChainOffset(int32_t index) const
     {
-        return chainOffsetFunc_ ? chainOffsetFunc_(index) : 0.0f;
+        if (!chainOffsetFunc_) {
+            return 0.0f;
+        }
+        if (!isStackFromEnd_) {
+            return chainOffsetFunc_(index);
+        }
+        return -chainOffsetFunc_(totalItemCount_ - index - 1);
+    }
+
+    void SetTotalItemCount(int32_t totalItemCount)
+    {
+        totalItemCount_ = totalItemCount;
+    }
+
+    void SetFirstRepeatCount(int32_t firstRepeatCount)
+    {
+        firstRepeatCount_ = firstRepeatCount;
     }
 
     void SetChainInterval(float interval)
@@ -442,6 +458,8 @@ public:
     {
         return laneIdx4Divider_;
     }
+
+    void CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper);
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -598,6 +616,7 @@ protected:
     bool expandSafeArea_ = false;
 
     int32_t totalItemCount_ = 0;
+    int32_t firstRepeatCount_ = 0;
 
     bool needEstimateOffset_ = false;
 

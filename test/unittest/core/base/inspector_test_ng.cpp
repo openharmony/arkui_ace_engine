@@ -30,6 +30,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -496,7 +497,16 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
     int32_t containerId = 1;
-    std::string result = Inspector::GetSimplifiedInspector(containerId, { false });
+    TreeParams params { false };
+    auto inspector = std::make_shared<SimplifiedInspector>(containerId, params);
+    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [](const std::shared_ptr<std::string> result) {
+            ASSERT_NE(result, nullptr);
+            EXPECT_NE(result->c_str(), "");
+        },
+        false);
+    inspector->GetInspectorAsync(collector);
+    auto result = inspector->GetInspector();
     EXPECT_NE(result, "");
     context->stageManager_ = nullptr;
 }
@@ -852,5 +862,27 @@ HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_001, TestSize.Level1)
     Inspector::GetRecordAllPagesNodes(treesInfos);
     EXPECT_TRUE(!treesInfos.empty());
     context1->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg022
+ * @tc.desc: Test the method GetInspectorChildrenInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test GetInspectorChildrenInfo
+     */
+    auto spanNode = SpanNode::GetOrCreateSpanNode(int32_t(191));
+    NG::InspectorTreeMap treesInfos;
+    EXPECT_TRUE(AceType::InstanceOf<SpanNode>(spanNode));
+    Inspector::GetInspectorChildrenInfo(spanNode, treesInfos, 1, 1);
+
+    auto customNode = CustomNode::CreateCustomNode(1, "custom");
+    EXPECT_TRUE(AceType::InstanceOf<CustomNode>(customNode));
+    Inspector::GetInspectorChildrenInfo(spanNode, treesInfos, 1, 1);
+
+    Inspector::GetInspectorChildrenInfo(spanNode, treesInfos, 1, 0);
 }
 } // namespace OHOS::Ace::NG

@@ -1043,7 +1043,7 @@ HWTEST_F(ArcindexerPatternTestNg, AtArcHotArea002, TestSize.Level1)
     Create();
     pattern_->isScreenReaderOn_ = true;
     bool status = pattern_->AtArcHotArea(Offset(0, 0));
-    EXPECT_TRUE(status);
+    EXPECT_FALSE(status);
 }
 
 /**
@@ -1090,7 +1090,8 @@ HWTEST_F(ArcindexerPatternTestNg, InitAccessibilityClickEvent001, TestSize.Level
     pattern_->expandedNode_ = childNode0;
     pattern_->SetChildNodeAccessibility(childNode0, nodeStr0);
     pattern_->InitAccessibilityClickEvent();
-    EXPECT_TRUE(pattern_->expandedClickListener_);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
+
     /**
      * @tc.steps: step2. collapsedNode
     */
@@ -1102,7 +1103,7 @@ HWTEST_F(ArcindexerPatternTestNg, InitAccessibilityClickEvent001, TestSize.Level
     EXPECT_TRUE(childNode1);
     pattern_->SetChildNodeAccessibility(childNode1, nodeStr1);
     pattern_->InitAccessibilityClickEvent();
-    EXPECT_NE(pattern_->collapsedClickListener_, nullptr);
+    EXPECT_EQ(pattern_->focusIndex_, 0);
 }
 
 /**

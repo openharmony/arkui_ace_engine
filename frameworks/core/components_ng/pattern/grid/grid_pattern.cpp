@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -71,6 +72,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
         algo->SetEnableSkip(!disableSkip);
+        algo->SetScrollSource(GetScrollSource());
         return algo;
     }
     RefPtr<GridScrollLayoutAlgorithm> result;
@@ -80,7 +82,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_, crossCount, mainCount);
     }
     result->SetCanOverScrollStart(canOverScrollStart);
-    result->SetCanOverScrollEnd(canOverScrollEnd);
+    result->SetCanOverScrollEnd(canOverScrollEnd && (info_.repeatDifference_ == 0));
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -92,7 +94,10 @@ void GridPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    info_.childrenCount_ = host->GetTotalChildCount();
+    info_.repeatDifference_ = 0;
+    info_.firstRepeatCount_ = 0;
+    info_.childrenCount_ = 0;
+    GetRepeatCountInfo(host, info_.repeatDifference_, info_.firstRepeatCount_, info_.childrenCount_);
 }
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
@@ -328,7 +333,8 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info_.endIndex_ == (info_.childrenCount_ - 1)) {
+    auto childrenCount = info_.childrenCount_ + info_.repeatDifference_;
+    if (info_.endIndex_ == (childrenCount - 1)) {
         if (!isInitialized_) {
             FireObserverOnReachEnd();
         }
@@ -419,7 +425,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (info_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (irregular) {
+            if (GetTotalHeight() <= GetMainContentSize()) {
+                overScroll = GetTotalOffset();
+            } else if (irregular) {
                 overScroll = info_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
             } else {
                 overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
@@ -457,6 +465,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
 }
 
@@ -558,6 +567,9 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     }
     auto onScrollIndex = gridEventHub->GetOnScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    if (indexChanged) {
+        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
+    }
     auto onReachStart = gridEventHub->GetOnReachStart();
     FireOnReachStart(onReachStart);
     auto onReachEnd = gridEventHub->GetOnReachEnd();
@@ -776,9 +788,7 @@ float GridPattern::EstimateHeight() const
     if (isSmoothScrolling_) {
         const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
         CHECK_NULL_RETURN(infoPtr, 0.0f);
-        int32_t lineIndex = 0;
-        infoPtr->GetLineIndexByIndex(info_.startIndex_, lineIndex);
-        return infoPtr->GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) - info_.currentOffset_;
+        return infoPtr->GetTotalHeightFromZeroIndex(info_.startMainLineIndex_, GetMainGap()) - info_.currentOffset_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0);
@@ -832,9 +842,6 @@ float GridPattern::GetAverageHeight() const
 
 float GridPattern::GetTotalHeight() const
 {
-    if (scrollbarInfo_.first.has_value() && scrollbarInfo_.second.has_value()) {
-        return scrollbarInfo_.second.value();
-    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
@@ -854,9 +861,7 @@ float GridPattern::GetTotalHeight() const
 void GridPattern::UpdateScrollBarOffset()
 {
     CheckScrollBarOff();
-    if ((!GetScrollBar() && !GetScrollBarProxy()) || !isConfigScrollable_) {
-        return;
-    }
+    CHECK_NULL_VOID((GetScrollBar() || GetScrollBarProxy()) && isConfigScrollable_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -878,9 +883,9 @@ void GridPattern::UpdateScrollBarOffset()
             offset = info.GetContentOffset(mainGap);
             estimatedHeight = info.GetContentHeight(mainGap);
         } else {
+            auto childrenCount = info_.childrenCount_ + info_.repeatDifference_;
             offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
-            estimatedHeight =
-                info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
+            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), childrenCount, mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -896,7 +901,7 @@ void GridPattern::UpdateScrollBarOffset()
         overScroll = info_.lastMainSize_ - estimatedHeight + offset;
         overScroll = Positive(overScroll) ? overScroll : 0.0f;
     }
-    if (info_.offsetEnd_ && NearZero(overScroll)) {
+    if (info_.offsetEnd_ && NearZero(overScroll) && info_.repeatDifference_ == 0) {
         offset = estimatedHeight - info_.lastMainSize_;
     }
     HandleScrollBarOutBoundary(overScroll);
@@ -924,7 +929,7 @@ int32_t GridPattern::GetCrossCount() const
 
 int32_t GridPattern::GetChildrenCount() const
 {
-    return info_.childrenCount_;
+    return info_.GetChildrenCount();
 }
 
 void GridPattern::ClearDragState()
@@ -992,12 +997,12 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
+    const float totalHeight = GetTotalHeight();
+    if (GetAlwaysEnabled() && LessNotEqual(totalHeight, contentHeight)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
         }
-        float totalHeight = info.GetTotalLineHeight(mainGap);
         return totalHeight - heightInView;
     }
 
@@ -1099,7 +1104,7 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         GetEndOverScrollIrregular(offset, static_cast<float>(delta));
         return offset;
     }
-    if (info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (info_.endIndex_ == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
         float endPos = info_.currentOffset_ + info_.totalHeightOfItemsInView_;
         float mainSize = info_.lastMainSize_ - info_.contentEndPadding_;
         if (GreatNotEqual(GetMainContentSize(), info_.currentOffset_ + info_.totalHeightOfItemsInView_)) {
@@ -1442,13 +1447,17 @@ void GridPattern::StopAnimate()
 
 bool GridPattern::IsPredictOutOfRange(int32_t index) const
 {
-    CHECK_NULL_RETURN(info_.reachEnd_, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
     auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
+}
+
+bool GridPattern::IsPredictInRange(int32_t index) const
+{
+    return index >= info_.startIndex_ && index <= info_.endIndex_;
 }
 
 inline bool GridPattern::UseIrregularLayout() const
@@ -1561,6 +1570,7 @@ void GridPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ColumnsTemplate", property->GetColumnsTemplate()->c_str());
     json->Put("CachedCount",
         property->GetCachedCount().has_value() ? std::to_string(property->GetCachedCount().value()).c_str() : "null");
+    json->Put("ShowCache", std::to_string(property->GetShowCachedItemsValue(false)).c_str());
     json->Put("MaxCount",
         property->GetMaxCount().has_value() ? std::to_string(property->GetMaxCount().value()).c_str() : "null");
     json->Put("MinCount",

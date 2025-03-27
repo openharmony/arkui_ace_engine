@@ -20,6 +20,7 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
+#include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 namespace {

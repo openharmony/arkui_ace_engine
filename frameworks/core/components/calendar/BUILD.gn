@@ -24,9 +24,6 @@ build_component("calendar") {
     "render_calendar_creator.cpp",
   ]
 
-  if (enable_graphic_text_gine) {
-    defines = [ "USE_GRAPHIC_TEXT_GINE" ]
-  }
   rosen_sources = [ "rosen_render_calendar.cpp" ]
 
   component_deps = [

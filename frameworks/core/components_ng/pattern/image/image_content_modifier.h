@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,15 +21,18 @@
 #include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
-// not in use, causes performance issues
+class ImagePattern;
 class ImageContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ImageContentModifier, ContentModifier);
 
 public:
     ImageContentModifier();
+    explicit ImageContentModifier(const WeakPtr<ImagePattern>& pattern);
     ~ImageContentModifier() override = default;
 
     void onDraw(DrawingContext& drawingContext) override;
+
+    void DrawDrawable(DrawingContext& drawingContext);
 
     void SetSensitive(bool sensitive)
     {
@@ -54,6 +57,7 @@ private:
     // the value of fill color must be changed on the modifier berfore the onDraw method
     static void UpdateSvgColorFilter(const RefPtr<CanvasImage>& canvasImage);
 
+    WeakPtr<ImagePattern> pattern_;
     RefPtr<PropertyBool> sensitive_;
     RefPtr<PropertySizeF> size_;
     RefPtr<PropertyCanvasImageModifierWrapper> canvasImageWrapper_;

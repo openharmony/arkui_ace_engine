@@ -18,9 +18,6 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/common/recorder/node_data_cache.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
@@ -39,37 +36,7 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void UpdateChangeEvent(bool isOn) const
-    {
-        auto task = [changeEvent = changeEvent_, onChangeEvent = onChangeEvent_, isOn]() {
-            if (onChangeEvent) {
-                onChangeEvent(isOn);
-            }
-            if (changeEvent) {
-                changeEvent(isOn);
-            }
-        };
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        context->PostAsyncEvent(task, "ArkUIToggleUpdateChangeEvent", TaskExecutor::TaskType::UI);
-
-        if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
-            Recorder::EventParamsBuilder builder;
-            auto host = GetFrameNode();
-            if (host) {
-                auto id = host->GetInspectorIdValue("");
-                builder.SetId(id)
-                    .SetType(host->GetHostTag())
-                    .SetHost(host)
-                    .SetDescription(host->GetAutoEventParamValue(""));
-                if (!id.empty()) {
-                    Recorder::NodeDataCache::Get().PutBool(host, id, isOn);
-                }
-            }
-            builder.SetChecked(isOn);
-            Recorder::EventRecorder::Get().OnChange(std::move(builder));
-        }
-    }
+    void UpdateChangeEvent(bool isOn) const;
 
     void SetOnChangeEvent(ChangeEvent&& onChangeEvent)
     {

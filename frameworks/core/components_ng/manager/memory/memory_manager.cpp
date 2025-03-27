@@ -15,6 +15,8 @@
 #include "core/components_ng/manager/memory/memory_manager.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/common/container.h"
 
 namespace {
 constexpr int32_t BACKGROUND_RECYCLE_WAIT_TIME_MS = 500;

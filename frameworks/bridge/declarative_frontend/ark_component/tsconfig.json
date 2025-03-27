@@ -102,7 +102,8 @@
         "src/ArkComponent3D.ts",
         "src/ArkContainerSpan.ts",
         "src/ArkLinearIndicator.ts",
-        "src/ArkIndicatorComponent.ts"
+        "src/ArkIndicatorComponent.ts",
+        "src/ArkLazyGridLayout.ts"
     ],
     "compilerOptions": {
         "module": "none",

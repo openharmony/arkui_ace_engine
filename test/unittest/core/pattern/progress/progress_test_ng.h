@@ -45,6 +45,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -104,6 +106,65 @@ constexpr float VALUE_OF_SET_VALUE = 10.0f;
 const std::vector<std::string> FONT_FAMILY = { "serif" };
 constexpr Dimension DEFAULT_SPACE = 3.0_vp;
 constexpr bool ACTIVE_SETTING_FALSE = false;
+constexpr uint32_t TOKEN_THEME_ID = 10001;
+
+struct TestProperty {
+    const ArkUI_Uint32 colors_[TokenColors::TOTAL_NUMBER] = {
+        // id for color value for test
+        125830976, /* BRAND = 0 */
+        125830979, /* WARNING = 1; */
+        125830980, /* ALERT = 2 */
+        125830981, /* CONFIRM = 3 */
+        125830982, /* FONT_PRIMARY = 4 */
+        125830983, /* FONT_SECONDARY = 5 */
+        125830984, /* FONT_TERTIARY = 6 */
+        125830985, /* FONT_FOURTH = 7 */
+        125830986, /* FONT_EMPHASIZE = 8 */
+        125830987, /* FONT_ON_PRIMARY = 9 */
+        125830988, /* FONT_ON_SECONDARY = 10 */
+        125830989, /* FONT_ON_TERTIARY = 11 */
+        125830990, /* FONT_ON_FOURTH = 12 */
+        125830991, /* ICON_PRIMARY = 13 */
+        125830992, /* ICON_SECONDARY = 14 */
+        125830993, /* ICON_TERTIARY = 15 */
+        125830994, /* ICON_FOURTH = 16 */
+        125830995, /* ICON_EMPHASIZE = 17 */
+        125830996, /* ICON_SUB_EMPHASIZE = 18 */
+        125831057, /* ICON_ON_PRIMARY = 19 */
+        125831058, /* ICON_ON_SECONDARY = 20 */
+        125831059, /* ICON_ON_TERTIARY = 21 */
+        125831060, /* ICON_ON_FOURTH = 22 */
+        125831061, /* BACKGROUND_PRIMARY = 23 */
+        125831062, /* BACKGROUND_SECONDARY = 24 */
+        125831063, /* BACKGROUND_TERTIARY = 25 */
+        125831064, /* BACKGROUND_FOURTH = 26 */
+        125831065, /* BACKGROUND_EMPHASIZE = 27 */
+        125831003, /* COMP_FOREGROUND_PRIMARY = 28 */
+        125831004, /* COMP_BACKGROUND_PRIMARY = 29 */
+        -1,        /* COMP_BACKGROUND_PRIMARY_TRAN = 30 */
+        125831005, /* COMP_BACKGROUND_PRIMARY_CONTRARY = 31 */
+        125831006, /* COMP_BACKGROUND_GRAY = 32 */
+        125831007, /* COMP_BACKGROUND_SECONDARY = 33 */
+        125831008, /* COMP_BACKGROUND_TERTIARY = 34 */
+        125831009, /* COMP_BACKGROUND_EMPHASIZE = 35 */
+        125831066, /* COMP_BACKGROUND_NEUTRAL = 36 */
+        125831011, /* COMP_EMPHASIZE_SECONDARY = 37 */
+        125831012, /* COMP_EMPHASIZE_TERTIARY = 38 */
+        125831013, /* COMP_DIVIDER = 39 */
+        125831014, /* COMP_COMMON_CONTRARY = 40 */
+        125831015, /* COMP_BACKGROUND_FOCUS = 41 */
+        125831016, /* COMP_FOCUSED_PRIMARY = 42 */
+        125831017, /* COMP_FOCUSED_SECONDARY = 43 */
+        125831018, /* COMP_FOCUSED_TERTIARY = 44 */
+        125831019, /* INTERACTIVE_HOVER = 45 */
+        125831020, /* INTERACTIVE_PRESSED = 46 */
+        125831021, /* INTERACTIVE_FOCUS = 47 */
+        125831022, /* INTERACTIVE_ACTIVE = 48 */
+        125831023, /* INTERACTIVE_SELECT = 49 */
+        125831024, /* INTERACTIVE_CLICK = 50 */
+    };
+    RefPtr<TokenColors> tokenColors_;
+};
 
 class ProgressTestNg : public TestNG {
 public:

@@ -40,6 +40,8 @@
     "src/lib/common/observed_property_abstract.ts",
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
+    "src/lib/common/finalization_registry.d.ts",
+    "src/lib/common/weakref_pool.ts",
 
     // full_update specific
     "src/lib/full_update/fu_observed_property.ts",

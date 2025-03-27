@@ -973,4 +973,14 @@ void DatePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     datePickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
+
+void DatePickerModelNG::UpdateUserSetSelectColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->UpdateUserSetSelectColor();
+}
+
 } // namespace OHOS::Ace::NG
