@@ -96,8 +96,7 @@ void ToJsonValue(const RefPtr<Element>& element,
     json->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
     auto shapeComposedElement = AceType::DynamicCast<V2::ShapeComposedElement>(element);
     if (shapeComposedElement != nullptr) {
-        int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
-        json->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
+        json->Replace(INSPECTOR_TYPE, shapeComposedElement->GetShapeType().c_str());
     }
     json->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
     json->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
