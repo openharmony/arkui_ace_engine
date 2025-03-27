@@ -297,8 +297,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
