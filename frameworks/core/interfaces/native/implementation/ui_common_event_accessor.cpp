@@ -119,7 +119,7 @@ void SetOnKeyEventImpl(Ark_UICommonEvent peer,
             return false;
         };
     }
-    ViewAbstract::SetOnKeyEvent(rawPtr, std::move(onKey));        
+    ViewAbstract::SetOnKeyEvent(rawPtr, std::move(onKey));
 }
 void SetOnFocusImpl(Ark_UICommonEvent peer,
                     const Opt_Callback_Void* callback_)
