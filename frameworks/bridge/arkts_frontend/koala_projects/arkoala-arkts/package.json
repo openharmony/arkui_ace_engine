@@ -119,6 +119,10 @@
         "run-previewer": "node scripts/run_previewer_arkts.mjs",
         "clear-preview": "rm -rf previewer/*",
         "check-preview": "if [ -f previewer/previewer/common/bin/Previewer ]; then echo 'Previewer is downloaded.'; else echo 'Previewer is not downloaded.'; fi",
-        "list-previewers": "node scripts/list-previewers.mjs"
+        "list-previewers": "node scripts/list-previewers.mjs",
+        "build:arkoala:ohos": "npm run build:arkoala:components:ohos && npm run link:arkoala:ohos",
+        "build:arkoala:components:ohos": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui-components",
+        "build:arkui-components": "npm run build:arkui-components --prefix arkui-ohos",
+        "link:arkoala:ohos": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui-ohos/build/arkui-components.abc ../arkoala/arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc"
     }
 }

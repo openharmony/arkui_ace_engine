@@ -18,6 +18,6 @@
     "arkoala:har-arm64": "npm run arkoala:har",
     "arkoala:har-arm32": "npm run all-arm32 --prefix arkoala/har",
     "arkoala:har-universal": "npm run all-universal --prefix arkoala/har",
-    "arkoala:abc": "npm run build:arkoala --prefix arkoala-arkts"
+    "arkoala:abc": "npm run build:arkoala:ohos --prefix arkoala-arkts"
   }
 }
