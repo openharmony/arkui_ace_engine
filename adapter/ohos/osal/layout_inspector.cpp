@@ -112,6 +112,7 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
 
 constexpr static char RECNODE_SELFID[] = "selfId";
 constexpr static char RECNODE_NODEID[] = "nodeID";
+constexpr static char RECNODE_PARENTID[] = "parentID";
 constexpr static char RECNODE_NAME[] = "value";
 constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
 constexpr static char RECNODE_CHILDREN[] = "RSNode";
@@ -398,6 +399,7 @@ void LayoutInspector::HandleStopRecord()
         if (uiNode.second != nullptr) {
             auto jsonNode = JsonUtil::Create(true);
             jsonNode->Put(RECNODE_NODEID, std::to_string(uiNode.second->GetSelfId()).c_str());
+            jsonNode->Put(RECNODE_PARENTID, uiNode.second->GetParentId());
             jsonNode->Put(RECNODE_SELFID, uiNode.second->GetNodeId());
             jsonNode->Put(RECNODE_NAME, uiNode.second->GetName().c_str());
             jsonNode->Put(RECNODE_DEBUGLINE, uiNode.second->GetDebugLine().c_str());
@@ -461,6 +463,7 @@ void LayoutInspector::HandleInnerCallback(FrameNodeInfo node)
     recNode->SetNodeId(node.frameNodeId);
     recNode->SetName(node.nodeType);
     recNode->SetDebugLine(node.debugline);
+    recNode->SetParentId(node.parentNodeId);
     std::lock_guard<std::mutex> lock(recMutex_);
     recNodeInfos_.emplace(node.rsNodeId, recNode);
 }
