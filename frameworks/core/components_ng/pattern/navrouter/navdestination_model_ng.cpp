@@ -295,7 +295,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     }
 
     // read navdestination back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    std::string message = theme->GetNavigationBack();
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
     
     titleBarNode->AddChild(backButtonNode);
@@ -448,7 +448,8 @@ void NavDestinationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<N
     if (userDefinedAccessibilityText) {
         NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
     } else {
-        std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+        auto theme = NavigationGetTheme();
+        std::string message = theme ? theme->GetNavigationBack() : "";
         NavigationTitleUtil::SetAccessibility(backButtonNode, message);
     }
 }

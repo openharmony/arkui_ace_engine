@@ -236,6 +236,7 @@ public:
             theme->dragBarItemActiveColor_ = pattern->GetAttr<Color>("drag_bar_item_active_color", Color(0xFF007DFF));
             theme->dividerGradientLightBlue_ = pattern->GetAttr<Color>("divider_light_blue", Color(0x7FCEDEFE));
             theme->dividerGradientDarkBlue_ = pattern->GetAttr<Color>("divider_dark_blue", Color(0xFF0A59F7));
+            theme->navigationBack_ = pattern->GetAttr<std::string>("navigation_back", "");
         }
     };
 
@@ -733,7 +734,11 @@ public:
         toolbarBgColor_ = color;
         toolbarBgColorWithOpacity_ = toolbarBgColor_.BlendOpacity(toolbarBgAlpha_);
     }
-
+    const std::string& GetNavigationBack() const
+    {
+        return navigationBack_;
+    }
+    
 protected:
     NavigationBarTheme() = default;
 
@@ -801,6 +806,7 @@ private:
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
     std::string moreMessage_ = "";
+    std::string navigationBack_ = "";
     uint32_t toolbarLimitGridCount_ = 8;
     uint32_t dividerShadowEnable_ = 0;
     Color navigationDividerColor_;
