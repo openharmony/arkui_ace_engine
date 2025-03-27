@@ -655,13 +655,11 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     if (jumpIndex_) {
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        RequestJump(*jumpIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
         jumpIndex_.reset();
     }
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollAlign_);
-        RequestFillToTarget(*targetIndex_, scrollAlign_, GetExtraOffset().value_or(0.0f));
     }
     if (jumpIndexInGroup_) {
         listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
@@ -1414,6 +1412,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
+                RequestFillToTarget(*targetIndex_, scrollAlign_, extraOffset.value_or(0.0f));
             }
         } else {
             if (extraOffset.has_value()) {
@@ -1421,6 +1420,7 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             }
             jumpIndex_ = index;
             scrollAlign_ = align;
+            RequestJump(*jumpIndex_, scrollAlign_, extraOffset.value_or(0.0f));
         }
         MarkDirtyNodeSelf();
     }

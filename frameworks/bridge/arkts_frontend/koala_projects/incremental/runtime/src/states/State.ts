@@ -221,10 +221,6 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
         once?: boolean,
         reuseKey?: string
     ): ScopeImpl<Value>
-
-    /* TEMP: traverse all scopes in the subtree to update id */
-    /* will be replaced by memo-plugin that keeps id constant within Reusable scope */
-    traverseOnReuse(idDiff: number): void
     increment(count: uint32, skip: boolean): void
 }
 
@@ -895,14 +891,12 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             }
         }
         if (once != true && this.once) throw new Error("prohibited to create scope(" + KoalaCallsiteKeys.asString(id) + ") within the remember scope(" + KoalaCallsiteKeys.asString(this.id) + ")")
-
         let reused = reuseKey ? this.nodeRef?.reuse(reuseKey) : undefined
         const scope = reused ? reused as ScopeImpl<Value> : new ScopeImpl<Value>(id, paramCount, compute, cleanup, reuseKey)
         scope.manager = manager
         if (reused) {
             scope.recomputeNeeded = true
-            const idDiff = id - scope.id
-            scope.traverseOnReuse(idDiff) // remove later when memo-plugin is ready
+            scope._id = id // children scope IDs are independent from Reusable parent
         } else if (create) {
             // create node within a scope
             scope._once = true
@@ -924,13 +918,6 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         return scope
     }
 
-    traverseOnReuse(idDiff: number): void {
-        this._id += idDiff
-        for (let child = this.child; child; child = child!.next) {
-            child!.traverseOnReuse(idDiff)
-        }
-    }
-
     private detachChildScopes(last?: ManagedScope): void {
         const inc = this.incremental
         let child = inc ? inc.next : this.child
@@ -947,13 +934,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         while (child != last) {
             if (child === undefined) throw new Error("unexpected")
             // TEMP: explicit compares to avoid compiler bug
-            const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
-            if (recycled) {
-                if (!child.node) throw Error("reusable scope doesn't have a node")
-                child.node!.detach()
-            } else {
-                child.dispose()
-            }
+            this.recycleOrDispose(child!!)
             child = child.next
         }
         manager.current = scope
@@ -1068,6 +1049,17 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         }
     }
 
+    private recycleOrDispose(child: ManagedScope): void {
+        const recycled = child.reuseKey !== undefined && this._nodeRef?.recycle(child.reuseKey!!, child) == true
+        if (recycled) {
+             // if parent node is also disposed, the recycled scopes would dispose in the ReusablePool
+            if (!child.node) throw Error("reusable scope doesn't have a node")
+            child.node!.detach()
+        } else {
+            child.dispose()
+        }
+    }
+
     get disposed(): boolean {
         return this.manager === undefined
     }
@@ -1087,7 +1079,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             error = cause as Error
         }
         for (let child = this.child; child; child = child!.next) {
-            child!.dispose()
+            this.recycleOrDispose(child!!)
         }
         this.child = undefined
         this.parentScope = undefined

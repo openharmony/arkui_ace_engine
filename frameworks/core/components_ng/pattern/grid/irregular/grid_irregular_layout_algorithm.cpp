@@ -272,6 +272,7 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         info_.jumpIndex_ = Negative(info_.currentOffset_) ? SkipLinesForward() : SkipLinesBackward();
         info_.scrollAlign_ = ScrollAlign::START;
         info_.currentOffset_ = 0.0f;
+        info_.jumpForRecompose_ = info_.jumpIndex_;
         Jump(mainSize);
         return true;
     }

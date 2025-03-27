@@ -23,9 +23,9 @@ class ArkExtendComponentComponent extends ArkReusableStruct<ArkExtendComponentCo
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
     }
-    __rebindStates(initializers?: ExtendComponentOptions): void {
-        if (initializers?.width_value)
-            this.width_value = initializers!.width_value!;
+    override __toRecord(initializers: Object): Record<string, Object> {
+        const _optionData = initializers as ExtendComponentOptions;
+        return { "width_value": _optionData.__backing_width_value?.value ?? (new Object()) };
     }
     /** @memo */
     __build(/**/
@@ -78,11 +78,9 @@ class ArkStylesComponentComponent extends ArkReusableStruct<ArkStylesComponentCo
     private set size_value(value: number) {
         this.__backing_size_value!.value = observableProxy(value);
     }
-    __rebindStates(initializers?: StylesComponentOptions): void {
-        if (initializers?.width_value)
-            this.width_value = initializers!.width_value!;
-        if (initializers?.size_value)
-            this.size_value = initializers!.size_value!;
+    override __toRecord(initializers: Object): Record<string, Object> {
+        const _optionData = initializers as StylesComponentOptions;
+        return { "enable": _optionData.__backing_enable?.value ?? (new Object()), "width_value": _optionData.__backing_width_value?.value ?? (new Object()), "size_value": _optionData.__backing_size_value?.value ?? (new Object()) };
     }
     /** @memo */
     componentFancy<T extends ArkCommonMethodInterface<T>>(CommonInstance: T): T {

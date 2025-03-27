@@ -364,6 +364,8 @@ struct GridLayoutInfo {
 
     void UpdateDefaultCachedCount();
 
+    std::string ToString() const;
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]

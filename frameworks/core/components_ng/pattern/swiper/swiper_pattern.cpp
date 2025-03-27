@@ -154,13 +154,8 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
 
     if (jumpIndex_) {
         algo->SetJumpIndex(jumpIndex_.value());
-        RequestJump(*jumpIndex_);
     } else if (targetIndex_) {
-        if (RequestFillToTarget(*targetIndex_)) {
-            algo->SetTargetIndex(targetIndex_.value());
-        } else {
-            targetIndex_.reset(); // postpone targetIndex_ to next frame
-        }
+        algo->SetTargetIndex(targetIndex_.value());
     }
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
@@ -1612,6 +1607,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
+    RequestJump(index);
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1679,8 +1675,9 @@ void SwiperPattern::SwipeTo(int32_t index)
         StopPropertyTranslateAnimation(isFinishAnimation_);
     }
 
-    targetIndex_ = targetIndex;
-
+    if (RequestFillToTarget(targetIndex)) {
+        targetIndex_ = targetIndex;
+    } else // postpone targetIndex_ to next frame
     UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);

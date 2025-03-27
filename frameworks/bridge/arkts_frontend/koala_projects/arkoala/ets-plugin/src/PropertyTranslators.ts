@@ -112,11 +112,20 @@ export abstract class PropertyTranslator {
     translateToUpdate(): ts.Statement | undefined {
         return undefined
     }
+
     /**
-     * re-assign values when struct is reused. Called in RebindStates
+     * translate struct property to an entry in Record<string, Object>
+     * Only used in ArkTS implementation.
      */
-    translateToReuse(): ts.Statement | undefined {
-        return undefined
+    translateToRecordEntry(object: ts.Expression): ts.PropertyAssignment {
+        const name = this.propertyName
+        return ts.factory.createPropertyAssignment(
+            ts.factory.createStringLiteral(name),
+            createNullishCoalescing(
+                createNullableAccessor(ts.factory.createPropertyAccessExpression(object, backingField(name)), "value"),
+                ts.factory.createNewExpression(ts.factory.createIdentifier("Object"), undefined, [])
+            )
+        )
     }
 
     createStateOf(type: ts.TypeNode | undefined, ...initializer: ts.Expression[]): ts.Expression {
@@ -541,11 +550,6 @@ class Link extends PropertyTranslator {
     }
     translateToInitialization(): ts.Statement {
         return translateToInitializationFromInitializers(backingField(this.propertyName))
-    }
-
-    override translateToReuse(): ts.Statement | undefined {
-        const name = this.propertyName
-        return assignToBackingField(name, createNotNullAccessor(initializers(), backingField(name)))
     }
 }
 

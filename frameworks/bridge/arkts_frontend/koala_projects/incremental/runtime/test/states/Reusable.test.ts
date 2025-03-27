@@ -14,7 +14,7 @@
  */
 
 import { Assert as assert, suite, test } from "@koalaui/harness"
-import { TestNode, ReusableTestNode, testUpdate } from "../../src"
+import { TestNode, ReusableTestNode, testUpdate, memoEntry, __id } from "../../src"
 import { createStateManager, InternalScope } from "../../src/states/State"
 import { assertNode } from "./State.test"
 suite("State", () => {
@@ -105,7 +105,7 @@ suite("State", () => {
             "  first node\n" +
             "  <UNDEFINED>")
     })
-    
+
     test("dispose root", () => {
         const manager = createStateManager()
 
@@ -130,6 +130,65 @@ suite("State", () => {
         assert(root.disposed)
         assert(firstNode.disposed)
         assert(secondNode.disposed)
+    })
+
+    test("reuse nested", () => {
+        const manager = createStateManager()
+        const version = manager.mutableState(0)
+
+        let reusedScope: InternalScope<void>
+        const rootNode = new ReusableTestNode(); rootNode.content = "root"
+        const root = manager.updatableNode(rootNode, context => {
+            assert.equal(rootNode, context.node)
+            if (version.value == 0) {
+                memoEntry(context, 2, () => {
+                    reusedScope =
+                        context.scope(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
+                    if (!reusedScope.unchanged)
+                        reusedScope.recache()
+                })
+                memoEntry(context, 3, () => {
+                    const scope = context.scope(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
+                    if (!scope.unchanged)
+                        scope.recache()
+                })
+            } else if (version.value == 1) {
+                // remove all
+            } else {
+                let id = 0
+                memoEntry(context, 3, () => {
+                    id = __id()
+                    console.log(`scope3`)
+                    const scope3 = context.scope(6, 0, () => { const node = new TestNode(); node.content = "third node"; return node }, undefined, undefined, undefined, "reuse")
+                    if (!scope3.unchanged) {
+                        // assert.equal(__id(), 0)
+                        scope3.recache()
+                    }
+                })
+                console.log(`after scope 3`)
+                memoEntry(context, 0, () => {
+                    assert.equal(__id(), id - 3)
+                    console.log(`scope4`)
+                    let scope4 = context.scope(7, 0, () => { const node = new TestNode(); node.content = "fourth node"; return node }, undefined, undefined, undefined, "reuse")
+                    assert.equal(reusedScope, scope4)
+                    if (!scope4.unchanged)
+                        scope4.recache()
+                })
+            }
+        })
+        assertNode(root,
+            "root\n" +
+            "  first node\n" +
+            "  second node")
+        version.value++
+        assert.equal(testUpdate(false, manager), 1)
+        assertNode(root, "root")
+        version.value++
+        assert.equal(testUpdate(false, manager), 1)
+        assertNode(root,
+            "root\n" +
+            "  second node\n" +
+            "  first node")
     })
 }
 )

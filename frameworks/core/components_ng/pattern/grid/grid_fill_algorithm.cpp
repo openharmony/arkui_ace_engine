@@ -101,6 +101,9 @@ bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, in
         return true;
     }
     if (direction == FillDirection::START) {
+        if (row > range_.startLine) {
+            return true;
+        }
         range_.AdjustBackward(info_.lineHeightMap_, params_.mainGap, row);
         return GreatNotEqual(range_.offset, params_.mainGap);
     }

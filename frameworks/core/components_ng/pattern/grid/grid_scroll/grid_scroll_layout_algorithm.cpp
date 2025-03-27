@@ -1143,7 +1143,6 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
-    info_.jumpForRecompose_ = info_.startIndex_;
 }
 
 void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper)
@@ -1189,7 +1188,6 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         CHECK_NULL_VOID(grid);
         grid->ChildrenUpdatedFrom(0);
     }
-    info_.jumpForRecompose_ = info_.startIndex_;
 }
 
 void GridScrollLayoutAlgorithm::SkipRegularLines(bool forward)
@@ -2203,7 +2201,6 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
-        if (info_.jumpIndex_ == EMPTY_JUMP_INDEX) info_.jumpForRecompose_ = info_.startIndex_;
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
         } else {
@@ -2226,7 +2223,6 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
             info_.ClearMatrixToEnd(updateIdx, it->first);
             info_.ClearHeightsFromMatrix(it->first);
             if (updateIdx <= info_.startIndex_) {
-                if (info_.jumpIndex_ == EMPTY_JUMP_INDEX) info_.jumpForRecompose_ = info_.startIndex_;
                 ReloadFromUpdateIdxToStartIndex(mainSize, crossSize, it->first, layoutWrapper);
             }
         }

@@ -25,11 +25,9 @@ class ArkGestureTestComponent extends ArkReusableStruct<ArkGestureTestComponent,
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
     }
-    __rebindStates(initializers?: GestureTestOptions): void {
-        if (initializers?.count)
-            this.count = initializers!.count!;
-        if (initializers?.width_value)
-            this.width_value = initializers!.width_value!;
+    override __toRecord(initializers: Object): Record<string, Object> {
+        const _optionData = initializers as GestureTestOptions;
+        return { "count": _optionData.__backing_count?.value ?? (new Object()), "width_value": _optionData.__backing_width_value?.value ?? (new Object()) };
     }
     /** @memo */
     __build(/**/

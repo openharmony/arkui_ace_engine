@@ -69,6 +69,16 @@ export class ReusableTestNode extends TestNode {
         this.reusePool!.get(reuseKey)!.push(child);
         return true
     }
+
+    override dispose(): void {
+        super.dispose()
+        for (const scopes of this.reusePool.values()) {
+            for (const scope of scopes) {
+                scope.dispose()
+            }
+        }
+        this.reusePool.clear()
+    }
 }
 
 /** @internal */

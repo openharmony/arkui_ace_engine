@@ -251,9 +251,9 @@ class ArkAnimationTestComponent extends ArkReusableStruct<ArkAnimationTestCompon
     private set width_value(value: string) {
         this.__backing_width_value!.value = observableProxy(value);
     }
-    __rebindStates(initializers?: AnimationTestOptions): void {
-        if (initializers?.width_value)
-            this.width_value = initializers!.width_value!;
+    override __toRecord(initializers: Object): Record<string, Object> {
+        const _optionData = initializers as AnimationTestOptions;
+        return { "width_value": _optionData.__backing_width_value?.value ?? (new Object()) };
     }
     /** @memo */
     __build(/**/
