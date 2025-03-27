@@ -502,6 +502,20 @@ void CallBackForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_value 
     asyncCtx->hasHandle = false;
 }
 
+DragRet TranslateDragResult(Msdp::DeviceStatus::DragResult dragResult)
+{
+    switch (dragResult) {
+        case Msdp::DeviceStatus::DragResult::DRAG_SUCCESS:
+            return DragRet::DRAG_SUCCESS;
+        case Msdp::DeviceStatus::DragResult::DRAG_FAIL:
+            return DragRet::DRAG_FAIL;
+        case Msdp::DeviceStatus::DragResult::DRAG_CANCEL:
+            return DragRet::DRAG_CANCEL;
+        default:
+            return DragRet::DRAG_FAIL;
+    }
+}
+
 void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, const DragNotifyMsg& dragNotifyMsg,
     const DragStatus dragStatus)
 {
@@ -537,7 +551,7 @@ void GetCallBackDataForJs(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, cons
     CHECK_NULL_VOID(jsDragEvent);
     auto dragEvent = AceType::MakeRefPtr<DragEvent>();
     CHECK_NULL_VOID(dragEvent);
-    dragEvent->SetResult(static_cast<DragRet>(resultCode));
+    dragEvent->SetResult(TranslateDragResult(resultCode));
     dragEvent->SetDragBehavior(static_cast<DragBehavior>(dragNotifyMsg.dragBehavior));
     jsDragEvent->SetDragEvent(dragEvent);
     napi_set_named_property(asyncCtx->env, result, "event", eventNapi);
