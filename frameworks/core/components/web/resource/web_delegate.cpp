@@ -7598,6 +7598,14 @@ void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
     isDragResizeStart_ = isDragResizeStart;
 }
 
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetNativeInnerWeb(isInnerWeb);
+    }
+}
+
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width)
 {
     dragResize_preHight_ = pre_height;
