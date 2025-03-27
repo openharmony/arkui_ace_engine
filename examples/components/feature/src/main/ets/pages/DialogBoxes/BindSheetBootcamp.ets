@@ -60,6 +60,10 @@ export struct BindSheetBootcamp {
   @State compBindSheetOptionScrollSizeMode: ScrollSizeMode = ScrollSizeMode.FOLLOW_DETENT
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
@@ -92,6 +96,9 @@ export struct BindSheetBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -172,7 +179,7 @@ export struct BindSheetBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         RadioBlock({
@@ -353,7 +360,12 @@ export struct BindSheetBootcamp {
         })
 
       }.width('100%')
-    }.height('50%')
+    }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 
