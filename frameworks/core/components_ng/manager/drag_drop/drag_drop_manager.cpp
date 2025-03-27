@@ -797,6 +797,115 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
     if (IsNeedDisplayInSubwindow() || isDragWithContextMenu_) {
         TransDragWindowToDragFwk(Container::CurrentId());
     }
+    ClearSummary();
+    ClearExtraInfo();
+    SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+}
+
+void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+    Point point = pointerEvent.GetPoint();
+    UpdateVelocityTrackerPoint(point, false);
+    UpdateDragListener(Point(-1, -1));
+    if (preTargetFrameNode_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Throw from the current window, windowId is %{public}d,"
+            " pointerEventId is %{public}d. PreTargetFrameNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), pointerEvent.pointerEventId, preTargetFrameNode_->GetTag().c_str(),
+            preTargetFrameNode_->GetDepth());
+        FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
+        preTargetFrameNode_ = nullptr;
+    }
+    ClearSummary();
+    ClearExtraInfo();
+    SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+}
+
+void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
+{
+    RemoveDeadlineTimer();
+    DoDragReset();
+    auto container = Container::Current();
+    auto containerId = container->GetInstanceId();
+    DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
+    DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
+    if (container && container->IsScenceBoardWindow()) {
+        if (IsDragged() && IsWindowConsumed()) {
+            SetIsWindowConsumed(false);
+            return;
+        }
+    }
+    SetIsWindowConsumed(false);
+    Point point = pointerEvent.GetPoint();
+    UpdateVelocityTrackerPoint(point, false);
+    UpdateDragListener(Point(-1, -1));
+    if (preTargetFrameNode_) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "Cancel from the current window, windowId is %{public}d,"
+            " pointerEventId is %{public}d. PreTargetFrameNode is %{public}s, depth is %{public}d.",
+            container->GetWindowId(), pointerEvent.pointerEventId, preTargetFrameNode_->GetTag().c_str(),
+            preTargetFrameNode_->GetDepth());
+        FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
+        preTargetFrameNode_ = nullptr;
+    }
+    DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::MOVE };
+    ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
+    ClearSummary();
+    ClearExtraInfo();
+    ClearVelocityInfo();
+}
+
+void DragDropManager::OnDragStartForDragEvent(const DragPointerEvent& pointerEvent,
+    const RefPtr<FrameNode>& frameNode)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    ResetPreTargetFrameNode(container->GetInstanceId());
+    RequireSummaryIfNecessary(pointerEvent);
+    SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
+    OnDragMove(pointerEvent, extraInfo_, frameNode);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
+}
+
+void DragDropManager::HandleDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
+    const RefPtr<FrameNode>& node)
+{
+    switch (action) {
+        case DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER: {
+            RequireSummary();
+            OnDragStart(pointerEvent.GetPoint());
+            break;
+        }
+        // PULL_OUT
+        case DragEventAction::DRAG_EVENT_OUT: {
+            OnDragMoveOut(pointerEvent);
+            break;
+        }
+        case DragEventAction::DRAG_EVENT_PULL_THROW: {
+            OnDragThrow(pointerEvent);
+            break;
+        }
+        case DragEventAction::DRAG_EVENT_PULL_CANCEL: {
+            OnDragPullCancel(pointerEvent);
+            break;
+        }
+        case DragEventAction::DRAG_EVENT_END: {
+            OnDragEnd(pointerEvent, extraInfo_, node);
+            break;
+        }
+        case DragEventAction::DRAG_EVENT_START: {
+            OnDragStartForDragEvent(pointerEvent, node);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
 bool DragDropManager::isDistanceLimited(const Point& point)
@@ -1092,24 +1201,6 @@ bool DragDropManager::HandleUIExtensionComponentDragCancel(const RefPtr<FrameNod
         return true;
     }
     return false;
-}
-
-void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
-    const RefPtr<FrameNode>& node)
-{
-    RemoveDeadlineTimer();
-    Point point = pointerEvent.GetPoint();
-    DoDragReset();
-    auto container = Container::Current();
-    auto containerId = container->GetInstanceId();
-    DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
-    DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Drag is canceled, finish drag. WindowId is %{public}d, "
-        "pointerEventId is %{public}d.",
-        container->GetWindowId(), pointerEvent.pointerEventId);
-    DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
-    ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-    ClearVelocityInfo();
 }
 
 bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)

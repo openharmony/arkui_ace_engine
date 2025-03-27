@@ -122,6 +122,7 @@ public:
     void UpdateItemDragPosition(int32_t globalX, int32_t globalY);
     void OnDragStart(const Point& point);
     void OnDragStart(const Point& point, const RefPtr<FrameNode>& frameNode);
+    void OnDragStartForDragEvent(const DragPointerEvent& pointerEvent, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& node = nullptr);
     void OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
@@ -129,12 +130,12 @@ public:
     bool HandleUIExtensionComponentDragCancel(const RefPtr<FrameNode>& preTargetFrameNode,
         const RefPtr<FrameNode>& dragFrameNode, const bool keyEscape, const DragPointerEvent& pointerEvent,
         const Point& point);
-    void OnDragPullCancel(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
-        const RefPtr<FrameNode>& node = nullptr);
     void HandleOnDragMove(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
     void HandleOnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
         const RefPtr<FrameNode>& dragFrameNode);
+    void OnDragThrow(const DragPointerEvent& pointerEvent);
+    void OnDragPullCancel(const DragPointerEvent& pointerEvent);
     void ResetDragEndOption(
         const DragNotifyMsgCore& notifyMessage, const RefPtr<OHOS::Ace::DragEvent>& dragEvent, int32_t currentId);
     void DoDragReset();
@@ -161,6 +162,8 @@ public:
     bool CheckRemoteData(
         const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey);
     void OnDragMoveOut(const DragPointerEvent& pointerEvent);
+    void HandleDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
+        const RefPtr<FrameNode>& node = nullptr);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
