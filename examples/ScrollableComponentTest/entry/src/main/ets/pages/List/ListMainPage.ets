@@ -32,11 +32,8 @@ class TextList {
 struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
-    new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
-    new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
-    new TextList(4, 'SwiperMainPage', 'pages/Swiper/SwiperMainPage'),
-    new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
+    new TextList(1, 'Back', 'pages/Index'),
+    new TextList(2, 'childrenMainSize', 'pages/List/childrenMainSize/ListItemGroupScenario'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
