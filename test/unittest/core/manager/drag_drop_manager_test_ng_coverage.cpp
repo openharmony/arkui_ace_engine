@@ -1956,4 +1956,77 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage070, TestSi
     dragDropManager->DoDragStartAnimation(overlayManager, event, guestureEventHub, drag);
     EXPECT_NE(dragDropManager->info_.textNode, nullptr);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage071
+ * @tc.desc: Test HandleUIExtensionComponentDragCancel
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    auto preTargetFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(preTargetFrameNode, nullptr);
+    preTargetFrameNode->tag_ = V2::UI_EXTENSION_COMPONENT_ETS_TAG;
+
+    auto dragFrameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(dragFrameNode, nullptr);
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isScenceBoardWindow_ = false;
+    dragDropManager->isDragCancel_ = false;
+    Point point = pointerEvent.GetPoint();
+    auto ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
+    ASSERT_EQ(ret, false);
+
+    dragDropManager->isDragCancel_ = true;
+    ret = dragDropManager->HandleUIExtensionComponentDragCancel(
+        preTargetFrameNode, dragFrameNode, true, pointerEvent, point);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage072
+ * @tc.desc: Test HandleDragEvent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage072, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragPointerEvent pointerEvent;
+    dragDropManager->dragDropState_ = DragDropMgrState::IDLE;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER, frameNode);
+    EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::DRAGGING);
+
+    MockContainer::Current()->SetIsScenceBoardWindow(false);
+    dragDropManager->isReDragStart_ = true;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_OUT, frameNode);
+    EXPECT_EQ(dragDropManager->isReDragStart_, false);
+
+    dragDropManager->isWindowConsumed_ = true;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_PULL_THROW, frameNode);
+    EXPECT_EQ(dragDropManager->isWindowConsumed_, false);
+
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_PULL_CANCEL, frameNode);
+    EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::IDLE);
+
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_END, frameNode);
+    EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::IDLE);
+
+    dragDropManager->isWindowConsumed_ = true;
+    dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_START, frameNode);
+    EXPECT_EQ(dragDropManager->isWindowConsumed_, false);
+}
 } // namespace OHOS::Ace::NG
