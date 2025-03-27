@@ -2452,7 +2452,7 @@ void ClearVirtualNodeAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int64
     renderContext->UpdateAccessibilityFocus(false);
 }
 
-void setParentAccessibilityId(const RefPtr<NG::FrameNode>& frameNode, FocusInfo& focusInfo)
+void SetParentAccessibilityId(const RefPtr<NG::FrameNode>& frameNode, FocusInfo& focusInfo)
 {
     auto parentUinode = frameNode->GetVirtualNodeParent().Upgrade();
     CHECK_NULL_VOID(parentUinode);
@@ -2502,7 +2502,7 @@ bool ActAccessibilityFocus(int64_t elementId, const RefPtr<NG::FrameNode>& frame
     UpdateAccessibilityFocusRect(frameNode, renderContext, isAccessibilityVirtualNode);
     focusInfo.currentFocusNodeId = frameNode->GetAccessibilityId();
     if (isAccessibilityVirtualNode) {
-        setParentAccessibilityId(frameNode, focusInfo);
+        SetParentAccessibilityId(frameNode, focusInfo);
     }
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
