@@ -237,9 +237,7 @@ public:
 
     void StopAnimate() override;
 
-    bool IsPredictOutOfRange(int32_t index) const;
-
-    bool IsPredictInRange(int32_t index) const;
+    bool IsPredictOutOfCacheRange(int32_t index) const;
 
     bool IsReverse() const override;
 

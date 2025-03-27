@@ -75,10 +75,7 @@ void GridLayoutUtils::PreloadGridItemsHelper(const RefPtr<GridPattern>& pattern,
             return;
         }
         auto it = items.begin();
-        if (pattern->IsPredictOutOfRange(it->idx)) {
-            return;
-        }
-        if (pattern->IsPredictInRange(it->idx)) {
+        if (pattern->IsPredictOutOfCacheRange(it->idx)) {
             return;
         }
         bool needMarkDirty = false;
