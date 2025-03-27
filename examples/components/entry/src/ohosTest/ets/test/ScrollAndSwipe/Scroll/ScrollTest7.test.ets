@@ -34,8 +34,8 @@ import { ScrollTest } from './ScrollTest'
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
 
-export default function ScrollTest4() {
-  describe('ScrollTest4', () => {
+export default function ScrollTest7() {
+  describe('ScrollTest7', () => {
     beforeAll(async (done: Function) => {
       await ScrollTest(done)
     })
