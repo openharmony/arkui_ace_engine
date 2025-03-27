@@ -976,6 +976,20 @@ void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
+void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& valueOpt)
+{
+    if (valueOpt) {
+        if (valueOpt.value() < CROWN_SENSITIVITY_MIN || valueOpt.value() > CROWN_SENSITIVITY_MAX) {
+            return;
+        }
+        CHECK_NULL_VOID(frameNode);
+        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(textPickerPattern);
+        textPickerPattern->SetDigitalCrownSensitivity(valueOpt.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
+    }
+}
+
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1570,12 +1584,15 @@ void TextPickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
     SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
 }
 
-void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
-    textPickerPattern->SetIsEnableHaptic(isEnableHapticFeedback);
+    if (valueOpt)
+    {
+        textPickerPattern->SetIsEnableHaptic(valueOpt.value());
+    }
 }
 
 bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)

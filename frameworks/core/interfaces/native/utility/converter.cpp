@@ -1809,6 +1809,24 @@ PickerTextStyle Convert(const Ark_PickerTextStyle& src)
 }
 
 template<>
+PickerTextStyle Convert(const Ark_TextPickerTextStyle& src)
+{
+    PickerTextStyle style;
+    style.textColor = OptConvert<Color>(src.color);
+    auto font = OptConvert<Font>(src.font);
+    if (font.has_value()) {
+        style.fontSize = font->fontSize;
+        style.fontFamily = font->fontFamilies;
+        style.fontWeight = font->fontWeight;
+        style.fontStyle = font->fontStyle;
+    }
+    style.minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
+    style.maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
+    style.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    return style;
+}
+
+template<>
 PickerTime Convert(const Ark_Date& src)
 {
     auto milliseconds = static_cast<int64_t>(src);

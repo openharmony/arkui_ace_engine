@@ -61,6 +61,8 @@ const auto ATTRIBUTE_STROKE_WIDTH_NAME = "strokeWidth";
 const auto ATTRIBUTE_START_MARGIN_NAME = "startMargin";
 const auto ATTRIBUTE_END_MARGIN_NAME = "endMargin";
 const auto ATTRIBUTE_GRADIENT_HEIGHT_NAME = "gradientHeight";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
+const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME = "disableTextStyleAnimation";
 
 const auto RES_STR_1_ID = IntResourceId { 111, Converter::ResourceType::STRING };
 const auto RES_STR_2_ID = IntResourceId { 222, Converter::ResourceType::STRING };
@@ -111,6 +113,8 @@ const auto ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE = "1.00px";
 const auto ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE = COLOR_BLACK;
 const auto ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_GRADIENT_HEIGHT_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE = "false";
 
 // Test plans
 typedef std::pair<Ark_Union_Number_String, std::string> PickerItemHeightTestStep;
@@ -370,6 +374,7 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<PickerTheme>();
+        SetupTheme<TextTheme>();
         AddResource(RES_STR_1_ID, "str1");
         AddResource(RES_STR_2_ID, "str2");
         AddResource(RES_STR_3_ID, "str3");
@@ -2102,5 +2107,51 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
     EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
     EXPECT_EQ(checkEvent->valueVct.value()[0], "value_1");
     EXPECT_EQ(checkEvent->valueVct.value()[1], "value_2");
+}
+
+/**
+ * @tc.name: setEnableHapticFeedback
+ * @tc.desc: Check the functionality of TextPickerModifierTest.EnableHapticFeedbackImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    value = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+}
+
+/**
+ * @tc.name: disableTextStyleAnimation
+ * @tc.desc: Check the functionality of TextPickerModifierTest.disableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, disableTextStyleAnimation, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisableTextStyleAnimation, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Ark_Boolean>(false);
+    modifier_->setDisableTextStyleAnimation(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    value = Converter::ArkValue<Ark_Boolean>(true);
+    modifier_->setDisableTextStyleAnimation(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_TRUE);
 }
 } // namespace OHOS::Ace::NG

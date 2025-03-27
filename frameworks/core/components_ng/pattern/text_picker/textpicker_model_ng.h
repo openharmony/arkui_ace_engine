@@ -106,6 +106,7 @@ public:
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& crownSensitivity);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
     static void SetHasSelectAttr(FrameNode* frameNode, bool value);
@@ -157,7 +158,7 @@ public:
     static void SetOnSelectedChangeEvent(FrameNode* frameNode, TextCascadeSelectedChangeEvent&& onChange);
     static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);
     static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
-    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& isEnableHapticFeedback);
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
 
 private:
