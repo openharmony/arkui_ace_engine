@@ -799,9 +799,7 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
     }
-    auto arg = info[0];
-
-    auto* spanString = JSRef<JSObject>::Cast(arg)->Unwrap<JSSpanString>();
+    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
     CHECK_NULL_VOID(spanString);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
@@ -821,7 +819,7 @@ void JSSpanString::Marshalling(const JSCallbackInfo& info)
 
 void JSSpanString::MarshallingExtSpan(const JSCallbackInfo& info, std::vector<uint8_t>& buff)
 {
-    if (info.Length() != 2 || !info[1]->IsFunction()) {
+    if (info.Length() != 2 || !info[1]->IsFunction() || !info[0]->IsObject()) {
         // marshalling only support one or two params
         return;
     }
