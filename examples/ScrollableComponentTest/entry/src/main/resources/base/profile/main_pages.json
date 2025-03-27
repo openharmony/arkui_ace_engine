@@ -8,6 +8,8 @@
     "pages/Tabs/OnContentWillChange",
     "pages/Tabs/TabContentObserver",
     "pages/Tabs/TabsHeightAdaptive",
-    "pages/Tabs/TabsSubTabBarStyle"
+    "pages/Tabs/TabsSubTabBarStyle",
+    "pages/waterflow/WaterFlowMainPage",
+    "pages/waterflow/demo01/WaterFlowDemo"
   ]
 }

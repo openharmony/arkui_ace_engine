@@ -34,6 +34,7 @@ struct IndexPage {
   @State arr: TextList[] = [
     new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
     new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
+    new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
