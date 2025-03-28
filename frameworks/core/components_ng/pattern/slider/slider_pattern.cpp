@@ -194,6 +194,14 @@ public:
         CHECK_NULL_RETURN(sliderPattern, false);
         if (state) {
             sliderPattern->InitAccessibilityVirtualNodeTask();
+        } else {
+            sliderPattern->SetBubbleFlag(false);
+            auto sliderContentModifier = sliderPattern->GetSliderContentModifier();
+            CHECK_NULL_RETURN(sliderContentModifier, false);
+            sliderContentModifier->SetIsHovered(false);
+            auto host = sliderPattern->GetHost();
+            CHECK_NULL_RETURN(host, false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
         sliderPattern->SetIsAccessibilityOn(state);
         return true;
