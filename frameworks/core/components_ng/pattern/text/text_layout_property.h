@@ -19,11 +19,15 @@
 #include <string>
 
 #include "base/utils/utf_helper.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/symbol/symbol_effect_options.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 #define ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(group, name, type, changeFlag) \
@@ -74,9 +78,29 @@ public:
 
     ~TextLayoutProperty() override = default;
 
-    RefPtr<LayoutProperty> Clone() const override;
+    RefPtr<LayoutProperty> Clone() const override
+    {
+        auto value = MakeRefPtr<TextLayoutProperty>();
+        Clone(value);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propSymbolSourceInfo_ = CloneSymbolSourceInfo();
+        return value;
+    }
 
-    void Reset() override;
+    void Reset() override
+    {
+        LayoutProperty::Reset();
+        ResetFontStyle();
+        ResetTextLineStyle();
+        ResetContent();
+        ResetSymbolSourceInfo();
+        ResetAdaptFontSizeStep();
+        ResetTextMarqueeOptions();
+        ResetCursorColor();
+        ResetSelectedBackgroundColor();
+        ResetTextColorFlagByUser();
+        propNeedReCreateParagraph_ = true;
+    }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -162,10 +186,34 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, MaxFontScale, float, PROPERTY_UPDATE_MEASURE);
 
     // for XTS inspector
-    std::string InspectorGetTextFont() const;
+    std::string InspectorGetTextFont() const
+    {
+        TextStyle font;
+        if (GetFontFamily().has_value()) {
+            font.SetFontFamilies(GetFontFamily().value());
+        }
+        if (GetFontSize().has_value()) {
+            font.SetFontSize(GetFontSize().value());
+        }
+        if (GetItalicFontStyle().has_value()) {
+            font.SetFontStyle(GetItalicFontStyle().value());
+        }
+        if (GetFontWeight().has_value()) {
+            font.SetFontWeight(GetFontWeight().value());
+        }
+        return V2::GetTextStyleInJson(font);
+    }
     std::string GetCopyOptionString() const;
 
-    void UpdateTextColorByRender(const Color &value);
+    void UpdateTextColorByRender(const Color &value)
+    {
+        auto& groupProperty = GetOrCreateFontStyle();
+        if (groupProperty->CheckTextColor(value)) {
+            return;
+        }
+        groupProperty->UpdateTextColor(value);
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 
     void OnPropertyChangeMeasure() override
     {
@@ -191,7 +239,19 @@ public:
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
 
 protected:
-    void Clone(RefPtr<LayoutProperty> property) const override;
+    void Clone(RefPtr<LayoutProperty> property) const override
+    {
+        auto value = DynamicCast<TextLayoutProperty>(property);
+        value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
+        value->propFontStyle_ = CloneFontStyle();
+        value->propTextLineStyle_ = CloneTextLineStyle();
+        value->propContent_ = CloneContent();
+        value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
+        value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
+        value->propCursorColor_ = CloneCursorColor();
+        value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propNeedReCreateParagraph_ = true;
+    }
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
