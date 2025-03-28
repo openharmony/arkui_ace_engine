@@ -5872,6 +5872,7 @@ bool WebDelegate::SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboa
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count)
 {
     if (nweb_) {
+        ACE_SCOPED_TRACE("WebDelegate::OnMouseEvent, web id = %d", GetWebId());
         nweb_->SendMouseEvent(x, y, static_cast<int>(button), static_cast<int>(action), count);
     }
 }
