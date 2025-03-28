@@ -1589,9 +1589,11 @@ void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, const std:
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
     if (valueOpt) {
-        textPickerPattern->SetIsEnableHaptic(valueOpt.value());
+        isEnableHapticFeedback = valueOpt.value();
     }
+    textPickerPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 
 bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
