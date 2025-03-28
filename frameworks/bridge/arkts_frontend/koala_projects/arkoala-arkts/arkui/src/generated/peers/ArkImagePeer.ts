@@ -337,6 +337,71 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_enhancedImageQuality(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    imageBorderRadiusAttribute(value: Length | BorderRadiuses | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        if (((RuntimeType.NUMBER) == (value_type)) || ((RuntimeType.STRING) == (value_type)) || (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isResource(value, false, false, false, false, false)))) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_0  = value as Length
+            thisSerializer.writeLength(value_0)
+        }
+        else if (((RuntimeType.OBJECT) == (value_type)) && (TypeChecker.isBorderRadiuses(value, false, false, false, false))) {
+            thisSerializer.writeInt8(1 as int32)
+            const value_1  = value as BorderRadiuses
+            const value_1_topLeft  = value_1.topLeft
+            let value_1_topLeft_type : int32 = RuntimeType.UNDEFINED
+            value_1_topLeft_type = runtimeType(value_1_topLeft)
+            thisSerializer.writeInt8(value_1_topLeft_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_1_topLeft_type)) {
+                const value_1_topLeft_value  = value_1_topLeft!
+                thisSerializer.writeLength(value_1_topLeft_value)
+            }
+            const value_1_topRight  = value_1.topRight
+            let value_1_topRight_type : int32 = RuntimeType.UNDEFINED
+            value_1_topRight_type = runtimeType(value_1_topRight)
+            thisSerializer.writeInt8(value_1_topRight_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_1_topRight_type)) {
+                const value_1_topRight_value  = value_1_topRight!
+                thisSerializer.writeLength(value_1_topRight_value)
+            }
+            const value_1_bottomLeft  = value_1.bottomLeft
+            let value_1_bottomLeft_type : int32 = RuntimeType.UNDEFINED
+            value_1_bottomLeft_type = runtimeType(value_1_bottomLeft)
+            thisSerializer.writeInt8(value_1_bottomLeft_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_1_bottomLeft_type)) {
+                const value_1_bottomLeft_value  = value_1_bottomLeft!
+                thisSerializer.writeLength(value_1_bottomLeft_value)
+            }
+            const value_1_bottomRight  = value_1.bottomRight
+            let value_1_bottomRight_type : int32 = RuntimeType.UNDEFINED
+            value_1_bottomRight_type = runtimeType(value_1_bottomRight)
+            thisSerializer.writeInt8(value_1_bottomRight_type as int32)
+            if ((RuntimeType.UNDEFINED) != (value_1_bottomRight_type)) {
+                const value_1_bottomRight_value  = value_1_bottomRight!
+                thisSerializer.writeLength(value_1_bottomRight_value)
+            }
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_borderRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    imageOpacityAttribute(value: number | Resource | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        if (RuntimeType.NUMBER == value_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_0  = value as number
+            thisSerializer.writeNumber(value_0)
+        }
+        else if (RuntimeType.OBJECT == value_type) {
+            thisSerializer.writeInt8(1 as int32)
+            const value_1  = value as Resource
+            thisSerializer.writeResource(value_1)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_opacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface ArkImageAttributes extends ArkCommonMethodAttributes {
     alt?: string | Resource | PixelMap

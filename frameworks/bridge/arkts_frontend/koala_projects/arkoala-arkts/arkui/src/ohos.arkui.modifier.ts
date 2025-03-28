@@ -21,6 +21,8 @@ export { CommonModifier } from './handwritten/modifiers/ArkCommonModifier'
 
 export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
+export { ImageModifier } from './handwritten/modifiers/ArkImageModifier'
+
 export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
 
 export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'

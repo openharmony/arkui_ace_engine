@@ -23,7 +23,7 @@ import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ResourceStr, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions } from "./ArkUnitsInterfaces"
 import { DrawableDescriptor } from "./ArkDrawableDescriptorMaterialized"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./ArkImageCommonInterfaces"
-import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, PointLightStyle } from "./ArkCommonInterfaces"
+import { CommonMethod, Rectangle, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, AccessibilityCallback, AnimateParam, TransitionOptions, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, CustomBuilder, DragItemInfo, UniformDataType, PreDragStatus, MotionPathOptions, ShadowOptions, ShadowStyle, StateStyles, PixelStretchEffectOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, SafeAreaType, SafeAreaEdge, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, PointLightStyle, CommonAttribute } from "./ArkCommonInterfaces"
 import { DrawModifier } from "./ArkDrawModifierMaterialized"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./ArkEnumsInterfaces"
 import { Callback_Array_TouchTestInfo_TouchResult, Callback_ClickEvent_Void, Callback_Boolean_HoverEvent_Void, Callback_MouseEvent_Void, Callback_TouchEvent_Void, Callback_KeyEvent_Void, Callback_KeyEvent_Boolean, Callback_Void, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, Callback_DragEvent_String_Void, Callback_PreDragStatus_Void, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_TouchEvent_HitTestMode, Literal_Alignment_align, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event } from "./SyntheticDeclarations"
@@ -89,32 +89,34 @@ export interface ImageSourceSize {
     width: number;
     height: number;
 }
-export interface ImageAttribute extends CommonMethod<ImageAttribute> {
-    alt: string | Resource | PixelMap;
-    matchTextDirection: boolean;
-    fitOriginalSize: boolean;
-    fillColor: ResourceColor;
-    objectFit: ImageFit;
-    objectRepeat: ImageRepeat;
-    autoResize: boolean;
-    renderMode: ImageRenderMode;
-    dynamicRangeMode: DynamicRangeMode;
-    interpolation: ImageInterpolation;
-    sourceSize: ImageSourceSize;
-    syncLoad: boolean;
-    colorFilter: ColorFilter | DrawingColorFilter;
-    copyOption: CopyOptions;
-    draggable: boolean;
-    pointLight: PointLightStyle;
-    edgeAntialiasing: number;
-    onComplete: ((event?: Type_ImageAttribute_onComplete_callback_event) => void);
-    onError: ImageErrorCallback;
-    onFinish: (() => void);
-    enableAnalyzer: boolean;
-    analyzerConfig: ImageAnalyzerConfig;
-    resizable: ResizableOptions;
-    privacySensitive: boolean;
-    enhancedImageQuality: ResolutionQuality;
+export interface ImageAttribute extends CommonAttribute {
+    // alt: string | Resource | PixelMap;
+    // matchTextDirection: boolean;
+    // fitOriginalSize: boolean;
+    // fillColor: ResourceColor;
+    // objectFit: ImageFit;
+    // objectRepeat: ImageRepeat;
+    // autoResize: boolean;
+    // renderMode: ImageRenderMode;
+    // dynamicRangeMode: DynamicRangeMode;
+    // interpolation: ImageInterpolation;
+    // sourceSize: ImageSourceSize;
+    // syncLoad: boolean;
+    // colorFilter: ColorFilter | DrawingColorFilter;
+    // copyOption: CopyOptions;
+    // draggable: boolean;
+    // pointLight: PointLightStyle;
+    // edgeAntialiasing: number;
+    // onComplete: ((event?: Type_ImageAttribute_onComplete_callback_event) => void);
+    // onError: ImageErrorCallback;
+    // onFinish: (() => void);
+    // enableAnalyzer: boolean;
+    // analyzerConfig: ImageAnalyzerConfig;
+    // resizable: ResizableOptions;
+    // privacySensitive: boolean;
+    // enhancedImageQuality: ResolutionQuality;
+    borderRadius(value: Length | BorderRadiuses): this;
+    opacity(value: number | Resource): this;
 }
 export type ImageErrorCallback = (error: ImageError) => void;
 export interface ImageError {
