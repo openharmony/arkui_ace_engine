@@ -76,20 +76,21 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("selectedBackgroundColor",
-            propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
-        json->PutExtAttr("popupBackground",
-            propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str(), filter);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
+        json->PutExtAttr("selectedBackgroundColor",
+            propSelectedBackgroundColor_.value_or(indexerTheme->GetSelectedBackgroundColor()).ColorToString().c_str(),
+            filter);
+        json->PutExtAttr("popupBackground",
+            propPopupBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("popupSelectedColor", propPopupSelectedColor_.
             value_or(indexerTheme->GetPopupSelectedTextColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("popupUnselectedColor", propPopupUnselectedColor_.
             value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("popupItemBackground", propPopupItemBackground_.
-            value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str(), filter);
+            value_or(indexerTheme->GetPopupUnclickedBgAreaColor()).ColorToString().c_str(), filter);
         BorderRadiusToJsonValue(json, filter);
         BlurStyleOption blurStyleOption;
         if (propPopupBackgroundBlurStyle_.has_value()) {
