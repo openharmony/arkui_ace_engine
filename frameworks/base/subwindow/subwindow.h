@@ -52,6 +52,7 @@ enum class SubwindowType {
     TYPE_DIALOG,
     TYPE_SELECT_MENU,
     TYPE_SHEET,
+    TYPE_TIPS,
     SUB_WINDOW_TYPE_COUNT,
 };
 

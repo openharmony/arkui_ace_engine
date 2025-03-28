@@ -1650,7 +1650,7 @@ void OverlayManager::ShowTips(int32_t targetId, const PopupInfo& popupInfo, int3
     }
     UpdateTipsEnterAndLeaveInfoBool(targetId);
     auto duration = appearingTime;
-    if (tipsInfoList_.empty()) {
+    if (TipsInfoListIsEmpty(targetId)) {
         UpdateTipsStatus(targetId, false);
         duration = appearingTime;
     } else {
@@ -1740,9 +1740,12 @@ void OverlayManager::HideTips(int32_t targetId, const PopupInfo& popupInfo, int3
     taskExecutor->PostDelayedTask(hideTipsTask, TaskExecutor::TaskType::UI, duration, "ArkUIOverlayContinuousPopToast");
 }
 
-bool OverlayManager::TipsInfoListIsEmpty()
+bool OverlayManager::TipsInfoListIsEmpty(int32_t targetId)
 {
     if (tipsInfoList_.empty()) {
+        return true;
+    }
+    if (tipsInfoList_.size() == 1 && tipsInfoList_.back().first == targetId) {
         return true;
     }
     return false;

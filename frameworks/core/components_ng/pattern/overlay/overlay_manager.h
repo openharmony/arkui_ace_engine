@@ -141,7 +141,7 @@ public:
     void UpdateTipsStatus(int32_t targetId, bool isInContinus);
     void EraseTipsStatus(int32_t targetId);
     bool GetTipsStatus(int32_t targetId);
-    bool TipsInfoListIsEmpty();
+    bool TipsInfoListIsEmpty(int32_t targetId);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
