@@ -239,8 +239,8 @@ private:
     std::vector<float> arrowOffsetByClips_ = { 0.0f, 0.0f, 0.0f, 0.0f };
     PopupLinearGradientProperties outlineLinearGradient_;
     PopupLinearGradientProperties innerBorderLinearGradient_;
-    float outerBorderWidthByUser_ = Dimension(0.8_vp).ConvertToPx();
-    float innerBorderWidthByUser_ = Dimension(0.6_vp).ConvertToPx();
+    float outerBorderWidthByUser_;
+    float innerBorderWidthByUser_;
 
 #ifndef USE_ROSEN_DRAWING
     RSPath path_;

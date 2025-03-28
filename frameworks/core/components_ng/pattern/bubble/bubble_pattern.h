@@ -85,12 +85,26 @@ public:
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
         if (outlineWidth_.has_value()) {
             bubbleMethod->SetOuterBorderWidthByUser(outlineWidth_.value());
+            bubbleMethod->SetOuterBorderWidth(outlineWidth_.value());
         }
         if (innerBorderWidth_.has_value()) {
             bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
+            bubbleMethod->SetInnerBorderWidth(innerBorderWidth_.value());
         }
-        bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
-        bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+        if (!outlineLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+            if (!outlineWidth_.has_value()) {
+                bubbleMethod->SetOuterBorderWidthByUser(Dimension(1.0_vp));
+                bubbleMethod->SetOuterBorderWidth(Dimension(1.0_vp));
+            }
+        }
+        if (!innerBorderLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+            if (!innerBorderWidth_.has_value()) {
+                bubbleMethod->SetInnerBorderWidthByUser(Dimension(1.0_vp));
+                bubbleMethod->SetInnerBorderWidth(Dimension(1.0_vp));
+            }
+        }
         return bubbleMethod;
     }
 
