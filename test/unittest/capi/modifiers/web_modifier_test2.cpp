@@ -521,7 +521,7 @@ HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
     static constexpr int32_t contextId = 123;
     auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_KeyEvent parameter, const Callback_Boolean_Void continuation) {
-        auto peer = reinterpret_cast<KeyEventPeer*>(parameter.ptr);
+        auto peer = parameter;
         ASSERT_NE(peer, nullptr);
         auto info = peer->GetEventInfo();
         auto accessor = GeneratedModifier::GetKeyEventAccessor();

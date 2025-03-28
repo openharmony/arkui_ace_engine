@@ -30,6 +30,7 @@
 #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
 #endif // WEB_SUPPORTED
+#include "test/unittest/capi/stubs/mock_web_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -111,7 +112,7 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
         .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
     auto options = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions);
 
-    #ifdef WEB_SUPPORTED
+    #ifdef WEB_SUPPORTED_TEST
     int callsCount(0);
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     ASSERT_NE(webPattern, nullptr);
@@ -119,7 +120,7 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
 
     for (auto [spanType, builder, responseType]: testPlan) {
         modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options);
-        #ifdef WEB_SUPPORTED
+        #ifdef WEB_SUPPORTED_TEST
         WebElementType convType = Converter::OptConvert<WebElementType>(spanType).value();
         ResponseType convResponseType = Converter::OptConvert<ResponseType>(responseType).value();
         std::shared_ptr<WebPreviewSelectionMenuParam> reviewSelectionMenuParams =

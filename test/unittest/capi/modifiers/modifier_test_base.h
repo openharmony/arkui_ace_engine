@@ -18,10 +18,11 @@
 #include <iostream>
 #include <set>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
 
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -201,6 +202,7 @@ public:
     {
         DumpJsonToFile(node_);
         DisposeNode(node_);
+        PeerUtils::ClearAllPeers();
     }
 
 protected:

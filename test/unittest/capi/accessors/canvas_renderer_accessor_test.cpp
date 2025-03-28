@@ -381,11 +381,14 @@ public:
 
     void ChangeDensity(const double density)
     {
-        TearDown();
         auto pipelineContext =
             AceType::DynamicCast<NG::MockPipelineContext>(NG::MockPipelineContext::GetCurrentContext());
         pipelineContext->SetDensity(density);
-        SetUp();
+        // Re-create peer for density to have effect
+        finalyzer_(peer_);
+        peer_ = accessor_->ctor();
+        reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer_)->SetRenderingContext2DModel(
+            renderingModel_);
     }
 
     RefPtr<MockCanvasRenderingContext2DModel> renderingModel_ = nullptr;
@@ -1057,7 +1060,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1ScaleTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
-    auto peer = new Matrix2DPeer();
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
     for (const auto& expectedX : NUMBER_ALPHA_TEST_PLAN) {
@@ -1087,7 +1090,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1SkewTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
-    auto peer = new Matrix2DPeer();
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
@@ -1112,7 +1115,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform1TranslateTest, TestSize.Level1
 {
     ASSERT_NE(accessor_->setTransform1, nullptr);
     Ark_Matrix2D arkMatrix;
-    auto peer = new Matrix2DPeer();
+    auto peer = PeerUtils::CreatePeer<Matrix2DPeer>();
     arkMatrix = peer;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
@@ -1949,7 +1952,7 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
             Ark_CanvasPattern patternPeer = pattern.value();
             ASSERT_NE(patternPeer, nullptr);
 
-            std::optional<Matrix2DPeer*> optMatrix = new Matrix2DPeer();
+            std::optional<Matrix2DPeer*> optMatrix = PeerUtils::CreatePeer<Matrix2DPeer>();
             patternPeer->SetTransform(optMatrix);
             ASSERT_NE(target, nullptr);
             EXPECT_NEAR(target->GetImageWidth(), actualW, FLT_PRECISION);
