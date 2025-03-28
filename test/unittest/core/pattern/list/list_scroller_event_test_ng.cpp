@@ -499,7 +499,7 @@ HWTEST_F(ListScrollerEventTestNg, ListOnReachEnd001, TestSize.Level1)
     pattern_->repeatDifference_ = 1;
     EXPECT_EQ(pattern_->endIndex_, totalCount - 1);
     EXPECT_EQ(pattern_->maxListItemIndex_, totalCount - 1);
-    pattern_->FireOnReachEnd(onReachEndEvent);
+    pattern_->FireOnReachEnd(onReachEndEvent, nullptr);
     EXPECT_FALSE(isTrigger);
 }
 
