@@ -70,7 +70,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
     const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
+            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
         algo->SetEnableSkip(!disableSkip);
         algo->SetScrollSource(GetScrollSource());
         return algo;
@@ -1101,7 +1102,9 @@ OverScrollOffset GridPattern::GetOverScrollOffset(double delta) const
         }
     }
     if (UseIrregularLayout()) {
-        GetEndOverScrollIrregular(offset, static_cast<float>(delta));
+        if (info_.repeatDifference_ == 0) {
+            GetEndOverScrollIrregular(offset, static_cast<float>(delta));
+        }
         return offset;
     }
     if (info_.endIndex_ == (info_.childrenCount_ + info_.repeatDifference_ - 1)) {
@@ -1445,19 +1448,16 @@ void GridPattern::StopAnimate()
     isSmoothScrolling_ = false;
 }
 
-bool GridPattern::IsPredictOutOfRange(int32_t index) const
+bool GridPattern::IsPredictOutOfCacheRange(int32_t index) const
 {
+    CHECK_NULL_RETURN(index < info_.GetChildrenCount(), true);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, true);
     auto cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
-    return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount;
-}
-
-bool GridPattern::IsPredictInRange(int32_t index) const
-{
-    return index >= info_.startIndex_ && index <= info_.endIndex_;
+    return index < info_.startIndex_ - cacheCount || index > info_.endIndex_ + cacheCount ||
+           (index >= info_.startIndex_ && index <= info_.endIndex_);
 }
 
 inline bool GridPattern::UseIrregularLayout() const
