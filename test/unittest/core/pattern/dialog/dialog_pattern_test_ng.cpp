@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -82,6 +83,7 @@ void DialogPatternAdditionalTestNg::SetUpTestCase()
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockSystemProperties::g_isSuperFoldDisplayDevice = false;
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DialogTheme::TypeId()) {
@@ -776,6 +778,38 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateHostW
 }
 
 /**
+ * @tc.name: DialogPatternAdditionalTestNgUpdateHostWindowRect002
+ * @tc.desc: Test DialogPattern UpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateHostWindowRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->isUIExtensionSubWindow_ = true;
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
+    EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    EXPECT_TRUE(SystemProperties::IsSuperFoldDisplayDevice());
+    pattern->UpdateHostWindowRect();
+}
+
+/**
  * @tc.name: DialogPatternAdditionalTestNgParseBorderRadius001
  * @tc.desc: Test DialogPattern ParseBorderRadius
  * @tc.type: FUNC
@@ -1213,11 +1247,11 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCheckScroll
 }
 
 /**
- * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect
+ * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect001
  * @tc.desc: Test DialogPattern NeedUpdateHostWindowRect
  * @tc.type: FUNC
  */
-HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect, TestSize.Level1)
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create dialogNode and dialogTheme instance.
@@ -1235,6 +1269,51 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateH
      * @tc.steps: step2. Invoke Handle functions.
      * @tc.expected: These Dump properties are matched.
      */
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect002
+ * @tc.desc: Test DialogPattern NeedUpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isUIExtensionSubWindow_ = true;
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    EXPECT_TRUE(SystemProperties::IsSuperFoldDisplayDevice());
+    auto host = frameNode->GetPattern<Pattern>()->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pipeline->instanceId_ = 0;
+    EXPECT_TRUE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
+    EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    AceEngine::Get().AddContainer(pipeline->GetInstanceId(), AceType::MakeRefPtr<MockContainer>());
+    auto container = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(pipeline->instanceId_));
+    ASSERT_NE(container, nullptr);
+    container->SetDisplayInfo(AceType::MakeRefPtr<DisplayInfo>());
+    EXPECT_FALSE(container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD);
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+    MockContainer::Current()->GetMockDisplayInfo()->foldStatus_ = FoldStatus::HALF_FOLD;
+    EXPECT_TRUE(container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD);
     EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
 }
 
@@ -1275,5 +1354,86 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgGetContentR
     auto customContent = AccessibilityManagerNG::DynamicCast<FrameNode>(customNode);
     EXPECT_NE(customContent, nullptr);
     EXPECT_EQ(pattern->GetContentRect(frameNode), frameNode->GetGeometryNode()->GetFrameRect());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgInitHostWindowRect
+ * @tc.desc: Test DialogPattern InitHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgInitHostWindowRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.isShowInSubWindow = true;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_FALSE(!pattern->dialogProperties_.isShowInSubWindow);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    EXPECT_FALSE(container->IsSubContainer());
+    container->isUIExtensionWindow_ = true;
+    EXPECT_TRUE(container->IsUIExtensionWindow());
+    pattern->InitHostWindowRect();
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+    pattern->InitHostWindowRect();
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgIsShowInFreeMultiWindow
+ * @tc.desc: Test DialogPattern IsShowInFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgIsShowInFreeMultiWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    MockContainer::container_ = nullptr;
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_EQ(container, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
+
+    MockContainer::SetUp();
+    container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    auto subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_EQ(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
+
+    SubwindowManager::GetInstance()->AddParentContainerId(Container::CurrentId(), Container::CurrentId());
+    currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    AceEngine::Get().AddContainer(currentId, container);
+    subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_NE(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
 }
 } // namespace OHOS::Ace::NG
