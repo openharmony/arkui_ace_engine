@@ -219,6 +219,7 @@ public:
     virtual RefPtr<PixelMap> GetCropPixelMap(const Rect& srcRect) = 0;
     virtual bool EncodeTlv(std::vector<uint8_t>& buff) = 0;
     virtual uint32_t WritePixels(const WritePixelsOptions& opts) = 0;
+    virtual bool GetIsWideColorGamut() const = 0;
 };
 
 } // namespace Ace
