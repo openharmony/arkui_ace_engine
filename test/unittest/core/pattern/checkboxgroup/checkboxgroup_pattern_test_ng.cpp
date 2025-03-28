@@ -468,4 +468,52 @@ HWTEST_F(CheckBoxGroupPatternTestNG, CheckBoxGroupPatternTest008, TestSize.Level
     pattern->GetInnerFocusPaintRect(paintRect);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: OnInjectionEvent001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, OnInjectionEvent001, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. Create CheckBoxGroup model.
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(CHECKBOXGROUP_NAME);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::string jsonCommandFalse = R"({"cmd":"selectCheckBoxGroup","selectStatus": false})";
+    int32_t resultfalse = pattern->OnInjectionEvent(jsonCommandFalse);
+    EXPECT_EQ(resultfalse, RET_SUCCESS);
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto status = paintProperty->GetSelectStatus();
+    bool selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, false);
+
+    std::string jsonCommandTrue = R"({"cmd":"selectCheckBoxGroup","selectStatus": true})";
+    int32_t resultTrue = pattern->OnInjectionEvent(jsonCommandTrue);
+    EXPECT_EQ(resultTrue, RET_SUCCESS);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
+
+    std::string jsonCommandUndifine = R"({"cmd":"selectCheckBoxGroup","selectStatus": "undifine"})";
+    int32_t resultUndifine = pattern->OnInjectionEvent(jsonCommandUndifine);
+    EXPECT_EQ(resultUndifine, RET_FAILED);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
+
+    std::string jsonCommandCheckbox = R"({"cmd":"selectCheckBox","selectStatus": "false"})";
+    int32_t resultCheckbox = pattern->OnInjectionEvent(jsonCommandCheckbox);
+    EXPECT_EQ(resultCheckbox, RET_FAILED);
+    status = paintProperty->GetSelectStatus();
+    selectStatus = status == CheckBoxGroupPaintProperty::SelectStatus::ALL ? true : false;
+    EXPECT_EQ(selectStatus, true);
+}
 } // namespace OHOS::Ace::NG
