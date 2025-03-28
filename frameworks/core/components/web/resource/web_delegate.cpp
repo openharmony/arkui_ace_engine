@@ -6971,9 +6971,6 @@ void WebDelegate::OnNativeEmbedVisibilityChange(const std::string& embedId, bool
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->RequestFocus();
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);
@@ -6993,11 +6990,6 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                     std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
                 if (!param->HasSendTask()) {
                     param->SetGestureEventResult(true);
-                }
-                if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
-                    auto webPattern = delegate->webPattern_.Upgrade();
-                    CHECK_NULL_VOID(webPattern);
-                    webPattern->RequestFocus();
                 }
             }
         },
