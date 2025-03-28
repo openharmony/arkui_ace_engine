@@ -27,6 +27,8 @@ void DialogTheme::Builder::ParsePattern(
     if (!dialogPattern) {
         return;
     }
+    auto isWatch = SystemProperties::GetDeviceType() == DeviceType::WEARABLE ||
+        SystemProperties::GetDeviceType() == DeviceType::WATCH;
     theme->titleTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("title_text_color", Color::BLACK));
     theme->titleTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("title_text_font_size", 20.0_fp));
     theme->titleTextStyle_.SetFontWeight(FontWeight::MEDIUM);
@@ -36,7 +38,7 @@ void DialogTheme::Builder::ParsePattern(
     theme->contentTextStyle_.SetTextColor(dialogPattern->GetAttr<Color>("content_text_color", Color::BLACK));
     theme->contentTextStyle_.SetFontSize(dialogPattern->GetAttr<Dimension>("content_text_font_size", 16.0_fp));
     theme->buttonBackgroundColor_ = dialogPattern->GetAttr<Color>("button_bg_color", Color::BLACK);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && !isWatch) {
         theme->radius_ = Radius(dialogPattern->GetAttr<Dimension>("dialog_container_radius", 32.0_vp));
         theme->backgroundColor_ = dialogPattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffff));
     } else {
@@ -219,5 +221,7 @@ void DialogTheme::Builder::ParseNewPattern(
     theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
     theme->dialogBackgroundBlurStyle_ =
         dialogPattern->GetAttr<int>("dialog_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+    theme->cancelText_ = dialogPattern->GetAttr<std::string>("common_cancel_text", "");
+    theme->confirmText_ = dialogPattern->GetAttr<std::string>("common_ok_text", "");
 }
 } // namespace OHOS::Ace

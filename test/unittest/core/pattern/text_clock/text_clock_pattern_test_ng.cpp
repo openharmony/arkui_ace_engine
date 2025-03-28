@@ -44,7 +44,17 @@ using namespace OHOS::Ace::Framework;
 
 namespace {
 constexpr int32_t HOURS_WEST = -8;
+const std::string UTC_INPUT = "1742734385000";
+const std::string UTC_INPUT_NEXT = "1742734885000";
+const std::string UTC_INPUT_NEXT_STRING = "08:00:00";
+const std::string UTC_INPUT2 = "1742734386000";
+const std::string UTC_INPUT_NEXT2 = "1742734886000";
+const std::string UTC_INPUT3 = "1742734387000";
+const std::string UTC_INPUT_NEXT3 = "1742734887000";
 inline const std::string CLOCK_FORMAT = "aa h:m:s";
+inline const std::string CLOCK_FORMAT2 = "HH:mm:ss";
+inline const std::string CLOCK_FORMAT3 = "HH:mm:ss eee";
+inline const std::string CLOCK_FORMAT4 = "aa HH:mm:ss";
 inline const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
@@ -52,10 +62,24 @@ const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 } // namespace
 
+struct TestProperty {
+    std::optional<std::string> format = std::nullopt;
+    std::optional<int32_t> hoursWest = std::nullopt;
+    std::optional<Dimension> fontSize = std::nullopt;
+    std::optional<Color> textColor = std::nullopt;
+    std::optional<Ace::FontStyle> italicFontStyle = std::nullopt;
+    std::optional<Ace::FontWeight> fontWeight = std::nullopt;
+    std::optional<std::vector<std::string>> fontFamily = std::nullopt;
+    std::optional<std::vector<Shadow>> textShadow = std::nullopt;
+    std::optional<FONT_FEATURES_LIST> fontFeature = std::nullopt;
+    std::optional<ZeroPrefixType> preFixHour = ZeroPrefixType::AUTO;
+};
+
 class TextClockPatternTestNG : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static RefPtr<FrameNode> CreateTextClockParagraph(const TestProperty& testProperty);
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
@@ -92,6 +116,43 @@ void TextClockPatternTestNG::SetUpTestSuite()
 void TextClockPatternTestNG::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+}
+
+RefPtr<FrameNode> TextClockPatternTestNG::CreateTextClockParagraph(const TestProperty& testProperty)
+{
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    if (testProperty.format.has_value()) {
+        textClockModel.SetFormat(testProperty.format.value());
+    }
+    if (testProperty.hoursWest.has_value()) {
+        textClockModel.SetHoursWest(testProperty.hoursWest.value());
+    }
+    if (testProperty.fontSize.has_value()) {
+        textClockModel.SetFontSize(testProperty.fontSize.value());
+    }
+    if (testProperty.textColor.has_value()) {
+        textClockModel.SetTextColor(testProperty.textColor.value());
+    }
+    if (testProperty.italicFontStyle.has_value()) {
+        textClockModel.SetItalicFontStyle(testProperty.italicFontStyle.value());
+    }
+    if (testProperty.fontWeight.has_value()) {
+        textClockModel.SetFontWeight(testProperty.fontWeight.value());
+    }
+    if (testProperty.fontFamily.has_value()) {
+        textClockModel.SetFontFamily(testProperty.fontFamily.value());
+    }
+    if (testProperty.textShadow.has_value()) {
+        textClockModel.SetTextShadow(testProperty.textShadow.value());
+    }
+    if (testProperty.fontFeature.has_value()) {
+        textClockModel.SetFontFeature(testProperty.fontFeature.value());
+    }
+    if (testProperty.preFixHour.has_value()) {
+        textClockModel.SetDateTimeOptions(testProperty.preFixHour.value());
+    }
+    return AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
 }
 
 void TextClockPatternTestNG::SetUp() {}
@@ -346,5 +407,427 @@ HWTEST_F(TextClockPatternTestNG, FireBuilder001, TestSize.Level1)
     });
     pattern_->FireBuilder();
     EXPECT_EQ(size, pattern_->GetHost()->GetChildren().size());
+}
+
+/**
+ * @tc.name: TextClockOnDateChange001
+ * @tc.desc: Test OnDateChange of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_INPUT;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_INPUT_NEXT; };
+    textClockModel.SetOnDateChange(onChange);
+
+    /**
+     * @tc.steps: step2. get textClock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. get pattern.
+     * @tc.expected: step4.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isStart_ = false;
+    MockPipelineContext::SetUp();
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->RegistVisibleAreaChangeCallback();
+
+    /**
+     * @tc.steps: step4. VisibleArea be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->isStart_ = true;
+    pattern->OnVisibleAreaChange(false);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT);
+    pattern->OnVisibleAreaChange(true);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT_NEXT);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockOnDateChange002
+ * @tc.desc: Test OnDateChange of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_INPUT2;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_INPUT_NEXT2; };
+    textClockModel.SetOnDateChange(onChange);
+
+    /**
+     * @tc.steps: step2. get textClock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. get pattern.
+     * @tc.expected: step4.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isStart_ = false;
+    MockPipelineContext::SetUp();
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->RegistVisibleAreaChangeCallback();
+
+    /**
+     * @tc.steps: step4. visible attribute be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->isStart_ = true;
+    pattern->OnVisibleChange(false);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT2);
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT_NEXT2);
+    pattern->prevTime_ = "1";
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT_NEXT2);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockOnDateChange003
+ * @tc.desc: Test OnDateChange of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockOnDateChange003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock and set event.
+     */
+    TextClockModelNG textClockModel;
+    textClockModel.Create();
+    std::string utc = UTC_INPUT3;
+    auto onChange = [&utc](const std::string& isUtc) { utc = UTC_INPUT_NEXT3; };
+    textClockModel.SetOnDateChange(onChange);
+
+    /**
+     * @tc.steps: step2. get textClock frameNode and event.
+     * @tc.expected: function is called.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<TextClockEventHub> eventHub = frameNode->GetEventHub<NG::TextClockEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step3. get pattern.
+     * @tc.expected: step4.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isStart_ = false;
+    MockPipelineContext::SetUp();
+    pattern->InitUpdateTimeTextCallBack();
+    pattern->RegistVisibleAreaChangeCallback();
+
+    /**
+     * @tc.steps: step4. VisibleArea be changed, call the event entry function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->isStart_ = true;
+    pattern->OnVisibleChange(false);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT3);
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT_NEXT3);
+    pattern->prevTime_ = "1";
+    pattern->OnVisibleChange(true);
+    pattern->UpdateTimeText();
+    EXPECT_EQ(utc, UTC_INPUT_NEXT3);
+
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    pattern->OnModifyDone();
+    EXPECT_EQ(textLayoutProperty->GetContent(), StringUtils::Str8ToStr16(UTC_INPUT_NEXT_STRING));
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: TextClockParseDateTime001
+ * @tc.desc: Test ParseDateTime of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockParseDateTime001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT2);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTime function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    std::string strDateTimeValue = "1970.01.01, 01:01:01.001";
+    std::string res = pattern->ParseDateTime(strDateTimeValue, 2, 3, 11);
+    std::string strRes = "1970.01.01, 01:01:01.001";
+    EXPECT_EQ(res, strRes);
+}
+
+/**
+ * @tc.name: TextClockParseDateTime002
+ * @tc.desc: Test ParseDateTime of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockParseDateTime002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. ParseDateTimeValue function is called..
+     * @tc.expected: step3. check whether the properties is correct.
+     */
+    std::vector<std::string> res = { "1900", "0", "1", "0", "0", "0", "0", "", "0", "", "", "", "", "" };
+    std::string strDateTimeValue = "1970.01.01";
+    std::vector<std::string> str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, res);
+
+    std::vector<std::string> res2 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
+    strDateTimeValue = "1970/01/01, 01:01:01.001";
+    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, res2);
+
+    std::vector<std::string> res3 = { "1970", "01", "01", "1", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
+    strDateTimeValue = "1970/01/01, 01:01:01.001";
+    pattern->is24H_ = true;
+    textClockProperty->UpdatePrefixHour(ZeroPrefixType::HIDE);
+    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, res3);
+
+    std::vector<std::string> res4 = { "1970", "01", "01", "01", "01", "01", "001", "", "0", "70", "1", "1", "00",
+        "" };
+    strDateTimeValue = "1970/01/01, 1:01:01.001";
+    pattern->is24H_ = false;
+    textClockProperty->UpdatePrefixHour(ZeroPrefixType::SHOW);
+    str = pattern->ParseDateTimeValue(strDateTimeValue);
+    EXPECT_EQ(str, res4);
+}
+
+/**
+ * @tc.name: TextClockParseInputFormat001
+ * @tc.desc: Test ParseInputFormat of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockParseInputFormat001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT3);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->ParseInputFormat();
+    std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
+    std::string dateTimeValue = "2025/03/25, 下午8:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "3/25/2025, 8:35:07.67 am";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "03/25/2025, 20:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime);
+    pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
+    EXPECT_EQ(pattern->is24H_, true);
+}
+
+/**
+ * @tc.name: TextClockParseInputFormat002
+ * @tc.desc: Test ParseInputFormat of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockParseInputFormat002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT4);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textClockProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    ASSERT_NE(textClockProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->ParseInputFormat();
+    std::vector<std::string> curDateTime = { "1900", "0", "1", "0", "0", "0", "0", "", "2" };
+    std::string dateTimeValue = "2025/03/25, 上午8:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "3/25/2025, 8:35:07.67 am";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    dateTimeValue = "03/25/2025, 08:35:07.007";
+    curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime);
+    pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 13, true);
+    pattern->CheckDateTimeElement(curDateTime, 'E', 8, true);
+    EXPECT_EQ(pattern->is24H_, true);
+}
+
+/**
+ * @tc.name: TextClockCheckDateTimeElement001
+ * @tc.desc: Test ParseInputFormat of TextClockPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockPatternTestNG, TextClockCheckDateTimeElement001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.format = std::make_optional(CLOCK_FORMAT4);
+    testProperty.hoursWest = std::make_optional(HOURS_WEST);
+    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and layoutProperty.
+     * @tc.expected: step2.
+     */
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call the format and datetime split, and datetime splice function.
+     * @tc.expected: check whether the value is correct.
+     */
+    pattern->ParseInputFormat();
+    std::string dateTimeValue = "2025/03/25 08:35:07.007";
+    std::vector<std::string> curDateTime = pattern->ParseDateTimeValue(dateTimeValue);
+    pattern->SpliceDateTime(curDateTime);
+    auto res1 = pattern->CheckDateTimeElement(curDateTime, 'y', 0, true);
+    std::string checkRes1 = "2025";
+    EXPECT_EQ(res1, checkRes1);
+    auto res2 = pattern->CheckDateTimeElement(curDateTime, 'M', 1, true);
+    std::string checkRes2 = "03";
+    EXPECT_EQ(res2, checkRes2);
+    auto res3 = pattern->CheckDateTimeElement(curDateTime, 'd', 2, true);
+    std::string checkRes3 = "25";
+    EXPECT_EQ(res3, checkRes3);
+    auto res4 = pattern->CheckDateTimeElement(curDateTime, 'h', 3, true);
+    std::string checkRes4 = "08";
+    EXPECT_EQ(res4, checkRes4);
+    auto res5 = pattern->CheckDateTimeElement(curDateTime, 'm', 4, true);
+    std::string checkRes5 = "35";
+    EXPECT_EQ(res5, checkRes5);
+    auto res6 = pattern->CheckDateTimeElement(curDateTime, 's', 5, true);
+    std::string checkRes6 = "07";
+    EXPECT_EQ(res6, checkRes6);
 }
 } // namespace OHOS::Ace::NG

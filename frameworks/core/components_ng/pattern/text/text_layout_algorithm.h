@@ -22,15 +22,10 @@
 #include <unordered_map>
 #include <utility>
 
-#include "base/geometry/dimension.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_adapt_font_sizer.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;

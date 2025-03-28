@@ -106,6 +106,9 @@ void MenuItemLayoutAlgorithm::CheckUserHeight(LayoutWrapper* layoutWrapper)
 
 float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRowHeight)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, leftRowHeight:%{public}f, rightRowHeight:%{public}f,"
+        " paddingHeight:%{public}f, idealHeight_:%{public}f, userHeight_:%{public}f",
+        leftRowHeight, rightRowHeight, padding_.Height(), idealHeight_, userHeight_);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         if (userSetPadding_) {
             return GreatNotEqual(userHeight_, 0.0f) ? userHeight_ - padding_.Height()
@@ -115,7 +118,8 @@ float MenuItemLayoutAlgorithm::CalcItemHeight(float leftRowHeight, float rightRo
                 : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
         }
     } else {
-        return std::max(leftRowHeight, rightRowHeight) + padding_.Height();
+        return GreatNotEqual(idealHeight_, 0.0f) ? idealHeight_
+            : std::max(leftRowHeight, rightRowHeight) + padding_.Height();
     }
 }
 
@@ -178,14 +182,14 @@ void MenuItemLayoutAlgorithm::CalcContentExpandWidth(std::optional<LayoutConstra
 
     idealWidth_ = 0.0f;
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             idealWidth_ = maxRowWidth_;
         } else {
             idealWidth_ = std::max(layoutConstraint->minSize.Width(),
                 std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value()));
         }
         float newLeftRowWidth = idealWidth_ - rightRowWidth - middleSpace_;
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !userSetPadding_) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) || !userSetPadding_) {
             newLeftRowWidth -= padding_.Width();
         }
         if (newLeftRowWidth > leftRowWidth) {
@@ -212,7 +216,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = 0.0f;
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         contentWidth = leftRowWidth + rightRowWidth + middleSpace_;
     } else {
         contentWidth = leftRowWidth + rightRowWidth + padding_.Width() + middleSpace_;
@@ -222,7 +226,7 @@ void MenuItemLayoutAlgorithm::MeasureItemViews(LayoutConstraintF& childConstrain
 
     auto width = std::max(minRowWidth_, contentWidth);
     auto actualWidth = GreatNotEqual(idealWidth_, 0.0f) ? idealWidth_ : width;
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         childConstraint.minSize.SetWidth(actualWidth);
         childConstraint.maxSize.SetWidth(actualWidth);
     } else {
@@ -329,6 +333,7 @@ void MenuItemLayoutAlgorithm::CheckNeedExpandContent(LayoutWrapper* layoutWrappe
 void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     float width, float itemHeight, float expandableHeight)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto menuNode = layoutWrapper->GetHostNode();
     auto menuItemPattern = menuNode ? menuNode->GetPattern<MenuItemPattern>() : nullptr;
     auto isEmbedded = menuItemPattern ? menuItemPattern->IsEmbedded() : false;
@@ -353,15 +358,10 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     itemHeight += GetDividerStroke(layoutWrapper);
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        float height = 0.0f;
-        if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-            height = std::max(itemHeight, minItemHeight_);
-        } else {
-            height = std::max(itemHeight - bordersHeight, minItemHeight_);
-        }
+        float height = CalcSelfHeight(itemHeight, bordersHeight);
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, height + expandableHeight));
         if (clickableArea) {
-            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
                 clickableArea->GetGeometryNode()->SetFrameSize(SizeF(width + padding_.Width(),
                     height + padding_.Height()));
             } else {
@@ -372,6 +372,18 @@ void MenuItemLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(width, itemHeight));
     }
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem measure, itemContentSizeH:%{public}f, item marginFrameSizeH:%{public}f",
+        geometryNode->GetContentSize().Height(), geometryNode->GetMarginFrameSize().Height());
+}
+
+float MenuItemLayoutAlgorithm::CalcSelfHeight(float itemHeight, float bordersHeight)
+{
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        return std::max(itemHeight, minItemHeight_);
+    }
+    return std::max(itemHeight - bordersHeight, minItemHeight_);
 }
 
 float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
@@ -463,7 +475,7 @@ void MenuItemLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
 void MenuItemLayoutAlgorithm::InitPadding(const RefPtr<LayoutProperty>& props,
     std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         padding_ = props->CreatePaddingAndBorderWithDefault(horInterval_, verInterval_, 0.0f, 0.0f);
         return;
     }
@@ -526,7 +538,7 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
             padding_.Width();
     }
     CheckNeedMatchParent(layoutWrapper, layoutConstraint);
-    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         minRowWidth_ = layoutConstraint->minSize.Width() - padding_.Width();
     } else {
         minRowWidth_ = layoutConstraint->minSize.Width();
@@ -556,11 +568,11 @@ void MenuItemLayoutAlgorithm::MeasureClickableArea(LayoutWrapper* layoutWrapper)
 {
     auto clickableArea = layoutWrapper->GetOrCreateChildByIndex(CLICKABLE_AREA_VIEW_INDEX);
     if (GreatNotEqual(idealWidth_, 0.0f)) {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !userSetPadding_) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) || !userSetPadding_) {
             layoutWrapper->GetGeometryNode()->SetFrameWidth(idealWidth_);
         }
         if (clickableArea) {
-            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (userSetPadding_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
                 clickableArea->GetGeometryNode()->SetFrameWidth(
                     layoutWrapper->GetGeometryNode()->GetFrameSize().Width());
             } else {

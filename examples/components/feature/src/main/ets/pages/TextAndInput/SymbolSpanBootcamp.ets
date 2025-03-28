@@ -15,9 +15,12 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
+import { curves } from '@kit.ArkUI';
+
 
 class MyButtonModifierNormal implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false;
+
   applyNormalAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -29,6 +32,7 @@ class MyButtonModifierNormal implements AttributeModifier<SymbolSpanAttribute> {
 
 class MyButtonModifierPressed implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false
+
   applyPressedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -40,6 +44,7 @@ class MyButtonModifierPressed implements AttributeModifier<SymbolSpanAttribute> 
 
 class MyButtonModifierFocused implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false
+
   applyFocusedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -51,6 +56,7 @@ class MyButtonModifierFocused implements AttributeModifier<SymbolSpanAttribute> 
 
 class MyButtonModifierDisabled implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false
+
   applyDisabledAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -62,6 +68,7 @@ class MyButtonModifierDisabled implements AttributeModifier<SymbolSpanAttribute>
 
 class MyButtonModifierSelected implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false
+
   applySelectedAttribute(instance: SymbolSpanAttribute): void {
     if (this.isDark) {
       instance.backgroundColor(Color.Black)
@@ -100,6 +107,12 @@ export struct SymbolSpanBootcamp {
   @State enableEnableModifierSelected: boolean = false;
   @State enableModifierSelected: boolean = false;
   @State modifierSelected: MyButtonModifierSelected = new MyButtonModifierSelected()
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   build() {
     NavDestination() {
@@ -108,6 +121,9 @@ export struct SymbolSpanBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -129,106 +145,109 @@ export struct SymbolSpanBootcamp {
             .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
             .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
             .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+            .key('SymbolSpan')
         }
 
         Row({ space: 10 }) {
           Column() {
-            if (this.enableModifierNormal) {
-              Text('Modifier.normal')
-              Text() {
-                SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
-                  .fontSize(useEnabled(this.enableFontSize, this.fontSize))
-                  .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
-                  .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
-                  .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
-                  .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
-                  .attributeModifier(this.modifierNormal)
-                  .onClick(() => {
-                    this.modifierNormal.isDark = !this.modifierNormal.isDark
-                  })
-              }
+            Text('Modifier.pressed')
+            Text() {
+              SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
+                .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+                .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
+                .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
+                .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
+                .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+                .attributeModifier(this.modifierPressed)
+                .key('SymbolSpan')
+                .onClick(() => {
+                  this.modifierPressed.isDark = !this.modifierPressed.isDark
+                })
             }
           }
+          .visibility(this.enableModifierPressed ? Visibility.Visible : Visibility.None)
 
           Column() {
-            if (this.enableModifierPressed) {
-              Text('Modifier.pressed')
-              Text() {
-                SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
-                  .fontSize(useEnabled(this.enableFontSize, this.fontSize))
-                  .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
-                  .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
-                  .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
-                  .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
-                  .attributeModifier(this.modifierPressed)
-                  .onClick(() => {
-                    this.modifierPressed.isDark = !this.modifierPressed.isDark
-                  })
-              }
+            Text('Modifier.normal')
+            Text() {
+              SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
+                .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+                .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
+                .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
+                .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
+                .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+                .attributeModifier(this.modifierNormal)
+                .key('SymbolSpan')
+                .onClick(() => {
+                  this.modifierNormal.isDark = !this.modifierNormal.isDark
+                })
             }
           }
+          .visibility(this.enableModifierNormal ? Visibility.Visible : Visibility.Hidden)
+
 
           Column() {
-            if (this.enableModifierFocused) {
-              Text('Modifier.focused')
-              Text() {
-                SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
-                  .fontSize(useEnabled(this.enableFontSize, this.fontSize))
-                  .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
-                  .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
-                  .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
-                  .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
-                  .attributeModifier(this.modifierPressed)
-                  .onClick(() => {
-                    this.modifierFocused.isDark = !this.modifierFocused.isDark
-                  })
-              }
+            Text('Modifier.focused')
+            Text() {
+              SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
+                .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+                .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
+                .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
+                .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
+                .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+                .attributeModifier(this.modifierPressed)
+                .key('SymbolSpan')
+                .onClick(() => {
+                  this.modifierFocused.isDark = !this.modifierFocused.isDark
+                })
             }
           }
+          .visibility(this.enableModifierFocused ? Visibility.Visible : Visibility.None)
 
           Column() {
-            if (this.enableModifierDisabled) {
-              Text('Modifier.disabled')
-              Text() {
-                SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
-                  .fontSize(useEnabled(this.enableFontSize, this.fontSize))
-                  .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
-                  .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
-                  .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
-                  .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
-                  .attributeModifier(this.modifierDisabled)
-                  .onClick(() => {
-                    this.modifierDisabled.isDark = !this.modifierDisabled.isDark
-                  })
-              }
+            Text('Modifier.disabled')
+            Text() {
+              SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
+                .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+                .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
+                .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
+                .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
+                .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+                .attributeModifier(this.modifierDisabled)
+                .key('SymbolSpan')
+                .onClick(() => {
+                  this.modifierDisabled.isDark = !this.modifierDisabled.isDark
+                })
             }
           }
+          .visibility(this.enableModifierDisabled ? Visibility.Visible : Visibility.None)
 
           Column() {
-            if (this.enableModifierSelected) {
-              Text('Modifier.selected')
-              Text() {
-                SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
-                  .fontSize(useEnabled(this.enableFontSize, this.fontSize))
-                  .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
-                  .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
-                  .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
-                  .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
-                  .attributeModifier(this.modifierSelected)
-                  .onClick(() => {
-                    this.modifierSelected.isDark = !this.modifierSelected.isDark
-                  })
-              }
+            Text('Modifier.selected')
+            Text() {
+              SymbolSpan($r('sys.symbol.ohos_folder_badge_plus'))
+                .fontSize(useEnabled(this.enableFontSize, this.fontSize))
+                .fontWeight(useEnabled(this.enableFontWeight, this.fontWeight))
+                .fontColor([useEnabled(this.enableFontColor, this.fontColor)])
+                .renderingStrategy(useEnabled(this.enableRenderingStrategy, this.renderingStrategy))
+                .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
+                .attributeModifier(this.modifierSelected)
+                .key('SymbolSpan')
+                .onClick(() => {
+                  this.modifierSelected.isDark = !this.modifierSelected.isDark
+                })
             }
           }
+          .visibility(this.enableModifierSelected ? Visibility.Visible : Visibility.None)
         }
+
       }
     }.justifyContent(FlexAlign.Start)
   }
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         ColorBlock({
@@ -342,6 +361,53 @@ export struct SymbolSpanBootcamp {
 
       }
     }
+    .align(Alignment.Top)
+    .height('50%')
+    .id('scroll')
+  }
+
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection == str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
+
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+      Column({ space: 8 }) {
+
+      }.width('100%')
+    }
+    .height('52%')
+    .id('scroll')
   }
 }
 

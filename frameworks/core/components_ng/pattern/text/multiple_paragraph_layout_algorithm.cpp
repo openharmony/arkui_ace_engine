@@ -26,13 +26,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
+const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
@@ -78,12 +79,21 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG,
         frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-    auto fontManager = pipeline->GetFontManager();
-    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
-        !(textLayoutProperty->GetFontFamily().has_value())) {
-        textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
+    textStyle.SetSymbolType(symbolType);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        // Update Symbol TextStyle
+        textStyle.SetSymbolUid(frameNode->GetId() + 1);
+        UpdateSymbolStyle(textStyle);
     } else {
-        textStyle.SetFontFamilies(textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+            !(textLayoutProperty->GetFontFamily().has_value())) {
+            textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
+        } else {
+            textStyle.SetFontFamilies(
+                textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
+        }
     }
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
@@ -96,12 +106,32 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
     // Register callback for fonts.
     FontRegisterCallback(frameNode, textStyle);
-    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
-    textStyle.SetSymbolType(symbolType);
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
     UpdateTextColorIfForeground(frameNode, textStyle);
     inheritTextStyle_ = textStyle;
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle)
+{
+    textStyle.isSymbolGlyph_ = true;
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
+    auto symbolType = textStyle.GetSymbolType();
+    std::vector<std::string> fontFamilies;
+    if (symbolType == SymbolType::CUSTOM) {
+        auto symbolFontFamily = textStyle.GetFontFamilies();
+        for (auto& name : symbolFontFamily) {
+            if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
+                fontFamilies.push_back(name);
+                break;
+            }
+        }
+        textStyle.SetFontFamilies(fontFamilies);
+    } else {
+        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        textStyle.SetFontFamilies(fontFamilies);
+    }
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -931,5 +961,28 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
+}
+
+std::string MultipleParagraphLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
+            ss << "[" << item->interval.first << "," << item->interval.second << ":"
+               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
+
+std::vector<ParagraphManager::ParagraphInfo> MultipleParagraphLayoutAlgorithm::GetParagraphs()
+{
+    std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
+    if (paragraphManager_) {
+        paragraphInfo = paragraphManager_->GetParagraphs();
+    }
+    return paragraphInfo;
 }
 } // namespace OHOS::Ace::NG

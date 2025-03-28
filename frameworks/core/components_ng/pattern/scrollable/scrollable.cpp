@@ -126,7 +126,11 @@ void Scrollable::Initialize(const RefPtr<FrameNode>& host)
     springVelocityScale_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)
                                ? scrollableTheme->GetSpringVelocityScale()
                                : VELOCITY_SCALE;
-    ratio_ = scrollableTheme->GetRatio();
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        ratio_ = scrollableTheme->GetGreatApiRatio();
+    } else {
+        ratio_ = scrollableTheme->GetRatio();
+    }
     springResponse_ = scrollableTheme->GetSpringResponse();
     touchPadVelocityScaleRate_ = scrollableTheme->GetTouchPadVelocityScaleRate();
     if (friction_ == -1) {
@@ -1452,6 +1456,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
             nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
             mainDelta = nextStep_.value();
         }
+        position = currentPos_ + mainDelta;
     }
 #endif
     if (needScrollSnapToSideCallback_) {
@@ -1471,7 +1476,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         ResetContinueDragCount();
         StopFrictionAnimation();
     }
-    currentPos_ += mainDelta;
+    currentPos_ = position;
 
     // spring effect special process
     if ((canOverScroll_ && source != SCROLL_FROM_AXIS) || needScrollSnapChange_) {

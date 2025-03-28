@@ -31,6 +31,7 @@
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -291,6 +292,16 @@ void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dy
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode, frameNode);
+}
+
+void ImageModelNG::SetHdrBrightness(float hdrBrightness)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, hdrBrightness);
+}
+
+void ImageModelNG::SetHdrBrightness(FrameNode* frameNode, float hdrBrightness)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, HdrBrightness, hdrBrightness, frameNode);
 }
 
 void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)

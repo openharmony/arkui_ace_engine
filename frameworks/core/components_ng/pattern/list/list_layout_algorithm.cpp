@@ -1660,8 +1660,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         int32_t newCacheCount = UpdateDefaultCachedCount(cacheCount, itemCount);
         listProps->SetDefaultCachedCount(newCacheCount);
     }
-    FixItemLayoutOffset(layoutWrapper);
     ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
+    FixItemLayoutOffset(layoutWrapper);
     LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
     UpdateOverlay(layoutWrapper);
     ProcessStackFromEnd();

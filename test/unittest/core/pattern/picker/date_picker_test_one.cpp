@@ -43,7 +43,14 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t START_YEAR = 1980;
 constexpr int32_t END_YEAR = 2090;
 constexpr int32_t CURRENT_DAY = 5;
+
 constexpr int32_t SELECTED_YEAR = 2000;
+constexpr int32_t SELECTED_MONTH = 5;
+constexpr int32_t SELECTED_DAY = 20;
+constexpr int32_t SELECTED_HOUR = 8;
+constexpr int32_t SELECTED_MINUTE = 4;
+constexpr int32_t SELECTED_SECOND = 58;
+
 RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == IconTheme::TypeId()) {
@@ -1444,5 +1451,323 @@ HWTEST_F(DatePickerTestOne, CreateAndMountMonthDaysNode001, TestSize.Level1)
     ASSERT_NE(lunarChangeEvent, nullptr);
     lunarChangeEvent(true);
     EXPECT_TRUE(layoutProp->GetLunarValue());
+}
+
+/**
+ * @tc.name: GetIsUserSetTextProperties001
+ * @tc.desc: Test DatePickerDialogView GetIsUserSetTextProperties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, GetIsUserSetTextProperties001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePickerSettingData and call GetIsUserSetTextProperties.
+     * @tc.expected: all of if conditions are false and return false.
+     */
+    DatePickerSettingData settingData;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    auto isUserSet = DatePickerDialogView::GetIsUserSetTextProperties(settingData.properties);
+    EXPECT_EQ(isUserSet, false);
+}
+
+/**
+ * @tc.name: DatePickerPatternGetSelectedObject001
+ * @tc.desc: Test DatePickerPattern GetSelectedObject function when isColumnChange is true and showTime_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, DatePickerPatternGetSelectedObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct input parameters and call DatePickerDialogView::Show.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(SELECTED_HOUR, SELECTED_MINUTE, SELECTED_SECOND);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. showTime_ is false and isColumnChange is true.
+     */
+    datePickerPattern->SetShowTimeFlag(false);
+    auto result = datePickerPattern->GetSelectedObject(true, 0);
+
+    std::string expectValue = std::string("{\"year\":") + std::to_string(SELECTED_YEAR) +
+        ",\"month\":" + std::to_string(SELECTED_MONTH) +
+        ",\"day\":" + std::to_string(SELECTED_DAY + 1) +
+        ",\"";
+    std::string filterResult = result.substr(0, result.find("hour"));
+    EXPECT_EQ(filterResult, expectValue);
+}
+
+/**
+ * @tc.name: DatePickerPatternGetSelectedObject002
+ * @tc.desc: Test DatePickerPattern GetSelectedObject function when isColumnChange and showTime_ are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, DatePickerPatternGetSelectedObject002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct input parameters and call DatePickerDialogView::Show.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(SELECTED_HOUR, SELECTED_MINUTE, SELECTED_SECOND);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. showTime_ and isColumnChange are false.
+     */
+    datePickerPattern->SetShowTimeFlag(false);
+    auto result = datePickerPattern->GetSelectedObject(false, 0);
+
+    std::string expectValue = std::string("{\"year\":") + std::to_string(SELECTED_YEAR) +
+        ",\"month\":" + std::to_string(SELECTED_MONTH - 1) +
+        ",\"day\":" + std::to_string(SELECTED_DAY) +
+        ",\"";
+    std::string filterResult = result.substr(0, result.find("hour"));
+    EXPECT_EQ(filterResult, expectValue);
+}
+
+/**
+ * @tc.name: DatePickerPatternGetSelectedObject003
+ * @tc.desc: Test GetSelectedObject function when isColumnChange, showMonthDay_ and showTime_ are true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, DatePickerPatternGetSelectedObject003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct input parameters and call DatePickerDialogView::Show.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(SELECTED_HOUR, SELECTED_MINUTE, SELECTED_SECOND);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. showMonthDay_, showTime_ and isColumnChange are true.
+     */
+    datePickerPattern->SetShowTimeFlag(true);
+    datePickerPattern->SetShowMonthDaysFlag(true);
+    auto result = datePickerPattern->GetSelectedObject(true, 0);
+
+    std::string expectValue = std::string("{\"year\":") + std::to_string(SELECTED_YEAR) +
+        ",\"month\":" + std::to_string(SELECTED_MONTH) +
+        ",\"day\":" + std::to_string(SELECTED_DAY + 1) +
+        ",\"hour\":" + std::to_string(SELECTED_HOUR) +
+        ",\"minute\":" + std::to_string(SELECTED_MINUTE) +
+        ",\"status\":0}";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: DatePickerPatternGetSelectedObject004
+ * @tc.desc: Test GetSelectedObject function when showMonthDay_ and showTime_ are true, isColumnChange is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, DatePickerPatternGetSelectedObject004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct input parameters and call DatePickerDialogView::Show.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(SELECTED_HOUR, SELECTED_MINUTE, SELECTED_SECOND);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. showMonthDay_ and showTime_ are true, isColumnChange is false.
+     */
+    datePickerPattern->SetShowTimeFlag(true);
+    datePickerPattern->SetShowMonthDaysFlag(true);
+    auto result = datePickerPattern->GetSelectedObject(false, 0);
+
+    std::string expectValue = std::string("{\"year\":") + std::to_string(SELECTED_YEAR) +
+        ",\"month\":" + std::to_string(SELECTED_MONTH - 1) +
+        ",\"day\":" + std::to_string(SELECTED_DAY) +
+        ",\"hour\":" + std::to_string(SELECTED_HOUR) +
+        ",\"minute\":" + std::to_string(SELECTED_MINUTE) +
+        ",\"status\":0}";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: DatePickerPatternGetSelectedObject005
+ * @tc.desc: Test GetSelectedObject function when showTime_ is true, showMonthDay_ is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestOne, DatePickerPatternGetSelectedObject005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct input parameters and call DatePickerDialogView::Show.
+     */
+    DialogProperties dialogProperties;
+
+    DatePickerSettingData settingData;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, SELECTED_MONTH, SELECTED_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(SELECTED_HOUR, SELECTED_MINUTE, SELECTED_SECOND);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+
+    std::vector<ButtonInfo> buttonInfos;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto midStackNode =
+        AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(midStackNode, nullptr);
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    ASSERT_NE(dateNode, nullptr);
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. showTime_ is true, showMonthDay_ is false, and isColumnChange is false.
+     */
+    datePickerPattern->SetShowTimeFlag(true);
+    datePickerPattern->SetShowMonthDaysFlag(false);
+    auto result = datePickerPattern->GetSelectedObject(false, 0);
+
+    std::string expectValue = std::string("{\"year\":") + std::to_string(SELECTED_YEAR) +
+        ",\"month\":" + std::to_string(SELECTED_MONTH - 1) +
+        ",\"day\":" + std::to_string(SELECTED_DAY) +
+        ",\"status\":0}";
+    EXPECT_EQ(result, expectValue);
+
+    /**
+     * @tc.cases: case2. showTime_ is true, showMonthDay_ is false, and isColumnChange is true.
+     */
+    datePickerPattern->SetShowTimeFlag(true);
+    datePickerPattern->SetShowMonthDaysFlag(false);
+    result = datePickerPattern->GetSelectedObject(true, 0);
+
+    expectValue = R"({"year":0,"month":0,"day":0,"status":0})";
+    EXPECT_EQ(result, expectValue);
 }
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@ constexpr unsigned int TOP_LEFT = 0;
 constexpr unsigned int TOP_RIGHT = 1;
 constexpr unsigned int BOTTOM_LEFT = 2;
 constexpr unsigned int BOTTOM_RIGHT = 3;
+constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -130,6 +131,12 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
         config.obscuredReasons_ = renderCtx->GetObscured().value_or(std::vector<ObscuredReasons>());
     }
 
+    if (renderProps->HasHdrBrightness() && canvasImage_->IsHdrPixelMap() && renderCtx) {
+        renderCtx->SetImageHDRBrightness(renderProps->GetHdrBrightnessValue(DEFAULT_HDR_BRIGHTNESS));
+        renderCtx->SetImageHDRPresent(true);
+        config.dynamicMode = DynamicRangeMode::HIGH;
+    }
+
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
@@ -155,7 +162,8 @@ void ImagePaintMethod::UpdatePaintMethod(
 {
     selected_ = imagePainterMethodConfig.selected;
     selected_ = imagePainterMethodConfig.selected;
-    sensitive_ = imagePainterMethodConfig.sensitive, canvasImage_ = canvasImage;
+    sensitive_ = imagePainterMethodConfig.sensitive;
+    canvasImage_ = canvasImage;
     interpolationDefault_ = imagePainterMethodConfig.interpolation;
     imageOverlayModifier_ = imagePainterMethodConfig.imageOverlayModifier;
     imageContentModifier_ = imagePainterMethodConfig.imageContentModifier;

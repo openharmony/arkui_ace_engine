@@ -660,4 +660,53 @@ HWTEST_F(DragAnimationHelperTestNg, DragStartAnimation, TestSize.Level1)
     TranslateOptions expectValue { 10.0f, 10.0f, 0.0f };
     EXPECT_EQ(result.x.CalcValue(), expectValue.x.CalcValue());
 }
+
+/**
+ * @tc.name: CreateBadgeTextNodeTest001
+ * @tc.desc: Test CreateBadgeTextNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ASSERT_NE(gestureEventHub, nullptr);
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+
+    /**
+     * @tc.steps: step2. Invoke CreateBadgeTextNode.
+     */
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
+    EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateRelativeContainerNode01
+ * @tc.desc: test CreateRelativeContainerNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateRelativeContainerNode01, TestSize.Level1)
+{
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_TRUE(frameNode != nullptr);
+    auto imageNodeId = GetElmtId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_TRUE(imageNode != nullptr);
+    PreparedInfoForDrag data;
+
+    DragAnimationHelper::CreateRelativeContainerNode(frameNode, imageNode, data, OffsetF(0.0f, 0.0f), mockPixelMap);
+    ASSERT_TRUE(data.relativeContainerNode != nullptr);
+}
 } // namespace OHOS::Ace::NG

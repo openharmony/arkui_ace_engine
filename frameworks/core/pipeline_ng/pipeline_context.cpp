@@ -727,7 +727,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::FlushMouseEventVoluntarily()
 {
-    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE ||
+        windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -4582,7 +4583,6 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    std::string extraInfo = manager->GetExtraInfo();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -4590,48 +4590,15 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
             return;
         }
     }
-    if (action == DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER) {
-        manager->RequireSummary();
-        manager->OnDragStart(pointerEvent.GetPoint());
-        return;
-    }
-    if (action == DragEventAction::DRAG_EVENT_OUT) {
-        lastDragTime_ = GetTimeFromExternalTimer();
-        CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragMoveOut(pointerEvent);
-        manager->ClearSummary();
-        manager->ClearExtraInfo();
-        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
-        return;
-    }
 
-    if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummaryIfNecessary(pointerEvent);
-        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
-        TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
-    }
-    if (action == DragEventAction::DRAG_EVENT_END) {
+    if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
+        action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
         lastDragTime_ = GetTimeFromExternalTimer();
         CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragEnd(pointerEvent, extraInfo, node);
+        manager->HandleDragEvent(pointerEvent, action, node);
         return;
     }
-    if (action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
-        lastDragTime_ = GetTimeFromExternalTimer();
-        CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragPullCancel(pointerEvent, extraInfo, node);
-        return;
-    }
-    HandleOnDragEventMove(pointerEvent, action, node);
-}
-
-void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
-    const RefPtr<NG::FrameNode>& node)
-{
-    auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    std::string extraInfo = manager->GetExtraInfo();
+    manager->HandleDragEvent(pointerEvent, action, node);
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->SetDragAnimationPointerEvent(pointerEvent);
         dragEvents_[node].emplace_back(pointerEvent);
@@ -4640,9 +4607,6 @@ void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent
     if (action != DragEventAction::DRAG_EVENT_MOVE &&
         historyPointsEventById_.find(pointerEvent.pointerId) != historyPointsEventById_.end()) {
         historyPointsEventById_.erase(pointerEvent.pointerId);
-    }
-    if (action != DragEventAction::DRAG_EVENT_MOVE) {
-        manager->OnDragMove(pointerEvent, extraInfo, node);
     }
 }
 
@@ -5907,8 +5871,7 @@ void PipelineContext::FlushMouseEventForHover()
         return;
     }
     CHECK_NULL_VOID(rootNode_);
-    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG ||
-        windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
+    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -5920,6 +5883,8 @@ void PipelineContext::FlushMouseEventForHover()
     event.screenX = lastMouseEvent_->screenX;
     event.screenY = lastMouseEvent_->screenY;
     event.button = lastMouseEvent_->button;
+    event.deviceId = lastMouseEvent_->deviceId;
+    event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
     event.action = lastMouseEvent_->action;
     event.time = lastMouseEvent_->time;
@@ -5972,6 +5937,7 @@ void PipelineContext::FlushMouseEventInVsync()
         FlushMouseEventForHover();
         isTransFlag_ = false;
     }
+    windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 }
 
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)

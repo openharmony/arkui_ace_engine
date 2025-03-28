@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
-#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -383,19 +382,19 @@ RadiusF GetPreviewBorderRadiusFromPattern(
     }
 
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
-    if (borderRadius->radiusTopLeft.has_value()) {
+    if (borderRadius->radiusTopLeft.has_value() && borderRadius->radiusTopLeft->IsNonNegative()) {
         topLeft = borderRadius->radiusTopLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusTopRight.has_value()) {
+    if (borderRadius->radiusTopRight.has_value() && borderRadius->radiusTopRight->IsNonNegative()) {
         topRight = borderRadius->radiusTopRight->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomLeft.has_value()) {
+    if (borderRadius->radiusBottomLeft.has_value() && borderRadius->radiusBottomLeft->IsNonNegative()) {
         bottomLeft = borderRadius->radiusBottomLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomRight.has_value()) {
+    if (borderRadius->radiusBottomRight.has_value() && borderRadius->radiusBottomRight->IsNonNegative()) {
         bottomRight = borderRadius->radiusBottomRight->ConvertToPxWithSize(previewWidth);
     }
 
@@ -724,15 +723,26 @@ BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& pre
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, {});
     auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
-
-    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    BorderRadiusProperty previewBorderRadius = BorderRadiusProperty(Dimension(previewBorderRadiusValue));
     if (menuParam.previewBorderRadius.has_value()) {
-        BorderRadiusProperty previewBorderRadius;
-        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
-        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
-        return previewBorderRadius;
+        if (menuParam.previewBorderRadius->radiusTopLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusTopLeft->IsNonNegative()) {
+            previewBorderRadius.radiusTopLeft = menuParam.previewBorderRadius->radiusTopLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusTopRight.has_value() &&
+            menuParam.previewBorderRadius->radiusTopRight->IsNonNegative()) {
+            previewBorderRadius.radiusTopRight = menuParam.previewBorderRadius->radiusTopRight;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomLeft->IsNonNegative()) {
+            previewBorderRadius.radiusBottomLeft = menuParam.previewBorderRadius->radiusBottomLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomRight.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomRight->IsNonNegative()) {
+            previewBorderRadius.radiusBottomRight = menuParam.previewBorderRadius->radiusBottomRight;
+        }
     }
-    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+    return previewBorderRadius;
 }
 
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
@@ -1622,8 +1632,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (params[index].value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -1643,8 +1656,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (value.value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);

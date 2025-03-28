@@ -23,11 +23,13 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t INVALID_WINDOW_ID = -1;
 constexpr int32_t WORKER_ERROR = 10002;
-constexpr size_t WORKER_MAX_NUM = 16;
+constexpr size_t WORKER_MAX_NUM = 1;
 }
 
 void ApplyAccessibilityElementInfoOffset(Accessibility::AccessibilityElementInfo& output, const OffsetF& offset)
@@ -108,7 +110,7 @@ bool DynamicComponentRendererImpl::IsRestrictedWorkerThread()
 bool DynamicComponentRendererImpl::CheckWorkerMaxConstraint()
 {
     std::lock_guard<std::mutex> lock(usingWorkerMutex_);
-    return usingWorkers_.size() <= WORKER_MAX_NUM;
+    return usingWorkers_.size() < WORKER_MAX_NUM;
 }
 
 bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker)
@@ -195,6 +197,49 @@ void DynamicComponentRendererImpl::CreateDynamicContent()
     });
 }
 
+RefPtr<SystemWindowScene> DynamicComponentRendererImpl::GetWindowScene()
+{
+    RefPtr<SystemWindowScene> hostPattern = nullptr;
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, hostPattern);
+    auto hostWindowNode = WindowSceneHelper::FindWindowScene(host);
+    CHECK_NULL_RETURN(hostWindowNode, hostPattern);
+    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+    CHECK_NULL_RETURN(hostNode, hostPattern);
+    hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    return hostPattern;
+}
+
+int32_t DynamicComponentRendererImpl::GetWindowSceneId()
+{
+    auto hostPattern = GetWindowScene();
+    CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
+    auto hostSession = hostPattern->GetSession();
+    CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
+    return hostSession->GetPersistentId();
+}
+
+void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
+    DynamicInitialConfig& dynamicInitialConfig)
+{
+    dynamicInitialConfig.hostInstanceId = hostInstanceId_;
+    dynamicInitialConfig.abcPath = isolatedInfo_.abcPath;
+    dynamicInitialConfig.hapPath = isolatedInfo_.resourcePath;
+    dynamicInitialConfig.entryPoint = isolatedInfo_.entryPoint;
+    dynamicInitialConfig.registerComponents = isolatedInfo_.registerComponents;
+    auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = container->GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    if (container->IsScenceBoardWindow()) {
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = GetWindowSceneId();
+    } else {
+        dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
+    }
+}
+
 void DynamicComponentRendererImpl::InitUiContent(
     OHOS::AbilityRuntime::Context *abilityContext)
 {
@@ -206,8 +251,9 @@ void DynamicComponentRendererImpl::InitUiContent(
     uiContent_->SetUIContentType(uIContentType_);
     rendererDumpInfo_.createUiContenTime = GetCurrentTimestamp();
 
-    uiContent_->InitializeDynamic(hostInstanceId_,
-        isolatedInfo_.resourcePath, isolatedInfo_.abcPath, isolatedInfo_.entryPoint, isolatedInfo_.registerComponents);
+    DynamicInitialConfig dynamicInitialConfig;
+    BuildDynamicInitialConfig(dynamicInitialConfig);
+    uiContent_->InitializeDynamic(dynamicInitialConfig);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {

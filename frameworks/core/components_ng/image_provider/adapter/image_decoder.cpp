@@ -53,6 +53,12 @@ void ImageDecoder::RemoveFromPixelMapCache(const ImageSourceInfo& imageSourceInf
     weakPixelMapCache_.erase(key);
 }
 
+void ImageDecoder::ClearPixelMapCache()
+{
+    std::unique_lock<std::shared_mutex> lock(pixelMapMtx_);
+    weakPixelMapCache_.clear();
+}
+
 void ImageDecoder::AddToPixelMapCache(
     const ImageSourceInfo& imageSourceInfo, const SizeF& size, WeakPtr<PixelMap> weakPixelMap)
 {

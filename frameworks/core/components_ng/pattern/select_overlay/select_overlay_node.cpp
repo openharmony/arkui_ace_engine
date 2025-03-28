@@ -59,14 +59,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr char BUTTON_COPY_ALL[] = "textoverlay.select_all";
-constexpr char BUTTON_CUT[] = "textoverlay.cut";
-constexpr char BUTTON_COPY[] = "textoverlay.copy";
-constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-constexpr char BUTTON_SHARE[] = "textoverlay.share";
-constexpr char BUTTON_TRANSLATE[] = "textoverlay.translate";
-constexpr char BUTTON_SEARCH[] = "textoverlay.search";
-
 constexpr int32_t OPTION_INDEX_CUT = 0;
 constexpr int32_t OPTION_INDEX_COPY = 1;
 constexpr int32_t OPTION_INDEX_PASTE = 2;
@@ -637,24 +629,24 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     CHECK_NULL_RETURN(pipeline, params);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, params);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT),
+    params.emplace_back(theme->GetCutLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.onCut), theme->GetCutLabelInfo(), info->menuInfo.showCut);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY),
+    params.emplace_back(theme->GetCopyLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.onCopy), theme->GetCopyLabelInfo(), info->menuInfo.showCopy);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
+    params.emplace_back(theme->GetPasteLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.onPaste), theme->GetPasteLabelInfo(),
         info->menuInfo.showPaste);
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
+    params.emplace_back(theme->GetSelectAllLabel(),
         GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), theme->GetSelectAllLabelInfo(),
         info->menuInfo.showCopyAll);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
+        params.emplace_back(theme->GetTranslateLabel(),
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), "", info->menuInfo.showTranslate);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE),
+        params.emplace_back(theme->GetShareLabel(),
             GetMenuCallbackWithContainerId(info->menuCallback.onShare), "", info->menuInfo.showShare);
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
+        params.emplace_back(theme->GetSearchLabel(),
             GetMenuCallbackWithContainerId(info->menuCallback.onSearch), "", info->menuInfo.showSearch);
     }
     return params;
@@ -722,25 +714,25 @@ std::string GetItemContent(const std::string& id, const std::string& content)
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, content);
     if (id == OH_DEFAULT_CUT) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_CUT);
+        return textOverlayTheme->GetCutLabel();
     }
     if (id == OH_DEFAULT_COPY) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_COPY);
+        return textOverlayTheme->GetCopyLabel();
     }
     if (id == OH_DEFAULT_SELECT_ALL) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL);
+        return textOverlayTheme->GetSelectAllLabel();
     }
     if (id == OH_DEFAULT_PASTE) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE);
+        return textOverlayTheme->GetPasteLabel();
     }
     if (id == OH_DEFAULT_TRANSLATE) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE);
+        return textOverlayTheme->GetTranslateLabel();
     }
     if (id == OH_DEFAULT_SEARCH) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH);
+        return textOverlayTheme->GetSearchLabel();
     }
     if (id == OH_DEFAULT_SHARE) {
-        return Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE);
+        return textOverlayTheme->GetShareLabel();
     }
     if (id == OH_DEFAULT_AI_WRITE) {
         return textOverlayTheme->GetAIWrite();
@@ -1078,8 +1070,7 @@ RefPtr<FrameNode> GetMenuWrapper(std::vector<OptionParam>& params, const RefPtr<
 #ifdef OHOS_PLATFORM
         RefPtr<FrameNode> menuItem = nullptr;
         for (size_t i = 0; i < params.size(); i++) {
-            constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-            if (params[i].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+            if (params[i].value == textOverlayTheme->GetPasteLabel()) {
                 menuItem = CreateMenuItemPaste(params[i].labelInfo, innerMenuNode, params[i], i);
             } else {
                 menuItem = CreateMenuItem(params[i].value, params[i].labelInfo, innerMenuNode, params[i], i);
@@ -1614,41 +1605,43 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
     std::vector<OptionParam> params;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, params);
+    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, params);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     auto defaultOptionCallback = GetDefaultOptionCallback();
     if (!isShowInDefaultMenu_[OPTION_INDEX_CUT]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_CUT_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), iconPath,
+        params.emplace_back(textOverlayTheme->GetCutLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onCut), GetSymbolFunc(OH_DEFAULT_CUT));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_COPY]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_COPY_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), iconPath,
+        params.emplace_back(textOverlayTheme->GetCopyLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onCopy), GetSymbolFunc(OH_DEFAULT_COPY));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_PASTE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_PASTE_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), iconPath,
+        params.emplace_back(textOverlayTheme->GetPasteLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onPaste), GetSymbolFunc(OH_DEFAULT_PASTE));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_COPY_ALL]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SELECT_ALL_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), iconPath,
+        params.emplace_back(textOverlayTheme->GetSelectAllLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onSelectAll), GetSymbolFunc(OH_DEFAULT_SELECT_ALL));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TRANSLATE_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath,
+        params.emplace_back(textOverlayTheme->GetTranslateLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), GetSymbolFunc(OH_DEFAULT_TRANSLATE));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_SHARE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), iconPath,
+        params.emplace_back(textOverlayTheme->GetShareLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onShare), GetSymbolFunc(OH_DEFAULT_SHARE));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_SEARCH]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath,
+        params.emplace_back(textOverlayTheme->GetSearchLabel(), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onSearch), GetSymbolFunc(OH_DEFAULT_SEARCH));
     }
     GetFlexibleOptionsParams(info, params);
@@ -1972,15 +1965,19 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
     memset_s(isShowInDefaultMenu_, sizeof(isShowInDefaultMenu_), 0, sizeof(isShowInDefaultMenu_));
 
-    ShowCut(maxWidth, allocatedSize, info);
-    ShowCopy(maxWidth, allocatedSize, info);
-    ShowPaste(maxWidth, allocatedSize, info);
-    ShowCopyAll(maxWidth, allocatedSize, info);
-    ShowTranslate(maxWidth, allocatedSize, info);
-    ShowShare(maxWidth, allocatedSize, info);
-    ShowSearch(maxWidth, allocatedSize, info);
-    ShowCamera(maxWidth, allocatedSize, info);
-    ShowAIWrite(maxWidth, allocatedSize, info);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    ShowCut(maxWidth, allocatedSize, info, theme->GetCutLabel());
+    ShowCopy(maxWidth, allocatedSize, info, theme->GetCopyLabel());
+    ShowPaste(maxWidth, allocatedSize, info, theme->GetPasteLabel());
+    ShowCopyAll(maxWidth, allocatedSize, info, theme->GetSelectAllLabel());
+    ShowTranslate(maxWidth, allocatedSize, info, theme->GetTranslateLabel());
+    ShowShare(maxWidth, allocatedSize, info, theme->GetShareLabel());
+    ShowSearch(maxWidth, allocatedSize, info, theme->GetSearchLabel());
+    ShowCamera(maxWidth, allocatedSize, info, theme->GetCameraInput());
+    ShowAIWrite(maxWidth, allocatedSize, info, theme->GetAIWrite());
     if (isDefaultBtnOverMaxWidth_) {
         isDefaultBtnOverMaxWidth_ = false;
         return true;
@@ -1989,12 +1986,12 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     return false;
 }
 
-void SelectOverlayNode::ShowCut(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowCut(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showCut) {
         float buttonWidth = 0.0f;
-        auto button = BuildButton(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onCut, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2009,13 +2006,13 @@ void SelectOverlayNode::ShowCut(float maxWidth, float& allocatedSize, std::share
     }
 }
 
-void SelectOverlayNode::ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowCopy(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showCopy) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(
-            Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onCopy, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2030,7 +2027,8 @@ void SelectOverlayNode::ShowCopy(float maxWidth, float& allocatedSize, std::shar
     }
 }
 
-void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowPaste(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showPaste) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
@@ -2038,8 +2036,7 @@ void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::sha
 #ifdef OHOS_PLATFORM
         auto button = BuildPasteButton(info->menuCallback.onPaste, GetId(), buttonWidth);
 #else
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE),
-            info->menuCallback.onPaste, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onPaste, GetId(), buttonWidth);
 #endif
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
@@ -2055,13 +2052,13 @@ void SelectOverlayNode::ShowPaste(float maxWidth, float& allocatedSize, std::sha
     }
 }
 
-void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowCopyAll(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showCopyAll) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL),
-            info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
+        auto button = BuildButton(label, info->menuCallback.onSelectAll, GetId(), buttonWidth, true);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2076,7 +2073,8 @@ void SelectOverlayNode::ShowCopyAll(float maxWidth, float& allocatedSize, std::s
     }
 }
 
-void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowTranslate(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (!IsShowTranslateOnTargetAPIVersion()) {
         isShowInDefaultMenu_[OPTION_INDEX_TRANSLATE] = true;
@@ -2085,8 +2083,7 @@ void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std:
     if (info->menuInfo.showTranslate) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
-            info->menuCallback.onTranslate, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onTranslate, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2101,7 +2098,8 @@ void SelectOverlayNode::ShowTranslate(float maxWidth, float& allocatedSize, std:
     }
 }
 
-void SelectOverlayNode::ShowSearch(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowSearch(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (!IsShowOnTargetAPIVersion()) {
         isShowInDefaultMenu_[OPTION_INDEX_SEARCH] = true;
@@ -2110,8 +2108,7 @@ void SelectOverlayNode::ShowSearch(float maxWidth, float& allocatedSize, std::sh
     if (info->menuInfo.showSearch) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
-            info->menuCallback.onSearch, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onSearch, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2126,7 +2123,8 @@ void SelectOverlayNode::ShowSearch(float maxWidth, float& allocatedSize, std::sh
     }
 }
 
-void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowShare(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (!IsShowOnTargetAPIVersion()) {
         isShowInDefaultMenu_[OPTION_INDEX_SHARE] = true;
@@ -2135,8 +2133,7 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
     if (info->menuInfo.showShare) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto button = BuildButton(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE),
-            info->menuCallback.onShare, GetId(), buttonWidth);
+        auto button = BuildButton(label, info->menuCallback.onShare, GetId(), buttonWidth);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2151,16 +2148,13 @@ void SelectOverlayNode::ShowShare(float maxWidth, float& allocatedSize, std::sha
     }
 }
 
-void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowAIWrite(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showAIWrite) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextOverlayTheme>();
-        CHECK_NULL_VOID(theme);
-        auto button = BuildButton(theme->GetAIWrite(), info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
+        auto button = BuildButton(label, info->menuCallback.onAIWrite, GetId(), buttonWidth, true);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2175,17 +2169,13 @@ void SelectOverlayNode::ShowAIWrite(float maxWidth, float& allocatedSize, std::s
     }
 }
 
-void SelectOverlayNode::ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info)
+void SelectOverlayNode::ShowCamera(
+    float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label)
 {
     if (info->menuInfo.showCameraInput) {
         CHECK_EQUAL_VOID(isDefaultBtnOverMaxWidth_, true);
         float buttonWidth = 0.0f;
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextOverlayTheme>();
-        CHECK_NULL_VOID(theme);
-        auto button =
-            BuildButton(theme->GetCameraInput(), info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
+        auto button = BuildButton(label, info->menuCallback.onCameraInput, GetId(), buttonWidth, false);
         CHECK_NULL_VOID(button);
         if (GreatOrEqual(maxWidth - allocatedSize, buttonWidth)) {
             button->MountToParent(selectMenuInner_);
@@ -2310,46 +2300,46 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
     const std::shared_ptr<SelectOverlayInfo>& info)
 {
     std::vector<MenuItemParam> systemItemParams;
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, systemItemParams);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, systemItemParams);
     if (info->menuInfo.showCopy || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, BUTTON_COPY);
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_COPY, theme->GetCopyLabel());
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showPaste || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, BUTTON_PASTE);
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_PASTE, theme->GetPasteLabel());
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showCut || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, BUTTON_CUT);
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_CUT, theme->GetCutLabel());
         systemItemParams.emplace_back(param);
     }
 
     if (info->menuInfo.showCopyAll || info->isUsingMouse) {
-        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, BUTTON_COPY_ALL);
+        MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SELECT_ALL, theme->GetSelectAllLabel());
         systemItemParams.emplace_back(param);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (info->menuInfo.showTranslate || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, BUTTON_TRANSLATE);
+            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, theme->GetTranslateLabel());
             systemItemParams.emplace_back(param);
         }
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         if (info->menuInfo.showShare || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, BUTTON_SHARE);
+            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, theme->GetShareLabel());
             systemItemParams.emplace_back(param);
         }
         if (info->menuInfo.showSearch || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SEARCH, BUTTON_SEARCH);
+            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SEARCH, theme->GetSearchLabel());
             systemItemParams.emplace_back(param);
         }
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, systemItemParams);
-    auto theme = pipeline->GetTheme<TextOverlayTheme>();
-    CHECK_NULL_RETURN(theme, systemItemParams);
     if (info->menuInfo.showCameraInput) {
         MenuItemParam param;
         MenuOptionsParam menuOptionsParam;
@@ -2374,7 +2364,7 @@ const MenuItemParam SelectOverlayNode::GetSystemMenuItemParam(const std::string&
     MenuItemParam param;
     MenuOptionsParam menuOptionsParam;
     menuOptionsParam.id = menuId;
-    menuOptionsParam.content = Localization::GetInstance()->GetEntryLetters(menuButton);
+    menuOptionsParam.content = menuButton;
     param.menuOptionsParam = menuOptionsParam;
     return param;
 }

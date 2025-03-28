@@ -18,13 +18,15 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline/pipeline_base.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(TextPickerLayoutProperty, LinearLayoutProperty);

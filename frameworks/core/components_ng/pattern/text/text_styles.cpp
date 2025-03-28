@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
+#include "core/components_ng/base/frame_node.h"
+
 namespace {
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;

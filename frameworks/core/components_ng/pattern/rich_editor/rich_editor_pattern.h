@@ -93,6 +93,8 @@ struct TextConfig;
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class OneStepDragController;
+class RichEditorUndoManager;
+struct UndoRedoRecord;
 
 // TextPattern is the base class for text render node to perform paint text.
 enum class MoveDirection { FORWARD, BACKWARD };
@@ -216,6 +218,11 @@ public:
         bool IsValid() const
         {
             return !previewContent.empty() && previewTextHasStarted && startOffset >= 0 && endOffset >= startOffset;
+        }
+
+        bool NeedReplace() const
+        {
+            return needReplacePreviewText || needReplaceText;
         }
     };
 
@@ -481,13 +488,18 @@ public:
         return styledString_;
     }
 
+    bool IsStyledStringModeEnabled()
+    {
+        return isSpanStringMode_ && styledString_;
+    }
+
     void UpdateSpanItems(const std::list<RefPtr<NG::SpanItem>>& spanItems) override;
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledStringMore(RefPtr<SpanString> insertStyledString, int32_t changeStart, int32_t changeLength,
-        std::u16string& insertValue, bool needReplaceInTextPreview);
-    void InsertValueInStyledString(const std::u16string& insertValue, bool calledByImf = false);
+    void InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput = false);
+    void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
+        std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
     RefPtr<FontSpan> CreateFontSpanByTextStyle(
@@ -498,9 +510,15 @@ public:
     void DeleteForwardInStyledString(int32_t length, bool isIME = true);
     void DeleteValueInStyledString(int32_t start, int32_t length, bool isIME = true, bool isUpdateCaret = true);
 
+    RefPtr<SpanString> CreateStyledStringByStyleBefore(int32_t start, const std::u16string& string);
+    bool BeforeStyledStringChange(const UndoRedoRecord& record, bool isUndo = false);
     bool BeforeStyledStringChange(int32_t start, int32_t length, const std::u16string& string);
     bool BeforeStyledStringChange(int32_t start, int32_t length, const RefPtr<SpanString>& styledString);
+    void AfterStyledStringChange(const UndoRedoRecord& record, bool isUndo = false);
     void AfterStyledStringChange(int32_t start, int32_t length, const std::u16string& string);
+    void HandleUndoInStyledString(const UndoRedoRecord& record);
+    void HandleRedoInStyledString(const UndoRedoRecord& record);
+    void ApplyRecordInStyledString(const UndoRedoRecord& record);
 
     void ResetBeforePaste();
     void ResetAfterPaste();
@@ -859,7 +877,7 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* node) override;
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return true;
     }
@@ -1240,6 +1258,7 @@ protected:
 private:
     friend class RichEditorSelectOverlay;
     friend class OneStepDragController;
+    friend class RichEditorUndoManager;
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);
@@ -1533,11 +1552,11 @@ private:
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
     int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t start);
-    bool ProcessTextTruncationOperation(std::u16string& text, bool calledByImf);
+    bool ProcessTextTruncationOperation(std::u16string& text, bool shouldCommitInput);
     void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
     void ProcessInsertValue(const std::u16string& insertValue, OperationType operationType = OperationType::DEFAULT,
-        bool calledbyImf = false);
+        bool shouldCommitInput = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
     void ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options);
@@ -1713,6 +1732,7 @@ private:
     RectF lastRichTextRect_;
     std::optional<int32_t> maxLength_ = std::nullopt;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
+    std::unique_ptr<RichEditorUndoManager> undoManager_;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;

@@ -1064,6 +1064,21 @@ inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
 }
 } // namespace
 
+namespace {
+inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
+{
+    auto startLine = info_.gridMatrix_.find(info_.startMainLineIndex_);
+    if (startLine != info_.gridMatrix_.end() && !startLine->second.empty()) {
+        info_.startIndex_ = startLine->second.begin()->second;
+        return;
+    }
+
+    if (info_.endIndex_ < info_.childrenCount_ - 1) {
+        info_.startIndex_ = info_.endIndex_ + 1;
+    }
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
 {
     auto it = info_.gridMatrix_.find(line);
@@ -1107,7 +1122,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         info_.currentOffset_ = mainLength;
         info_.prevOffset_ = info_.currentOffset_;
         info_.startMainLineIndex_ = line + 1;
-        info_.UpdateStartIndexByStartLine();
+        UpdateStartIndexByStartLine(info_);
     }
     return true;
 }
@@ -1430,7 +1445,12 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
 
     for (uint32_t i = 0; i < crossCount_; i++) {
         // already finish first line forward
-        if (reverse && currentIndex >= info_.startIndex_) {
+        if ((reverse && currentIndex >= info_.startIndex_)) {
+            break;
+        }
+        if (currentIndex >= info_.GetChildrenCount()) {
+            TAG_LOGW(ACE_GRID, "can not get item at:%{public}d, total items:%{public}d", currentIndex,
+                info_.GetChildrenCount());
             break;
         }
         // Step1. Get wrapper of [GridItem]

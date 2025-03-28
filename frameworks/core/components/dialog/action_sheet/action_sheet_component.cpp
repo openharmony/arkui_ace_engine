@@ -56,7 +56,7 @@ void ActionSheetComponent::BuildChild(const RefPtr<ThemeManager>& themeManager)
     BuildMenu(column);
     BuildActions(themeManager, column);
     BuildFocusChild(column, focusCollaboration);
-    if (deviceType_ == DeviceType::WATCH) {
+    if (deviceType_ == DeviceType::WATCH || deviceType_ == DeviceType::WEARABLE) {
         auto scroll = AceType::MakeRefPtr<ScrollComponent>(focusCollaboration);
         box->SetChild(scroll);
     } else {
@@ -133,7 +133,7 @@ void ActionSheetComponent::BuildContent(const RefPtr<ColumnComponent>& column)
     }
     contentPadding->SetPadding(std::move(contentPadding_));
     RefPtr<FlexItemComponent> contentFlex;
-    if (deviceType_ == DeviceType::WATCH) {
+    if (deviceType_ == DeviceType::WATCH || deviceType_ == DeviceType::WEARABLE) {
         contentPadding->SetChild(content_);
         contentFlex = AceType::MakeRefPtr<FlexItemComponent>(0, 0, 0.0, contentPadding);
     } else {

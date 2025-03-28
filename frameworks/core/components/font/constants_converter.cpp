@@ -544,6 +544,8 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
     if (txtStyle.symbol.GetSymbolType() != Rosen::SymbolType::CUSTOM) {
         txtStyle.fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
     }
+    txtStyle.symbol.SetSymbolBitmap(textStyle.GetReLayoutSymbolStyleBitmap());
+    txtStyle.symbol.SetSymbolUid(textStyle.GetSymbolUid());
 }
 
 Rect ConvertSkRect(const Rosen::Drawing::RectF& skRect)

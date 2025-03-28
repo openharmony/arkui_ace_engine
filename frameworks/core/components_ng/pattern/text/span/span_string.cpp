@@ -21,6 +21,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 namespace OHOS::Ace {
 
@@ -131,9 +132,9 @@ std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
         auto newSpan = (*it)->GetSameStyleSpanItem();
         newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
         (*it)->interval = { offset, offset + newlineIndex + 1 };
-        (*it)->content = GetWideStringSubstr(wString, 0, newlineIndex + 1);
+        (*it)->UpdateContent(GetWideStringSubstr(wString, 0, newlineIndex + 1));
         wString = GetWideStringSubstr(wString, newlineIndex + 1);
-        newSpan->content = wString;
+        newSpan->UpdateContent(wString);
         newlineIndex = static_cast<int32_t>(wString.find(u'\n'));
 
         offset = newSpan->interval.first;

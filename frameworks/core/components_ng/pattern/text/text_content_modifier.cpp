@@ -19,17 +19,13 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
-#include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -422,10 +418,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
-                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
-            textPattern->DumpRecord(logTag);
-            textPattern->LogForFormRender(logTag);
             DrawText(canvas, pManager);
         } else {
             // Racing

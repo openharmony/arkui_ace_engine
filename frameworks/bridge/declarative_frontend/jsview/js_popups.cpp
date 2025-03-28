@@ -25,8 +25,10 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 
 #include "bridge/declarative_frontend/jsview/js_popups.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -168,6 +170,93 @@ static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
     CHECK_NULL_VOID(theme);
     auto blurStyle = static_cast<BlurStyle>(theme->GetPopupBackgroundBlurStyle());
     popupParam->SetBlurStyle(blurStyle);
+}
+
+void SetBorderLinearGradientDirection(const JSRef<JSObject>& obj,
+    PopupLinearGradientProperties& popupBorberLinearGradient)
+{
+    popupBorberLinearGradient.popupDirection = GradientDirection::BOTTOM;
+    auto directionValue = obj->GetProperty("direction");
+    if (directionValue->IsNumber()) {
+        auto gradientDirection = directionValue->ToNumber<int32_t>();
+        if (gradientDirection >= static_cast<int32_t>(GradientDirection::LEFT) &&
+            gradientDirection <= static_cast<int32_t>(GradientDirection::END_TO_START)) {
+            popupBorberLinearGradient.popupDirection = static_cast<GradientDirection>(gradientDirection);
+        }
+    }
+}
+
+void ParseGradientColor(const JSRef<JSArray>& colorArray, PopupGradientColor& gradientColor)
+{
+    Color gradientColorItem;
+    auto colorVal = colorArray->GetValueAt(0);
+    if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
+        gradientColor.gradientColor = gradientColorItem;
+    }
+    if (colorArray->GetValueAt(1)->IsNumber()) {
+        gradientColor.gradientNumber = colorArray->GetValueAt(1)->ToNumber<double>();
+    }
+}
+
+void SetBorderLinearGradientColors(const JSRef<JSObject>& obj,
+    PopupLinearGradientProperties& popupBorberLinearGradient)
+{
+    auto colorsValues = obj->GetProperty("colors");
+    if (!colorsValues->IsArray()) {
+        return;
+    }
+    auto colorsArray = JSRef<JSArray>::Cast(colorsValues);
+    for (size_t i = 0; i < colorsArray->Length(); i++) {
+        auto colorInfo = colorsArray->GetValueAt(i);
+        if (!colorInfo->IsArray()) {
+            continue;
+        }
+        auto colorArray = JSRef<JSArray>::Cast(colorInfo);
+        PopupGradientColor gradientColor;
+        ParseGradientColor(colorArray, gradientColor);
+        popupBorberLinearGradient.gradientColors.push_back(gradientColor);
+    }
+}
+
+void SetPopupBorderWidthInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
+    const char* borderWidthParam)
+{
+    std::string outlineWidth = "outlineWidth";
+    auto popupBorderWidthVal = popupObj->GetProperty(borderWidthParam);
+    if (popupBorderWidthVal->IsNull()) {
+        return;
+    }
+    CalcDimension popupBorderWidth;
+    if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth)) {
+        return;
+    }
+    if (popupBorderWidth.Value() < 0) {
+        return;
+    }
+    if (borderWidthParam == outlineWidth) {
+        popupParam->SetOutlineWidth(popupBorderWidth);
+    } else {
+        popupParam->SetInnerBorderWidth(popupBorderWidth);
+    }
+}
+
+void SetPopupBorderInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
+    const char* borderWidthParam, const char* borderColorParam)
+{
+    std::string outlineLinearGradient = "outlineLinearGradient";
+    PopupLinearGradientProperties popupBorberLinearGradient;
+    auto borderLinearGradientVal = popupObj->GetProperty(borderColorParam);
+    if (borderLinearGradientVal->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(borderLinearGradientVal);
+        SetBorderLinearGradientDirection(obj, popupBorberLinearGradient);
+        SetBorderLinearGradientColors(obj, popupBorberLinearGradient);
+        if (borderColorParam == outlineLinearGradient) {
+            popupParam->SetOutlineLinearGradient(popupBorberLinearGradient);
+        } else {
+            popupParam->SetInnerBorderLinearGradient(popupBorberLinearGradient);
+        }
+    }
+    SetPopupBorderWidthInfo(popupObj, popupParam, borderWidthParam);
 }
 
 void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
@@ -425,6 +514,13 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
         }
     }
+
+    const char* outlineLinearGradient = "outlineLinearGradient";
+    const char* outlineWidth = "outlineWidth";
+    SetPopupBorderInfo(popupObj, popupParam, outlineWidth, outlineLinearGradient);
+    const char* borderLinearGradient = "borderLinearGradient";
+    const char* borderWidth = "borderWidth";
+    SetPopupBorderInfo(popupObj, popupParam, borderWidth, borderLinearGradient);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -576,6 +672,7 @@ void ParseTipsParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& ti
     }
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
+    tipsParam->SetShowInSubWindow(true);
 }
 
 void ParseTipsArrowPositionParam(const JSRef<JSObject>& tipsObj, const RefPtr<PopupParam>& tipsParam)
@@ -1091,12 +1188,12 @@ void ParseContentPreviewAnimationOptionsParam(const JSCallbackInfo& info, const 
 
 void ParsePreviewBorderRadiusParam(const JSRef<JSObject>& menuContentOptions, NG::MenuParam& menuParam)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     auto previewBorderRadiusValue = menuContentOptions->GetProperty("previewBorderRadius");
     NG::BorderRadiusProperty previewBorderRadius;
-    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius);
+    JSViewAbstract::ParseBorderRadius(previewBorderRadiusValue, previewBorderRadius, false);
     menuParam.previewBorderRadius = previewBorderRadius;
 }
 
@@ -1200,7 +1297,19 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(tipsParam);
     // Set message to tipsParam
-    tipsParam->SetMessage(info[0]->ToString());
+    std::string value;
+    RefPtr<SpanString> styledString;
+    if (info[0]->IsString()) {
+        value = info[0]->ToString();
+    } else {
+        auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+        if (!spanString) {
+            JSViewAbstract::ParseJsString(info[0], value);
+        } else {
+            styledString = spanString->GetController();
+        }
+    }
+    tipsParam->SetMessage(value);
     // Set bindTipsOptions to tipsParam
     JSRef<JSObject> tipsObj;
     if (info.Length() > PARAMETER_LENGTH_FIRST && info[1]->IsObject()) {
@@ -1214,7 +1323,7 @@ void JSViewAbstract::JsBindTips(const JSCallbackInfo& info)
         ParseTipsArrowPositionParam(tipsObj, tipsParam);
         ParseTipsArrowSizeParam(tipsObj, tipsParam);
     }
-    ViewAbstractModel::GetInstance()->BindTips(tipsParam);
+    ViewAbstractModel::GetInstance()->BindTips(tipsParam, styledString);
 }
 
 void JSViewAbstract::SetPopupDismiss(

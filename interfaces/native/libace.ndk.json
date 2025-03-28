@@ -2768,27 +2768,27 @@
         "name": "OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Create"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Dispose"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetRatios"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
     },
     {
@@ -2840,15 +2840,15 @@
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_DragEvent_RequestDragEndPending"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_NotifyDragResult"
     },
     {
-        "first_introduced": "16",
+        "first_introduced": "18",
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
     {
@@ -3178,6 +3178,14 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_CustomDialog_SetHoverModeArea"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_CustomDialog_SetBackgroundEffect"
     },
     {
         "first_introduced": "18",

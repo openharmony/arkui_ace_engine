@@ -102,7 +102,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     float indicatorScale = theme->GetIndicatorScale();
-    if ((maxDisplayCount_ > 0 || !indicatorInteractive_) && isBindIndicator_) {
+    if (maxDisplayCount_ > 0 || (!indicatorInteractive_ && isBindIndicator_)) {
         indicatorScale = 1.0f;
     }
     userItemWidth *= indicatorScale;
@@ -123,7 +123,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     
     auto indicatorDotItemSpace = paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
     auto allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (indicatorDisplayCount_ - 1);
-    if (maxDisplayCount_ > 0 && isBindIndicator_) {
+    if (maxDisplayCount_ > 0) {
         allPointSpaceSum = static_cast<float>(indicatorDotItemSpace.ConvertToPx()) * (maxDisplayCount_ - 1);
         allPointDiameterSum = userItemWidth * (maxDisplayCount_ - OVERLONG_SMALL_COUNT - 1) + userSelectedItemWidth +
                               userItemWidth * SECOND_SMALLEST_POINT_RATIO + userItemWidth * SMALLEST_POINT_RATIO;

@@ -333,6 +333,21 @@ enum class ParagraphStyleAttribute {
     MAX_TEXT_STYLE
 };
 
+enum class SymbolStyleAttribute {
+    RE_CREATE = -1,
+    // EffectStrategy
+    EFFECT_STRATEGY = 0,
+    // SymbolEffectOptions
+    ANIMATION_MODE = 1,
+    ANIMATION_START = 2,
+    COMMONSUB_TYPE = 3,
+    // RenderColors(SymbolColorList)
+    COLOR_LIST = 4,
+    // RenderStrategy
+    RENDER_MODE = 5,
+    MAX_SYMBOL_STYLE,
+};
+
 // For textStyle
 #define ACE_DEFINE_TEXT_STYLE(name, type, changeflag) \
 public:                                               \
@@ -469,6 +484,54 @@ public:                                                                         
                                                                                      \
 private:                                                                             \
     type prop##name##_ = value;
+
+// For symbol
+#define ACE_DEFINE_SYMBOL_STYLE(name, type, changeflag)    \
+public:                                                    \
+    const type& Get##name() const                          \
+    {                                                      \
+        return prop##name##_;                              \
+    }                                                      \
+    void Set##name(const type& newValue)                   \
+    {                                                      \
+        if (NearEqual(prop##name##_, newValue)) {          \
+            return;                                        \
+        }                                                  \
+        auto flag = static_cast<int32_t>(changeflag);      \
+        if (GreatOrEqual(flag, 0)) {                       \
+            reLayoutSymbolStyleBitmap_.set(flag);          \
+        } else {                                           \
+            needReCreateParagraph_ = true;                 \
+        }                                                  \
+        prop##name##_ = newValue;                          \
+    }                                                      \
+                                                           \
+private:                                                   \
+    type prop##name##_;
+ 
+#define ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(name, type, value, changeflag)    \
+public:                                                                              \
+    const type& Get##name() const                                                    \
+    {                                                                                \
+        return prop##name##_;                                                        \
+    }                                                                                \
+    void Set##name(const type& newValue)                                             \
+    {                                                                                \
+        if (NearEqual(prop##name##_, newValue)) {                                    \
+            return;                                                                  \
+        }                                                                            \
+        auto flag = static_cast<int32_t>(changeflag);                                \
+        if (GreatOrEqual(flag, 0)) {                                                 \
+            reLayoutSymbolStyleBitmap_.set(flag);                                    \
+        } else {                                                                     \
+            needReCreateParagraph_ = true;                                           \
+        }                                                                            \
+        prop##name##_ = newValue;                                                    \
+    }                                                                                \
+                                                                                     \
+private:                                                                             \
+    type prop##name##_ = value;
+
 class ACE_EXPORT TextStyle final {
 public:
     TextStyle() = default;
@@ -531,11 +594,11 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
 
     // for Symbol
-    ACE_DEFINE_TEXT_STYLE(RenderColors, std::vector<Color>, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(SymbolEffectOptions, NG::SymbolEffectOptions, TextStyleAttribute::RE_CREATE);
-    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(SymbolType, SymbolType, SymbolType::SYSTEM, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
+    ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);
+    ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, SymbolStyleAttribute::EFFECT_STRATEGY);
+    ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
+        SymbolType, SymbolType, SymbolType::SYSTEM, SymbolStyleAttribute::RE_CREATE);
 
 public:
     void SetFontSize(const Dimension& fontSize)
@@ -743,13 +806,26 @@ public:
         if (NearEqual(propRenderColors_, renderColors)) {
             return;
         }
-        needReCreateParagraph_ = true;
+        reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::COLOR_LIST));
         propRenderColors_ = renderColors;
     }
 
     const std::vector<Color>& GetSymbolColorList() const
     {
         return propRenderColors_;
+    }
+
+    void CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
+        const std::optional<NG::SymbolEffectOptions>& oldOptions);
+ 
+    void CompareAnimationMode(SymbolEffectType effectType, const std::optional<NG::SymbolEffectOptions>& options,
+        const std::optional<NG::SymbolEffectOptions>& oldOptions);
+ 
+    void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions);
+ 
+    const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const
+    {
+        return symbolEffectOptions_;
     }
 
     std::string ToString() const;
@@ -766,9 +842,15 @@ public:
         return reLayoutParagraphStyleBitmap_;
     }
 
+    const std::bitset<static_cast<size_t>(SymbolStyleAttribute::MAX_SYMBOL_STYLE)>& GetReLayoutSymbolStyleBitmap() const
+    {
+        return reLayoutSymbolStyleBitmap_;
+    }
+
     bool NeedReLayout() const
     {
-        return reLayoutTextStyleBitmap_.any() || reLayoutParagraphStyleBitmap_.any();
+        return reLayoutTextStyleBitmap_.any() || reLayoutParagraphStyleBitmap_.any() ||
+               reLayoutSymbolStyleBitmap_.any();
     }
 
     bool NeedReCreateParagraph() const
@@ -780,6 +862,7 @@ public:
     {
         reLayoutTextStyleBitmap_.reset();
         reLayoutParagraphStyleBitmap_.reset();
+        reLayoutSymbolStyleBitmap_.reset();
         needReCreateParagraph_ = false;
     }
 
@@ -793,11 +876,23 @@ public:
         textStyleUid_ = textStyleUid;
     }
 
+    int32_t GetSymbolUid() const
+    {
+        return symbolUid_;
+    }
+ 
+    void SetSymbolUid(int32_t symbolUid)
+    {
+        symbolUid_ = symbolUid;
+    }
+
 private:
     std::bitset<static_cast<size_t>(TextStyleAttribute::MAX_TEXT_STYLE)> reLayoutTextStyleBitmap_;
     std::bitset<static_cast<size_t>(ParagraphStyleAttribute::MAX_TEXT_STYLE)> reLayoutParagraphStyleBitmap_;
+    std::bitset<static_cast<size_t>(SymbolStyleAttribute::MAX_SYMBOL_STYLE)> reLayoutSymbolStyleBitmap_;
     bool needReCreateParagraph_ = false;
     int32_t textStyleUid_ = 0;
+    int32_t symbolUid_ = 0;
     std::list<std::pair<std::string, int32_t>> fontFeatures_;
     std::vector<Dimension> preferFontSizes_;
     std::vector<TextSizeGroup> preferTextSizeGroups_;
@@ -813,6 +908,8 @@ private:
     bool hasHeightOverride_ = false;
     bool adaptTextSize_ = false;
     bool adaptHeight_ = false; // whether adjust text size with height.
+    // for Symbol
+    std::optional<NG::SymbolEffectOptions> symbolEffectOptions_;
 };
 
 namespace StringUtils {

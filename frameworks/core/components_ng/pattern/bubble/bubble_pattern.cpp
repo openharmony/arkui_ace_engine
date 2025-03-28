@@ -790,7 +790,9 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
         auto parentNode = node->GetParent();
         if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
             !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            if (popupTheme->GetPopupDoubleButtonIsSameStyle()) {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            }
         } else if (!isSetMessageColor_) {
             if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
                 textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());

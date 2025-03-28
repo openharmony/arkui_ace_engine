@@ -23,11 +23,6 @@
 
 #include "base/geometry/dimension.h"
 #include "base/image/pixel_map.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {

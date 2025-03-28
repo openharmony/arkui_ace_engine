@@ -129,11 +129,6 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
       this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
-  avoidance(mode: AvoidanceMode): this {
-    modifierWithKey(
-      this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
-    return this;
-  }
   menuBackgroundColor(value: ResourceColor): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
@@ -183,6 +178,10 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
   menuOutline(outline: MenuOutlineOptions): this {
     modifierWithKey(
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+  }
+  avoidance(mode: AvoidanceMode): this {
+    modifierWithKey(
+      this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
 }
@@ -354,23 +353,6 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
     } else {
       return stageValue !== value;
     }
-  }
-}
-
-class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
-  constructor(value: AvoidanceMode) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('selectAvoidance');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().select.resetAvoidance(node);
-    } else {
-      getUINativeModule().select.setAvoidance(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
   }
 }
 
@@ -765,6 +747,22 @@ class MenuOutlineModifier extends ModifierWithKey<MenuOutlineOptions> {
   }
 }
 
+class AvoidanceModifier extends ModifierWithKey<AvoidanceMode> {
+  constructor(value: AvoidanceMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectAvoidance');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
 // @ts-ignore
 globalThis.Select.attributeModifier = function (modifier: ArkComponent): void {
   attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {

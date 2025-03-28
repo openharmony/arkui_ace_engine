@@ -50,6 +50,7 @@
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -2083,6 +2084,10 @@ bool AceContainer::DumpDynamicUiContent(const std::vector<std::string>& params, 
 {
     LOGI("DumpDynamicUiContent");
     ContainerScope scope(instanceId_);
+    paramUie_.assign(params.begin(), params.end());
+    if (std::find(params.begin(), params.end(), "-simplify") != params.end()) {
+        paramUie_.push_back("-nouie");
+    }
     return DumpInfo(params);
 }
 
@@ -3058,6 +3063,7 @@ void AceContainer::UpdateConfiguration(
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
+    NG::ImageDecoder::ClearPixelMapCache();
 }
 
 void AceContainer::UpdateConfigurationSyncForAll(const ParsedConfig& parsedConfig, const std::string& configuration)

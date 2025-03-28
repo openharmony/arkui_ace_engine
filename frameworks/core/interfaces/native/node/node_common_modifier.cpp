@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -2355,6 +2356,7 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     std::string messageString = message;
     tipsParam->SetMessage(messageString);
+    tipsParam->SetShowInSubWindow(true);
     tipsParam->SetAppearingTime(timeOptions.appearingTime);
     tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
@@ -2396,7 +2398,7 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     }
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
-    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), nullptr);
 }
 
 void ResetBindTips(ArkUINodeHandle node)
@@ -2406,7 +2408,8 @@ void ResetBindTips(ArkUINodeHandle node)
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     tipsParam->SetBlockEvent(false);
     tipsParam->SetTipsFlag(true);
-    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode));
+    RefPtr<SpanString> styledString;
+    ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
 }
 
 void SetOffset(ArkUINodeHandle node, const ArkUI_Float32* number, const ArkUI_Int32* unit)

@@ -950,6 +950,215 @@ HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest007, TestSize.Level1)
+{
+    auto linearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(linearGradient, nullptr);
+    auto linearGradientAttr = linearGradient->linearGradientAttr_;
+    linearGradientAttr.x1 = 3.0_vp;
+    linearGradientAttr.x2 = 35.0_vp;
+    linearGradientAttr.y1 = 31.0_vp;
+    linearGradientAttr.y2 = 32.0_vp;
+    linearGradientAttr.gradientTransform = "gradientTransform11";
+    linearGradient->linearGradientAttr_.gradientUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    linearGradient->SetAttr("gradienttransform", "val1");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.gradientTransform, "");
+
+    linearGradient->SetAttr("gradientunits", "userSpaceOnUse");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.gradientUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+
+    linearGradient->SetAttr("gradientunits", "userSpaceOnUse22");
+    linearGradient->linearGradientAttr_.gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    EXPECT_EQ(linearGradient->linearGradientAttr_.gradientUnits, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+
+    linearGradient->SetAttr("spreadmethod", "repeat");
+    linearGradient->linearGradientAttr_.spreadMethod = SvgSpreadMethod::REPEAT;
+    EXPECT_EQ(linearGradient->linearGradientAttr_.spreadMethod, SvgSpreadMethod::REPEAT);
+
+    linearGradient->SetAttr("spreadmethod", "reflect");
+    linearGradient->linearGradientAttr_.spreadMethod = SvgSpreadMethod::REFLECT;
+    EXPECT_EQ(linearGradient->linearGradientAttr_.spreadMethod, SvgSpreadMethod::REFLECT);
+
+    linearGradient->linearGradientAttr_.spreadMethod = SvgSpreadMethod::PAD;
+    linearGradient->SetAttr("spreadmethod", "reflect222");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.spreadMethod, SvgSpreadMethod::PAD);
+
+    linearGradient->linearGradientAttr_.x1 = 20.0_px;
+    linearGradient->SetAttr("x1", "20");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.x1.ToString(), "20.00px");
+
+    linearGradient->linearGradientAttr_.x2 = 35.0_vp;
+    linearGradient->SetAttr("x2", "20");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.x2.ToString(), "35.00vp");
+
+    linearGradient->linearGradientAttr_.y1 = 31.0_vp;
+    linearGradient->SetAttr("y1", "20");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.y1.ToString(), "31.00vp");
+
+    linearGradient->linearGradientAttr_.y2 = 32.0_vp;
+    linearGradient->SetAttr("y2", "20");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.y2.ToString(), "32.00vp");
+
+    linearGradient->linearGradientAttr_.y2 = 32.0_vp;
+    linearGradient->SetAttr("y22", "20");
+    EXPECT_EQ(linearGradient->linearGradientAttr_.y2.ToString(), "32.00vp");
+}
+
+/**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest008, TestSize.Level1)
+{
+    RefPtr<SvgLinearGradient> linearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(linearGradient, nullptr);
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+
+    auto info = linearGradient->GetLinearGradientInfo(context);
+    EXPECT_EQ(info.x1, 0);
+    EXPECT_EQ(info.x2, 1);
+    EXPECT_EQ(info.y1, 0);
+    EXPECT_EQ(info.y2, 0);
+    EXPECT_EQ(info.spreadMethod, 0);
+    EXPECT_EQ(info.gradientTransform, "");
+    EXPECT_EQ(info.colors.size(), 0);
+}
+
+/**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgLinearGradientTest009, TestSize.Level1)
+{
+    auto linearGradient = AceType::DynamicCast<SvgLinearGradient>(SvgLinearGradient::Create());
+    EXPECT_NE(linearGradient, nullptr);
+
+    linearGradient->linearGradientAttr_.gradientUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    auto units = linearGradient->GradientUnits();
+    EXPECT_EQ(units, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+
+    units = linearGradient->GradientUnits();
+    linearGradient->linearGradientAttr_.gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    EXPECT_EQ(units, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+}
+
+/**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest001, TestSize.Level1)
+{
+    auto linearGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(linearGradient, nullptr);
+    auto radialGradientAttr = linearGradient->radialGradientAttr_;
+    radialGradientAttr.cx = 3.0_vp;
+    radialGradientAttr.cy = 35.0_vp;
+    radialGradientAttr.r = 31.0_vp;
+    radialGradientAttr.cx = 32.0_vp;
+    radialGradientAttr.cy = 32.0_vp;
+    radialGradientAttr.gradientTransform = "gradientTransform11";
+    linearGradient->radialGradientAttr_.gradientUnits = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    linearGradient->SetAttr("gradienttransform", "val1");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.gradientTransform, "");
+
+    linearGradient->SetAttr("gradientunits", "userSpaceOnUse");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.gradientUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+
+    linearGradient->SetAttr("gradientunits", "userSpaceOnUse22");
+    linearGradient->radialGradientAttr_.gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    EXPECT_EQ(linearGradient->radialGradientAttr_.gradientUnits, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+
+    linearGradient->SetAttr("spreadmethod", "repeat");
+    linearGradient->radialGradientAttr_.spreadMethod = SvgSpreadMethod::REPEAT;
+    EXPECT_EQ(linearGradient->radialGradientAttr_.spreadMethod, SvgSpreadMethod::REPEAT);
+
+    linearGradient->SetAttr("spreadmethod", "reflect");
+    linearGradient->radialGradientAttr_.spreadMethod = SvgSpreadMethod::REFLECT;
+    EXPECT_EQ(linearGradient->radialGradientAttr_.spreadMethod, SvgSpreadMethod::REFLECT);
+
+    linearGradient->radialGradientAttr_.spreadMethod = SvgSpreadMethod::PAD;
+    linearGradient->SetAttr("spreadmethod", "reflect222");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.spreadMethod, SvgSpreadMethod::PAD);
+
+    linearGradient->radialGradientAttr_.cx = 20.0_px;
+    linearGradient->SetAttr("cx", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.cx.ToString(), "20.00px");
+
+    linearGradient->radialGradientAttr_.cy = 35.0_vp;
+    linearGradient->SetAttr("cy", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.cy.ToString(), "35.00vp");
+
+    linearGradient->radialGradientAttr_.r = 31.0_vp;
+    linearGradient->SetAttr("r", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.r.ToString(), "31.00vp");
+
+    linearGradient->radialGradientAttr_.fx = 32.0_vp;
+    linearGradient->SetAttr("fx", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fx->ToString(), "32.00vp");
+
+    linearGradient->radialGradientAttr_.fy = 32.0_vp;
+    linearGradient->SetAttr("fy", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "32.00vp");
+
+    linearGradient->radialGradientAttr_.fy = 32.0_vp;
+    linearGradient->SetAttr("fy", "20");
+    EXPECT_EQ(linearGradient->radialGradientAttr_.fy->ToString(), "32.00vp");
+}
+
+/**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest002, TestSize.Level1)
+{
+    auto radialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(radialGradient, nullptr);
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+
+    auto info = radialGradient->GetRadialGradientInfo(context);
+    EXPECT_EQ(info.cx, 0.5);
+    EXPECT_EQ(info.cy, 0.5);
+
+    EXPECT_EQ(info.r, 0.5);
+    EXPECT_EQ(info.fx, 0.5);
+    EXPECT_EQ(info.fy, 0.5);
+    EXPECT_EQ(info.spreadMethod, 0);
+    EXPECT_EQ(info.gradientTransform, "");
+    EXPECT_EQ(info.colors.size(), 0);
+}
+
+/**
+ * @tc.name: Svg Linear Gradient
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgRadialGradientTest003, TestSize.Level1)
+{
+    auto radialGradient = AceType::DynamicCast<SvgRadialGradient>(SvgRadialGradient::Create());
+    EXPECT_NE(radialGradient, nullptr);
+
+    radialGradient->radialGradientAttr_.gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    auto units = radialGradient->GradientUnits();
+    EXPECT_EQ(units, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+
+    units = radialGradient->GradientUnits();
+    radialGradient->radialGradientAttr_.gradientUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    EXPECT_EQ(units, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+}
+
+/**
  * @tc.name: SvgPolygonPathTest001
  * @tc.desc: test asPath
  * @tc.type: FUNC
@@ -2339,5 +2548,238 @@ HWTEST_F(SvgNodeTestNg, SvgGraphicTest041, TestSize.Level1)
     svgGraphic->attributes_.strokeState.SetLineJoin(LineJoinStyle::BEVEL);
     result = svgGraphic->UpdateStrokeStyle(false);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateStrokeStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest042, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto lineDashState = svgGraphic->attributes_.strokeState.GetLineDash().lineDash;
+    lineDashState.emplace_back(1.3f);
+    lineDashState.emplace_back(1.5f);
+    lineDashState.emplace_back(4.3f);
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    svgGraphic->UpdateLineDash();
+    EXPECT_EQ(static_cast<int32_t>(lineDashState.size()), 3);
+    MockContainer::Current()->TearDown();
+
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    svgGraphic->UpdateLineDash();
+    EXPECT_EQ(static_cast<int32_t>(lineDashState.size()), 3);
+    MockContainer::Current()->TearDown();
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetPenColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest043, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    svgGraphic->attributes_.hasOpacity = true;
+    svgGraphic->attributes_.opacity = 63.0f;
+    svgGraphic->attributes_.strokeState.SetOpacity(2.0f);
+    svgGraphic->SetPenColor(pen);
+    auto result = svgGraphic->GetStrokeOpacity();
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test AddColorFilterEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest044, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    svgGraphic->AddColorFilterEffect(pen);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    ImageColorFilter filter;
+    svgGraphic->colorFilter_ = filter;
+    svgGraphic->AddColorFilterEffect(pen);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    filter.colorFilterMatrix_ = std::make_shared<std::vector<float>>(std::vector<float> { 0.5f, 0.3f, 0.7f });
+    svgGraphic->colorFilter_ = filter;
+    svgGraphic->AddColorFilterEffect(pen);
+    EXPECT_NE(pen.GetWidth(), 4.0f);
+
+    filter.colorFilterMatrix_ = nullptr;
+    svgGraphic->colorFilter_ = filter;
+    svgGraphic->AddColorFilterEffect(pen);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    const std::vector<float>& drawingMatrix = { 4.0, 2.0 };
+    auto colorFilterDrawing = DrawingColorFilter::CreateDrawingColorFilter(drawingMatrix);
+    filter.colorFilterDrawing_ = colorFilterDrawing;
+    svgGraphic->colorFilter_ = filter;
+    svgGraphic->AddColorFilterEffect(pen);
+    EXPECT_NE(pen.GetWidth(), 3.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test UpdateColorFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest045, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSFilter filter;
+    RSPen pen;
+    pen.SetFilter(filter);
+    svgGraphic->UpdateColorFilter(filter);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    ImageColorFilter imageColorFilter;
+    svgGraphic->colorFilter_ = imageColorFilter;
+    svgGraphic->UpdateColorFilter(filter);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    imageColorFilter.colorFilterMatrix_ = std::make_shared<std::vector<float>>(std::vector<float> { 0.5f, 0.3f, 0.7f });
+    svgGraphic->colorFilter_ = imageColorFilter;
+    svgGraphic->UpdateColorFilter(filter);
+    EXPECT_NE(pen.GetWidth(), 4.0f);
+
+    imageColorFilter.colorFilterMatrix_ = nullptr;
+    svgGraphic->colorFilter_ = imageColorFilter;
+    svgGraphic->UpdateColorFilter(filter);
+    EXPECT_EQ(pen.GetWidth(), 0.0f);
+
+    const std::vector<float>& drawingMatrix = { 4.0, 2.0 };
+    auto colorFilterDrawing = DrawingColorFilter::CreateDrawingColorFilter(drawingMatrix);
+    imageColorFilter.colorFilterDrawing_ = colorFilterDrawing;
+    svgGraphic->colorFilter_ = imageColorFilter;
+    svgGraphic->UpdateColorFilter(filter);
+    EXPECT_NE(pen.GetWidth(), 3.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test RectifyTargetSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest046, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    double width = 10.0f;
+    double height = 12.0f;
+    Rect rect(10, 12, 13, 0);
+    svgGraphic->RectifyTargetSize(rect, width, height);
+    EXPECT_EQ(width, 10.0f);
+    EXPECT_EQ(height, 12.0f);
+
+    Rect rect1(10, 12, 10, 10);
+    svgGraphic->RectifyTargetSize(rect, width, height);
+    EXPECT_EQ(width, 10.0f);
+    EXPECT_EQ(height, 12.0f);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test SetPenLinearGradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest047, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSPen pen;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+    OHOS::Ace::Gradient gradient;
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+    OHOS::Ace::GradientColor gradientColor1;
+    gradientColor1.SetColor(Color::RED);
+    gradient.colors_.emplace_back(gradientColor1);
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+    svgGraphic->attributes_.fillState.SetGradient(gradient);
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+
+    auto svgPattern = AceType::MakeRefPtr<SvgPattern>();
+    svgGraphic->attributes_.strokeState.SetHref("myPattern");
+    svgContext->Push("myPattern", svgPattern);
+    EXPECT_FALSE(svgGraphic->SetPenRadialGradient(pen, context));
+
+    auto radialGradient = SvgRadialGradient::Create();
+    svgContext->Push("radialGradient", radialGradient);
+    svgGraphic->attributes_.strokeState.SetHref("radialGradient");
+    EXPECT_TRUE(svgGraphic->SetPenRadialGradient(pen, context));
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test GetFillColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest048, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    auto result = svgGraphic->GetFillColor();
+    EXPECT_EQ(result, std::nullopt);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    svgGraphic->SetContext(svgContext);
+
+    result = svgGraphic->GetFillColor();
+    EXPECT_EQ(result, std::nullopt);
+
+    std::optional<Color> color = Color::BLACK;
+    svgContext->SetFillColor(color);
+    result = svgGraphic->GetFillColor();
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result.value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: Svg Graphic
+ * @tc.desc: test ApplyTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgNodeTestNg, SvgGraphicTest049, TestSize.Level1)
+{
+    auto svgGraphic = AceType::MakeRefPtr<SvgGraphic>();
+    EXPECT_NE(svgGraphic, nullptr);
+    RSRecordingPath path;
+    svgGraphic->ApplyTransform(path);
+    EXPECT_EQ(path.GetLength(false), 0);
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    transformVec.emplace_back(info);
+    svgGraphic->attributes_.transformVec = transformVec;
+    svgGraphic->ApplyTransform(path);
+    EXPECT_EQ(path.GetLength(true), 0);
+
+    std::vector<NG::TransformInfo> transformVec1;
+    NG::TransformInfo info1;
+    info1.funcType = "translate";
+    transformVec1.emplace_back(info);
+    svgGraphic->attributes_.transformVec = transformVec1;
+    svgGraphic->ApplyTransform(path);
+    EXPECT_NE(path.GetLength(false), 20);
 }
 } // namespace OHOS::Ace::NG

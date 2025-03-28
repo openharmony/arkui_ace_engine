@@ -160,6 +160,8 @@ void SwitchTheme::Builder::ParseSubStylePattern(const RefPtr<ThemeConstants>& th
     theme->isUseDiffPointColor_ =
         static_cast<bool>(switchPattern->GetAttr<double>("switch_different_pointColor", 0.0));
     theme->focusPadding_ = switchPattern->GetAttr<Dimension>("switch_focus_box_padding", 0.0_vp);
+    theme->switchOnText_ = switchPattern->GetAttr<std::string>("switch_on_text", "");
+    theme->switchOffText_ = switchPattern->GetAttr<std::string>("switch_off_text", "");
 }
 
 void CheckboxTheme::Builder::SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants,

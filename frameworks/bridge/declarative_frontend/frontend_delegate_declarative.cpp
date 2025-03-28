@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -74,6 +73,23 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
         TaskExecutor::TaskType::UI, name);
 }
 
+struct DialogStrings {
+    std::string confirm;
+    std::string cancel;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.confirm = dialogTheme->GetConfirmText();
+    strs.cancel = dialogTheme->GetCancelText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
@@ -1851,6 +1867,34 @@ void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
     NG::ViewAbstract::DismissDialog();
 }
 
+void FrontendDelegateDeclarative::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
+{
+#if defined(PREVIEW)
+    if (dialogProperties.isShowInSubWindow) {
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+        dialogProperties.isShowInSubWindow = false;
+    }
+#endif
+    if (dialogAttr.alignment.has_value()) {
+        dialogProperties.alignment = dialogAttr.alignment.value();
+    }
+    if (dialogAttr.offset.has_value()) {
+        dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        dialogProperties.isSysBlurStyle = false;
+    } else {
+        if (dialogAttr.backgroundBlurStyle.has_value()) {
+            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+        }
+    }
+}
+
 DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
     DialogProperties dialogProperties = {
@@ -1879,29 +1923,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
-#if defined(PREVIEW)
-    if (dialogProperties.isShowInSubWindow) {
-        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-             "emulator or a real device instead.");
-        dialogProperties.isShowInSubWindow = false;
-    }
-#endif
-    if (dialogAttr.alignment.has_value()) {
-        dialogProperties.alignment = dialogAttr.alignment.value();
-    }
-    if (dialogAttr.offset.has_value()) {
-        dialogProperties.offset = dialogAttr.offset.value();
-    }
-    if (dialogAttr.hoverModeArea.has_value()) {
-        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        dialogProperties.isSysBlurStyle = false;
-    } else {
-        if (dialogAttr.backgroundBlurStyle.has_value()) {
-            dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
-        }
-    }
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 
@@ -2212,14 +2234,15 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }

@@ -33,7 +33,6 @@ constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
 constexpr int32_t CALCLINEEND_POSITION = 0;
 constexpr int32_t PERFORM_ACTION = 1;
-constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 } // namespace
 
 class RichEditorPatternTestThreeNg : public RichEditorCommonTestNg {
@@ -199,29 +198,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnEscape001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalcDeleteValueObj001
- * @tc.desc: test CalcDeleteValueObj delete builder span
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto spans = richEditorPattern->GetSpanItemChildren();
-    ASSERT_FALSE(spans.empty());
-    auto spanItem = spans.back();
-    ASSERT_NE(spanItem, nullptr);
-    int32_t currentPosition = INIT_VALUE_1.size() - 2;
-    spanItem->placeholderIndex = currentPosition;
-
-    RichEditorDeleteValue info;
-    int32_t length = 2;
-    richEditorPattern->CalcDeleteValueObj(currentPosition, length, info);
-    EXPECT_EQ(info.GetRichEditorDeleteSpans().size(), 1);
-}
-
-/**
  * @tc.name: GetSpanNodeBySpanItem001
  * @tc.desc: test GetSpanNodeBySpanItem
  * @tc.type: FUNC
@@ -232,37 +208,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetSpanNodeBySpanItem001, TestSize.Level2
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     ASSERT_EQ(richEditorPattern->GetSpanNodeBySpanItem(nullptr), nullptr);
-}
-
-/**
- * @tc.name: DeleteValueSetImageSpan001
- * @tc.desc: test DeleteValueSetImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetImageSpan001, TestSize.Level1)
-{
-    AddImageSpan();
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto imageNode = AceType::DynamicCast<FrameNode>(richEditorNode_->GetLastChild());
-    ASSERT_NE(imageNode, nullptr);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateVerticalAlign(VerticalAlign::CENTER);
-
-    RichEditorAbstractSpanResult spanResult;
-    spanResult.SetSpanIndex(richEditorNode_->GetChildIndexById(imageNode->GetId()));
-
-    auto spans = richEditorPattern->GetSpanItemChildren();
-    ASSERT_FALSE(spans.empty());
-    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spans.back());
-    ASSERT_NE(imageSpanItem, nullptr);
-    richEditorPattern->DeleteValueSetImageSpan(imageSpanItem, spanResult);
-    EXPECT_EQ(spanResult.GetObjectFit(), ImageFit::FILL);
-    EXPECT_EQ(spanResult.GetVerticalAlign(), VerticalAlign::CENTER);
 }
 
 /**
@@ -867,58 +812,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithImageSpan002, TestS
 }
 
 /**
- * @tc.name: InsertOrDeleteSpace001
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = -1;
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_FALSE(tag);
-}
-
-/**
- * @tc.name: InsertOrDeleteSpace002
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = 0;
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = u"test";
-    spanItem->rangeStart = 0;
-    spanItem->position = 4;
-    richEditorPattern->spans_.push_back(spanItem);
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_TRUE(tag);
-}
-
-/**
- * @tc.name: InsertOrDeleteSpace003
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = 0;
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = u" test";
-    spanItem->rangeStart = 0;
-    spanItem->position = 5;
-    richEditorPattern->spans_.push_back(spanItem);
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_TRUE(tag);
-}
-
-/**
  * @tc.name: IsTextEditableForStylus001
  * @tc.desc: test IsTextEditableForStylus
  * @tc.type: FUNC
@@ -1486,19 +1379,4 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleDraggableFlag, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
 }
 
-/**
- * @tc.name: DeleteValueSetSymbolSpan001
- * @tc.desc: test DeleteValueSetSymbolSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetSymbolSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    RichEditorAbstractSpanResult spanResult;
-    auto result = richEditorPattern->DeleteValueSetSymbolSpan(spanItem, spanResult);
-    EXPECT_TRUE(result == SYMBOL_SPAN_LENGTH);
-}
 } // namespace OHOS::Ace::NG

@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/log/dump_log.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/grid_row/grid_row_event_hub.h"
 #include "core/components_ng/pattern/grid_row/grid_row_layout_algorithm.h"
@@ -63,6 +64,42 @@ public:
     {
         return { false, true, ScopeType::OTHERS };
     }
+
+    void DumpInfo() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<GridRowLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        auto columns = layoutProperty->GetColumns();
+        if (columns.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("columns: ").append(columns.value().ToString().c_str()));
+        }
+        auto gutter = layoutProperty->GetGutter();
+        if (gutter.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("gutter: ").append(gutter.value().ToString().c_str()));
+        }
+        auto breakPoints = layoutProperty->GetBreakPoints();
+        if (breakPoints.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("breakPoints: ").append(breakPoints.value().ToString().c_str()));
+        }
+        auto direction = layoutProperty->GetDirection();
+        if (direction.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("direction: ").append(std::to_string(static_cast<int32_t>(direction.value())).c_str()));
+        }
+        auto sizeType = layoutProperty->GetSizeType();
+        if (sizeType.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("sizeType: ").append(std::to_string(static_cast<int32_t>(sizeType.value())).c_str()));
+        }
+        auto alignItems = layoutProperty->GetAlignItems();
+        if (alignItems.has_value()) {
+            DumpLog::GetInstance().AddDesc(
+                std::string("alignItems: ").append(std::to_string(static_cast<int32_t>(alignItems.value())).c_str()));
+        }
+    }
+
 private:
     std::optional<int32_t> callbackId_;
 

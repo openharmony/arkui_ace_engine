@@ -2089,6 +2089,186 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetRepeatCountInfo001
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with Repeat.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of Repeat.
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 10);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 11);
+}
+
+/**
+ * @tc.name: GetRepeatCountInfo002
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is LazyForEach.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with LazyForEach.
+     */
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemGroupsInLazyForEach(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of LazyForEach.
+     */
+    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(lazyForEach, nullptr);
+    int32_t frameCount = lazyForEach->FrameCount();
+    EXPECT_EQ(frameCount, 20);
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 20);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 21);
+}
+
+/**
+ * @tc.name: GetRepeatCountInfo003
+ * @tc.desc: Test the GetRepeatCountInfo when the child of List is CustomNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, GetRepeatCountInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the List with CustomNode.
+     */
+    ListModelNG model = CreateList();
+    AddCustomNode();
+
+    /**
+     * @tc.steps: step2. Check the totalCount of CustomNode.
+     */
+    EXPECT_NE(pattern_, nullptr);
+    auto repeatDifference = 0;
+    auto firstRepeatCount = 0;
+    auto totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 1);
+
+    AddListItem();
+    repeatDifference = 0;
+    firstRepeatCount = 0;
+    totalChildCount = 0;
+    pattern_->GetRepeatCountInfo(frameNode_, repeatDifference, firstRepeatCount, totalChildCount);
+    EXPECT_EQ(repeatDifference, 0);
+    EXPECT_EQ(firstRepeatCount, 0);
+    EXPECT_EQ(totalChildCount, 2);
+}
+
+/**
+ * @tc.name: ListCacheCount001
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Flush Idle Task
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: Not pre load item.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(true);
+    UpdateCurrentOffset(-250);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+
+    /**
+     * @tc.steps: step3. Flush Idle Task
+     * @tc.expected: ListItem 1 and 7 is cached, ListItem 2,3,4,5,6 is active.
+     */
+    frameNode_->GetContext()->SetIsWindowSizeDragging(false);
+    FlushIdleTask(listPattern);
+    childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 7);
+    cachedItem = frameNode_->GetChildByIndex(1)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    cachedItem = frameNode_->GetChildByIndex(7)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 1), -150.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
+}
+
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC

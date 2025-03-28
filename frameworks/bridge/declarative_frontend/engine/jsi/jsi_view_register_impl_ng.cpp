@@ -612,8 +612,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRotationRecognizer::JSBind(globalObj);
 }
 
-void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runtime,
-    void* nativeEngine, const shared_ptr<JsValue> globalPtr)
+void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSCanvasGradient::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
@@ -625,7 +624,6 @@ void JsBindWorkerViews(BindingTarget globalObj, const shared_ptr<JsRuntime> runt
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
-    JSMock::JSBind(globalObj, runtime, globalPtr);
 }
 
 } // namespace OHOS::Ace::Framework

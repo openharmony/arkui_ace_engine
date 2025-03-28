@@ -22,7 +22,9 @@
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 

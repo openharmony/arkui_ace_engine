@@ -56,6 +56,7 @@ public:
     static void SetColorFilter(const JSCallbackInfo& info);
     static void SetSmoothEdge(const JSCallbackInfo& info);
     static void SetDynamicRangeMode(const JSCallbackInfo& info);
+    static void SetHdrBrightness(const JSCallbackInfo& info);
     static void SetEnhancedImageQuality(const JSCallbackInfo& info);
     static void SetOrientation(const JSCallbackInfo& info);
 

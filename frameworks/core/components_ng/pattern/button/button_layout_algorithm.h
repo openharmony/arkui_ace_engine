@@ -17,12 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUTTON_BUTTON_LAYOUT_ALGORITHM_H
 
 #include "base/memory/referenced.h"
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
+class LayoutWrapper;
 class ACE_EXPORT ButtonLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(ButtonLayoutAlgorithm, BoxLayoutAlgorithm);
 

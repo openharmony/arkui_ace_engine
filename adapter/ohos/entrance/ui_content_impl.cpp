@@ -243,7 +243,10 @@ void AddSetAppColorModeToResConfig(
 std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::stringstream ss;
-    ss << "[";
+    if (avoidAreas.empty()) {
+        return ss.str();
+    }
+    ss << "updateAvoidAreas size: " << avoidAreas.size() << "[";
     std::for_each(avoidAreas.begin(), avoidAreas.end(), [&ss](const auto& avoidArea) {
         ss << "(" << static_cast<int32_t>(avoidArea.first) << "," << avoidArea.second.ToString() << ")";
     });
@@ -1017,18 +1020,19 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     return errorCode;
 }
 
-void UIContentImpl::InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-    const std::string& entryPoint, const std::vector<std::string>& registerComponents)
+void UIContentImpl::InitializeDynamic(const DynamicInitialConfig& config)
 {
     isDynamicRender_ = true;
-    hapPath_ = hapPath;
-    hostInstanceId_ = hostInstanceId;
-    registerComponents_ = registerComponents;
+    hapPath_ = config.hapPath;
+    hostInstanceId_ = config.hostInstanceId;
+    registerComponents_ = config.registerComponents;
     auto env = reinterpret_cast<napi_env>(runtime_);
+    auto entryPoint = config.entryPoint;
+    hostWindowInfo_ = config.hostWindowInfo;
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
 
-    CommonInitializeForm(nullptr, abcPath, nullptr);
+    CommonInitializeForm(nullptr, config.abcPath, nullptr);
     AddWatchSystemParameter();
 
     LOGI("[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -1531,6 +1535,18 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);
+    }
+
+    if (isDynamicRender_) {
+        if (hostWindowInfo_.focusWindowId != 0) {
+            container->SetFocusWindowId(hostWindowInfo_.focusWindowId);
+        }
+
+        if (hostWindowInfo_.realHostWindowId > 0) {
+            container->SetRealHostWindowId(hostWindowInfo_.realHostWindowId);
+        }
+        LOGI("DynamicRender: focusWindowId: %{public}u, realHostWindowId: %{public}d",
+            hostWindowInfo_.focusWindowId, hostWindowInfo_.realHostWindowId);
     }
 
     // after frontend initialize
@@ -2294,16 +2310,21 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
-    bool isSystemWindow = GetIsSystemWindow(container) &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+    bool isSystemWindow =
+        GetIsSystemWindow(container) && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
             window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
-            pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
-            pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
-            pipeline->UpdateNavSafeArea(
-                container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
+            auto systemInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM);
+            auto cutoutInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT);
+            auto navInsets = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
+            pipeline->UpdateSystemSafeArea(systemInsets);
+            pipeline->UpdateCutoutSafeArea(cutoutInsets);
+            pipeline->UpdateNavSafeArea(navInsets);
+            TAG_LOGI(ACE_LAYOUT,
+                "InitializeSafeArea systemInsets:%{public}s, cutoutInsets:%{public}s, navInsets:%{public}s",
+                systemInsets.ToString().c_str(), cutoutInsets.ToString().c_str(), navInsets.ToString().c_str());
         }
     }
 }
@@ -2885,12 +2906,13 @@ void UIContentImpl::AddKeyFrameAnimateEndCallback(const std::function<void()>& c
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (context) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
-    }
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "AddKeyFrameAnimateEndCallback");
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->AddKeyFrameAnimateEndCallback(callback);
 }
 
 void UIContentImpl::AddKeyFrameCanvasNodeCallback(const std::function<
@@ -2908,12 +2930,26 @@ void UIContentImpl::LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvas
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (context) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
+    CHECK_NULL_VOID(context);
+#ifndef NG_BUILD
+#ifdef ENABLE_ROSEN_BACKEND
+    if (SystemProperties::GetRosenBackendEnabled()) {
+        CHECK_NULL_VOID(window_);
+        auto surfaceNode = window_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        CHECK_NULL_VOID(canvasNode);
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "AddChild surfaceNode %{public}" PRIu64 "canvasNode %{public}" PRIu64 "",
+            surfaceNode->GetId(), canvasNode->GetId());
+        surfaceNode->AddChild(canvasNode, -1);
     }
+#endif
+#endif
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "LinkKeyFrameCanvasNode.");
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_VOID(rootElement);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->LinkCanvasNodeToRootNode(context->GetRootElement());
 }
 
 void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
@@ -2944,31 +2980,32 @@ void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
         TAG_LOGE(AceLogTag::ACE_WINDOW, "context is null.");
         return;
     }
-    if (canvasNode_) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "canvasNode already exist.");
-        return;
-    }
-    if (auto transactionController =  Rosen::RSSyncTransactionController::GetInstance()) {
-        transactionController->OpenSyncTransaction();
-        auto rsTransaction = transactionController->GetRSTransaction();
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        canvasNode_ = rosenRenderContext->GetCanvasNode();
-        if (addNodeCallback_ && canvasNode_) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
-            addNodeCallback_(canvasNode_, rsTransaction);
-        }
+
+    auto transactionController =  Rosen::RSSyncTransactionController::GetInstance();
+    CHECK_NULL_VOID(transactionController);
+    transactionController->OpenSyncTransaction();
+    auto rsTransaction = transactionController->GetRSTransaction();
+    auto rootElement = context->GetRootElement();
+    if (!rootElement) {
         transactionController->CloseSyncTransaction();
-    } else {
-        TAG_LOGE(AceLogTag::ACE_WINDOW, "transactionController is null.");
         return;
     }
-    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
-    if (callbackCachedAnimation) {
-        auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-            context->GetRootElement()->GetRenderContext());
-        rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    if (!rosenRenderContext) {
+        transactionController->CloseSyncTransaction();
+        return;
     }
+    rosenRenderContext->CreateCanvasNode();
+    canvasNode_ = rosenRenderContext->GetCanvasNode();
+    if (addNodeCallback_ && canvasNode_) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW, "rsTransaction addNodeCallback_.");
+        addNodeCallback_(canvasNode_, rsTransaction);
+    }
+    transactionController->CloseSyncTransaction();
+
+    std::function<void()> callbackCachedAnimation = std::bind(&UIContentImpl::ExecKeyFrameCachedAnimateAction, this);
+    CHECK_NULL_VOID(callbackCachedAnimation);
+    rosenRenderContext->AddKeyFrameCachedAnimateActionCallback(callbackCachedAnimation);
 }
 
 bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
@@ -2982,24 +3019,28 @@ bool UIContentImpl::KeyFrameActionPolicy(const ViewportConfig& config,
 
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    if (!container) {
-        return true;
-    }
+    CHECK_NULL_RETURN(container, true);
     auto pipelineContext = container->GetPipelineContext();
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    if (!context) {
-        return true;
-    }
+    CHECK_NULL_RETURN(context, true);
 
     bool animateRes = true;
-    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(
-        context->GetRootElement()->GetRenderContext());
+    auto rootElement = context->GetRootElement();
+    CHECK_NULL_RETURN(rootElement, true);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(rootElement->GetRenderContext());
+    CHECK_NULL_RETURN(rosenRenderContext, true);
     switch (reason) {
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_START:
-            KeyFrameDragStartPolicy(context);
+            if (!rosenRenderContext->GetIsDraggingFlag()) {
+                if (rosenRenderContext->GetCanvasNode()) {
+                    rosenRenderContext->SetReDraggingFlag(true);
+                }
+                rosenRenderContext->SetIsDraggingFlag(true);
+                KeyFrameDragStartPolicy(context);
+            }
             return true;
         case OHOS::Rosen::WindowSizeChangeReason::DRAG_END:
-            canvasNode_ = nullptr;
+            rosenRenderContext->SetIsDraggingFlag(false);
         case OHOS::Rosen::WindowSizeChangeReason::DRAG:
             animateRes = rosenRenderContext->SetCanvasNodeOpacityAnimation(
                 config.GetKeyFrameConfig().animationDuration_,
@@ -3039,9 +3080,9 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
     TAG_LOGD(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
-        "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
+        "rsTransaction nullptr %{public}d, %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
-        rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
+        rsTransaction == nullptr, stringifiedMap.c_str());
     if (reason == OHOS::Rosen::WindowSizeChangeReason::PAGE_ROTATION) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "save PAGE_ROTATION as ROTATION");
         reason = OHOS::Rosen::WindowSizeChangeReason::ROTATION;
@@ -3178,7 +3219,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             pipelineContext->SetDisplayWindowRectInfo(
                 Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
             pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
-            TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayAvailableRect in UpdateViewportConfig to : %{public}s",
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayWindowRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(

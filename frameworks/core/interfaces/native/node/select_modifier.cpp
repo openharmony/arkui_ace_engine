@@ -121,26 +121,6 @@ void SetMenuAlign(
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
 }
 
-void SetAvoidance(ArkUINodeHandle node, ArkUI_Int32 modeValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::Avoidance avoidance;
-    switch (modeValue) {
-        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::COVER_TARGET):
-            avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
-            break;
-        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET):
-            avoidance.mode = OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET;
-            break;
-        default:
-            avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
-            break;
-    }
-
-    SelectModelNG::SetAvoidance(frameNode, avoidance);
-}
-
 void SetFont(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -338,15 +318,6 @@ void ResetMenuAlign(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MenuAlign menuAlignObj;
     SelectModelNG::SetMenuAlign(frameNode, menuAlignObj);
-}
-
-void ResetAvoidance(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::Avoidance avoidance;
-    avoidance.mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
-    SelectModelNG::SetAvoidance(frameNode, avoidance);
 }
 
 void ResetFont(ArkUINodeHandle node)
@@ -742,6 +713,51 @@ void ResetMenuOutline(ArkUINodeHandle node)
     SelectModelNG::SetMenuOutline(frameNode, menuParam);
 }
 
+void SetSelectSymbolValue(ArkUINodeHandle node, ArkUI_CharPtr* values,
+    void** symbolFunction, ArkUI_Uint32 length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(values);
+    CHECK_NULL_VOID(symbolFunction);
+
+    std::vector<SelectParam> params(length);
+    for (uint32_t i = 0; i < length; i++) {
+        if (values[i] == nullptr) {
+            return;
+        }
+        params[i].text = values[i];
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction[i]);
+        params[i].symbolIcon = *symbolCallback;
+    }
+    SelectModelNG::InitSelect(frameNode, params);
+}
+
+void SetAvoidance(ArkUINodeHandle node, ArkUI_Int32 modeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    AvoidanceMode mode = AvoidanceMode::COVER_TARGET;
+    switch (modeValue) {
+        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::COVER_TARGET):
+            mode = OHOS::Ace::AvoidanceMode::COVER_TARGET;
+            break;
+        case static_cast<ArkUI_Int32>(OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET):
+            mode = OHOS::Ace::AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            break;
+    }
+    SelectModelNG::SetAvoidance(frameNode, mode);
+}
+
+void ResetAvoidance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetAvoidance(frameNode, AvoidanceMode::COVER_TARGET);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -757,7 +773,6 @@ const ArkUISelectModifier* GetSelectModifier()
         .setSelectedOptionFontColor = SetSelectedOptionFontColor,
         .setArrowPosition = SetArrowPosition,
         .setMenuAlign = SetMenuAlign,
-        .setAvoidance = SetAvoidance,
         .setFont = SetFont,
         .setOptionFont = SetOptionFont,
         .setSelectedOptionFont = SetSelectedOptionFont,
@@ -771,7 +786,6 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
         .resetArrowPosition = ResetArrowPosition,
         .resetMenuAlign = ResetMenuAlign,
-        .resetAvoidance = ResetAvoidance,
         .resetFont = ResetFont,
         .resetOptionFont = ResetOptionFont,
         .resetSelectedOptionFont = ResetSelectedOptionFont,
@@ -804,6 +818,9 @@ const ArkUISelectModifier* GetSelectModifier()
         .setOnSelect = SetOnSelectExt,
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
+        .setSelectSymbolValue = SetSelectSymbolValue,
+        .setAvoidance = SetAvoidance,
+        .resetAvoidance = ResetAvoidance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -824,7 +841,6 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .setSelectedOptionFontColor = SetSelectedOptionFontColor,
         .setArrowPosition = SetArrowPosition,
         .setMenuAlign = SetMenuAlign,
-        .setAvoidance = SetAvoidance,
         .setFont = SetFont,
         .setOptionFont = SetOptionFont,
         .setSelectedOptionFont = SetSelectedOptionFont,
@@ -838,7 +854,6 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
         .resetArrowPosition = ResetArrowPosition,
         .resetMenuAlign = ResetMenuAlign,
-        .resetAvoidance = ResetAvoidance,
         .resetFont = ResetFont,
         .resetOptionFont = ResetOptionFont,
         .resetSelectedOptionFont = ResetSelectedOptionFont,
@@ -868,6 +883,8 @@ const CJUISelectModifier* GetCJUISelectModifier()
         .resetSelectDirection = ResetSelectDirection,
         .setMenuOutline = SetMenuOutline,
         .resetMenuOutline = ResetMenuOutline,
+        .setAvoidance = SetAvoidance,
+        .resetAvoidance = ResetAvoidance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

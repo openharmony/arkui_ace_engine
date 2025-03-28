@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
 #endif
@@ -577,7 +578,7 @@ bool SecurityComponentHandler::CheckForegroundEffect(const RefPtr<FrameNode>& no
     const RefPtr<RenderContext>& renderContext, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
     if (!NearEqual(renderContext->GetForegroundEffect().value_or(0.0f), 0.0f)) {
-        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.hasNonCompatibleChange_ = true;
         buttonInfo.foregroundBlurRadius_ = renderContext->GetForegroundEffect().value();
     }
     return false;
@@ -588,7 +589,7 @@ bool SecurityComponentHandler::CheckOverlayText(const RefPtr<FrameNode>& node, s
 {
     auto overlayText = renderContext->GetOverlayText();
     if (overlayText.has_value()) {
-        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.hasNonCompatibleChange_ = true;
         buttonInfo.isOverlayTextSet_ = true;
     }
     return false;
@@ -662,7 +663,7 @@ bool SecurityComponentHandler::CheckOverlayNode(RefPtr<FrameNode>& parentNode, R
     CHECK_NULL_RETURN(node, false);
     auto secRect = node->GetPaintRectWithTransform();
     if (overlayRect.IsInnerIntersectWithRound(secRect)) {
-        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.hasNonCompatibleChange_ = true;
         buttonInfo.isOverlayNodeCovered_ = true;
     }
     return false;
@@ -693,7 +694,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             return true;
         }
         CheckOverlayNode(parentNode, node, message, buttonInfo);
-        if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatileChange_, buttonInfo.blurRadius_)) {
+        if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatibleChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType +
@@ -1000,7 +1001,7 @@ bool SecurityComponentHandler::InitButtonInfoValue(RefPtr<FrameNode>& node,
     buttonInfo.type_ = scType;
     if (layoutProperty->GetIsIconExceeded().has_value() && layoutProperty->GetIsIconExceeded().value()) {
         buttonInfo.isIconExceeded_ = true;
-        buttonInfo.hasNonCompatileChange_ = true;
+        buttonInfo.hasNonCompatibleChange_ = true;
     }
     if (!InitChildInfo(buttonInfo, node)) {
         return false;

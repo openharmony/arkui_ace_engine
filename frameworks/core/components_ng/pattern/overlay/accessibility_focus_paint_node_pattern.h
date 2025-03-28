@@ -152,12 +152,48 @@ public:
         return rect;
     }
 
+    RectF ApplyFrameNodeTranformToRectWithoutRotate(const RectF& rect, const RefPtr<NG::FrameNode>& parent) const
+    {
+        RectF newRect = rect;
+        if (!parent) {
+            return newRect;
+        }
+        auto parentRenderContext = parent->GetRenderContext();
+        if (!parentRenderContext) {
+            return newRect;
+        }
+        auto parentScale = parentRenderContext->GetTransformScale();
+        auto offset = rect.GetOffset();
+        if (parentScale) {
+            newRect.SetWidth(rect.Width() * parentScale.value().x);
+            newRect.SetHeight(rect.Height() * parentScale.value().y);
+            offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+        }
+        offset += parentRenderContext->GetPaintRectWithTransformWithoutDegree().GetOffset();
+        newRect.SetOffset(offset);
+        return newRect;
+    }
+
+    RectF GetTransformRectRelativeToWindowWithoutRotate(const RefPtr<NG::FrameNode>& frameNode) const
+    {
+        CHECK_NULL_RETURN(frameNode, RectF());
+        auto context = frameNode->GetRenderContext();
+        CHECK_NULL_RETURN(context, RectF());
+        RectF rect = context->GetPaintRectWithTransformWithoutDegree();
+        auto parent = frameNode->GetAncestorNodeOfFrame(true);
+        while (parent) {
+            rect = ApplyFrameNodeTranformToRectWithoutRotate(rect, parent);
+            parent = parent->GetAncestorNodeOfFrame(true);
+        }
+        return rect;
+    }
+
     void ChangePaintNodeLayoutInner(
         const RefPtr<NG::FrameNode>& focusNode, const RefPtr<NG::FrameNode>& paintNode, int32_t left, int32_t top)
     {
         CHECK_NULL_VOID(focusNode);
         auto trueCenter = GetPaintRectCenter(focusNode);
-        auto rect = focusNode->GetTransformRectRelativeToWindow();
+        auto rect = GetTransformRectRelativeToWindowWithoutRotate(focusNode);
         RectF showRect(trueCenter.GetX() - (rect.Width() / CENTER_DIVISOR) - left,
             trueCenter.GetY() - (rect.Height() / CENTER_DIVISOR) - top,
             rect.Width(), rect.Height());
@@ -179,6 +215,12 @@ public:
         CHECK_NULL_VOID(paintRenderContext);
         auto focusRenderContext = focusNode->GetRenderContext();
         CHECK_NULL_VOID(focusRenderContext);
+        auto pipeline = focusNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        auto degree = accessibilityManager->GetTransformDegreeRelativeToWindow(focusNode);
+        paintRenderContext->UpdateTransformRotate(NG::Vector5F(0, 0, 1, degree, 0));
         if (focusRenderContext->HasOpacity()) {
             paintRenderContext->UpdateOpacity(focusRenderContext->GetOpacityValue());
         }

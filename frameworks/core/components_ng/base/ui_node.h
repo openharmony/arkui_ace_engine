@@ -36,7 +36,6 @@
 #include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_event.h"
 
@@ -153,6 +152,12 @@ public:
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    {
+        return children_;
+    }
+
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
     {
         return children_;
     }

@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STEPPER_STEPPER_ITEM_LAYOUT_PROPERTY_H
 
 #include "base/i18n/localization.h"
+#include "core/components/stepper/stepper_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,10 +56,20 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<StepperTheme>();
+        std::string stepperBack = "";
+        std::string stepperNext = "";
+        if (theme) {
+            stepperBack = theme->GetStepperBack();
+            stepperNext = theme->GetStepperNext();
+        }
+        
         json->PutExtAttr("prevLabel",
-            GetLeftLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.back")).c_str(), filter);
+            GetLeftLabel().value_or(stepperBack).c_str(), filter);
         json->PutExtAttr("nextLabel",
-            GetRightLabel().value_or(Localization::GetInstance()->GetEntryLetters("stepper.next")).c_str(), filter);
+            GetRightLabel().value_or(stepperNext).c_str(), filter);
         static const std::map<std::string, std::string> STATUS_TO_STRING = { { "normal", "ItemState.Normal" },
             { "disabled", "ItemState.Disabled" }, { "waiting", "ItemState.Waiting" }, { "skip", "ItemState.Skip" } };
         json->PutExtAttr("status", STATUS_TO_STRING.at(GetLabelStatus().value_or("normal")).c_str(), filter);

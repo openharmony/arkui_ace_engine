@@ -439,6 +439,11 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
     return children_;
 }
 
+const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildrenForInspector() const
+{
+    return children_;
+}
+
 void RepeatVirtualScrollNode::OnRecycle()
 {
     for (auto& [key, child]: caches_.GetAllNodes()) {

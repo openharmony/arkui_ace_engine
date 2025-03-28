@@ -37,6 +37,8 @@ constexpr float DEFAULT_SIZE_24 = 24.0f;
 constexpr float DEFAULT_SIZE_32 = 32.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 constexpr int EXPECTED_UPDATE_INTERVAL_VALUE = 1000;
+constexpr float DEFAULT_VISIBLE_RATIO_MIN = 0.0f;
+constexpr float DEFAULT_VISIBLE_RATIO_MAX = 1.0f;
 
 ArkUI_LayoutConstraint* OH_ArkUI_LayoutConstraint_Create()
 {
@@ -1144,7 +1146,9 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions
     }
     option->ratios.clear();
     for (int32_t i = 0; i < size; i++) {
-        option->ratios.push_back(value[i]);
+        auto ratio = value[i];
+        ratio = std::clamp(ratio, DEFAULT_VISIBLE_RATIO_MIN, DEFAULT_VISIBLE_RATIO_MAX);
+        option->ratios.push_back(ratio);
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

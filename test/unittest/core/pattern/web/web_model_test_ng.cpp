@@ -2085,7 +2085,7 @@ HWTEST_F(WebModelTestNg, SetOnDragLeave012, TestSize.Level1)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     std::string extraParams = "extraParams";
-    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, dragEvent, extraParams);
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEvent, extraParams);
     EXPECT_TRUE(callbackCalled);
 #endif
 }

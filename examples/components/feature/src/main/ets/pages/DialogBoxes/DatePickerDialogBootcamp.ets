@@ -118,6 +118,10 @@ export struct DatePickerDialogBootcamp {
   @State isHapticFeedback: boolean = true;
   @State datePickerMode: DatePickerMode = DatePickerMode.DATE;
   @State enableMode: boolean = false;
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   build() {
     NavDestination() {
@@ -146,7 +150,7 @@ export struct DatePickerDialogBootcamp {
             start: new Date('2000-1-1'),
             end: new Date('2100-12-31'),
             selected: this.selectedDate,
-            mode: useEnabled(this.enableMode, this.datePickerMode),
+            // mode: useEnabled(this.enableMode, this.datePickerMode),
             lunar: useEnabled(this.enableLunar, this.lunar),
             lunarSwitch: useEnabled(this.enableLunarSwitch, this.lunarSwitch),
             showTime: useEnabled(this.enableShowTime, this.showTime),
@@ -244,189 +248,187 @@ export struct DatePickerDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
-          title: '显示为农历',
+          title: 'lunar',
           isEnabled: $enableLunar,
           value: $lunar,
           dataSource: [
-            { label: '开启', value: true },
-            { label: '关闭', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
 
         RadioBlock({
-          title: '展示切换农历的开关',
+          title: 'lunarSwitch',
           isEnabled: $enableLunarSwitch,
           value: $lunarSwitch,
           dataSource: [
-            { label: '展示', value: true },
-            { label: '隐藏', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
 
         RadioBlock({
-          title: '展示时间项',
+          title: 'showTime',
           isEnabled: $enableShowTime,
           value: $showTime,
           dataSource: [
-            { label: '开启', value: true },
-            { label: '关闭', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
 
         RadioBlock({
-          title: '是否为24小时制',
+          title: 'useMilitaryTime',
           isEnabled: $enableMilitaryTime,
           value: $isMilitaryTime,
           dataSource: [
-            { label: '24小时制', value: true },
-            { label: '12小时制', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
 
         ColorBlock({
-          title: '最上和最下两个选项的文本颜色',
+          title: 'disappearTextStyle.color',
           isEnabled: $enableDisappearTextStyleColor,
           color: $disappearTextStyleColor
         })
 
         RadioBlock({
-          title: '最上和最下两个选项的文本字号',
+          title: 'disappearTextStyle.fontSize',
           isEnabled: $enableDisappearTextStyleFontSize,
           value: $disappearTextStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12fp' },
-            { label: '正常', value: '14fp' },
-            { label: '大型', value: '20fp' },
+            { label: '12fp', value: '12fp' },
+            { label: '16fp', value: '16fp' },
+            { label: '20fp', value: '20fp' },
           ]
         })
 
         RadioBlock({
-          title: '最上和最下两个选项的文本字体粗细',
+          title: 'disappearTextStyle.fontWeight',
           isEnabled: $enableDisappearTextStyleFontWeight,
           value: $disappearTextStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'FontWeight.Regular', value: FontWeight.Regular },
+            { label: 'FontWeight.Medium', value: FontWeight.Medium },
           ]
         })
 
         ColorBlock({
-          title: '除了最上、最下及选中项以外的文本颜色',
+          title: 'textStyle.color',
           isEnabled: $enableTextStyleColor,
           color: $textStyleColor
         })
 
         RadioBlock({
-          title: '除了最上、最下及选中项以外的文本字号',
+          title: 'textStyle.fontSize',
           isEnabled: $enableTextStyleFontSize,
           value: $textStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12fp' },
-            { label: '正常', value: '16fp' },
-            { label: '大型', value: '20fp' },
+            { label: '12fp', value: '12fp' },
+            { label: '16fp', value: '16fp' },
+            { label: '20fp', value: '20fp' },
           ]
         })
 
         RadioBlock({
-          title: '除了最上、最下及选中项以外的文本字体粗细',
+          title: 'textStyle.fontWeight',
           isEnabled: $enableTextStyleFontWeight,
           value: $textStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'FontWeight.Regular', value: FontWeight.Regular },
+            { label: 'FontWeight.Medium', value: FontWeight.Medium },
           ]
         })
 
         ColorBlock({
-          title: '选中项的文本颜色',
+          title: 'selectedTextStyle.color',
           isEnabled: $enableSelectedTextStyleColor,
           color: $selectedTextStyleColor
         })
 
         RadioBlock({
-          title: '选中项的文本字号',
+          title: 'selectedTextStyle.fontSize',
           isEnabled: $enableSelectedTextStyleFontSize,
           value: $selectedTextStyleFontSize,
           dataSource: [
-            { label: '小型', value: '12vp' },
-            { label: '正常', value: '20vp' },
-            { label: '大型', value: '30vp' },
+            { label: '12vp', value: '12vp' },
+            { label: '20vp', value: '20vp' },
+            { label: '30vp', value: '30vp' },
           ]
         })
 
         RadioBlock({
-          title: '选中项的文本字体粗细',
+          title: 'selectedTextStyle.fontWeight',
           isEnabled: $enableSelectedTextStyleFontWeight,
           value: $selectedTextStyleFontWeight,
           dataSource: [
-            { label: '常规', value: FontWeight.Regular },
-            { label: '中等', value: FontWeight.Medium },
+            { label: 'FontWeight.Regular', value: FontWeight.Regular },
+            { label: 'FontWeight.Medium', value: FontWeight.Medium },
           ]
         })
 
         RadioBlock({
-          title: '确认按钮类型',
+          title: 'acceptButtonStyle',
           isEnabled: this.enabledAcceptButtonType,
           value: this.acceptButtonType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
           ]
         })
 
         RadioBlock({
-          title: '取消按钮类型',
+          title: 'cancelButtonStyle',
           isEnabled: this.enabledCancelButtonType,
           value: this.cancelButtonType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
           ]
         })
 
         RadioBlock({
-          title: '确认按钮样式',
+          title: 'acceptButtonType',
           isEnabled: this.enableAcceptButtonStyle,
           value: this.acceptButtonStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮样式',
+          title: 'cancelButtonType',
           isEnabled: this.enableCancelButtonStyle,
           value: this.cancelButtonStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         ColorBlock({
-          title: '确认按钮字体颜色',
+          title: 'acceptButtonStyle.fontColor',
           isEnabled: this.enableAcceptButtonFontColor,
           color: this.acceptButtonFontColor
         })
 
         ColorBlock({
-          title: '取消按钮字体颜色',
+          title: 'cancelButtonStyle.fontColor',
           isEnabled: this.enableCancelButtonFontColor,
           color: this.cancelButtonFontColor
         })
 
         RadioBlock({
-          title: '确认按钮角色',
+          title: 'acceptButton.role',
           isEnabled: this.enableAcceptButtonRole,
           value: this.acceptButtonRole,
           dataSource: [
@@ -436,7 +438,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮角色',
+          title: 'cancelButton.role',
           isEnabled: this.enableCancelButtonRole,
           value: this.cancelButtonRole,
           dataSource: [
@@ -446,47 +448,47 @@ export struct DatePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '确认按钮尺寸',
+          title: 'acceptButton.size',
           isEnabled: this.enableAcceptButtonFontSize,
           value: this.acceptButtonFontSize,
           dataSource: [
-            { label: '正常', value: '16fp' },
-            { label: '小型', value: '12fp' },
+            { label: '16fp', value: '16fp' },
+            { label: '12fp', value: '12fp' },
           ]
         })
 
         RadioBlock({
-          title: '取消按钮尺寸',
+          title: 'cancelButton.size',
           isEnabled: this.enableCancelButtonFontSize,
           value: this.cancelButtonFontSize,
           dataSource: [
-            { label: '正常', value: '16fp' },
-            { label: '小型', value: '12fp' },
+            { label: '16fp', value: '16fp' },
+            { label: '12fp', value: '12fp' },
           ]
         })
 
         RadioBlock({
-          title: '确认按钮字体粗细',
+          title: 'acceptButton.fontWeight',
           isEnabled: this.enableAcceptButtonFontWeight,
           value: this.acceptButtonFontWeight,
           dataSource: [
-            { label: '正常', value: 400 },
-            { label: '加粗', value: 800 },
+            { label: '400px', value: 400 },
+            { label: '800px', value: 800 },
           ]
         })
 
         RadioBlock({
-          title: '取消按钮字体粗细',
+          title: 'cancelButton.fontWeight',
           isEnabled: this.enableCancelButtonFontWeight,
           value: this.cancelButtonFontWeight,
           dataSource: [
-            { label: '正常', value: 400 },
-            { label: '加粗', value: 800 },
+            { label: '400px', value: 400 },
+            { label: '800px', value: 800 },
           ]
         })
 
         RadioBlock({
-          title: '确认按钮字体样式',
+          title: 'acceptButton.fontStyle',
           isEnabled: this.enableAcceptButtonFontStyle,
           value: this.acceptButtonFontStyle,
           dataSource: [
@@ -496,7 +498,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮字体样式',
+          title: 'cancelButton.fontStyle',
           isEnabled: this.enableCancelButtonFontStyle,
           value: this.cancelButtonFontStyle,
           dataSource: [
@@ -506,51 +508,51 @@ export struct DatePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '确认按钮背景颜色',
+          title: 'acceptButton.backgroundColor',
           isEnabled: this.enableAcceptButtonBackGroundColor,
           color: this.acceptButtonBackGroundColor
         })
 
         ColorBlock({
-          title: '取消按钮背景颜色',
+          title: 'cancelButton.backgroundColor',
           isEnabled: this.enableCancelButtonBackGroundColor,
           color: this.cancelButtonBackGroundColor
         })
 
         RadioBlock({
-          title: '确认按钮边框圆角半径',
+          title: 'acceptButton.borderRadius',
           isEnabled: this.enableAcceptButtonBorderRadius,
           value: this.acceptButtonBorderRadius,
           dataSource: [
-            { label: '正常', value: 10 },
-            { label: '较大', value: 100 },
+            { label: '10px', value: 10 },
+            { label: '100px', value: 100 },
           ]
         })
 
         RadioBlock({
-          title: '取消按钮边框圆角半径',
+          title: 'cancelButton.borderRadius',
           isEnabled: this.enableCancelButtonBorderRadius,
           value: this.cancelButtonBorderRadius,
           dataSource: [
-            { label: '正常', value: 10 },
-            { label: '较大', value: 100 },
+            { label: '10px', value: 10 },
+            { label: '100px', value: 100 },
           ]
         })
 
         RadioBlock({
-          title: '弹窗在竖直方向上的对齐方式',
+          title: 'alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
-            { label: '顶部', value: DialogAlignment.Top },
-            { label: '中心', value: DialogAlignment.Center },
-            { label: '底部', value: DialogAlignment.Bottom },
-            { label: '默认', value: DialogAlignment.Default }
+            { label: 'Top', value: DialogAlignment.Top },
+            { label: 'Center', value: DialogAlignment.Center },
+            { label: 'Bottom', value: DialogAlignment.Bottom },
+            { label: 'Default', value: DialogAlignment.Default }
           ]
         })
 
         SliderBlock({
-          title: '弹窗相对alignment所在位置的偏移量：x',
+          title: 'offset.dx',
           isEnabled: $enableOffsetDx,
           value: $offsetDx,
           min: -40,
@@ -558,7 +560,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗相对alignment所在位置的偏移量：y',
+          title: 'offset.dy',
           isEnabled: $enableOffsetDy,
           value: $offsetDy,
           min: -100,
@@ -566,7 +568,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗遮蔽层区域偏移量：x',
+          title: 'maskRect.x',
           isEnabled: $enableMaskRectX,
           value: $maskRectX,
           min: 0,
@@ -574,7 +576,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '弹窗遮蔽层区域偏移量：y',
+          title: 'maskRect.y',
           isEnabled: $enableMaskRectY,
           value: $maskRectY,
           min: 0,
@@ -582,7 +584,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗遮蔽层区域：宽度比例',
+          title: 'maskRect.width',
           isEnabled: $enableMaskRectWidth,
           value: $maskRectWidth,
           dataSource: [
@@ -592,7 +594,7 @@ export struct DatePickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '弹窗遮蔽层区域：高度比例',
+          title: 'maskRect.height',
           isEnabled: $enableMaskRectHeight,
           value: $maskRectHeight,
           dataSource: [
@@ -602,60 +604,61 @@ export struct DatePickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '弹窗背板颜色',
+          title: 'dialogBackgroundColor',
           isEnabled: $enableDialogBackgroundColor,
           color: $dialogBackgroundColor
         })
 
         RadioBlock({
-          title: '弹窗背板模糊材质',
+          title: 'DialogBackgroundBlurStyle',
           isEnabled: $enableDialogBackgroundBlurStyle,
           value: $dialogBackgroundBlurStyle,
           dataSource: [
-            { label: '薄型', value: BlurStyle.Thin },
-            { label: '组件超厚', value: BlurStyle.COMPONENT_ULTRA_THICK }
+            { label: 'Thin', value: BlurStyle.Thin },
+            { label: 'COMPONENT_ULTRA_THICK', value: BlurStyle.COMPONENT_ULTRA_THICK }
           ]
         })
 
         RadioBlock({
-          title: '弹窗背板阴影',
+          title: 'shadow',
           isEnabled: $enableDialogShadow,
           value: $dialogShadow,
           dataSource: [
-            { label: '外部浮动MD', value: ShadowStyle.OUTER_FLOATING_MD },
-            { label: '外部浮动SM', value: ShadowStyle.OUTER_FLOATING_SM }
+            { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM }
           ]
         })
 
         RadioBlock({
-          title: '小时是否有前导0',
+          title: 'hourFormat',
           isEnabled: this.enableHourFormat,
           value: this.hourFormat,
           dataSource: [
-            { label: '有前导0', value: '2-digit' },
-            { label: '无前导0', value: 'numeric' },
+            { label: '2-digit', value: '2-digit' },
+            { label: 'numeric', value: 'numeric' },
           ]
         })
 
         RadioBlock({
-          title: '分钟是否有前导0',
+          title: 'minuteFormat',
           isEnabled: this.enableMinuteFormat,
           value: this.minuteFormat,
           dataSource: [
-            { label: '有前导0', value: '2-digit' },
-            { label: '无前导0', value: 'numeric' },
+            { label: '2-digit', value: '2-digit' },
+            { label: 'numeric', value: 'numeric' },
           ]
         })
 
         RadioBlock({
-          title: '是否开启音效震动',
+          title: 'hapticFeedback',
           isEnabled: this.enableHapticFeedback,
           value: this.isHapticFeedback,
           dataSource: [
-            { label: '开启', value: true },
-            { label: '关闭', value: false },
+            { label: 'true', value: true },
+            { label: 'false', value: false },
           ]
         })
+
         RadioBlock({
           title: '是否设置选项列',
           isEnabled: $enableMode,
@@ -667,7 +670,7 @@ export struct DatePickerDialogBootcamp {
           ]
         })
       }.width('100%')
-    }.height('50%')
+    }.height('50%').id('scroll')
   }
 }
 

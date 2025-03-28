@@ -22,6 +22,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/text_paint_method.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

@@ -155,6 +155,7 @@ public:
                 sheetPattern->GetAttr<int>("sheet_height_default_mode", SHEET_HEIGHT_DEFAULT_MODE);
             theme->closeIconButtonStyle_ =
                 sheetPattern->GetAttr<int>("sheet_close_icon_button_style", SHEET_CLOSE_ICON_BUTTON_STYLE);
+            theme->sheetClose_ = sheetPattern->GetAttr<std::string>("sheet_close", "");
         }
     };
     ~SheetTheme() override = default;
@@ -380,6 +381,11 @@ public:
     {
         return sheetTitleAreaMargin_;
     }
+    
+    const std::string& GetSheetClose() const
+    {
+        return sheetClose_;
+    }
 protected:
     SheetTheme() = default;
 
@@ -403,6 +409,7 @@ private:
     Color closeIconSymbolColor_;
     std::string sheetType_;
     std::string sheetBottom_;
+    std::string sheetClose_;
     int sheetBackgroundBlurStyle_;
     double sheetNormalScale_;
     double sheetMaxAgingScale_;

@@ -58,6 +58,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
 constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
+constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -569,6 +570,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
@@ -597,6 +602,19 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "load snapshot failed: %{public}s", info.GetErrorMessage().c_str());
             auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
             self->snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            self->snapshotWindow_->MarkNeedRenderOnly();
+        });
+        eventHub->SetOnComplete([weakThis = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+            if (info.GetLoadingStatus() != SNAPSHOT_LOAD_COMPLETE) {
+                return;
+            }
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self && self->snapshotWindow_);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
+                self->session_->GetPersistentId());
+            auto context = self->snapshotWindow_->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateBackgroundColor(Color::TRANSPARENT);
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }

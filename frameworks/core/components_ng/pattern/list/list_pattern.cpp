@@ -661,7 +661,7 @@ void ListPattern::SetLayoutAlgorithmParams(
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
     listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
+    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom(true));
     if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
@@ -782,7 +782,7 @@ bool ListPattern::IsAtTop() const
            NonNegative(startMainPos - currentDelta_ + GetChainDelta(0) - contentStartOffset_);
 }
 
-bool ListPattern::IsAtBottom() const
+bool ListPattern::IsAtBottom(bool considerRepeat) const
 {
     bool groupAtStart = true;
     bool groupAtEnd = true;
@@ -794,7 +794,8 @@ bool ListPattern::IsAtBottom() const
     if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
-    return (endIndex == GetMaxIndexByRepeat() && groupAtEnd) &&
+    auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
+    return (endIndex == maxListItemIndex && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
 
@@ -2529,7 +2530,7 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
     if (source == SCROLL_FROM_UPDATE && GetCanOverScroll()) {
         float tempDelta = currentDelta_;
         currentDelta_ -= dragOffset;
-        bool isAtEdge = IsAtTop() || IsAtBottom();
+        bool isAtEdge = IsAtTop() || IsAtBottom(true);
         currentDelta_ = tempDelta;
         SetCanOverScroll(isAtEdge);
     }

@@ -116,7 +116,8 @@ void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<Gest
         CHECK_EQUAL_VOID(touches.empty(), true);
         auto touchType = touches.front().GetTouchType();
         auto targetId = targetNode->GetId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow =
+            SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
@@ -155,7 +156,8 @@ void ViewAbstractModelNG::BindMenuTouch(FrameNode* targetNode, const RefPtr<Gest
 bool ViewAbstractModelNG::CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode)
 {
     CHECK_NULL_RETURN(targetNode, false);
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+    auto subwindow =
+        SubwindowManager::GetInstance()->GetSubwindowByType(Container::CurrentId(), SubwindowType::TYPE_MENU);
     CHECK_NULL_RETURN(subwindow, false);
     auto childContainerId = subwindow->GetChildContainerId();
     auto childContainer = AceEngine::Get().GetContainer(childContainerId);

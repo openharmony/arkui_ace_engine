@@ -619,7 +619,8 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     }
 
     //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
     backButtonNode->MarkModifyDone();
@@ -763,7 +764,8 @@ void NavigationModelNG::SetBackButtonIcon(const std::function<void(WeakPtr<NG::F
     if (userDefinedAccessibilityText) {
         NavigationTitleUtil::SetAccessibility(backButtonNode, backButtonAccessibilityText);
     } else {
-        std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+        auto theme = NavigationGetTheme();
+        std::string message = theme ? theme->GetNavigationBack() : "";
         NavigationTitleUtil::SetAccessibility(backButtonNode, message);
     }
 }
@@ -1377,7 +1379,8 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
     }
 
     //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
     backButtonNode->MarkModifyDone();

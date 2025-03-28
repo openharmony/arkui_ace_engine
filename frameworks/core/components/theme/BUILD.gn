@@ -41,8 +41,6 @@ template("ace_core_components_theme_set") {
 
     sources = [
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp",
       "app_theme.cpp",
       "blur_style_theme.cpp",
       "icon_theme.cpp",
@@ -53,6 +51,12 @@ template("ace_core_components_theme_set") {
       "theme_utils.cpp",
     ]
 
+    # add sources only needed by wearable like watch.
+    if (is_wearable_product) {
+      sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
+    } else {
+      sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp" ]
+    }
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }

@@ -617,6 +617,9 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     }
     int32_t intValue = firstArg->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
+    if (nodeInfo == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
@@ -1682,7 +1685,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
 }
 
-void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine, const shared_ptr<JsValue> globalPtr)
+void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
@@ -1701,7 +1704,7 @@ void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine, const sh
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
-    JsBindWorkerViews(globalObj, runtime, nativeEngine, globalPtr);
+    JsBindWorkerViews(globalObj, nativeEngine);
 }
 
 } // namespace OHOS::Ace::Framework
