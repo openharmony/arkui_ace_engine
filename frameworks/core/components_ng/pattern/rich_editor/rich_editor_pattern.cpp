@@ -163,7 +163,8 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
-    
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetStyledString, len=%{public}d", value->GetLength());
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetStyledString, str=%{public}s", value->GetString().c_str());
     if (GetTextContentLength() > maxLength_.value_or(INT_MAX)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetStyledString: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return;
