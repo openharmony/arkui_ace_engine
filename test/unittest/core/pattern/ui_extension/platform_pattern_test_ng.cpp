@@ -25,6 +25,8 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -41,6 +43,17 @@ namespace {
 
 class PlatformPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = PipelineBase::GetCurrentContext();
+    }
+    static void TearDownTestSuite()
+    {
+        MockContainer::Current()->pipelineContext_ = nullptr;
+        NG::MockPipelineContext::TearDown();
+    }
     void SetUp() override;
     void TearDown() override;
 };
@@ -231,5 +244,149 @@ HWTEST_F(PlatformPatternTestNg, PlatformPatternTest005, TestSize.Level1)
      */
     ASSERT_GE(platformPattern->GetNodeId(), 1);
     ASSERT_GE(platformPattern->GetInstanceId(), -1);
+}
+
+/**
+ * @tc.name: InitKeyEvent001
+ * @tc.desc: Test PlatformPattern InitKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PlatformPatternTestNg, InitKeyEvent001, TestSize.Level1)
+{
+    auto platformPattern = AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    focusHub->SetIsNodeNeedKey(true);
+    platformPattern->InitKeyEvent(focusHub);
+    focusHub->onFocusInternal_();
+    focusHub->onBlurInternal_();
+    focusHub->onClearFocusStateCallback_();
+    KeyEvent keyEvent;
+    bool ret = focusHub->onPaintFocusStateCallback_();
+    EXPECT_TRUE(ret);
+    bool ret2 = focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+    EXPECT_EQ(ret2, platformPattern->HandleKeyEvent(keyEvent));
+
+    
+    platformPattern = nullptr;
+    focusHub->SetIsNodeNeedKey(true);
+    focusHub->onFocusInternal_();
+    focusHub->onBlurInternal_();
+    focusHub->onClearFocusStateCallback_();
+    ret = focusHub->onPaintFocusStateCallback_();
+    EXPECT_FALSE(ret);
+    ret2 = focusHub->onKeyEventsInternal_[OnKeyEventType::DEFAULT].operator()(keyEvent);
+    EXPECT_FALSE(ret2);
+}
+
+/**
+ * @tc.name: InitTouchEvent001
+ * @tc.desc: Test PlatformPattern InitTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PlatformPatternTestNg, InitTouchEvent001, TestSize.Level1)
+{
+    auto platformPattern = AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_NE(gestureHub, nullptr);
+
+    platformPattern->InitTouchEvent(gestureHub);
+    TouchEventInfo touchEventInfo("touch");
+    platformPattern->touchEvent_->callback_(touchEventInfo);
+    EXPECT_NE(gestureHub, nullptr);
+
+    auto touchTask = [](TouchEventInfo& info) {};
+    platformPattern->touchEvent_ = AccessibilityManager::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    platformPattern->InitTouchEvent(gestureHub);
+    EXPECT_NE(gestureHub, nullptr);
+}
+
+/**
+ * @tc.name: InitMouseEvent001
+ * @tc.desc: Test PlatformPattern InitMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PlatformPatternTestNg, InitMouseEvent001, TestSize.Level1)
+{
+    auto platformPattern = AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+    EXPECT_NE(inputHub, nullptr);
+
+    platformPattern->InitMouseEvent(inputHub);
+    MouseInfo info;
+    platformPattern->mouseEvent_->GetOnMouseEventFunc()(info);
+    EXPECT_NE(inputHub, nullptr);
+
+    auto mouseCallback = [](MouseInfo& info) {};
+    platformPattern->mouseEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(mouseCallback));
+    platformPattern->InitMouseEvent(inputHub);
+    EXPECT_NE(inputHub, nullptr);
+}
+
+/**
+ * @tc.name: InitHoverEvent001
+ * @tc.desc: Test PlatformPattern InitHoverEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PlatformPatternTestNg, InitHoverEvent001, TestSize.Level1)
+{
+    auto platformPattern = AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> inputHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+    EXPECT_NE(inputHub, nullptr);
+
+    platformPattern->InitHoverEvent(inputHub);
+    bool isHover = true;
+    platformPattern->hoverEvent_->GetOnHoverEventFunc()(isHover);
+    EXPECT_NE(inputHub, nullptr);
+
+    auto hoverCallback = [](const MouseInfo& info) {};
+    platformPattern->hoverEvent_ = AceType::MakeRefPtr<InputEvent>(hoverCallback);
+    platformPattern->InitHoverEvent(inputHub);
+    EXPECT_NE(inputHub, nullptr);
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: Test PlatformPattern HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PlatformPatternTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    auto platformPattern = AceType::MakeRefPtr<PlatformPattern>(AceLogTag::ACE_DEFAULT_DOMAIN, platformId);
+    TouchEventInfo info("touch");
+    info.SetSourceDevice(SourceType::NONE);
+    platformPattern->HandleTouchEvent(info);
+
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.pointerEvent_ = std::make_shared<MMI::PointerEvent>(1);
+    
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto attachFrameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+    platformPattern->AttachToFrameNode(attachFrameNode);
+    auto host = platformPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+
+    TouchLocationInfo touchInfo1(1);
+    TouchLocationInfo touchInfo2(2);
+    TouchLocationInfo touchInfo3(3);
+    touchInfo3.SetTouchType(TouchType::DOWN);
+    info.changedTouches_.push_back(touchInfo1);
+    info.changedTouches_.push_back(touchInfo2);
+    info.changedTouches_.push_back(touchInfo3);
+    auto changedTouches = info.GetChangedTouches();
+
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    host->focusHub_ =  AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(host->focusHub_, nullptr);
+
+    platformPattern->HandleTouchEvent(info);
+    EXPECT_FALSE(changedTouches.empty());
+    EXPECT_EQ(changedTouches.back().GetTouchType(), TouchType::DOWN);
 }
 } // namespace OHOS::Ace::NG
