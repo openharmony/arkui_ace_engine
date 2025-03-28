@@ -19,7 +19,6 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 

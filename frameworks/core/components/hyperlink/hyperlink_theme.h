@@ -21,6 +21,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/theme_manager.h"
+#include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace {
 /**
