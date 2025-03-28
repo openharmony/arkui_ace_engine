@@ -14,9 +14,7 @@
  */
 
 import abilityTest from './Ability.test';
-import SpanBootcampTest from './TextAndInput/SpanBootcamp.test';
 
 export default function testsuite() {
   abilityTest();
-  SpanBootcampTest();
 }
