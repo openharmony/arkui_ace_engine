@@ -84,3 +84,14 @@ export abstract class FrameCallback {
 }
 export class UIObserver {
 }
+
+export type CustomBuilderWithId = (id: number) => void;
+
+export interface TargetInfo {
+    id: string | number;
+    componentId?: number;
+}
+
+export interface OverlayManagerOptions {
+    renderRootOverlay?: boolean;
+}
