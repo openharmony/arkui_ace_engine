@@ -916,11 +916,13 @@ int32_t RichEditorPattern::GetTextContentLength()
 
 void RichEditorPattern::SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& builder, const SelectMenuParam& menuParam)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewMenuParam, spanType=%{public}d", spanType);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetPreviewMenuParam, spanType=%{public}d, builder=%{public}d",
+        spanType, !!builder);
     if (!oneStepDragController_) {
         oneStepDragController_ = std::make_unique<OneStepDragController>(WeakClaim(this));
     }
     oneStepDragController_->SetMenuParam(spanType, builder, menuParam);
+    oneStepDragController_->SetEnableEventResponse(textSelector_, imageNodes, builderNodes);
 }
 
 void RichEditorPattern::HandleImageDrag(const RefPtr<ImageSpanNode>& imageNode)

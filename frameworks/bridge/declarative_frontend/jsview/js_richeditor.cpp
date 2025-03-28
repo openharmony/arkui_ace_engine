@@ -1030,6 +1030,7 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     }
 
     // Builder
+    CHECK_NULL_VOID(info.Length() >= 2);
     if (info.Length() < 2 || !info[1]->IsObject()) {
         return;
     }

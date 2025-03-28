@@ -42,6 +42,7 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
 
 void OneStepDragParam::EnableDrag(const RefPtr<FrameNode>& frameNode) const
 {
+    
     frameNode->SetDraggable(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);

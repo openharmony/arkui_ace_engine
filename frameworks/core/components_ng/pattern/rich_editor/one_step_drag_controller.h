@@ -89,6 +89,7 @@ public:
     void MarkDirtyNode(const WeakPtr<ImageSpanNode>& dirtyFrameNode);
     void HandleDirtyNodes();
 
+    
 private:
     const std::unique_ptr<OneStepDragParam>& GetDragParam(TextSpanType spanType) const;
     const std::unique_ptr<OneStepDragParam>& CreateDragParam(TextSpanType spanType, const Builder& builder,
