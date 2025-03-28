@@ -3776,27 +3776,23 @@ std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool e
     return std::make_pair(offset, error);
 }
 
-// returns a node's offset relative to stage node
+// returns a node's offset relative to page node
 // and accumulate every ancestor node's graphic properties such as rotate and transform
-// most of applications has stage offset of status bar height
-OffsetF FrameNode::GetPaintRectOffsetToStage() const
+// most of applications has page offset of status bar height
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame(true);
-    while (parent && parent->GetTag() != V2::STAGE_ETS_TAG) {
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         // Eliminate the impact of default page transition
-        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
-            offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
-        } else {
-            offset += renderContext->GetPaintRectWithTransform().GetOffset();
-        }
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
         parent = parent->GetAncestorNodeOfFrame(true);
     }
-    return (parent && parent->GetTag() == V2::STAGE_ETS_TAG) ? offset : OffsetF();
+    return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
 std::optional<RectF> FrameNode::GetViewPort(bool checkBoundary) const
@@ -4672,9 +4668,6 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (needSyncRsNode) {
             renderContext_->SyncPartialRsProperties();
         }
-    } else {
-        geometryNode_->SetPixelGridRoundOffset(geometryNode_->GetFrameOffset());
-        geometryNode_->SetPixelGridRoundSize(geometryNode_->GetFrameSize());
     }
     config = { .frameSizeChange = frameSizeChange,
         .frameOffsetChange = frameOffsetChange,
