@@ -67,6 +67,7 @@ struct CalendarThemeStructure {
     std::string nextMonth;
     std::string preYear;
     std::string preMonth;
+    std::string today;
     Color weekColor;
     Color dayColor;
     Color lunarColor;
@@ -239,6 +240,7 @@ public:
             theme->calendarTheme_.nextMonth = pattern->GetAttr<std::string>("general_next_month", "");
             theme->calendarTheme_.preYear = pattern->GetAttr<std::string>("general_pre_year", "");
             theme->calendarTheme_.preMonth = pattern->GetAttr<std::string>("general_pre_month", "");
+            theme->calendarTheme_.today = pattern->GetAttr<std::string>("general_today", "");
         }
 
         void ParseCalenderPickerFirstPart(const RefPtr<ThemeConstants>& themeConstants,

@@ -172,6 +172,7 @@ private:
     float GetWidth(const RefPtr<FrameNode>& host);
     bool IsDateInRange(const CalendarDay& day);
     std::string GetDayStr(int32_t index);
+    std::string GetTodayStr();
     bool isCalendarDialog_ = false;
     bool hoverState_ = false;
     bool isOnHover_ = false;
