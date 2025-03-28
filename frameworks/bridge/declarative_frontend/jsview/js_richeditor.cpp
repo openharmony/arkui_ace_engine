@@ -1031,17 +1031,14 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
 
     // Builder
     CHECK_NULL_VOID(info.Length() >= 2);
-    if (info.Length() < 2 || !info[1]->IsObject()) {
-        return;
+    RefPtr<JsFunction> builderFunc = nullptr;
+    if (!info[1]->IsUndefined() && info[1]->IsObject()) {
+        JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
+        auto builder = menuObj->GetProperty("builder");
+        if (builder->IsFunction()) {
+            builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        }
     }
-
-    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
-    auto builder = menuObj->GetProperty("builder");
-    if (!builder->IsFunction()) {
-        return;
-    }
-    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(builderFunc);
 
     // responseType
     NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
@@ -1049,11 +1046,11 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         auto response = info[2]->ToNumber<int32_t>();
         responseType = static_cast<NG::TextResponseType>(response);
     }
-    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+    auto buildFunc = builderFunc ? [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindSelectionMenu");
         func->Execute();
-    };
+    } : std::function<void()>();
     NG::SelectMenuParam menuParam;
     const int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
@@ -1067,6 +1064,7 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
             return;
         }
     }
+    CHECK_NULL_VOID(buildFunc);
     RichEditorModel::GetInstance()->BindSelectionMenu(editorType, responseType, buildFunc, menuParam);
 }
 
