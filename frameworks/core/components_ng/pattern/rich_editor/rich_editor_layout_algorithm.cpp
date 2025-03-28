@@ -129,6 +129,7 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
         auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
         tailNewLineSpan->content = u"\n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
+        tailNewLineSpan->MarkDirty();
         CopySpanStyle(lastSpan, tailNewLineSpan);
         newGroup.push_back(tailNewLineSpan);
         spans_.push_back(std::move(newGroup));
