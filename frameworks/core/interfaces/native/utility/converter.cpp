@@ -1895,7 +1895,6 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
 template<>
 void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
 {
-    auto colorMode = SystemProperties::GetColorMode();
     ShadowStyle shadowStyle = Converter::OptConvert<ShadowStyle>(src).value_or(ShadowStyle::None);
     if (shadowStyle == ShadowStyle::None) {
         return;
@@ -1911,7 +1910,7 @@ void AssignCast(std::optional<Shadow>& dst, const Ark_ShadowStyle& src)
         return;
     }
 
-    dst = shadowTheme->GetShadow(shadowStyle, colorMode);
+    dst = shadowTheme->GetShadow(shadowStyle, SystemProperties::GetColorMode());
 }
 
 template<>
@@ -1937,8 +1936,7 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
 template<>
 PickerValueType Convert(const Ark_String& src)
 {
-    auto str = Converter::Convert<std::string>(src);
-    return str;
+    return Converter::Convert<std::string>(src);
 }
 
 template<>
