@@ -10488,7 +10488,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     }
 
     auto it = textTemp.find(LINE_SEPARATOR);
-    bool containNextLine = it != std::u16string::npos;
+    bool containNextLine = it != std::u16string::npos && it != textTemp.size() - 1;
 
     if (textStyle || containNextLine) { // SpanNode Fission
         GetReplacedSpanFission(changeValue, innerPosition, textTemp, spanIndex, offsetInSpan, textStyle, paraStyle,
