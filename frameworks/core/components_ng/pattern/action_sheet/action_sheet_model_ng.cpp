@@ -64,10 +64,6 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
             Maskarg.autoCancel = arg.autoCancel;
             Maskarg.onWillDismiss = arg.onWillDismiss;
             Maskarg.shadow = arg.shadow;
-            Maskarg.onWillAppear = arg.onWillAppear;
-            Maskarg.onDidAppear = arg.onDidAppear;
-            Maskarg.onWillDisappear = arg.onWillDisappear;
-            Maskarg.onDidDisappear = arg.onDidDisappear;
             auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
             CHECK_NULL_VOID(mask);
             overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
