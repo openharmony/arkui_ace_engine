@@ -68,7 +68,7 @@ export default namespace componentUtils {
         number,
     ];
 
-    interface ComponentInfo {
+    export interface ComponentInfo {
         size: Size
         localOffset: Offset
         windowOffset: Offset
