@@ -649,6 +649,23 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode, c
     }
 }
 
+void SecurityComponentModelNG::SetBackgroundBorderRadius(FrameNode* frameNode,
+    const std::optional<BorderRadiusProperty>& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (!IsBackgroundVisible(frameNode)) {
+        SC_LOG_WARN("background is not exist");
+        return;
+    }
+
+    if (value) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius,
+            value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, frameNode);
+    }
+}
+
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,
     const std::optional<Dimension>& right, const std::optional<Dimension>& top,
     const std::optional<Dimension>& bottom)

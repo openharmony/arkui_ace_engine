@@ -73,6 +73,8 @@ public:
     static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
         const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
         const std::optional<Dimension>& bottomRight);
+    static void SetBackgroundBorderRadius(FrameNode* frameNode,
+        const std::optional<BorderRadiusProperty>& value);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(FrameNode* frameNode,

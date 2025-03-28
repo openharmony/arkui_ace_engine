@@ -249,8 +249,8 @@ void BorderRadius1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SecurityComponentMethodModelNG::SetBorderRadius1(frameNode, convValue);
+    auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
+    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Dimension* value)
