@@ -798,6 +798,7 @@ private:
     void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
     void SetDialogTransitionEffect(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node, AccessibilityEventType eventType);
     void CloseDialogMatchTransition(const RefPtr<FrameNode>& node);
     void SetContainerButtonEnable(bool isEnabled);
 
