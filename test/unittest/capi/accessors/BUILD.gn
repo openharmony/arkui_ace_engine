@@ -39,6 +39,7 @@ ace_unittest("capi_all_accessors_test") {
     "clent_authentication_handler_accessor_test.cpp",
     "click_event_accessor_test.cpp",
     "color_filter_accessor_test.cpp",
+    "color_metrics_accessor_test.cpp",
     "console_message_accessor_test.cpp",
     "controller_handler_accessor_test.cpp",
     "custom_dialog_controller_accessor_test.cpp",
