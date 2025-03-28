@@ -23,10 +23,21 @@ interface CrossLanguageOptions {
   attributeSetting?: boolean;
 }
 
+interface InteractionEventBindingInfo  {
+  baseEventRegistered?: boolean;
+  nodeEventRegistered?: boolean;
+  nativeEventRegistered?: boolean;
+  builtInEventRegistered?: boolean;
+}
+
 enum ExpandMode {
   NOT_EXPAND = 0,
   EXPAND = 1,
   LAZY_EXPAND = 2,
+}
+
+enum EventQueryType {
+  ON_CLICK = 0,
 }
 
 class FrameNode {
@@ -593,6 +604,25 @@ class FrameNode {
 
   checkIfCanCrossLanguageAttributeSetting(): boolean {
     return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
+  }
+
+  getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo {
+    if (eventType === undefined || eventType === null) {
+      return undefined;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const eventBindingInfo = getUINativeModule().frameNode.getInteractionEventBindingInfo(this.getNodePtr(), eventType);
+    __JSScopeUtil__.restoreInstanceId();
+    if (!eventBindingInfo || (!eventBindingInfo.baseEventRegistered && !eventBindingInfo.nodeEventRegistered &&
+      !eventBindingInfo.nativeEventRegistered && !eventBindingInfo.builtInEventRegistered)) {
+      return undefined;
+    }
+    return {
+      baseEventRegistered: eventBindingInfo.baseEventRegistered,
+      nodeEventRegistered: eventBindingInfo.nodeEventRegistered,
+      nativeEventRegistered: eventBindingInfo.nativeEventRegistered,
+      builtInEventRegistered: eventBindingInfo.builtInEventRegistered,
+    };
   }
 
   get commonAttribute(): ArkComponent {

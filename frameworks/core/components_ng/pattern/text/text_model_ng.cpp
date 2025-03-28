@@ -423,6 +423,9 @@ void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click, d
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(std::move(clickFunc), distanceThreshold);
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
 }
 
 void TextModelNG::ClearOnClick()
@@ -1012,6 +1015,9 @@ void TextModelNG::SetOnClick(FrameNode* frameNode, GestureEventFunc&& click)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(std::move(click));
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
 }
 
 void TextModelNG::ClearOnClick(FrameNode* frameNode)
@@ -1020,6 +1026,9 @@ void TextModelNG::ClearOnClick(FrameNode* frameNode)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(nullptr);
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), false);
 }
 
 void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)

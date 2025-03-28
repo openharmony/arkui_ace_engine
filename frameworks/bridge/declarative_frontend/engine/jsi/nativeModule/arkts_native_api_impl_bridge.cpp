@@ -4293,6 +4293,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnWaterFlowScrollIndex"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetOnWaterFlowScrollIndex));
 
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInteractionEventBindingInfo"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInteractionEventBindingInfo));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
