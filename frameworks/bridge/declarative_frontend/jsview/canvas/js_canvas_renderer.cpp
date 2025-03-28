@@ -878,7 +878,10 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_VOID(runtime);
     NativeEngine* nativeEngine = runtime->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
+    if (!nativeEngine) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "GetPixelMap engine is NULL");
+        return;
+    }
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     auto pixelmapSharedPtr = pixelmap->GetPixelMapSharedPtr();
     napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelmapSharedPtr);
