@@ -269,7 +269,7 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
         const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         Ark_Boolean param = Converter::ArkValue<Ark_Boolean>(true);
-        CallbackHelper(cbReturn).Invoke(param);
+        CallbackHelper(cbReturn).InvokeSync(param);
     };
     auto arkFunc = Converter::ArkValue<Callback_Boolean>(nullptr, onBackPressed, expectedResId);
     modifier_->setOnBackPressed(node_, &arkFunc);

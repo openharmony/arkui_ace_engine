@@ -65,7 +65,7 @@ public:
                 checkEventF = {.resourceId = resourceId, .parentNode = parentNode};
             }
             if (uiNode) {
-                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+                CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
             }
         };
         CustomNodeBuilder customBuilder =

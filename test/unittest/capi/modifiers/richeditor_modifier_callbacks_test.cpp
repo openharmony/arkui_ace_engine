@@ -224,7 +224,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, AboutToIMEInputTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = info,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorInsertValue_Boolean>(nullptr, inputCallback, expectedResId);
     modifier_->setAboutToIMEInput(node_, &func);
@@ -357,7 +357,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSetAboutToDeleteTest, TestSize.Level
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = info,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorDeleteValue_Boolean>(nullptr, inputCallback, expectedResId);
     modifier_->setAboutToDelete(node_, &func);
@@ -548,7 +548,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
             .info = value,
         };
-        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(true));
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
     auto func = Converter::ArkValue<Callback_RichEditorChangeValue_Boolean>(nullptr, inputCallback, frameNode->GetId());
     modifier_->setOnWillChange(node_, &func);

@@ -423,7 +423,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestCOPY, TestSize.Level1)
         } else {
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
@@ -482,7 +482,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTestMOVE, TestSize.Level1)
         } else {
             TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
         GeneratedModifier::GetDragEventAccessor()->destroyPeer(event);
     };
 
@@ -528,7 +528,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnChildTouchTest, TestSize.Level1)
             .strategy = isCompetition ? ARK_TOUCH_TEST_STRATEGY_FORWARD_COMPETITION : ARK_TOUCH_TEST_STRATEGY_FORWARD,
             .id = ArkValue<Opt_String>(fakeId)
         };
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto arkCallback = Converter::ArkValue<Callback_Array_TouchTestInfo_TouchResult>(nullptr,
         callSyncFunc, expectedResourceId);
@@ -571,7 +571,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnOnGestureJudgeBeginTest, TestSize.Level
         EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
         auto isOk = Convert<bool>(gestureInfo.isSystemGesture);
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto arkCallback = Converter::ArkValue<Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult>(nullptr,
         callSyncFunc, expectedResourceId);
@@ -616,7 +616,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin0Test, TestS
         ASSERT_NE(info, nullptr);
         auto isOk = info->GetSourceDevice() != SourceType::NONE;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
     modifier_->setOnGestureRecognizerJudgeBegin0(node_, &arkCallback);
@@ -658,7 +658,7 @@ HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestS
         ASSERT_NE(info, nullptr);
         auto isOk = info->GetSourceDevice() != SourceType::NONE;
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
     modifier_->setOnGestureRecognizerJudgeBegin1(node_, &arkCallback, ArkValue<Ark_Boolean>(false));
@@ -696,7 +696,7 @@ HWTEST_F(CommonMethodModifierTest7, SetShouldBuiltInRecognizerParallelWithTest, 
         const Callback_GestureRecognizer_Void continuation)
     {
         Ark_GestureRecognizer arkResult = others.length > 0 && others.array ? *(others.array) : current;
-        CallbackHelper(continuation).Invoke(arkResult);
+        CallbackHelper(continuation).InvokeSync(arkResult);
     };
     auto arkCallback = Converter::ArkValue<ShouldBuiltInRecognizerParallelWithCallback>(nullptr, callSyncFunc);
     modifier_->setShouldBuiltInRecognizerParallelWith(node_, &arkCallback);

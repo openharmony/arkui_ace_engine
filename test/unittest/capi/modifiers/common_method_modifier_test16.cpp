@@ -201,7 +201,7 @@ CustomNodeBuilder getBuilderCb()
                              const Callback_Pointer_Void continuation) {
         checkEvent = { .resourceId = resourceId, .parentNode = parentNode };
         if (uiNode) {
-            CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
         }
     };
     CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
@@ -241,7 +241,7 @@ Opt_Union_MenuPreviewMode_CustomBuilder getPreviewCustomBuilder()
                              const Callback_Pointer_Void continuation) {
         checkEvent2 = { .resourceId = resourceId, .parentNode = parentNode };
         if (uiNode) {
-            CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
         }
     };
     CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID_2);
