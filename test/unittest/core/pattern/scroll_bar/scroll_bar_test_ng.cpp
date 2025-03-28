@@ -798,4 +798,112 @@ HWTEST_F(ScrollBarTestNg, ScrollPositionCallback001, TestSize.Level1)
     scrollBarPattern->ScrollPositionCallback(2.0f, SCROLL_FROM_START, true);
     EXPECT_TRUE(scrollBarPattern->isScrolling_);
 }
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ScrollBarPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ToJsonValue001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 3;
+    scrollBarPattern->enableNestedSorll_ = true;
+    scrollBarPattern->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("enableNestedScroll"), "true");
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test ScrollBarPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ToJsonValue002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    filter.filterFixed = 0;
+    scrollBarPattern->enableNestedSorll_ = true;
+    scrollBarPattern->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("enableNestedScroll"), "true");
+}
+
+/**
+ * @tc.name: GetPositionMode001
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::RTL;
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::LEFT);
+}
+
+/**
+ * @tc.name: GetPositionMode002
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode002, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->layoutDirection_ = TextDirection::LTR;
+    frameNode->layoutProperty_ = layoutProperty;
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::RIGHT);
+}
+
+/**
+ * @tc.name: GetPositionMode003
+ * @tc.desc: Test ScrollBarPattern GetPositionMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, GetPositionMode003, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollBarPattern->frameNode_ = frameNode;
+    auto result = scrollBarPattern->GetPositionMode();
+    EXPECT_EQ(result, PositionMode::RIGHT);
+}
+
+/**
+ * @tc.name: UpdateScrollBarRegion001
+ * @tc.desc: Test ScrollBarPattern UpdateScrollBarRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, UpdateScrollBarRegion001, TestSize.Level1)
+{
+    RefPtr<ScrollBarPattern> scrollBarPattern = AceType::MakeRefPtr<ScrollBarPattern>();
+    ASSERT_NE(scrollBarPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, scrollBarPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollBarPattern->frameNode_ = frameNode;
+    Size viewPort(4.0F, 2.0F);
+    Offset viewOffset(4.0F, 6.0F);
+    OffsetF scrollOffset(2.0F, 2.0F);
+    SizeF scrollSize(2.0F, 2.0F);
+    scrollBarPattern->scrollBarOverlayModifier_ =
+        AceType::MakeRefPtr<ScrollBarOverlayModifier>(scrollOffset, scrollSize);
+    scrollBarPattern->UpdateScrollBarRegion(2.0f, 2.0f, viewPort, viewOffset, SCROLL_FROM_START);
+    EXPECT_NE(scrollBarPattern->scrollBarOverlayModifier_->GetOpacity(), 0);
+}
 } // namespace OHOS::Ace::NG
