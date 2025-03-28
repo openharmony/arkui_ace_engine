@@ -483,18 +483,18 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         firstHandleInfo = selectOverlayHolder_->GetFirstHandleInfo();
         if (firstHandleInfo) {
             ConvertHandleRelativeToParent(*firstHandleInfo);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
+                firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
-        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
-            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
         secondHandleInfo = selectOverlayHolder_->GetSecondHandleInfo();
         if (secondHandleInfo) {
             ConvertHandleRelativeToParent(*secondHandleInfo);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
+                secondHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
         }
-        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
-            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     if (!firstHandleInfo && !secondHandleInfo) {
         return;

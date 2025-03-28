@@ -2841,8 +2841,10 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     SymbolSpanStyle symbolSpanStyle;
     std::string symbolColorValue;
     auto symbolColors = node->GetSymbolColorList();
-    for (const auto& color : *symbolColors) {
-        symbolColorValue += color.ColorToString() + ",";
+    if (symbolColors.has_value()) {
+        for (const auto& color : *symbolColors) {
+            symbolColorValue += color.ColorToString() + ",";
+        }
     }
     symbolColorValue =
         symbolColorValue.substr(0, !symbolColorValue.empty() ? static_cast<int32_t>(symbolColorValue.size()) - 1 : 0);
