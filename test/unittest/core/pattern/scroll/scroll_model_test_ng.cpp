@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
 #include "scroll_test_ng.h"
-
 #include "base/memory/ace_type.h"
-#undef private
+
 namespace OHOS::Ace::NG {
 
 void ScrollModelNGTestNg::SetUp() {}

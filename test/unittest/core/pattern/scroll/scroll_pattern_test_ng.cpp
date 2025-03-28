@@ -12,11 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define private public
 #include "scroll_test_ng.h"
-
 #include "base/memory/ace_type.h"
-#undef private
+
 namespace OHOS::Ace::NG {
 
 void ScrollPatternTestNg::SetUp() {}
@@ -108,116 +106,316 @@ HWTEST_F(ScrollPatternTestNg, ScrollPatternTestNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateNodePaintMethod001
- * @tc.desc: Test SetEnablePaging When enablePaging is false
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap 1,1
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod001, TestSize.Level1)
+HWTEST_F(ScrollPatternTestNg, OnModifyDone001, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::GAUGE_ETS_TAG, -1, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->AttachToFrameNode(frameNode);
     auto host = scrollPattern->GetHost();
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto drawDirection = (layoutDirection == TextDirection::RTL);
-    auto scrollEffect = scrollPattern->GetScrollEdgeEffect();
-    ASSERT_NE(scrollPattern, nullptr);
-    scrollEffect->IsFadeEffect();
-    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>(scrollPattern->GetAxis() == Axis::HORIZONTAL, drawDirection);
-    scrollPattern->CreateNodePaintMethod();
-    paint->SetEdgeEffect(scrollEffect);
-    EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
+    ASSERT_NE(host, nullptr);
+    auto overlayNode_ = host->GetOverlayNode();
+    ASSERT_EQ(overlayNode_, nullptr);
+    auto paintProperty = host->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateFadingEdge(scrollPattern->CreateNodePaintMethod());
+    scrollPattern->OnModifyDone();
+    EXPECT_NE(host->overlayNode_, nullptr);
 }
 
 /**
- * @tc.name: CreateNodePaintMethod002
- * @tc.desc: Test SetEnablePaging When enablePaging is false
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test GetChildrenExpandedSize
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod002, TestSize.Level1)
+HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize001, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto host = scrollPattern->GetHost();
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto drawDirection = (layoutDirection == TextDirection::RTL);
-    auto scrollEffect = nullptr;
-    ASSERT_NE(scrollPattern, nullptr);
-    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>(scrollPattern->GetAxis() == Axis::HORIZONTAL, drawDirection);
-    scrollPattern->CreateNodePaintMethod();
-    paint->SetEdgeEffect(scrollEffect);
-    EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
+    scrollPattern->axis_ = Axis::VERTICAL;
+    scrollPattern->viewPort_.AddWidth(10.0f);
+    auto result = scrollPattern->GetChildrenExpandedSize();
+    SizeF sizeF;
+    EXPECT_NE(sizeF.Width(), result.Width());
 }
 
 /**
- * @tc.name: CreateNodePaintMethod003
- * @tc.desc: Test SetEnablePaging When enablePaging is false
+ * @tc.name: OnModifyDone002
+ * @tc.desc: Test GetChildrenExpandedSize
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod003, TestSize.Level1)
+HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize002, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto host = scrollPattern->GetHost();
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto drawDirection = (layoutDirection == TextDirection::RTL);
-    auto scrollEffect = scrollPattern->GetScrollEdgeEffect();
-    ASSERT_NE(scrollPattern, nullptr);
-    scrollEffect->IsRestrictBoundary();
-    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>(scrollPattern->GetAxis() == Axis::HORIZONTAL, drawDirection);
-    scrollPattern->CreateNodePaintMethod();
-    paint->SetEdgeEffect(scrollEffect);
-    EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
+    scrollPattern->axis_ = Axis::VERTICAL;
+    scrollPattern->viewPort_.AddWidth(10.0f);
+    auto result = scrollPattern->GetChildrenExpandedSize();
+    SizeF sizeF;
+    EXPECT_NE(sizeF.Width(), result.Width());
 }
 
 /**
- * @tc.name: CreateNodePaintMethod004
- * @tc.desc: Test SetEnablePaging When enablePaging is false
+ * @tc.name: OnModifyDone003
+ * @tc.desc: Test GetChildrenExpandedSize
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod004, TestSize.Level1)
+HWTEST_F(ScrollPatternTestNg, GetChildrenExpandedSize003, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto host = scrollPattern->GetHost();
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto drawDirection = (layoutDirection == TextDirection::RTL);
-    auto scrollEffect = scrollPattern->GetScrollEdgeEffect();
-    ASSERT_NE(scrollPattern, nullptr);
-    scrollEffect->IsNoneEffect();
-    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>(scrollPattern->GetAxis() == Axis::HORIZONTAL, drawDirection);
-    scrollPattern->CreateNodePaintMethod();
-    paint->SetEdgeEffect(scrollEffect);
-    EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
+    scrollPattern->axis_ = Axis::NONE;
+    auto result = scrollPattern->GetChildrenExpandedSize();
+    SizeF sizeF;
+    EXPECT_EQ(sizeF.Width(), result.Width());
 }
 
 /**
- * @tc.name: CreateNodePaintMethod005
- * @tc.desc: Test SetEnablePaging When enablePaging is false
+ * @tc.name: StartSnapAnimation001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod005, TestSize.Level1)
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation001, TestSize.Level1)
 {
     auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    auto host = scrollPattern->GetHost();
-    auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    auto drawDirection = (layoutDirection == TextDirection::RTL);
-    auto scrollEffect = scrollPattern->GetScrollEdgeEffect();
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    scrollBar = nullptr;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
     ASSERT_NE(scrollPattern, nullptr);
-    scrollEffect->IsSpringEffect();
-    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>(scrollPattern->GetAxis() == Axis::HORIZONTAL, drawDirection);
-    scrollPattern->CreateNodePaintMethod();
-    paint->SetEdgeEffect(scrollEffect);
-    EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
+    auto scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
+    ASSERT_NE(scrollBar_, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    scrollPattern->scrollBar_ = scrollBar_;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    auto driving = scrollBar->IsDriving();
+    driving = true;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
+    ASSERT_NE(scrollBar_, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    scrollPattern->scrollBar_ = scrollBar_;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    auto driving = scrollBar->IsDriving();
+    driving = false;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation004
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    scrollBar = nullptr;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation005
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
+    ASSERT_NE(scrollBar_, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    scrollPattern->scrollBar_ = scrollBar_;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    auto driving = scrollBar->IsDriving();
+    driving = true;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation006
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF, ShapeMode::DEFAULT);
+    ASSERT_NE(scrollBar_, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    scrollPattern->scrollBar_ = scrollBar_;
+    auto scrollBar = scrollPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    auto driving = scrollBar->IsDriving();
+    driving = false;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation007
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation007, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    scrollBarProxy = nullptr;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation008
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation008, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBarProxy_ = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    ASSERT_NE(scrollBarProxy_, nullptr);
+    scrollPattern->SetScrollBarProxy(scrollBarProxy_);
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    ASSERT_NE(scrollBarProxy, nullptr);
+    auto driving = scrollBarProxy->IsScrollSnapTrigger();
+    driving = true;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation009
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation009, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBarProxy_ = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    ASSERT_NE(scrollBarProxy_, nullptr);
+    scrollPattern->SetScrollBarProxy(scrollBarProxy_);
+    SnapAnimationOptions options;
+    options.fromScrollBar = true;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    ASSERT_NE(scrollBarProxy, nullptr);
+    auto driving = scrollBarProxy->IsScrollSnapTrigger();
+    driving = false;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation010
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation010, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    scrollBarProxy = nullptr;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation011
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation011, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBarProxy_ = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    ASSERT_NE(scrollBarProxy_, nullptr);
+    scrollPattern->SetScrollBarProxy(scrollBarProxy_);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    ASSERT_NE(scrollBarProxy, nullptr);
+    auto driving = scrollBarProxy->IsScrollSnapTrigger();
+    driving = true;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: StartSnapAnimation012
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, StartSnapAnimation012, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto scrollBarProxy_ = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    ASSERT_NE(scrollBarProxy_, nullptr);
+    scrollPattern->SetScrollBarProxy(scrollBarProxy_);
+    SnapAnimationOptions options;
+    options.fromScrollBar = false;
+    auto scrollBarProxy = scrollPattern->GetScrollBarProxy();
+    ASSERT_NE(scrollBarProxy, nullptr);
+    auto driving = scrollBarProxy->IsScrollSnapTrigger();
+    driving = false;
+    auto result = scrollPattern->StartSnapAnimation(options);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG
