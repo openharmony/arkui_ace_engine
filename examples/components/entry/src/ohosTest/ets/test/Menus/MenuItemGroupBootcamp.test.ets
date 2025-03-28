@@ -5,7 +5,7 @@ import { buttonClick,
   getToggle,
   radioClick, Search, searchParentBlock,
   Slide,
-  sliderDrag, titleSearch, ToggleClick } from '../utils';
+  sliderDrag, titleSearch, ToggleClick } from '../../utils';
 
 
 const TAG = 'MenuItemGroupBootcamp001'
