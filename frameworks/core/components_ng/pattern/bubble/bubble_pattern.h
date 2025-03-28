@@ -89,8 +89,12 @@ public:
         if (innerBorderWidth_.has_value()) {
             bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
         }
-        bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
-        bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+        if (!outlineLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+        }
+        if (!innerBorderLinearGradient_.gradientColors.empty()) {
+            bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
+        }
         return bubbleMethod;
     }
 

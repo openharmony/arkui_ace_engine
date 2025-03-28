@@ -155,6 +155,7 @@ public:
             theme->innerBorderEndGredientColor_ =
                 pattern->GetAttr<Color>("popup_inner_border_end_gredient_color", Color::TRANSPARENT);
             theme->popupDoubleButtonIsSameStyle_ = pattern->GetAttr<int>("popup_double_button_is_same_style", 1);
+            theme->popupButtonIsCarStyle_ = pattern->GetAttr<int>("popup_button_is_car_style", 0);
         }
     };
 
@@ -537,6 +538,10 @@ public:
     {
         return popupDoubleButtonIsSameStyle_;
     }
+    int GetPopupButtonIsCarStyle() const
+    {
+        return popupButtonIsCarStyle_;
+    }
 
 protected:
     PopupTheme() = default;
@@ -626,6 +631,7 @@ private:
     int popupButtonFlexGrow_ = 0;
     Dimension buttonSpacingNewVersion_ = 0.0_vp;
     int popupDoubleButtonIsSameStyle_ = 1;
+    int popupButtonIsCarStyle_ = 0;
 };
 
 } // namespace OHOS::Ace

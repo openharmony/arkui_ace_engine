@@ -406,6 +406,7 @@ std::vector<RSPoint> CalculateGradientPoints(GradientDirection direction,
             endPoint = RSPoint(topLeftX + width, topLeftY + halfHeight);
             break;
         case GradientDirection::BOTTOM:
+        case GradientDirection::NONE:
             startPoint = RSPoint(topLeftX + halfWidth, topLeftY);
             endPoint = RSPoint(topLeftX + halfWidth, topLeftY + height);
             break;
@@ -424,10 +425,6 @@ std::vector<RSPoint> CalculateGradientPoints(GradientDirection direction,
         case GradientDirection::RIGHT_BOTTOM:
             startPoint = RSPoint(topLeftX, topLeftY);
             endPoint = RSPoint(topLeftX + width, topLeftY + height);
-            break;
-        case GradientDirection::NONE:
-            startPoint = RSPoint(topLeftX, topLeftY);
-            endPoint = RSPoint(topLeftX, topLeftY);
             break;
         default:
             break;
