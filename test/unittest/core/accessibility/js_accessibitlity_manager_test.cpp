@@ -900,7 +900,20 @@ HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
     EXPECT_EQ(windowInfo.scaleY, 1.0f);
 
     /**
-     * @tc.steps: step4. mock SingleHandTransform, and then test GenerateWindowInfo method again
+     * @tc.steps: step4. mock IsReentrantLimit, and then test GenerateWindowInfo method again
+     */
+    jsAccessibilityManager->RegisterGetParentRectHandler();
+    EXPECT_NE(jsAccessibilityManager->getParentRectHandlerNew_, nullptr);
+    jsAccessibilityManager->SetReentrantLimit(true);
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, context);
+ 
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    /**
+     * @tc.steps: step5. mock SingleHandTransform, and then test GenerateWindowInfo method again
      */
     container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.7f));
 
