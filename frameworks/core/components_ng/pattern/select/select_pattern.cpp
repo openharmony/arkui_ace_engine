@@ -644,7 +644,7 @@ void SelectPattern::SetDisabledStyle()
     }
     spinner_->MarkModifyDone();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()

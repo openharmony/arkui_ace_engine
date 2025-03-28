@@ -45,7 +45,7 @@ private:
     float horizontalPadding_ = 0.0f;
     float verticalPadding_ = 0.0f;
 
-    void InitializeParam();
+    void InitializeParam(const RefPtr<FrameNode>& host);
 };
 } // namespace OHOS::Ace::NG
 
