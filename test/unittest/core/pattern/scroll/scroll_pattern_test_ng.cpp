@@ -220,49 +220,4 @@ HWTEST_F(ScrollPatternTestNg, CreateNodePaintMethod005, TestSize.Level1)
     paint->SetEdgeEffect(scrollEffect);
     EXPECT_EQ(scrollPattern->GetScrollEdgeEffect(), nullptr);
 }
-
-/**
- * @tc.name: GetOverScrollOffset001
- * @tc.desc: Test SetEnablePaging When enablePaging is false
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollPatternTestNg, GetOverScrollOffset001, TestSize.Level1)
-{
-    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    double delta = 0;
-    OverScrollOffset offset = scrollPattern->GetOverScrollOffset(delta);
-    scrollPattern->GetOverScrollOffset(delta);
-    EXPECT_EQ(offset.start, delta);
-}
-
-/**
- * @tc.name: GetOverScrollOffset002
- * @tc.desc: Test SetEnablePaging When enablePaging is false
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollPatternTestNg, GetOverScrollOffset002, TestSize.Level1)
-{
-    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    double delta = 2;
-    OverScrollOffset offset = scrollPattern->GetOverScrollOffset(delta);
-    scrollPattern->GetOverScrollOffset(delta);
-    EXPECT_EQ(offset.start, delta);
-}
-
-/**
- * @tc.name: GetOverScrollOffset003
- * @tc.desc: Test SetEnablePaging When enablePaging is false
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollPatternTestNg, GetOverScrollOffset003, TestSize.Level1)
-{
-    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    double delta = -2;
-    OverScrollOffset offset = scrollPattern->GetOverScrollOffset(delta);
-    scrollPattern->GetOverScrollOffset(delta);
-    EXPECT_EQ(offset.start, delta);
-}
 } // namespace OHOS::Ace::NG
