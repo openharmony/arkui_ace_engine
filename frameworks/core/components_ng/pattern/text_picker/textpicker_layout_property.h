@@ -188,6 +188,8 @@ public:
         defaultFont->Put("size", GetDefaultFontSizeValue(Dimension(0)).ToString().c_str());
         defaultFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
             GetDefaultWeight().value_or(FontWeight::NORMAL)).c_str());
+        defaultFont->Put("style", GetDefaultFontStyleValue(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+            ? "FontStyle.Normal" : "FontStyle.Italic");
         auto defaultTextStyle = JsonUtil::Create(true);
         defaultTextStyle->Put("color", GetDefaultColor().value_or(Color::BLACK).ColorToString().c_str());
         defaultTextStyle->Put("minFontSize", GetDefaultMinFontSize().value_or(Dimension()).ToString().c_str());

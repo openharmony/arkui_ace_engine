@@ -2229,7 +2229,7 @@ HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
         modifier_->setDefaultTextStyle(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
-        auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
         auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
         EXPECT_EQ(checkSize, size.second);
     }
@@ -2256,6 +2256,40 @@ HWTEST_F(TextPickerModifierTest, defaultTextColor, TestSize.Level1)
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
         EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: defaultFontStyle
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setDefaultTextStyle, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    Ark_Font font = {
+        .family = UNION_RESOURCE_STRING_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_TextPickerTextStyle pickerStyle;
+    auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto style : FONT_STYLE_TEST_PLAN) {
+        font.style = style.first;
+        pickerStyle.font.value = font;
+        modifier_->setDefaultTextStyle(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkStyle =  GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_STYLE_NAME);
+        EXPECT_EQ(checkStyle, style.second);
     }
 }
 } // namespace OHOS::Ace::NG
