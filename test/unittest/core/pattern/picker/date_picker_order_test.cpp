@@ -443,6 +443,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder003, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -452,7 +453,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -480,7 +481,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -498,6 +499,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -507,7 +509,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -535,7 +537,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -553,6 +555,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -562,7 +565,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -590,7 +593,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -608,6 +611,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -617,7 +621,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -645,7 +649,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -663,6 +667,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -672,7 +677,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -700,7 +705,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -718,6 +723,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -727,7 +733,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     auto textConfirmNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -755,7 +761,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -773,6 +779,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -808,7 +815,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -828,6 +835,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -863,7 +871,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -883,6 +891,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -918,7 +927,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -938,6 +947,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -973,7 +983,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -993,6 +1003,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1028,7 +1039,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1048,6 +1059,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1083,7 +1095,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1103,6 +1115,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1138,7 +1151,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1158,6 +1171,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1193,7 +1207,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1213,6 +1227,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1248,7 +1263,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1268,6 +1283,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1303,7 +1319,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1323,6 +1339,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1358,7 +1375,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1378,6 +1395,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1413,7 +1431,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1433,6 +1451,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1468,7 +1487,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1488,6 +1507,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1523,7 +1543,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1543,6 +1563,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1578,7 +1599,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1598,6 +1619,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1633,7 +1655,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1653,6 +1675,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1688,7 +1711,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1708,6 +1731,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1743,7 +1767,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
@@ -1763,6 +1787,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1796,7 +1821,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->HandleReduceLunarMonthDaysChange(0);
 
@@ -1822,6 +1847,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder028, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1855,7 +1881,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->HandleReduceLunarDayChange(0);
     EXPECT_NE(datePickerPattern, nullptr);
@@ -1880,6 +1906,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1913,7 +1940,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
 
     auto allChildNode = datePickerPattern->GetAllChildNode();
@@ -1933,6 +1960,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
 HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
 {
     auto pickerTheme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
         V2::DATE_PICKER_ETS_TAG, 1, []() { return AceType::MakeRefPtr<DatePickerPattern>(); });
@@ -1966,7 +1994,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
     auto textCancelNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     textCancelNode->MountToParent(buttonCancelNode);
 
     auto allChildNode = datePickerPattern->GetAllChildNode();
