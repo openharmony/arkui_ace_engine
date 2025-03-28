@@ -283,6 +283,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest004, TestSize.L
     EXPECT_EQ(result, true);
 
     auto endNodeMock = MockFrameNode::CreateFrameNode("main", NUMTWO, AceType::MakeRefPtr<Pattern>(), true);
+    endNodeMock->SetParent(frameNode);
     result = accessibilityManagerNg.ConvertPointFromAncestorToNode(frameNode, endNodeMock, hoverPoint, pointNode);
     EXPECT_EQ(result, true);
 }
