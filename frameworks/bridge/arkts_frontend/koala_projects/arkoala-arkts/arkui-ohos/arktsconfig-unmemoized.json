@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "package": "@ohos/arkui",
+        "package": "arkui",
         "outDir": "build/abc",
         "baseUrl": "./build/unmemoized/src",
         "paths": {

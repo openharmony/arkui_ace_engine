@@ -43,9 +43,9 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "L@ohos/arkui/ArkUIEntry/Application;",
+    "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZL@ohos/arkui/UserView/UserView;:L@ohos/arkui/ArkUIEntry/Application;",
+    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;:Larkui/ArkUIEntry/Application;",
     "start",
     ":J",
     "enter",
