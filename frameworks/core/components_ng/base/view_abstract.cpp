@@ -2126,6 +2126,7 @@ void ViewAbstract::BindTips(
             showInSubWindow = true;
         }
     }
+    targetNode->SetBindTips(true);
     HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, spanString);
 }
 
@@ -2228,6 +2229,7 @@ void ViewAbstract::AddHoverEventForTips(
         }
     };
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
+    hoverEvent->SetIstips(true);
     inputHub->AddOnHoverEvent(hoverEvent);
 }
 

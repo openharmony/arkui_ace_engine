@@ -141,6 +141,11 @@ public:
         checkboxFlag_ = checkboxFlag;
     }
 
+    void SetBindTips(bool hasBindTips)
+    {
+        hasBindTips_ = hasBindTips;
+    }
+
     bool GetCheckboxFlag() const
     {
         return checkboxFlag_;
@@ -1483,6 +1488,12 @@ private:
     bool ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
 
+    bool ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& newComingTargets);
+
+    void TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint, const PointF& parentRevertPoint,
+        TouchRestrict& touchRestrict, TouchTestResult& result, ResponseLinkResult& responseLinkResult, bool isDispatch);
+
     void ResetPredictNodes();
 
     const char* GetPatternTypeName() const;
@@ -1589,6 +1600,7 @@ private:
     bool exposeInnerGestureFlag_ = false;
     bool isDeleteRsNode_ = false;
     bool hasPositionZ_ = false;
+    bool hasBindTips_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

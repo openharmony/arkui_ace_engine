@@ -2862,10 +2862,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             GetTag().c_str(), paintRect.ToString().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
+
     if (eventHub_ && !eventHub_->IsEnabled()) {
+        if (hasBindTips_) {
+            TipsTouchTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result,
+                responseLinkResult, isDispatch);
+        }
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s eventHub not enabled, need't do touch test", GetTag().c_str());
         return HitTestResult::OUT_OF_REGION;
     }
+
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto localMat = cacheMatrixInfo.localMatrix;
     if (!touchRestrict.touchEvent.isMouseTouchTest) {
@@ -3070,6 +3076,35 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
+void FrameNode::TipsTouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result,
+    ResponseLinkResult& responseLinkResult, bool isDispatch)
+{
+    auto& cacheMatrixInfo = GetOrRefreshMatrixFromCache();
+    auto paintRect = cacheMatrixInfo.paintRectWithTransform;
+    auto defaultResponseRegion = renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList =
+        GetResponseRegionList(defaultResponseRegion, static_cast<int32_t>(touchRestrict.sourceType));
+    RefPtr<TargetComponent> targetComponent = targetComponent_.Upgrade();
+    if (!targetComponent) {
+        targetComponent = MakeRefPtr<TargetComponent>();
+        targetComponent_ = targetComponent;
+    }
+    targetComponent->SetNode(WeakClaim(this));
+    TouchTestResult newComingTargets;
+    auto tmp = parentLocalPoint - paintRect.GetOffset();
+    renderContext_->GetPointWithTransform(tmp);
+    const auto localPoint = tmp;
+    auto revertPoint = parentRevertPoint;
+    if ((GetHitTestMode() != HitTestMode::HTMNONE) &&
+        (isDispatch || (InResponseRegionList(revertPoint, responseRegionList)))) {
+        if (touchRestrict.hitTestType == SourceType::MOUSE) {
+            ProcessTipsMouseTestHit(globalPoint, localPoint, touchRestrict, newComingTargets);
+        }
+    }
+    result.splice(result.end(), std::move(newComingTargets));
+}
+
 bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
     TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
 {
@@ -3085,6 +3120,18 @@ bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& loc
     }
 
     return mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
+}
+
+bool FrameNode::ProcessTipsMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
+    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
+{
+    CHECK_NULL_RETURN(eventHub_, false);
+    auto mouseHub = eventHub_->GetInputEventHub();
+    if (!mouseHub) {
+        return false;
+    }
+    const auto coordinateOffset = globalPoint - localPoint;
+    return mouseHub->ProcessTipsMouseTestHit(coordinateOffset, newComingTargets);
 }
 
 std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t sourceType)
