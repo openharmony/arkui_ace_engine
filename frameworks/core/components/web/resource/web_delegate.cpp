@@ -3284,9 +3284,6 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
         return;
     }
 
-    // Trigger OnAreaChange, when the size or offset changes
-    OnAreaChange({windowRelativeOffset_.GetX(), windowRelativeOffset_.GetY(), width, height});
-
     if ((resizeWidth_ == width) && (resizeHeight_ == height)) {
         return;
     }
@@ -6486,7 +6483,6 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, 
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         return;
     }
-    windowRelativeOffset_ = Offset(offset.GetX(), offset.GetY());
     if (isEnhanceSurface_) {
         if (surfaceDelegate_) {
             if (needResizeAtFirst_) {
