@@ -38,6 +38,27 @@ namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
+class MockTextInputClient : public TextInputClient {
+public:
+    MOCK_METHOD(void, UpdateEditingValue, (
+        const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
+};
+
+class MockTextInputConnection : public TextInputConnection {
+public:
+    MockTextInputConnection(const WeakPtr<TextInputClient>& client, const RefPtr<TaskExecutor>& taskExecutor)
+        : TextInputConnection(client, taskExecutor)
+    {}
+
+    MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
+    MOCK_METHOD(void, SetEditingState, (
+        const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+};
+
 class TextFieldPatternTestNine : public TextInputBases {
 public:
 };
@@ -515,5 +536,204 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
     info3.touches_.push_back(tinfo3);
     imageTouchHub->touchEventActuator_->touchEvents_.front()->callback_(info3);
     EXPECT_NE(imageTouchHub->touchEventActuator_->touchEvents_.front(), nullptr);
+}
+
+/**
+ * @tc.name: HandleCrossPlatformInBlurEvent001
+ * @tc.desc: test HandleCrossPlatformInBlurEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleCrossPlatformInBlurEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->imeShown_ = true;
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    pattern_->cursorTwinklingTask_.Reset([] {});
+    pattern_->HandleCrossPlatformInBlurEvent();
+    EXPECT_TRUE(pattern_->HasConnection());
+}
+
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: test OnKeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnKeyEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    KeyEvent event;
+    event.code = KeyCode::KEY_ENTER;
+    pattern_->independentControlKeyboard_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    pattern_->customKeyboard_ = AceType::DynamicCast<NG::UINode>(
+        AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
+    pattern_->isCustomKeyboardAttached_ = true;
+    auto ret = pattern_->OnKeyEvent(event);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnCopy002
+ * @tc.desc: test HandleOnCopy
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnCopy002, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    pattern->clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    ASSERT_NE(pattern->clipboard_, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_NE(pattern->contentController_, nullptr);
+    pattern->contentController_->content_ = u"";
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->selectController_->UpdateHandleIndex(0, 4);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool calledOnCopy = false;
+    eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
+        calledOnCopy = true;
+    });
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->SetUsingMouse(true);
+    pattern->HandleOnCopy(true);
+    auto start = pattern->selectController_->GetStartIndex();
+    auto end = pattern->selectController_->GetEndIndex();
+    auto value = pattern->contentController_->GetSelectedValue(start, end);
+    EXPECT_TRUE(value.empty());
+}
+
+/**
+ * @tc.name: GetCancelButton001
+ * @tc.desc: test GetCancelButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetCancelButton001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+    pattern_->GetCancelButton();
+    auto theme = pattern_->GetTheme();
+    EXPECT_TRUE(theme->GetCancelButton().empty());
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    TouchEventInfo info("unknown");
+    pattern_->dragStatus_ = DragStatus::ON_DROP;
+    TouchLocationInfo tinfo("test", 0);
+    tinfo.touchType_ = TouchType::MOVE;
+    info.touches_.push_back(tinfo);
+    pattern_->selectOverlay_->touchAtHandle_ = true;
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern_->selectOverlay_->OnBind(manager);
+    pattern_->HandleTouchEvent(info);
+    EXPECT_TRUE(pattern_->selectOverlay_->IsTouchAtHandle(info));
+
+    pattern_->selectOverlay_->touchAtHandle_ = false;
+    info.changedTouches_.push_back(tinfo);
+    pattern_->moveCaretState_.isMoveCaret = false;
+    pattern_->moveCaretState_.isTouchCaret = false;
+    pattern_->ProcessOverlay();
+    pattern_->isSelecting_ = false;
+    pattern_->HandleTouchEvent(info);
+    EXPECT_TRUE(!pattern_->selectOverlay_->IsTouchAtHandle(info));
+}
+
+/**
+ * @tc.name: OnDragDrop001
+ * @tc.desc: test OnDragDrop
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnDragDrop001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    std::string str("test");
+    pattern_->dragStatus_ = DragStatus::DRAGGING;
+    event->pressedKeyCodes_.push_back(KeyCode::KEY_CTRL_RIGHT);
+    event->unifiedData_ = AceType::MakeRefPtr<MockUnifiedData>();
+    pattern_->OnDragDrop()(event, str);
+    EXPECT_EQ(event->GetPressedKeyCodes().size(), 1);
+
+    event->pressedKeyCodes_.push_back(KeyCode::KEY_CAPS_LOCK);
+    pattern_->OnDragDrop()(event, str);
+    EXPECT_EQ(event->GetPressedKeyCodes().size(), 2);
+}
+
+/**
+ * @tc.name: InitDragDropCallBack001
+ * @tc.desc: test InitDragDropCallBack
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto eventHub = host->GetEventHub<EventHub>();
+    pattern_->InitDragDropCallBack();
+    RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    const std::string extraParams("test");
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    auto tmpHost = pattern_->GetHost();
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    auto pipeline = pattern_->GetContext();
+    auto dragManager = pipeline->GetDragDropManager();
+    host->isDisallowDropForcedly_ = false;
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    layoutProperty->UpdateTextInputType(TextInputType::JS_ENUM_URL);
+    host->previewOption_.enableEdgeAutoScroll = false;
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
+
+    eventHub->onDragLeave_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 } // namespace OHOS::Ace::NG,
