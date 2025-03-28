@@ -1315,12 +1315,8 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveDown()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() + PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_
-
-                                    ->GetGlyphIndexByCoordinate(
-
-                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
-                                    .index);
+    return static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(
+        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset).index);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForClick(const Offset& offset)
@@ -1642,5 +1638,4 @@ double RosenRenderTextField::GetLongestLine() const
     }
     return RenderTextField::GetLongestLine();
 }
-
 } // namespace OHOS::Ace

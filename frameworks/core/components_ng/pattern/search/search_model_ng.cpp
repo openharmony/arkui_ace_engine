@@ -2265,7 +2265,6 @@ void SearchModelNG::SetBackBorderRadius()
     radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
         (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
 
-
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldPaintProperty->UpdateBorderRadiusFlagByUser(radius);
