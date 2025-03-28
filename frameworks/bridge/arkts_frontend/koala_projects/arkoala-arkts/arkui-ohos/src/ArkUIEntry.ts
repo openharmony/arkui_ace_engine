@@ -15,7 +15,7 @@
 
 import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
 import { int32, int64 } from "@koalaui/common"
-import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName } from "@koalaui/interop"
+import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "./generated/ArkEventEmulatorMaterialized"
@@ -25,6 +25,9 @@ import { checkEvents, setCustomEventsChecker } from "./generated/Events"
 import { checkArkoalaCallbacks } from "./generated/peers/CallbacksChecker"
 import { setUIDetachedRootCreator } from "./generated/peers/CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./handwritten"
+import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
+import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
+import { Deserializer } from "./generated/peers/Deserializer"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -128,6 +131,13 @@ function drawCurrentCrash(crash: Object) {
         crashDumped = true
     }
     ArkUINativeModule._ShowCrash(msg ?? "unknown error message")
+}
+
+function registerSyncCallbackProcessor() {
+    wrapSystemCallback(1, (buff:KSerializerBuffer, len:int32) => {
+        deserializeAndCallCallback(new Deserializer(buff, len))
+        return 0
+    })
 }
 
 export class Application {
@@ -343,6 +353,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
+        registerSyncCallbackProcessor()
         return new Application(userView, useNativeLog)
     }
 }
