@@ -20,9 +20,11 @@
 #include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
-#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/select_content_overlay/select_content_overlay_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -32,10 +34,15 @@ const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemS
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
+    if (!IsEnableSelectionMenu()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The selectoverlay is not displayed cause enableSelectionMenu is false");
+        return;
+    }
     UpdateTransformFlag();
     if (!PreProcessOverlay(request) || AnimationUtils::IsImplicitAnimationOpen()) {
         return;
     }
+    isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
     auto checkClipboard = [weak = WeakClaim(this), request](bool hasData) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HasData callback from clipboard, data available ? %{public}d", hasData);
         auto overlay = weak.Upgrade();
@@ -1565,32 +1572,64 @@ bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
 
 void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
 {
-    auto host = GetOwner();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto isExpandDisplay = selectTheme->GetExpandDisplay();
-    auto isFreeMultiWindow = container->IsFreeMultiWindow();
-    if (!isFreeMultiWindow && !isExpandDisplay) {
-        return;
-    }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->IsRightClickSubWindowMenu()) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+        if (NeedsProcessMenuOnWinChange()) {
+            CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+        }
     } else if (overlayManager->IsSelectOverlaySubWindowMenu()) {
-        if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        if (isSuperFoldDisplayDevice_ && NeedsProcessMenuOnWinChange()) {
             CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
             return;
         }
-        if (overlayManager->IsMenuShow()) {
+        if (overlayManager->IsMenuShow() && NeedsProcessMenuOnWinChange()) {
             HideMenu(true);
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
         }
     }
+}
+
+void BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+{
+    selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+    selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+    auto textRange = [weak = GetHostTextBase()](int32_t& start, int32_t& end) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->GetSelectIndex(start, end);
+    };
+    selectInfo.onCreateCallback.textRangeCallback = textRange;
+}
+
+std::optional<SelectOverlayInfo> BaseTextSelectOverlay::GetSelectOverlayInfos()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
+    return manager->GetSelectOverlayInfo();
+}
+
+bool BaseTextSelectOverlay::IsEnableSelectionMenu()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, true);
+    return textOverlayTheme->GetEnableSelectionMenu();
+}
+
+bool BaseTextSelectOverlay::NeedsProcessMenuOnWinChange()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, false);
+    return selectTheme->GetExpandDisplay() || container->IsFreeMultiWindow();
 }
 } // namespace OHOS::Ace::NG

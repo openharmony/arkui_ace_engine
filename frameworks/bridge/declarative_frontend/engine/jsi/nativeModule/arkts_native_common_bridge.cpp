@@ -38,6 +38,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_accessibility.h"
 #include "bridge/declarative_frontend/jsview/js_popups.h"
+#include "bridge/declarative_frontend/style_string/js_span_string.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -922,46 +923,6 @@ void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim
     }
 }
 
-void ParseOuterBorderWidth(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized = false)
-{
-    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
-
-    std::optional<CalcDimension> leftDim;
-    std::optional<CalcDimension> rightDim;
-    std::optional<CalcDimension> topDim;
-    std::optional<CalcDimension> bottomDim;
-    std::optional<CalcDimension> startDim;
-    std::optional<CalcDimension> endDim;
-
-    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
-    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
-    if (needLocalized) {
-        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
-        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
-        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
-    } else {
-        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
-        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
-    }
-
-    if (startDim.has_value() || endDim.has_value()) {
-        PushOuterBorderDimensionVector(startDim, values);
-        PushOuterBorderDimensionVector(endDim, values);
-    } else {
-        PushOuterBorderDimensionVector(leftDim, values);
-        PushOuterBorderDimensionVector(rightDim, values);
-    }
-    PushOuterBorderDimensionVector(topDim, values);
-    PushOuterBorderDimensionVector(bottomDim, values);
-}
-
 void PushOuterBorderColorVector(const std::optional<Color>& valueColor, std::vector<uint32_t> &options)
 {
     options.push_back(static_cast<uint32_t>(valueColor.has_value()));
@@ -1635,6 +1596,46 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
 
     GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size);
     return panda::JSValueRef::Undefined(vm);
+}
+
+void CommonBridge::ParseOuterBorderWidth(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values, bool needLocalized)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+    std::optional<CalcDimension> startDim;
+    std::optional<CalcDimension> endDim;
+
+    ArkTSUtils::ParseOuterBorder(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorder(vm, rightArgs, rightDim);
+    if (needLocalized) {
+        Local<JSValueRef> startArgs = runtimeCallInfo->GetCallArgRef(25); // 25: index of BorderWidth.start
+        Local<JSValueRef> endArgs = runtimeCallInfo->GetCallArgRef(26);   // 26: index of BorderWidth.end
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, startArgs, startDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+    } else {
+        ArkTSUtils::ParseOuterBorder(vm, topArgs, topDim);
+        ArkTSUtils::ParseOuterBorder(vm, bottomArgs, bottomDim);
+    }
+
+    if (startDim.has_value() || endDim.has_value()) {
+        PushOuterBorderDimensionVector(startDim, values);
+        PushOuterBorderDimensionVector(endDim, values);
+    } else {
+        PushOuterBorderDimensionVector(leftDim, values);
+        PushOuterBorderDimensionVector(rightDim, values);
+    }
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
 }
 
 ArkUINativeModuleValue CommonBridge::ResetBorderWidth(ArkUIRuntimeCallInfo *runtimeCallInfo)
@@ -3534,12 +3535,80 @@ ArkUINativeModuleValue CommonBridge::SetBindMenu(ArkUIRuntimeCallInfo* runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
+bool ParseTipsMessage(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, const EcmaVM* vm, std::string& message, RefPtr<SpanString>& styledString)
+{
+    bool parseRuslut = false;
+    Local<JSValueRef> messageArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (messageArg->IsString(vm)) {
+        message = messageArg->ToString(vm)->ToString(vm);
+        parseRuslut = true;
+    } else if (messageArg->IsObject(vm)) {
+        Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+        Framework::JSRef<Framework::JSVal> args = info[1];
+        auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
+        if (!spanString) {
+            ArkTSUtils::ParseJsString(vm, messageArg, message);
+        } else {
+            styledString = spanString->GetController();
+        }
+        parseRuslut = true;
+    }
+    return parseRuslut;
+}
+
+void ParseTipsParam(const RefPtr<PopupParam>& tipsParam, const ArkUIBindTipsOptionsTime& timeOptions,
+    const ArkUIBindTipsOptionsArrow& arrowOptions)
+{
+    CHECK_NULL_VOID(tipsParam);
+    tipsParam->SetShowInSubWindow(true);
+    tipsParam->SetAppearingTime(timeOptions.appearingTime);
+    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
+    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
+    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+    tipsParam->SetEnableArrow(arrowOptions.enableArrow);
+    if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
+        CalcDimension offset;
+        char* pEnd = nullptr;
+        std::strtod(arrowOptions.arrowPointPosition, &pEnd);
+        if (pEnd != nullptr) {
+            if (std::strcmp(pEnd, "Start") == 0) {
+                offset = 0.0_pct; // 0.0_pct : The offset is 0%
+            }
+            if (std::strcmp(pEnd, "Center") == 0) {
+                offset = 0.5_pct; // 0.5_pct : The offset is 50%
+            }
+            if (std::strcmp(pEnd, "End") == 0) {
+                offset = 1.0_pct; // 1.0_pct : The offset is 100%
+            }
+            tipsParam->SetArrowOffset(offset);
+        }
+    }
+    CalcDimension arrowWidth(arrowOptions.arrowWidthValue, static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit));
+    bool setArrowWidthError = true;
+    if (arrowOptions.arrowWidthValue > 0 &&
+        static_cast<DimensionUnit>(arrowOptions.arrowWidthUnit) != DimensionUnit::PERCENT) {
+        tipsParam->SetArrowWidth(arrowWidth);
+        setArrowWidthError = false;
+    }
+    tipsParam->SetErrorArrowWidth(setArrowWidthError);
+    CalcDimension arrowHeight(arrowOptions.arrowHeightValue, static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit));
+    bool setArrowHeightError = true;
+    if (arrowOptions.arrowHeightValue > 0 &&
+        static_cast<DimensionUnit>(arrowOptions.arrowHeightUnit) != DimensionUnit::PERCENT) {
+        tipsParam->SetArrowHeight(arrowHeight);
+        setArrowHeightError = false;
+    }
+    tipsParam->SetErrorArrowHeight(setArrowHeightError);
+    tipsParam->SetBlockEvent(false);
+    tipsParam->SetTipsFlag(true);
+}
+
 ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> messageArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> appearingTimeArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> disappearingTimeArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> appearingTimeWithContinuousOperationArg = runtimeCallInfo->GetCallArgRef(NUM_4);
@@ -3549,41 +3618,41 @@ ArkUINativeModuleValue CommonBridge::SetBindTips(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> arrowWidthArg = runtimeCallInfo->GetCallArgRef(NUM_8);
     Local<JSValueRef> arrowHeightArg = runtimeCallInfo->GetCallArgRef(NUM_9);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-
-    std::string message = messageArg->ToString(vm)->ToString(vm);
-
-    ArkUIBindTipsOptionsTime tipsOptionsTime {
-        .appearingTime = 700.0f,    // 700.0f : Default appearing time for BindTips,
-        .disappearingTime = 300.0f, // 300.0f : Default disappearing time for BindTips
-        .appearingTimeWithContinuousOperation =
-            300.0f, // 300.0f : Default appearing time with continuous operation for BindTips
-        .disappearingTimeWithContinuousOperation =
-            0.0f // 0.0f : Default disappearing time with continuous operation for BindTips
+    std::string message;
+    RefPtr<SpanString> styledString;
+    if (!ParseTipsMessage(runtimeCallInfo, vm, message, styledString)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUIBindTipsOptionsTime timeOptions {
+        .appearingTime = 700.0f,                         // 700.0f : Default appearing time
+        .disappearingTime = 300.0f,                      // 300.0f : Default disappearing time
+        .appearingTimeWithContinuousOperation = 300.0f,  // 300.0f : Default continous appearing time
+        .disappearingTimeWithContinuousOperation = 0.0f  // 0.0f : Default continous disappearing time
     };
-    ParseTipsOptionsTime(vm, tipsOptionsTime, appearingTimeArg, tipsOptionsTime.appearingTime);
-    ParseTipsOptionsTime(vm, tipsOptionsTime, disappearingTimeArg, tipsOptionsTime.disappearingTime);
-    ParseTipsOptionsTime(vm, tipsOptionsTime, appearingTimeWithContinuousOperationArg,
-        tipsOptionsTime.appearingTimeWithContinuousOperation);
-    ParseTipsOptionsTime(vm, tipsOptionsTime, disappearingTimeWithContinuousOperationArg,
-        tipsOptionsTime.disappearingTimeWithContinuousOperation);
-
-    ArkUIBindTipsOptionsArrow bindTipsOptionsArrow;
-
-    bindTipsOptionsArrow.enableArrow = (enableArrowArg->IsBoolean()) ? enableArrowArg->ToBoolean(vm)->Value() : true;
-
+    ParseTipsOptionsTime(vm, timeOptions, appearingTimeArg, timeOptions.appearingTime);
+    ParseTipsOptionsTime(vm, timeOptions, disappearingTimeArg, timeOptions.disappearingTime);
+    ParseTipsOptionsTime(
+        vm, timeOptions, appearingTimeWithContinuousOperationArg, timeOptions.appearingTimeWithContinuousOperation);
+    ParseTipsOptionsTime(vm, timeOptions, disappearingTimeWithContinuousOperationArg,
+        timeOptions.disappearingTimeWithContinuousOperation);
+    ArkUIBindTipsOptionsArrow arrowOptions;
+    arrowOptions.enableArrow = (enableArrowArg->IsBoolean()) ? enableArrowArg->ToBoolean(vm)->Value() : true;
     std::string arrowPointPosition;
     if (arrowPointPositionArg->IsString(vm)) {
         arrowPointPosition = arrowPointPositionArg->ToString(vm)->ToString(vm);
-        bindTipsOptionsArrow.arrowPointPosition = arrowPointPosition.c_str();
+        arrowOptions.arrowPointPosition = arrowPointPosition.c_str();
     }
-
-    ParseTipsOptionsArrowSize(
-        vm, arrowWidthArg, bindTipsOptionsArrow.arrowWidthValue, bindTipsOptionsArrow.arrowWidthUnit);
-        
-    ParseTipsOptionsArrowSize(
-        vm, arrowHeightArg, bindTipsOptionsArrow.arrowHeightValue, bindTipsOptionsArrow.arrowHeightUnit);
-    GetArkUINodeModifiers()->getCommonModifier()->setBindTips(
-        nativeNode, message.c_str(), tipsOptionsTime, bindTipsOptionsArrow);
+    ParseTipsOptionsArrowSize(vm, arrowWidthArg, arrowOptions.arrowWidthValue, arrowOptions.arrowWidthUnit);
+    ParseTipsOptionsArrowSize(vm, arrowHeightArg, arrowOptions.arrowHeightValue, arrowOptions.arrowHeightUnit);
+    if (styledString) {
+        auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+        ParseTipsParam(tipsParam, timeOptions, arrowOptions);
+        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+        ViewAbstract::BindTips(tipsParam, AceType::Claim(frameNode), styledString);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->setBindTips(
+            nativeNode, message.c_str(), timeOptions, arrowOptions);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5286,18 +5355,13 @@ ArkUINativeModuleValue CommonBridge::SetForegroundEffect(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> disableSystemAdaptationArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     CalcDimension radius;
     if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
     ArkUI_Float32 radiusArk = static_cast<ArkUI_Int32>(radius.Value());
-    bool disableSystemAdaptation = false;
-    if (disableSystemAdaptationArg->IsBoolean()) {
-        disableSystemAdaptation = disableSystemAdaptationArg->ToBoolean(vm)->Value();
-    }
-    GetArkUINodeModifiers()->getCommonModifier()->setForegroundEffect(nativeNode, radiusArk, disableSystemAdaptation);
+    GetArkUINodeModifiers()->getCommonModifier()->setForegroundEffect(nativeNode, radiusArk);
     return panda::JSValueRef::Undefined(vm);
 }
 

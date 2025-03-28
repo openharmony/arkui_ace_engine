@@ -21,7 +21,7 @@ import argparse
 import os
 import subprocess
 import sys
-
+from pathlib import Path
 from src.content_parser import ContentParser
 from src.graph.graph_converter import generate_all_graphs
 from src.pre_process import handle_file_preprocess
@@ -55,6 +55,8 @@ def delete_file(file_path):
         log_error("delete file error")
 
 def dump_from_device():
+    delete_file("dump_temp.txt")
+    delete_file("log.txt")
     bat_file_path = r'src\bats\dump_event.bat'
     try:
         subprocess.call([bat_file_path])
@@ -65,30 +67,38 @@ def dump_from_device():
         print(f'exception: {e}')
 
 
+def isFileExist(file):
+    file_path = Path(file)
+    if file_path.is_file():
+        return False
+    else:
+        return True
+
 # python main.py -i input.txt
 if __name__ == '__main__':
     # parse the args
     args = parse_args()
-    generated_file_path = ''
     # config log model
     if args.debug:
         enable_debug(True)
     # dump trace from device if needed
     if os.name == 'nt':
         dump_from_device()
-        with open('generated_file_path.txt', 'r') as f:
-            generated_file_path = f.read().strip()
     else:
         log_error('only support dump from device on windows')
         sys.exit(1)
-    # pre process
-    handle_file_preprocess(generated_file_path, 'dump_temp.txt')
-    # read the dump file and parse
-    dump_result = ContentParser('dump_temp.txt').do_parse()
-    if dump_result.is_succeed():
-        log_info('parse done')
-        dump_result.dump()
-    else:
-        log_error('parse failed')
-    delete_file('generated_file_path.txt')
-    generate_all_graphs(dump_result, args.detailed)
+    file="./resources/dumpfile/input.txt"
+    dump_file="dump_temp.txt"
+    if isFileExist(dump_file):
+        handle_file_preprocess(file, 'dump_temp.txt')
+    try:
+        # read the dump file and parse
+        dump_result = ContentParser('dump_temp.txt').do_parse()
+        if dump_result.is_succeed():
+            log_info('parse done')
+            dump_result.dump()
+        else:
+            log_error('parse failed')
+        generate_all_graphs(dump_result, args.detailed)
+    except Exception as e:
+        log_error("read dump_tmp error")

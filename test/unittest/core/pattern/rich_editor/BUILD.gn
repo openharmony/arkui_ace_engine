@@ -27,6 +27,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_common_test_ng.cpp",
     "rich_editor_content_modifier_test_ng.cpp",
     "rich_editor_controller_test.cpp",
+    "rich_editor_delete_test_ng.cpp",
     "rich_editor_double_click_or_long_press_test_ng.cpp",
     "rich_editor_drag_test_ng.cpp",
     "rich_editor_edit_test_ng.cpp",

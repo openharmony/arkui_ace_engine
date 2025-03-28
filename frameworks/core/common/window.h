@@ -117,6 +117,13 @@ public:
         return !onShow_;
     }
 
+    bool GetUiDvsyncSwitch() const
+    {
+        return dvsyncOn_;
+    }
+
+    int64_t GetDeadlineByFrameCount(int64_t deadline, int64_t ts, int64_t frameBufferCount);
+
     void SetDensity(double density)
     {
         density_ = density;
@@ -239,6 +246,8 @@ protected:
     uint64_t lastRequestVsyncTime_ = 0;
     int64_t lastVsyncEndTimestamp_ = 0;
     uint32_t windowId_ = 0;
+    bool dvsyncOn_ = false;
+    int64_t lastDVsyncInbihitPredictTs_ = 0;
 
 private:
     std::function<Rect()> windowRectImpl_;

@@ -43,6 +43,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SHEET_DETENTS_TWO = 2;
 constexpr int32_t SHEET_DETENTS_THREE = 3;
+constexpr int32_t SHEET_OPERATION_INDEX = 0;
+constexpr int32_t SHEET_CLOSE_ICON_INDEX = 1;
+constexpr int32_t SHEET_SCROLL_INDEX = 2;
 constexpr Dimension WINDOW_RADIUS = 16.0_vp;
 } // namespace
 RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
@@ -108,6 +111,11 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
         }
     }
     CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode, sheetDragBarHeight);
+
+    // set accessibilityProperty to sheet operation column
+    auto accessibilityProperty = operationColumn->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityZIndex(SHEET_OPERATION_INDEX);
     return operationColumn;
 }
 
@@ -208,8 +216,9 @@ void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::Sheet
     // set accessibilityProperty to sheet close button
     auto accessibilityProperty = buttonNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    std::string message  = Localization::GetInstance()->GetEntryLetters("sheet.close");
+    std::string message = sheetTheme->GetSheetClose();
     accessibilityProperty->SetAccessibilityText(message);
+    accessibilityProperty->SetAccessibilityZIndex(SHEET_CLOSE_ICON_INDEX);
 }
 
 void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
@@ -280,6 +289,11 @@ RefPtr<FrameNode> SheetView::CreateScrollNode(const NG::SheetStyle& sheetStyle)
         pattern->SetNestedScroll(nestedOpt);
     }
     scroll->MarkModifyDone();
+
+    // set accessibilityProperty to sheet scroll node
+    auto accessibilityProperty = scroll->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityZIndex(SHEET_SCROLL_INDEX);
     return scroll;
 }
 

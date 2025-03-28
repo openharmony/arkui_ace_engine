@@ -761,6 +761,8 @@ void JSXComponent::JsHdrBrightness(const JSCallbackInfo& args)
     if (args[0]->IsNumber()) {
         float hdrBrightness = args[0]->ToNumber<float>();
         XComponentModel::GetInstance()->HdrBrightness(std::clamp(hdrBrightness, 0.0f, 1.0f));
+    } else {
+        XComponentModel::GetInstance()->HdrBrightness(1.0f);
     }
 }
 

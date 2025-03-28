@@ -358,8 +358,8 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.steps3: call ToRSTextStyle and set input textStyle.textOverflow_ is TextOverflow::ELLIPSIS.
      * @tc.expected: the return retTextStyle is expected.
      */
-    textStyle.textOverflow_ = TextOverflow::ELLIPSIS;
-    textStyle.wordSpacing_ = WORD_SPACING_PX;
+    textStyle.propTextOverflow_ = TextOverflow::ELLIPSIS;
+    textStyle.propWordSpacing_ = WORD_SPACING_PX;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.ellipsis, StringUtils::Str8ToStr16(StringUtils::ELLIPSIS));
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE);
@@ -378,7 +378,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg011, TestSize.Lev
      * @tc.steps5: call ToRSTextStyle and set input textStyle.wordSpacing_ is WORD_SPACING_PERCENT.
      * @tc.expected: retTextStyle.heightScale is equal to LINE_HIGHT_PERCENT.value_.
      */
-    textStyle.wordSpacing_ = WORD_SPACING_PERCENT;
+    textStyle.propWordSpacing_ = WORD_SPACING_PERCENT;
     textStyle.lineHeight_ = LINE_HIGHT_PERCENT;
     retTextStyle = ToRSTextStyle(context, textStyle);
     EXPECT_EQ(retTextStyle.wordSpacing, WORD_SPACING_PERCENT.value_ * FONT_SIZE);
@@ -403,8 +403,8 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
      * @tc.steps2: call ToRSTextStyle and set values of textStyle.
      * @tc.expected: retTextSty is expected and retTextStyle.letterSpacing_ is equal to WORD_SPACING_PX.value_.
      */
-    textStyle.letterSpacing_ = LETTER_SPACING;
-    textStyle.wordSpacing_ = WORD_SPACING_PX;
+    textStyle.propLetterSpacing_ = LETTER_SPACING;
+    textStyle.propWordSpacing_ = WORD_SPACING_PX;
     textStyle.lineHeight_ = LINE_HIGHT_PX;
     RSTextStyle retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE * pipelineContext->fontScale_);
@@ -416,7 +416,7 @@ HWTEST_F(DrawingPropConvertorTestNg, DrawingPropConvertorTestNg012, TestSize.Lev
      * @tc.steps3: call ToRSTextStyle and set textStyle.allowScale_ is false.
      * @tc.expected: retTextStyle.fontSize is equal to FONT_SIZE.
      */
-    textStyle.allowScale_ = false;
+    textStyle.propAllowScale_ = false;
     retTextStyle = ToRSTextStyle(pipelineContext, textStyle);
     EXPECT_EQ(retTextStyle.fontSize, FONT_SIZE);
 

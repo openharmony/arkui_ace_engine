@@ -25,6 +25,7 @@
 #include "base/thread/task_executor.h"
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 namespace OHOS::Ace::NG {
 
@@ -104,6 +105,9 @@ private:
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
     void InitializeDynamicAccessibility();
+    void BuildDynamicInitialConfig(DynamicInitialConfig& dynamicInitialConfig);
+    RefPtr<SystemWindowScene> GetWindowScene();
+    int32_t GetWindowSceneId();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

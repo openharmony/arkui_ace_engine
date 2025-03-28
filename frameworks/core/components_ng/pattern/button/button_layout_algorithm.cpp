@@ -18,6 +18,8 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

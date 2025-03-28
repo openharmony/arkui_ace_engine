@@ -28,6 +28,7 @@
 
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 using namespace testing;
 using namespace testing::ext;

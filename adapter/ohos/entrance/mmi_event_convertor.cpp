@@ -712,7 +712,7 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 uint32_t windowId = pipelineContext->GetWindowId();
-                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "pointdown windowId: %{public}u", windowId);
+                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "pointdown windowId: %{public}u", windowId);
             }
         }
     }

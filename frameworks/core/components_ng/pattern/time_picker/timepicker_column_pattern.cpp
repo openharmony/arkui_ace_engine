@@ -137,7 +137,6 @@ void TimePickerColumnPattern::OnModifyDone()
         SetOptionShiftDistance();
     }
     InitHapticController(host);
-    GetIsStartEndTimeDefined(host);
 }
 
 void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
@@ -175,18 +174,19 @@ void TimePickerColumnPattern::StopHaptic()
     stopHaptic_ = true;
 }
 
-void TimePickerColumnPattern::GetIsStartEndTimeDefined(const RefPtr<FrameNode>& host)
+bool TimePickerColumnPattern::IsStartEndTimeDefined()
 {
-    CHECK_NULL_VOID(host);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_VOID(blendNode);
+    CHECK_NULL_RETURN(blendNode, false);
     auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
-    CHECK_NULL_VOID(stackNode);
+    CHECK_NULL_RETURN(stackNode, false);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_RETURN(parentNode, false);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    isStartEndTimeDefined_ = timePickerRowPattern->IsStartEndTimeDefined();
+    CHECK_NULL_RETURN(timePickerRowPattern, false);
+    return timePickerRowPattern->IsStartEndTimeDefined();
 }
 
 void TimePickerColumnPattern::RegisterWindowStateChangedCallback()
@@ -1223,9 +1223,7 @@ void TimePickerColumnPattern::SetOptionShiftDistance()
 
 void TimePickerColumnPattern::UpdateToss(double offsetY)
 {
-    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
-    isTossing_ = false;
 }
 
 void TimePickerColumnPattern::UpdateFinishToss(double offsetY)
@@ -1377,9 +1375,6 @@ bool TimePickerColumnPattern::CanMove(bool isDown) const
 {
     if (wheelModeEnabled_) {
         CHECK_NULL_RETURN(NotLoopOptions(), true);
-    }
-    if (isTossing_ && isStartEndTimeDefined_ && NotLoopOptions()) {
-        return true;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);

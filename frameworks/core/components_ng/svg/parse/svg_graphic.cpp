@@ -343,11 +343,12 @@ void SvgGraphic::SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& 
         auto bounds = path_->GetBounds();
         auto maxBounds = std::max(bounds.GetWidth(), bounds.GetHeight());
         if (maxBounds != 0) {
-            RSMatrix m, t;
+            RSMatrix m;
+            RSMatrix t;
             auto scaleX = bounds.GetWidth() / maxBounds;
             auto scaleY = bounds.GetHeight() / maxBounds;
-            auto transX = (1 - scaleX) * (bounds.GetLeft() + bounds.GetWidth()* HALF);
-            auto transY = (1 - scaleY) * (bounds.GetTop() + bounds.GetHeight()* HALF);
+            auto transX = (1 - scaleX) * (bounds.GetLeft() + bounds.GetWidth() * HALF);
+            auto transY = (1 - scaleY) * (bounds.GetTop() + bounds.GetHeight() * HALF);
             m.SetScale(scaleX, scaleY);
             t.Translate(transX, transY);
             t.PreConcat(m);

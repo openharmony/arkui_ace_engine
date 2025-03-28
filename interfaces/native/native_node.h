@@ -6632,7 +6632,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
      * when this callback is invoked. \n
      *
-     * @since 18
+     * @since 17
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
 

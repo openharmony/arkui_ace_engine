@@ -881,6 +881,9 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
             pushAnimations_.emplace_back(backButtonAnimation);
         }
     }
+    if (preNode) {
+        preNode->SetNodeFreeze(true);
+    }
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
 
@@ -936,6 +939,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             CHECK_NULL_VOID(navigation);
             auto preNode = weakPreNode.Upgrade();
             while (preNode) {
+                preNode->SetNodeFreeze(false);
                 if (!navigation->CheckAnimationIdValid(preNode, preAnimationId)) {
                     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "pre node is doing another animation, skip handling.");
                     break;
@@ -1822,6 +1826,10 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
         auto navigation = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigation);
+        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(weakPreNode.Upgrade());
+        if (preNavDestination && preNavDestination->NeedRemoveInPush()) {
+            navigation->hideNodes_.emplace_back(std::make_pair(preNavDestination, true));
+        }
         navigation->RemoveDialogDestination();
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
@@ -2174,15 +2182,5 @@ void NavigationGroupNode::ResetSystemAnimationProperties(const RefPtr<FrameNode>
     CHECK_NULL_VOID(titleBarRenderContext);
     // update titleBar's translateXY
     titleBarRenderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
-}
-
-void NavigationGroupNode::SetPageViewportConfig(const RefPtr<PageViewportConfig>& config)
-{
-    viewportConfig_ = config;
-    if (config) {
-        safeAreaInsets_ = config->GetSafeArea();
-    } else {
-        safeAreaInsets_ = SafeAreaInsets();
-    }
 }
 } // namespace OHOS::Ace::NG

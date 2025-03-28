@@ -33,6 +33,30 @@ struct TextRange {
     {
         return this->start != other.start || this->end != other.end;
     }
+
+    bool IsValid() const
+    {
+        return start > -1 && end > -1;
+    }
+
+    int32_t GetLength() const
+    {
+        return std::abs(end - start);
+    }
+
+    std::string ToString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_INT(jsonValue, start);
+        JSON_STRING_PUT_INT(jsonValue, end);
+        return jsonValue->ToString();
+    }
+
+    void Reset()
+    {
+        start = -1;
+        end = -1;
+    }
 };
 
 } // namespace OHOS::Ace

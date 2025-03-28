@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
 
+namespace OHOS::Ace {
+class SpanString;
+}
+
 namespace OHOS::Ace::Framework {
 
 class ViewAbstractModelImpl : public ViewAbstractModel {
@@ -273,7 +277,7 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
-    void BindTips(const RefPtr<PopupParam>& param) override;
+    void BindTips(const RefPtr<PopupParam>& param, const RefPtr<OHOS::Ace::SpanString>& sapnString) override;
     int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
     {
         return 0;

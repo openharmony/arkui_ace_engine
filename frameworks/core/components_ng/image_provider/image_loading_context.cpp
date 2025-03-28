@@ -233,8 +233,8 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg)
 {
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "Image LoadFail, src = %{private}s, reason: %{public}s, %{public}s",
-        src_.ToString().c_str(), errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadFail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
+        errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
     needErrorCallBack_ = false;

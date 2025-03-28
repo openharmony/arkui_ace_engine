@@ -547,4 +547,20 @@ HWTEST_F(RichEditorDragTestNG, GetMaxSelectedWidth001, TestSize.Level1)
     auto ret = richPattern->GetMaxSelectedWidth();
     EXPECT_EQ(ret, 0.0f);
 }
+
+/**
+ * @tc.name: RichEditorDragStart001
+ * @tc.desc: test dragstart
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, RichEditorDragStart001, TestSize.Level1)
+{
+    auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    auto richPattern = hostNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richPattern, nullptr);
+    richPattern->HandleDragStart(nullptr, "");
+    EXPECT_TRUE(richPattern->isDragSponsor_);
+}
 } // namespace OHOS::Ace::NG

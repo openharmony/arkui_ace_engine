@@ -512,9 +512,10 @@ class __RepeatVirtualScroll2Impl<T> {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) initialRender()`,
             `data array length: ${this.arr_.length}, totalCount: ${this.totalCount_} - start`);
 
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
         // Create the RepeatVirtualScroll2Node object
         // pass the C++ to TS callback functions.
-        RepeatVirtualScroll2Native.create(this.totalCount_, {
+        RepeatVirtualScroll2Native.create(arrLen, this.totalCount_, {
             onGetRid4Index: this.onGetRid4Index.bind(this),
             onRecycleItems: this.onRecycleItems.bind(this),
             onActiveRange: this.onActiveRange.bind(this),
@@ -620,8 +621,9 @@ class __RepeatVirtualScroll2Impl<T> {
             `\nnewL1Rid4Index: ${JSON.stringify(Array.from(newL1Rid4Index))}`,
             `\nfirst item changed at index ${this.firstIndexChanged_} .`);
 
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
         RepeatVirtualScroll2Native.updateL1Rid4Index(
-            this.repeatElmtId_, this.totalCount_, this.firstIndexChanged_, Array.from(newL1Rid4Index));
+            this.repeatElmtId_, arrLen, this.totalCount_, this.firstIndexChanged_, Array.from(newL1Rid4Index));
 
         this.rerenderOngoing_ = false;
 
@@ -1566,15 +1568,19 @@ class __RepeatVirtualScroll2Impl<T> {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) notifyContainerLayoutChange`,
             changeIndex, changeCount, notificationType);
 
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
         // triggers FrameNode::NotifyChange in CPP side
-        RepeatVirtualScroll2Native.notifyContainerLayoutChange(this.repeatElmtId_, this.totalCount_,
+        RepeatVirtualScroll2Native.notifyContainerLayoutChange(this.repeatElmtId_, arrLen, this.totalCount_,
             changeIndex, changeCount, notificationType);
     }
 
     private requestContainerReLayout(changeIndex?: number): void {
         stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) requestContainerReLayout`, changeIndex);
-         // trigger MarkNeedSyncRenderTree, MarkNeedFrameFlushDirty in CPP side
-        RepeatVirtualScroll2Native.requestContainerReLayout(this.repeatElmtId_, this.totalCount_, changeIndex);
+
+        const arrLen = this.onLazyLoadingFunc_ ? this.totalCount_ : this.arr_.length;
+        // trigger MarkNeedSyncRenderTree, MarkNeedFrameFlushDirty in CPP side
+        RepeatVirtualScroll2Native.requestContainerReLayout(
+            this.repeatElmtId_, arrLen, this.totalCount_, changeIndex);
     }
 
     private onPurge(): void {

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/search/search_text_field.h"
 
 #include "core/components_ng/pattern/search/search_event_hub.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,7 +35,6 @@ RefPtr<FocusHub> SearchTextFieldPattern::GetFocusHub() const
 
 void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Search PerformAction %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -43,6 +43,9 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     // Enter key type callback
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(GetTextUtf16Value(), event);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    TAG_LOGI(
+        AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
     // If the developer wants to keep editing, editing will not stop
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         if (event.IsKeepEditable()) {

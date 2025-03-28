@@ -72,12 +72,15 @@ public:
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
     static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
     static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void SetHasCustomOutline(
+        const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
     static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
-    static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
+    static void UpdateMenuBorderEffect(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,

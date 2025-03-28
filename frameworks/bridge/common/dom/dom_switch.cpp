@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/common/dom/dom_switch.h"
 
-#include "base/i18n/localization.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::Framework {
@@ -27,9 +26,10 @@ constexpr Dimension BOX_HOVER_RADIUS = 8.0_vp;
 
 DOMSwitch::DOMSwitch(NodeId nodeId, const std::string& nodeName) : DOMNode(nodeId, nodeName)
 {
+    RefPtr<SwitchTheme> theme = GetTheme<SwitchTheme>();
     switchChild_ = AceType::MakeRefPtr<SwitchComponent>(nullptr);
-    switchChild_->SetTextOn(Localization::GetInstance()->GetEntryLetters("switch.on"));
-    switchChild_->SetTextOff(Localization::GetInstance()->GetEntryLetters("switch.off"));
+    switchChild_->SetTextOn(theme->GetSwitchOnText());
+    switchChild_->SetTextOff(theme->GetSwitchOffText());
 }
 
 void DOMSwitch::InitializeStyle()
@@ -43,8 +43,8 @@ void DOMSwitch::ResetInitializedStyle()
     if (theme) {
         switchChild_->ApplyTheme(theme);
     }
-    switchChild_->SetTextOn(Localization::GetInstance()->GetEntryLetters("switch.on"));
-    switchChild_->SetTextOff(Localization::GetInstance()->GetEntryLetters("switch.off"));
+    switchChild_->SetTextOn(theme->GetSwitchOnText());
+    switchChild_->SetTextOff(theme->GetSwitchOffText());
 }
 
 bool DOMSwitch::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

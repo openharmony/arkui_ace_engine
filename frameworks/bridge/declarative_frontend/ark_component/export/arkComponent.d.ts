@@ -962,6 +962,7 @@ declare class ArkSelectComponent extends ArkComponent implements SelectAttribute
     arrowPosition(value: ArrowPosition): this;
     menuAlign(alignType: MenuAlignType, offset?: Offset): this;
     avoidance(mode: AvoidanceMode): this;
+    menuOutline(outline: MenuOutlineOptions): this;
 }
 declare class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

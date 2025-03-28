@@ -708,6 +708,7 @@ private:
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
     bool isSlow_ = false;
+    std::optional<float> nextStep_;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

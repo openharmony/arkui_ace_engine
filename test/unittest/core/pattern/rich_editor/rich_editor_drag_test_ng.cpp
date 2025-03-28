@@ -22,6 +22,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/text/span/tlv_util.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -733,7 +734,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorPatternTestResetDragSpanItems001, TestS
     richEditorPattern->ResetDragSpanItems();
 
     auto firstItem = AceType::MakeRefPtr<ImageSpanItem>();
-    firstItem->imageNodeId = testFrameNodeId;
+    firstItem->nodeId_ = testFrameNodeId;
     richEditorPattern->dragSpanItems_.emplace_back(firstItem);
     richEditorPattern->ResetDragSpanItems();
     ASSERT_EQ(richEditorPattern->dragSpanItems_.size(), 0);

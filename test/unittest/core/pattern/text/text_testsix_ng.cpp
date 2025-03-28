@@ -73,7 +73,7 @@ HWTEST_F(TextTestSixNg, UseSelfStyle001, TestSize.Level1)
     fontStyle->UpdateMaxFontScale(2.0);
 
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), false);
-    UseSelfStyle(fontStyle, nullptr, textStyle);
+    UseSelfStyle(fontStyle, nullptr, textStyle, true);
     EXPECT_EQ(textStyle.GetSymbolEffectOptions().has_value(), true);
 }
 
@@ -100,34 +100,6 @@ HWTEST_F(TextTestSixNg, UseSelfStyle002, TestSize.Level1)
 
     UseSelfStyle(nullptr, textLineStyle, textStyle);
     EXPECT_EQ(textStyle.GetLineSpacing(), Dimension(1.0, DimensionUnit::PX));
-}
-
-/**
- * @tc.name: CreateTextStyleUsingThemeWithText001
- * @tc.desc: test text_styles.cpp CreateTextStyleUsingThemeWithText function
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestSixNg, CreateTextStyleUsingThemeWithText001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-
-    auto fontStyle = std::make_unique<FontStyle>();
-    auto textLineStyle = std::make_unique<TextLineStyle>();
-    RefPtr<TextTheme> textTheme;
-
-    auto textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle, TextStyle());
-
-    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy::INVERT);
-    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
-
-    renderContext->UpdateForegroundColor(Color::BLACK);
-    textStyle = CreateTextStyleUsingThemeWithText(frameNode, fontStyle, textLineStyle, textTheme);
-    EXPECT_EQ(textStyle.GetTextColor(), Color::FOREGROUND);
 }
 
 /**

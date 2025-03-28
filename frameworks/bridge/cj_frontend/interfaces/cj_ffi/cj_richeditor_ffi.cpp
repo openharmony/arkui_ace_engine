@@ -14,10 +14,12 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_richeditor_ffi.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 #include "cj_lambda.h"
 #include "securec.h"
+
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -42,6 +44,16 @@ TextInputAction TransfromToTextInputAction(int32_t value)
         return TextInputAction::UNSPECIFIED;
     }
     return static_cast<TextInputAction>(value);
+}
+
+char* MallocCString(const std::string& origin)
+{
+    auto len = origin.length() + 1;
+    char* res = static_cast<char*>(malloc(sizeof(char) * len));
+    if (res == nullptr) {
+        return nullptr;
+    }
+    return std::char_traits<char>::copy(res, origin.c_str(), len);
 }
 
 void ParseNativeFont(const NativeFont& origin, Font& font)
@@ -73,7 +85,9 @@ void ParseDataDetectorConfig(NativeTextDataDetectorConfig origin, TextDetectConf
     if (origin.hasOnDetectResultUpdate) {
         auto onDetectResultUpdate = [cjCallback = CJLambda::Create(origin.onDetectResultUpdate)](
             const std::string& value) -> void {
-            cjCallback(value.c_str());
+            auto resValue = MallocCString(value);
+            cjCallback(resValue);
+            free((void*) resValue);
         };
         textDetectConfig.onResult = std::move(onDetectResultUpdate);
     }
@@ -178,11 +192,14 @@ void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEdit
 {
     auto aboutToIMEInputFunc = [cjCallback = CJLambda::Create(callback)](
         const NG::RichEditorInsertValue& insertValue) -> bool {
-        auto utilstring = UtfUtils::Str16ToStr8(insertValue.GetInsertValue()).c_str();
+        auto utilstring = MallocCString(UtfUtils::Str16ToStr8(insertValue.GetInsertValue()));
         NativeRichEditorInsertValue result {
-            insertValue.GetInsertOffset(), utilstring
+            insertValue.GetInsertOffset(),
+            utilstring
         };
-        return cjCallback(result);
+        auto res = cjCallback(result);
+        free(utilstring);
+        return res;
     };
     RichEditorModel::GetInstance()->SetAboutToIMEInput(std::move(aboutToIMEInputFunc));
 }
@@ -213,18 +230,18 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
 
         NativeTextDecorationResult decoration {
             static_cast<int32_t>(textSpanResult.GetTextDecoration()),
-            textSpanResult.GetColor().c_str(),
+            MallocCString(textSpanResult.GetColor())
         };
 
         NativeRichEditorTextStyleResult textStyle {
-            textSpanResult.GetFontColor().c_str(),
+            MallocCString(textSpanResult.GetFontColor()),
             textSpanResult.GetFontSize(),
             static_cast<int32_t>(textSpanResult.GetFontStyle()),
             textSpanResult.GetFontWeight(),
-            textSpanResult.GetFontFamily().c_str(),
+            MallocCString(textSpanResult.GetFontFamily()),
             decoration
         };
-        auto utilstring = UtfUtils::Str16ToStr8(textSpanResult.GetValue()).c_str();
+        auto utilstring = MallocCString(UtfUtils::Str16ToStr8(textSpanResult.GetValue()));
         NativeRichEditorTextSpanResult result {
             spanPosition,
             utilstring,
@@ -234,6 +251,10 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
         };
 
         cjCallback(result);
+        free((void*) decoration.color);
+        free((void*) textStyle.fontColor);
+        free((void*) textStyle.fontFamily);
+        free(utilstring);
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(onIMEInputCompleteFunc));
 }
@@ -289,6 +310,47 @@ void FfiOHOSAceFrameworkRichEditorOnSelect(void(*callback)(NativeRichEditorSelec
     RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
 }
 
+void FfiOHOSAceFrameworkRichEditorOnSelect12(void(*callback)(NativeRichEditorSelection12))
+{
+    auto onSelectFunc = [cjCallback = CJLambda::Create(callback)](const BaseEventInfo* info) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<SelectionInfo>(info);
+        auto selectionInfo = eventInfo->GetSelection();
+
+        auto selectionStart = selectionInfo.selection[0];
+        auto selectionEnd = selectionInfo.selection[1];
+
+        const std::list<ResultObject>& spanObjectList = selectionInfo.resultObjects;
+        auto spans = new NativeRichEditorSpanResult12[spanObjectList.size()];
+        size_t idx = 0;
+        for (const ResultObject& spanObject : spanObjectList) {
+            NativeRichEditorSpanResult12 current;
+            if (spanObject.type == SelectSpanType::TYPESPAN ||
+                spanObject.type == SelectSpanType::TYPESYMBOLSPAN) {
+                current.isText = true;
+                NativeRichEditorTextSpanResult12 textResult;
+                NativeRichEditorController::ParseRichEditorTextSpanResult(spanObject, textResult);
+                current.textResult = textResult;
+            } else {
+                current.isText = false;
+                NativeRichEditorImageSpanResult12 imageResult;
+                NativeRichEditorController::ParseRichEditorImageSpanResult(spanObject, imageResult);
+                current.imageResult = imageResult;
+            }
+            spans[idx] = current;
+            idx ++;
+        }
+        NativeRichEditorSelection12 result;
+        result.selectionStart = selectionStart;
+        result.selectionEnd = selectionEnd;
+        result.spans = spans;
+        result.spanSize = static_cast<int64_t>(spanObjectList.size());
+
+        cjCallback(result);
+        delete[] spans;
+    };
+    RichEditorModel::GetInstance()->SetOnSelect(std::move(onSelectFunc));
+}
+
 void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditorDeleteValue))
 {
     auto aboutToDeleteFunc = [cjCallback = CJLambda::Create(callback)](
@@ -320,6 +382,20 @@ void FfiOHOSAceFrameworkRichEditorAboutToDelete(bool(*callback)(NativeRichEditor
         result.spanSize = static_cast<int64_t>(deleteSpans.size());
 
         auto res = cjCallback(result);
+        for (int64_t i = 0; i < result.spanSize; i++) {
+            if (spans[i].textResult.value) {
+                free((void*) spans[i].textResult.value);
+            }
+            if (spans[i].textResult.textStyle.fontColor) {
+                free((void*) spans[i].textResult.textStyle.fontColor);
+            }
+            if (spans[i].textResult.textStyle.fontFamily) {
+                free((void*) spans[i].textResult.textStyle.fontFamily);
+            }
+            if (spans[i].textResult.textStyle.decoration.color) {
+                free((void*) spans[i].textResult.textStyle.decoration.color);
+            }
+        }
         delete[] spans;
         return res;
     };

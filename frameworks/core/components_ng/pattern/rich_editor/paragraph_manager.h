@@ -20,8 +20,8 @@
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
+
 namespace OHOS::Ace::NG {
 class ParagraphManager : public virtual AceType {
     DECLARE_ACE_TYPE(ParagraphManager, AceType);
@@ -120,6 +120,8 @@ private:
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
+    static void AddParagraphPacingBlankRect(
+        std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData);
 };
 } // namespace OHOS::Ace::NG
 #endif

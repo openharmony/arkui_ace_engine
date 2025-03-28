@@ -23,6 +23,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -82,6 +83,7 @@ void DialogPatternAdditionalTestNg::SetUpTestCase()
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    MockSystemProperties::g_isSuperFoldDisplayDevice = false;
 
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DialogTheme::TypeId()) {
@@ -525,6 +527,79 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump009, Te
 }
 
 /**
+ * @tc.name: DialogPatternAdditionalTestNgDump010
+ * @tc.desc: Test DialogPattern Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::unique_ptr<JsonValue> jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Dump functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->dialogProperties_.height = HEIGHTDIMENSION;
+    EXPECT_FALSE(pattern->dialogProperties_.width.has_value());
+    EXPECT_TRUE(pattern->dialogProperties_.height.has_value());
+    pattern->DumpSimplifySizeProperty(jsonPtr);
+    EXPECT_FALSE(jsonPtr->Contains("Width"));
+    EXPECT_FALSE(jsonPtr->Contains("Height"));
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgDump011
+ * @tc.desc: Test DialogPattern Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgDump011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    std::unique_ptr<JsonValue> jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Dump functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    jsonPtr.reset();
+    jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    pattern->dialogProperties_.borderRadius = BorderRadiusProperty(Dimension(1, Dimension().Unit()));
+    pattern->DumpSimplifyBorderProperty(jsonPtr);
+    EXPECT_TRUE(jsonPtr->Contains("BorderRadius"));
+
+    Dimension defaultValue(0, Dimension().Unit());
+    BorderRadiusProperty defaultRadius(defaultValue);
+    jsonPtr.reset();
+    jsonPtr = JsonUtil::Create(false);
+    ASSERT_NE(jsonPtr, nullptr);
+    pattern->dialogProperties_.borderRadius = defaultRadius;
+    pattern->DumpSimplifyBorderProperty(jsonPtr);
+    EXPECT_FALSE(jsonPtr->Contains("BorderRadius"));
+}
+
+/**
  * @tc.name: DialogPatternAdditionalTestNgHandle001
  * @tc.desc: Test DialogPattern Handle
  * @tc.type: FUNC
@@ -700,6 +775,38 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateHostW
     pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
     pattern->UpdateHostWindowRect();
     EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgUpdateHostWindowRect002
+ * @tc.desc: Test DialogPattern UpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgUpdateHostWindowRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->isUIExtensionSubWindow_ = true;
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
+    EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    EXPECT_TRUE(SystemProperties::IsSuperFoldDisplayDevice());
+    pattern->UpdateHostWindowRect();
 }
 
 /**
@@ -983,6 +1090,39 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnWindowSiz
 }
 
 /**
+ * @tc.name: DialogPatternAdditionalTestNgOnWindowSizeChanged002
+ * @tc.desc: Test DialogPattern OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgOnWindowSizeChanged002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isFoldStatusChanged_ = false;
+    WindowSizeChangeReason type = WindowSizeChangeReason::RESIZE;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pattern->OnWindowSizeChanged(INTONE, INTONE, type);
+    EXPECT_FALSE(pattern->isFoldStatusChanged_);
+
+    pattern->isFoldStatusChanged_ = false;
+    type = WindowSizeChangeReason::DRAG;
+    pattern->OnWindowSizeChanged(INTONE, INTONE, type);
+    EXPECT_FALSE(pattern->isFoldStatusChanged_);
+}
+
+/**
  * @tc.name: DialogPatternAdditionalTestNgNeedsButtonDirectionChange001
  * @tc.desc: Test DialogPattern NeedsButtonDirectionChange
  * @tc.type: FUNC
@@ -1021,5 +1161,279 @@ HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedsButton
 
     childNode->MountToParent(pattern->buttonContainer_);
     EXPECT_FALSE(pattern->NeedsButtonDirectionChange(buttons));
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgCreateButton
+ * @tc.desc: Test DialogPattern CreateButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCreateButton, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogTheme_->buttonHighlightBgColor_ = Color::BLACK;
+    pattern->dialogTheme_->buttonDefaultBgColor_ = Color::GREEN;
+    pattern->dialogTheme_->buttonDefaultFontColor_ = Color::BLUE;
+    pattern->dialogTheme_->button_type_ = 1;
+    ButtonInfo params;
+    params.textColor = MESSAGE;
+    params.defaultFocus = false;
+    params.text = TITLE;
+    params.dlgButtonStyle = DialogButtonStyle::DEFAULT;
+    params.isPrimary = true;
+    std::string msg;
+    auto clickCallback = [&msg](GestureEvent& /* info */) { msg = TITLE; };
+    params.action = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_EQ(pattern->CreateButton(params, 0), nullptr);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgCheckScrollHeightIsNegative
+ * @tc.desc: Test DialogPattern CheckScrollHeightIsNegative
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgCheckScrollHeightIsNegative, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->buttonContainer_ =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, INTONE, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(pattern->buttonContainer_, nullptr);
+    DialogProperties Dialogprops;
+    ButtonInfo buttonInfo1 = { .text = TITLE };
+    ButtonInfo buttonInfo2 = { .text = TITLE };
+    Dialogprops.buttons.emplace_back(buttonInfo1);
+    RefPtr<UINode> contentColumn = AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>());
+    pattern->buttonContainer_->MountToParent(contentColumn);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_TRUE(Dialogprops.buttons.size() == 1);
+    pattern->CheckScrollHeightIsNegative(contentColumn, Dialogprops);
+
+    Dialogprops.buttons.emplace_back(buttonInfo2);
+    pattern->buttonContainer_->tag_ = V2::ROW_ETS_TAG;
+    EXPECT_TRUE(pattern->buttonContainer_->GetTag() == V2::ROW_ETS_TAG);
+    pattern->CheckScrollHeightIsNegative(contentColumn, Dialogprops);
+
+    pattern->buttonContainer_->tag_ = V2::COLUMN_ETS_TAG;
+    pattern->isScrollHeightNegative_ = true;
+    pattern->CheckScrollHeightIsNegative(contentColumn, Dialogprops);
+    EXPECT_TRUE(pattern->notAdapationAging_);
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect001
+ * @tc.desc: Test DialogPattern NeedUpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isUIExtensionSubWindow_ = true;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgNeedUpdateHostWindowRect002
+ * @tc.desc: Test DialogPattern NeedUpdateHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgNeedUpdateHostWindowRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isUIExtensionSubWindow_ = true;
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    EXPECT_TRUE(SystemProperties::IsSuperFoldDisplayDevice());
+    auto host = frameNode->GetPattern<Pattern>()->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    pipeline->instanceId_ = 0;
+    EXPECT_TRUE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+    pipeline->instanceId_ = MIN_SUBCONTAINER_ID + 1;
+    EXPECT_FALSE(pipeline->GetInstanceId() < MIN_SUBCONTAINER_ID);
+    AceEngine::Get().AddContainer(pipeline->GetInstanceId(), AceType::MakeRefPtr<MockContainer>());
+    auto container = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(pipeline->instanceId_));
+    ASSERT_NE(container, nullptr);
+    container->SetDisplayInfo(AceType::MakeRefPtr<DisplayInfo>());
+    EXPECT_FALSE(container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD);
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+    MockContainer::Current()->GetMockDisplayInfo()->foldStatus_ = FoldStatus::HALF_FOLD;
+    EXPECT_TRUE(container->GetCurrentFoldStatus() == FoldStatus::HALF_FOLD);
+    EXPECT_FALSE(pattern->NeedUpdateHostWindowRect());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgGetContentRect
+ * @tc.desc: Test DialogPattern GetContentRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgGetContentRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.customStyle = true;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    frameNode->SetGeometryNode(geometryNode);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_EQ(pattern->GetContentRect(frameNode), frameNode->GetGeometryNode()->GetFrameRect());
+
+    RefPtr<FrameNode> dialogNode = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialogNode, nullptr);
+    pattern->customNode_ = dialogNode;
+    auto customNode = pattern->customNode_.Upgrade();
+    EXPECT_NE(pattern->customNode_.Upgrade(), nullptr);
+    auto customContent = AccessibilityManagerNG::DynamicCast<FrameNode>(customNode);
+    EXPECT_NE(customContent, nullptr);
+    EXPECT_EQ(pattern->GetContentRect(frameNode), frameNode->GetGeometryNode()->GetFrameRect());
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgInitHostWindowRect
+ * @tc.desc: Test DialogPattern InitHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgInitHostWindowRect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->dialogProperties_.isShowInSubWindow = true;
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    EXPECT_FALSE(!pattern->dialogProperties_.isShowInSubWindow);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    EXPECT_FALSE(container->IsSubContainer());
+    container->isUIExtensionWindow_ = true;
+    EXPECT_TRUE(container->IsUIExtensionWindow());
+    pattern->InitHostWindowRect();
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+    pattern->InitHostWindowRect();
+}
+
+/**
+ * @tc.name: DialogPatternAdditionalTestNgIsShowInFreeMultiWindow
+ * @tc.desc: Test DialogPattern IsShowInFreeMultiWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternAdditionalTestNg, DialogPatternAdditionalTestNgIsShowInFreeMultiWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create dialogNode and dialogTheme instance.
+     * @tc.expected: The dialogNode and dialogNode created successfully.
+     */
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DialogPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Invoke Handle functions.
+     * @tc.expected: These Dump properties are matched.
+     */
+    MockContainer::container_ = nullptr;
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_EQ(container, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
+
+    MockContainer::SetUp();
+    container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    auto subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_EQ(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
+
+    SubwindowManager::GetInstance()->AddParentContainerId(Container::CurrentId(), Container::CurrentId());
+    currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    AceEngine::Get().AddContainer(currentId, container);
+    subcontainer = AceEngine::Get().GetContainer(currentId);
+    ASSERT_NE(subcontainer, nullptr);
+    EXPECT_FALSE(pattern->IsShowInFreeMultiWindow());
 }
 } // namespace OHOS::Ace::NG

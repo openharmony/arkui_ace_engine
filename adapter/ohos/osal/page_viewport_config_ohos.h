@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_PAGE_VIEWPORT_CONFIG_OHOS_H
 
 #include <map>
+#include <stack>
 
 #include "core/common/page_viewport_config.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -61,9 +62,12 @@ public:
     void RestoreSafeArea() override;
 
 private:
-    int32_t backupRootWidth_ = -1;
-    int32_t backupRootHeight_ = -1;
-    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> backupSafeAreas_;
+    struct BackupInfo {
+        int32_t rootWidth = -1;
+        int32_t rootHeight = -1;
+        std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> safeAreas;
+    };
+    std::stack<BackupInfo> backupInfos_;
     ViewportConfig config_;
     AvoidAreaInfo avoidAreas_;
     WeakPtr<NG::PipelineContext> pipeline_;

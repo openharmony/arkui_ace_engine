@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include "core/components_ng/base/distributed_ui.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MIN_RECT_TOP = -0.4f;
@@ -438,6 +440,7 @@ std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::Get
             std::vector<RectF> rects;
             selectData.relativeStart = std::max(0, start - info.start);
             selectData.relativeEnd = end - info.start;
+            selectData.paragraphSpacing = info.paragraphStyle.paragraphSpacing.ConvertToPx();
             if (rectHeightPolicy == RectHeightPolicy::COVER_TEXT) {
                 info.paragraph->GetTightRectsForRange(selectData.relativeStart, selectData.relativeEnd, rects);
             } else {
@@ -464,7 +467,9 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
     const int32_t realEnd = info.end - info.start;
     const bool isLastParagraph = (selectData.relativeEnd == 0) || (selectData.relativeEnd < realEnd);
     if (isLastParagraph && !result.empty() && IsRectOutByHandler(result.back(), selectData)) {
+        auto lastRect = result.back();
         result.pop_back();
+        AddParagraphPacingBlankRect(result, lastRect, selectData);
         return;
     }
     CHECK_NULL_VOID(info.paragraph);
@@ -479,7 +484,7 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
         }
         CaretMetricsF caretMetrics;
         bool res = info.paragraph->CalcCaretMetricsByPosition(index, caretMetrics, TextAffinity::UPSTREAM);
-        CHECK_NULL_BREAK(res)
+        CHECK_NULL_BREAK(res);
         RectF rect(caretMetrics.offset.GetX(), caretMetrics.offset.GetY(), 0.0f, caretMetrics.height);
         if (GreatNotEqual(rect.Bottom(), height) || (isLastParagraph && IsRectOutByHandler(rect, selectData))) {
             continue;
@@ -487,11 +492,22 @@ void ParagraphManager::MakeBlankLineRectsInParagraph(std::vector<RectF>& result,
         if (LessNotEqual(rect.Top(), lastBottom)) {
             break;
         }
+        AddParagraphPacingBlankRect(result, rect, selectData);
         height = rect.Top();
         rects.emplace_back(rect);
     }
     std::reverse(rects.begin(), rects.end());
     result.insert(result.end(), rects.begin(), rects.end());
+}
+
+void ParagraphManager::AddParagraphPacingBlankRect(
+    std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData)
+{
+    if (!Positive(selectData.paragraphSpacing) || rects.empty() || NearEqual(rects.back().Top(), lastRect.Top())) {
+        return;
+    }
+    rects.emplace_back(
+        RectF(lastRect.Left(), lastRect.Top() - selectData.paragraphSpacing, 0.0f, selectData.paragraphSpacing));
 }
 
 std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> ParagraphManager::GetRichEditorBoxesForSelect(

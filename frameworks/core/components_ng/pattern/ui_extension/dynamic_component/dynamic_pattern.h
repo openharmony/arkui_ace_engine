@@ -82,6 +82,11 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
 
+    bool HasDynamicRenderer() const
+    {
+        return dynamicComponentRenderer_ != nullptr;
+    }
+
 private:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();

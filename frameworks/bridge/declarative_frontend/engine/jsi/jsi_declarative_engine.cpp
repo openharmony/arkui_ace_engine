@@ -342,11 +342,11 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
             ohmUrl = jsOhmUrl->ToString(vm)->ToString(vm);
             ohmUrlValid = true;
         } else {
-            TAG_LOGE(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
+            TAG_LOGD(AceLogTag::ACE_ROUTER, "add named router record with invalid ohmUrl!");
         }
     }
     if (!ohmUrlValid) {
-        TAG_LOGI(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
+        TAG_LOGD(AceLogTag::ACE_ROUTER, "build ohmUrl for forward compatibility");
         ohmUrl = BuildOhmUrl(bundleName, moduleName, pagePath);
     }
 
@@ -598,7 +598,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
-    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime, global);
+    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);

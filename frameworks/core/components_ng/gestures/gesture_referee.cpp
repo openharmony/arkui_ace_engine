@@ -556,4 +556,9 @@ bool GestureReferee::HasGestureAccepted(size_t touchId) const
     return scope->HasGestureAccepted();
 }
 
+bool GestureReferee::IsScopesEmpty() const
+{
+    return gestureScopes_.empty();
+}
+
 } // namespace OHOS::Ace::NG

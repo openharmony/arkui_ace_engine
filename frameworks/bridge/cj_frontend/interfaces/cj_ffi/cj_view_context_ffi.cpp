@@ -172,7 +172,7 @@ void FfiOHOSAceFrameworkViewContextAnimationTo(NativeAnimateParam animateParam, 
     if (SystemProperties::GetRosenBackendEnabled()) {
         if (pipelineContextBase->IsLayouting()) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                "pipeline is layouting, post animateTo, duration:%{public}d, curve:%{public}s",
+                "Pipeline layouting, post animateTo, dur:%{public}d, curve:%{public}s",
                 animateOpt.GetDuration(), animateOpt.GetCurve() ? animateOpt.GetCurve()->ToString().c_str() : "");
             pipelineContextBase->GetTaskExecutor()->PostTask(
                 [id = Container::CurrentIdSafely(), animateOpt, callback, isImmediately]() mutable {

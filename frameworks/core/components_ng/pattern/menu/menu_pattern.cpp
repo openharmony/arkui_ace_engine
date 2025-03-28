@@ -1132,6 +1132,7 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
         borderRadius.SetRadius(theme->GetMenuBorderRadius());
     }
     renderContext->UpdateBorderRadius(borderRadius);
+    renderContext->UpdateOuterBorderRadius(borderRadius);
 }
 
 void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)

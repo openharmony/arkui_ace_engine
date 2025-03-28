@@ -26,6 +26,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_render_surface.h"
+#include "test/mock/core/manager/mock_display_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -65,12 +66,19 @@ namespace {
 const std::string XCOMPONENT_ID = "xcomponent";
 const std::string XCOMPONENT_LIBRARY_NAME = "native_render";
 const std::string XCOMPONENT_SO_PATH = "com.example.xcomponentmultihap/entry";
+const uint64_t XCOMPONENT_SCREEN_ID = 12345u;
 constexpr XComponentType XCOMPONENT_SURFACE_TYPE_VALUE = XComponentType::SURFACE;
 constexpr XComponentType XCOMPONENT_TEXTURE_TYPE_VALUE = XComponentType::TEXTURE;
+constexpr XComponentType XCOMPONENT_COMPONENT_TYPE_VALUE = XComponentType::COMPONENT;
 constexpr float MAX_WIDTH = 400.0f;
 constexpr float MAX_HEIGHT = 400.0f;
+constexpr uint32_t SURFACE_WIDTH_SIZE = 200;
+constexpr uint32_t SURFACE_HEIGHT_SIZE = 250;
+constexpr float OFFSET_X = 10;
+constexpr float OFFSET_Y = 10;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 const RectF MAX_SURFACE_RECT(0, 0, MAX_WIDTH, MAX_HEIGHT);
+ArkUI_XComponent_Params params;
 TestProperty g_testProperty;
 } // namespace
 
@@ -763,5 +771,327 @@ HWTEST_F(XComponentTestTwoNg, NativeXComponentCallbackTest, TestSize.Level1)
 
     pattern->OnSurfaceDestroyed();
     ASSERT_TRUE(hasSurfaceDestroyed);
+}
+
+/**
+ * @tc.name: GetGlobalPositionTestOne
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestOne, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::SURFACE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_NO_ERROR);
+    EXPECT_EQ(offsetX, pattern->GetOffsetRelativeToWindow().GetX());
+    EXPECT_EQ(offsetY, pattern->GetOffsetRelativeToWindow().GetY());
+}
+
+/**
+ * @tc.name: GetGlobalPositionTestTwo
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestTwo, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::TEXTURE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_TYPE_ERROR);
+}
+
+/**
+ * @tc.name: SetScreenIdShouldCallPatternSetFuncTest
+ * @tc.desc: Test SetScreenIdShouldCallPatternSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetScreenIdShouldCallPatternSetFuncTest, TestSize.Level1)
+{
+    // type is surface
+    params.type = XCOMPONENT_SURFACE_TYPE_VALUE;
+    params.id = XCOMPONENT_ID;
+    params.controller = std::make_shared<XComponentControllerNG>();
+    params.screenId = XCOMPONENT_SCREEN_ID;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_EQ(pattern->screenId_.value(), XCOMPONENT_SCREEN_ID);
+}
+
+/**
+ * @tc.name: SetScreenIdShouldNotCallPatternSetFuncTest
+ * @tc.desc: Test SetScreenIdShouldNotCallPatternSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetScreenIdShouldNotCallPatternSetFuncTest, TestSize.Level1)
+{
+    // type is component
+    params.type = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    params.id = XCOMPONENT_ID;
+    params.controller = std::make_shared<XComponentControllerNG>();
+    params.screenId = XCOMPONENT_SCREEN_ID;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = AceType::DynamicCast<FrameNode>(XComponentModelNG().CreateTypeNode(nodeId, &params));
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_EQ(pattern->screenId_.has_value(), false);
+}
+
+/**
+ * @tc.name: SetXComponentSurfaceSizeTest
+ * @tc.desc: Test SetXComponentSurfaceSize Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetXComponentSurfaceSizeTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
+        ConfigSurface(SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE))
+        .WillOnce(Return());
+    XComponentModelNG::SetXComponentSurfaceSize(Referenced::RawPtr(frameNode), SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+}
+
+/**
+ * @tc.name: InitXComponentShouldNotCallInitNativeXComponentAndLoadNativeTest
+ * @tc.desc: Test InitXComponentShouldNotCallInitNativeXComponentAndLoadNative Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitXComponentShouldNotCallInitNativeXComponentAndLoadNativeTest, TestSize.Level1)
+{
+    // type = XCOMPONENT_COMPONENT_TYPE_VALUE
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    
+    XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern->isNativeXComponent_, false);
+}
+
+/**
+ * @tc.name: InitXComponentShouldCallInitNativeXComponentAndLoadNativeTest
+ * @tc.desc: Test InitXComponentShouldCallInitNativeXComponentAndLoadNative Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitXComponentShouldCallInitNativeXComponentAndLoadNativeTest, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_= true, libraryName has value
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    
+    XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern->isNativeXComponent_, true);
+}
+
+/**
+ * @tc.name: InitXComponentShouldCallInitNativeXComponentTest
+ * @tc.desc: Test InitXComponentShouldCallInitNativeXComponent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitXComponentShouldCallInitNativeXComponentTest, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = true, libraryName = std::nullopt
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = std::nullopt;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->isTypedNode_ = true;
+    
+    XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern->isNativeXComponent_, false);
+}
+
+/**
+ * @tc.name: InitXComponentShouldNotCallInitNativeXComponentTest
+ * @tc.desc: Test InitXComponentShouldNotCallInitNativeXComponent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitXComponentShouldNotCallInitNativeXComponentTest, TestSize.Level1)
+{
+    // type = XCOMPONENT_SURFACE_TYPE_VALUE, isTypedNode_ = false
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    
+    XComponentModelNG().InitXComponent(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(pattern->isNativeXComponent_, false);
+}
+
+/**
+ * @tc.name: SetOnLoadShouldCallEventHubSetFuncTest
+ * @tc.desc: Test SetOnLoadShouldCallEventHubSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetOnLoadShouldCallEventHubSetFuncTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    uint32_t onNativeLoadCount = 0;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto loadEvent = [&onNativeLoadCount](const std::string&) {
+        ++onNativeLoadCount;
+    };
+
+    XComponentModelNG::SetOnLoad(Referenced::RawPtr(frameNode), loadEvent);
+    pattern->OnNativeLoad(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(onNativeLoadCount, 1);
+}
+
+/**
+ * @tc.name: SetOnLoadShouldNotCallEventHubSetFuncTest
+ * @tc.desc: Test SetOnLoadShouldNotCallEventHubSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetOnLoadShouldNotCallEventHubSetFuncTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    uint32_t onNativeLoadCount = 0;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto loadEvent = [&onNativeLoadCount](const std::string&) {
+        ++onNativeLoadCount;
+    };
+
+    XComponentModelNG::SetOnLoad(Referenced::RawPtr(frameNode), loadEvent);
+    pattern->OnNativeLoad(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(onNativeLoadCount, 0);
+}
+
+/**
+ * @tc.name: SetOnDestroyShouldCallEventHubSetFuncTest
+ * @tc.desc: Test SetOnDestroyShouldCallEventHubSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetOnDestroyShouldCallEventHubSetFuncTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    uint32_t onDestroyCount = 0;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto destroyEvent = [&onDestroyCount](const std::string&) {
+        ++onDestroyCount;
+    };
+
+    XComponentModelNG::SetOnDestroy(Referenced::RawPtr(frameNode), destroyEvent);
+    pattern->OnNativeUnload(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(onDestroyCount, 1);
+}
+
+/**
+ * @tc.name: SetOnDestroyShouldNotCallEventHubSetFuncTest
+ * @tc.desc: Test SetOnDestroyShouldNotCallEventHubSetFunc Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetOnDestroyShouldNotCallEventHubSetFuncTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    uint32_t onDestroyCount = 0;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto destroyEvent = [&onDestroyCount](const std::string&) {
+        ++onDestroyCount;
+    };
+
+    XComponentModelNG::SetOnDestroy(Referenced::RawPtr(frameNode), destroyEvent);
+    pattern->OnNativeUnload(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(onDestroyCount, 0);
+}
+
+/**
+ * @tc.name: GetSurfaceRenderFitTest
+ * @tc.desc: Test GetSurfaceRenderFit Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetSurfaceRenderFitTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    RenderFit renderFit = XComponentModelNG::GetSurfaceRenderFit(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(renderFit, RenderFit::RESIZE_FILL);
+}
+
+/**
+ * @tc.name: SetXComponentSurfaceRectTest
+ * @tc.desc: Test SetXComponentSurfaceRect Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetXComponentSurfaceRectTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    XComponentModelNG::SetXComponentSurfaceRect(
+        Referenced::RawPtr(frameNode), OFFSET_X, OFFSET_Y, SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    EXPECT_EQ(pattern->selfIdealSurfaceOffsetX_, OFFSET_X);
+    EXPECT_EQ(pattern->selfIdealSurfaceOffsetY_, OFFSET_Y);
+    EXPECT_EQ(pattern->selfIdealSurfaceWidth_, SURFACE_WIDTH_SIZE);
+    EXPECT_EQ(pattern->selfIdealSurfaceHeight_, SURFACE_HEIGHT_SIZE);
+}
+
+/**
+ * @tc.name: GetXComponentEnableAnalyzerTest
+ * @tc.desc: Test GetXComponentEnableAnalyzer Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetXComponentEnableAnalyzerTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->EnableAnalyzer(true);
+    auto isEnableAnalyzer = XComponentModelNG().GetXComponentEnableAnalyzer(Referenced::RawPtr(frameNode));
+    EXPECT_EQ(isEnableAnalyzer, true);
 }
 } // namespace OHOS::Ace::NG

@@ -478,7 +478,7 @@ class MultiSelectBackground extends ViewPU {
                                 Stack.height(this.buttonItemsSize[index].height);
                                 Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
                                 Stack.borderRadius(this.buttonBorderRadius[index]);
-                                Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
+                                Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
                             }, Stack);
                             Stack.pop();
                         });
@@ -2748,7 +2748,7 @@ export class SegmentButton extends ViewPU {
                                     Stack.size(ObservedObject.GetRawObject(this.componentSize));
                                     Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
                                     Stack.borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height / 2);
-                                    Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
+                                    Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
                                 }, Stack);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();

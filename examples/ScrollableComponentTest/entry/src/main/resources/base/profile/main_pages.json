@@ -1,7 +1,22 @@
 {
   "src": [
     "pages/Index",
-    "pages/Scrollable/ScrollableMainPage",
-    "pages/Scrollable/ListNestedScroll1"
+    "pages/scrollable/ScrollableMainPage",
+    "pages/scrollable/ListNestedScroll1",
+    "pages/Tabs/TabsMainPage",
+    "pages/Tabs/BarBackgroundBlurStyle",
+    "pages/Tabs/OnContentWillChange",
+    "pages/Tabs/TabContentObserver",
+    "pages/Tabs/TabsHeightAdaptive",
+    "pages/Tabs/TabsSubTabBarStyle",
+    "pages/waterflow/WaterFlowMainPage",
+    "pages/waterflow/demo01/WaterFlowDemo",
+    "pages/Swiper/SwiperMainPage",
+    "pages/Swiper/OnContentWillScrollNormal",
+    "pages/Swiper/OnContentWillScrollNestList",
+    "pages/Swiper/OnContentWillScrollListNest",
+    "pages/Swiper/CachedCountIsShownNormal",
+    "pages/List/ListMainPage",
+    "pages/List/childrenMainSize/ListItemGroupScenario"
   ]
 }

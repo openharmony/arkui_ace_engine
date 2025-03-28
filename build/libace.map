@@ -531,6 +531,7 @@
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
     };
   local:
     *;

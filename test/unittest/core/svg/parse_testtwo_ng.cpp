@@ -72,6 +72,7 @@
 #include "core/components_ng/svg/parse/svg_stop.h"
 #include "core/components_ng/svg/parse/svg_style.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
+#include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
 
@@ -570,6 +571,271 @@ HWTEST_F(ParseTestTwoNg, ParsePolygonTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePolygonTest004, TestSize.Level1)
+{
+    auto polygon = AceType::DynamicCast<SvgPolygon>(AceType::MakeRefPtr<SvgPolygon>(true));
+    EXPECT_NE(polygon, nullptr);
+    std::vector<RSPoint> points;
+    RSPoint point1;
+    point1.SetX(1.0f);
+    point1.SetX(2.0f);
+    points.emplace_back(point1);
+
+    RSPoint point2;
+    point2.SetX(1.0f);
+    point2.SetX(2.0f);
+    points.emplace_back(point2);
+
+    SvgLengthScaleRule lengthScaleRule;
+    polygon->ConvertPoints(points, lengthScaleRule);
+    EXPECT_EQ(points.size(), 2);
+}
+
+/**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePolygonTest005, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto polygon = AceType::DynamicCast<SvgPolygon>(AceType::MakeRefPtr<SvgPolygon>(true));
+    EXPECT_NE(polygon, nullptr);
+
+    Size size;
+    auto result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "no";
+    result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|";
+    polygon->attributes_.clipState.clipRule_ = SvgRuleType::SVG_RULE_EVENODD;
+    polygon->attributes_.fillState.fillRule_ = "evenodd";
+    result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePolygonTest006, TestSize.Level1)
+{
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto polygon = AceType::DynamicCast<SvgPolygon>(AceType::MakeRefPtr<SvgPolygon>(true));
+    EXPECT_NE(polygon, nullptr);
+
+    Size size;
+    auto result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "no";
+    result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|";
+    polygon->attributes_.clipState.clipRule_ = SvgRuleType::SVG_RULE_EVENODD;
+    polygon->attributes_.fillState.fillRule_ = "evenodd";
+    result = polygon->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePolygonTest007, TestSize.Level1)
+{
+    auto polygon = AceType::DynamicCast<SvgPolygon>(AceType::MakeRefPtr<SvgPolygon>(true));
+    EXPECT_NE(polygon, nullptr);
+    SvgLengthScaleRule rule;
+    RSRecordingPath path;
+    polygon->path_ = path;
+
+    auto result = polygon->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->path_ = std::nullopt;
+    result = polygon->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "no";
+    result = polygon->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    polygon->polyAttr_.points = "*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|*aaaaaaaa|";
+    polygon->attributes_.fillState.fillRule_ = "evenodd";
+    rule.pathTransform_ = true;
+    result = polygon->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgGTest001, TestSize.Level1)
+{
+    auto svgG = AceType::DynamicCast<SvgG>(AceType::MakeRefPtr<SvgG>());
+    EXPECT_NE(svgG, nullptr);
+    auto svgG1 = SvgG::Create();
+    EXPECT_NE(svgG1, nullptr);
+    SvgLengthScaleRule lengthRule;
+    RSCanvas canvas;
+    svgG->ApplyOpacity(canvas);
+    svgG->attributes_.hasOpacity = true;
+    svgG->ApplyOpacity(canvas);
+    svgG->OnDraw(canvas, lengthRule);
+    Size size;
+    auto result = svgG->AsPath(size);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+    result = svgG->AsPath(lengthRule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgPath001, TestSize.Level1)
+{
+    auto svgPath = AceType::DynamicCast<SvgPath>(AceType::MakeRefPtr<SvgPath>());
+    EXPECT_NE(svgPath, nullptr);
+    SvgLengthScaleRule rule;
+    rule.lengthScaleUnit_ = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    auto rect = svgPath->GetobjectBoundingBox(rule);
+    EXPECT_EQ(rect.Width(), 0);
+    EXPECT_EQ(rect.Height(), 0);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Top(), 0);
+
+    rule.lengthScaleUnit_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    rect = svgPath->GetobjectBoundingBox(rule);
+    EXPECT_EQ(rect.Width(), 1);
+    EXPECT_EQ(rect.Height(), 1);
+    EXPECT_EQ(rect.Left(), 0);
+    EXPECT_EQ(rect.Top(), 0);
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgPath002, TestSize.Level1)
+{
+    auto svgPath = AceType::DynamicCast<SvgPath>(AceType::MakeRefPtr<SvgPath>());
+    EXPECT_NE(svgPath, nullptr);
+    SvgLengthScaleRule rule;
+    auto result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    RSRecordingPath path;
+    svgPath->path_ = path;
+
+    result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    rule.pathTransform_ = true;
+    svgPath->path_ = std::nullopt;
+    result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    svgPath->path_ = path;
+    result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    svgPath->d_ = "123";
+    result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+
+    svgPath->attributes_.fillState.fillRule_ = "evenodd";
+    result = svgPath->AsPath(rule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgFeGaussianBlurTest001, TestSize.Level1)
+{
+    auto feGaussianBlur = AceType::DynamicCast<SvgFeGaussianBlur>(SvgFeGaussianBlur::Create());
+    EXPECT_NE(feGaussianBlur, nullptr);
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgColorInterpolationType type = SvgColorInterpolationType::SRGB;
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+    feGaussianBlur->OnAsImageFilter(imageFilter, type, colorInterpolationType, resultHash, false);
+
+    feGaussianBlur->filterContext_.primitiveRule_.lengthScaleUnit_ = SvgLengthScaleUnit::USER_SPACE_ON_USE;
+    feGaussianBlur->OnAsImageFilter(imageFilter, type, colorInterpolationType, resultHash, true);
+
+    feGaussianBlur->filterContext_.primitiveRule_.lengthScaleUnit_ = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    feGaussianBlur->OnAsImageFilter(imageFilter, type, colorInterpolationType, resultHash, true);
+
+    auto result = feGaussianBlur->ParseAndSetSpecializedAttr("edgemode", "aaaa");
+    EXPECT_TRUE(result);
+
+    result = feGaussianBlur->ParseAndSetSpecializedAttr("stddeviation", "1,2,4,6,76,43");
+    EXPECT_TRUE(result);
+
+    result = feGaussianBlur->ParseAndSetSpecializedAttr("stddeviation", "1 2 4 6 76 43");
+    EXPECT_TRUE(result);
+
+    result = feGaussianBlur->ParseAndSetSpecializedAttr("stddeviation", "1,2");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SvgGTest001
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgPatternTest001, TestSize.Level1)
+{
+    auto pattern = AceType::DynamicCast<SvgPattern>(SvgPattern::Create());
+    EXPECT_NE(pattern, nullptr);
+    RSCanvas canvas;
+    Size viewPort;
+    std::optional<Color> color = Color::BLACK;
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    pattern->OnDrawTraversedBefore(canvas, viewPort, color);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+
+    pattern->patternAttr_.patternContentUnits = SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+    pattern->OnDrawTraversedBefore(canvas, viewPort, color);
+    pattern->OnDrawTraversedAfter(canvas, viewPort, color);
+    RSBrush brush;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    RefPtr<SvgNode> svgNode1 = nullptr;
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    pattern->children_.emplace_back(svgNode1);
+    pattern->children_.emplace_back(svgNode2);
+    pattern->OnPatternEffect(canvas, brush, context);
+    EXPECT_TRUE(context.UseFillColor());
+}
+
+/**
  * @tc.name: ParseStyleTest002
  * @tc.desc: parse use label
  * @tc.type: FUNC
@@ -896,7 +1162,7 @@ HWTEST_F(ParseTestTwoNg, ParseNodeTest004, TestSize.Level1)
     Size size = { 100, 100 };
     src.SetFillColor(Color::GREEN);
     auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    svgDom->SetAnimationOnFinishCallback([](){});
+    svgDom->SetAnimationOnFinishCallback([]() {});
     svgDom->SetColorFilter(std::nullopt);
     Testing::MockCanvas rSCanvas;
     CallBack(rSCanvas);
@@ -1581,10 +1847,7 @@ HWTEST_F(ParseTestTwoNg, ParseFeTest002, TestSize.Level1)
      * @tc.expected: Execute function return value not is nullptr
      */
     std::shared_ptr<RSImageFilter> imageFilter = nullptr;
-    SvgFeIn in = {
-        .in = SvgFeInType::SOURCE_GRAPHIC,
-        .id = "test"
-    };
+    SvgFeIn in = { .in = SvgFeInType::SOURCE_GRAPHIC, .id = "test" };
 
     in.in = SvgFeInType::PRIMITIVE;
     auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
@@ -1800,5 +2063,436 @@ HWTEST_F(ParseTestTwoNg, ParseStyleTest001, TestSize.Level1)
 
     SvgStyle::ParseCssStyle("body {font-style: oblique;}.normal {font-style: normal;}", callback);
     EXPECT_FALSE(str.empty());
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform001, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "asd";
+    paramVec.emplace_back("213");
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "asd";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform002, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "matrix";
+    paramVec.emplace_back("213");
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "matrix";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    paramVec1.emplace_back("215333");
+    paramVec1.emplace_back("213733");
+    paramVec1.emplace_back("213363");
+    paramVec1.emplace_back("217333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform003, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "rotate";
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "rotate";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    paramVec1.emplace_back("215333");
+    paramVec1.emplace_back("213733");
+    paramVec1.emplace_back("213363");
+    paramVec1.emplace_back("217333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    NG::TransformInfo info2;
+    std::vector<std::string> paramVec2;
+    info2.funcType = "rotate";
+    paramVec2.emplace_back("213");
+    paramVec2.emplace_back("21333");
+    paramVec2.emplace_back("215333");
+    info2.paramVec = paramVec2;
+    transformVec.emplace_back(info2);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform004, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "scale";
+    paramVec.emplace_back("213");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "scale";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    NG::TransformInfo info2;
+    std::vector<std::string> paramVec2;
+    info2.funcType = "scale";
+    paramVec2.emplace_back("213");
+    paramVec2.emplace_back("21333");
+    paramVec2.emplace_back("215333");
+    info2.paramVec = paramVec2;
+    transformVec.emplace_back(info2);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform005, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "skewX";
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "skewX";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    paramVec1.emplace_back("215333");
+    paramVec1.emplace_back("213733");
+    paramVec1.emplace_back("213363");
+    paramVec1.emplace_back("217333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform006, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "skewY";
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "skewY";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    paramVec1.emplace_back("215333");
+    paramVec1.emplace_back("213733");
+    paramVec1.emplace_back("213363");
+    paramVec1.emplace_back("217333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform007, TestSize.Level1)
+{
+    // NG::NGSvgTransform::ApplyTransformPivot
+    std::vector<NG::TransformInfo> transformVec;
+    NG::TransformInfo info;
+    std::vector<std::string> paramVec;
+    info.funcType = "translate";
+    paramVec.emplace_back("21333");
+    info.paramVec = paramVec;
+    transformVec.emplace_back(info);
+
+    NG::TransformInfo info1;
+    std::vector<std::string> paramVec1;
+    info1.funcType = "translate";
+    paramVec1.emplace_back("213");
+    paramVec1.emplace_back("21333");
+    paramVec1.emplace_back("215333");
+    paramVec1.emplace_back("213733");
+    paramVec1.emplace_back("213363");
+    paramVec1.emplace_back("217333");
+    info1.paramVec = paramVec1;
+    transformVec.emplace_back(info1);
+
+    NG::TransformInfo info2;
+    std::vector<std::string> paramVec2;
+    info2.funcType = "translate";
+    paramVec2.emplace_back("213");
+    paramVec2.emplace_back("21333");
+    paramVec2.emplace_back("215333");
+    info2.paramVec = paramVec2;
+    transformVec.emplace_back(info2);
+
+    Offset offset;
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    EXPECT_EQ(result.Get(1, 0), 0);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform008, TestSize.Level1)
+{
+    std::vector<std::string> paramVec;
+    RSMatrix matrix;
+
+    auto result = NGSvgTransform::CreateTranslate(paramVec, matrix);
+    EXPECT_FALSE(result);
+    paramVec.emplace_back("2153353");
+    result = NGSvgTransform::CreateTranslate(paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    paramVec.emplace_back("21533333");
+    result = NGSvgTransform::CreateTranslate(paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    paramVec.emplace_back("21536633");
+    result = NGSvgTransform::CreateTranslate(paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    paramVec.emplace_back("2153600633");
+    result = NGSvgTransform::CreateTranslate(paramVec, matrix);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform009, TestSize.Level1)
+{
+    std::vector<std::string> paramVec;
+    Matrix4 matrix;
+
+    std::string funcType = "asd";
+    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "matrix";
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "matrix";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    paramVec.emplace_back("2");
+    paramVec.emplace_back("3");
+    paramVec.emplace_back("4");
+    paramVec.emplace_back("5");
+    paramVec.emplace_back("6");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "rotate";
+    paramVec.clear();
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "rotate";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "scale";
+    paramVec.clear();
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "scale";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "scale";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    paramVec.emplace_back("2");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform010, TestSize.Level1)
+{
+    std::vector<std::string> paramVec;
+    Matrix4 matrix;
+    std::string funcType = "asd";
+
+    funcType = "skewX";
+    paramVec.clear();
+    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "skewX";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "skewY";
+    paramVec.clear();
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "skewY";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "translate";
+    paramVec.clear();
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_FALSE(result);
+
+    funcType = "translate";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+
+    funcType = "translate";
+    paramVec.clear();
+    paramVec.emplace_back("1");
+    paramVec.emplace_back("2");
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgTransform011, TestSize.Level1)
+{
+    Matrix4 matrix;
+    Offset offset;
+    std::string funcType = "asd";
+    NGSvgTransform::ApplyTransformPivot(funcType, offset, matrix);
+    EXPECT_EQ(funcType, "asd");
+}
+
+/**
+ * @tc.name: ParseStyleTest001
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, SvgClipPath001, TestSize.Level1)
+{
+    auto clipPath = AceType::DynamicCast<SvgClipPath>(SvgClipPath::Create());
+    EXPECT_NE(clipPath, nullptr);
+
+    Testing::MockCanvas rSCanvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+
+    clipPath->OnClipEffect(rSCanvas, context);
+    auto svgContext = AceType::MakeRefPtr<SvgContext>();
+    clipPath->SetContext(svgContext);
+    clipPath->OnClipEffect(rSCanvas, context);
+
+    SvgLengthScaleRule clipPathRule = context.BuildScaleRule(clipPath->attributes_.clipState.GetClipPathUnits());
+    auto result = clipPath->AsPath(clipPathRule);
+    EXPECT_TRUE(result.BuildFromSVGString(""));
 }
 } // namespace OHOS::Ace::NG

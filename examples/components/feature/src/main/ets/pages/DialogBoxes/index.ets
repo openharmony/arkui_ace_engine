@@ -44,7 +44,7 @@ export const dialogBoxesRoute: RouteGroup = {
     { name: 'TextpickerDialog', label: '文本选择器弹窗/TextpickerDialog' },
     { name: 'BindContentCover', label: '全模态/BindContentCover' },
     { name: 'BindSheet', label: '半模态/BindSheet' },
-    { name: 'CustomDialog', label: '打开自定义弹窗/CustomDialog' },
+    { name: 'promptActionCustomDialog', label: 'promptActionCustomDialog' },
     { name: 'BindContextMenu', label: '上下文菜单/BindContextMenu' },
     { name: 'ActionMenu', label: '菜单弹窗/ActionMenu' },
     { name: 'Menu', label: '菜单/Menu' },
@@ -73,7 +73,7 @@ export function dialogBoxesDestination(name: string, route: Route) {
     BindContentCoverBootcamp({title: route.label})
   }else if (name === 'DialogBoxes/BindSheet'){
     BindSheetBootcamp({title: route.label})
-  } else if (name === 'DialogBoxes/CustomDialog'){
+  } else if (name === 'DialogBoxes/promptActionCustomDialog'){
     promptActionCustomDialogBootcamp({title: route.label})
   } else if (name === 'DialogBoxes/BindContextMenu'){
     BindContextMenuBootcamp({title: route.label})

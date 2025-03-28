@@ -61,6 +61,7 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class SpanString;
 }
 
 namespace OHOS::Ace::NG {
@@ -176,7 +177,7 @@ public:
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
     static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice);
-    static void SetForegroundEffect(float radius, const SysOptions& sysOptions = SysOptions());
+    static void SetForegroundEffect(float radius);
     static void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
@@ -391,9 +392,10 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
-    static void BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void BindTips(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
     static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-        PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId);
+        PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
@@ -678,7 +680,7 @@ public:
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetMotionBlur(FrameNode* frameNode, const MotionBlurOption& motionBlurOption);
-    static void SetForegroundEffect(FrameNode* frameNode, float radius, const SysOptions& sysOptions = SysOptions());
+    static void SetForegroundEffect(FrameNode* frameNode, float radius);
     static void SetBackgroundEffect(
         FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
     static void SetBackgroundImageResizableSlice(FrameNode* frameNode, const ImageResizableSlice& slice);

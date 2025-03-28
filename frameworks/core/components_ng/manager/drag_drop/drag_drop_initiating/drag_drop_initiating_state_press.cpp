@@ -58,11 +58,15 @@ void DragDropInitiatingStatePress::HandleOnDragStart(RefPtr<FrameNode> frameNode
     if (!CheckStatusForPanActionBegin(frameNode, info)) {
         return;
     }
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->GetTextDraggable()) {
+        HandleTextDragStart(frameNode, info);
+        return;
+    }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     HideEventColumn();
     DragDropFuncWrapper::RecordMenuWrapperNodeForDrag(frameNode->GetId());
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     auto gestureEvent = info;
     gestureHub->HandleOnDragStart(gestureEvent);
 }

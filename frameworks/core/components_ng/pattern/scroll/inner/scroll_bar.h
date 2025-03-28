@@ -95,6 +95,14 @@ public:
     {
         foregroundColor_ = foregroundColor;
     }
+    void SetForegroundHoverColor(const Color& foregroundHoverBlendColor)
+    {
+        foregroundHoverColor_ = foregroundColor_.BlendColor(foregroundHoverBlendColor);
+    }
+    void SetForegroundPressedColor(const Color& foregroundPressedBlendColor)
+    {
+        foregroundPressedColor_ = foregroundColor_.BlendColor(foregroundPressedBlendColor);
+    }
     double GetTopAngle() const
     {
         return topAngle_;
@@ -608,6 +616,8 @@ private:
     Edge padding_;
     Color backgroundColor_;
     Color foregroundColor_;
+    Color foregroundHoverColor_;
+    Color foregroundPressedColor_;
     Rect touchRegion_;
     Rect hoverRegion_;
     Rect barRect_;

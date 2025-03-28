@@ -1705,6 +1705,7 @@ NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent
             UdmfClient::GetInstance()->AddLinkRecord(aceUnifiedData, linkUrl, linkTitle);
             TAG_LOGI(AceLogTag::ACE_WEB, "web DragDrop event Start, linkUrl size:%{public}zu", linkUrl.size());
         }
+        UdmfClient::GetInstance()->SetTagProperty(aceUnifiedData, "records_to_entries_data_format");
         info->SetData(aceUnifiedData);
         HandleOnDragEnter(info);
         return dragDropInfo;
@@ -2076,7 +2077,7 @@ void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
     // hyperlink
     std::string linkUrl;
     std::string linkTitle;
-    UdmfClient::GetInstance()->GetLinkRecord(aceData, linkUrl, linkTitle);
+    UdmfClient::GetInstance()->GetLinkEntry(aceData, linkUrl, linkTitle);
     if (!linkUrl.empty()) {
         delegate_->dragData_->SetLinkURL(linkUrl);
         delegate_->dragData_->SetLinkTitle(linkTitle);
@@ -2095,7 +2096,7 @@ void WebPattern::HandleOnDragDropFile(RefPtr<UnifiedData> aceData)
     CHECK_NULL_VOID(delegate_->dragData_);
     // file
     std::vector<std::string> urlVec;
-    UdmfClient::GetInstance()->GetFileUriRecord(aceData, urlVec);
+    UdmfClient::GetInstance()->GetFileUriEntry(aceData, urlVec);
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop event WebEventHub onDragDropId,"
         "url array size is:%{public}zu", urlVec.size());
     delegate_->dragData_->ClearImageFileNames();
@@ -2145,9 +2146,8 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
             "DragDrop event WebEventHub onDragDropId, size:%{public}" PRId64 "", aceData->GetSize());
         CHECK_NULL_VOID(delegate_->dragData_);
         // plain text
-        std::vector<std::string> plains = UdmfClient::GetInstance()->GetPlainTextRecords(aceData);
-        if (!plains.empty() && !plains[0].empty()) {
-            std::string plain = plains[0];
+        std::string plain = UdmfClient::GetInstance()->GetPlainTextEntry(aceData);
+        if (!plain.empty()) {
             delegate_->dragData_->SetFragmentText(plain);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, plain size:%{public}zu", plain.size());
@@ -2155,14 +2155,14 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
         // html
         std::string htmlContent;
         std::string plainContent;
-        UdmfClient::GetInstance()->GetHtmlRecord(aceData, htmlContent, plainContent);
+        UdmfClient::GetInstance()->GetHtmlEntry(aceData, htmlContent, plainContent);
         if (!htmlContent.empty()) {
             delegate_->dragData_->SetFragmentHtml(htmlContent);
             TAG_LOGI(AceLogTag::ACE_WEB,
                 "DragDrop event WebEventHub onDragDropId, htmlContent size:%{public}zu", htmlContent.size());
         }
         // spanstring
-        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringRecord(aceData);
+        std::vector<uint8_t> spanString = UdmfClient::GetInstance()->GetSpanStringEntry(aceData);
         if (!spanString.empty()) {
             std::string htmlStr = OHOS::Ace::SpanToHtml::ToHtml(spanString);
             delegate_->dragData_->SetFragmentHtml(htmlStr);
@@ -2544,7 +2544,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             CHECK_NULL_RETURN(pipeline, false);
             ProcessVirtualKeyBoard(pipeline->GetRootWidth(), pipeline->GetRootHeight(), lastKeyboardHeight_);
         }
-        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
+        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_ || keyboardGetready_);
         IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
     } else {
@@ -3625,6 +3625,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     lastKeyboardHeight_ = keyboard;
+    keyboardGetready_ = true;
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), width, height]() {
             auto webPattern = weak.Upgrade();
@@ -3635,6 +3636,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
                                                       height,
                                                       webPattern->lastKeyboardHeight_,
                                                       webPattern->GetDrawSize().Height());
+            webPattern->keyboardGetready_ = false;
         }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
     return true;
 }
@@ -6082,6 +6084,7 @@ void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     if (delegate_) {
+        UpdateJavaScriptOnDocumentStartByOrder();
         delegate_->JavaScriptOnDocumentStartByOrder();
     }
 }

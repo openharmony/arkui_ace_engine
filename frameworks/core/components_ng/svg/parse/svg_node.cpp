@@ -518,7 +518,7 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         OnTransform(canvas, lengthRule);
     }
     if (!hrefMaskId_.empty()) {
-        OnMask(canvas, svgCoordinateSystemContext);
+        OnMask(canvas, svgCoordinateSystemContext.GetViewPort());
     }
     if (!hrefFilterId_.empty()) {
         OnFilter(canvas, svgCoordinateSystemContext);

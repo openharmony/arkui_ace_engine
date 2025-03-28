@@ -176,7 +176,7 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     auto* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
     if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "pixmap pointer is nullptr when CreatePixelMap.");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "invalid pixmap");
         return nullptr;
     }
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
@@ -446,4 +446,22 @@ uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
     return pixmap_->WritePixels(options);
 }
 
+bool PixelMapOhos::GetIsWideColorGamut() const
+{
+    if (!pixmap_) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap_ is nullptr");
+        return false;
+    }
+#ifdef IMAGE_COLORSPACE_FLAG
+    switch (pixmap_->InnerGetGrColorSpace().GetColorSpaceName()) {
+        case OHOS::ColorManager::ColorSpaceName::DISPLAY_P3:
+        case OHOS::ColorManager::ColorSpaceName::DCI_P3:
+        case OHOS::ColorManager::ColorSpaceName::BT2020_HLG:
+            return true;
+        default:
+            return false;
+    }
+#endif
+    return false;
+}
 } // namespace OHOS::Ace

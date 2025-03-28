@@ -167,19 +167,21 @@ void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<Cont
 {
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto padding = buttonTheme->GetPadding(controlSize.value());
-    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-    PaddingProperty defaultPadding;
-    if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
-        float leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
-        float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
-        defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
-    } else {
-        defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    if (controlSize.has_value()) {
+        auto padding = buttonTheme->GetPadding(controlSize.value());
+        ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        PaddingProperty defaultPadding;
+        if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
+            float leftPadding = buttonTheme->GetPaddingText().ConvertToPx();
+            float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
+            defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding), CalcLength(padding.Top()),
+                CalcLength(padding.Bottom()) };
+        } else {
+            defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
+                CalcLength(padding.Bottom()) };
+        }
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
 void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)

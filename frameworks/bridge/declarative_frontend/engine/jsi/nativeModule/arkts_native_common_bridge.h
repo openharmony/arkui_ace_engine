@@ -314,6 +314,8 @@ public:
         uint32_t argNumber, ArkUIGesture* gesture);
     static void ParseLocalizedBorder(ArkUIRuntimeCallInfo* runtimeCallInfo, int& isLocalizedBorderWidth,
         int& isLocalizedBorderColor, int& isLocalizedBorderRadius);
+    static void ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
+        std::vector<ArkUI_Float32>& values, bool needLocalized = false);
     static ArkUIGesture* GetGestureGroup(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateCommonGestureEventInfo(EcmaVM* vm, GestureEvent& info);
     static Local<panda::ArrayRef> CreateFingerListArray(EcmaVM* vm, GestureEvent& info);

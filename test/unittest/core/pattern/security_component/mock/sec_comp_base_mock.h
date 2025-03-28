@@ -117,7 +117,7 @@ public:
     int32_t icon_;
     SecCompBackground bg_;
 
-    bool hasNonCompatileChange_ = false;
+    bool hasNonCompatibleChange_ = false;
     double blurRadius_ = 0.0;
     double foregroundBlurRadius_ = 0.0;
     bool isOverlayTextSet_ = false;

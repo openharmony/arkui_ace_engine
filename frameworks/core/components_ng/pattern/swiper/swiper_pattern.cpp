@@ -126,7 +126,8 @@ void SwiperPattern::OnAttachToFrameNode()
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = GetContext();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -250,6 +251,7 @@ void SwiperPattern::CheckLoopChange()
             GetLoopIndex(currentIndex_, oldChildrenSize_.has_value() ? oldChildrenSize_.value() : TotalCount());
         if (props->GetPrevMargin().has_value() || props->GetNextMargin().has_value()) {
             jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+            StopIndicatorAnimation(true);
         }
         preLoop_ = currentLoopValue;
     }
@@ -377,8 +379,9 @@ void SwiperPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     swiperId_ = host->GetId();
-    auto hub = host->GetEventHub<EventHub>();
+    auto hub = host->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(hub);
+    hub->SetSwiperId(swiperId_);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
 
@@ -1529,9 +1532,6 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
 void SwiperPattern::FireAnimationStartEvent(
     int32_t currentIndex, int32_t nextIndex, const AnimationCallbackInfo& info) const
 {
-    TAG_LOGI(AceLogTag::ACE_SWIPER,
-        "FireAnimationStartEvent, currentIndex: %{public}d, nextIndex: %{public}d, id:%{public}d", currentIndex,
-        nextIndex, swiperId_);
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
@@ -1543,10 +1543,6 @@ void SwiperPattern::FireAnimationStartEvent(
 void SwiperPattern::FireAnimationEndEvent(
     int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt) const
 {
-    TAG_LOGI(AceLogTag::ACE_SWIPER,
-        "FireAnimationEndEvent currentIndex: %{public}d, currentOffset: has_value %{public}d, value %{public}fvp, "
-        "isForce: %{public}d, id:%{public}d",
-        currentIndex, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop, swiperId_);
     if (currentIndex == -1) {
         return;
     }
@@ -4634,6 +4630,11 @@ RefPtr<Curve> SwiperPattern::GetCurve() const
 
 bool SwiperPattern::IsLoop() const
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (HasRepeatTotalCountDifference(host)) {
+        return false;
+    }
     if (hasCachedCapture_) {
         return true;
     }
@@ -7197,6 +7198,26 @@ void SwiperPattern::BuildPanDirectionInfo(std::unique_ptr<JsonValue>& json)
             break;
         }
     }
+}
+
+bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
+{
+    CHECK_NULL_RETURN(node, false);
+    auto& children = node->GetChildren();
+    for (const auto& child : children) {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
+        if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
+            return true;
+        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                   AceType::InstanceOf<ForEachNode>(child)) {
+            continue;
+        } else {
+            if (HasRepeatTotalCountDifference(child)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void SwiperPattern::SetPageFlipMode(int32_t pageFlipMode)

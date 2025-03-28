@@ -1201,9 +1201,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
-        && !info[0]->IsEmpty())) {
+    if (!info[0]->IsObject()) {
         return;
     }
 
@@ -1789,9 +1787,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()) ||
-        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && !info[0]->IsObject()
-        && !info[0]->IsEmpty())) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);

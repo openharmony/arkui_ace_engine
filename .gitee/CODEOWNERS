@@ -191,35 +191,35 @@ advanced_ui_component/atomicserviceweb/ @giteewzp
 advanced_ui_component/BUILD.gn @arkuistatemgmt
 advanced_ui_component/chipgroup/ @arkuistatemgmt
 advanced_ui_component/chip/ @arkuistatemgmt
-advanced_ui_component/composelistitem/ @guozonghao11
-advanced_ui_component/composetitlebar/ @guozonghao11
+advanced_ui_component/composelistitem/ @wxwg_admin
+advanced_ui_component/composetitlebar/ @wxwg_admin
 advanced_ui_component/counter/ @arkuistatemgmt
-advanced_ui_component/dialog/ @guozonghao11
-advanced_ui_component/dialogv2/ @guozonghao11
+advanced_ui_component/dialog/ @wxwg_admin
+advanced_ui_component/dialogv2/ @wxwg_admin
 advanced_ui_component/downloadfilebutton/
-advanced_ui_component/editabletitlebar/ @guozonghao11
-advanced_ui_component/exceptionprompt/ @guozonghao11
-advanced_ui_component/filter/ @guozonghao11
+advanced_ui_component/editabletitlebar/ @wxwg_admin
+advanced_ui_component/exceptionprompt/ @wxwg_admin
+advanced_ui_component/filter/ @wxwg_admin
 advanced_ui_component/foldsplitcontainer/ @arkuilayout
 advanced_ui_component/formmenu/
 advanced_ui_component/fullscreenlaunchcomponent/ @arkuiabilitygroup
-advanced_ui_component/gridobjectsortcomponent/ @guozonghao11
+advanced_ui_component/gridobjectsortcomponent/ @wxwg_admin
 advanced_ui_component/interstitialdialogaction/ @giteewzp
 advanced_ui_component/popup/ @arkuipopupwindow
-advanced_ui_component/progressbutton/ @guozonghao11
-advanced_ui_component/progressbuttonv2/ @guozonghao11
+advanced_ui_component/progressbutton/ @wxwg_admin
+advanced_ui_component/progressbuttonv2/ @wxwg_admin
 advanced_ui_component/segmentbutton/ @arkuistatemgmt
 advanced_ui_component/segmentbuttonv2/ @arkuistatemgmt
 advanced_ui_component/selectionmenu/ @huawei_g_five
-advanced_ui_component/selecttitlebar/ @guozonghao11
-advanced_ui_component/splitlayout/ @guozonghao11
-advanced_ui_component/subheader/ @guozonghao11
-advanced_ui_component/subheaderv2/ @guozonghao11
-advanced_ui_component/swiperefresher/ @guozonghao11
-advanced_ui_component/tabtitlebar/ @guozonghao11
-advanced_ui_component/toolbar/ @guozonghao11
-advanced_ui_component/toolbarv2/ @guozonghao11
-advanced_ui_component/treeview/ @guozonghao11
+advanced_ui_component/selecttitlebar/ @wxwg_admin
+advanced_ui_component/splitlayout/ @wxwg_admin
+advanced_ui_component/subheader/ @wxwg_admin
+advanced_ui_component/subheaderv2/ @wxwg_admin
+advanced_ui_component/swiperefresher/ @wxwg_admin
+advanced_ui_component/tabtitlebar/ @wxwg_admin
+advanced_ui_component/toolbar/ @wxwg_admin
+advanced_ui_component/toolbarv2/ @wxwg_admin
+advanced_ui_component/treeview/ @wxwg_admin
 
 [Extend UI Components]
 component_ext/arc_swiper/
@@ -860,12 +860,12 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h @arkuiscroll
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.cpp @arkuilayout
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.cpp @huawei_g_five

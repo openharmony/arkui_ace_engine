@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 
 #include "base/geometry/dimension.h"
-#include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -383,19 +382,19 @@ RadiusF GetPreviewBorderRadiusFromPattern(
     }
 
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
-    if (borderRadius->radiusTopLeft.has_value()) {
+    if (borderRadius->radiusTopLeft.has_value() && borderRadius->radiusTopLeft->IsNonNegative()) {
         topLeft = borderRadius->radiusTopLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusTopRight.has_value()) {
+    if (borderRadius->radiusTopRight.has_value() && borderRadius->radiusTopRight->IsNonNegative()) {
         topRight = borderRadius->radiusTopRight->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomLeft.has_value()) {
+    if (borderRadius->radiusBottomLeft.has_value() && borderRadius->radiusBottomLeft->IsNonNegative()) {
         bottomLeft = borderRadius->radiusBottomLeft->ConvertToPxWithSize(previewWidth);
     }
 
-    if (borderRadius->radiusBottomRight.has_value()) {
+    if (borderRadius->radiusBottomRight.has_value() && borderRadius->radiusBottomRight->IsNonNegative()) {
         bottomRight = borderRadius->radiusBottomRight->ConvertToPxWithSize(previewWidth);
     }
 
@@ -724,15 +723,26 @@ BorderRadiusProperty GetPreviewBorderRadiusFromNode(const RefPtr<FrameNode>& pre
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_RETURN(menuTheme, {});
     auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
-
-    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    BorderRadiusProperty previewBorderRadius = BorderRadiusProperty(Dimension(previewBorderRadiusValue));
     if (menuParam.previewBorderRadius.has_value()) {
-        BorderRadiusProperty previewBorderRadius;
-        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
-        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
-        return previewBorderRadius;
+        if (menuParam.previewBorderRadius->radiusTopLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusTopLeft->IsNonNegative()) {
+            previewBorderRadius.radiusTopLeft = menuParam.previewBorderRadius->radiusTopLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusTopRight.has_value() &&
+            menuParam.previewBorderRadius->radiusTopRight->IsNonNegative()) {
+            previewBorderRadius.radiusTopRight = menuParam.previewBorderRadius->radiusTopRight;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomLeft.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomLeft->IsNonNegative()) {
+            previewBorderRadius.radiusBottomLeft = menuParam.previewBorderRadius->radiusBottomLeft;
+        }
+        if (menuParam.previewBorderRadius->radiusBottomRight.has_value() &&
+            menuParam.previewBorderRadius->radiusBottomRight->IsNonNegative()) {
+            previewBorderRadius.radiusBottomRight = menuParam.previewBorderRadius->radiusBottomRight;
+        }
     }
-    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+    return previewBorderRadius;
 }
 
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
@@ -1024,6 +1034,22 @@ void UpdateMenuBackgroundStyleOption(const RefPtr<FrameNode>& menuNode, const Me
 }
 } // namespace
 
+void MenuView::SetHasCustomOutline(
+    const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    CHECK_NULL_VOID(menuNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (!menuParam.outlineWidth.has_value() || menuParam.outlineWidth->leftDimen->IsNegative() ||
+        menuParam.outlineWidth->rightDimen->IsNegative() || menuParam.outlineWidth->topDimen->IsNegative() ||
+        menuParam.outlineWidth->bottomDimen->IsNegative()) {
+        return;
+    }
+    menuWrapperPattern->SetHasCustomOutlineWidth(true);
+    menuWrapperPattern->SetHasCustomOutlineColor(true);
+}
+
 void MenuView::CalcHoverScaleInfo(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1123,13 +1149,18 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         CreateTitleNode(menuParam.title, column);
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
     MountOptionToColumn(params, menuNode, menuParam, column);
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
@@ -1247,6 +1278,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+    SetHasCustomOutline(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
 
     SetPreviewScaleAndHoverImageScale(menuNode, menuParam);
@@ -1285,8 +1317,16 @@ void MenuView::UpdateMenuParam(
 void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
     const MenuParam& menuParam, const MenuType& type)
 {
+    CHECK_NULL_VOID(menuNode);
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
-        UpdateMenuBorderEffect(menuNode);
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
+    } else {
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            menuWrapperPattern->SetMenuParam(menuParam);
+        }
     }
     menuNode->MarkModifyDone();
 
@@ -1366,7 +1406,8 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MountToParent(column);
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        UpdateMenuBorderEffect(menuNode);
+        MenuParam menuParam;
+        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
     }
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
@@ -1410,31 +1451,40 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
     }
 }
 
-void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
+void MenuView::UpdateMenuBorderEffect(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam)
 {
+    CHECK_NULL_VOID(wrapperNode);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     CHECK_NULL_VOID(menuNode);
     auto pipeLineContext = menuNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeLineContext);
     auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
-    if (menuTheme->GetDoubleBorderEnable()) {
+    if (menuTheme->GetDoubleBorderEnable() || menuWrapperPattern->GetHasCustomOutlineWidth()) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         BorderStyleProperty styleProp;
         styleProp.SetBorderStyle(BorderStyle::SOLID);
-        BorderColorProperty outerColorProp;
-        outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
         auto theme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
         BorderRadiusProperty outerRadiusProp;
         outerRadiusProp.SetRadius(Dimension(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) ?
             theme->GetMenuDefaultRadius() : theme->GetMenuBorderRadius()));
-        BorderWidthProperty outerWidthProp;
-        outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
+            renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
+            renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
+        } else {
+            BorderWidthProperty outerWidthProp;
+            outerWidthProp.SetBorderWidth(Dimension(menuTheme->GetOuterBorderWidth()));
+            renderContext->SetOuterBorderWidth(outerWidthProp);
+            BorderColorProperty outerColorProp;
+            outerColorProp.SetColor(menuTheme->GetOuterBorderColor());
+            renderContext->SetOuterBorderColor(outerColorProp);
+        }
         renderContext->SetOuterBorderStyle(styleProp);
-        renderContext->SetOuterBorderColor(outerColorProp);
         renderContext->UpdateOuterBorderRadius(outerRadiusProp);
-        renderContext->SetOuterBorderWidth(outerWidthProp);
         BorderColorProperty innerColorProp;
         innerColorProp.SetColor(menuTheme->GetInnerBorderColor());
         BorderRadiusProperty innerRadiusProp;
@@ -1582,8 +1632,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (params[index].value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (params[index].value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
@@ -1603,8 +1656,11 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
         AceType::MakeRefPtr<MenuItemRowPattern>());
 
 #ifdef OHOS_PLATFORM
-    constexpr char BUTTON_PASTE[] = "textoverlay.paste";
-    if (value.value == Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (value.value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);
     } else {
         CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);

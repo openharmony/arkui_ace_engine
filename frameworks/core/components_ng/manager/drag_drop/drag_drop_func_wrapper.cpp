@@ -626,7 +626,7 @@ bool DragDropFuncWrapper::IsExpandDisplay(const RefPtr<PipelineBase>& context)
         SubwindowManager::GetInstance()->GetParentContainerId(containerId) : containerId;
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    return container->IsFreeMultiWindow();
+    return container->IsFreeMultiWindow() || container->IsUIExtensionWindow();
 }
 
 OffsetF DragDropFuncWrapper::GetCurrentWindowOffset(const RefPtr<PipelineBase>& context)

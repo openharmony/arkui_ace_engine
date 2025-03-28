@@ -558,6 +558,25 @@ public:
         isSelectOverlaySubWindowWrapper_ = isSelectOverlaySubWindowWrapper;
     }
 
+    bool GetHasCustomOutlineWidth() const
+    {
+        return hasCustomOutlineWidth_;
+    }
+
+    void SetHasCustomOutlineWidth(bool hasCustomOutlineWidth)
+    {
+        hasCustomOutlineWidth_ = hasCustomOutlineWidth;
+    }
+
+    bool GetHasCustomOutlineColor() const
+    {
+        return hasCustomOutlineColor_;
+    }
+
+    void SetHasCustomOutlineColor(bool hasCustomOutlineColor)
+    {
+        hasCustomOutlineColor_ = hasCustomOutlineColor;
+    }
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -631,6 +650,8 @@ private:
     std::optional<bool> enableFold_;
     // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
     bool isSelectOverlaySubWindowWrapper_ = false;
+    bool hasCustomOutlineWidth_ = false;
+    bool hasCustomOutlineColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -460,7 +460,8 @@ void RenderButton::Update(const RefPtr<Component>& component)
     clickedColor_ = AnimatableColor(button->GetClickedColor());
     backgroundColor_.SetValue(button->GetBackgroundColor().GetValue());
     stateEffect_ = button->GetStateEffect();
-    isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH);
+    isWatch_ = (SystemProperties::GetDeviceType() == DeviceType::WATCH ||
+        SystemProperties::GetDeviceType() == DeviceType::WEARABLE);
     isTv_ = (SystemProperties::GetDeviceType() == DeviceType::TV);
     isPhone_ = (SystemProperties::GetDeviceType() == DeviceType::PHONE);
     isTablet_ = (SystemProperties::GetDeviceType() == DeviceType::TABLET ||

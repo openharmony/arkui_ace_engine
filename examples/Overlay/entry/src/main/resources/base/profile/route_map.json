@@ -1,0 +1,99 @@
+{
+  "routerMap": [
+    {
+      "name": "NavIndex",
+      "pageSourceFile": "src/main/ets/pages/navigationPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "UIExtensionTest",
+      "pageSourceFile": "src/main/ets/pages/UIExtensionTestPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "DialogIndex",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/Index.ets",
+      "buildFunction": "DialogIndexBuilder"
+    },
+    {
+      "name": "AlertDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialog.ets",
+      "buildFunction": "AlertDialogBuilder"
+    },
+    {
+      "name": "ActionSheet",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheet.ets",
+      "buildFunction": "ActionSheetBuilder"
+    },
+    {
+      "name": "CustomDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialog.ets",
+      "buildFunction": "CustomDialogBuilder"
+    },
+    {
+      "name": "PromptAction",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/promptAction.ets",
+      "buildFunction": "PromptActionBuilder"
+    },
+    {
+      "name": "DialogController",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogController.ets",
+      "buildFunction": "DialogControllerBuilder"
+    },
+    {
+      "name": "DialogLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevelOrder.ets",
+      "buildFunction": "DialogLevelOrderBuilder"
+    },
+    {
+      "name": "DialogFocusable",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogFocusable.ets",
+      "buildFunction": "DialogFocusableBuilder"
+    },
+    {
+      "name": "MenuIndex",
+      "pageSourceFile": "src/main/ets/pages/components/menu/Index.ets",
+      "buildFunction": "MenuIndexBuilder"
+    },
+    {
+      "name": "BindMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindMenu.ets",
+      "buildFunction": "BindMenuBuilder"
+    },
+    {
+      "name": "BindContextMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenu.ets",
+      "buildFunction": "BindContextMenuBuilder"
+    },
+    {
+      "name": "OverlayIndex",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
+      "buildFunction": "OverlayIndexBuilder"
+    },
+    {
+      "name": "OverlayLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayLevelOrder.ets",
+      "buildFunction": "OverlayLevelOrderBuilder"
+    },
+    {
+      "name": "PopupIndex",
+      "pageSourceFile": "src/main/ets/pages/components/popup/Index.ets",
+      "buildFunction": "PopupIndexBuilder"
+    },
+    {
+      "name": "Popup",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popup.ets",
+      "buildFunction": "PopupBuilder"
+    },
+    {
+      "name": "ToastIndex",
+      "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
+      "buildFunction": "ToastIndexBuilder"
+    },
+    {
+      "name": "Toast",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toast.ets",
+      "buildFunction": "ToastBuilder"
+    }
+  ]
+}

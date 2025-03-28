@@ -20,4 +20,4 @@ uiservice_files = [
 ]
 
 # Enable ace_engine uiservice idl
-ace_engine_enable_uiservice_idl = false
+ace_engine_enable_uiservice_idl = true

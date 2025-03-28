@@ -16,27 +16,24 @@ setlocal enabledelayedexpansion
 
 hdc shell param set persist.ace.debug.enabled 1
 
-echo.
-echo Please enter the window ID which is to be dumped.
-hdc shell "hidumper -s WindowManagerService -a '-a'"
+set "output="
 
-echo.
-set /p "windowId=please enter the window ID: "
-
-echo UI dump generate...
-hdc shell "hidumper -s WindowManagerService -a '-w %windowId% -event -c'" > %windowId%_event.txt
-
-if exist .\%windowId%_event.txt (
-    echo file saved as: %cd%\%windowId%_event.txt
-    echo .\%windowId%_event.txt > generated_file_path.txt
-) else (
-    echo err: failed
+for /f "delims=" %%a in ('hdc shell "hidumper -s WindowManagerService -a '-a'"') do (
+    set "output=!output!%%a"
+    echo %%a
 )
-goto :success
 
-echo Error
-exit /b 1
+echo !output! | findstr /C:"Fail" >nul
+if %errorlevel% equ 0 (
+    exit
+)
 
-:success
-echo.
-echo done!
+endlocal 
+
+@set /p windowId=input WindowId :
+
+for /F %%i in ('hdc shell "find data/ -name arkui.dump"') do (
+	hdc shell "rm %%i"
+)
+
+hdc shell "hidumper -s WindowManagerService -a '-w %windowId% -event'" > dump_temp.txt

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,4 +42,53 @@ RefPtr<FrameNode> RelativeContainerBaseTestNG::CreateRelativeContainer(
     ViewStackProcessor::GetInstance()->PopContainer();
     return AceType::DynamicCast<FrameNode>(element);
 }
+
+string RelativeContainerBaseTestNG::PrintReliedOnMap(
+    unordered_map<string, set<string>>& reliedOnMap, const string& anchor)
+{
+    string res;
+    auto iter = reliedOnMap.find(anchor);
+    if (iter != reliedOnMap.end()) {
+        res += "[";
+        auto& reliedList = reliedOnMap[anchor];
+        for (auto it = reliedList.begin(); it != reliedList.end(); ++it) {
+            res += *it;
+            if (std::next(it) != reliedList.end()) {
+                res += ", ";
+            }
+        }
+        res += "]";
+    } else {
+        res = "Doesn't exist";
+    }
+    return res;
+}
+
+void RelativeContainerBaseTestNG::PrepareMeasureChild(
+    LayoutWrapper* layoutWrapper, RelativeContainerLayoutAlgorithm& layoutAlgorithm)
+{
+    layoutAlgorithm.Initialize(layoutWrapper);
+    // create idNodeMap_
+    layoutAlgorithm.CollectNodesById(layoutWrapper);
+    // create reliedOnMap_
+    layoutAlgorithm.GetDependencyRelationship();
+    // create incomingDegreeMap_
+    layoutAlgorithm.PreTopologicalLoopDetection(layoutWrapper);
+    // create renderList_
+    layoutAlgorithm.TopologicalSort(layoutAlgorithm.renderList_);
+}
+
+void RelativeContainerBaseTestNG::AddGuidelineStart(
+    std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction, std::optional<Dimension> start)
+{
+    GuidelineInfo info = { .id = id, .direction = direction, .start = start };
+    guidelineInfos.emplace_back(info);
+};
+
+void RelativeContainerBaseTestNG::AddGuidelineEnd(
+    std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction, std::optional<Dimension> end)
+{
+    GuidelineInfo info = { .id = id, .direction = direction, .end = end };
+    guidelineInfos.emplace_back(info);
+};
 } // namespace OHOS::Ace::NG

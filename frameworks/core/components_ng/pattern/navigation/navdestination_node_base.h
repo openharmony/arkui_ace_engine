@@ -297,6 +297,14 @@ public:
     {
         return preNavigationIndicatorConfig_;
     }
+    void SetIsSizeMatchNavigation(bool match)
+    {
+        isSizeMatchNavigation_ = match;
+    }
+    bool IsSizeMatchNavigation() const
+    {
+        return isSizeMatchNavigation_;
+    }
 
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
@@ -342,6 +350,7 @@ protected:
     std::optional<std::pair<bool, bool>> preStatusBarConfig_;
     std::optional<bool> navigationIndicatorConfig_;
     std::optional<bool> preNavigationIndicatorConfig_;
+    bool isSizeMatchNavigation_ = true;
 };
 } // namespace OHOS::Ace::NG
 

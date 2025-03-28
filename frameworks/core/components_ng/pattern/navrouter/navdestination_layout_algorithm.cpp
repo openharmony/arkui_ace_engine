@@ -341,6 +341,23 @@ float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float d
         defaultBarHeight : 0.0f;
 }
 
+bool IsDestSizeMatchNavigation(const RefPtr<NavDestinationGroupNode>& destNode, const SizeF& navDestSize)
+{
+    CHECK_NULL_RETURN(destNode, false);
+    auto rotateAngle = destNode->GetPageRotateAngle();
+    if (rotateAngle.has_value() && rotateAngle.value() != ROTATION_0) {
+        return true;
+    }
+
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(destNode->GetNavigationNode());
+    CHECK_NULL_RETURN(navigationNode, false);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, false);
+    auto navigationSize = navigationPattern->GetNavigationSize();
+    return NearEqual(navDestSize.Width(), navigationSize.Width()) &&
+        NearEqual(navDestSize.Height(), navigationSize.Height());
+}
+
 std::optional<float> GetContainerModalTitleHeightIfNeeded(
     const RefPtr<NavDestinationPattern>& navDestPattern, const SizeF& navDestSize)
 {
@@ -407,6 +424,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
     auto containerModalTitleHeight = GetContainerModalTitleHeightIfNeeded(navDestinationPattern, size);
+    bool sizeMatch = IsDestSizeMatchNavigation(hostNode, size);
+    hostNode->SetIsSizeMatchNavigation(sizeMatch);
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);

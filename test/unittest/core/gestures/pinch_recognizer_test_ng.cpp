@@ -1578,4 +1578,734 @@ HWTEST_F(PinchRecognizerTestNg, PinchGestureLimitFingerTest002, TestSize.Level1)
     EXPECT_EQ(pinchRecognizer->distance_, PINCH_GESTURE_DISTANCE);
     EXPECT_EQ(pinchRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
 }
+
+/**
+ * @tc.name: OnAccepted001
+ * @tc.desc: Test OnAccepted function
+ */
+HWTEST_F(PinchRecognizerTestNg, OnAccepted001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    pinchRecognizerPtr->OnAccepted();
+    EXPECT_EQ(pinchRecognizerPtr->firstInputTime_.has_value(), true);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent001
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.SetX(-100);
+    touchEvent.SetY(200);
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->currentFingers_ = 2;
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->HandleTouchDownEvent(touchEvent);
+
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent002
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent002, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    AxisEvent event;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.isRotationEvent = true;
+    event.time = timeStape;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->firstInputTime_, timeStape);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent003
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent003, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    AxisEvent event;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.time = timeStape;
+    event.pinchAxisScale = 1.0;
+    int32_t apiVersion = 1018;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 1.0;
+    event.sourceTool = SourceTool::FINGER;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes.clear();
+    event.sourceTool = SourceTool::TOUCHPAD;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    event.sourceTool = SourceTool::FINGER;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::READY);
+
+    event.pinchAxisScale = 100.0;
+    event.sourceTool = SourceTool::TOUCHPAD;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::READY);
+
+    event.pinchAxisScale = 100.0;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent004
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent004, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    AxisEvent event;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.time = timeStape;
+    event.pinchAxisScale = 1.0;
+    int32_t apiVersion = 1018;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 1.0;
+    event.sourceTool = SourceTool::FINGER;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes.clear();
+    event.sourceTool = SourceTool::TOUCHPAD;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    event.sourceTool = SourceTool::FINGER;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    event.sourceTool = SourceTool::TOUCHPAD;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent005
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent005, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    int32_t apiVersion = 1000;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+    AxisEvent event;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.time = timeStape;
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+}
+
+/**
+ * @tc.name: HandleTouchDownEvent006
+ * @tc.desc: Test HandleTouchDownEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchDownEvent006, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    AxisEvent event;
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.time = timeStape;
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 1.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::DETECTING);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::READY;
+    event.pinchAxisScale = 100.0;
+    event.pressedCodes.clear();
+    pinchRecognizerPtr->HandleTouchDownEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent001
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchUpEvent001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = true;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->fingersId_.clear();
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->isLastPinchFinished_, true);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent002
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchUpEvent002, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    pinchRecognizerPtr->fingers_ = 2;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 2;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent003
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchUpEvent003, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    pinchRecognizerPtr->fingers_ = 1;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleTouchUpEvent004
+ * @tc.desc: Test HandleTouchUpEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchUpEvent004, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    AxisEvent event;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    pinchRecognizerPtr->fingers_ = 1;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchUpEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->activeFingers_.size(), 0);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEvent001
+ * @tc.desc: Test HandleTouchMoveEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchMoveEvent001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    touchEvent.time = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    pinchRecognizerPtr->fingers_ = 3;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->fingers_ = 3;
+    pinchRecognizerPtr->activeFingers_.clear();
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->activeFingers_.push_back(1);
+    pinchRecognizerPtr->activeFingers_.push_back(2);
+    pinchRecognizerPtr->touchPoints_.clear();
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->fingers_ = 2;
+    pinchRecognizerPtr->activeFingers_.clear();
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->touchPoints_[2] = touchEvent;
+    pinchRecognizerPtr->touchPoints_[3] = touchEvent;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->fingers_ = 1;
+    pinchRecognizerPtr->activeFingers_.clear();
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->activeFingers_.push_back(1);
+    pinchRecognizerPtr->activeFingers_.push_back(2);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->touchPoints_[2] = touchEvent;
+    pinchRecognizerPtr->touchPoints_[3] = touchEvent;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEvent002
+ * @tc.desc: Test HandleTouchMoveEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchMoveEvent002, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    touchEvent.time = timeStape;
+    SystemProperties::traceInputEventEnable_ = true;
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->initialDev_ = pinchRecognizerPtr->ComputeAverageDeviation()-1;
+    pinchRecognizerPtr->distance_ = 1;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEvent003
+ * @tc.desc: Test HandleTouchMoveEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchMoveEvent003, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->fingersId_.clear();
+
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    pinchRecognizerPtr->firstInputTime_ = timeStape;
+    touchEvent.time = timeStape;
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->fingers_ = 0;
+    pinchRecognizerPtr->isLimitFingerCount_ = true;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->fingers_ = 3;
+    pinchRecognizerPtr->activeFingers_.push_back(2);
+    pinchRecognizerPtr->activeFingers_.push_back(3);
+    pinchRecognizerPtr->isLimitFingerCount_ = true;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->fingers_ = 3;
+    pinchRecognizerPtr->isLimitFingerCount_ = false;
+    pinchRecognizerPtr->isFlushTouchEventsEnd_ = true;
+    pinchRecognizerPtr->HandleTouchMoveEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+}
+
+/**
+ * @tc.name: HandleTouchMoveEvent004
+ * @tc.desc: Test HandleTouchMoveEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchMoveEvent004, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    int32_t apiVersion = 1000;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+
+    AxisEvent event;
+    event.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    event.time = timeStape;
+    event.pinchAxisScale = 0.0;
+    event.verticalAxis = 1.0;
+    event.horizontalAxis = 1.0;
+    pinchRecognizerPtr->scale_ = 0.0;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchMoveEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    event.pinchAxisScale = 0.0;
+    event.verticalAxis = - 1.0;
+    event.horizontalAxis = - 1.0;
+    pinchRecognizerPtr->scale_ = 0.0;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchMoveEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    event.pinchAxisScale = 0.0;
+    event.verticalAxis = 1.0;
+    event.horizontalAxis = - 1.0;
+    pinchRecognizerPtr->scale_ = 0.0;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchMoveEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+
+    event.pinchAxisScale = 0.0;
+    event.verticalAxis = - 1.0;
+    event.horizontalAxis = 1.0;
+    pinchRecognizerPtr->scale_ = 0.0;
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchMoveEvent(event);
+    EXPECT_EQ(pinchRecognizerPtr->time_, timeStape);
+}
+
+/**
+ * @tc.name: HandleTouchCancelEvent001
+ * @tc.desc: Test HandleTouchCancelEvent function
+ */
+HWTEST_F(PinchRecognizerTestNg, HandleTouchCancelEvent001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    pinchRecognizerPtr->isNeedResetVoluntarily_ = false;
+    pinchRecognizerPtr->currentFingers_ = 1;
+    pinchRecognizerPtr->activeFingers_.push_back(touchEvent.id);
+    pinchRecognizerPtr->touchPoints_[touchEvent.id] = touchEvent;
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizerPtr->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->IsActiveFinger(touchEvent.id), true);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::FAIL;
+    pinchRecognizerPtr->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->IsActiveFinger(touchEvent.id), true);
+
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    pinchRecognizerPtr->HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(pinchRecognizerPtr->IsActiveFinger(touchEvent.id), true);
+}
+
+/**
+ * @tc.name: ComputePinchCenter001
+ * @tc.desc: Test ComputePinchCenter function
+ */
+HWTEST_F(PinchRecognizerTestNg, ComputePinchCenter001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    auto ret = pinchRecognizerPtr->ComputePinchCenter();
+    EXPECT_EQ(ret, Offset());
+}
+
+/**
+ * @tc.name: SendCallbackMsg001
+ * @tc.desc: Test SendCallbackMsg function
+ */
+HWTEST_F(PinchRecognizerTestNg, SendCallbackMsg001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    auto callback = std::make_unique<GestureEventFunc>(funtest);
+    RefPtr<GestureInfo> gestureInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestureInfo->disposeTag_ = true;
+    pinchRecognizerPtr->SetGestureInfo(gestureInfo);
+    pinchRecognizerPtr->SendCallbackMsg(callback);
+
+    pinchRecognizerPtr->lastTouchEvent_.SetRollAngle(10.0);
+    gestureInfo->disposeTag_ = false;
+    pinchRecognizerPtr->SendCallbackMsg(callback);
+    EXPECT_EQ(pinchRecognizerPtr->lastTouchEvent_.rollAngle.has_value(), true);
+
+    pinchRecognizerPtr->lastTouchEvent_.SetRollAngle(10.0);
+    gestureInfo->disposeTag_ = false;
+    pinchRecognizerPtr->SetGestureInfo(nullptr);
+    pinchRecognizerPtr->SendCallbackMsg(callback);
+    EXPECT_EQ(pinchRecognizerPtr->lastTouchEvent_.rollAngle.has_value(), true);
+}
+
+/**
+ * @tc.name: TriggerGestureJudgeCallback001
+ * @tc.desc: Test TriggerGestureJudgeCallback function
+ */
+HWTEST_F(PinchRecognizerTestNg, TriggerGestureJudgeCallback001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    GestureRecognizerJudgeFunc judgeFunc1;
+    GestureJudgeFunc judgeFunc2;
+
+    judgeFunc1 = [](const std::shared_ptr<BaseGestureEvent>& info,
+        const RefPtr<NGGestureRecognizer>& current,
+        const std::list<RefPtr<NGGestureRecognizer>>& others) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+    judgeFunc2 = [](const RefPtr<GestureInfo>& gestureInfo,
+        const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+        return GestureJudgeResult::REJECT;
+    };
+
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<NG::TargetComponent>();
+    pinchRecognizerPtr->SetTargetComponent(targetComponent);
+    EXPECT_EQ(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
+
+    targetComponent->SetOnGestureRecognizerJudgeBegin(std::move(judgeFunc1));
+    pinchRecognizerPtr->SetTargetComponent(targetComponent);
+    EXPECT_NE(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
+
+    targetComponent->onGestureJudgeBegin_ = judgeFunc2;
+    pinchRecognizerPtr->SetTargetComponent(targetComponent);
+    EXPECT_NE(pinchRecognizerPtr->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
+
+    RefPtr<PinchRecognizer> pinchRecognizerPtr2 =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    RefPtr<NG::TargetComponent> targetComponent2 = AceType::MakeRefPtr<NG::TargetComponent>();
+    targetComponent2->onGestureJudgeBegin_ = judgeFunc2;
+    pinchRecognizerPtr2->lastTouchEvent_.SetRollAngle(10.0);
+    pinchRecognizerPtr2->SetTargetComponent(targetComponent2);
+    EXPECT_EQ(pinchRecognizerPtr2->lastTouchEvent_.rollAngle.has_value(), true);
+    EXPECT_NE(pinchRecognizerPtr2->TriggerGestureJudgeCallback(), GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: ProcessAxisAbnormalCondition001
+ * @tc.desc: Test ProcessAxisAbnormalCondition function
+ */
+HWTEST_F(PinchRecognizerTestNg, ProcessAxisAbnormalCondition001, TestSize.Level1)
+{
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    int32_t apiVersion = 1018;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
+    AxisEvent axisEvent;
+    axisEvent.pinchAxisScale = 1.0;
+    auto ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent);
+    EXPECT_EQ(ret, false);
+
+    axisEvent.sourceTool = SourceTool::TOUCHPAD;
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent);
+    EXPECT_EQ(ret, false);
+
+    AxisEvent axisEvent2;
+    axisEvent2.pinchAxisScale = 1.0;
+    axisEvent2.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent2);
+    EXPECT_EQ(ret, false);
+
+    axisEvent.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent);
+    EXPECT_EQ(ret, false);
+
+    AxisEvent axisEvent3;
+    axisEvent3.pinchAxisScale = 0.0;
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent3);
+    EXPECT_EQ(ret, false);
+
+    axisEvent3.sourceTool = SourceTool::TOUCHPAD;
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent3);
+    EXPECT_EQ(ret, true);
+
+    AxisEvent axisEvent4;
+    axisEvent4.pinchAxisScale = 0.0;
+    axisEvent4.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent4);
+    EXPECT_EQ(ret, false);
+
+    axisEvent3.pressedCodes = {KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A};
+    pinchRecognizerPtr->refereeState_ = RefereeState::DETECTING;
+    ret = pinchRecognizerPtr->ProcessAxisAbnormalCondition(axisEvent3);
+    EXPECT_EQ(ret, true);
+}
 } // namespace OHOS::Ace::NG

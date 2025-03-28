@@ -12,8 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "test/mock/base/mock_task_executor.h"
-#include "test/mock/core/render/mock_canvas_image.h"
 #include "test/unittest/core/base/frame_node_test_ng.h"
 
 #include "core/common/recorder/event_definition.h"
@@ -22,6 +20,8 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_canvas_image.h"
 
 using namespace testing;
 using namespace testing::ext;

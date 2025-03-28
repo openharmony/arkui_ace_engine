@@ -201,7 +201,7 @@ AdjustOffset WaterFlowLayoutUtils::GetAdjustOffset(const RefPtr<LayoutWrapper>& 
         }
         auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
         if (pattern) {
-            return pattern->GetAdjustOffset();
+            return pattern->GetAndResetAdjustOffset();
         }
         child = child->GetFirstChild();
     } while (child);

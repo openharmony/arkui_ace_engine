@@ -675,8 +675,9 @@ public:
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
-    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
-    static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
+    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative = true);
+    static void ParseCommonBorderRadiusProps(
+        const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius, bool notNegative = true);
     static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
         NG::OnMenuItemClickCallback& onMenuItemClick);

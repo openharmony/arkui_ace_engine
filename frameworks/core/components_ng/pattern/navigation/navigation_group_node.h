@@ -315,12 +315,6 @@ public:
 
     std::string ToDumpString();
 
-    void SetPageViewportConfig(const RefPtr<PageViewportConfig>& config);
-    const RefPtr<PageViewportConfig>& GetPageViewportConfig() const
-    {
-        return viewportConfig_;
-    }
-
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -364,9 +358,6 @@ private:
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
     int32_t preLastStandardIndex_ = -1;
-    RefPtr<PageViewportConfig> viewportConfig_;
-    SafeAreaInsets safeAreaInsets_;
-    bool isCustomExpandRunning_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

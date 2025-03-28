@@ -93,6 +93,12 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     if (type == RouteType::NONE) {
         return;
     }
+    if (srcPage) {
+        srcPage->SetNodeFreeze(true);
+    }
+    if (destPage) {
+        destPage->SetNodeFreeze(false);
+    }
     animationId_++;
     if (type == RouteType::PUSH) {
         pushAnimations_.clear();

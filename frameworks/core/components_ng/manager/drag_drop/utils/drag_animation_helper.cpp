@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -404,6 +405,34 @@ void DragAnimationHelper::UpdateGatherNodeToTop()
     manager->UpdateGatherNodeToTop();
 }
 
+void SwapGatherNodeToSubwindowInUIExtension(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto container = AceEngine::Get().GetContainer(mainPipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (!container->IsUIExtensionWindow()) {
+        return;
+    }
+    auto manager = mainPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto gatherNode = manager->GetGatherNode();
+    CHECK_NULL_VOID(gatherNode);
+    if (gatherNode->GetContextRefPtr() != mainPipeline) {
+        return;
+    }
+    auto rootNode = manager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto subwindowRootNode = menuWrapperNode->GetParent();
+    CHECK_NULL_VOID(subwindowRootNode);
+    rootNode->RemoveChild(gatherNode);
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    subwindowRootNode->AddChildBefore(gatherNode, menuWrapperNode);
+    gatherNode->OnMountToParentDone();
+    subwindowRootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
 {
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
@@ -416,6 +445,7 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         weakManager = AceType::WeakClaim(AceType::RawPtr(manager))]() {
         auto menuWrapperNode = weakWrapperNode.Upgrade();
         CHECK_NULL_VOID(menuWrapperNode);
+        SwapGatherNodeToSubwindowInUIExtension(menuWrapperNode);
         auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         auto manager = weakManager.Upgrade();

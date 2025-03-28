@@ -121,11 +121,12 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
-    CHECK_NULL_VOID(Container::Current());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
@@ -135,10 +136,12 @@ void UIObserverHandler::NotifyDidClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(didClickHandleFunc_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }

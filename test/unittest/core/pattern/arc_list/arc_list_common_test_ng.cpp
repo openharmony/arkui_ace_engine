@@ -320,7 +320,7 @@ HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction002, TestSize.Level1)
 
     pattern_->contentMainSize_ = 50.0;
     pattern_->GetScrollUpdateFriction(-1.0);
-    pattern_->StartVibrator(true);
+    pattern_->OnMidIndexChanged();
     auto itemEventHub = GetChildFrameNode(frameNode_, 0)->GetEventHub<ListItemEventHub>();
     auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 250.f), DragEventType::START);
     EXPECT_EQ(jsonStr, "{\"selectedIndex\":0}");

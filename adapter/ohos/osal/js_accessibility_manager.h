@@ -27,6 +27,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 #include "js_third_accessibility_hover_ng.h"
@@ -260,7 +261,7 @@ public:
         const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) override;
     bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) override;
-    int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false);
+    int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false) override;
     AccessibilityParentRectInfo GetTransformRectInfoRelativeToWindow(
         const RefPtr<NG::FrameNode>& node, const RefPtr<PipelineBase>& context) override;
 #ifdef WEB_SUPPORTED
@@ -371,6 +372,12 @@ public:
         const WeakPtr<NG::FrameNode>& hostNode,
         AccessibilityElementOperatorCallback& callback,
         const int32_t requestId);
+
+    void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) override;
+
+    void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+
+    bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -688,6 +695,8 @@ private:
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
 
+    void ReleaseCacheAccessibilityEvent(const int32_t pageId);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
@@ -721,6 +730,7 @@ private:
     mutable std::mutex nextFocusMapWithSubWindowMutex_;
 
     AccessibilityParentRectInfo uecRectInfo_;
+    NG::PageEventController pageController_;
 };
 
 } // namespace OHOS::Ace::Framework

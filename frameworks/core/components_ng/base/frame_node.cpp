@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
+#include "base/log/event_report.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
@@ -704,14 +705,27 @@ void FrameNode::InitializePatternAndContext()
     }
 }
 
+void FrameNode::DumpLayoutInfo()
+{
+    auto layoutInfoString = layoutProperty_->LayoutInfoToString();
+    if (!layoutInfoString.empty()) {
+        DumpLog::GetInstance().AddDesc(std::string("LayoutInfo: ").append(layoutInfoString.c_str()));
+    }
+    const auto& flexItemProperty = layoutProperty_->GetFlexItemProperty();
+    if (flexItemProperty) {
+        auto flexLayoutInfoString = flexItemProperty->FlexLayoutInfoToString();
+        if (!flexLayoutInfoString.empty()) {
+            DumpLog::GetInstance().AddDesc(std::string("FlexLayoutInfo: ").append(flexLayoutInfoString.c_str()));
+        }
+    }
+}
+
 void FrameNode::DumpSafeAreaInfo()
 {
     auto&& opts = layoutProperty_->GetSafeAreaExpandOpts();
     if (opts) {
-        DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaExpandOpts()
-                                           ->ToString()
-                                           .append(",hostPageId: ")
-                                           .append(std::to_string(GetPageId()).c_str()));
+        DumpLog::GetInstance().AddDesc(
+            opts->ToString().append(",hostPageId: ").append(std::to_string(GetPageId()).c_str()));
     }
     if (layoutProperty_->GetSafeAreaInsets()) {
         DumpLog::GetInstance().AddDesc(layoutProperty_->GetSafeAreaInsets()->ToString());
@@ -840,6 +854,7 @@ void FrameNode::DumpCommonInfo()
     DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();
+    DumpLayoutInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
@@ -1300,7 +1315,12 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
     CHECK_NULL_VOID(renderContext_);
     auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
     if (callback) {
-        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine() };
+        auto parent = GetParent();
+        int32_t parentId = -1;
+        if (parent != nullptr) {
+            parentId = parent->GetId();
+        }
+        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine(),  parentId };
         callback(info);
     }
 #endif
@@ -2109,6 +2129,14 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)
 {
     geometryNode_ = node;
+}
+
+void FrameNode::SetNodeFreeze(bool isFreeze)
+{
+    CHECK_NULL_VOID(renderContext_);
+    if (SystemProperties::IsPageTransitionFreeze()) {
+        renderContext_->UpdateFreeze(isFreeze);
+    }
 }
 
 void FrameNode::CreateLayoutTask(bool forceUseMainThread)
@@ -3491,13 +3519,11 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            offsetCurrent = offsetCurrent * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
@@ -3524,13 +3550,11 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            nodeOffset = nodeOffset * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
@@ -4226,13 +4250,18 @@ int32_t FrameNode::GetNodeExpectedRate()
     return iter->second;
 }
 
-void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+void FrameNode::TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status)
 {
     if (SystemProperties::GetDebugEnabled()) {
         const std::string sceneStatusStrs[] = { "START", "RUNNING", "END" };
         LOGD("%{public}s  AddFRCSceneInfo scene:%{public}s   speed:%{public}f  status:%{public}s", GetTag().c_str(),
             scene.c_str(), std::abs(speed), sceneStatusStrs[static_cast<int32_t>(status)].c_str());
     }
+}
+
+void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status)
+{
+    TryPrintDebugLog(scene, speed, status);
 
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -4244,6 +4273,8 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);
+    EventReport::FrameRateDurationsStatistics(expectedRate, scene, status);
+
     switch (status) {
         case SceneStatus::START: {
             if (iter == sceneRateMap_.end()) {

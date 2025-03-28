@@ -347,7 +347,8 @@ void NavDestinationPatternBase::OnToolBarAnimationFinish()
 
 void NavDestinationPatternBase::AbortBarAnimation()
 {
-    for (const auto& pair : barAnimations_) {
+    auto barAnimations = barAnimations_;
+    for (const auto& pair : barAnimations) {
         if (pair.second) {
             AnimationUtils::StopAnimation(pair.second);
         }

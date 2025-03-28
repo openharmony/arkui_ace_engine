@@ -23,6 +23,7 @@
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
 #endif
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {

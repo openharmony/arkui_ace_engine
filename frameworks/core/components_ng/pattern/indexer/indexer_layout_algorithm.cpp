@@ -35,7 +35,8 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     OptionalSize<float> selfIdealSize = layoutConstraint.selfIdealSize;
     Dimension itemSize = indexerLayoutProperty->GetItemSize().value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
-    itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
+    itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height())
+                    .value_or(Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP).ConvertToPx());
 
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     auto defaultVerticalPadding = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)

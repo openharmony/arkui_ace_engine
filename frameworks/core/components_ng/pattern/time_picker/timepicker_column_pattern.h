@@ -312,7 +312,7 @@ public:
     }
 
     void InitHapticController(const RefPtr<FrameNode>& host);
-    void GetIsStartEndTimeDefined(const RefPtr<FrameNode>& host);
+    bool IsStartEndTimeDefined();
 
     void StopHaptic();
     uint32_t GetEnterIndex() const
@@ -490,8 +490,6 @@ private:
     bool isEnableHaptic_ = true;
     bool stopHaptic_ = false;
     bool isTossReadyToStop_ = false;
-    bool isStartEndTimeDefined_ = false;
-    bool isTossing_ = false;
 
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);

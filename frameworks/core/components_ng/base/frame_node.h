@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,6 +287,8 @@ public:
     void TriggerOnSizeChangeCallback();
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
+
+    void SetNodeFreeze(bool isFreeze);
 
     const RefPtr<RenderContext>& GetRenderContext() const
     {
@@ -815,6 +817,8 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
+
+    void TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
@@ -1404,6 +1408,8 @@ private:
     void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpSafeAreaInfo();
+    // add flexLayout && direction && align && aspectRatio dumpInfo
+    void DumpLayoutInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;

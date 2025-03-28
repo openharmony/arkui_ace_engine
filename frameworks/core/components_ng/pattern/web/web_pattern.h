@@ -1216,6 +1216,7 @@ private:
     bool isSetMouseDragMonitorState = false;
     double density_ = 0.0;
     int32_t densityCallbackId_ = 0;
+    bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
 

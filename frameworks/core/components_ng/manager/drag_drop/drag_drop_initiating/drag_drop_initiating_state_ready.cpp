@@ -40,16 +40,8 @@ void DragDropInitiatingStateReady::HandleOnDragStart(RefPtr<FrameNode> frameNode
         return;
     }
     if (gestureHub->GetTextDraggable()) {
-        auto pattern = frameNode->GetPattern<TextBase>();
-        if (pattern && (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE)) {
-            dragDropManager->ResetDragging();
-            gestureHub->SetIsTextDraggable(false);
-            TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
-            DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
-            DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
-            return;
-        }
-        HandleTextDragCallback();
+        HandleTextDragStart(frameNode, info);
+        return;
     }
     dragDropManager->ResetDragging(DragDropMgrState::ABOUT_TO_PREVIEW);
     frameNode->MarkModifyDone();

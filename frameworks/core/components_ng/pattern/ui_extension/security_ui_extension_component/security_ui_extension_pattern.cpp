@@ -988,7 +988,7 @@ bool SecurityUIExtensionPattern::SendBusinessData(
     UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
+    UIEXT_LOGD("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
     return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 

@@ -22,7 +22,9 @@
 
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
-
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1404,8 +1406,8 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
      * @tc.steps: step2. construct different child SpanNode.
      */
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto childFrameNode =
-        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     host->AddChild(childFrameNode);
     childFrameNode->SetParent(host);
 

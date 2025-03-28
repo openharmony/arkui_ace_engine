@@ -18,6 +18,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr double DEFAULT_DOUBLE_50 = 50.0;
+constexpr double DEFAULT_DOUBLE_100 = 100.0;
+} // namespace
+
 class ClickRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -1504,5 +1509,281 @@ HWTEST_F(ClickRecognizerTestNg, TapGestureLimit002, TestSize.Level1)
     tapGesture.gestureMask_ = GestureMask::Normal;
     auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
     EXPECT_EQ(tapRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: HandleTouchUpEventTest001
+ * @tc.desc: Test HandleTouchUpEvent
+ */
+HWTEST_F(ClickRecognizerTestNg, HandleTouchUpEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case1: refereeState is READY.
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    clickRecognizer->currentTouchPointsNum_ = 1;
+    clickRecognizer->equalsToFingers_ = true;
+    clickRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::PENDING);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case2: touchEvent.sourceType is SourceType::MOUSE.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.sourceType = SourceType::MOUSE;
+    clickRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::PENDING);
+
+    /**
+     * @tc.steps: step3. call AboutToAddToPendingRecognizers function and compare result.
+     * @tc.steps: case1: refereeState is PENDING_BLOCKED.
+     * @tc.expected: step3. result equals.
+     */
+    clickRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+    clickRecognizer->AboutToAddToPendingRecognizers(touchEvent);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::PENDING);
+
+    /**
+     * @tc.steps: step3. call AboutToAddToPendingRecognizers function and compare result.
+     * @tc.steps: case2: refereeState is PENDING.
+     * @tc.expected: step3. result equals.
+     */
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->AboutToAddToPendingRecognizers(touchEvent);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::PENDING);
+}
+
+/*
+ * @tc.name: IsPointInRegionTest001
+ * @tc.desc: Test IsPointInRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, IsPointInRegionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT, 0);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+    double distanceThreshold = 1.0;
+
+    /**
+     * @tc.steps: step2. call IsPointInRegion function and compare result.
+     * @tc.steps: case1: distanceThreshold is 1.0.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.SetScreenX(DEFAULT_DOUBLE_100);
+    touchEvent.SetScreenY(DEFAULT_DOUBLE_100);
+    clickRecognizer->SetDistanceThreshold(distanceThreshold);
+    bool result = clickRecognizer->IsPointInRegion(touchEvent);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(clickRecognizer->disposal_, GestureDisposal::REJECT);
+
+    /**
+     * @tc.steps: step2. call IsPointInRegion function and compare result.
+     * @tc.steps: case2: distanceThreshold is 0.0.
+     * @tc.expected: step2. result equals.
+     */
+    distanceThreshold = 0.0;
+    clickRecognizer->SetDistanceThreshold(distanceThreshold);
+    clickRecognizer->AttachFrameNode(frameNode);
+    result = clickRecognizer->IsPointInRegion(touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/*
+ * @tc.name: GetClickInfoTest001
+ * @tc.desc: Test GetClickInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, GetClickInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call GetClickInfo function and compare result.
+     * @tc.steps: case: rollAngle has value.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.rollAngle = 0;
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    ClickInfo result = clickRecognizer->GetClickInfo();
+    EXPECT_EQ(result.GetPatternName(), "myButton");
+    EXPECT_EQ(result.GetRollAngle(), 0);
+}
+
+/*
+ * @tc.name: IsFormRenderClickRejectedTest001
+ * @tc.desc: Test IsFormRenderClickRejected
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, IsFormRenderClickRejectedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    TouchEvent testTouchEvent;
+
+    /**
+     * @tc.steps: step2. call IsFormRenderClickRejected function and compare result.
+     * @tc.steps: case1: touchEvent is default.
+     * @tc.expected: step2. result is false.
+     */
+    bool result = clickRecognizer->IsFormRenderClickRejected(touchEvent);
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step2. call IsFormRenderClickRejected function and compare result.
+     * @tc.steps: case2: touchEvent is not default.
+     * @tc.expected: step2. result is true.
+     */
+    touchEvent.SetScreenX(DEFAULT_DOUBLE_100);
+    touchEvent.SetScreenY(DEFAULT_DOUBLE_100);
+    testTouchEvent.SetScreenX(DEFAULT_DOUBLE_50);
+    testTouchEvent.SetScreenY(DEFAULT_DOUBLE_50);
+    clickRecognizer->touchPoints_[0] = testTouchEvent;
+    result = clickRecognizer->IsFormRenderClickRejected(touchEvent);
+    EXPECT_TRUE(result);
+}
+
+/*
+ * @tc.name: GetGestureEventInfoTest001
+ * @tc.desc: Test GetGestureEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call GetGestureEventInfo function and compare result.
+     * @tc.steps: case: touchEvent is not default.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.sourceType = SourceType::MOUSE;
+    touchEvent.SetTiltX(0);
+    touchEvent.SetTiltY(0);
+    touchEvent.rollAngle = 0;
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    GestureEvent result = clickRecognizer->GetGestureEventInfo();
+    EXPECT_EQ(result.GetPatternName(), "myButton");
+    EXPECT_EQ(result.GetTiltX(), 0);
+    EXPECT_EQ(result.GetTiltY(), 0);
+    EXPECT_EQ(result.GetRollAngle(), 0);
+}
+
+/**
+ * @tc.name: TriggerGestureJudgeCallbackTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, TriggerGestureJudgeCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<NG::TargetComponent> targetComponent = AceType::MakeRefPtr<TargetComponent>();
+    auto gestureJudgeFunc = [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+        return GestureJudgeResult::REJECT;
+    };
+    auto func = [](const std::shared_ptr<BaseGestureEvent>& info, const RefPtr<NGGestureRecognizer>& current,
+                    const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult::REJECT; };
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case1: targetComponent is default.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.rollAngle = 0;
+    clickRecognizer->touchPoints_[0] = touchEvent;
+    clickRecognizer->targetComponent_ = targetComponent;
+    GestureJudgeResult result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case2: gestureRecognizerJudgeFunc is not null.
+     * @tc.expected: step2. result equals.
+     */
+    targetComponent->SetOnGestureRecognizerJudgeBegin(func);
+    result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback function and compare result.
+     * @tc.steps: case3: sysJudge_ is not null.
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer->sysJudge_ = gestureJudgeFunc;
+    result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: OnAcceptedTest001
+ * @tc.desc: Test OnAccepted
+ */
+HWTEST_F(ClickRecognizerTestNg, OnAcceptedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, TAPPED_COUNT);
+
+    /**
+     * @tc.steps: step2. call OnAccepted function and compare result.
+     * @tc.expected: result equals.
+     */
+    TimeStamp timeStape = std::chrono::high_resolution_clock::now();
+    clickRecognizer->firstInputTime_ = timeStape;
+    clickRecognizer->OnAccepted();
+    EXPECT_FALSE(clickRecognizer->firstInputTime_.has_value());
+}
+
+/**
+ * @tc.name: UpdateInfoWithDownEventTest001
+ * @tc.desc: Test UpdateInfoWithDownEvent
+ */
+HWTEST_F(ClickRecognizerTestNg, UpdateInfoWithDownEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create clickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, TAPPED_COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("myButton", 0, AceType::MakeRefPtr<Pattern>());
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call UpdateInfoWithDownEvent function and compare result.
+     * @tc.expected: result equals.
+     */
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->UpdateInfoWithDownEvent(touchEvent);
+    EXPECT_FALSE(clickRecognizer->equalsToFingers_);
 }
 } // namespace OHOS::Ace::NG

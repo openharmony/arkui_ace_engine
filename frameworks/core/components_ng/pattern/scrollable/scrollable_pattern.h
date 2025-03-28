@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,7 +135,7 @@ public:
         return false;
     }
     virtual bool IsAtTop() const = 0;
-    virtual bool IsAtBottom() const = 0;
+    virtual bool IsAtBottom(bool considerRepeat = false) const = 0;
     virtual bool IsAtTopWithDelta() const
     {
         return IsAtTop();
@@ -807,6 +807,9 @@ public:
     }
 
     void OnStatusBarClick() override;
+
+    void GetRepeatCountInfo(
+        RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);

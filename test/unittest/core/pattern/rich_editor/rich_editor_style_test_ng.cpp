@@ -452,7 +452,7 @@ HWTEST_F(RichEditorStyleTestNg, HasSameTypingStyle001, TestSize.Level1)
     ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_TRUE(ret);
 
-    spanItem->textStyle_.value().fontFamilies_.push_back("test1");
+    spanItem->textStyle_.value().propFontFamilies_.push_back("test1");
     ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_FALSE(ret);
 }
@@ -698,9 +698,9 @@ HWTEST_F(RichEditorStyleTestNg, SetTextStyleToRet001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorAbstractSpanResult retInfo;
     TextStyle textStyle;
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
-    textStyle.fontFamilies_.emplace_back(TEST_STR);
+    textStyle.propFontFamilies_.emplace_back(TEST_STR);
+    textStyle.propFontFamilies_.emplace_back(TEST_STR);
+    textStyle.propFontFamilies_.emplace_back(TEST_STR);
     richEditorPattern->SetTextStyleToRet(retInfo, textStyle);
     EXPECT_EQ(retInfo.GetFontSize(), textStyle.GetFontSize().ConvertToVp());
 }
@@ -1080,7 +1080,7 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper003, TestSize.Level1
     AddSpan(INIT_VALUE_1);
     KeyCode code = KeyCode::KEY_I;
     TextStyle spanStyle;
-    spanStyle.fontStyle_ = OHOS::Ace::FontStyle::ITALIC;
+    spanStyle.propFontStyle_ = OHOS::Ace::FontStyle::ITALIC;
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
     EXPECT_EQ(spanStyle.GetFontStyle(), OHOS::Ace::FontStyle::NORMAL);
 }
@@ -1098,7 +1098,7 @@ HWTEST_F(RichEditorStyleTestNg, HandleSelectFontStyleWrapper004, TestSize.Level1
     AddSpan(INIT_VALUE_1);
     KeyCode code = KeyCode::KEY_U;
     TextStyle spanStyle;
-    spanStyle.textDecoration_ = TextDecoration::UNDERLINE;
+    spanStyle.propTextDecoration_ = TextDecoration::UNDERLINE;
     richEditorPattern->HandleSelectFontStyleWrapper(code, spanStyle);
     EXPECT_EQ(spanStyle.GetTextDecoration(), TextDecoration::NONE);
 }
