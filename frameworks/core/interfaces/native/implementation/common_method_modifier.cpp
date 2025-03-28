@@ -3359,8 +3359,8 @@ void AllowDropImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //CommonMethodModelNG::SetAllowDrop(frameNode, convValue);
-    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_Union_Array_UniformDataType_Undefined"
-        ".CustomObject is not supported.\n");
+    LOGE("ARKOALA: CommonMethod::setAllowDrop: Ark_UniformDataType contained"
+        " _UniformDataTypeStub is not supported.\n");
 }
 void DraggableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
