@@ -73,7 +73,7 @@ export async function checkButtonAndClickWithID(text: string) {
   await driver.assertComponentExist(ON.id(atom));
   let button = await driver.findComponent(ON.id(atom));
   await button.click();
-  await driver.delayMs(1500);
+  await driver.delayMs(2000);
   console.info(TAG, atom);
 }
 
@@ -107,19 +107,21 @@ export async function radioClick(radioOperate: radioOperateType, blockStr?: stri
   listText?: string) {
   await getToggle(ToggleClick.Open, radioOperate.toggleClick?.toggleClickObj)
   if (radioOperate.radioClickObj != undefined) {
+
     if (typeof radioOperate.radioClickObj === 'string') {
       await searchRadio(radioOperate.radioClickObj)
     } else {
-      let radio: Component[] =
+      let radio: Array<Component> =
         await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable(true))
       await radio[radioOperate.radioClickObj].click(); // 等待点击操作完成
-      await driver.delayMs(1500);
+      await driver.delayMs(2000);
     }
   }
   if (radioOperate.id) {
     let idValue = getInspectorByKey(radioOperate.id)
     console.log(idValue)
     let result = getJson(radioOperate.arr, idValue)
+    console.log('jj', JSON.stringify(result))
     expect(JSON.stringify(result)).assertEqual(JSON.stringify(radioOperate.assertEqual));
     console.log(TAG, result, 'expect', radioOperate.assertEqual)
   }
@@ -154,10 +156,10 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 
   if (sliderOperate.slideStar) {
     await driver.drag(rect.left, point.y, rect.right, point.y)
-    await driver.delayMs(1500);
+    await driver.delayMs(2000);
   } else {
     await driver.drag(rect.right, point.y, rect.left, point.y)
-    await driver.delayMs(1500);
+    await driver.delayMs(2000);
   }
 
   if (sliderOperate.id) {
@@ -177,11 +179,11 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 // 根据参数点击ButtonBlock项
 export async function buttonClick(buttonOperate: buttonOperateType) {
   await getToggle(ToggleClick.Open, buttonOperate.toggleClick?.toggleClickObj)
-  let button: Component[] =
+  let button: Array<Component> =
     await driver.findComponents(ON.type('Button').within(ON.id('scroll')).clickable(true))
 
   await button[buttonOperate.buttonClickObj].click()
-  await driver.delayMs(1500);
+  await driver.delayMs(2000);
 
   if (buttonOperate.id) {
     let idValue = getInspectorByKey(buttonOperate.id)
@@ -203,19 +205,24 @@ export async function buttonClick(buttonOperate: buttonOperateType) {
 
 /*滚动*/
 export async function scroll(distance: number) {
-  let scroller: Scroller | undefined = AppStorage.get('scroller')
+  let scroll: Component = await driver.findComponent(ON.id('scroll'));
+  let scroller: Scroller | undefined = AppStorage.get('scroller');
+  let rect = await scroll.getBounds();
   let curve = curves.interpolatingSpring(10, 1, 228, 30)
   if (scroller) {
     const yOffset: number = scroller.currentOffset().yOffset;
     scroller.scrollTo({
       xOffset: 0,
-      yOffset: yOffset + px2vp(distance),
-      animation: { duration: 1000, curve: curve }
+      yOffset: yOffset + px2vp(distance - rect.top - 5),
+      animation: {
+        duration: 1000, curve: curve
+      }
     })
     return true;
   }
   return false;
 }
+
 
 //通过id获取组件宽高
 export function getCompSize(id: string, direction: Direction): number {
@@ -238,11 +245,11 @@ export async function Search(category: string, compText: string, listText?: stri
     let title: Component = await scrolls.scrollSearch(ON.text(compText));
     titleRect = await title.getBounds();
     if (title) {
-      scroll(titleRect.top - 678)
+     await scroll(titleRect.top)
     }
   } else {
     let textSearch: Component = await driver.findComponent(ON.text('基础属性'))
-    await driver.delayMs(1500)
+    await driver.delayMs(2000)
     await textSearch.click()
     let scrolls: Component = await driver.findComponent(ON.id('scroll'));
     if (listText) {
@@ -254,35 +261,36 @@ export async function Search(category: string, compText: string, listText?: stri
       let title: Component = await scrolls.scrollSearch(ON.text(compText))
       if (title) {
         titleRect = await title.getBounds();
-        scroll(titleRect.top - 678)
+       await scroll(titleRect.top)
       }
     } else {
       let title: Component = await scrolls.scrollSearch(ON.text(compText))
       titleRect = await title.getBounds();
       if (title) {
-        scroll(titleRect.top - 678)
+       await scroll(titleRect.top)
       }
     }
   }
 }
 
 //LastCompText为可选参数，当scroller触底之后LastCompText为你要控制toggle的前面一个toggle文本
-export async function getToggle(isClose: ToggleClick = ToggleClick.Open, lastCompText?: string) {
+export async function getToggle(isClose: ToggleClick = ToggleClick.Open, LastCompText?: string) {
   let toggle: Component =
-    await driver.findComponent(lastCompText ?
-    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(lastCompText)) :
+    await driver.findComponent(LastCompText ?
+    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(LastCompText)) :
     ON.type('Toggle').within(ON.type('Scroll')));
   if (await toggle.isChecked() === (isClose === ToggleClick.Close)) {
     await toggle.click();
-    await driver.delayMs(1500)
+    await driver.delayMs(2000)
   }
 }
+
 export async function titleSearch(category: string, compText: string, listText?: string) {
   let title = await driver.findComponent(ON.text(compText))
-  await driver.delayMs(1500)
+  await driver.delayMs(2000)
   if (title) {
     let titleRect = await title.getBounds();
-    await scroll(titleRect.top - 678)
+    await scroll(titleRect.top)
   } else {
     await Search(category, compText, listText)
   }
@@ -299,7 +307,7 @@ export async function searchRadio(radioName: string) {
       for (let i = 0; i < texts.length; i++) {
         if (await texts[i].getText() === radioName) {
           await radios[i].click()
-          await driver.delayMs(1500)
+          await driver.delayMs(2000)
           break
         }
       }
@@ -320,7 +328,7 @@ export async function searchParentBlock(searchStr: string, clickBool: boolean = 
   }
   let toggle: Component =
     await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(searchStr)))
-  await driver.delayMs(1500)
+  await driver.delayMs(2000)
   if (await toggle.isChecked() !== clickBool) {
     await toggle.click();
   }
@@ -342,7 +350,6 @@ export async function searchToggle(toggleName: string, currentText: string, list
   let scrolls: Component = await driver.findComponent(ON.id('scroll'));
   let title: Component = await scrolls.scrollSearch(ON.text(currentText))
   if (!title) {
-
     let titles: Component = await scrolls.scrollSearch(ON.text(toggleName))
     if (titles) {
       let toggle: Component =
