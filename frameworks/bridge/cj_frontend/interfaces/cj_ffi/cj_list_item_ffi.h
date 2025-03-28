@@ -22,6 +22,7 @@
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkListItemCreate();
+CJ_EXPORT void FfiOHOSAceFrameworkListItemLazyCreate(void (*callback)(int32_t nodeId), int32_t styleId);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemCreateWithOptions(int32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetBorderRaduis(double raduis, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemSetSticky(int32_t sticky);
