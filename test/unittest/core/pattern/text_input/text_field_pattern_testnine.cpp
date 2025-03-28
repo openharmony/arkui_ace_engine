@@ -38,6 +38,27 @@ namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
+class MockTextInputClient : public TextInputClient {
+public:
+    MOCK_METHOD(void, UpdateEditingValue, (
+        const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
+};
+
+class MockTextInputConnection : public TextInputConnection {
+public:
+    MockTextInputConnection(const WeakPtr<TextInputClient>& client, const RefPtr<TaskExecutor>& taskExecutor)
+        : TextInputConnection(client, taskExecutor)
+    {}
+
+    MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
+    MOCK_METHOD(void, SetEditingState, (
+        const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+};
+
 class TextFieldPatternTestNine : public TextInputBases {
 public:
 };
@@ -515,5 +536,74 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
     info3.touches_.push_back(tinfo3);
     imageTouchHub->touchEventActuator_->touchEvents_.front()->callback_(info3);
     EXPECT_NE(imageTouchHub->touchEventActuator_->touchEvents_.front(), nullptr);
+}
+
+/**
+ * @tc.name: HandleCountStyle001
+ * @tc.desc: test text_field_pattern.cpp HandleCountStyle function,
+    case showCountBorderStyle_ && !showBorder,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleCountStyle001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateShowCounter(true);
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    layoutProperty->UpdateMaxLength(123);
+    pattern_->showCountBorderStyle_ = true;
+    layoutProperty->UpdateShowHighlightBorder(false);
+
+    pattern_->HandleCountStyle();
+    auto frameNode = pattern_->GetHost();
+    auto context = frameNode->GetRenderContext();
+    OffsetF offset(-1.0, 0.0);
+    EXPECT_EQ(context->GetTranslateXYProperty(), offset);
+}
+
+/**
+ * @tc.name: ProcessSelection001
+ * @tc.desc: test text_field_pattern.cpp ProcessSelection function,
+    case !isTextChangedAtCreation_ && selectOverlay_->IsShowMouseMenu(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcessSelection001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->ProcessOverlay();
+    pattern_->isTextChangedAtCreation_ = false;
+    auto overlayManager = pattern_->selectOverlay_->GetManager<SelectContentOverlayManager>();
+    overlayManager->shareOverlayInfo_->menuInfo.menuType = OptionMenuType::MOUSE_MENU;
+    pattern_->ProcessSelection();
+    EXPECT_FALSE(pattern_->needToRefreshSelectOverlay_);
+}
+
+/**
+ * @tc.name: ProcessSelection002
+ * @tc.desc: test text_field_pattern.cpp ProcessSelection function,
+    case IsGestureSelectingText(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcessSelection002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->contentController_->content_ = u"test";
+    pattern_->isSelecting_ = true;
+    pattern_->ProcessSelection();
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 4);
 }
 } // namespace OHOS::Ace::NG,
