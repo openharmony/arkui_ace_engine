@@ -34,6 +34,10 @@ struct IndexPage {
   @State arr: TextList[] = [
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, 'ListNestedScroll1', 'pages/scrollable/ListNestedScroll1'),
+    new TextList(3, 'Grid_AttributeModifier', 'pages/Scrollable/Grid_AttributeModifier'),
+    new TextList(4, 'Grid_AttributeUpdater', 'pages/Scrollable/Grid_AttributeUpdater'),
+    new TextList(5, 'WaterFlow_AttributeModifier', 'pages/Scrollable/WaterFlow_AttributeModifier'),
+    new TextList(6, 'WaterFlow_AttributeUpdater', 'pages/Scrollable/WaterFlow_AttributeUpdater'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

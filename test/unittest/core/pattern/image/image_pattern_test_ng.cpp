@@ -1683,4 +1683,33 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level1)
         LoadNotifier(nullptr, nullptr, nullptr));
     EXPECT_TRUE(imagePattern->RecycleImageData());
 }
+
+/**
+* @tc.name: AllowVisibleAreaCheck001
+* @tc.desc: AllowVisibleAreaCheck001
+* @tc.type: FUNC
+*/
+HWTEST_F(ImagePatternTestNg, AllowVisibleAreaCheck001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. call AllowVisibleAreaCheck.
+    * @tc.expected: Returned value is false.
+    */
+    EXPECT_FALSE(imagePattern->AllowVisibleAreaCheck());
+}
 } // namespace OHOS::Ace::NG

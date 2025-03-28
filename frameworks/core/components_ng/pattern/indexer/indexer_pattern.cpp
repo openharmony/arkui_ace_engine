@@ -1556,19 +1556,17 @@ void IndexerPattern::UpdateBubbleListItemContext(
     CHECK_NULL_VOID(listItemNode);
     auto listItemContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(listItemContext);
+    auto popupItemBackground =
+            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto popupItemRadius = paintProperty->GetPopupItemBorderRadius().has_value()
                                     ? paintProperty->GetPopupItemBorderRadiusValue()
                                     : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
         listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
                                                    ? (indexerTheme->GetPopupClickedBgAreaColor())
                                                    : popupItemBackground);
     } else {
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
             static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
@@ -1598,9 +1596,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-            ? paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor())
-            : paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
+        paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     auto listNode = popupNode_->GetLastChild()->GetFirstChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {

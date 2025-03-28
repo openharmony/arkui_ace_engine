@@ -358,4 +358,45 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level1)
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->originalMenuIsShow_);
 }
+
+/**
+ * @tc.name: GetSelectOverlayInfo
+ * @tc.desc: test GetSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
+    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
+    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    auto firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    auto secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_TRUE(firstHandleInfo.value().isShow);
+    EXPECT_TRUE(firstHandleInfo.value().isTouchable);
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_TRUE(secondHandleInfo.value().isShow);
+    EXPECT_TRUE(secondHandleInfo.value().isTouchable);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 200, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 200, 20, 20);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
+    EXPECT_FALSE(firstHandleInfo.value().isTouchable);
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_FALSE(secondHandleInfo.value().isShow);
+    EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+}
 } // namespace OHOS::Ace::NG

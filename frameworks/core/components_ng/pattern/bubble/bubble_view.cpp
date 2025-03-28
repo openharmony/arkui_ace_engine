@@ -135,8 +135,8 @@ void SetHitTestMode(RefPtr<FrameNode>& popupNode, bool isBlockEvent)
     }
 }
 
-RefPtr<FrameNode> BubbleView::CreateBubbleNode(
-    const std::string& targetTag, int32_t targetId, const RefPtr<PopupParam>& param)
+RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int32_t targetId,
+    const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
 {
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::POPUP_ETS_TAG, popupId);
@@ -314,6 +314,13 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         if (param->IsTips()) {
             auto shadow = Shadow::CreateShadow(ShadowStyle::OuterDefaultSM);
             renderContext->UpdateBackShadow(shadow);
+        }
+    }
+    if (spanString) {
+        auto messageNode = bubblePattern->GetMessageNode();
+        if (messageNode) {
+            auto textPattern = messageNode->GetPattern<TextPattern>();
+            textPattern->SetStyledString(spanString, false);
         }
     }
     child->MountToParent(popupNode);

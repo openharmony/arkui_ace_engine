@@ -774,6 +774,51 @@ HWTEST_F(XComponentTestTwoNg, NativeXComponentCallbackTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetGlobalPositionTestOne
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestOne, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::SURFACE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_NO_ERROR);
+    EXPECT_EQ(offsetX, pattern->GetOffsetRelativeToWindow().GetX());
+    EXPECT_EQ(offsetY, pattern->GetOffsetRelativeToWindow().GetY());
+}
+
+/**
+ * @tc.name: GetGlobalPositionTestTwo
+ * @tc.desc: Test GetGlobalPosition Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetGlobalPositionTestTwo, TestSize.Level1)
+{
+    auto xComponentController = std::make_shared<XComponentControllerNG>();
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->type_ = XComponentType::TEXTURE;
+    xComponentController->pattern_ = pattern;
+    float offsetX = 20.0f;
+    float offsetY = 30.0f;
+    auto result = xComponentController->GetGlobalPosition(offsetX, offsetY);
+    EXPECT_EQ(result, XCOMPONENT_CONTROLLER_TYPE_ERROR);
+}
+
+/**
  * @tc.name: SetScreenIdShouldCallPatternSetFuncTest
  * @tc.desc: Test SetScreenIdShouldCallPatternSetFunc Func
  * @tc.type: FUNC

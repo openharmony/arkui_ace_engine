@@ -125,6 +125,7 @@ public:
     MOCK_METHOD1(HideSheetSubWindow, void(int32_t containerId));
     MOCK_METHOD0(GetAttachState, MenuWindowState());
     MOCK_METHOD0(GetDetachState, MenuWindowState());
+    MOCK_CONST_METHOD0(GetWindowRect, NG::RectF());
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_SUBWINDOW_H

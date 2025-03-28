@@ -111,6 +111,7 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_video.cpp",
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",
+    "accessibitlity_manager_utils_test.cpp",
     "js_accessibitlity_manager_test.cpp",
     "js_third_accessibility_hover_ng_test.cpp",
     "js_third_provider_interaction_operation_test.cpp",
