@@ -463,7 +463,6 @@ namespace Converter {
     template<> CalcDimension Convert(const Ark_Number& src);
     template<> CalcDimension Convert(const Ark_String& src);
     template<> CalcLength Convert(const Ark_Length& src);
-    template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
     template<> CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src);
@@ -486,6 +485,7 @@ namespace Converter {
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
     template<> Font Convert(const Ark_Font& src);
     template<> FontFamilies Convert(const Ark_String& src);
+    template<> FontInfo Convert(const Ark_FontInfo& src);
     template<> FontMetaData Convert(const Ark_Font& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradient_common& value);

@@ -495,23 +495,31 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-#ifdef WRONG_INTERFACE
 HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
 {
-    Callback_Number_ScrollState_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
         Dimension scrollOffset;
-        std::optional<ScrollState> scrollState;
+        int32_t scrollState;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
+    Callback_Number_Number_Void arkCallback = {
+        .resource = {.resourceId = frameNode->GetId()},
+        .call = [](Ark_Int32 nodeId, const Ark_Number offset, const Ark_Number state) {
+            checkEvent = {
+                .nodeId = nodeId,
+                .scrollOffset = Converter::Convert<Dimension>(offset),
+                .scrollState = Converter::Convert<int32_t>(state),
+            };
+        }
+    };
 
     auto onScroll = eventHub->GetOnScroll();
     EXPECT_EQ(onScroll, nullptr);
-    modifier_->setOnScroll(node_, &func);
+    modifier_->setOnScroll(node_, &arkCallback);
     onScroll = eventHub->GetOnScroll();
     EXPECT_NE(onScroll, nullptr);
 
@@ -521,10 +529,8 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->scrollOffset.Value(), 55);
     EXPECT_EQ(checkEvent->scrollOffset.Unit(), DimensionUnit::VP);
-    EXPECT_TRUE(checkEvent->scrollState.has_value());
-    EXPECT_EQ(checkEvent->scrollState.value(), ScrollState::FLING);
+    EXPECT_EQ(checkEvent->scrollState, static_cast<int>(ScrollState::FLING));
 }
-#endif
 
 /*
  * @tc.name: setOnReachStartTest

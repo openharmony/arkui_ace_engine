@@ -15,10 +15,11 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_ACCESSOR_TEST_BASE_H
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -139,6 +140,7 @@ public:
             finalyzer_(peer_);
         }
         peer_ = nullptr;
+        PeerUtils::ClearAllPeers();
     }
 
     template<typename Theme>

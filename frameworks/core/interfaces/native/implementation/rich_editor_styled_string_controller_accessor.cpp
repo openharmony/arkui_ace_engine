@@ -63,8 +63,8 @@ Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController
 Ark_RichEditorRange GetSelectionImpl(Ark_RichEditorStyledStringController peer)
 {
     CHECK_NULL_RETURN(peer, {});
-    LOGW("RichEditorStyledString Accessor:: GetSelectionImpl is not implemented");
-    return {};
+    SelectionRangeInfo selection = peer->GetSelection();
+    return Converter::ArkValue<Ark_RichEditorRange>(selection);
 }
 void OnContentChangedImpl(Ark_RichEditorStyledStringController peer,
                           const Ark_StyledStringChangedListener* listener)

@@ -48,6 +48,12 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
             dst.start = Converter::ArkValue<Opt_Number>(selection.selection[0]);
             dst.end = Converter::ArkValue<Opt_Number>(selection.selection[1]);
         }
+    } else if (src.GetType() == "SelectionRangeInfo") {
+        auto selectionRangeInfo = static_cast<const SelectionRangeInfo*>(&src);
+        if (selectionRangeInfo) {
+            dst.start = Converter::ArkValue<Opt_Number>(selectionRangeInfo->start_);
+            dst.end = Converter::ArkValue<Opt_Number>(selectionRangeInfo->end_);
+        }
     }
 }
 

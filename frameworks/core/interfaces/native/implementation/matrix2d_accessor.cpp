@@ -25,15 +25,11 @@ const auto ERROR_VALUE = Converter::ArkValue<Opt_Number>();
 
 void DestroyPeerImpl(Ark_Matrix2D peer)
 {
-    if (peer) {
-        peer->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_Matrix2D CtorImpl()
 {
-    auto peer = Referenced::MakeRefPtr<Matrix2DPeer>();
-    peer->IncRefCount();
-    return reinterpret_cast<Matrix2DPeer*>(Referenced::RawPtr(peer));
+    return PeerUtils::CreatePeer<Matrix2DPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

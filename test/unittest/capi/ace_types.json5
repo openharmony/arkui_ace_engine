@@ -433,12 +433,12 @@
             "name": "VariableFontWeightEnum",
             "type": "Ark_FontWeight",
             "validValues": [
-                ["ARK_FONT_WEIGHT_LIGHTER", "400"],
+                ["ARK_FONT_WEIGHT_LIGHTER", "100"],
                 ["ARK_FONT_WEIGHT_NORMAL", "400"],
                 ["ARK_FONT_WEIGHT_REGULAR", "400"],
-                ["ARK_FONT_WEIGHT_MEDIUM", "400"],
-                ["ARK_FONT_WEIGHT_BOLD", "400"],
-                ["ARK_FONT_WEIGHT_BOLDER", "400"],
+                ["ARK_FONT_WEIGHT_MEDIUM", "500"],
+                ["ARK_FONT_WEIGHT_BOLD", "700"],
+                ["ARK_FONT_WEIGHT_BOLDER", "900"],
             ],
             "invalidValues": [
                 "static_cast<Ark_FontWeight>(-1)",

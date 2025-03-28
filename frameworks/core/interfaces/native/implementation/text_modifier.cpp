@@ -27,19 +27,53 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
+namespace {
+constexpr int32_t DEFAULT_MULTIPLE = 100;
+int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
+{
+    OHOS::Ace::FontWeight convertValue;
+    switch (fontWeight) {
+        case OHOS::Ace::FontWeight::W100:
+        case OHOS::Ace::FontWeight::LIGHTER:
+            convertValue = OHOS::Ace::FontWeight::W100;
+            break;
+        case OHOS::Ace::FontWeight::W200:
+            convertValue = OHOS::Ace::FontWeight::W200;
+            break;
+        case OHOS::Ace::FontWeight::W300:
+            convertValue = OHOS::Ace::FontWeight::W300;
+            break;
+        case OHOS::Ace::FontWeight::W400:
+        case OHOS::Ace::FontWeight::NORMAL:
+        case OHOS::Ace::FontWeight::REGULAR:
+            convertValue = OHOS::Ace::FontWeight::W400;
+            break;
+        case OHOS::Ace::FontWeight::W500:
+        case OHOS::Ace::FontWeight::MEDIUM:
+            convertValue = OHOS::Ace::FontWeight::W500;
+            break;
+        case OHOS::Ace::FontWeight::W600:
+            convertValue = OHOS::Ace::FontWeight::W600;
+            break;
+        case OHOS::Ace::FontWeight::W700:
+        case OHOS::Ace::FontWeight::BOLD:
+            convertValue = OHOS::Ace::FontWeight::W700;
+            break;
+        case OHOS::Ace::FontWeight::W800:
+            convertValue = OHOS::Ace::FontWeight::W800;
+            break;
+        case OHOS::Ace::FontWeight::W900:
+        case OHOS::Ace::FontWeight::BOLDER:
+            convertValue = OHOS::Ace::FontWeight::W900;
+            break;
+        default:
+            convertValue = OHOS::Ace::FontWeight::W400;
+            break;
+    }
+    return (static_cast<int32_t>(convertValue) + 1) * DEFAULT_MULTIPLE;
+}
+}
 namespace OHOS::Ace::NG::Converter {
-namespace WeightNum {
-int32_t W100 = 100;
-int32_t W200 = 200;
-int32_t W300 = 300;
-int32_t W400 = 400;
-int32_t W500 = 500;
-int32_t W600 = 600;
-int32_t W700 = 700;
-int32_t W800 = 800;
-int32_t W900 = 900;
-} // namespace WeightNum
-
 struct FontSettingOptions {
     std::optional<bool> enableVariableFontWeight;
 };
@@ -134,24 +168,6 @@ TextOptions Convert(const Ark_TextOptions& src)
     TextOptions options;
     options.peer = src.controller;
     return options;
-}
-
-std::optional<int32_t> FontWeightToInt(const FontWeight& src)
-{
-    std::optional<int32_t> dst;
-    switch (src) {
-        case FontWeight::W100: dst = WeightNum::W100; break;
-        case FontWeight::W200: dst = WeightNum::W200; break;
-        case FontWeight::W300: dst = WeightNum::W300; break;
-        case FontWeight::W400: dst = WeightNum::W400; break;
-        case FontWeight::W500: dst = WeightNum::W500; break;
-        case FontWeight::W600: dst = WeightNum::W600; break;
-        case FontWeight::W700: dst = WeightNum::W700; break;
-        case FontWeight::W800: dst = WeightNum::W800; break;
-        case FontWeight::W900: dst = WeightNum::W900; break;
-        default: dst = std::nullopt; break;
-    }
-    return dst;
 }
 
 template<>
@@ -351,7 +367,10 @@ void FontWeight0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto weight = Converter::OptConvert<FontWeight>(*value);
     TextModelNG::SetFontWeight(frameNode, weight);
-    auto variableWeight = weight ? Converter::FontWeightToInt(weight.value()) : std::nullopt;
+    std::optional<int32_t> variableWeight = std::nullopt;
+    if (weight.has_value()) {
+        variableWeight = ConvertToVariableFontWeight(weight.value());
+    }
     TextModelNG::SetVariableFontWeight(frameNode, variableWeight);
 }
 void FontWeight1Impl(Ark_NativePointer node,
