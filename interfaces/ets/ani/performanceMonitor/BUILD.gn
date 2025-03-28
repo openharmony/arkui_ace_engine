@@ -34,7 +34,7 @@ ohos_shared_library("performanceMonitor_ani") {
 #构建abc
 generate_static_abc("performanceMonitor") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.performanceMonitor.ets" ]
+  files = [ "./ets/@ohos.arkui.performanceMonitor.ets" ]
   is_boot_abc = "True"
   device_dst_file = "system/framework/performanceMonitor.abc"
 }
