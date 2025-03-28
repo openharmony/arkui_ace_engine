@@ -51,12 +51,26 @@ import { BaseGestureEvent } from "./ArkBaseGestureEventMaterialized"
 import { PixelMap } from "./ArkPixelMapMaterialized"
 import { ColorFilter } from "./ArkColorFilterMaterialized"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./ArkImageCommonInterfaces"
+import { AttributeUpdater } from "../handwritten/modifiers/ArkAttributeUpdater"
+import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
+import { ArkImageAttributeSet, ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
+import { applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
+
 import { DrawableDescriptor } from "./ArkDrawableDescriptorMaterialized"
 /** @memo:stable */
 export class ArkImageComponent extends ArkCommonMethodComponent {
     getPeer(): ArkImagePeer {
         return (this.peer as ArkImagePeer)
     }
+
+    getModifierHost(): ArkImageNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkImageNode()
+            this._modifierHost!.setPeer(this.getPeer())
+        }
+        return this._modifierHost as ArkImageNode
+    }
+
     /** @memo */
     public setImageOptions(src: PixelMap | ResourceStr | DrawableDescriptor | PixelMap | ResourceStr | DrawableDescriptor | ImageContent, imageAIOptions?: ImageAIOptions): this {
         if (this.checkPriority("setImageOptions")) {
@@ -307,6 +321,33 @@ export class ArkImageComponent extends ArkCommonMethodComponent {
         }
         return this
     }
+
+    attributeModifier(modifier: AttributeModifier<ImageAttribute>): this {
+        let peerNode = this.getPeer();
+        let attributeSet = peerNode._attributeSet;
+        let isAttributeUpdater = modifier instanceof AttributeUpdater
+        if (isAttributeUpdater) {
+            let attributeUpdater = modifier as AttributeUpdater<ImageAttribute>;
+            attributeUpdater.attribute = this.getModifierHost();
+            if (!attributeSet) {
+                attributeSet = new ArkImageAttributeSet();
+                peerNode._attributeSet = attributeSet;
+            }
+            attributeUpdater.initializeModifier((peerNode._attributeSet as Object) as ImageAttribute)
+        } else {
+            let attributeModifier = ((modifier as Object) as AttributeModifier<ImageAttribute>);
+            let imageModifier = (attributeModifier as Object) as ImageModifier;
+            if (!attributeSet) {
+                attributeSet = new ArkImageAttributeSet();
+                attributeSet._modifiersWithKeys = imageModifier._modifiersWithKeys;
+                peerNode._attributeSet = attributeSet;
+            }
+        }
+        applyUIAttributes(modifier, peerNode);
+        peerNode._attributeSet!.applyModifierPatch(peerNode);
+        return this;
+    }
+
     public applyAttributesFinish(): void {
         // we calls this function outside of class, so need to make it public
         super.applyAttributesFinish()
