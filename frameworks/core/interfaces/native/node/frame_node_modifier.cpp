@@ -32,6 +32,10 @@ enum class ExpandMode : uint32_t {
     LAZY_EXPAND,
 };
 
+enum EventQueryType {
+    ON_CLICK = 0,
+};
+
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -611,6 +615,22 @@ ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
     return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
 }
 
+EventBindingInfo GetInteractionEventBindingInfo(ArkUINodeHandle node, int eventType)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    EventBindingInfo bindingInfo {};
+    CHECK_NULL_RETURN(currentNode, bindingInfo);
+    if (eventType != EventQueryType::ON_CLICK) {
+        return bindingInfo;
+    }
+    auto info = currentNode->GetInteractionEventBindingInfo();
+    bindingInfo.baseEventRegistered = info.baseEventRegistered;
+    bindingInfo.nodeEventRegistered = info.nodeEventRegistered;
+    bindingInfo.nativeEventRegistered= info.nativeEventRegistered;
+    bindingInfo.builtInEventRegistered= info.builtInEventRegistered;
+    return bindingInfo;
+}
+
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -983,6 +1003,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCrossLanguageOptions = GetCrossLanguageOptions,
         .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
         .setKeyProcessingMode = SetKeyProcessingMode,
+        .getInteractionEventBindingInfo = GetInteractionEventBindingInfo,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

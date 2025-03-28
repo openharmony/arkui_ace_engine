@@ -1945,6 +1945,29 @@ ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(
     return panda::BooleanRef::New(vm, result);
 }
 
+ArkUINativeModuleValue FrameNodeBridge::GetInteractionEventBindingInfo(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(!secondArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    int eventQueryType = secondArg->ToNumber(vm)->Value();
+    auto result =
+        GetArkUINodeModifiers()->getFrameNodeModifier()->getInteractionEventBindingInfo(nativeNode, eventQueryType);
+    const char* keys[] = { "baseEventRegistered", "nodeEventRegistered", "nativeEventRegistered",
+        "builtInEventRegistered" };
+    Local<JSValueRef> values[] = { panda::BooleanRef::New(vm, result.baseEventRegistered),
+        panda::BooleanRef::New(vm, result.nodeEventRegistered),
+        panda::BooleanRef::New(vm, result.nativeEventRegistered),
+        panda::BooleanRef::New(vm, result.builtInEventRegistered) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    return obj;
+}
+
 ArkUINativeModuleValue FrameNodeBridge::AddSupportedStates(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -1238,6 +1238,24 @@ class FrameNode {
     checkIfCanCrossLanguageAttributeSetting() {
         return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
     }
+    getInteractionEventBindingInfo(eventType) {
+        if (eventType === undefined || eventType === null) {
+            return undefined;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const eventBindingInfo = getUINativeModule().frameNode.getInteractionEventBindingInfo(this.getNodePtr(), eventType);
+        __JSScopeUtil__.restoreInstanceId();
+        if (!eventBindingInfo || (!eventBindingInfo.baseEventRegistered && !eventBindingInfo.nodeEventRegistered &&
+            !eventBindingInfo.nativeEventRegistered && !eventBindingInfo.builtInEventRegistered)) {
+            return undefined;
+        }
+        return {
+            baseEventRegistered: eventBindingInfo.baseEventRegistered,
+            nodeEventRegistered: eventBindingInfo.nodeEventRegistered,
+            nativeEventRegistered: eventBindingInfo.nativeEventRegistered,
+            builtInEventRegistered: eventBindingInfo.builtInEventRegistered,
+        };
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
