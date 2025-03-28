@@ -431,11 +431,11 @@ class CreateIconParam {
 }
 
 class OperateItemStructController {
-  changeRadioState = () => {
+  public changeRadioState = () => {
   };
-  changeCheckboxState = () => {
+  public changeCheckboxState = () => {
   };
-  changeSwitchState = () => {
+  public changeSwitchState = () => {
   };
 }
 
