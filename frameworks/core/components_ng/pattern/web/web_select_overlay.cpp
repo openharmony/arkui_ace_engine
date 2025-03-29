@@ -790,7 +790,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    if(!quickMenuCallback_){
+    if (!quickMenuCallback_) {
         pattern->CloseSelectOverlay();
         return;
     }

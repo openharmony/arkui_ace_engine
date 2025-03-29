@@ -121,7 +121,7 @@ public:
     void UpdateClippedSelectionBounds(int32_t x, int32_t y, int32_t w, int32_t h);
     void ChangeVisibilityOfQuickMenu();
     bool IsShowHandle() { return isShowHandle_; }
-    bool SetIsShowHandle(bool isShowHandle)
+    void SetIsShowHandle(bool isShowHandle)
     {
         isShowHandle_ = isShowHandle;
     }
