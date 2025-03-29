@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/common/recorder/event_controller.h"
 
 #include "core/text/text_emoji_processor.h"
 #include "base/i18n/localization.h"
