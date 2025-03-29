@@ -451,6 +451,7 @@
       OHOS::Ace::Kit::AnimationUtils::*;
       OHOS::Ace::Kit::View::*;
       OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;

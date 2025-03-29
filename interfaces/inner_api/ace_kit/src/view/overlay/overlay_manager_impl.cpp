@@ -60,4 +60,16 @@ void OverlayManagerImpl::ShowMenu(const int32_t targetId, const NG::OffsetF& off
     CHECK_NULL_VOID(aceMenuNode);
     overlayManager_->ShowMenu(targetId, offset, aceMenuNode);
 }
+
+NG::SafeAreaInsets OverlayManagerImpl::GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow)
+{
+    CHECK_NULL_RETURN(overlayManager_, {});
+    CHECK_NULL_RETURN(frameNode, {});
+    auto frameNodeImpl = AceType::DynamicCast<FrameNodeImpl>(frameNode);
+    CHECK_NULL_RETURN(frameNodeImpl, {});
+    auto aceFrameNode = frameNodeImpl->GetAceNode();
+    CHECK_NULL_RETURN(aceFrameNode, {});
+    return overlayManager_->GetSafeAreaInsets(aceFrameNode, useCurrentWindow);
+}
+
 } // OHOS::Ace::Kit
