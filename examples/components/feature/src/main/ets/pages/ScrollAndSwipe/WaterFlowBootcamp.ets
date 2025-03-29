@@ -27,20 +27,20 @@ import {
 
 import { common2D, uiEffect } from '@kit.ArkGraphics2D';
 import { pointer } from '@kit.InputKit';
-import { CompSizeBlocks } from '../../components/CompSizeBlocks'
-import { CompLocationBlocks } from '../../components/CompLocationBlocks'
-import { CompLayoutConstraintsBlocks } from '../../components/CompLayoutConstraintsBlocks'
-import { CompBorderBlocks } from '../../components/CompBorderBlocks'
-import { CompBorderImageBlocks } from '../../components/CompBorderImageBlocks'
-import { CompBackgroundBlocks } from '../../components/CompBackgroundBlocks'
-import { CompOpacityBlocks } from '../../components/CompOpacityBlocks'
-import { CompVisibilityBlocks } from '../../components/CompVisibilityBlocks'
-import { CompEnabledBlocks } from '../../components/CompEnabledBlocks'
-import { CompOverlayBlocks } from '../../components/CompOverlayBlocks'
-import { CompZOrderControlBlocks } from '../../components/CompZOrderControlBlocks'
-import { CompTransformationBlocks } from '../../components/CompTransformationBlocks'
-import { CompShapeClippingBlocks } from '../../components/CompShapeClippingBlocks'
-import { CompImageEffectsBlocks } from '../../components/CompImageEffectsBlocks'
+import { CompSizeBlocks } from './../../components/CompSizeBlocks'
+import { CompLocationBlocks } from './../../components/CompLocationBlocks'
+import { CompLayoutConstraintsBlocks } from './../../components/CompLayoutConstraintsBlocks'
+import { CompBorderBlocks } from './../../components/CompBorderBlocks'
+import { CompBorderImageBlocks } from './../../components/CompBorderImageBlocks'
+import { CompBackgroundBlocks } from './../../components/CompBackgroundBlocks'
+import { CompOpacityBlocks } from './../../components/CompOpacityBlocks'
+import { CompVisibilityBlocks } from './../../components/CompVisibilityBlocks'
+import { CompEnabledBlocks } from './../../components/CompEnabledBlocks'
+import { CompOverlayBlocks } from './../../components/CompOverlayBlocks'
+import { CompZOrderControlBlocks } from './../../components/CompZOrderControlBlocks'
+import { CompTransformationBlocks } from './../../components/CompTransformationBlocks'
+import { CompShapeClippingBlocks } from './../../components/CompShapeClippingBlocks'
+import { CompImageEffectsBlocks } from './../../components/CompImageEffectsBlocks'
 import { CompGestureModifierBlocks } from '../../components/CompGestureModifierBlocks'
 import { CompOutlineBlocks } from '../../components/CompOutlineBlocks'
 import { CompVisualEffectBlocks } from '../../components/CompVisualEffectBlocks'
@@ -68,8 +68,6 @@ import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlock
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
-
-
 
 //part2
 class MyModifier implements AttributeModifier<WaterFlowAttribute> {
