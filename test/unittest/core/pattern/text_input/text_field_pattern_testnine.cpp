@@ -612,13 +612,14 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
     });
     ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->SetUsingMouse(true);
-    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u""), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u""),
+        layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     pattern->HandleOnCopy(true);
     std::string data_;
-    auto GetCallback = [&data_](const std::string& data) {
+    auto getDataCallback = [&data_](const std::string& data) {
         data_ = data;
     };
-    pattern->clipboard_->GetData(GetCallback, true);
+    pattern->clipboard_->GetData(getDataCallback, true);
     EXPECT_TRUE(data_.empty());
 }
 
