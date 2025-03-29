@@ -15,7 +15,7 @@
 
 import image from '@ohos.multimedia.image';
 import { BusinessError, AsyncCallback } from '@ohos.base';
-import { CustomBuilder } from '@ohos.arkui.component.Common';
+import { CustomBuilder } from '@ohos.arkui.component';
 
 export default namespace componentSnapshot {
 
