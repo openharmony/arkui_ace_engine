@@ -666,7 +666,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
 
 /**
  * @tc.name: OnDragDrop001
- * @tc.desc: test text_field_pattern.cpp OnDragDrop function, 
+ * @tc.desc: test text_field_pattern.cpp OnDragDrop function,
     case (gesturePressedCodes.size() == 1) && ((gesturePressedCodes[0] == KeyCode::KEY_CTRL_LEFT) ||
         (gesturePressedCodes[0] == KeyCode::KEY_CTRL_RIGHT)),
  * @tc.type: FUNC
