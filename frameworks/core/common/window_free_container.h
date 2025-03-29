@@ -22,9 +22,9 @@
 namespace OHOS::Ace::Platform {
 class ACE_FORCE_EXPORT WindowFreeContainer {
 public:
-WindowFreeContainer() = delete;
-static RefPtr<Container> CreateWindowFreeContainer(void *env, void *context);
-static void DestroyWindowFreeContainer();
+    WindowFreeContainer() = delete;
+    static RefPtr<Container> CreateWindowFreeContainer(void *env, void *context);
+    static void DestroyWindowFreeContainer();
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_FREE_CONTAINER_H
