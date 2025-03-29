@@ -609,7 +609,11 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
                 return;
             }
             auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self && self->snapshotWindow_);
+            CHECK_NULL_VOID(self);
+            if (self->session_->IsExitSplitOnBackground()) {
+                return;
+            }
+            CHECK_NULL_VOID(self->snapshotWindow_);
             TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
                 self->session_->GetPersistentId());
             auto context = self->snapshotWindow_->GetRenderContext();
