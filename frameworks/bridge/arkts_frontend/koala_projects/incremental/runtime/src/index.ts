@@ -146,7 +146,10 @@ export {
     StateManager,
     ValueTracker,
 } from "./states/State"
-
+export {
+    StateDecoratedVariable,
+    LinkDecoratedVariable
+} from './states/StateMgmt'
 export {
     __context,
     __id,
