@@ -883,7 +883,7 @@ void ArcSwiperPattern::UsePropertyAnimation(const OffsetF& offset)
 }
 
 void ArcSwiperPattern::PlayPropertyTranslateAnimation(
-    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
+    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay, std::optional<float> pixelRoundTargetPos)
 {
     if (NearZero(translate)) {
         OnAnimationTranslateZero(nextIndex, stopAutoPlay);

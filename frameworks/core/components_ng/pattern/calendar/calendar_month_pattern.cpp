@@ -1069,6 +1069,17 @@ std::string CalendarMonthPattern::GetDayStr(int32_t index)
     }
 }
 
+std::string CalendarMonthPattern::GetTodayStr()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, "");
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    return theme->GetCalendarTheme().today;
+}
+
 void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarDay)
 {
     auto host = GetHost();
@@ -1085,7 +1096,7 @@ void CalendarMonthPattern::ChangeVirtualNodeContent(const CalendarDay& calendarD
     std::string message;
     if (calendarDay.month.year == calendarDay_.month.year && calendarDay.month.month == calendarDay_.month.month &&
                       calendarDay.day == calendarDay_.day) {
-        message += Localization::GetInstance()->GetEntryLetters("calendar.today");
+        message += GetTodayStr();
     }
     message += std::to_string(calendarDay.month.year) + "/";
     message += std::to_string(calendarDay.month.month) + "/";

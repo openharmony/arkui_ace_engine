@@ -23,10 +23,21 @@ interface CrossLanguageOptions {
   attributeSetting?: boolean;
 }
 
+interface InteractionEventBindingInfo  {
+  baseEventRegistered?: boolean;
+  nodeEventRegistered?: boolean;
+  nativeEventRegistered?: boolean;
+  builtInEventRegistered?: boolean;
+}
+
 enum ExpandMode {
   NOT_EXPAND = 0,
   EXPAND = 1,
   LAZY_EXPAND = 2,
+}
+
+enum EventQueryType {
+  ON_CLICK = 0,
 }
 
 class FrameNode {
@@ -34,6 +45,7 @@ class FrameNode {
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
   public _componentAttribute: ArkComponent;
+  public _scrollableEvent: UIScrollableCommonEvent;
   protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
@@ -594,6 +606,25 @@ class FrameNode {
     return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
   }
 
+  getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo {
+    if (eventType === undefined || eventType === null) {
+      return undefined;
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    const eventBindingInfo = getUINativeModule().frameNode.getInteractionEventBindingInfo(this.getNodePtr(), eventType);
+    __JSScopeUtil__.restoreInstanceId();
+    if (!eventBindingInfo || (!eventBindingInfo.baseEventRegistered && !eventBindingInfo.nodeEventRegistered &&
+      !eventBindingInfo.nativeEventRegistered && !eventBindingInfo.builtInEventRegistered)) {
+      return undefined;
+    }
+    return {
+      baseEventRegistered: eventBindingInfo.baseEventRegistered,
+      nodeEventRegistered: eventBindingInfo.nodeEventRegistered,
+      nativeEventRegistered: eventBindingInfo.nativeEventRegistered,
+      builtInEventRegistered: eventBindingInfo.builtInEventRegistered,
+    };
+  }
+
   get commonAttribute(): ArkComponent {
     if (this._commonAttribute === undefined) {
       this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -1016,6 +1047,59 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
   ]
 )
 
+const __eventMap__ = new Map<string, (node: FrameNode) => UICommonEvent>(
+  [
+    ['List', (node: FrameNode): UIListEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIListEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['Scroll', (node: FrameNode): UIScrollEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['Grid', (node: FrameNode): UIGridEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIGridEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }],
+    ['WaterFlow', (node: FrameNode): UIWaterFlowEvent => {
+      if (node._scrollableEvent) {
+        return node._scrollableEvent;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
+      node._scrollableEvent.setNodePtr(node);
+      node._scrollableEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
+      return node._scrollableEvent;
+    }]
+  ]
+)
+
 class typeNode {
   static createNode(context: UIContext, type: string, options?: object): FrameNode {
     let creator = __creatorMap__.get(type)
@@ -1038,6 +1122,17 @@ class typeNode {
     }
     return attribute(node);
   }
+
+  static getEvent(node: FrameNode, nodeType: string): UICommonEvent {
+    if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+      return undefined;
+    }
+    let event = __eventMap__.get(nodeType);
+    if (event === undefined || event === null) {
+      return undefined;
+    }
+    return event(node);
+  } 
 
   static bindController(node: FrameNode, controller: Scroller, nodeType: string): void {
     if (node === undefined || node === null || controller === undefined || controller === null ||

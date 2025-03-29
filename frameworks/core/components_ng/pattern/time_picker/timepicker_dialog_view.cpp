@@ -290,7 +290,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(textNextPrevNode, nullptr);
     auto textNextPrevLayoutProperty = textNextPrevNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textNextPrevLayoutProperty, nullptr);
-    textNextPrevLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+    textNextPrevLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textNextPrevLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     textNextPrevLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
@@ -305,7 +305,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     CHECK_NULL_RETURN(buttonNextPrevEventHub, nullptr);
     buttonNextPrevEventHub->SetStateEffect(true);
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
+    buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -356,13 +356,12 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         CHECK_NULL_VOID(buttonNextPrevLayoutProperty);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
-        if (textLayoutProperty->GetContent() ==
-            UtfUtils::Str8ToStr16(Localization::GetInstance()->GetEntryLetters("common.next"))) {
+        if (textLayoutProperty->GetContent() == UtfUtils::Str8ToStr16(GetDialogAgingButtonText(true))) {
             UpdateCancelButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
         } else {
             UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
-            textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+            textLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
         }
         textNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     };
@@ -695,7 +694,7 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -736,7 +735,7 @@ void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(
     const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -789,7 +788,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     buttonCancelEventHub->SetStateEffect(true);
 
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -818,7 +817,7 @@ void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
     const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -1210,4 +1209,23 @@ void TimePickerDialogView::SetEnableCascade(
     timePickerRowPattern->SetEnableCascade(isEnableCascade);
 }
 
+std::string TimePickerDialogView::GetDialogAgingButtonText(bool isNext)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, "");
+    auto buttonText = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    return buttonText;
+}
+
+std::string TimePickerDialogView::GetDialogNormalButtonText(bool isConfirm)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, "");
+    auto buttonText = isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText();
+    return buttonText;
+}
 } // namespace OHOS::Ace::NG

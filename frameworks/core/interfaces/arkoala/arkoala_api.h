@@ -1917,6 +1917,13 @@ struct ArkUIImageResizableSlice {
     ArkUI_Float32 bottom;
 };
 
+struct EventBindingInfo {
+    bool baseEventRegistered;
+    bool nodeEventRegistered;
+    bool nativeEventRegistered;
+    bool builtInEventRegistered;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -5822,6 +5829,7 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
     ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
     void (*setKeyProcessingMode)(ArkUI_Int32 instanceId, ArkUI_Int32 mode);
+    EventBindingInfo (*getInteractionEventBindingInfo)(ArkUINodeHandle node, int type);
 };
 
 struct ArkUINodeContentEvent {

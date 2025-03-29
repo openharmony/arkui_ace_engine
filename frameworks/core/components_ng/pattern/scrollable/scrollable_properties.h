@@ -483,6 +483,7 @@ using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;

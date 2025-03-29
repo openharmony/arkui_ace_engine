@@ -479,13 +479,13 @@ void DatePickerPattern::UpdateButtonNode(const RefPtr<FrameNode>& buttonNode, co
     auto updateNodeLayout = updateNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(updateNodeLayout);
 
-    std::string lettersStr = isConfirmNode ? "common.ok" : "common.cancel";
-    updateNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters(lettersStr));
-
     auto pipeline = updateNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    std::string lettersStr = isConfirmNode ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText();
+    updateNodeLayout->UpdateContent(lettersStr);
+
     UpdateButtonMargin(buttonNode, dialogTheme, isConfirmNode);
     updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -494,11 +494,13 @@ void DatePickerPattern::UpdateLunarSwitch()
 {
     auto lunarSwitchNode = weakLunarSwitchText_.Upgrade();
     CHECK_NULL_VOID(lunarSwitchNode);
-
+    auto context = lunarSwitchNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
     auto lunarSwitchTextLayoutProperty = lunarSwitchNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(lunarSwitchTextLayoutProperty);
-    lunarSwitchTextLayoutProperty->UpdateContent(
-        Localization::GetInstance()->GetEntryLetters("datepicker.lunarSwitch"));
+    lunarSwitchTextLayoutProperty->UpdateContent(pickerTheme->GetLunarSwitchText());
     lunarSwitchNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

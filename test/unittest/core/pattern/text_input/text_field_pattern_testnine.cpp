@@ -583,11 +583,11 @@ HWTEST_F(TextFieldPatternTestNine, OnKeyEvent001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleOnCopy002
+ * @tc.name: HandleOnCopy001
  * @tc.desc: test HandleOnCopy
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNine, HandleOnCopy002, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
 {
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
@@ -612,27 +612,14 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy002, TestSize.Level0)
     });
     ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->SetUsingMouse(true);
+    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u""), layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     pattern->HandleOnCopy(true);
-    auto start = pattern->selectController_->GetStartIndex();
-    auto end = pattern->selectController_->GetEndIndex();
-    auto value = pattern->contentController_->GetSelectedValue(start, end);
-    EXPECT_TRUE(value.empty());
-}
-
-/**
- * @tc.name: GetCancelButton001
- * @tc.desc: test GetCancelButton
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, GetCancelButton001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
-    pattern_->GetCancelButton();
-    auto theme = pattern_->GetTheme();
-    EXPECT_TRUE(theme->GetCancelButton().empty());
+    std::string data_;
+    auto GetCallback = [&data_](const std::string& data) {
+        data_ = data;
+    };
+    pattern->clipboard_->GetData(GetCallback, true);
+    EXPECT_TRUE(data_.empty());
 }
 
 /**
@@ -668,7 +655,8 @@ HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
     pattern_->ProcessOverlay();
     pattern_->isSelecting_ = false;
     pattern_->HandleTouchEvent(info);
-    EXPECT_TRUE(!pattern_->selectOverlay_->IsTouchAtHandle(info));
+    OffsetF offset(-1.0f, -1.0f);
+    EXPECT_TRUE(pattern_->originCaretPosition_ == offset);
 }
 
 /**

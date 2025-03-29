@@ -955,6 +955,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest111, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -966,7 +967,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest111, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -1134,6 +1135,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -1145,7 +1147,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -1158,14 +1160,14 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     ASSERT_NE(textCancelLayoutProperty, nullptr);
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
     std::string nodeInfo = "";
-    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    auto cancel = dialogTheme->GetCancelText();
     EXPECT_EQ(cancel, nodeInfo);
 }
 
@@ -1727,6 +1729,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -1738,7 +1741,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);

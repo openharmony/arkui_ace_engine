@@ -17,12 +17,13 @@
 
 #include "securec.h"
 
-#include "base/i18n/localization.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/frontend/cj_page_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/dialog/dialog_theme.h"
 
 using namespace OHOS::Ace::NG;
 
@@ -121,6 +122,24 @@ void ExitToDesktop()
         },
         TaskExecutor::TaskType::UI, "CJExitToDesktop");
 }
+
+struct DialogStrings {
+    std::string cancel;
+    std::string confirm;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.cancel = dialogTheme->GetCancelText();
+    strs.confirm = dialogTheme->GetConfirmText();
+    return strs;
+}
 } // namespace
 
 void CJPageRouterNG::OnShowCurrent()
@@ -195,11 +214,13 @@ void CJPageRouterNG::EnableAlertBeforeBackPage(const std::string& message, std::
     CHECK_NULL_VOID(pageInfo);
     ClearAlertCallback(pageInfo);
 
+    auto strs = GetDialogStrings();
+
     DialogProperties dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .onSuccess =
             [weak = AceType::WeakClaim(this), callback](int32_t successType, int32_t successIndex) {
                 LOGI("showDialog successType: %{public}d, successIndex: %{public}d", successType, successIndex);

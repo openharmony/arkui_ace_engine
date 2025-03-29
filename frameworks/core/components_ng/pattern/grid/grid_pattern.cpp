@@ -298,61 +298,82 @@ void GridPattern::FireOnScrollStart()
     auto hub = host->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID(onScrollStart);
-    onScrollStart();
+    if (onScrollStart) {
+        onScrollStart();
+    }
+    auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
+    if (onJSFrameNodeScrollStart) {
+        onJSFrameNodeScrollStart();
+    }
 }
 
-void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (info_.startIndex_ == 0) {
-        if (!isInitialized_) {
+    if (info_.startIndex_ != 0) {
+        return;
+    }
+    if (!isInitialized_) {
+        FireObserverOnReachStart();
+        CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
+        if (onReachStart) {
+            onReachStart();
+        }
+        if (onJSFrameNodeReachStart) {
+            onJSFrameNodeReachStart();
+        }
+        AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+    }
+    auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
+    if (!NearZero(finalOffset)) {
+        bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, 0.0) && LessOrEqual(info_.currentHeight_, 0.0);
+        bool scrollDownToStart = LessNotEqual(info_.prevHeight_, 0.0) && GreatOrEqual(info_.currentHeight_, 0.0);
+        if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
+            ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
+                scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
             if (onReachStart) {
                 onReachStart();
-                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
             }
-        }
-        auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
-        if (!NearZero(finalOffset)) {
-            bool scrollUpToStart = GreatOrEqual(info_.prevHeight_, 0.0) && LessOrEqual(info_.currentHeight_, 0.0);
-            bool scrollDownToStart = LessNotEqual(info_.prevHeight_, 0.0) && GreatOrEqual(info_.currentHeight_, 0.0);
-            if (scrollUpToStart || scrollDownToStart) {
-                FireObserverOnReachStart();
-                CHECK_NULL_VOID(onReachStart);
-                ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid",
-                    scrollUpToStart, scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
-                onReachStart();
-                AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
+            if (onJSFrameNodeReachStart) {
+                onJSFrameNodeReachStart();
             }
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
         }
     }
 }
 
-void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenCount = info_.childrenCount_ + info_.repeatDifference_;
-    if (info_.endIndex_ == (childrenCount - 1)) {
-        if (!isInitialized_) {
+    if (info_.endIndex_ != (childrenCount - 1)) {
+        return;
+    }
+    if (!isInitialized_) {
+        FireObserverOnReachEnd();
+    }
+    auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
+    if (!NearZero(finalOffset)) {
+        bool scrollDownToEnd =
+            LessNotEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
+        bool scrollUpToEnd =
+            GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
+        if (scrollDownToEnd || scrollUpToEnd) {
             FireObserverOnReachEnd();
-        }
-        auto finalOffset = info_.currentHeight_ - info_.prevHeight_;
-        if (!NearZero(finalOffset)) {
-            bool scrollDownToEnd =
-                LessNotEqual(info_.prevHeight_, endHeight_) && GreatOrEqual(info_.currentHeight_, endHeight_);
-            bool scrollUpToEnd =
-                GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
-            if (scrollDownToEnd || scrollUpToEnd) {
-                FireObserverOnReachEnd();
-                CHECK_NULL_VOID(onReachEnd);
-                ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
-                    scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
+            CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
+            ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
+                scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
+            if (onReachEnd) {
                 onReachEnd();
-                AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
             }
+            if (onJSFrameNodeReachEnd) {
+                onJSFrameNodeReachEnd();
+            }
+            AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
         }
     }
 }
@@ -566,16 +587,26 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
     }
+    auto onJSFrameNodeDidScroll = gridEventHub->GetJSFrameNodeOnDidScroll();
+    if (onJSFrameNodeDidScroll) {
+        FireOnScroll(finalOffset, onJSFrameNodeDidScroll);
+    }
     auto onScrollIndex = gridEventHub->GetOnScrollIndex();
+    auto onJsFrameNodeScrollIndex = gridEventHub->GetJSFrameNodeOnGridScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
     }
     auto onReachStart = gridEventHub->GetOnReachStart();
-    FireOnReachStart(onReachStart);
+    auto onJSFrameNodeReachStart = gridEventHub->GetJSFrameNodeOnReachStart();
+    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
     auto onReachEnd = gridEventHub->GetOnReachEnd();
-    FireOnReachEnd(onReachEnd);
-    OnScrollStop(gridEventHub->GetOnScrollStop());
+    auto onJSFrameNodeReachEnd = gridEventHub->GetJSFrameNodeOnReachEnd();
+    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
+    auto onScrollStop = gridEventHub->GetOnScrollStop();
+    auto onJSFrameNodeScrollStop = gridEventHub->GetJSFrameNodeOnScrollStop();
+    OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
     if (isSmoothScrolling_ && scrollStop_) {
         isSmoothScrolling_ = false;
     }

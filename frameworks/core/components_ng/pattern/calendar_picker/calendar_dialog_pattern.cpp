@@ -213,6 +213,10 @@ void CalendarDialogPattern::UpdateOptionsButton()
     CHECK_NULL_VOID(host);
     auto options = host->GetChildAtIndex(OPTIONS_NODE_INDEX);
     CHECK_NULL_VOID(options);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     size_t buttonIndex = OPTION_CANCEL_BUTTON_INDEX;
     for (const auto& child : options->GetChildren()) {
@@ -223,9 +227,9 @@ void CalendarDialogPattern::UpdateOptionsButton()
             auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
             CHECK_NULL_VOID(buttonLayoutProperty);
             if (buttonIndex == OPTION_ACCEPT_BUTTON_INDEX) {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
             } else {
-                buttonLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+                buttonLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
             }
             button->MarkDirtyNode();
             buttonIndex++;

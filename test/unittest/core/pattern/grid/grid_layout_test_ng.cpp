@@ -665,7 +665,7 @@ HWTEST_F(GridLayoutTestNg, EstimateHeight001, TestSize.Level1)
     EXPECT_EQ(pattern_->info_.lineHeightMap_[2], ITEM_MAIN_SIZE);
 
     UpdateCurrentOffset(-100.0f);
-    ;
+
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
     EXPECT_EQ(pattern_->info_.currentOffset_, -22.5);

@@ -1077,6 +1077,22 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     MockContainer::Current()->SetIsScenceBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step3. create dialog mask node
+     */
+    DialogProperties maskProps {
+        .isMask = true,
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto maskNode_ = DialogView::CreateDialogNode(props, nullptr);
+    EXPECT_NE(maskNode_, nullptr);
+    overlayManager->OpenDialogAnimation(maskNode_, maskProps);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
 /**

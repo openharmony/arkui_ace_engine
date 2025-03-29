@@ -99,6 +99,23 @@ public:
         return onScrollIndexEvent_;
     }
 
+    void SetJSFrameNodeOnGridScrollIndex(ScrollIndexFunc&& onScroll)
+    {
+        onJSFrameNodeScrollIndexEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnGridScrollIndex()
+    {
+        if (onJSFrameNodeScrollIndexEvent_) {
+            onJSFrameNodeScrollIndexEvent_ = nullptr;
+        }
+    }
+
+    const ScrollIndexFunc& GetJSFrameNodeOnGridScrollIndex() const
+    {
+        return onJSFrameNodeScrollIndexEvent_;
+    }
+
     std::pair<std::optional<float>, std::optional<float>> FireOnScrollBarUpdate(int32_t index, const Dimension& offset)
     {
         if (onScrollBarUpdate_) {
@@ -159,6 +176,7 @@ private:
     RefPtr<FrameNode> draggingItem_;
 
     ScrollIndexFunc onScrollIndexEvent_;
+    ScrollIndexFunc onJSFrameNodeScrollIndexEvent_;
 };
 
 } // namespace OHOS::Ace::NG

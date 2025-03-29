@@ -1006,7 +1006,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd002, TestSize.Level1)
      * @tc.expected: the OnReachEnd event can not be triggered.
      */
     pattern_->layoutInfo_->repeatDifference_ = 1;
-    pattern_->FireOnReachEnd(event);
+    pattern_->FireOnReachEnd(event, nullptr);
     EXPECT_FALSE(pattern_->layoutInfo_->repeatDifference_ == 0);
     EXPECT_FALSE(isTrigger);
 }
