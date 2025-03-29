@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
-#include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,14 +33,14 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<RadioPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             host->GetGeometryNode()->ResetContent();
         } else {
             host->GetGeometryNode()->Reset();
         }
         return std::nullopt;
     }
-    InitializeParam();
+    InitializeParam(host);
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
@@ -99,15 +99,16 @@ void RadioLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     PerformMeasureSelf(layoutWrapper);
 }
 
-void RadioLayoutAlgorithm::InitializeParam()
+void RadioLayoutAlgorithm::InitializeParam(const RefPtr<FrameNode>& host)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
     defaultWidth_ = radioTheme->GetWidth().ConvertToPx();
     defaultHeight_ = radioTheme->GetHeight().ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         horizontalPadding_ = radioTheme->GetDefaultPaddingSize().ConvertToPx();
         verticalPadding_ = radioTheme->GetDefaultPaddingSize().ConvertToPx();
     } else {

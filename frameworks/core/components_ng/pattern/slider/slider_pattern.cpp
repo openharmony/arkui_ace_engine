@@ -106,7 +106,7 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         HandleEnabled();
     }
     SetAccessibilityAction();
@@ -642,8 +642,10 @@ bool SliderPattern::UpdateParameters()
 
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (type == WindowSizeChangeReason::ROTATION &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SetSkipGestureEvents();
     }
 }

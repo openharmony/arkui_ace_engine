@@ -27,7 +27,7 @@ RefPtr<NodePaintMethod> MenuDividerPattern::CreateNodePaintMethod()
     auto context = GetContext();
     CHECK_NULL_RETURN(context, paintMethod_);
     auto theme = context->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(context, paintMethod_);
+    CHECK_NULL_RETURN(theme, paintMethod_);
     auto themeOutPadding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                            static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto themeIconPadding = static_cast<float>(theme->GetIconSideLength().ConvertToPx()) +

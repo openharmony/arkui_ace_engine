@@ -121,14 +121,13 @@ void SelectLayoutAlgorithm::MeasureAndGetTextSize(double fontSize, SizeF& textSi
 
 float SelectLayoutAlgorithm::MeasureAndGetDefaultHeight(RefPtr<LayoutProperty> layoutProps, RefPtr<SelectTheme> theme)
 {
-    float defaultHeight = 0.0f;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto host = layoutProps->GetHost();
+    float defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
+    auto host = layoutProps->GetHost();
+    CHECK_NULL_RETURN(host, defaultHeight);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto selectPattern = host->GetPattern<SelectPattern>();
         defaultHeight =
             static_cast<float>(theme->GetSelectDefaultHeight(selectPattern->GetControlSize()).ConvertToPx());
-    } else {
-        defaultHeight = static_cast<float>(theme->GetSelectDefaultHeight().ConvertToPx());
     }
     return defaultHeight;
 }
