@@ -1623,7 +1623,7 @@ void TextPattern::InitFocusEvent()
     auto host = GetHost();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto contentModifier = pattern->GetContentModifier();

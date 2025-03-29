@@ -974,7 +974,7 @@ void UIExtensionPattern::OnModifyDone()
 
 void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");

@@ -382,7 +382,7 @@ void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 
 void GridItemPattern::InitOnFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();

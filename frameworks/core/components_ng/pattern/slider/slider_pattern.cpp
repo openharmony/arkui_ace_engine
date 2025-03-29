@@ -1207,7 +1207,7 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
-    auto onFocus = [wp = WeakClaim(this)]() {
+    auto onFocus = [wp = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider on focus");
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
