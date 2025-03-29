@@ -258,6 +258,7 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
             UpdateFirstHandleOffset();
         } else {
             ProcessOverlay({ .animation = true });
+            isShowHandle_ = true;
         }
     } else {
         if (selectTemporarilyHidden_ || selectTemporarilyHiddenByScroll_) {
@@ -278,6 +279,7 @@ void WebSelectOverlay::UpdateTouchHandleForOverlay(bool fromOverlay)
             UpdateAllHandlesOffset();
         } else {
             ProcessOverlay({ .animation = true });
+            isShowHandle_ = true;
         }
     }
 }
@@ -788,6 +790,10 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
+    if (!quickMenuCallback_) {
+        pattern->CloseSelectOverlay();
+        return;
+    }
     switch (id) {
         case OptionMenuActionId::COPY:
             quickMenuCallback_->Continue(
@@ -920,10 +926,10 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     selectOverlayDragging_ = false;
     selectTemporarilyHidden_ = false;
     selectTemporarilyHiddenByScroll_ = false;
+    isShowHandle_ = false;
     if (CloseReason::CLOSE_REASON_BACK_PRESSED == reason) {
         SelectCancel();
     }
-    isShowHandle_ = false;
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
