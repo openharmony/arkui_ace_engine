@@ -583,6 +583,53 @@ HWTEST_F(RichEditorStyledStringTestNg, StyledStringController008, TestSize.Level
 }
 
 /**
+ * @tc.name: StyledStringController009
+ * @tc.desc: Test SetStyledString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, StyledStringController009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create styledString with text
+     */
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
+
+    /**
+     * @tc.steps: step2. get richEditor styledString controller and set styledString
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto styledStringController = richEditorPattern->GetRichEditorStyledStringController();
+    ASSERT_NE(styledStringController, nullptr);
+
+    /**
+     * @tc.steps: step3. SetOnWillChange
+     */
+    auto onWillChange = [styledStringController, mutableStr](const StyledStringChangeValue& changeValue) {
+        onStyledStringWillChangeValue = changeValue;
+        styledStringController->SetStyledString(mutableStr);
+        return false;
+    };
+    styledStringController->SetOnWillChange(onWillChange);
+
+    /**
+     * @tc.steps: step4. enable preview text
+     */
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
+    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
+    richEditorPattern->previewTextRecord_.startOffset = 0;
+    richEditorPattern->previewTextRecord_.endOffset = 4;
+
+    /**
+     * @tc.steps: step3. insert value
+     */
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->InsertValue(INIT_STRING_2);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+}
+
+/**
  * @tc.name: StyledStringInsertValue001
  * @tc.desc: Test insert value in styledString mode.
  * @tc.type: FUNC

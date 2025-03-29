@@ -20,6 +20,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
@@ -671,11 +672,11 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridSCroll001
+ * @tc.name: GridScroll001
  * @tc.desc: Test SetSelected Function.
  * @tc.type: FUNC
  */
-HWTEST_F(GridScrollLayoutTestNg, GridSCroll001, TestSize.Level1)
+HWTEST_F(GridScrollLayoutTestNg, GridScroll001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create GridItemModelNG object
@@ -2353,5 +2354,28 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset001, TestSize.Level1)
 
     pattern_->UpdateCurrentOffset(10.f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
+}
+
+/**
+ * @tc.name: Test GetTotalOffset
+ * @tc.desc: Test GetTotalOffset when updating an item's height in the viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalOffsetTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    pattern_->ScrollToIndex(30, false, ScrollAlign::START);
+    FlushUITasks();
+    auto offset = pattern_->GetTotalOffset();
+    auto gridItemProp = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 29);
+    EXPECT_NE(gridItemProp, nullptr);
+    gridItemProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(ITEM_MAIN_SIZE + 50))));
+    FlushUITasks();
+    EXPECT_EQ(offset, pattern_->GetTotalOffset());
 }
 } // namespace OHOS::Ace::NG

@@ -1071,11 +1071,11 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -1085,7 +1085,7 @@ void TimePickerRowPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }

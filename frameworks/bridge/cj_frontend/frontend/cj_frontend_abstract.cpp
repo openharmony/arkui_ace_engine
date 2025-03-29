@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 
-#include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_loader.h"
 #include "bridge/cj_frontend/runtime/cj_runtime_delegate.h"
@@ -23,6 +22,7 @@
 #include "core/common/font_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "securec.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace;
@@ -286,7 +286,11 @@ void CJFrontendAbstract::ShowActionMenu(
 void CJFrontendAbstract::ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback)
 {
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(theme);
+    ButtonInfo buttonInfo = { .text = theme->GetCancelText(), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },

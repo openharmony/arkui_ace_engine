@@ -2669,87 +2669,69 @@ float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(const ArkUI_UIInputEve
 int32_t HandleCMouseEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-    if (!mouseEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(mouseEvent->modifierKeyState);
+    *keys = mouseEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCTouchEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-    if (!touchEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(touchEvent->modifierKeyState);
+    *keys = touchEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCHoverEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
-    if (!hoverEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(hoverEvent->modifierKeyState);
+    *keys = hoverEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCClickEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
-    if (!clickEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(clickEvent->modifierKeyState);
+    *keys = clickEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
-    if (!axisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(axisEvent->modifierKeyState);
+    *keys = axisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCKeyEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
-    if (!keyEvent) {
-        return 0.0f;
-    }
-    return static_cast<int32_t>(keyEvent->modifierKeyState);
+    *keys = keyEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleCFocusAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
-    if (!focusAxisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(focusAxisEvent->modifierKeyState);
+    *keys = focusAxisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleAxisEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
-    if (!axisEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(axisEvent->modifierKeyState);
+    *keys = axisEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t HandleTouchEventModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
-    if (!touchEvent) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    return static_cast<int32_t>(touchEvent->modifierKeyState);
+    *keys = touchEvent->modifierKeyState;
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_UIInputEvent_GetModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys)
 {
-    if (!event) {
+    if (!event || !keys) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     std::map<ArkUIEventTypeId, std::function<int32_t(ArkUI_UIInputEvent*, uint64_t*)>> eventHandlers = {

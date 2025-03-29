@@ -560,6 +560,10 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     clickEventActuator_->AddClickEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+
+    auto uiNode = AceType::DynamicCast<UINode>(GetFrameNode());
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetBuiltInEventRegistrationState(true);
 }
 
 void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)

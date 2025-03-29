@@ -656,6 +656,21 @@ public:
         return showCircleDial_;
     }
 
+    const std::string& GetLunarSwitchText() const
+    {
+        return lunarSwitch_;
+    }
+
+    const std::string& GetPrevText() const
+    {
+        return prevText_;
+    }
+
+    const std::string& GetNextText() const
+    {
+        return nextText_;
+    }
+
 private:
 
     Color focusColor_;
@@ -750,6 +765,10 @@ private:
     Color selectorItemFocusBorderColor_;
     Color selectorItemFocusBgColor_;
     Color selectorItemNormalBgColor_;
+
+    std::string lunarSwitch_;
+    std::string prevText_;
+    std::string nextText_;
 };
 
 } // namespace OHOS::Ace

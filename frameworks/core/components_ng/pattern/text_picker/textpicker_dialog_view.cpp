@@ -505,7 +505,7 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
 {
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -586,7 +586,7 @@ void TextPickerDialogView::UpdateConfirmButtonTextLayoutProperty(
 {
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -601,7 +601,7 @@ void TextPickerDialogView::UpdateCancelButtonTextLayoutProperty(
 {
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textCancelLayoutProperty);
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
@@ -617,7 +617,7 @@ void TextPickerDialogView::UpdateForwardButtonTextLayoutProperty(
     auto textForwardLayoutProperty = textForwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textForwardLayoutProperty);
     auto pickerThemeOptionStyle = pickerTheme->GetOptionStyle(true, false);
-    textForwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.next"));
+    textForwardLayoutProperty->UpdateContent(GetDialogAgingButtonText(true));
     textForwardLayoutProperty->UpdateTextColor(pickerThemeOptionStyle.GetTextColor());
     textForwardLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
@@ -630,7 +630,7 @@ void TextPickerDialogView::UpdateBackwardButtonTextLayoutProperty(
     auto textBackwardLayoutProperty = textBackwardNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textBackwardLayoutProperty);
     auto pickerThemeOptionStyle = pickerTheme->GetOptionStyle(true, false);
-    textBackwardLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.prev"));
+    textBackwardLayoutProperty->UpdateContent(GetDialogAgingButtonText(false));
     textBackwardLayoutProperty->UpdateTextColor(pickerThemeOptionStyle.GetTextColor());
     textBackwardLayoutProperty->UpdateFontSize(
         ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize()));
@@ -859,7 +859,7 @@ void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -886,7 +886,7 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     CHECK_NULL_VOID(pickerTheme);
     UpdateForwardButtonMargin(buttonForwardNode, dialogTheme);
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonForwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
+    buttonForwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonForwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -914,7 +914,7 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     CHECK_NULL_VOID(pickerTheme);
     UpdateBackwardButtonMargin(buttonBackwardNode, dialogTheme);
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonBackwardLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.prev"));
+    buttonBackwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(false));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonBackwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
@@ -1646,4 +1646,23 @@ void TextPickerDialogView::GetUserSettingLimit()
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
 }
 
+std::string TextPickerDialogView::GetDialogAgingButtonText(bool isNext)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, "");
+    auto buttonText = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
+    return buttonText;
+}
+
+std::string TextPickerDialogView::GetDialogNormalButtonText(bool isConfirm)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, "");
+    auto buttonText = isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText();
+    return buttonText;
+}
 } // namespace OHOS::Ace::NG

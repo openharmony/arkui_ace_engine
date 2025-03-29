@@ -1841,4 +1841,36 @@ HWTEST_F(ScrollEventTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     pattern_->OnColorConfigurationUpdate();
     EXPECT_EQ(scrollBar_->GetForegroundColor(), Color::FromString("#FFFFFFFF"));
 }
+
+/**
+ * @tc.name: SpringFinalPosition001
+ * @tc.desc: Test SpringAnimation final position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, SpringFinalPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize variables and callback
+     * @tc.expected: Variables initialized successfully.
+     */
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step2. start spring animation.
+     * @tc.expected: final position is -1 when spring animation end.
+     */
+    Offset startOffset = Offset();
+    float dragDelta = 100.f;
+    float velocityDelta = -200;
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(frameNode_, startOffset, dragDelta, velocityDelta);
+    EXPECT_TRUE(Position(dragDelta));
+    EXPECT_TRUE(TickPosition(dragDelta / TICK));
+    EXPECT_TRUE(TickPosition(0));
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    EXPECT_EQ(scrollable->springOffsetProperty_->Get(), -1);
+}
 } // namespace OHOS::Ace::NG

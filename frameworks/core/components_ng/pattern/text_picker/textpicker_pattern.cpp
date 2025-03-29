@@ -156,14 +156,14 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -173,11 +173,11 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
