@@ -38,6 +38,27 @@ namespace OHOS::Ace::NG {
 
 namespace {} // namespace
 
+class MockTextInputClient : public TextInputClient {
+public:
+    MOCK_METHOD(void, UpdateEditingValue, (
+        const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
+};
+
+class MockTextInputConnection : public TextInputConnection {
+public:
+    MockTextInputConnection(const WeakPtr<TextInputClient>& client, const RefPtr<TaskExecutor>& taskExecutor)
+        : TextInputConnection(client, taskExecutor)
+    {}
+
+    MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
+    MOCK_METHOD(void, SetEditingState, (
+        const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+};
+
 class TextFieldPatternTestNine : public TextInputBases {
 public:
 };
@@ -515,5 +536,72 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
     info3.touches_.push_back(tinfo3);
     imageTouchHub->touchEventActuator_->touchEvents_.front()->callback_(info3);
     EXPECT_NE(imageTouchHub->touchEventActuator_->touchEvents_.front(), nullptr);
+}
+
+/**
+ * @tc.name: ProcessOverlayAfterLayout001
+ * @tc.desc: test ProcessOverlayAfterLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, ProcessOverlayAfterLayout001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    OffsetF prevOffset(1, 2);
+    pattern_->ProcessOverlayAfterLayout(prevOffset);
+    EXPECT_TRUE(prevOffset != pattern_->parentGlobalOffset_);
+
+    OffsetF prevOffset1(0, 0);
+    pattern_->ProcessOverlay();
+    pattern_->selectController_->firstHandleInfo_.index = 1;
+    pattern_->selectController_->secondHandleInfo_.index = 2;
+    pattern_->processOverlayDelayTask_ = nullptr;
+    pattern_->needToRefreshSelectOverlay_ = true;
+    pattern_->ProcessOverlayAfterLayout(prevOffset1);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+}
+
+/**
+ * @tc.name: CheckSelectAreaVisible001
+ * @tc.desc: test CheckSelectAreaVisible
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CheckSelectAreaVisible001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto tmpHost = pattern_->GetHost();
+    auto pipeline = tmpHost->GetContextRefPtr();
+    pipeline->safeAreaManager_->keyboardInset_.start = 1;
+    pipeline->safeAreaManager_->keyboardInset_.end = 4;
+    pattern_->selectController_->caretInfo_.rect.y_ = 5;
+    pattern_->selectController_->caretInfo_.rect.width_  = 1;
+    pattern_->selectController_->caretInfo_.rect.x_ = 1;
+    auto ret = pattern_->CheckSelectAreaVisible();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CursorMove001
+ * @tc.desc: test CursorMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, CursorMove001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    CaretMoveIntent direction = static_cast<CaretMoveIntent>(130);
+    int32_t originCaretPosition = pattern_->selectController_->GetCaretIndex();
+    pattern_->CursorMove(direction);
+    EXPECT_TRUE(originCaretPosition == pattern_->selectController_->GetCaretIndex());
 }
 } // namespace OHOS::Ace::NG,
