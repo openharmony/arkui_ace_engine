@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/view_abstract.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2640,5 +2641,188 @@ HWTEST_F(UINodeTestNg, AddFunc_API02, TestSize.Level1)
     testNode->AddChildAfter(node2, node);
     EXPECT_EQ(testNode->children_.size(), 2);
     testNode->Clean(false);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo001
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with JS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with JS.
+     * @tc.expected: InteractionEventBindingInfo.baseEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo002
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with attributeModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with attributeModifier.
+     * @tc.expected: InteractionEventBindingInfo.baseEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo003
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with capi.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with capi.
+     * @tc.expected: InteractionEventBindingInfo.nativeEventRegistered = true.
+     */
+    uiNode->setIsCNode(true);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    ViewAbstract::DisableOnClick(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo004
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with frameNode commomEvens.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with frameNode commomEvens.
+     * @tc.expected: InteractionEventBindingInfo.nodeEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo005
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with buitIn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with buitIn.
+     * @tc.expected: InteractionEventBindingInfo.builtInEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickCallback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
 } // namespace OHOS::Ace::NG
