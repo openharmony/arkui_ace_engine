@@ -3132,6 +3132,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SystemOps_restoreInstanceId(): void
     @ani.unsafe.Quick
+    native static _SystemOps_getResourceId(bundleName: KStringPtr, moduleName: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Quick
     native static _FocusController_requestFocus(key: KStringPtr): void
     @ani.unsafe.Direct
     native static _DrawingCanvas_ctor(pixelmap: KPointer): KPointer
