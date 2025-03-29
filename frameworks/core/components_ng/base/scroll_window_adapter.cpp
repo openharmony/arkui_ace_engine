@@ -67,7 +67,7 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
-        LOGE("current node of %{public}d is nullptr, childrenCount = %{public}d", markIndex_,
+        LOGW("current node of %{public}d is nullptr, childrenCount = %{public}d", markIndex_,
             container_->TotalChildCount());
         return nullptr;
     }
@@ -81,7 +81,6 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
     }
     // 2: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
-        LOGI("no more space left");
         return nullptr;
     }
     return item;
@@ -103,7 +102,7 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     auto* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));
     if (!pendingNode) {
-        LOGE("fail to find pendingNode");
+        LOGW("fail to find pendingNode");
         return nullptr;
     }
     auto index = direction == FillDirection::START ? nodeToIndex_[markItem] - 1 : nodeToIndex_[markItem] + 1;
@@ -133,7 +132,6 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     }
     // 3: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(axis_, size_, index, direction)) {
-        LOGE("no more space left");
         return nullptr;
     }
     return pendingNode;
@@ -163,7 +161,6 @@ bool ScrollWindowAdapter::UpdateSlidingOffset(float delta)
             return false;
         }
     }
-    LOGD("need to load");
     markIndex_ = fillAlgorithm_->GetMarkIndex();
 
     RequestRecompose(markIndex_);
