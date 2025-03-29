@@ -60,6 +60,7 @@ public:
     ~InspectorJsonUtil() = delete;
     static std::shared_ptr<InspectorJsonValue> Create(bool isRoot = true);
     static std::shared_ptr<InspectorJsonValue> CreateArray(bool isRoot = true);
+    static std::unique_ptr<InspectorJsonValue> CreateObject(bool isRoot = true);
 };
 
 } // namespace OHOS::Ace

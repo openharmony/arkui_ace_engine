@@ -3220,6 +3220,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         OnDumpRecorderStart(params);
     } else if (params[0] == "-end") {
         DumpRecorder::GetInstance().Stop();
+    } else if (params[0] == "-injection" && params.size() > PARAM_NUM) {
+#ifndef IS_RELEASE_VERSION
+        OnDumpInjection(params);
+#endif
     }
     return true;
 }
@@ -5953,5 +5957,13 @@ void PipelineContext::FlushMouseEventInVsync()
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;
+}
+
+void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) const
+{
+    auto nodeId = std::stoi(params[PARAM_NUM]);
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnRecvCommand(params[1]);
 }
 } // namespace OHOS::Ace::NG
