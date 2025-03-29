@@ -461,6 +461,11 @@ public:
 
     void CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper);
 
+    void SetIsRoundingMode()
+    {
+        isRoundingMode_ = true;
+    }
+
 protected:
     virtual void UpdateListItemConstraint(
         Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -661,6 +666,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool isRoundingMode_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 

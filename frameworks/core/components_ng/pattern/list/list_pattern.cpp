@@ -625,6 +625,10 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
 
     SetLayoutAlgorithmParams(listLayoutAlgorithm, listLayoutProperty);
 
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        listLayoutAlgorithm->SetIsRoundingMode();
+    }
     return listLayoutAlgorithm;
 }
 
@@ -696,7 +700,12 @@ void ListPattern::SetChainAnimationLayoutAlgorithm(
         }
     }
     if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
-        listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
+        float chainInterval = CHAIN_INTERVAL_DEFAULT.ConvertToPx();
+        auto pipeline = GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            chainInterval = Round(chainInterval);
+        }
+        listLayoutAlgorithm->SetChainInterval(chainInterval);
     }
 }
 
@@ -2539,7 +2548,12 @@ void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 float ListPattern::GetChainDelta(int32_t index) const
 {
     CHECK_NULL_RETURN(chainAnimation_, 0.0f);
-    return chainAnimation_->GetValue(index);
+    float chainDelta = chainAnimation_->GetValue(index);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        chainDelta = Round(chainDelta);
+    }
+    return chainDelta;
 }
 
 void ListPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -2967,6 +2981,10 @@ RefPtr<ListChildrenMainSize> ListPattern::GetOrCreateListChildrenMainSize()
         context->RequestFrame();
     };
     childrenSize_->SetOnDataChange(callback);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
     return childrenSize_;
 }
 
@@ -2983,6 +3001,10 @@ void ListPattern::SetListChildrenMainSize(float defaultSize, const std::vector<f
 {
     childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
     OnChildrenSizeChanged({ -1, -1, -1 }, LIST_UPDATE_CHILD_SIZE);
+    auto pipeline = GetContext();
+    if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+        childrenSize_->SetIsRoundingMode();
+    }
 }
 
 void ListPattern::ResetChildrenSize()
