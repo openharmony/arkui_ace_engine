@@ -668,6 +668,9 @@ void ImagePattern::CreateModifier()
     if (!overlayMod_) {
         overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
+    if (!imagePaintMethod_) {
+        imagePaintMethod_ = MakeRefPtr<ImagePaintMethod>(nullptr);
+    }
 }
 
 bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
