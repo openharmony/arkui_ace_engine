@@ -5453,6 +5453,9 @@ function applyGesture(modifier, component) {
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
