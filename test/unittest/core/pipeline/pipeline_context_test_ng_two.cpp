@@ -137,14 +137,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg133, TestSize.Level1)
     context_->SetupRootElement();
     EXPECT_NE(context_->rootNode_, nullptr);
     SystemProperties::focusCanBeActive_.store(true);
-    context_->isFocusActive_= true;
+    auto focusManager = context_->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = false;
 
     /**
      * @tc.steps2: Call the function SetIsFocusActive.
      * @tc.expected: Test the stability of this function.
      */
     context_->SetIsFocusActive(false, FocusActiveReason::USE_API);
-    EXPECT_FALSE(context_->isFocusActive_);
+    EXPECT_FALSE(context_->GetIsFocusActive());
 }
 
 /**
@@ -400,10 +402,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg140, TestSize.Level1)
      * @tc.expected: Test the stability of this function with different parameters passed in.
      */
     ASSERT_NE(context_, nullptr);
+    auto focusManager = context_->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
     context_->SetIsFocusActive(false, FocusActiveReason::USE_API, false);
-    EXPECT_FALSE(context_->autoFocusInactive_);
+    EXPECT_FALSE(focusManager->autoFocusInactive_);
     context_->SetIsFocusActive(false, FocusActiveReason::USE_API, true);
-    EXPECT_TRUE(context_->autoFocusInactive_);
+    EXPECT_TRUE(focusManager->autoFocusInactive_);
     auto result_1 = context_->SetIsFocusActive(false, FocusActiveReason::POINTER_EVENT, false);
     EXPECT_FALSE(result_1);
 

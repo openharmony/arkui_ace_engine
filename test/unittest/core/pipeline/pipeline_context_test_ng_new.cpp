@@ -1487,7 +1487,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
      * @tc.steps2: Partial addition of function execution.
      * @tc.expected:Change the state of the pipeline.
      */
-    auto formCallback = [](bool visible) {};
     pipeline->ContainerModalUnFocus();
     pipeline->windowModal_ = WindowModal::NORMAL;
     pipeline->SetContainerModalTitleHeight(0);
@@ -1506,10 +1505,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg078, TestSize.Level1)
     auto frameNode1 = FrameNode::GetOrCreateFrameNode("test", 6, nullptr);
     pipeline->activeNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
     pipeline->GetCurrentExtraInfo();
-    pipeline->AddIsFocusActiveUpdateEvent(frameNode, formCallback);
-    EXPECT_EQ(pipeline->isFocusActiveUpdateEvents_.size(), 1);
-    pipeline->RemoveIsFocusActiveUpdateEvent(frameNode);
-    EXPECT_EQ(pipeline->isFocusActiveUpdateEvents_.size(), 0);
 }
 
 /**

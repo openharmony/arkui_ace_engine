@@ -1044,7 +1044,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest002, TestSize.Level1
     */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     pattern->HandleFocusEvent();
     EXPECT_TRUE(pattern->isFocusTextColorSet_);
 }
@@ -1077,7 +1079,9 @@ HWTEST_F(ProgressBuilderTestNg, ProgressHandleFocusEventTest003, TestSize.Level1
     */
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     pattern->focusShadowStyle_ = ShadowStyle::OuterDefaultSM;
     pattern->HandleFocusEvent();
     EXPECT_TRUE(pattern->isFocusTextColorSet_);

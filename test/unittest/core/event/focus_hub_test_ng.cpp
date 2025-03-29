@@ -1300,7 +1300,10 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent004, TestSize.Level1)
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UP;
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     /**
      * @tc.steps5: test keyEvent with keyEvent.code == KeyCode::TV_CONTROL_UP.
@@ -1690,7 +1693,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0032, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     std::list<RefPtr<FocusHub>> focusNodes;

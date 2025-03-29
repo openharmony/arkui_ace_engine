@@ -750,7 +750,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     pattern->HandleBlurEvent();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     ASSERT_TRUE(pipeline->GetIsFocusActive());
     pattern->HandleFocusEvent();
     pattern->isKeyAsync_ = true;
