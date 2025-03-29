@@ -111,7 +111,7 @@ export async function radioClick(radioOperate: radioOperateType, blockStr?: stri
     if (typeof radioOperate.radioClickObj === 'string') {
       await searchRadio(radioOperate.radioClickObj)
     } else {
-      let radio: Array<Component> =
+      let radio: Component[] =
         await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable(true))
       await radio[radioOperate.radioClickObj].click(); // 等待点击操作完成
       await driver.delayMs(2000);
@@ -179,7 +179,7 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 // 根据参数点击ButtonBlock项
 export async function buttonClick(buttonOperate: buttonOperateType) {
   await getToggle(ToggleClick.Open, buttonOperate.toggleClick?.toggleClickObj)
-  let button: Array<Component> =
+  let button: Component[] =
     await driver.findComponents(ON.type('Button').within(ON.id('scroll')).clickable(true))
 
   await button[buttonOperate.buttonClickObj].click()
@@ -259,6 +259,7 @@ export async function Search(category: string, compText: string, listText?: stri
         await scrolls.scrollToTop();
       }
       let title: Component = await scrolls.scrollSearch(ON.text(compText))
+      console.log('---1' + title)
       if (title) {
         titleRect = await title.getBounds();
        await scroll(titleRect.top)
@@ -274,10 +275,10 @@ export async function Search(category: string, compText: string, listText?: stri
 }
 
 //LastCompText为可选参数，当scroller触底之后LastCompText为你要控制toggle的前面一个toggle文本
-export async function getToggle(isClose: ToggleClick = ToggleClick.Open, LastCompText?: string) {
+export async function getToggle(isClose: ToggleClick = ToggleClick.Open, lastCompText?: string) {
   let toggle: Component =
-    await driver.findComponent(LastCompText ?
-    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(LastCompText)) :
+    await driver.findComponent(lastCompText ?
+    ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(lastCompText)) :
     ON.type('Toggle').within(ON.type('Scroll')));
   if (await toggle.isChecked() === (isClose === ToggleClick.Close)) {
     await toggle.click();
@@ -306,6 +307,7 @@ export async function searchRadio(radioName: string) {
       let texts: Component[] = await driver.findComponents(ON.type('Text').within(ON.type('Scroll')))
       for (let i = 0; i < texts.length; i++) {
         if (await texts[i].getText() === radioName) {
+          console.log('---radio' + i)
           await radios[i].click()
           await driver.delayMs(2000)
           break
@@ -339,6 +341,7 @@ export async function searchToggle(toggleName: string, currentText: string, list
   let textSearch: Component = await driver.findComponent(ON.text(titles ? '参数列表' : '基础属性'))
   await textSearch.click()
   if (selection != listText) {
+    console.log('---1')
     let scrolls: Component = await driver.findComponent(ON.id('scroll'));
     let title: Component = await scrolls.scrollSearch(ON.text(listText)
       .isBefore(ON.type('Image'))
@@ -350,8 +353,10 @@ export async function searchToggle(toggleName: string, currentText: string, list
   let scrolls: Component = await driver.findComponent(ON.id('scroll'));
   let title: Component = await scrolls.scrollSearch(ON.text(currentText))
   if (!title) {
+    console.log('---2' + title)
     let titles: Component = await scrolls.scrollSearch(ON.text(toggleName))
     if (titles) {
+      console.log('---3' + titles)
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text(toggleName)))
       await toggle.click();
