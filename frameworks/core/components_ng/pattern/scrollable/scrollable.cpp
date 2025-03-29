@@ -479,9 +479,6 @@ void Scrollable::HandleTouchDown(bool fromcrown)
         StopFrictionAnimation();
     } else if (state_ == AnimationState::SNAP) {
         StopSnapAnimation();
-    } else {
-        // Resets values.
-        currentPos_ = 0.0;
     }
 }
 

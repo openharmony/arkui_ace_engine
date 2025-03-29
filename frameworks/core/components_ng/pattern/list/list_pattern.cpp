@@ -1680,7 +1680,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
-    if (!smooth) {
+    if (!smooth && !lastSnapTargetIndex_.has_value()) {
         StopAnimate();
         targetIndex_.reset();
         targetIndexInGroup_.reset();
