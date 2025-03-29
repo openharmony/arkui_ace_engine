@@ -346,6 +346,7 @@ template("ace_core_source_set") {
     if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
             vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
       sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+      external_deps += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling_deps
     } else {
       sources +=
           [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
@@ -973,6 +974,7 @@ template("ace_core_ng_source_set") {
     if (ace_engine_feature_enable_long_press_gesture_extra_handling && defined(
             vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling)) {
       sources += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling
+      external_deps += vendor_configs.ace_engine_advanced_enable_long_press_gesture_extra_handling_deps
     } else {
       sources +=
           [ "components_ng/gestures/recognizers/gestures_extra_handler.cpp" ]
