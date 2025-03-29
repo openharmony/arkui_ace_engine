@@ -44,7 +44,6 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     }
 }
 
-#ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
     static constexpr uint32_t suggestSize = 100000;
@@ -59,30 +58,19 @@ void CanvasPaintMethod::PushTask(const TaskFunc& task)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-#endif
 
 bool CanvasPaintMethod::HasTask() const
 {
-#ifndef USE_FAST_TASKPOOL
     return !tasks_.empty();
-#else
-    return fastTaskPool_ && !fastTaskPool_->Empty();
-#endif
 }
 
 void CanvasPaintMethod::FlushTask()
 {
-#ifndef USE_FAST_TASKPOOL
     ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
     tasks_.clear();
-#else
-    CHECK_NULL_VOID(fastTaskPool_);
-    fastTaskPool_->Draw(this);
-    fastTaskPool_->Reset();
-#endif
     needMarkDirty_ = true;
 }
 

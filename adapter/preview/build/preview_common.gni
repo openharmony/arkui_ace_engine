@@ -33,7 +33,6 @@ preview_support = true
 model_component_support = false
 window_scene_support = false
 build_for_preview = true
-use_fast_taskpool = false
 
 # js engine common configs
 js_pa_support = false
@@ -114,10 +113,6 @@ if (defined(enable_rosen_backend) && enable_rosen_backend) {
 
 if (defined(window_scene_support) && window_scene_support) {
   defines += [ "WINDOW_SCENE_SUPPORTED" ]
-}
-
-if (use_fast_taskpool) {
-  defines += [ "USE_FAST_TASKPOOL" ]
 }
 
 libace_target = "//foundation/arkui/ace_engine/build:libace_compatible"
