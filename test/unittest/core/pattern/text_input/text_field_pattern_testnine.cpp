@@ -604,4 +604,82 @@ HWTEST_F(TextFieldPatternTestNine, CursorMove001, TestSize.Level0)
     pattern_->CursorMove(direction);
     EXPECT_TRUE(originCaretPosition == pattern_->selectController_->GetCaretIndex());
 }
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test text_field_pattern.cpp OnModifyDone function,
+    case IsGestureSelectingText(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->firstAutoFillContainerNode_.Upgrade());
+}
+
+/**
+ * @tc.name: TriggerAvoidWhenCaretGoesDown001
+ * @tc.desc: test text_field_pattern.cpp TriggerAvoidWhenCaretGoesDown function,
+    case context->UsingCaretAvoidMode() && HasFocus() && textFieldManager,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, TriggerAvoidWhenCaretGoesDown001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto context = host->GetContext();
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
+
+    pattern_->SetLastCaretPos(30);
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
+
+    pattern_->SetLastCaretPos(123);
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 123);
+}
+
+/**
+ * @tc.name: RecordTextInputEvent001
+ * @tc.desc: test text_field_pattern.cpp RecordTextInputEvent function,
+    case isPwdType,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, RecordTextInputEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    for (int i = 0; i < 10; i++)
+    {
+        Recorder::EventRecorder::Get().globalSwitch_[i] = true;
+        Recorder::EventRecorder::Get().eventSwitch_[i] = true;
+    }
+    auto host = pattern_->GetHost();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    auto size = Recorder::EventController::Get().cacheEvents_.size();
+    pattern_->RecordTextInputEvent();
+    EXPECT_TRUE(size == Recorder::EventController::Get().cacheEvents_.size());
+
+    layoutProperty->UpdateTextInputType(TextInputType::DATETIME);
+    Recorder::EventController::Get().hasCached_ = false;
+    auto size2 = Recorder::EventController::Get().cacheEvents_.size();
+    pattern_->RecordTextInputEvent();
+    EXPECT_TRUE(size2 < Recorder::EventController::Get().cacheEvents_.size());
+}
 } // namespace OHOS::Ace::NG,
