@@ -83,6 +83,9 @@ constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
+constexpr int32_t USED_ID_FIND_FLAG = 3;
+constexpr int32_t USED_JSON_PARAM = 4;
+constexpr char PID_FLAG[] = "pidflag";
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -3063,27 +3066,26 @@ void PipelineContext::DumpData(
     const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
     CHECK_NULL_VOID(node);
-    std::string pid = "";
-    for (auto param : params) {
-        if (param.find("-") == std::string::npos) {
-            pid = param;
-            LOGD("Find pid in element dump pipeline");
-        }
-    }
-
     int32_t depth = 0;
     if (IsDynamicRender()) {
         depth = GetDepthFromParams(params);
     }
-    if (pid == "") {
-        LOGD("Dump element without pid");
+    uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    auto paramSize = params.size();
+    auto container = Container::GetContainer(instanceId_);
+    if (container && (container->IsUIExtensionWindow())) {
+        paramSize = std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG));
+    }
+    if (paramSize < used_id_flag) {
         node->DumpTree(depth, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
-    } else {
-        node->DumpTreeById(depth, params[PARAM_NUM], hasJson);
+    }
+    if (paramSize == used_id_flag && !node->DumpTreeById(depth, params[PARAM_NUM], hasJson)) {
+        DumpLog::GetInstance().Print(
+            "There is no id matching the ID in the parameter, please check whether the id is correct.");
     }
 }
 
