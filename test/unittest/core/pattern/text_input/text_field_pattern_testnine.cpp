@@ -540,7 +540,8 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
 
 /**
  * @tc.name: HandleCrossPlatformInBlurEvent001
- * @tc.desc: test HandleCrossPlatformInBlurEvent
+ * @tc.desc: test text_field_pattern.cpp HandleCrossPlatformInBlurEvent function,
+    case HasConnection(),
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, HandleCrossPlatformInBlurEvent001, TestSize.Level0)
@@ -556,12 +557,13 @@ HWTEST_F(TextFieldPatternTestNine, HandleCrossPlatformInBlurEvent001, TestSize.L
     pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
     pattern_->cursorTwinklingTask_.Reset([] {});
     pattern_->HandleCrossPlatformInBlurEvent();
-    EXPECT_TRUE(pattern_->HasConnection());
+    EXPECT_EQ(pattern_->connection_, nullptr);
 }
 
 /**
  * @tc.name: OnKeyEvent001
- * @tc.desc: test OnKeyEvent
+ * @tc.desc: test text_field_pattern.cpp OnKeyEvent function,
+    case RequestKeyboard(false, true, true),
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, OnKeyEvent001, TestSize.Level0)
@@ -584,7 +586,8 @@ HWTEST_F(TextFieldPatternTestNine, OnKeyEvent001, TestSize.Level0)
 
 /**
  * @tc.name: HandleOnCopy001
- * @tc.desc: test HandleOnCopy
+ * @tc.desc: test text_field_pattern.cpp HandleOnCopy function,
+    case value.empty(),
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
@@ -612,7 +615,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
     });
     ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->SetUsingMouse(true);
-    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u""),
+    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u"test123"),
         layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
     pattern->HandleOnCopy(true);
     std::string data_;
@@ -620,12 +623,13 @@ HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
         data_ = data;
     };
     pattern->clipboard_->GetData(getDataCallback, true);
-    EXPECT_TRUE(data_.empty());
+    EXPECT_TRUE(data_ == "test123");
 }
 
 /**
  * @tc.name: HandleTouchEvent001
- * @tc.desc: test HandleTouchEvent
+ * @tc.desc: test text_field_pattern.cpp HandleTouchEvent function,
+    case selectOverlay_->IsTouchAtHandle(info)
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
@@ -662,7 +666,9 @@ HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
 
 /**
  * @tc.name: OnDragDrop001
- * @tc.desc: test OnDragDrop
+ * @tc.desc: test text_field_pattern.cpp OnDragDrop function, 
+    case (gesturePressedCodes.size() == 1) && ((gesturePressedCodes[0] == KeyCode::KEY_CTRL_LEFT) ||
+        (gesturePressedCodes[0] == KeyCode::KEY_CTRL_RIGHT)),
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, OnDragDrop001, TestSize.Level0)
@@ -687,7 +693,9 @@ HWTEST_F(TextFieldPatternTestNine, OnDragDrop001, TestSize.Level0)
 
 /**
  * @tc.name: InitDragDropCallBack001
- * @tc.desc: test InitDragDropCallBack
+ * @tc.desc: test text_field_pattern.cpp InitDragDropCallBack function,
+    case pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host),
+        pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
