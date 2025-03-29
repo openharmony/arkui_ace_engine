@@ -25408,10 +25408,45 @@ Ark_String impl_UrlStyle_getUrl(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUrlStyleAccessor()->getUrl(self);
 }
 KOALA_INTEROP_1(UrlStyle_getUrl, KStringPtr, Ark_NativePointer)
-Ark_NativePointer impl_MutableStyledString_ctor() {
-        return GetAccessors()->getMutableStyledStringAccessor()->ctor();
+Ark_NativePointer impl_MutableStyledString_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_String_ImageAttachment_CustomSpan value_value_buf = {};
+    value_value_buf.selector = value_value_buf_selector;
+    if (value_value_buf_selector == 0) {
+        value_value_buf.selector = 0;
+        value_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else if (value_value_buf_selector == 1) {
+        value_value_buf.selector = 1;
+        value_value_buf.value1 = static_cast<Ark_ImageAttachment>(thisDeserializer.readImageAttachment());
+    }
+    else if (value_value_buf_selector == 2) {
+        value_value_buf.selector = 2;
+        value_value_buf.value2 = static_cast<Ark_CustomSpan>(thisDeserializer.readCustomSpan());
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_String_ImageAttachment_CustomSpan value_value = static_cast<Ark_Union_String_ImageAttachment_CustomSpan>(value_value_buf);;
+    const auto styles_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Array_StyleOptions styles_value_buf = {};
+    styles_value_buf.tag = styles_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (styles_value_buf_runtimeType))
+    {
+        const Ark_Int32 styles_value_buf__length = thisDeserializer.readInt32();
+        Array_StyleOptions styles_value_buf_ = {};
+        thisDeserializer.resizeArray<std::decay<decltype(styles_value_buf_)>::type,
+    std::decay<decltype(*styles_value_buf_.array)>::type>(&styles_value_buf_, styles_value_buf__length);
+        for (int styles_value_buf__i = 0; styles_value_buf__i < styles_value_buf__length; styles_value_buf__i++) {
+            styles_value_buf_.array[styles_value_buf__i] = thisDeserializer.readStyleOptions();
+        }
+        styles_value_buf.value = styles_value_buf_;
+    }
+    Opt_Array_StyleOptions styles_value = styles_value_buf;;
+    return GetAccessors()->getMutableStyledStringAccessor()->ctor((const Ark_Union_String_ImageAttachment_CustomSpan*)&value_value, (const Opt_Array_StyleOptions*)&styles_value);
 }
-KOALA_INTEROP_DIRECT_0(MutableStyledString_ctor, Ark_NativePointer)
+KOALA_INTEROP_2(MutableStyledString_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MutableStyledString_getFinalizer() {
         return GetAccessors()->getMutableStyledStringAccessor()->getFinalizer();
 }
