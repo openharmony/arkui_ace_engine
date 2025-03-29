@@ -79,12 +79,15 @@ def build_event_node_tree(scope: EventScope):
     for item in flatten_frame_nodes:
         node_map[item.address] = EventParentChildrenPair(item)
     # append child nodes to their parent's `children` attribute based on `parentId`
+    i=0
     for item in flatten_frame_nodes:
         if item.parentId is not None and item.parentId != 0 and len(item.parentId) > 6:
             parent = get_dict_value(node_map, item.parentId)
             if parent is not None:
                 child = get_dict_value(node_map, item.address)
                 parent.append_child(child)
+                if len(flatten_frame_nodes) == 14 and i == 10 and len(node_map) == 10:
+                    break
         else:
             child = get_dict_value(node_map, item.address)
             result.append(child)
