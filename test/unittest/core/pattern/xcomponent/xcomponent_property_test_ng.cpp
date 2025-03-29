@@ -1961,10 +1961,10 @@ HWTEST_F(XComponentPropertyTestNg, XComponentNodeTypeToStringTest, TestSize.Leve
     auto xComponentPattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(xComponentPattern);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::TYPE_NODE), "type node");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::TYPE_NODE), "type_node");
     EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::UNKNOWN), "unknown");
     EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::CNODE), "cnode");
-    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::DECLARATIVE_NODE), "declarative node");
+    EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(XComponentNodeType::DECLARATIVE_NODE), "declarative_node");
     EXPECT_EQ(xComponentPattern->XComponentNodeTypeToString(static_cast<XComponentNodeType>(5)), "unknown");
 }
 
