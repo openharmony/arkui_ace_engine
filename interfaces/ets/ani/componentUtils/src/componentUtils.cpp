@@ -48,7 +48,11 @@ static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangl
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "width", rectangle.size.Width())) {
@@ -68,7 +72,11 @@ static ani_object getLocalOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "x", rectangle.localOffset.GetX())) {
@@ -88,7 +96,11 @@ static ani_object getWindowOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "x", rectangle.windowOffset.GetX())) {
@@ -108,7 +120,11 @@ static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     auto x = rectangle.windowOffset.GetX() + rectangle.screenRect.GetOffset().GetX();
@@ -130,7 +146,11 @@ static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::N
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "x", rectangle.translate.x)) {
@@ -153,7 +173,11 @@ static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "x", rectangle.scale.x)) {
@@ -182,7 +206,11 @@ static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &obj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &obj)) {
         return nullptr;
     }
     if (ANI_OK != env->Object_SetPropertyByName_Double(obj, "x", rectangle.rotate.x)) {
@@ -220,7 +248,7 @@ static ani_object getRransform([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rec
     return array;
 }
 
-static ani_object getRectangleById([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_string id)
+static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
 {
     OHOS::Ace::NG::Rectangle rectangle;
     auto delegate = OHOS::Ace::EngineHelper::GetCurrentDelegateSafely();
@@ -236,7 +264,11 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, [[maybe_unused
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_New(cls, nullptr, &rectangleObj)) {
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_New(cls, ctor, &rectangleObj)) {
         return nullptr;
     }
     ani_object size_obj = getSize(env, rectangle);
