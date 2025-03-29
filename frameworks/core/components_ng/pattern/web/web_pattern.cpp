@@ -5576,8 +5576,10 @@ void WebPattern::OnScrollStartRecursive(float position)
     auto it = parentsMap_.find(expectedScrollAxis_);
     CHECK_EQUAL_VOID(it, parentsMap_.end());
     auto parent = it->second;
-    parent.Upgrade()->OnScrollStartRecursive(WeakClaim(this), position);
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive parent OnScrollStartRecursive");
+    if (parent) {
+        parent.Upgrade()->OnScrollStartRecursive(WeakClaim(this), position);
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive parent OnScrollStartRecursive");
+    }
 }
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
