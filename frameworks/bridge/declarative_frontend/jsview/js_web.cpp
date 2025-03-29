@@ -2934,7 +2934,7 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebAllSslErrorEvent, 1>>(
         JSRef<JSFunc>::Cast(args[0]), WebAllSslErrorEventToJSValue);
     auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
@@ -3343,7 +3343,7 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
-                               node = frameNode]() {
+                            node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BindSelectionMenuPreviwer");
             PipelineContext::SetCallBackNode(node);
