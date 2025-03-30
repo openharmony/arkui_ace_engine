@@ -22,6 +22,7 @@
 namespace OHOS::Ace {
 namespace {
 constexpr float ERR_TEXT_COLOR_ALPHA = 0.9f;
+constexpr char DEFAULT_TEXT_CLOCK_CONTENT[] = "";
 } // namespace
 
 class TextClockTheme : public virtual Theme {
@@ -63,13 +64,16 @@ public:
                 LOGW("find pattern of textclock fail");
                 return;
             }
-            theme->textStyleClock_.SetTextColor(
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
+            theme->textStyleClock_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
                     .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, ERR_TEXT_COLOR_ALPHA)));
             theme->textStyleClock_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
-            theme->SetTextParseFailedColor(
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
+            theme->SetTextParseFailedColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
                     .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, ERR_TEXT_COLOR_ALPHA)));
+            theme->SetTextClockYear(pattern->GetAttr<std::string>(PATTERN_TEXT_CLOCK_YEAR, DEFAULT_TEXT_CLOCK_CONTENT));
+            theme->SetTextClockMonth(
+                pattern->GetAttr<std::string>(PATTERN_TEXT_CLOCK_MONTH, DEFAULT_TEXT_CLOCK_CONTENT));
+            theme->SetTextClockDay(pattern->GetAttr<std::string>(PATTERN_TEXT_CLOCK_DAY, DEFAULT_TEXT_CLOCK_CONTENT));
+            theme->SetTextClockWeek(pattern->GetAttr<std::string>(PATTERN_TEXT_CLOCK_WEEK, DEFAULT_TEXT_CLOCK_CONTENT));
         }
     };
 
@@ -90,6 +94,46 @@ public:
         textClockParseFailedColor_ = textColor;
     }
 
+    const std::string& GetTextClockYear() const
+    {
+        return textClockYear_;
+    }
+
+    void SetTextClockYear(std::string textClockYear)
+    {
+        textClockYear_ = textClockYear;
+    }
+
+    const std::string& GetTextClockMonth() const
+    {
+        return textClockMonth_;
+    }
+
+    void SetTextClockMonth(std::string textClockMonth)
+    {
+        textClockMonth_ = textClockMonth;
+    }
+
+    const std::string& GetTextClockDay() const
+    {
+        return textClockDay_;
+    }
+
+    void SetTextClockDay(std::string textClockDay)
+    {
+        textClockDay_ = textClockDay;
+    }
+
+    const std::string& GetTextClockWeek() const
+    {
+        return textClockWeek_;
+    }
+
+    void SetTextClockWeek(std::string textClockWeek)
+    {
+        textClockWeek_ = textClockWeek;
+    }
+
 protected:
     TextClockTheme() = default;
     TextStyle textStyleClock_;
@@ -97,6 +141,10 @@ protected:
 private:
     // For Parse Failed
     Color textClockParseFailedColor_;
+    std::string textClockYear_;
+    std::string textClockMonth_;
+    std::string textClockDay_;
+    std::string textClockWeek_;
 };
 
 } // namespace OHOS::Ace
