@@ -75,7 +75,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
 
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
     } else {
         clip_ = MakeRefPtr<PropertyBool>(false);
