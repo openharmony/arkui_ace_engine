@@ -19,8 +19,6 @@
 
 namespace OHOS::Ace::NG {
 
-using CacheItem = RepeatVirtualScrollCaches::CacheItem;
-
 RepeatVirtualScrollCaches::RepeatVirtualScrollCaches(
     const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
     const std::function<void(uint32_t)>& onCreateNode,
@@ -755,8 +753,24 @@ bool RepeatVirtualScrollCaches::Purge()
         // improvement idea: in addition to distance from range use the
         // scroll direction for selecting these keys
         auto safeDist = std::min(cacheCount, static_cast<uint32_t>(l2Keys.size()));
-        auto itL2Key = std::next(l2Keys.begin(), safeDist);
+        auto itL2Key = l2Keys.begin();
+        auto itDivider = std::next(l2Keys.begin(), safeDist);
 
+        auto greatOrEqualApi18 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN);
+        while (itL2Key != itDivider) {
+            if (greatOrEqualApi18) {
+                // freeze the remaining nodes in L2
+                const auto& uiNodeIter = uiNode4Key.find(*itL2Key);
+                if (uiNodeIter != uiNode4Key.end()) {
+                    TAG_LOGD(AceLogTag::ACE_REPEAT,
+                        "... freezing spare node cache item old key '%{public}s' -> "
+                        "node %{public}s, ttype: '%{public}s'",
+                        itL2Key->c_str(), DumpUINodeWithKey(*itL2Key).c_str(), ttype.c_str());
+                    uiNodeIter->second->SetJSViewActive(false);
+                }
+            }
+            itL2Key++;
+        }
         while (itL2Key != l2Keys.end()) {
             // delete remaining keys
             TAG_LOGD(AceLogTag::ACE_REPEAT,

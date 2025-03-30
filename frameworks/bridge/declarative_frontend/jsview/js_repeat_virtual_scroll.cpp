@@ -48,7 +48,7 @@ enum {
     MIN_PARAM_SIZE = 4,
 };
 
-static bool ParseAndVerifyParams(const JSCallbackInfo& info)
+bool ParseAndVerifyParams(const JSCallbackInfo& info)
 {
     if (info.Length() < MIN_PARAM_SIZE) {
         return false;

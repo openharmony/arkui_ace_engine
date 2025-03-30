@@ -63,7 +63,6 @@ public:
         ids_ = std::move(ids);
     }
 
-    void AfterAddChild();
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,
         std::function<void(int32_t, int32_t)>&& onMoveThrough, std::function<void(int32_t)>&& onDrop);
@@ -75,8 +74,6 @@ public:
 
 private:
     std::list<std::string> ids_;
-    int32_t from_ = -1;
-    int32_t to_ = -1;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;

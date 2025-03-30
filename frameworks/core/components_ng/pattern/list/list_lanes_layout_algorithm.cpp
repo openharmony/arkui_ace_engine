@@ -364,9 +364,6 @@ int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& h
         if (AceType::InstanceOf<RepeatVirtualScrollNode>(parent)) {
             return parent->GetFrameNodeIndex(host);
         }
-        if (AceType::InstanceOf<RepeatVirtualScroll2Node>(parent)) {
-            return parent->GetFrameNodeIndex(host);
-        }
         parent = parent->GetParent();
     }
     return -1;
