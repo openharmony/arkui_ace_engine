@@ -254,10 +254,4 @@ const char LINEAR_SPLIT_CHILD_MIN_SIZE[] = "linear_split_child_min_size";
 
 // stepper attributes
 const char STEPPER_FOCUS_COLOR[] = "stepper_focus_color";
-
-// textclock attributes
-const char PATTERN_TEXT_CLOCK_YEAR[] = "general_year";
-const char PATTERN_TEXT_CLOCK_MONTH[] = "general_month";
-const char PATTERN_TEXT_CLOCK_DAY[] = "general_day";
-const char PATTERN_TEXT_CLOCK_WEEK[] = "general_text_clock_week";
 } // namespace OHOS::Ace
