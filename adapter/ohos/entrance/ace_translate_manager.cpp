@@ -33,6 +33,7 @@ void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> n
 void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
 {
     listenerMap_.erase(nodeId);
+    LOGI("RemoveTranslateListener WebView nodeId:%{public}d", nodeId);
 }
 
 void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
@@ -99,6 +100,8 @@ void UiTranslateManagerImpl::SendTranslateResult(int32_t nodeId, std::string res
         auto pattern = frameNode->GetPattern<NG::WebPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SendTranslateResult(res);
+    } else {
+        LOGW("SendTranslateResult can not find WebView nodeId:%{public}d", nodeId);
     }
 }
 
@@ -124,6 +127,8 @@ void UiTranslateManagerImpl::ResetTranslate(int32_t nodeId)
             auto pattern = frameNode->GetPattern<NG::WebPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->EndTranslate();
+        } else {
+            LOGW("ResetTranslate can not find WebView nodeId:%{public}d", nodeId);
         }
     }
 }
