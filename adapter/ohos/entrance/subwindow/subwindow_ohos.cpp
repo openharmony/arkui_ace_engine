@@ -788,7 +788,6 @@ void SubwindowOhos::HideWindow()
         ContainerModalUnFocus();
     }
     OHOS::Rosen::WMError ret = window_->Hide();
-    detachState_ = MenuWindowState::DETACHING;
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     if (!parentContainer) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
@@ -801,6 +800,9 @@ void SubwindowOhos::HideWindow()
     if (ret != OHOS::Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Hide window failed with errCode: %{public}d", static_cast<int32_t>(ret));
         return;
+    }
+    if (isShowed_) {
+        detachState_ = MenuWindowState::DETACHING;
     }
     isShowed_ = false;
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow successfully.");
