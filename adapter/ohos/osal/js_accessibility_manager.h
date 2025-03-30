@@ -104,7 +104,8 @@ enum class DumpMode {
     NODE,
     HANDLE_EVENT,
     HOVER_TEST,
-    EVENT_TEST
+    EVENT_TEST,
+    INJECT_ACTION_TEST,
 };
 
 struct DumpInfoArgument {
@@ -594,6 +595,7 @@ private:
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
+    void DumpInjectActionTest(const std::vector<std::string>& params);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
