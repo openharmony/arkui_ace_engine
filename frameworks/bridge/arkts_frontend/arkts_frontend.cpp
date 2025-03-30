@@ -43,9 +43,9 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "L@koalaui/arkts-arkui/ArkUIEntry/Application;",
+    "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZL@koalaui/arkts-arkui/UserView/UserView;:L@koalaui/arkts-arkui/ArkUIEntry/Application;",
+    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;:Larkui/ArkUIEntry/Application;",
     "start",
     ":J",
     "enter",
@@ -66,7 +66,7 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
     ani_class appClass;
     if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
-        LOGE("[%{public}s] Cannot load main class %{}s", __func__, KOALA_APP_INFO.className);
+        LOGE("[%{public}s] Cannot load main class %{public}s", __func__, KOALA_APP_INFO.className);
         return;
     }
  
