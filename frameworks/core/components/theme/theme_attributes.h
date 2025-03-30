@@ -256,11 +256,5 @@ extern const char LINEAR_SPLIT_CHILD_MIN_SIZE[];
 
 // stepper attributes
 extern const char STEPPER_FOCUS_COLOR[];
-
-// textclock attributes
-extern const char PATTERN_TEXT_CLOCK_YEAR[];
-extern const char PATTERN_TEXT_CLOCK_MONTH[];
-extern const char PATTERN_TEXT_CLOCK_DAY[];
-extern const char PATTERN_TEXT_CLOCK_WEEK[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
