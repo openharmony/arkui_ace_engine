@@ -1719,6 +1719,21 @@ void TextPattern::RecoverCopyOption()
             copyOption_ = CopyOptions::None;
         }
     }
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (copyOption_ == CopyOptions::None && !textDetectEnable_ && !textLayoutProperty->GetTextOverflow() &&
+        !onClick_ && !longPressEvent_) { // performance prune
+        if (host->IsDraggable() || gestureEventHub->GetTextDraggable()) {
+            gestureEventHub->SetTextDraggable(false);
+            eventHub->SetDefaultOnDragStart(nullptr);
+            if (!eventHub->HasOnDragStart() && IsTextNode()) {
+                gestureEventHub->RemoveDragEvent();
+            }
+        }
+        return;
+    }
     if (copyOption_ == CopyOptions::None) {
         CloseSelectOverlay();
         ResetSelection();
@@ -1729,10 +1744,6 @@ void TextPattern::RecoverCopyOption()
         dataDetectorAdapter_->StartAITask();
     }
     ProcessMarqueeVisibleAreaCallback();
-    auto gestureEventHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
     InitCopyOption(gestureEventHub, eventHub);
     bool enabledCache = eventHub->IsEnabled();
     selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
