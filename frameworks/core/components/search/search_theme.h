@@ -231,7 +231,6 @@ public:
         return searchButtonSpace_;
     }
 
-
     const Dimension& GetIconHeight() const
     {
         return iconHeight_;

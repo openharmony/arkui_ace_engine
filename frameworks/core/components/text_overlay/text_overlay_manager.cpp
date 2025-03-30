@@ -384,12 +384,10 @@ void TextOverlayBase::PaintSelection(RSCanvas* canvas, const Offset& globalOffse
         selectedRect_.emplace_back(selectionRect + globalOffset);
         if (box.direction == Rosen::TextDirection::LTR) {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Left(), selectionRect.Top(), selectionRect.Right(),
-                                 selectionRect.Bottom()),
-                paint);
+                selectionRect.Bottom()), paint);
         } else {
             canvas->drawRect(SkRect::MakeLTRB(selectionRect.Right(), selectionRect.Top(), selectionRect.Left(),
-                                 selectionRect.Bottom()),
-                paint);
+                selectionRect.Bottom()), paint);
         }
     }
     canvas->restore();
