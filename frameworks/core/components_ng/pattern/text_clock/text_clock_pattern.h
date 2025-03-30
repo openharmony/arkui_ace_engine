@@ -149,16 +149,17 @@ private:
     static std::string GetAmPm(int32_t hour);
     static std::string Abstract(const std::string& strSource, const bool& abstractItem);
     static int32_t GetDigitNumber(const std::string& strSource);
-    static std::string GetWeek(const bool& isShortType, const int32_t& week);
+    std::string GetWeek(const bool& isShortType, const int32_t& week);
     static std::string GetMonth(int32_t month);
     std::string SpliceDateTime(const std::vector<std::string>& curDateTime);
-    static std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
+    std::string CheckDateTimeElement(const std::vector<std::string>& curDateTime, const char& element,
         const int32_t& elementIndex, const bool& oneElement);
     std::string AddZeroPrefix(const std::string& strTimeValue);
     std::string RemoveZeroPrefix(const std::string& strTimeValue);
     std::string GetFormat() const;
     float GetHoursWest() const;
     RefPtr<FrameNode> GetTextNode();
+    void GetTextClockWeek(std::string& dateTimeValue);
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
 

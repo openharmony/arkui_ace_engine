@@ -56,10 +56,6 @@ const std::string FORM_FORMAT = "hh:mm";
 const std::string FORM_FORMAT_24H = "HH:mm";
 const std::string FORMAT_12H = "%Y/%m/%d %I:%M:%S";
 const std::string FORMAT_24H = "%Y/%m/%d %H:%M:%S";
-constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
-constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
-constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
-constexpr char TEXTCLOCK_DAY[] = "textclock.day";
 
 enum class TextClockElementIndex {
     CUR_YEAR_INDEX = 0,
@@ -708,7 +704,8 @@ std::string TextClockPattern::GetWeek(const bool& isShortType, const int32_t& we
     if (week < (int32_t)weeks.size()) {
         if ((strcmp(language.c_str(), "zh") == 0) && isShortType) {
             // chinese E/EE/EEE
-            curWeek = Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_WEEK) + weeks[week];
+            GetTextClockWeek(curWeek);
+            curWeek = curWeek + weeks[week];
         } else {
             curWeek = weeks[week];
         }
@@ -754,16 +751,22 @@ std::string TextClockPattern::CheckDateTimeElement(const std::vector<std::string
     std::string curDateTimeElement = "yMdHhmsSaE";
     if (curDateTimeElement.find(element) != std::string::npos) {
         format = curDateTime[elementIndex];
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, format);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, format);
+        auto textClockTheme = pipeline->GetTheme<TextClockTheme>(host->GetThemeScopeId());
+        CHECK_NULL_RETURN(textClockTheme, format);
         if ((oneElement)) {
             switch (element) {
                 case 'y':
-                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_YEAR);
+                    format += textClockTheme->GetTextClockYear();
                     break;
                 case 'M':
-                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_MONTH);
+                    format += textClockTheme->GetTextClockMonth();
                     break;
                 case 'd':
-                    format += Localization::GetInstance()->GetEntryLetters(TEXTCLOCK_DAY);
+                    format += textClockTheme->GetTextClockDay();
                     break;
                 default:
                     break;
@@ -823,6 +826,17 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
         return nullptr;
     }
     return textNode;
+}
+
+void TextClockPattern::GetTextClockWeek(std::string& dateTimeValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textClockTheme = pipeline->GetTheme<TextClockTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textClockTheme);
+    dateTimeValue = textClockTheme->GetTextClockWeek();
 }
 
 void TextClockPattern::OnTimeChange()
