@@ -29,6 +29,7 @@
 // SORTED_SECTION
 #include "base/geometry/dimension.h"
 #include "core/common/ime/text_input_action.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/image/image_event.h"
 #include "core/components/picker/picker_base_component.h"
@@ -40,6 +41,7 @@
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
@@ -242,14 +244,15 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_Resource& dst, const Ark_Length& src);
-    void AssignArkValue(Ark_Resource& dst, const ResourceObject& src);
+    void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
     void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
     void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src);
+    void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src);
     void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src);
     void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src);
-    void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src);
+    void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
