@@ -795,24 +795,25 @@ void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>
 
 void TabsPattern::ReportComponentChangeEvent(int32_t currentIndex)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_VOID(params);
     params->Put("index", currentIndex);
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::Create();
     CHECK_NULL_VOID(json);
     json->Put("cmd", "onTabBarClick");
     json->Put("params", params);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
     auto nodeId = host->GetId();
-    TAG_LOGI(AceLogTag::ACE_TABS, "Report onTabBarClick event, the nodeId:%{public}d, details:%{public}s", nodeId,
-        json->ToString().c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json);
-#endif
+    result->Put("nodeId", nodeId);
+    result->Put("event", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
 
 bool TabsPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)

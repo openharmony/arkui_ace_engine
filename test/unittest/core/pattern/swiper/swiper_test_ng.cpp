@@ -1590,4 +1590,41 @@ HWTEST_F(SwiperTestNg, SwiperPattern_OnDirtyLayoutWrapperSwap003, TestSize.Level
     swiperPattern->OnDirtyLayoutWrapperSwap(dirty, config);
     EXPECT_EQ(swiperPattern->oldIndex_, 2);
 }
+
+/**
+ * @tc.name: OnInjectionEventTest001
+ * @tc.desc: test OnInjectionEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, OnInjectionEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    int32_t currentIndex = 3;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (swiperInfo != nullptr) {
+            currentIndex = swiperInfo->GetIndex();
+        }
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnChange(std::move(onChange));
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string command = R"({"cmd":"changeIndex","params":{"index":2}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 2);
+    command = R"({"cmd":"changeIndex","params":{"index":100}})";
+    pattern->OnInjectionEvent(command);
+    EXPECT_EQ(currentIndex, 0);
+    command = R"({"cmd":"changeIndex","params":{"index":-10}})";
+    EXPECT_EQ(currentIndex, 0);
+    pattern->OnInjectionEvent(command);
+}
 } // namespace OHOS::Ace::NG
