@@ -919,6 +919,9 @@ export struct ImageAnimatorBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
