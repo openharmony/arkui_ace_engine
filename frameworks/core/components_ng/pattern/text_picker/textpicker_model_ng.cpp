@@ -987,8 +987,7 @@ void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, std::op
         CHECK_NULL_VOID(textPickerPattern);
         textPickerPattern->SetDigitalCrownSensitivity(valueOpt.value());
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
-    }
-    else {
+    } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, frameNode);
     }
 }
