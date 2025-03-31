@@ -68,7 +68,7 @@ public:
 
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;
-    virtual void SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)> destroyCallback) = 0;
+    virtual void SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback) = 0;
     virtual void SetConfigurationUpdateCallback(
         const std::function<void(const ConfigurationChange& configurationChange)>&& callback) = 0;
     virtual void AddExtraCustomProperty(const std::string& key, void* extraData) = 0;

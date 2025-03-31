@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ui/view/components/tabs.h"
+#include "ui/view/components/tabs/tabs.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/ace_type.h"

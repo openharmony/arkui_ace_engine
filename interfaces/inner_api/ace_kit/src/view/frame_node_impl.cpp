@@ -248,7 +248,7 @@ int32_t FrameNodeImpl::GetId() const
     return frameNode_->GetId();
 }
 
-void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)> destroyCallback)
+void FrameNodeImpl::SetOnNodeDestroyCallback(const std::function<void(RefPtr<FrameNode>)>& destroyCallback)
 {
     CHECK_NULL_VOID(frameNode_);
     auto frameNode = frameNode_;
