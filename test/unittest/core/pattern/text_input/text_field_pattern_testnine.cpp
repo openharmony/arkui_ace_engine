@@ -685,10 +685,12 @@ HWTEST_F(TextFieldPatternTestNine, OnDragDrop001, TestSize.Level0)
     event->unifiedData_ = AceType::MakeRefPtr<MockUnifiedData>();
     pattern_->OnDragDrop()(event, str);
     EXPECT_EQ(event->GetPressedKeyCodes().size(), 1);
+    EXPECT_FALSE(pattern_->releaseInDrop_);
 
     event->pressedKeyCodes_.push_back(KeyCode::KEY_CAPS_LOCK);
     pattern_->OnDragDrop()(event, str);
     EXPECT_EQ(event->GetPressedKeyCodes().size(), 2);
+    EXPECT_FALSE(pattern_->releaseInDrop_);
 }
 
 /**
