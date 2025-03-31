@@ -31,6 +31,7 @@ class ACE_EXPORT WaterFlowPattern : public ScrollablePattern, public LinearLazyC
     DECLARE_ACE_TYPE(WaterFlowPattern, ScrollablePattern, LinearLazyContainer);
 
 public:
+    void OnAttachToFrameNode() override;
     bool UpdateCurrentOffset(float delta, int32_t source) override;
     bool IsScrollable() const override;
     bool IsAtTop() const override;
