@@ -55,7 +55,8 @@ void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
 }
 Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
-    auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
+    auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(
+        GetMutableStyledStringAccessor()->ctor(nullptr, nullptr));
     CHECK_NULL_RETURN(peer && mutableString, mutableString);
     mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
     return mutableString;

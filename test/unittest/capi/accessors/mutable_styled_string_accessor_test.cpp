@@ -26,10 +26,38 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class MutableStyledStringAccessorTest : public AccessorTestBase<GENERATED_ArkUIMutableStyledStringAccessor,
+template <typename V1>
+class MutableStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIMutableStyledStringAccessor,
     &GENERATED_ArkUIAccessors::getMutableStyledStringAccessor, MutableStyledStringPeer> {
-protected:
+public:
+    static void SetUpTestCase()
+    {
+        AccessorTestCtorBase::SetUpTestCase();
+        SetupTheme<TextTheme>();
+    }
+
+    void SetUp(void) override
+    {
+        AccessorTestCtorBase::SetUp();
+    }
+
+    void* CreatePeerInstance() override
+    {
+        auto value = settings.Union();
+        auto styles = settings.Styles();
+        return accessor_->ctor(value, styles);
+    }
+
+    void TearDown() override
+    {
+        AccessorTestCtorBase::TearDown();
+        settings.TearDown();
+    }
+
     Ark_VMContext vmContext_ = nullptr;
+    Ark_AsyncWorkerPtr asyncWorker_ = nullptr;
+private:
+    V1 settings;
 };
 
 
@@ -41,23 +69,29 @@ struct StyleTestPlan {
 };
 } // namespace
 
+struct StyledStringUnionNull {
+    Ark_Union_String_ImageAttachment_CustomSpan* Union() { return nullptr; }
+    Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown() {}
+};
+using MutableStyledStringAccessorUnionNullTest = MutableStyledStringAccessorTest<StyledStringUnionNull>;
 
 /**
  * @tc.name: ctorTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, ctorTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, ctorTest, TestSize.Level1)
 {
-    auto peer1 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
-    auto peer2 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
-    auto peer3 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
+    auto peer1 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
+    auto peer2 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
+    auto peer3 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
     ASSERT_NE(peer1, nullptr);
     ASSERT_NE(peer2, nullptr);
     ASSERT_NE(peer3, nullptr);
-    EXPECT_EQ(peer1->spanString, nullptr);
-    EXPECT_EQ(peer2->spanString, nullptr);
-    EXPECT_EQ(peer3->spanString, nullptr);
+    ASSERT_NE(peer1->spanString, nullptr);
+    ASSERT_NE(peer2->spanString, nullptr);
+    ASSERT_NE(peer3->spanString, nullptr);
     finalyzer_(peer1);
     finalyzer_(peer2);
     finalyzer_(peer3);
@@ -68,7 +102,7 @@ HWTEST_F(MutableStyledStringAccessorTest, ctorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, replaceStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, replaceStringTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("replaceStringTest");
     const auto start = Converter::ArkValue<Ark_Number>(7);
@@ -84,7 +118,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStringTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, replaceStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, replaceStringInvalidTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("replaceStringInvalidTest");
     const auto start = Converter::ArkValue<Ark_Number>(-1);
@@ -104,7 +138,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStringInvalidTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, insertStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, insertStringTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("insertStringTest");
     const auto start = Converter::ArkValue<Ark_Number>(6);
@@ -119,7 +153,7 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStringTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, insertStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, insertStringInvalidTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("insertStringInvalidTest");
     const auto start = Converter::ArkValue<Ark_Number>(-1);
@@ -137,7 +171,7 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStringInvalidTest, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeStringTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("removeStringTest");
     const auto start = Converter::ArkValue<Ark_Number>(5);
@@ -152,7 +186,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStringTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeStringInvalidTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("removeStringInvalidTest");
     const auto start = Converter::ArkValue<Ark_Number>(-10);
@@ -171,7 +205,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStringInvalidTest, TestSize.Leve
  * The conversion of all spans is checked in the tests for StyledStringAccessor ctor.
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, DISABLED_replaceStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, DISABLED_replaceStyleTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("replaceStyleTest");
     const std::vector<RefPtr<SpanBase>> spans {
@@ -220,7 +254,7 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_replaceStyleTest, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, replaceStyleInvalidTest, TestSize.Level1)
 {
     static constexpr auto start = 0;
     static constexpr auto length = 7;
@@ -268,7 +302,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Leve
  * The conversion of all spans is checked in the tests for StyledStringAccessor ctor.
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, DISABLED_setStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, DISABLED_setStyleTest, TestSize.Level1)
 {
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>("setStyleTest");
     const std::vector<StyleTestPlan> testPlan {
@@ -311,7 +345,7 @@ HWTEST_F(MutableStyledStringAccessorTest, DISABLED_setStyleTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, setStyleInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, setStyleInvalidTest, TestSize.Level1)
 {
     static constexpr auto start = 0;
     static constexpr auto length = 5;
@@ -367,7 +401,7 @@ static RefPtr<MutableSpanString> CreateTestSpans(const std::string& str)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeStyleTest, TestSize.Level1)
 {
     const std::string testString("removeStyleTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -396,7 +430,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStyleTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStyleTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeInvalidStyleTest, TestSize.Level1)
 {
     const std::string testString("removeInvalidStyleTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -420,7 +454,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStyleTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeStylesTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeStylesTest, TestSize.Level1)
 {
     const std::string testString("removeStylesTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -443,7 +477,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStylesTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStylesTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, removeInvalidStylesTest, TestSize.Level1)
 {
     const std::string testString("removeInvalidStylesTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -468,7 +502,7 @@ HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStylesTest, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, clearStylesTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, clearStylesTest, TestSize.Level1)
 {
     const std::string testString("clearStylesTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -484,7 +518,7 @@ HWTEST_F(MutableStyledStringAccessorTest, clearStylesTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, clearInvalidStylesTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, clearInvalidStylesTest, TestSize.Level1)
 {
     const std::string testString("clearInvalidStylesTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -516,7 +550,7 @@ static RefPtr<MutableSpanString> CreateTestSpans2(const std::string& str)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, replaceStyledStringTest, TestSize.Level1)
 {
     const std::string testString1("replaceStyledStringTest");
     const std::string testString2("secondString");
@@ -548,7 +582,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringTest, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, replaceStyledStringInvalidTest, TestSize.Level1)
 {
     const std::string testString("replaceStyledStringInvalidTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -573,7 +607,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringInvalidTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, insertStyledStringTest, TestSize.Level1)
 {
     const std::string testString1("insertStyledStringTest");
     const std::string testString2("Second");
@@ -605,7 +639,7 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, insertStyledStringInvalidTest, TestSize.Level1)
 {
     const std::string testString("insertStyledStringInvalidTest");
     peer_->spanString = CreateTestSpans(testString);
@@ -628,7 +662,7 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringInvalidTest, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, appendStyledStringTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, appendStyledStringTest, TestSize.Level1)
 {
     const std::string testString1("appendStyledStringTest");
     const std::string testString2("End");
@@ -660,7 +694,7 @@ HWTEST_F(MutableStyledStringAccessorTest, appendStyledStringTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MutableStyledStringAccessorTest, appendStyledStringInvalidTest, TestSize.Level1)
+HWTEST_F(MutableStyledStringAccessorUnionNullTest, appendStyledStringInvalidTest, TestSize.Level1)
 {
     const std::string testString("appendStyledStringInvalidTest");
     peer_->spanString = CreateTestSpans(testString);

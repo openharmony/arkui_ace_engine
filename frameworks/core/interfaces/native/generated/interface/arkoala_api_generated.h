@@ -22149,7 +22149,8 @@ typedef struct GENERATED_ArkUIUrlStyleAccessor {
 
 typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
     void (*destroyPeer)(Ark_MutableStyledString peer);
-    Ark_MutableStyledString (*ctor)();
+    Ark_MutableStyledString (*ctor)(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                    const Opt_Array_StyleOptions* styles);
     Ark_NativePointer (*getFinalizer)();
     void (*replaceString)(Ark_VMContext vmContext,
                           Ark_MutableStyledString peer,

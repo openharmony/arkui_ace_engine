@@ -16823,9 +16823,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             delete peerImpl;
         }
     }
-    Ark_MutableStyledString CtorImpl()
+    Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                     const Opt_Array_StyleOptions* styles)
     {
-        return new MutableStyledStringPeer();
+        return new MutableStyledStringPeer(value, styles);
     }
     Ark_NativePointer GetFinalizerImpl()
     {

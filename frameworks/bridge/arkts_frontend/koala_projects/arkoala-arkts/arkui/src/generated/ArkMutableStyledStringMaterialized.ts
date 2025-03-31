@@ -35,14 +35,47 @@ export class MutableStyledStringInternal {
     }
 }
 export class MutableStyledString extends StyledString implements MaterializedBase {
-    static ctor_mutablestyledstring(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._MutableStyledString_ctor()
+    static ctor_mutablestyledstring(value: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>): KPointer {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        if (RuntimeType.STRING == value_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const value_0  = value as string
+            thisSerializer.writeString(value_0)
+        }
+        else if (TypeChecker.isImageAttachment(value, false, false, false, false, false)) {
+            thisSerializer.writeInt8(1 as int32)
+            const value_1  = value as ImageAttachment
+            thisSerializer.writeImageAttachment(value_1)
+        }
+        else if (TypeChecker.isCustomSpan(value)) {
+            thisSerializer.writeInt8(2 as int32)
+            const value_2  = value as CustomSpan
+            thisSerializer.writeCustomSpan(value_2)
+        }
+        let styles_type : int32 = RuntimeType.UNDEFINED
+        styles_type = runtimeType(styles)
+        thisSerializer.writeInt8(styles_type as int32)
+        if ((RuntimeType.UNDEFINED) != (styles_type)) {
+            const styles_value  = styles!
+            thisSerializer.writeInt32(styles_value.length as int32)
+            for (let i = 0; i < styles_value.length; i++) {
+                const styles_value_element : StyleOptions = styles_value[i]
+                thisSerializer.writeStyleOptions(styles_value_element)
+            }
+        }
+        const retval  = ArkUIGeneratedNativeModule._MutableStyledString_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
         return retval
     }
-    constructor() {
+    constructor(value?: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
         super()
-        const ctorPtr : KPointer = MutableStyledString.ctor_mutablestyledstring()
-        this.peer = new Finalizable(ctorPtr, MutableStyledString.getFinalizer())
+        if (((value) !== (undefined)) || ((styles) !== (undefined)))
+        {
+            const ctorPtr : KPointer = MutableStyledString.ctor_mutablestyledstring((value)!, (styles)!)
+            this.peer = new Finalizable(ctorPtr, MutableStyledString.getFinalizer())
+        }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._MutableStyledString_getFinalizer()

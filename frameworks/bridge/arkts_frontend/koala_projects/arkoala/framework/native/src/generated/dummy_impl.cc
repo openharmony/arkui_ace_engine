@@ -34348,11 +34348,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_MutableStyledString CtorImpl()
+    Ark_MutableStyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* value,
+                                     const Opt_Array_StyleOptions* styles)
     {
         if (!needGroupedLog(1))
             return (Ark_MutableStyledString) 100;
         string out("new MutableStyledString(");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, styles);
         out.append(") \n");
         out.append("[return (Ark_MutableStyledString) 100] \n");
         appendGroupedLog(1, out);
