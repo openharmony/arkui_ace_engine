@@ -255,6 +255,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(fontSize);
+    Validator::ValidateNonPercent(fontSize);
     TextModelNG::SetAdaptMinFontSize(frameNode, fontSize);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
@@ -265,6 +266,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(fontSize);
+    Validator::ValidateNonPercent(fontSize);
     TextModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
 }
 
@@ -386,8 +388,12 @@ void MaxLinesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto maxLines = Converter::Convert<int>(*value);
-    TextModelNG::SetMaxLines(frameNode, maxLines);
+    auto maxLines = Converter::Convert<int32_t>(*value);
+    std::optional<uint32_t> convValue;
+    if (maxLines >= 0) {
+        convValue = static_cast<uint32_t>(maxLines);
+    }
+    TextModelNG::SetMaxLines(frameNode, convValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_DecorationStyleInterface* value)
