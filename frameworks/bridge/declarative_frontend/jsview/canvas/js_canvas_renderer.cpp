@@ -1034,7 +1034,7 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
 {
     double limit = 0.0;
     if (info.GetDoubleArg(0, limit)) {
-        if (limit == 0 && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
+        if (NearEqual(limit, 0.0)) {
             return;
         }
         renderingContext2DModel_->SetMiterLimit(limit);
@@ -1110,12 +1110,8 @@ void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
     if (!info.GetStringArg(0, colorStr)) {
         return;
     }
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        if (!ProcessColorFromString(colorStr, color)) {
-            return;
-        }
-    } else {
-        color = Color::FromString(colorStr);
+    if (!ProcessColorFromString(colorStr, color)) {
+        return;
     }
     renderingContext2DModel_->SetShadowColor(color);
 }
@@ -1575,43 +1571,40 @@ void JSCanvasRenderer::JsSetTextBaseline(const JSCallbackInfo& info)
 // measureText(text: string): TextMetrics
 void JSCanvasRenderer::JsMeasureText(const JSCallbackInfo& info)
 {
-    std::string text;
     double density = GetDensity();
-    bool isGetStr = info.GetStringArg(0, text);
-    if (!isGetStr && apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        if (info[0]->IsUndefined()) {
-            text = "undefined";
-            isGetStr = true;
-        } else if (info[0]->IsNull()) {
-            text = "null";
-            isGetStr = true;
-        }
+    if (!Positive(density)) {
+        return;
     }
-    if (Positive(density) && isGetStr) {
-        TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
-        auto vm = info.GetVm();
-        CHECK_NULL_VOID(vm);
-        static const char* keysOfMeasureText[] = { "width", "height", "actualBoundingBoxLeft", "actualBoundingBoxRight",
-            "actualBoundingBoxAscent", "actualBoundingBoxDescent", "hangingBaseline", "alphabeticBaseline",
-            "ideographicBaseline", "emHeightAscent", "emHeightDescent", "fontBoundingBoxAscent",
-            "fontBoundingBoxDescent" };
-        Local<JSValueRef> valuesOfMeasureText[] = { panda::NumberRef::New(vm, (textMetrics.width / density)),
-            panda::NumberRef::New(vm, (textMetrics.height / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxLeft / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxRight / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxDescent / density)),
-            panda::NumberRef::New(vm, (textMetrics.hangingBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.alphabeticBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.ideographicBaseline / density)),
-            panda::NumberRef::New(vm, (textMetrics.emHeightAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.emHeightDescent / density)),
-            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxAscent / density)),
-            panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxDescent / density)) };
-        auto obj = panda::ObjectRef::NewWithNamedProperties(
-            vm, ArraySize(keysOfMeasureText), keysOfMeasureText, valuesOfMeasureText);
-        info.SetReturnValue(JsiRef<JsiObject>(JsiObject(obj)));
+    std::string text;
+    if (info[0]->IsUndefined()) { // text is undefined
+        text = "undefined";
+    } else if (info[0]->IsNull()) { // text is null
+        text = "null";
+    } else if (!info.GetStringArg(0, text)) { // text is not string
+        return;
     }
+    TextMetrics textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+    auto vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    static const char* keysOfMeasureText[] = { "width", "height", "actualBoundingBoxLeft", "actualBoundingBoxRight",
+        "actualBoundingBoxAscent", "actualBoundingBoxDescent", "hangingBaseline", "alphabeticBaseline",
+        "ideographicBaseline", "emHeightAscent", "emHeightDescent", "fontBoundingBoxAscent", "fontBoundingBoxDescent" };
+    Local<JSValueRef> valuesOfMeasureText[] = { panda::NumberRef::New(vm, (textMetrics.width / density)),
+        panda::NumberRef::New(vm, (textMetrics.height / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxLeft / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxRight / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.actualBoundingBoxDescent / density)),
+        panda::NumberRef::New(vm, (textMetrics.hangingBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.alphabeticBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.ideographicBaseline / density)),
+        panda::NumberRef::New(vm, (textMetrics.emHeightAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.emHeightDescent / density)),
+        panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxAscent / density)),
+        panda::NumberRef::New(vm, (textMetrics.fontBoundingBoxDescent / density)) };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(
+        vm, ArraySize(keysOfMeasureText), keysOfMeasureText, valuesOfMeasureText);
+    info.SetReturnValue(JsiRef<JsiObject>(JsiObject(obj)));
 }
 
 // fillRect(x: number, y: number, w: number, h: number): void
