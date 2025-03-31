@@ -424,6 +424,11 @@ bool TouchEvent::IsPenHoverEvent() const
                                                 (type == TouchType::MOVE && NearZero(force)));
 }
 
+int32_t TouchEvent::GetTargetDisplayId() const
+{
+    return targetDisplayId;
+}
+
 void TouchCallBackInfo::SetScreenX(float screenX)
 {
     screenX_ = screenX;

@@ -114,6 +114,11 @@ struct DragPointerEvent final : public PointerEvent {
     {
         pressedKeyCodes = keyCodes;
     }
+
+    int32_t GetTargetDisplayId() const
+    {
+        return targetWindowId;
+    }
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_POINTER_EVENT_H
