@@ -260,7 +260,7 @@ export struct BindContentCoverBootcamp {
         })
 
         ColorBlock({
-          title: '背景色',
+          title: 'backGroundColor',
           isEnabled: this.enableBackgroundColorColor,
           color: this.backgroundColorColor,
         })
