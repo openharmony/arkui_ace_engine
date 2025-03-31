@@ -23,6 +23,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -36,7 +37,6 @@ namespace OHOS::Ace {
 namespace NG {
 class TextPattern;
 class RichEditorPattern;
-class FrameNode;
 }
 
 struct AISpan {
@@ -56,7 +56,10 @@ public:
     DataDetectorAdapter() = default;
     ~DataDetectorAdapter() override = default;
 
-    RefPtr<NG::FrameNode> GetHost() const;
+    RefPtr<NG::FrameNode> GetHost() const
+    {
+        return frameNode_.Upgrade();
+    }
     void SetTextDetectResult(const TextDataDetectResult result)
     {
         textDetectResult_ = result;
