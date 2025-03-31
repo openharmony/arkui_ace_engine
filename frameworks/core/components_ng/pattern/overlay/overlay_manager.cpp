@@ -6642,9 +6642,14 @@ void OverlayManager::RemoveFilterAnimation()
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     AnimationOption option;
-    option.SetOnFinishEvent([weak = WeakClaim(this)] {
+    option.SetOnFinishEvent([weak = WeakClaim(this), filterId = filterNode->GetId()] {
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
+        auto filterNode = overlayManager->GetFilterColumnNode();
+        if (filterNode && filterNode->GetId() != filterId) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "no more removing the non-existing filter node");
+            return;
+        }
         if (!overlayManager->hasFilterActived) {
             overlayManager->RemoveFilter();
         }
