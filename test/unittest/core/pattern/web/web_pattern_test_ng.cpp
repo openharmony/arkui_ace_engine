@@ -1150,11 +1150,16 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     GestureEvent event;
     event.SetScale(-2);
     webPattern->preScale_ = 0;
-    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    webPattern->preScale_ = 1;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    event.SetScale(1);
+    webPattern->preScale_ = 0;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1179,14 +1184,13 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
-    webPattern->zoomStatus_ = 3;
+    event.SetScale(1);
+    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-    webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = true;
+    webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1211,11 +1215,10 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
+    event.SetScale(1);
     webPattern->zoomStatus_ = 3;
     webPattern->zoomErrorCount_ = 1;
     webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureChange(event);
     EXPECT_EQ(webPattern->zoomErrorCount_, 0);
