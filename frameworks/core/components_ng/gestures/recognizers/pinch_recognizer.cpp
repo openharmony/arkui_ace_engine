@@ -124,17 +124,9 @@ void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch axis start, state: %{public}d", event.touchEventId,
         refereeState_);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        if (refereeState_ == RefereeState::READY &&
-            (NearEqual(event.pinchAxisScale, 1.0) ||
-                (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
-            scale_ = 1.0f;
-            pinchCenter_ = Offset(event.x, event.y);
-            refereeState_ = RefereeState::DETECTING;
-        }
-        return;
-    }
-    if (refereeState_ == RefereeState::READY && (NearEqual(event.pinchAxisScale, 1.0) || IsCtrlBeingPressed(event))) {
+    if (refereeState_ == RefereeState::READY &&
+        (NearEqual(event.pinchAxisScale, 1.0) ||
+            (IsCtrlBeingPressed(event) && event.sourceTool != SourceTool::TOUCHPAD))) {
         scale_ = 1.0f;
         pinchCenter_ = Offset(event.x, event.y);
         refereeState_ = RefereeState::DETECTING;
@@ -526,18 +518,9 @@ RefPtr<GestureSnapshot> PinchRecognizer::Dump() const
 
 bool PinchRecognizer::ProcessAxisAbnormalCondition(const AxisEvent& event)
 {
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        if (NearZero(event.pinchAxisScale) &&
-            (!IsCtrlBeingPressed(event) || event.sourceTool == SourceTool::TOUCHPAD)) {
-            if (ProcessAxisReject()) {
-                return true;
-            }
-        }
-    } else {
-        if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed(event)) {
-            if (ProcessAxisReject()) {
-                return true;
-            }
+    if (NearZero(event.pinchAxisScale) && (!IsCtrlBeingPressed(event) || event.sourceTool == SourceTool::TOUCHPAD)) {
+        if (ProcessAxisReject()) {
+            return true;
         }
     }
     return false;
