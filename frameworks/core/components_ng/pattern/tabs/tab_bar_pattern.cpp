@@ -382,7 +382,7 @@ void TabBarPattern::SetTabBarFinishCallback()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         // always swipe with physical curve, ignore animationDuration
-        pattern->SetSwiperCurve(TabBarPhysicalCurve);
+        pattern->SetSwiperCurve(pattern->GetAnimationCurve(TabBarPhysicalCurve));
 
         if (pattern->scrollableEvent_) {
             auto scrollable = pattern->scrollableEvent_->GetScrollable();
@@ -997,7 +997,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
 
-    SetSwiperCurve(DurationCubicCurve);
+    SetSwiperCurve(GetAnimationCurve(DurationCubicCurve));
     UpdateAnimationDuration();
     auto duration = GetAnimationDuration().value_or(0);
     if (tabsPattern->GetIsCustomAnimation()) {
@@ -1488,7 +1488,7 @@ void TabBarPattern::HandleClick(SourceType type, int32_t index)
         index >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-    SetSwiperCurve(DurationCubicCurve);
+    SetSwiperCurve(GetAnimationCurve(DurationCubicCurve));
 
     TabBarClickEvent(index);
     if (!ContentWillChange(layoutProperty->GetIndicatorValue(0), index)) {
@@ -2560,7 +2560,7 @@ void TabBarPattern::StopTranslateAnimation(bool isImmediately)
 
 void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targetIndex)
 {
-    auto curve = DurationCubicCurve;
+    auto curve = GetAnimationCurve(DurationCubicCurve);
     StopTranslateAnimation();
     SetSwiperCurve(curve);
     auto pipelineContext = GetContext();
@@ -3328,6 +3328,8 @@ void TabBarPattern::DumpAdvanceInfo()
     touching_ ? DumpLog::GetInstance().AddDesc("touching:true") : DumpLog::GetInstance().AddDesc("touching:false");
     isMaskAnimationByCreate_ ? DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:true")
                              : DumpLog::GetInstance().AddDesc("isMaskAnimationByCreate:false");
+    animationCurve_ ? DumpLog::GetInstance().AddDesc("animationCurve:" + animationCurve_->ToString())
+                    : DumpLog::GetInstance().AddDesc("animationCurve:null");
     animationDuration_.has_value()
         ? DumpLog::GetInstance().AddDesc("animationDuration:" + std::to_string(animationDuration_.value()))
         : DumpLog::GetInstance().AddDesc("animationDuration:null");
@@ -3442,11 +3444,22 @@ void TabBarPattern::SetRegionInfo(std::unique_ptr<JsonValue>& json)
     }
 }
 
+void TabBarPattern::SetAnimationCurve(const RefPtr<Curve>& curve)
+{
+    animationCurve_ = curve;
+}
+
+const RefPtr<Curve> TabBarPattern::GetAnimationCurve(const RefPtr<Curve>& defaultCurve) const
+{
+    return animationCurve_ ? animationCurve_ : defaultCurve;
+}
+
 void TabBarPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("isRTL", isRTL_);
     json->Put("touching", touching_);
     json->Put("isMaskAnimationByCreate", isMaskAnimationByCreate_);
+    json->Put("animationCurve", animationCurve_ ? animationCurve_->ToString().c_str() : "null");
     json->Put("animationDuration",
         animationDuration_.has_value() ? std::to_string(animationDuration_.value()).c_str() : "null");
     json->Put("isTouchingSwiper", isTouchingSwiper_);

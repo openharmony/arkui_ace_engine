@@ -3476,6 +3476,7 @@ struct ArkUITabsModifier {
     void (*setTabBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setTabBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setBarAdaptiveHeight)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setAnimationCurve)(ArkUINodeHandle node, ArkUI_Uint32 type, ArkUI_CharPtr curveChar, void* curveCallback);
     void (*setAnimationDuration)(ArkUINodeHandle node, ArkUI_Float32 duration);
     void (*resetTabBarMode)(ArkUINodeHandle node);
     void (*resetScrollableBarModeOptions)(ArkUINodeHandle node);
@@ -3493,6 +3494,7 @@ struct ArkUITabsModifier {
     void (*resetTabBarWidth)(ArkUINodeHandle node);
     void (*resetTabBarHeight)(ArkUINodeHandle node);
     void (*resetBarAdaptiveHeight)(ArkUINodeHandle node);
+    void (*resetAnimationCurve)(ArkUINodeHandle node);
     void (*resetAnimationDuration)(ArkUINodeHandle node);
     void (*setTabClip)(ArkUINodeHandle node, ArkUI_Bool clipEdge);
     void (*resetTabClip)(ArkUINodeHandle node);

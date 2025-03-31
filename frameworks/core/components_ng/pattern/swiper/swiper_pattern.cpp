@@ -341,6 +341,19 @@ void SwiperPattern::ResetOnForceMeasure()
     MarkDirtyNodeSelf();
 }
 
+const RefPtr<Curve> SwiperPattern::GetTabBarAnimationCurve(const RefPtr<Curve>& curve)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, curve);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, curve);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, curve);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(tabBarPattern, curve);
+    return tabBarPattern->GetAnimationCurve(curve);
+}
+
 void SwiperPattern::UpdateTabBarIndicatorCurve()
 {
     CHECK_NULL_VOID(swiperController_);
@@ -352,7 +365,7 @@ void SwiperPattern::UpdateTabBarIndicatorCurve()
         auto props = host->GetPaintProperty<SwiperPaintProperty>();
         CHECK_NULL_VOID(props);
         auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-        props->UpdateCurve(curve);
+        props->UpdateCurve(swiperPattern->GetTabBarAnimationCurve(curve));
     };
     swiperController_->SetUpdateCubicCurveCallback(std::move(updateCubicCurveCallback));
 }

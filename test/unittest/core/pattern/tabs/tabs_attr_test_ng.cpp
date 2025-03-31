@@ -1731,4 +1731,82 @@ HWTEST_F(TabsAttrTestNg, CachedMaxCount003, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(swiperPattern_->itemsNeedClean_.size(), 0);
 }
+
+/**
+ * @tc.name: AnimationCurve001
+ * @tc.desc: test animationCurve attribute.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, AnimationCurve001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    ASSERT_NE(Curves::FRICTION, nullptr);
+    ASSERT_NE(Curves::LINEAR, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step1. test SetAnimationCurve(const RefPtr<Curve>&) function.
+     */
+    model.SetAnimationCurve(Curves::FRICTION);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->animationCurve_));
+
+    model.SetAnimationCurve(nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    model.SetAnimationCurve(Curves::LINEAR);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->animationCurve_));
+
+    model.SetAnimationCurve(nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetAnimationCurve(FrameNode*, const RefPtr<Curve>&) function.
+     */
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::FRICTION);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->animationCurve_));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), Curves::LINEAR);
+    EXPECT_NE(tabBarPattern_->animationCurve_, nullptr);
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->animationCurve_));
+
+    TabsModelNG::SetAnimationCurve(Referenced::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+}
+
+/**
+ * @tc.name: GetAnimationCurve001
+ * @tc.desc: test GetAnimationCurve function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, GetAnimationCurve001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    ASSERT_NE(Curves::FRICTION, nullptr);
+    ASSERT_NE(Curves::LINEAR, nullptr);
+    ASSERT_NE(tabBarPattern_, nullptr);
+
+    EXPECT_EQ(tabBarPattern_->animationCurve_, nullptr);
+
+    /**
+     * @tc.steps: step1. test GetAnimationCurve(const RefPtr<Curve>&) function.
+     */
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = Curves::LINEAR;
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = nullptr;
+    EXPECT_TRUE(Curves::FRICTION->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+
+    tabBarPattern_->animationCurve_ = Curves::LINEAR;
+    EXPECT_TRUE(Curves::LINEAR->IsEqual(tabBarPattern_->GetAnimationCurve(Curves::FRICTION)));
+}
 } // namespace OHOS::Ace::NG

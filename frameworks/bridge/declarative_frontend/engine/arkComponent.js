@@ -31973,6 +31973,10 @@ class ArkTabsComponent extends ArkComponent {
     }
     return this;
   }
+  animationCurve(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsAnimationCurveModifier.identity, TabsAnimationCurveModifier, value);
+    return this;
+  }
   animationDuration(value) {
     modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
@@ -32199,6 +32203,43 @@ class TabsVerticalModifier extends ModifierWithKey {
   }
 }
 TabsVerticalModifier.identity = Symbol('vertical');
+class TabsAnimationCurveModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetAnimationCurve(node);
+    }
+    else {
+      if (typeof this.value === 'number') {
+        const curveMap = {
+          [0]: 'linear',
+          [1]: 'ease',
+          [2]: 'ease-in',
+          [3]: 'ease-out',
+          [4]: 'ease-in-out',
+          [5]: 'fast-out-slow-in',
+          [6]: 'linear-out-slow-in',
+          [7]: 'fast-out-linear-in',
+          [8]: 'extreme-deceleration',
+          [9]: 'sharp',
+          [10]: 'rhythm',
+          [11]: 'smooth',
+          [12]: 'friction'
+        };
+        if (this.value in curveMap) {
+          this.value = curveMap[this.value];
+        }
+        else {
+          this.value = this.value.toString();
+        }
+      }
+      getUINativeModule().tabs.setAnimationCurve(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TabsAnimationCurveModifier.identity = Symbol('tabsAnimationCurve');
 class AnimationDurationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

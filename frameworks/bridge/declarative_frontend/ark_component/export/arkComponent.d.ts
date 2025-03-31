@@ -1885,6 +1885,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barMode(value: BarMode, options?: ScrollableBarModeOptions | undefined): TabsAttribute;
     barWidth(value: Length): TabsAttribute;
     barHeight(value: Length): TabsAttribute;
+    animationCurve(value: Curve | ICurve): TabsAttribute;
     animationDuration(value: number): TabsAttribute;
     animationMode(value: AnimationMode): TabsAttribute;
     onChange(event: (index: number) => void): TabsAttribute;

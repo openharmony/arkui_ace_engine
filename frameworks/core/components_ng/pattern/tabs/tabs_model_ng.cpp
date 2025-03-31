@@ -370,6 +370,11 @@ void TabsModelNG::SetScrollable(bool scrollable)
     tabPattern->SetIsDisableSwipe(!scrollable);
 }
 
+void TabsModelNG::SetAnimationCurve(const RefPtr<Curve>& curve)
+{
+    SetAnimationCurve(ViewStackProcessor::GetInstance()->GetMainFrameNode(), curve);
+}
+
 void TabsModelNG::SetAnimationDuration(float duration)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -922,6 +927,21 @@ void TabsModelNG::SetTabBarHeight(FrameNode* frameNode, const Dimension& tabBarH
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
     }
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
+}
+
+void TabsModelNG::SetAnimationCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetAnimationCurve(curve);
+    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
+    CHECK_NULL_VOID(swiperPaintProperty);
+    swiperPaintProperty->UpdateCurve(tabBarPattern->GetAnimationCurve(TabBarPhysicalCurve));
 }
 
 void TabsModelNG::SetAnimationDuration(FrameNode* frameNode, float duration)
