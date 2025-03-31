@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include "generated/test_fixtures.h"
+#include "generated/type_helpers.h"
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
@@ -30,6 +31,7 @@
 
 namespace OHOS::Ace::NG {
 using namespace Converter;
+using namespace TypeHelper;
 
 namespace TestConst::SecurityComponentMethod {
 const auto ATTRIBUTE_POSITION_NAME = "position";

@@ -17,15 +17,21 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DisappearSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_DisappearSymbolEffect peer)
 {
+    delete peer;
 }
 Ark_DisappearSymbolEffect CtorImpl(const Opt_EffectScope* scope)
 {
-    return {};
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
+    return new DisappearSymbolEffectPeer(optScope);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,11 +39,15 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectScope GetScopeImpl(Ark_DisappearSymbolEffect peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_EffectScope>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_DisappearSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // DisappearSymbolEffectAccessor
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor()
@@ -51,5 +61,4 @@ const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAcce
     };
     return &DisappearSymbolEffectAccessorImpl;
 }
-
 }

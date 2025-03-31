@@ -1854,4 +1854,37 @@ void AssignCast(std::optional<DragBehavior>& dst, const Ark_DragBehavior& src)
         }
     }
 }
+template<>
+void AssignCast(std::optional<OHOS::Ace::ScopeType>& dst, const Ark_EffectScope& src)
+{
+    switch (src) {
+        case ARK_EFFECT_SCOPE_LAYER: dst = OHOS::Ace::ScopeType::LAYER; break;
+        case ARK_EFFECT_SCOPE_WHOLE: dst = OHOS::Ace::ScopeType::WHOLE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_EffectScope: %{public}d", src);
+        }
+    }
+}
+template<>
+void AssignCast(std::optional<OHOS::Ace::CommonSubType>& dst, const Ark_EffectDirection& src)
+{
+    switch (src) {
+        case ARK_EFFECT_DIRECTION_DOWN: dst = OHOS::Ace::CommonSubType::DOWN; break;
+        case ARK_EFFECT_DIRECTION_UP: dst = OHOS::Ace::CommonSubType::UP; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_EffectDirection: %{public}d", src);
+        }
+    }
+}
+template<>
+void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillStyle& src)
+{
+    switch (src) {
+        case ARK_EFFECT_FILL_STYLE_CUMULATIVE: dst = OHOS::Ace::FillStyle::CUMULATIVE; break;
+        case ARK_EFFECT_FILL_STYLE_ITERATIVE: dst = OHOS::Ace::FillStyle::ITERATIVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_EffectFillStyle: %{public}d", src);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

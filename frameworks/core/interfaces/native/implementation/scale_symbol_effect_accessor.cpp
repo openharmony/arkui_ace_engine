@@ -15,17 +15,29 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/symbol_effect_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScaleSymbolEffectAccessor {
 void DestroyPeerImpl(Ark_ScaleSymbolEffect peer)
 {
+    CHECK_NULL_VOID(peer);
+    delete peer;
 }
 Ark_ScaleSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                const Opt_EffectDirection* direction)
 {
-    return {};
+    std::optional<OHOS::Ace::ScopeType> optScope;
+    std::optional<OHOS::Ace::CommonSubType> optDirection;
+    if (scope) {
+        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    }
+    if (direction) {
+        optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
+    }
+    return new ScaleSymbolEffectPeer(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -33,19 +45,27 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Opt_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_EffectScope>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
+    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_EffectDirection>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectDirection>(peer->direction);
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
+    CHECK_NULL_VOID(peer);
+    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(direction);
 }
 } // ScaleSymbolEffectAccessor
 const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
@@ -61,5 +81,4 @@ const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     };
     return &ScaleSymbolEffectAccessorImpl;
 }
-
 }
