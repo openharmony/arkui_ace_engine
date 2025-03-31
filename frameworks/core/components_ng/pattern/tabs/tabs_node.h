@@ -160,6 +160,8 @@ public:
 
 private:
     bool Scrollable() const;
+    const RefPtr<Curve> GetAnimationCurve(const RefPtr<Curve>& defaultCurve) const;
+    std::string GetAnimationCurveStr(const RefPtr<Curve>& defaultCurve) const;
     int32_t GetAnimationDuration() const;
     TabBarMode GetTabBarMode() const;
     Dimension GetBarWidth() const;

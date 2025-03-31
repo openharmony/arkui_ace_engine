@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
+#include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -85,6 +86,38 @@ JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventIn
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
 }
 
+RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
+{
+    RefPtr<Curve> curve;
+    if (!info[0]->IsObject()) {
+        return curve;
+    }
+    auto object = JSRef<JSObject>::Cast(info[0]);
+    std::function<float(float)> customCallBack = nullptr;
+    JSRef<JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
+    if (onCallBack->IsFunction()) {
+        RefPtr<JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            ContainerScope scope(id);
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+            return resultValue;
+        };
+    }
+    auto jsCurveString = object->GetProperty("__curveString");
+    if (jsCurveString->IsString()) {
+        auto aniTimFunc = jsCurveString->ToString();
+        if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
+            curve = CreateCurve(customCallBack);
+        } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            curve = CreateCurve(aniTimFunc, false);
+        }
+    }
+    return curve;
+}
 } // namespace
 
 void JSTabs::SetOnChange(const JSCallbackInfo& info)
@@ -450,6 +483,17 @@ void JSTabs::SetHeight(const JSCallbackInfo& info)
 void JSTabs::SetIndex(int32_t index)
 {
     TabsModel::GetInstance()->SetIndex(index);
+}
+
+void JSTabs::SetAnimationCurve(const JSCallbackInfo& info)
+{
+    RefPtr<Curve> curve;
+    if (info[0]->IsString()) {
+        curve = CreateCurve(info[0]->ToString(), false);
+    } else if (info[0]->IsObject()) {
+        curve = CreateAnimationCurveByObject(info);
+    }
+    TabsModel::GetInstance()->SetAnimationCurve(curve);
 }
 
 void JSTabs::SetAnimationDuration(const JSCallbackInfo& info)
@@ -826,6 +870,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("width", &JSTabs::SetWidth);
     JSClass<JSTabs>::StaticMethod("height", &JSTabs::SetHeight);
     JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
+    JSClass<JSTabs>::StaticMethod("animationCurve", &JSTabs::SetAnimationCurve);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);

@@ -48,6 +48,51 @@ constexpr int32_t DEFAULT_COLUMN = -1;
 constexpr int REMAINDER = 2;
 constexpr int TABBARMODE_SCROLLABLE = 1;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
+constexpr int ANIMATION_CURVE_TYPE_DEFAULT = 0;
+constexpr int ANIMATION_CURVE_TYPE_STR = 1;
+constexpr int ANIMATION_CURVE_TYPE_FUNC = 2;
+namespace {
+void GetAnimationCurveInfo(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Uint32& type, std::string& aniTimFunc,
+    std::function<float(float)>& customCallBack)
+{
+    type = ANIMATION_CURVE_TYPE_DEFAULT;
+    aniTimFunc.clear();
+    customCallBack = nullptr;
+    CHECK_NULL_VOID(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (!valueArg->IsObject(vm)) {
+        return;
+    }
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto object = Framework::JSRef<Framework::JSObject>::Cast(info[TABS_ARG_INDEX_1]);
+    Framework::JSRef<Framework::JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
+    if (onCallBack->IsFunction()) {
+        RefPtr<Framework::JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            Framework::JSRef<Framework::JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
+            ContainerScope scope(id);
+            Framework::JSRef<Framework::JSVal> params[1];
+            params[0] = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+            return resultValue;
+        };
+    }
+    auto jsCurveString = object->GetProperty("__curveString");
+    if (jsCurveString->IsString()) {
+        aniTimFunc = jsCurveString->ToString();
+        if (aniTimFunc == DOM_ANIMATION_TIMING_FUNCTION_CUSTOM && customCallBack) {
+            type = ANIMATION_CURVE_TYPE_FUNC;
+        } else if (aniTimFunc != DOM_ANIMATION_TIMING_FUNCTION_CUSTOM) {
+            type = ANIMATION_CURVE_TYPE_STR;
+        }
+    }
+}
+} // namespace
+
 ArkUINativeModuleValue TabsBridge::SetTabBarMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -840,6 +885,42 @@ ArkUINativeModuleValue TabsBridge::ResetBarAdaptiveHeight(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetBarAdaptiveHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetAnimationCurve(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(TABS_ARG_INDEX_1);
+    if (valueArg->IsString(vm)) {
+        std::string curve = valueArg->ToString(vm)->ToString(vm);
+        GetArkUINodeModifiers()->getTabsModifier()->setAnimationCurve(nativeNode,
+            ANIMATION_CURVE_TYPE_STR, curve.c_str(), nullptr);
+    } else if (valueArg->IsObject(vm)) {
+        ArkUI_Uint32 type = ANIMATION_CURVE_TYPE_DEFAULT;
+        std::string aniTimFunc;
+        std::function<float(float)> customCallBack = nullptr;
+        GetAnimationCurveInfo(runtimeCallInfo, type, aniTimFunc, customCallBack);
+        GetArkUINodeModifiers()->getTabsModifier()->setAnimationCurve(nativeNode,
+            type, aniTimFunc.c_str(), reinterpret_cast<void*>(&customCallBack));
+    } else {
+        GetArkUINodeModifiers()->getTabsModifier()->resetAnimationCurve(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetAnimationCurve(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetAnimationCurve(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
