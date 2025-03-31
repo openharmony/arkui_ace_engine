@@ -266,9 +266,10 @@ bool WaterFlowLayoutInfoSW::ReachEnd(float prevPos, bool firstLayout) const
     if (!offsetEnd_ || lanes_.empty()) {
         return false;
     }
-    const float prevEndPos = EndPos() - (totalOffset_ - prevPos) + footerHeight_;
-    const bool backFromOverScroll = LessNotEqualCustomPrecision(prevEndPos, lastMainSize_, -0.1f) &&
-                                    GreatOrEqualCustomPrecision(EndPos() + footerHeight_, lastMainSize_, -0.1f);
+    const float prevEndPos = EndPosWithMargin() - (totalOffset_ - prevPos) + footerHeight_;
+    const bool backFromOverScroll =
+        LessNotEqualCustomPrecision(prevEndPos, lastMainSize_, -0.1f) &&
+        GreatOrEqualCustomPrecision(EndPosWithMargin() + footerHeight_, lastMainSize_, -0.1f);
     return firstLayout || GreatNotEqualCustomPrecision(prevEndPos, lastMainSize_, 0.1f) || backFromOverScroll;
 }
 
