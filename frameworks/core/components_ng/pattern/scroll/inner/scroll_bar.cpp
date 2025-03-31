@@ -133,6 +133,22 @@ void ScrollBar::UpdateScrollBarRegion(
         lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
         return;
     }
+    // When the scroll jumps without animation and is at the top or bottom before and after the jump,
+    // the scrollbar is not displayed.
+    auto checkAtEdge = (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) &&
+        displayMode_ == DisplayMode::AUTO && isScrollable_;
+    if (checkAtEdge) {
+        if (NearZero(GetMainOffset(lastOffset_)) && NearZero(GetMainOffset(lastOffset))) {
+            return;
+        }
+        auto lastIsAtBottom = NearEqual(GetMainOffset(lastOffset_), estimatedHeight_ - GetMainSize(viewPortSize_));
+        auto isAtBottom = NearEqual(GetMainOffset(lastOffset), estimatedHeight - GetMainSize(size));
+        if (lastIsAtBottom && isAtBottom) {
+            return;
+        }
+        opacityAnimationType_  = OpacityAnimationType::APPEAR_WITHOUT_ANIMATION;
+        ScheduleDisappearDelayTask();
+    }
     if (!NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) || viewPortSize_ != size) {
         needAddLayoutInfo = true;
     }
@@ -1055,6 +1071,11 @@ void ScrollBar::MarkNeedRender()
 float ScrollBar::GetMainOffset(const Offset& offset) const
 {
     return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+}
+
+float ScrollBar::GetMainSize(const Size& size) const
+{
+    return positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height();
 }
 
 void ScrollBar::SetReverse(bool reverse)

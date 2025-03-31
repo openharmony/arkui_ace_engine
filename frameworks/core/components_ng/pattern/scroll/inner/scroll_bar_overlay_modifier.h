@@ -34,6 +34,10 @@ enum class OpacityAnimationType {
      * run appear animation.
      */
     APPEAR,
+    /*
+     * appear without animation.
+     */
+    APPEAR_WITHOUT_ANIMATION,
 };
 
 enum class HoverAnimationType {

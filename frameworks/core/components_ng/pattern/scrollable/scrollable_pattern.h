@@ -462,14 +462,6 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
-            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisappearDelayTask();
-            }
-            StopScrollBarAnimatorByProxy();
-            StartScrollBarAnimatorByProxy();
-        }
         if (scrollSource == SCROLL_FROM_NONE) {
             if (lastScrollSource_ != scrollSource_) {
                 AddScrollableFrameInfo(scrollSource_);

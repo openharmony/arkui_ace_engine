@@ -361,6 +361,7 @@ public:
     virtual void CalcReservedHeight();
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
+    float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);
     BarDirection CheckBarDirection(const Point& point);
     void InitLongPressEvent();
