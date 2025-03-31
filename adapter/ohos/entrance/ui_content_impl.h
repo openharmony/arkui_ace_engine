@@ -451,6 +451,10 @@ private:
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
     void ChangeDisplayAvailableAreaListener(uint64_t displayId);
+    void SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context> &context);
+    void SetDeviceProperties();
+    RefPtr<Platform::AceContainer> CreateContainer(
+        std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

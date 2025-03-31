@@ -2553,4 +2553,49 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg098, TestSize.Level1)
     accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
     EXPECT_TRUE(frameNode->IsDrawFocusOnTop());
 }
+
+/**
+ * @tc.name: FrameNodeGetOrCreate
+ * @tc.desc: Test FrameNodeGetOrCreate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetOrCreate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode1 = FrameNode::CreateFrameNodeWithTree("Column", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode1, nullptr);
+    EXPECT_EQ(frameNode1->GetId(), 1);
+
+     /**
+     * @tc.steps: step2. attach node to main tree.
+     * @tc.expected: expect IsOnMainTree is true.
+     */
+    EXPECT_EQ(frameNode1->IsOnMainTree(), false);
+    frameNode1->AttachToMainTree();
+    EXPECT_EQ(frameNode1->IsOnMainTree(), true);
+    auto pattern = [] {return AceType::MakeRefPtr<Pattern>();};
+    /**
+     * @tc.steps: step3. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode("Column", 2, pattern);
+    EXPECT_NE(frameNode2, nullptr);
+    EXPECT_EQ(frameNode2->GetId(), 2);
+    /**
+     * @tc.steps: step4. create same node.
+     * @tc.expected: node2 == node 3.
+     */
+    auto frameNode3 = FrameNode::GetOrCreateFrameNode("Column", 2, pattern);
+    EXPECT_EQ(frameNode3, frameNode2);
+    /**
+     * @tc.steps: step5. create child node.
+     * @tc.expected: expect is not nullptr.
+     */
+    frameNode1->AddChild(frameNode2, 1, true);
+    auto children = frameNode1->GetChildren();
+    EXPECT_EQ(children.size(), 1);
+}
 } // namespace OHOS::Ace::NG
