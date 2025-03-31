@@ -46,6 +46,17 @@ void ConstructGestureStyle(GestureStyle& gestureInfo)
     auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
     gestureInfo.onLongPress = std::move(tmpLongPressFunc);
 }
+
+void ConstructUserGestureOptions(UserGestureOptions& gestureOption)
+{
+    auto onClick = [](const BaseEventInfo* info) {};
+    auto tmpClickFunc = [func = std::move(onClick)](GestureEvent& info) { func(&info); };
+    gestureOption.onClick = std::move(tmpClickFunc);
+
+    auto onLongPress = [](const BaseEventInfo* info) {};
+    auto tmpLongPressFunc = [func = std::move(onLongPress)](GestureEvent& info) { func(&info); };
+    gestureOption.onLongPress = std::move(tmpLongPressFunc);
+}
 } // namespace
 
 class RichEditorAccessibilityTestNg : public TestNG {
@@ -154,6 +165,43 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos000, TestSize.Level1
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
     EXPECT_EQ(subComponentInfos.size(), 0);
+}
+
+/**
+ * @tc.name: GetSubComponentInfos001
+ * @tc.desc: Test GetSubComponentInfos for addTextSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos001, TestSize.Level1)
+{
+    SetSpanStringMode(false);
+
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto controller = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    auto accessibilityProperty = richEditorNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set AddTextSpan with onClick
+     */
+    TextSpanOptions options;
+    options.value = INIT_STRING_1;
+    ConstructUserGestureOptions(options.userGestureOption);
+    controller->AddTextSpan(options);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+
+    /**
+     * @tc.steps: step3. test pattern GetSubComponentInfos
+     */
+    std::vector<SubComponentInfo> subComponentInfos;
+    accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+    EXPECT_EQ(subComponentInfos.size(), 1);
 }
 
 /**
@@ -285,6 +333,54 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
     std::vector<SubComponentInfo> subComponentInfos;
     accessibilityProperty->GetSubComponentInfo(subComponentInfos);
     EXPECT_EQ(subComponentInfos.size(), 1);
+}
+
+/**
+ * @tc.name: ExecSubComponent000
+ * @tc.desc: Test ExecSubComponent for addTextSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level1)
+{
+    SetSpanStringMode(false);
+
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto controller = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    auto accessibilityProperty = richEditorNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set AddTextSpan with onClick
+     */
+    TextSpanOptions options;
+    options.value = INIT_STRING_1;
+    ConstructUserGestureOptions(options.userGestureOption);
+    controller->AddTextSpan(options);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
+
+    /**
+     * @tc.steps: step3. test pattern GetSubComponentInfos
+     */
+    std::vector<SubComponentInfo> subComponentInfos;
+    accessibilityProperty->GetSubComponentInfo(subComponentInfos);
+
+    EXPECT_EQ(subComponentInfos.size(), 1);
+
+    /**
+     * @tc.steps: step4. test pattern ExecSubComponent
+     */
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(0), true);
+    EXPECT_EQ(richEditorPattern->ExecSubComponent(0), true);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(1), false);
+    EXPECT_EQ(richEditorPattern->ExecSubComponent(1), false);
+    EXPECT_EQ(accessibilityProperty->ActActionExecSubComponent(-1), false);
+    EXPECT_EQ(richEditorPattern->ExecSubComponent(-1), false);
 }
 
 /**
