@@ -936,7 +936,19 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
 
     auto layoutProperty = node->GetLayoutProperty();
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
-
+    if (dialogProps.dialogTransitionEffect != nullptr) {
+        auto contentNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(0));
+        CHECK_NULL_VOID(contentNode);
+        layoutProperty = contentNode->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+    }
+    if (dialogProps.maskTransitionEffect != nullptr) {
+        auto maskNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(1));
+        if (maskNode) {
+            layoutProperty = maskNode->GetLayoutProperty();
+            layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+        }
+    }
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     bool isNeedFocus = IsNeedChangeFocus(dialogProps.levelOrder, dialogProps.focusable);
@@ -971,6 +983,72 @@ void OverlayManager::SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node,
     DialogProperties props = dialogPattern->GetDialogProperties();
     if (!props.isMask) {
         node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
+}
+
+void OverlayManager::UpdateChildInvisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& child)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    auto ctx = child->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    if (ctx->HasDisappearTransition()) {
+        ctx->SetTransitionOutCallback(
+            [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node),
+                id = Container::CurrentId(), childWK = WeakPtr<FrameNode>(child)] {
+                ContainerScope scope(id);
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID(overlayManager);
+                auto node = nodeWk.Upgrade();
+                CHECK_NULL_VOID(node);
+                node->RemoveChild(childWK.Upgrade());
+                if (node->GetChildren().empty()) {
+                    overlayManager->PostDialogFinishEvent(nodeWk);
+                    auto dialogPattern = node->GetPattern<DialogPattern>();
+                    dialogPattern->CallDialogDidDisappearCallback();
+                }
+        });
+    } else {
+        node->RemoveChild(child);
+    }
+}
+
+void OverlayManager::CloseMaskAndContentMatchTransition(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
+    node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    dialogPattern->CallDialogWillDisappearCallback();
+
+    auto dialogProp = dialogPattern->GetDialogProperties();
+    auto contentNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(0));
+    auto maskNode = AceType::DynamicCast<FrameNode>(node->GetChildByIndex(1));
+    bool hasDisappearTransition = false;
+    if (maskNode) {
+        auto ctx = maskNode->GetRenderContext();
+        if (ctx) {
+            hasDisappearTransition = hasDisappearTransition || ctx->HasDisappearTransition();
+        }
+        UpdateChildInvisible(node, maskNode);
+    }
+    if (contentNode) {
+        auto ctx = contentNode->GetRenderContext();
+        if (ctx) {
+            hasDisappearTransition = hasDisappearTransition || ctx->HasDisappearTransition();
+        }
+        UpdateChildInvisible(node, contentNode);
+    }
+    if (!hasDisappearTransition) {
+        auto id = Container::CurrentId();
+        ContainerScope scope(id);
+        auto overlayManager = WeakClaim(this).Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        auto nodeWk = WeakPtr<FrameNode>(node);
+        overlayManager->PostDialogFinishEvent(nodeWk);
+        dialogPattern->CallDialogDidDisappearCallback();
     }
 }
 
@@ -3529,7 +3607,9 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     auto dialogTransitionEffect = dialogPattern->GetDialogProperties().dialogTransitionEffect;
     auto maskTransitionEffect = dialogPattern->GetDialogProperties().maskTransitionEffect;
     dialogNode->MarkRemoving();
-    if (transitionEffect != nullptr || dialogTransitionEffect != nullptr || maskTransitionEffect != nullptr) {
+    if (dialogTransitionEffect != nullptr || maskTransitionEffect != nullptr) {
+        CloseMaskAndContentMatchTransition(dialogNode);
+    } else if (transitionEffect != nullptr) {
         CloseDialogMatchTransition(dialogNode);
     } else {
         CloseDialogAnimation(dialogNode);
