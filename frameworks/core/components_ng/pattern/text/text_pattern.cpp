@@ -2215,6 +2215,23 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
     return IsDraggable(localOffset);
 }
 
+void TextPattern::LogForFormRender(const std::string& logTag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->IsFormRender() && !IsSetObscured() && !IsSensitiveEnalbe()) {
+        auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        auto content = textLayoutProperty->GetContent().value_or("");
+        if (content.length() == 1) {
+            TAG_LOGI(AceLogTag::ACE_TEXT, "%{public}s, content:%{public}s id:%{public}d", logTag.c_str(),
+                content.c_str(), host->GetId());
+        }
+    }
+}
+
 // end of TextDragBase implementations
 // ===========================================================
 
@@ -2229,7 +2246,9 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
     ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
-    DumpRecord(std::to_string(nowTime));
+    auto logTag = "OnModifyDone:" + std::to_string(nowTime);
+    DumpRecord(logTag);
+    LogForFormRender(logTag);
     if (!(PipelineContext::GetCurrentContextSafely() &&
             PipelineContext::GetCurrentContextSafely()->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =

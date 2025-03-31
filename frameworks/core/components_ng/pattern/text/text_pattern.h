@@ -682,6 +682,8 @@ public:
         frameRecord_ = record;
     }
 
+    void LogForFormRender(const std::string& logTag);
+
     void SetIsUserSetResponseRegion(bool isUserSetResponseRegion)
     {
         isUserSetResponseRegion_ = isUserSetResponseRegion;
