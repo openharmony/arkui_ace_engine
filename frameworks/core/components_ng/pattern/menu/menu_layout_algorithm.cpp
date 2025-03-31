@@ -1549,18 +1549,20 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
 
     auto menuHostNode = menuLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuHostNode);
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
+    previewSize_ = previewSize;
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto lastPreviewOffset = menuPattern->GetPreviewRect().GetOffset();
+    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
+    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 
-    // only update when current position is not equal to last position, otherwise animation will be interrupted
-    if (previewOffset_ != menuPattern->GetPreviewRect().GetOffset()) {
+    if (previewOffset_ != lastPreviewOffset) {
         renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
     }
 
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
-    previewSize_ = previewSize;
-    menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
-    menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
+    TAG_LOGD(AceLogTag::ACE_MENU, "previewOriginOffset: %{public}s currentPreviewRect: %{public}s",
+        previewOriginOffset_.ToString().c_str(), menuPattern->GetPreviewRect().ToString().c_str());
 }
 
 OffsetF MenuLayoutAlgorithm::FixMenuOriginOffset(float beforeAnimationScale, float afterAnimationScale)
