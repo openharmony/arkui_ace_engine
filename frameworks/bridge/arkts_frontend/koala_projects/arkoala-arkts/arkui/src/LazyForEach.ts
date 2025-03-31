@@ -192,7 +192,6 @@ export function LazyForEach<T>(dataSource: IDataSource<T>,
 	while (true) {
         // console.log(`LazyForEach[${parent}]: index=${index}`)
         if (index < 0 || index >= dataSource.totalCount()) break
-        if (index >= changeIndex) break // detach nodes after ChangeIndex
         const element: T = dataSource.getData(index as number)
         memoEntry2<T, number, void>(
             __context(),
