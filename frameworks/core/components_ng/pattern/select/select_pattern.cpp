@@ -2071,4 +2071,13 @@ void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPat
         optionPattern->SetFontWeight(optionFont_.FontWeight.value());
     }
 }
+
+void SelectPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Selected: " + std::to_string(selected_));
+    DumpLog::GetInstance().AddDesc("FontColor: " + std::to_string(fontColor_.value_or(Color())));
+    DumpLog::GetInstance().AddDesc("OptionFontColor: " + std::to_string(optionFont_.FontColor.value_or(Color())));
+    DumpLog::GetInstance().AddDesc(
+        "SelectedOptionFontColor: " + std::to_string(selectedFont_.FontColor.value_or(Color())));
+}
 } // namespace OHOS::Ace::NG

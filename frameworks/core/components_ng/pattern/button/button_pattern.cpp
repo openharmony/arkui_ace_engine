@@ -31,14 +31,10 @@ constexpr float NORMAL_SCALE = 1.0f;
 inline std::string ToString(const ButtonType& type)
 {
     static const LinearEnumMapNode<ButtonType, std::string> table[] = {
-        { ButtonType::NORMAL, "NORMAL" },
-        { ButtonType::CAPSULE, "CAPSULE" },
-        { ButtonType::CIRCLE, "CIRCLE" },
-        { ButtonType::TEXT, "TEXT" },
-        { ButtonType::ARC, "ARC" },
-        { ButtonType::DOWNLOAD, "DOWNLOAD" },
-        { ButtonType::ICON, "ICON" },
-        { ButtonType::CUSTOM, "CUSTOM" },
+        { ButtonType::NORMAL, "NORMAL" }, { ButtonType::CAPSULE, "CAPSULE" },
+        { ButtonType::CIRCLE, "CIRCLE" }, { ButtonType::TEXT, "TEXT" },
+        { ButtonType::ARC, "ARC" }, { ButtonType::DOWNLOAD, "DOWNLOAD" },
+        { ButtonType::ICON, "ICON" }, { ButtonType::CUSTOM, "CUSTOM" },
         { ButtonType::ROUNDED_RECTANGLE, "ROUNDED_RECTANGLE" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), type);
@@ -835,30 +831,25 @@ void ButtonPattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
     if (layoutProperty->HasType()) {
         DumpLog::GetInstance().AddDesc("Type: " + ToString(layoutProperty->GetTypeValue()));
     }
+    if (layoutProperty->HasButtonStyle()) {
+        DumpLog::GetInstance().AddDesc("ButtonStyle: " + ToString(layoutProperty->GetButtonStyleValue()));
+    }
+    if (layoutProperty->HasControlSize()) {
+        DumpLog::GetInstance().AddDesc("ControlSize: " + ToString(layoutProperty->GetControlSizeValue()));
+    }
+    if (layoutProperty->HasButtonRole()) {
+        DumpLog::GetInstance().AddDesc("ButtonRole: " + ToString(layoutProperty->GetButtonRoleValue()));
+    }
+    if (layoutProperty->HasCreateWithLabel()) {
+        DumpLog::GetInstance().AddDesc(
+            "CreateWithLabel: " + std::string(layoutProperty->GetCreateWithLabelValue() ? "true" : "false"));
+    }
     if (layoutProperty->HasLabel()) {
         DumpLog::GetInstance().AddDesc("Label: " + layoutProperty->GetLabelValue());
-    }
-    if (layoutProperty->HasFontSize()) {
-        DumpLog::GetInstance().AddDesc("FontSize: " + layoutProperty->GetFontSizeValue().ToString());
-    }
-    if (layoutProperty->HasFontWeight()) {
-        DumpLog::GetInstance().AddDesc("FontWeight: " + StringUtils::ToString(layoutProperty->GetFontWeightValue()));
-    }
-    if (layoutProperty->HasFontStyle()) {
-        DumpLog::GetInstance().AddDesc("FontStyle: " + StringUtils::ToString(layoutProperty->GetFontStyleValue()));
-    }
-    if (layoutProperty->HasFontFamily()) {
-        std::ostringstream oss;
-        for (const auto& str : layoutProperty->GetFontFamilyValue()) {
-            oss << str << " ";
-        }
-        DumpLog::GetInstance().AddDesc("FontFamily: " + oss.str());
-    }
-    if (layoutProperty->HasFontColor()) {
-        DumpLog::GetInstance().AddDesc("FontColor: " + layoutProperty->GetFontColorValue().ToString());
     }
     if (layoutProperty->HasTextOverflow()) {
         DumpLog::GetInstance().AddDesc(
@@ -877,21 +868,33 @@ void ButtonPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc(
             "HeightAdaptivePolicy: " + ToString(layoutProperty->GetHeightAdaptivePolicyValue()));
     }
+
+    DumpSubInfo(layoutProperty);
+}
+
+void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
+{
+    if (layoutProperty->HasFontSize()) {
+        DumpLog::GetInstance().AddDesc("FontSize: " + layoutProperty->GetFontSizeValue().ToString());
+    }
+    if (layoutProperty->HasFontWeight()) {
+        DumpLog::GetInstance().AddDesc("FontWeight: " + StringUtils::ToString(layoutProperty->GetFontWeightValue()));
+    }
+    if (layoutProperty->HasFontStyle()) {
+        DumpLog::GetInstance().AddDesc("FontStyle: " + StringUtils::ToString(layoutProperty->GetFontStyleValue()));
+    }
+    if (layoutProperty->HasFontFamily()) {
+        std::ostringstream oss;
+        for (const auto& str : layoutProperty->GetFontFamilyValue()) {
+            oss << str << ", ";
+        }
+        DumpLog::GetInstance().AddDesc("FontFamily: " + oss.str());
+    }
+    if (layoutProperty->HasFontColor()) {
+        DumpLog::GetInstance().AddDesc("FontColor: " + layoutProperty->GetFontColorValue().ToString());
+    }
     if (layoutProperty->HasBorderRadius()) {
         DumpLog::GetInstance().AddDesc("BorderRadius: " + layoutProperty->GetBorderRadiusValue().ToString());
-    }
-    if (layoutProperty->HasButtonStyle()) {
-        DumpLog::GetInstance().AddDesc("ButtonStyle: " + ToString(layoutProperty->GetButtonStyleValue()));
-    }
-    if (layoutProperty->HasControlSize()) {
-        DumpLog::GetInstance().AddDesc("ControlSize: " + ToString(layoutProperty->GetControlSizeValue()));
-    }
-    if (layoutProperty->HasButtonRole()) {
-        DumpLog::GetInstance().AddDesc("ButtonRole: " + ToString(layoutProperty->GetButtonRoleValue()));
-    }
-    if (layoutProperty->HasCreateWithLabel()) {
-        DumpLog::GetInstance().AddDesc(
-            "CreateWithLabel: " + std::string(layoutProperty->GetCreateWithLabelValue() ? "true" : "false"));
     }
 
     auto eventHub = GetEventHub<ButtonEventHub>();

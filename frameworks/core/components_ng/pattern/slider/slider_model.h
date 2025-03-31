@@ -71,6 +71,12 @@ public:
         {
             return std::isfinite(fromValue) && std::isfinite(toValue);
         }
+        std::string ToString() const
+        {
+            std::stringstream ss;
+            ss << "from: " << fromValue << " to: " << toValue;
+            return ss.str();
+        }
 
     private:
         float fromValue = std::numeric_limits<float>::quiet_NaN();

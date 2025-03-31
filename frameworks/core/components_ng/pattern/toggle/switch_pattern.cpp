@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -786,6 +787,30 @@ bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     }
 
     return result;
+}
+
+void SwitchPattern::DumpInfo()
+{
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasIsOn()) {
+        DumpLog::GetInstance().AddDesc("IsOn: " + std::string(paintProperty->GetIsOnValue() ? "true" : "false"));
+    }
+    if (paintProperty->HasSelectedColor()) {
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasSwitchPointColor()) {
+        DumpLog::GetInstance().AddDesc("SwitchPointColor: " + paintProperty->GetSwitchPointColorValue().ToString());
+    }
+    if (paintProperty->HasPointRadius()) {
+        DumpLog::GetInstance().AddDesc("PointRadius: " + paintProperty->GetPointRadiusValue().ToString());
+    }
+    if (paintProperty->HasUnselectedColor()) {
+        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColorValue().ToString());
+    }
+    if (paintProperty->HasTrackBorderRadius()) {
+        DumpLog::GetInstance().AddDesc("TrackBorderRadius: " + paintProperty->GetTrackBorderRadiusValue().ToString());
+    }
 }
 
 void SwitchPattern::SetSwitchIsOn(bool ison)
