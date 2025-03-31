@@ -154,7 +154,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         auto result = BuildTextRaceParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
-    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         BuildParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
         if (!AddPropertiesAndAnimations(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper)) {
@@ -352,7 +352,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
             paraStyle = externalParagraphStyle.value();
         }
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }
