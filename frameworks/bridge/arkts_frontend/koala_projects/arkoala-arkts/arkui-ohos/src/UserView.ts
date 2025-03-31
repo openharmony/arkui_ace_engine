@@ -54,3 +54,9 @@ export class UserView {
     }
 }
 
+export class EntryPoint {
+    constructor() {}
+    /** @memo */
+    entry(): void {
+    }
+}

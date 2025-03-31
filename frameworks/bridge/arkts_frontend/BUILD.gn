@@ -32,6 +32,7 @@ ohos_source_set("arkts_frontend") {
   sources = [
     "arkts_ani_utils.cpp",
     "arkts_frontend.cpp",
+    "entry/arkts_entry_loader.cpp",
   ]
   external_deps = [
     "hilog:libhilog",
