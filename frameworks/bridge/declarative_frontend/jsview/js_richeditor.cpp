@@ -1047,7 +1047,7 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         auto response = info[2]->ToNumber<int32_t>();
         responseType = static_cast<NG::TextResponseType>(response);
     }
-    auto buildFunc = std::function<void()>();
+    std::function<void()> buildFunc = nullptr;
     if (builderFunc) {
         buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
