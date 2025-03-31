@@ -525,6 +525,59 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     return;
 }
 
+void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
+    FrameRateRange& frameRateRange)
+{
+    static const char *className = "L@ohos/arkui/component/Common/ExpectedFrameRateRange;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return;
+    }
+
+    ani_boolean isInstance;
+    if (ANI_OK != env->Object_InstanceOf(objOption, cls, &isInstance)) {
+        return;
+    }
+
+    int32_t minFPS = 0;
+    int32_t maxFPS = 0;
+    int32_t expectedFPS = 0;
+
+    ani_double minAni;
+    ani_double maxAni;
+    ani_double expectedAni;
+    env->Object_GetPropertyByName_Double(objOption, "min", &minAni);
+    env->Object_GetPropertyByName_Double(objOption, "max", &maxAni);
+    env->Object_GetPropertyByName_Double(objOption, "expected", &expectedAni);
+
+    minFPS = static_cast<int32_t>(minAni);
+    maxFPS = static_cast<int32_t>(maxAni);
+    expectedFPS = static_cast<int32_t>(expectedAni);
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
+}
+
+// ani
+static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object objOption)
+{
+    auto animatorResult = GetAnimatorResult(env, obj);
+    if (animatorResult == nullptr) {
+        return;
+    }
+    auto animator = animatorResult->GetAnimator();
+    if (!animator) {
+        return;
+    }
+    if (!animator->HasScheduler()) {
+        auto result = animator->AttachSchedulerOnContainer();
+        if (!result) {
+            return;
+        }
+    }
+    FrameRateRange frameRateRange;
+    ParseExpectedFrameRateRange(env, objOption, frameRateRange);
+    animator->SetExpectedFrameRateRange(frameRateRange);
+}
+
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object animator_obj = {};
@@ -651,6 +704,8 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
         ani_native_function{"update", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIUpdate)},
         ani_native_function{"reset", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIReset)},
+        ani_native_function{"setExpectedFrameRateRange", nullptr,
+            reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

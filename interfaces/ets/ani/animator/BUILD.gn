@@ -35,7 +35,10 @@ ohos_shared_library("animator_ani") {
 
 generate_static_abc("animator_ani_abc") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.animator.ets" ]
+  files = [
+    "./ets/@ohos.animator.ets",
+    "./ets/@ohos.arkui.component.Common",
+  ]
   paths_keys = [ "@ohos.animator" ]
   paths_values = [ "./ets/@ohos.animator.ets" ]
   dst_file = target_out_dir + "/animator_ani.abc"

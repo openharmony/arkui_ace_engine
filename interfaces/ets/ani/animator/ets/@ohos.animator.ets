@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { ExpectedFrameRateRange } from './@ohos.arkui.component.Common'
+
 interface AnimatorOptions {
     duration: number;
     easing: string;
@@ -41,6 +43,7 @@ export interface AnimatorResult {
     onCancel: () => void;
     onRepeat: () => void;
     onFrame: (progress: number) => void;
+    setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
 }
 
 class AnimatorResultInner implements AnimatorResult {
@@ -57,6 +60,7 @@ class AnimatorResultInner implements AnimatorResult {
     public native finish(): void;
     public native update(options: AnimatorOptions): void;
     public native reset(options: AnimatorOptions): void;
+    public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
     
     // set and get onFinish
     private native setOnFinish(value: () => void) : void;
