@@ -249,7 +249,7 @@ struct InteropTypeConverter<KLength> {
     const static ets_class int_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/Int")));
     const static ets_class string_class = reinterpret_cast<ets_class>(env->NewGlobalRef(env->FindClass("std/core/String")));
     const static ets_class resource_class = reinterpret_cast<ets_class>(
-      env->NewGlobalRef(env->FindClass("@koalaui/arkts-arkui/generated/ArkResourceInterfaces/Resource")));
+      env->NewGlobalRef(env->FindClass("arkui/generated/ArkResourceInterfaces/Resource")));
 
     if (env->IsInstanceOf(value, double_class)) {
       const static ets_method double_p = env->Getp_method(double_class, "unboxed", ":D");
