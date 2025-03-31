@@ -85,7 +85,6 @@ private:
     bool needExpandContent_ = false;
     bool isOption_ = false;
     PaddingPropertyF padding_;
-    bool userSetPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };
