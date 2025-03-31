@@ -206,6 +206,7 @@ const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
         } },
 };
 
+// Provide positional enumeration order for select avoidance mode.
 const std::map<Placement, std::vector<Placement>> SELECT_PLACEMENT_STATES = {
     { Placement::BOTTOM_LEFT,
         {
@@ -2063,6 +2064,7 @@ OffsetF MenuLayoutAlgorithm::ComputeMenuPositionByOffset(
     return menuTrimOffset;
 }
 
+// Adapt to the menualign specification in select avoidance mode.
 void MenuLayoutAlgorithm::ComputePlacementByAlignType(const RefPtr<MenuLayoutProperty>& menuProp)
 {
     auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
@@ -2673,11 +2675,9 @@ OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool
         targetOffset_.GetY() + targetSize_.Height() + targetSpace_);
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
         targetOffset_.GetY() - childSize.Height() - targetSpace_);
-    OffsetF defaultPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + (targetSize_.Height() - childSize.Height()) / HALF);
 
     OffsetF childPosition;
-    OffsetF position = defaultPosition;
+    OffsetF position;
     std::vector<Placement> currentPlacementStates = SELECT_PLACEMENT_STATES.find(Placement::BOTTOM_LEFT)->second;
     auto it = SELECT_PLACEMENT_STATES.find(placement_);
     if (it != SELECT_PLACEMENT_STATES.end()) {
@@ -2697,36 +2697,7 @@ OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool
     }
     if (placement_ == Placement::NONE) {
         position = GetSelectAdjustPosition(currentPlacementStates, childSize, topPosition, bottomPosition);
-        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            position = HandleNoValidPlacement(topPosition, bottomPosition, layoutWrapper);
-        }
     }
-    return position;
-}
-
-OffsetF MenuLayoutAlgorithm::HandleNoValidPlacement(const OffsetF& topPosition, const OffsetF& bottomPosition,
-    LayoutWrapper* layoutWrapper)
-{
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(menuLayoutProperty, OffsetF(0.0f, 0.0f));
-
-    auto constraint = menuLayoutProperty->CreateChildConstraint();
-
-    float yAvoid = wrapperRect_.Top() + paddingTop_ + param_.topSecurity;
-    float maxSpaceHeight = wrapperRect_.Height() * HEIGHT_CONSTRAINT_FACTOR;
-    Rect targetRect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
-    float bottomSpace = std::min<float>(wrapperRect_.Bottom() -
-        targetRect.Bottom() - targetSecurity_ - paddingBottom_, maxSpaceHeight);
-    float topSpace = std::min<float>(targetRect.Top() - yAvoid - targetSecurity_, maxSpaceHeight);
-    OffsetF position;
-    if (GreatNotEqual(topSpace, bottomSpace)) {
-        position = topPosition;
-        constraint.maxSize.SetHeight(topSpace);
-    } else {
-        position = bottomPosition;
-        constraint.maxSize.SetHeight(bottomSpace);
-    }
-
     return position;
 }
 
