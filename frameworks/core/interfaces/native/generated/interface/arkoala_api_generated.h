@@ -595,8 +595,8 @@ typedef struct Opt_PixelMapMock Opt_PixelMapMock;
 typedef struct DragEventPeer DragEventPeer;
 typedef struct DragEventPeer* Ark_DragEvent;
 typedef struct Opt_DragEvent Opt_DragEvent;
-typedef struct Ark_Summary Ark_Summary;
-typedef struct Opt_Summary Opt_Summary;
+typedef struct Map_String_Int64 Map_String_Int64;
+typedef struct Opt_Map_String_Int64 Opt_Map_String_Int64;
 typedef struct Ark_DataSyncOptions Ark_DataSyncOptions;
 typedef struct Opt_DataSyncOptions Opt_DataSyncOptions;
 typedef struct OnDragEventCallback OnDragEventCallback;
@@ -1886,6 +1886,8 @@ typedef struct Ark_HistoricalPoint Ark_HistoricalPoint;
 typedef struct Opt_HistoricalPoint Opt_HistoricalPoint;
 typedef struct Ark_FingerInfo Ark_FingerInfo;
 typedef struct Opt_FingerInfo Opt_FingerInfo;
+typedef struct Ark_Summary Ark_Summary;
+typedef struct Opt_Summary Opt_Summary;
 typedef struct KeyEventPeer KeyEventPeer;
 typedef struct KeyEventPeer* Ark_KeyEvent;
 typedef struct Opt_KeyEvent Opt_KeyEvent;
@@ -7631,14 +7633,15 @@ typedef struct Opt_DragEvent {
     Ark_Tag tag;
     Ark_DragEvent value;
 } Opt_DragEvent;
-typedef struct Ark_Summary {
-    Ark_String dataType;
-    Ark_Number dataSize;
-} Ark_Summary;
-typedef struct Opt_Summary {
+typedef struct Map_String_Int64 {
+    Ark_Int32 size;
+    Ark_String* keys;
+    Ark_Int64* values;
+} Map_String_Int64;
+typedef struct Opt_Map_String_Int64 {
     Ark_Tag tag;
-    Ark_Summary value;
-} Opt_Summary;
+    Map_String_Int64 value;
+} Opt_Map_String_Int64;
 typedef struct Ark_DataSyncOptions {
     Ark_String _DataSyncOptionsStub;
 } Ark_DataSyncOptions;
@@ -12481,6 +12484,14 @@ typedef struct Opt_FingerInfo {
     Ark_Tag tag;
     Ark_FingerInfo value;
 } Opt_FingerInfo;
+typedef struct Ark_Summary {
+    Map_String_Int64 summary;
+    Ark_Int64 totalSize;
+} Ark_Summary;
+typedef struct Opt_Summary {
+    Ark_Tag tag;
+    Ark_Summary value;
+} Opt_Summary;
 typedef struct Opt_KeyEvent {
     Ark_Tag tag;
     Ark_KeyEvent value;
