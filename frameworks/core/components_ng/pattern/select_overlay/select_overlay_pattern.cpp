@@ -834,7 +834,7 @@ void SelectOverlayPattern::OnDpiConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 
 void SelectOverlayPattern::SwitchHandleToOverlayMode(bool afterRender)
@@ -867,13 +867,13 @@ void SelectOverlayPattern::OnColorConfigurationUpdate()
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     host->UpdateSelectMenuBg();
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 
 void SelectOverlayPattern::OnLanguageConfigurationUpdate()
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    host->UpdateToolBar(true, true);
+    host->UpdateToolBarFromMainWindow(true, true);
 }
 } // namespace OHOS::Ace::NG
