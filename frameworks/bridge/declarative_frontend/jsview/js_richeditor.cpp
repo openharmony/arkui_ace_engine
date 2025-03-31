@@ -1030,7 +1030,8 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
     }
 
     // Builder
-    CHECK_NULL_VOID(info.Length() >= 2);
+    const int32_t builderParamIndex = 1;
+    CHECK_NULL_VOID(info.Length() > builderParamIndex);
     RefPtr<JsFunction> builderFunc = nullptr;
     if (!info[1]->IsUndefined() && info[1]->IsObject()) {
         JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
@@ -1046,11 +1047,14 @@ void JSRichEditor::BindSelectionMenu(const JSCallbackInfo& info)
         auto response = info[2]->ToNumber<int32_t>();
         responseType = static_cast<NG::TextResponseType>(response);
     }
-    auto buildFunc = builderFunc ? [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("BindSelectionMenu");
-        func->Execute();
-    } : std::function<void()>();
+    auto buildFunc = std::function<void()>();
+    if (builderFunc) {
+        buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("BindSelectionMenu");
+            func->Execute();
+        };
+    }
     NG::SelectMenuParam menuParam;
     const int32_t requiredParamCount = 3;
     if (info.Length() > requiredParamCount && info[requiredParamCount]->IsObject()) {
