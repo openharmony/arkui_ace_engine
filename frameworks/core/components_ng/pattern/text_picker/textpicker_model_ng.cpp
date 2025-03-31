@@ -976,6 +976,22 @@ void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
+void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& valueOpt)
+{
+    if (valueOpt) {
+        if (valueOpt.value() < CROWN_SENSITIVITY_MIN || valueOpt.value() > CROWN_SENSITIVITY_MAX) {
+            return;
+        }
+        CHECK_NULL_VOID(frameNode);
+        auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+        CHECK_NULL_VOID(textPickerPattern);
+        textPickerPattern->SetDigitalCrownSensitivity(valueOpt.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, frameNode);
+    }
+}
+
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1357,6 +1373,16 @@ void TextPickerModelNG::SetDefaultTextStyle(
         value.textOverflow.value_or(textStyle.GetTextOverflow()), frameNode);
 }
 
+void TextPickerModelNG::SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    SetDefaultTextStyle(frameNode, textTheme, value);
+}
+
 std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, "");
@@ -1570,11 +1596,15 @@ void TextPickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
     SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
 }
 
-void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, const std::optional<bool>& valueOpt)
 {
     CHECK_NULL_VOID(frameNode);
     auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    if (valueOpt) {
+        isEnableHapticFeedback = valueOpt.value();
+    }
     textPickerPattern->SetIsEnableHaptic(isEnableHapticFeedback);
 }
 

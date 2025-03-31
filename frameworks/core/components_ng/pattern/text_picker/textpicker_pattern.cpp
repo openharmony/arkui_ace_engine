@@ -1501,6 +1501,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         }
     }
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
+    json->PutExtAttr("disableTextStyleAnimation", isDisableTextStyleAnimation_, filter);
     if (!columnWidths_.empty()) {
         json->PutExtAttr("columnWidths", GetColumnWidthsStr().c_str(), filter);
     }

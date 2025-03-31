@@ -61,6 +61,9 @@ const auto ATTRIBUTE_STROKE_WIDTH_NAME = "strokeWidth";
 const auto ATTRIBUTE_START_MARGIN_NAME = "startMargin";
 const auto ATTRIBUTE_END_MARGIN_NAME = "endMargin";
 const auto ATTRIBUTE_GRADIENT_HEIGHT_NAME = "gradientHeight";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
+const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME = "disableTextStyleAnimation";
+const auto ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME = "defaultTextStyle";
 
 const auto RES_STR_1_ID = IntResourceId { 111, Converter::ResourceType::STRING };
 const auto RES_STR_2_ID = IntResourceId { 222, Converter::ResourceType::STRING };
@@ -111,6 +114,8 @@ const auto ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE = "1.00px";
 const auto ATTRIBUTE_DIVIDER_COLOR_DEFAULT_VALUE = COLOR_BLACK;
 const auto ATTRIBUTE_DIVIDER_MARGIN_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_GRADIENT_HEIGHT_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
+const auto ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE = "false";
 
 // Test plans
 typedef std::pair<Ark_Union_Number_String, std::string> PickerItemHeightTestStep;
@@ -370,6 +375,7 @@ class TextPickerModifierTest : public ModifierTestBase<GENERATED_ArkUITextPicker
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<PickerTheme>();
+        SetupTheme<TextTheme>();
         AddResource(RES_STR_1_ID, "str1");
         AddResource(RES_STR_2_ID, "str2");
         AddResource(RES_STR_3_ID, "str3");
@@ -2102,5 +2108,154 @@ HWTEST_F(TextPickerModifierTest, setOnChangeEventValue2Impl, TestSize.Level1)
     EXPECT_EQ(checkEvent->valueVct.value().size(), 2);
     EXPECT_EQ(checkEvent->valueVct.value()[0], "value_1");
     EXPECT_EQ(checkEvent->valueVct.value()[1], "value_2");
+}
+
+/**
+ * @tc.name: setEnableHapticFeedback
+ * @tc.desc: Check the functionality of TextPickerModifierTest.EnableHapticFeedbackImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setEnableHapticFeedback, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    value = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+}
+
+/**
+ * @tc.name: disableTextStyleAnimation
+ * @tc.desc: Check the functionality of TextPickerModifierTest.disableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, disableTextStyleAnimation, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDisableTextStyleAnimation, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Ark_Boolean>(false);
+    modifier_->setDisableTextStyleAnimation(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_FALSE);
+    value = Converter::ArkValue<Ark_Boolean>(true);
+    modifier_->setDisableTextStyleAnimation(node_, value);
+    checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DISABLE_TEXT_STYLE_ANIMATION_NAME);
+    EXPECT_EQ(checkVal, EXPECTED_TRUE);
+}
+
+/**
+ * @tc.name: defaultTextWeight
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, defaultTextWeight, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    Ark_Font font = {
+        .family = UNION_RESOURCE_STRING_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_TextPickerTextStyle pickerStyle;
+    auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
+    auto sizeStr = FONT_SIZE_TEST_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setDefaultTextStyle(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+
+    for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
+        font.weight = weight.first;
+        pickerStyle.font.value = font;
+        modifier_->setDefaultTextStyle(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkWeight = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_WEIGHT_NAME);
+        EXPECT_EQ(checkWeight, weight.second);
+    }
+}
+
+/**
+ * @tc.name: defaultTextSize
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, defaultTextSize, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    Ark_Font font = {
+        .family = UNION_RESOURCE_STRING_PLAN[0].first,
+        .size = FONT_SIZE_TEST_PLAN[0].first,
+        .style = FONT_STYLE_TEST_PLAN[0].first,
+        .weight = FONT_WEIGHT_TEST_PLAN[0].first
+    };
+    Ark_TextPickerTextStyle pickerStyle;
+    auto familyStr = UNION_RESOURCE_STRING_PLAN[0].second;
+    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
+    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    for (auto size : FONT_SIZE_TEST_PLAN) {
+        font.size = size.first;
+        pickerStyle.font.value = font;
+        modifier_->setDefaultTextStyle(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        auto fontObject = GetAttrValue<std::unique_ptr<JsonValue>>(styleObject, ATTRIBUTE_FONT_NAME);
+        auto checkSize = GetAttrValue<std::string>(fontObject, ATTRIBUTE_FONT_SIZE_NAME);
+        EXPECT_EQ(checkSize, size.second);
+    }
+}
+
+/**
+ * @tc.name: defaultTextColor
+ * @tc.desc: Check the functionality of TextPickerModifier.defaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, defaultTextColor, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDefaultTextStyle, nullptr);
+    auto fullJson = GetJsonValue(node_);
+    auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+    auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE);
+    Ark_TextPickerTextStyle pickerStyle;
+
+    for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
+        pickerStyle.color = { .value = value };
+        modifier_->setDefaultTextStyle(node_, &pickerStyle);
+        auto fullJson = GetJsonValue(node_);
+        auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DEFAULT_TEXT_STYLE_NAME);
+        checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
+        EXPECT_EQ(checkVal, expectVal);
+    }
 }
 } // namespace OHOS::Ace::NG

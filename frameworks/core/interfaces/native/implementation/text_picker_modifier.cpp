@@ -27,6 +27,11 @@
 #include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    const int32_t CROWN_SENSITIVITY_LOW = 0;
+    const int32_t CROWN_SENSITIVITY_MEDIUM = 1;
+    const int32_t CROWN_SENSITIVITY_HIGH = 2;
+}
 
 struct TextPickerOptions {
     std::vector<NG::RangeContent> range;
@@ -277,6 +282,17 @@ ItemDivider Convert(const Ark_DividerOptions& src)
     divider.endMargin = OptConvert<Dimension>(src.endMargin).value_or(divider.endMargin);
     return divider;
 }
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_CrownSensitivity& src)
+{
+    switch (src) {
+        case ARK_CROWN_SENSITIVITY_LOW: dst = CROWN_SENSITIVITY_LOW; break;
+        case ARK_CROWN_SENSITIVITY_MEDIUM: dst = CROWN_SENSITIVITY_MEDIUM; break;
+        case ARK_CROWN_SENSITIVITY_HIGH: dst = CROWN_SENSITIVITY_HIGH; break;
+        default: LOGE("Unexpected enum value in Ark_CrownSensitivity: %{public}d", src);
+    }
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -467,7 +483,7 @@ void DisableTextStyleAnimationImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, convValue);
+    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, convValue);
 }
 void DefaultTextStyleImpl(Ark_NativePointer node,
                           const Ark_TextPickerTextStyle* value)
@@ -475,8 +491,8 @@ void DefaultTextStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetDefaultTextStyle(frameNode, convValue);
+    auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, pickerStyle);
 }
 void OnAcceptImpl(Ark_NativePointer node,
                   const Callback_String_Number_Void* value)
@@ -642,16 +658,16 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextPickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    TextPickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Union_Number_Array_Number_Void* callback)
