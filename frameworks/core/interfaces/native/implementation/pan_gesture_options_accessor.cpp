@@ -120,10 +120,10 @@ void SetFingersImpl(Ark_PanGestureOptions peer,
 }
 Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->handler, {});
-    auto panDirection = peer->handler->GetDirection();
-    return Converter::ArkValue<Ark_PanDirection>(panDirection);
+    CHECK_NULL_RETURN(peer, Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
+    CHECK_NULL_RETURN(peer->handler,  Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
+    auto direction = peer->handler->GetDirection();
+    return Converter::ArkValue<Ark_PanDirection>(direction, Converter::FC);
 }
 Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
 {

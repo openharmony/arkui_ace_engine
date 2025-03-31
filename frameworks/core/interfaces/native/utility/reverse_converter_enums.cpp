@@ -266,6 +266,17 @@ void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src)
     }
 }
 
+void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src)
+{
+    switch (src) {
+        case LineBreakStrategy::GREEDY: dst = ARK_LINE_BREAK_STRATEGY_GREEDY; break;
+        case LineBreakStrategy::HIGH_QUALITY: dst = ARK_LINE_BREAK_STRATEGY_HIGH_QUALITY; break;
+        case LineBreakStrategy::BALANCED: dst = ARK_LINE_BREAK_STRATEGY_BALANCED; break;
+        default: dst = static_cast<Ark_LineBreakStrategy>(-1);
+            LOGE("Unexpected enum value in LineBreakStrategy: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src)
 {
     switch (src) {
