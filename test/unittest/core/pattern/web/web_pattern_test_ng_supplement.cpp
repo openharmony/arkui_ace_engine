@@ -2095,6 +2095,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnScrollStartRecursive_001, TestSize.Level1
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent }, { Axis::VERTICAL, nullptr } };
     EXPECT_CALL(*parent, OnScrollStartRecursive).Times(1);
     webPattern->OnScrollStartRecursive(1.0f);
@@ -2150,6 +2151,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnScrollEndRecursive_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     RefPtr<MockNestableScrollContainer> parent = AccessibilityManager::MakeRefPtr<MockNestableScrollContainer>();
+    webPattern->expectedScrollAxis_ = Axis::HORIZONTAL;
     webPattern->parentsMap_ = { { Axis::HORIZONTAL, parent }, { Axis::VERTICAL, nullptr } };
     std::optional<float> velocity = 1.f;
     webPattern->isScrollStarted_ = true;
