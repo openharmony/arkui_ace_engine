@@ -524,9 +524,6 @@ export default function Refresh1() {
         await toggle.click();
       }
       done();
-
-      done();
-
     })
     /**
      * 测试组件backgroundImageResizable
