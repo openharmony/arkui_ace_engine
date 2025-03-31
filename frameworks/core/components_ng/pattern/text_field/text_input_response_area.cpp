@@ -691,6 +691,13 @@ bool PasswordResponseArea::IsShowPasswordIcon()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
     return textFieldPattern->IsShowPasswordIcon();
+}
+
+void PasswordResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
+{
+    // no interface to set password icon color, should update every time
+    CHECK_NULL_VOID(theme);
+    UpdatePasswordIconColor(theme->GetSymbolColor());
 } // PasswordResponseArea end
 
 // UnitResponseArea begin
@@ -1267,5 +1274,12 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
         imageRenderProperty->UpdateSvgFillColor(iconColor_);
     }
     return info;
+}
+
+void CleanNodeResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
+{
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
+        UpdateSymbolSource();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -4816,13 +4816,6 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
 
-void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
-{
-    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-    CHECK_NULL_VOID(passwordArea);
-    passwordArea->UpdatePasswordIconColor(color);
-}
-
 bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
@@ -4861,8 +4854,12 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         updateFlag = false;
     }
-    // no interface to set password icon color, should update every time
-    UpdatePasswordIconColor(textFieldTheme->GetSymbolColor());
+    if (responseArea_) {
+        responseArea_->OnThemeScopeUpdate(textFieldTheme);
+    }
+    if (cleanNodeResponseArea_) {
+        cleanNodeResponseArea_->OnThemeScopeUpdate(textFieldTheme);
+    }
     return updateFlag;
 }
 
