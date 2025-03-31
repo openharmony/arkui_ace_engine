@@ -25,7 +25,7 @@ export async function RefreshStart(done:Function) {
   });
   await driver.delayMs(4500);
 
-  let atomNavigates: Component = await driver.findComponent(ON.text('容器类'));
+  let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
   await atomNavigates.click();
   await driver.delayMs(3500);
 
