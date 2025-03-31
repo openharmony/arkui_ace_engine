@@ -205,6 +205,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const std::string& src);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
     void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
+    void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const ListItemGroupArea& src);
     void AssignArkValue(Ark_ListItemGroupArea& dst, const int& src);
@@ -230,8 +231,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_OffsetResult& dst, const Offset& src);
     void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src);
-    void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
+    void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
@@ -250,6 +251,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
     void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue& src);
     void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src);
+    void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src);
+    void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src);
     void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src);

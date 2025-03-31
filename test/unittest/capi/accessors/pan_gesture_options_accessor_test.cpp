@@ -71,6 +71,19 @@ HWTEST_F(PanGestureOptionsAccessorTest, setDirectionTest, TestSize.Level1)
     }
 }
 
+constexpr Ark_PanDirection TEST_DEFAULT_DIRECTION = ARK_PAN_DIRECTION_ALL;
+
+/**
+ * @tc.name: getDirectionTestDefault
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanGestureOptionsAccessorTest, getDirectionTestDefault, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getDirection, nullptr);
+    EXPECT_EQ(accessor_->getDirection(peer_), TEST_DEFAULT_DIRECTION);
+}
+
 /**
  * @tc.name: getDirectionTest
  * @tc.desc:

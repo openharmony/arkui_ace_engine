@@ -35,7 +35,6 @@ void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst, co
     ConvContext *ctx);
 void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src);
 void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
-void AssignArkValue(Ark_LineBreakStrategy& dst, const OHOS::Ace::LineBreakStrategy& src);
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style);
 void AssignArkValue(Ark_RichEditorRange& dst, const RangeOptions& src);
 } // namespace OHOS::Ace::NG::Converter
