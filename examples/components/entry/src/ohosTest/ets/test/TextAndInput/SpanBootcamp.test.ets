@@ -1,14 +1,11 @@
-import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
+import { describe, beforeAll,it} from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import { Point, Component, ON } from '@ohos.UiTest';
 import { buttonClick,
-  getToggle,
   JsonType, KeyStruct, radioClick, Search,
-  searchParentBlock,
-  searchToggle,
-  Slide, sliderDrag,
-  titleSearch,
-  ToggleClick } from '../../utils';
+  Slide,
+  sliderDrag,
+  ToggleClick } from '../../utils/index';
 
 const TAG = 'SpanBootcamp'
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
