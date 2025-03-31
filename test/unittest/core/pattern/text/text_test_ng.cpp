@@ -2344,7 +2344,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
     auto contentModifier = textPattern->GetContentModifier();
-    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
+    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, textFrameNode);
     EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraphManager_->GetMaxWidth());
 }
 
