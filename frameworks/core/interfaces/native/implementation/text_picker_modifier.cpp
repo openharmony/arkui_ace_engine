@@ -492,11 +492,7 @@ void DefaultTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto pickerStyle = Converter::Convert<PickerTextStyle>(*value);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, pickerStyle);
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, pickerStyle);
 }
 void OnAcceptImpl(Ark_NativePointer node,
                   const Callback_String_Number_Void* value)

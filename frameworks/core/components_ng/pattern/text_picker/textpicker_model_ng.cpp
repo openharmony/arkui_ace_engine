@@ -988,6 +988,9 @@ void TextPickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, std::op
         textPickerPattern->SetDigitalCrownSensitivity(valueOpt.value());
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
     }
+    else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DigitalCrownSensitivity, frameNode);
+    }
 }
 
 void TextPickerModelNG::SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values)
@@ -1369,6 +1372,16 @@ void TextPickerModelNG::SetDefaultTextStyle(
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
         value.textOverflow.value_or(textStyle.GetTextOverflow()), frameNode);
+}
+
+void TextPickerModelNG::SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    SetDefaultTextStyle(frameNode, textTheme, value);
 }
 
 std::string TextPickerModelNG::getTextPickerValue(FrameNode* frameNode)
