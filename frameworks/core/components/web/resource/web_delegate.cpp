@@ -674,12 +674,12 @@ NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBas
 
 void NWebScreenLockCallbackImpl::Handle(bool key)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetViewKeepScreenOn %{public}d", key);
     auto weakContext = context_.Upgrade();
     CHECK_NULL_VOID(weakContext);
     auto window = weakContext->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 WebDelegateObserver::~WebDelegateObserver() {}
@@ -3190,7 +3190,7 @@ void WebDelegate::SetKeepScreenOn(bool key)
     CHECK_NULL_VOID(context);
     auto window = context->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)
