@@ -1,8 +1,9 @@
 import { int32 } from "@koalaui/compat";
 import { mutableState } from "./GlobalStateManager";
 import { MutableState } from "./State";
+import { propDeepCopy } from "@koalaui/compat";
 
-type WatchFunc = ()=>void;
+type WatchFunc = () => void;
 export class MutableStateMetaBase {
     public readonly deco: string;
     constructor(deco: string) {
@@ -16,10 +17,10 @@ export class MutableStateMeta extends MutableStateMetaBase {
         super(deco);
     }
     public addRef(): void {
-        this.__metaDependency.value
+        this.__metaDependency.value;
     }
     public fireChange(): void {
-        this.__metaDependency.value++
+        this.__metaDependency.value++;
     }
 }
 
@@ -30,8 +31,8 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase {
     public addRef(key: string): void {
         let metaDependency: MutableState<int32> | undefined = this.__metaDependency.get(key);
         if (!metaDependency) {
-            metaDependency = mutableState<int32>(0)
-            this.__metaDependency.set(key, metaDependency)
+            metaDependency = mutableState<int32>(0);
+            this.__metaDependency.set(key, metaDependency);
         }
         metaDependency.value;
     }
@@ -39,11 +40,11 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase {
     public fireChange(key: string): void {
         let metaDependency: MutableState<int32> | undefined = this.__metaDependency.get(key);
         if (metaDependency) {
-            metaDependency.value++
+            metaDependency.value++;
         }
     }
     constructor(deco: string) {
-        super(deco)
+        super(deco);
     }
 }
 
@@ -80,7 +81,7 @@ export interface DecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 export interface DecoratedV1Variable {
-    _watchFunc: WatchFunc | undefined
+    _watchFunc: WatchFunc | undefined;
 }
 export abstract class DecoratedVariableBase<T> {
     public readonly _meta: MutableState<int32> = mutableState<int32>(0);
@@ -109,7 +110,7 @@ export class StateDecoratedVariable<T> extends DecoratedVariableBase<T> implemen
     }
     public get(): T {
         const value = this.__backing;
-        setObservationDepth(value, 1)
+        setObservationDepth(value, 1);
         this.addRef();
         return value;
     }
@@ -152,7 +153,60 @@ export class LinkDecoratedVariable<T>  implements DecoratedMutableVariable<T>, D
                 return;
             }
         }
-        this.sourceSet_!(newValue)
-        this._watchFunc?.()
+        this.sourceSet_!(newValue);
+        this._watchFunc?.();
 	}
+}
+
+function deepCopy<T>(value: T): T {
+    return propDeepCopy<T>(value) as T;
+}
+
+export class PropDecoratedVariable<T> extends DecoratedVariableBase<T> implements DecoratedMutableVariable<T>, DecoratedV1Variable, DecoratedUpdatableVariable<T> {
+    public readonly _watchFunc: WatchFunc | undefined;
+    private __backing: T;
+    private __sourceValue: T;
+    constructor(source_value: T, watchFunc?: WatchFunc) {
+        super();
+        this._watchFunc = watchFunc;
+        this.__backing = deepCopy<T>(source_value);
+        this.__sourceValue = source_value;
+    }
+    public get(): T {
+        setObservationDepth(this.__backing, 1);
+        this.addRef();
+        return this.__backing;
+    }
+
+    public set(newValue: T): void {
+        if (this.__backing != newValue) {
+            this.__backing = deepCopy<T>(newValue);
+            this.fireChange();
+            this._watchFunc?.();
+        }
+    }
+    public update(newValue: T): void {
+        this.addRef();
+        if (this.__sourceValue != newValue) {
+            this.__backing = deepCopy<T>(newValue);
+            this.__sourceValue = newValue;
+            StateMgmtLoop.add(() => {
+                this.fireChange();
+                this._watchFunc?.();
+            });
+        }
+    }
+}
+
+export class StateMgmtLoop {
+    static callbacks: Array<() => void> = new Array<() => void>();
+    static add(callback: () => void) {
+        StateMgmtLoop.callbacks.push(callback);
+    }
+    static consume(): void {
+        StateMgmtLoop.callbacks.forEach((callback: () => void) => {
+            callback();
+        });
+        StateMgmtLoop.callbacks.length = 0;
+    }
 }

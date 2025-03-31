@@ -66,6 +66,7 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
         this.instance.__initializeStruct(initializers, content);
     }
 
+    /** @memo */
     protected __updateStruct(
         initializers?: T_Options
     ): void {
