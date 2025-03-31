@@ -28,6 +28,7 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { _animateTo } from "../handwritten"
 export function getContext(component?: Object | undefined): Context {
     return GlobalScope.getContext(component)
 }
@@ -41,7 +42,7 @@ export function dollar_rawfile(value: string): Resource {
     return GlobalScope.dollar_rawfile(value)
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateTo(value, event)
+    _animateTo(value, event)
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
     GlobalScope.animateToImmediately(value, event)

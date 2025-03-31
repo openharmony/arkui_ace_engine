@@ -116,6 +116,10 @@ declare const LocalStorageProp: (value: string) => PropertyDecorator;
 
 declare const Reusable: ClassDecorator;
 
+declare class UIContext {
+    animateTo(param: AnimateParam, event: (() => void)): void;
+}
+
 declare interface IDataSource<T = Object> {
     totalCount(): number;
 
