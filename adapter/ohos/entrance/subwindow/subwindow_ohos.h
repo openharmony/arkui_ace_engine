@@ -226,7 +226,7 @@ private:
     bool CreateEventRunner();
     void GetToastDialogWindowProperty(
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
-    bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
+    bool InitToastDialogWindow(int32_t& width, int32_t& height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
     bool InitToastServiceConfig();
     void ShowToastForAbility(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);

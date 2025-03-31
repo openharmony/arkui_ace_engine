@@ -1379,6 +1379,15 @@ void SubwindowOhos::GetToastDialogWindowProperty(
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "get toast dialog window property enter");
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto subwindowOhos = AceType::DynamicCast<SubwindowOhos>(SubwindowManager::GetInstance()->GetCurrentDialogWindow());
+    if (subwindowOhos) {
+        auto dialogWindow = subwindowOhos->GetDialogWindow();
+        if (dialogWindow) {
+            auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(dialogWindow->GetDisplayId());
+            defaultDisplay = currentDisplay ? currentDisplay : defaultDisplay;
+        }
+    }
+
     if (defaultDisplay) {
         posX = 0;
         posY = 0;
@@ -1391,7 +1400,7 @@ void SubwindowOhos::GetToastDialogWindowProperty(
         posY, width, height, density);
 }
 
-bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast)
+bool SubwindowOhos::InitToastDialogWindow(int32_t& width, int32_t& height, int32_t posX, int32_t posY, bool isToast)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "init toast dialog window enter");
     OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
@@ -1415,6 +1424,11 @@ bool SubwindowOhos::InitToastDialogWindow(int32_t width, int32_t height, int32_t
     }
     CHECK_NULL_RETURN(dialogWindow_, false);
     dialogWindow_->SetLayoutFullScreen(true);
+    auto focusWindowId = dialogWindow_->GetDisplayId();
+    auto focusDisplayInfo = Rosen::DisplayManager::GetInstance().GetDisplayById(focusWindowId);
+    CHECK_NULL_RETURN(focusDisplayInfo, false);
+    width = focusDisplayInfo->GetWidth();
+    height = focusDisplayInfo->GetHeight();
     return true;
 }
 
