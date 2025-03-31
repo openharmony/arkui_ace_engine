@@ -539,69 +539,200 @@ HWTEST_F(TextFieldPatternTestNine, InitPasswordButtonMouseEvent001, TestSize.Lev
 }
 
 /**
- * @tc.name: ProcessOverlayAfterLayout001
- * @tc.desc: test ProcessOverlayAfterLayout
+ * @tc.name: HandleCrossPlatformInBlurEvent001
+ * @tc.desc: test text_field_pattern.cpp HandleCrossPlatformInBlurEvent function,
+    case HasConnection(),
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNine, ProcessOverlayAfterLayout001, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestNine, HandleCrossPlatformInBlurEvent001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
     });
     GetFocus();
 
-    OffsetF prevOffset(1, 2);
-    pattern_->ProcessOverlayAfterLayout(prevOffset);
-    EXPECT_TRUE(prevOffset != pattern_->parentGlobalOffset_);
+    pattern_->imeShown_ = true;
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    pattern_->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    pattern_->cursorTwinklingTask_.Reset([] {});
+    pattern_->HandleCrossPlatformInBlurEvent();
+    EXPECT_EQ(pattern_->connection_, nullptr);
+}
 
-    OffsetF prevOffset1(0, 0);
+/**
+ * @tc.name: OnKeyEvent001
+ * @tc.desc: test text_field_pattern.cpp OnKeyEvent function,
+    case RequestKeyboard(false, true, true),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnKeyEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    KeyEvent event;
+    event.code = KeyCode::KEY_ENTER;
+    pattern_->independentControlKeyboard_ = true;
+    pattern_->showKeyBoardOnFocus_ = true;
+    pattern_->customKeyboard_ = AceType::DynamicCast<NG::UINode>(
+        AceType::MakeRefPtr<FrameNode>("node", -1, AceType::MakeRefPtr<Pattern>()));
+    pattern_->isCustomKeyboardAttached_ = true;
+    auto ret = pattern_->OnKeyEvent(event);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleOnCopy001
+ * @tc.desc: test text_field_pattern.cpp HandleOnCopy function,
+    case value.empty(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleOnCopy001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto context = PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    pattern->clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+    ASSERT_NE(pattern->clipboard_, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_NE(pattern->contentController_, nullptr);
+    pattern->contentController_->content_ = u"";
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->selectController_->UpdateHandleIndex(0, 4);
+    auto eventHub = textFieldNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool calledOnCopy = false;
+    eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
+        calledOnCopy = true;
+    });
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->SetUsingMouse(true);
+    pattern->clipboard_->SetData(UtfUtils::Str16DebugToStr8(u"test123"),
+        layoutProperty->GetCopyOptionsValue(CopyOptions::Local));
+    pattern->HandleOnCopy(true);
+    std::string data_;
+    auto getDataCallback = [&data_](const std::string& data) {
+        data_ = data;
+    };
+    pattern->clipboard_->GetData(getDataCallback, true);
+    EXPECT_TRUE(data_ == "test123");
+}
+
+/**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: test text_field_pattern.cpp HandleTouchEvent function,
+    case selectOverlay_->IsTouchAtHandle(info)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, HandleTouchEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    TouchEventInfo info("unknown");
+    pattern_->dragStatus_ = DragStatus::ON_DROP;
+    TouchLocationInfo tinfo("test", 0);
+    tinfo.touchType_ = TouchType::MOVE;
+    info.touches_.push_back(tinfo);
+    pattern_->selectOverlay_->touchAtHandle_ = true;
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto manager = AceType::MakeRefPtr<SelectContentOverlayManager>(textFieldNode);
+    pattern_->selectOverlay_->OnBind(manager);
+    pattern_->HandleTouchEvent(info);
+    EXPECT_TRUE(pattern_->selectOverlay_->IsTouchAtHandle(info));
+
+    pattern_->selectOverlay_->touchAtHandle_ = false;
+    info.changedTouches_.push_back(tinfo);
+    pattern_->moveCaretState_.isMoveCaret = false;
+    pattern_->moveCaretState_.isTouchCaret = false;
     pattern_->ProcessOverlay();
-    pattern_->selectController_->firstHandleInfo_.index = 1;
-    pattern_->selectController_->secondHandleInfo_.index = 2;
-    pattern_->processOverlayDelayTask_ = nullptr;
-    pattern_->needToRefreshSelectOverlay_ = true;
-    pattern_->ProcessOverlayAfterLayout(prevOffset1);
-    EXPECT_FALSE(pattern_->isCaretTwinkling_);
+    pattern_->isSelecting_ = false;
+    pattern_->HandleTouchEvent(info);
+    OffsetF offset(-1.0f, -1.0f);
+    EXPECT_TRUE(pattern_->originCaretPosition_ == offset);
 }
 
 /**
- * @tc.name: CheckSelectAreaVisible001
- * @tc.desc: test CheckSelectAreaVisible
+ * @tc.name: OnDragDrop001
+ * @tc.desc: test text_field_pattern.cpp OnDragDrop function,
+    case (gesturePressedCodes.size() == 1) && ((gesturePressedCodes[0] == KeyCode::KEY_CTRL_LEFT) ||
+        (gesturePressedCodes[0] == KeyCode::KEY_CTRL_RIGHT)),
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestNine, CheckSelectAreaVisible001, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestNine, OnDragDrop001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
     });
     GetFocus();
 
+    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    std::string str("test");
+    pattern_->dragStatus_ = DragStatus::DRAGGING;
+    event->pressedKeyCodes_.push_back(KeyCode::KEY_CTRL_RIGHT);
+    event->unifiedData_ = AceType::MakeRefPtr<MockUnifiedData>();
+    pattern_->OnDragDrop()(event, str);
+    EXPECT_EQ(event->GetPressedKeyCodes().size(), 1);
+    EXPECT_FALSE(pattern_->releaseInDrop_);
+
+    event->pressedKeyCodes_.push_back(KeyCode::KEY_CAPS_LOCK);
+    pattern_->OnDragDrop()(event, str);
+    EXPECT_EQ(event->GetPressedKeyCodes().size(), 2);
+    EXPECT_FALSE(pattern_->releaseInDrop_);
+}
+
+/**
+ * @tc.name: InitDragDropCallBack001
+ * @tc.desc: test text_field_pattern.cpp InitDragDropCallBack function,
+    case pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host),
+        pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto eventHub = host->GetEventHub<EventHub>();
+    pattern_->InitDragDropCallBack();
+    RefPtr<OHOS::Ace::DragEvent> event  = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    const std::string extraParams("test");
+    auto paintProperty = pattern_->GetPaintProperty<TextFieldPaintProperty>();
     auto tmpHost = pattern_->GetHost();
-    auto pipeline = tmpHost->GetContextRefPtr();
-    pipeline->safeAreaManager_->keyboardInset_.start = 1;
-    pipeline->safeAreaManager_->keyboardInset_.end = 4;
-    pattern_->selectController_->caretInfo_.rect.y_ = 5;
-    pattern_->selectController_->caretInfo_.rect.width_  = 1;
-    pattern_->selectController_->caretInfo_.rect.x_ = 1;
-    auto ret = pattern_->CheckSelectAreaVisible();
-    EXPECT_FALSE(ret);
-}
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    layoutProperty->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    auto pipeline = pattern_->GetContext();
+    auto dragManager = pipeline->GetDragDropManager();
+    host->isDisallowDropForcedly_ = false;
+    eventHub->onDragEnter_(event, extraParams);
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
 
-/**
- * @tc.name: CursorMove001
- * @tc.desc: test CursorMove
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNine, CursorMove001, TestSize.Level0)
-{
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetType(TextInputType::VISIBLE_PASSWORD);
-    });
-    GetFocus();
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
 
-    CaretMoveIntent direction = static_cast<CaretMoveIntent>(130);
-    int32_t originCaretPosition = pattern_->selectController_->GetCaretIndex();
-    pattern_->CursorMove(direction);
-    EXPECT_TRUE(originCaretPosition == pattern_->selectController_->GetCaretIndex());
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    layoutProperty->UpdateTextInputType(TextInputType::JS_ENUM_URL);
+    host->previewOption_.enableEdgeAutoScroll = false;
+    eventHub->onDragMove_(event, extraParams);
+    EXPECT_FALSE(pattern_->contentScroller_.isScrolling);
+
+    eventHub->onDragLeave_(event, extraParams);
+    EXPECT_FALSE(pattern_->isCaretTwinkling_);
 }
 } // namespace OHOS::Ace::NG,
