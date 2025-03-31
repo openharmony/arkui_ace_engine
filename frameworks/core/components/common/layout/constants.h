@@ -669,6 +669,11 @@ enum class PixelRoundCalcPolicy {
     FORCE_FLOOR = 2,
 };
 
+enum class PixelRoundMode {
+    PIXEL_ROUND_ON_LAYOUT_FINISH = 0,
+    PIXEL_ROUND_AFTER_MEASURE = 1,
+};
+
 enum class LayoutCalPolicy {
     NO_MATCH = 0,
     MATCH_PARENT = 1,

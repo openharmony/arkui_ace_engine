@@ -65,6 +65,14 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     frameSize_.AddHeight(info_.contentEndPadding_);
     auto&& safeAreaOpts = gridLayoutProperty->GetSafeAreaExpandOpts();
     expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
+    auto host = layoutWrapper->GetHostNode();
+    if (host) {
+        auto pipeline = host->GetContext();
+        if (pipeline && pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE) {
+            frameSize_.SetWidth(round(frameSize_.Width()));
+            frameSize_.SetHeight(round(frameSize_.Height()));
+        }
+    }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.childrenCount_);
 
