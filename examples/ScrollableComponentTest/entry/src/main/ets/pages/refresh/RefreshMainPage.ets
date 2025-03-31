@@ -29,18 +29,14 @@ class TextList {
 
 @Entry
 @Component
-struct IndexPage {
+struct RefreshMainPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
-    new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
-    new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
-    new TextList(4, 'SwiperMainPage', 'pages/Swiper/SwiperMainPage'),
-    new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
-    new TextList(6, 'AlphabetIndexer', 'pages/alphabetIndexer/AlphabetIndexerMainPage'),
-    new TextList(7, 'Refresh', 'pages/refresh/RefreshMainPage'),
+    new TextList(1, 'Back', 'pages/Index'),
+    new TextList(2, 'RefreshingContent', 'pages/refresh/RefreshingContent'),
   ]
   @State fontSize: Resource | undefined = undefined
+
   build() {
     Column() {
       Scroll(this.scroll) {
