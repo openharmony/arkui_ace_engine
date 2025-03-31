@@ -18,6 +18,7 @@
 #include "richeditor_accessor_test.h"
 
 #include "core/components_ng/pattern/text/span/span_string.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -67,6 +68,7 @@ static constexpr double FONT_SIZE = 12.0;
 static constexpr OHOS::Ace::FontWeight FONT_WEIGHT = OHOS::Ace::FontWeight::BOLD;
 static constexpr OHOS::Ace::FontStyle FONT_STYLE = OHOS::Ace::FontStyle::ITALIC;
 static const OHOS::Ace::Color FONT_COLOUR = OHOS::Ace::Color::RED;
+static constexpr int TEST_NODE_ID = 333;
 
 namespace OHOS::Ace::NG {
 
@@ -169,11 +171,8 @@ public:
     MOCK_METHOD(void, UpdateSpanStyle, (int32_t, int32_t, TextStyle, ImageSpanAttribute));
     MOCK_METHOD(void, UpdateParagraphStyle, (int32_t, int32_t, const struct UpdateParagraphStyle&));
     MOCK_METHOD(void, DeleteSpans, (const RangeOptions&));
-    MOCK_METHOD(SelectionInfo, GetSpansInfo, (int32_t start, int32_t end));
     MOCK_METHOD(std::vector<ParagraphInfo>, GetParagraphsInfo, (int32_t start, int32_t end));
-    MOCK_METHOD(SelectionInfo, GetSelectionSpansInfo, ());
     MOCK_METHOD(RefPtr<SpanStringBase>, ToStyledString, (int32_t, int32_t));
-    MOCK_METHOD(SelectionInfo, FromStyledString, (RefPtr<SpanStringBase>));
 };
 } // namespace
 
@@ -193,16 +192,34 @@ public:
         peerImpl->AddTargetController(mockRichEditorControllerKeeper_);
 
         ASSERT_NE(mockRichEditorController_, nullptr);
+
+        SetupTheme<RichEditorTheme>();
     }
 
     void TearDown() override
     {
         mockRichEditorControllerKeeper_ = nullptr;
         mockRichEditorController_ = nullptr;
+        richEditorPattern_ = nullptr;
+        richEditorNode_ = nullptr;
+    }
+
+    RefPtr<RichEditorPattern> GetRichEditorPattern()
+    {
+        richEditorNode_ = FrameNode::GetOrCreateFrameNode(
+            V2::RICH_EDITOR_ETS_TAG, TEST_NODE_ID, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+        CHECK_NULL_RETURN(richEditorNode_, nullptr);
+        richEditorPattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+        CHECK_NULL_RETURN(richEditorPattern_, nullptr);
+        richEditorPattern_->SetRichEditorController(AceType::Claim(mockRichEditorController_));
+        mockRichEditorController_->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern_)));
+        return richEditorPattern_;
     }
 
     MockRichEditorController *mockRichEditorController_ = nullptr;
     RefPtr<MockRichEditorController> mockRichEditorControllerKeeper_ = nullptr;
+    RefPtr<FrameNode> richEditorNode_ = nullptr;;
+    RefPtr<RichEditorPattern> richEditorPattern_ = nullptr;
     Ark_VMContext vmContext_ = nullptr;
 };
 
@@ -369,13 +386,48 @@ HWTEST_F(RichEditorControllerAccessorTest, deleteSpansTest, TestSize.Level1)
 HWTEST_F(RichEditorControllerAccessorTest, getSpansTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSpans, nullptr);
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextStyle style;
+    style.SetFontFamilies(FONT_FAMILIES);
+    style.SetFontSize(Dimension(FONT_SIZE));
+    style.SetFontWeight(FONT_WEIGHT);
+    style.SetFontStyle(FONT_STYLE);
+    style.SetTextColor(FONT_COLOUR);
+
+    TextSpanOptions textSpanOptions;
+    textSpanOptions.value = TEST_VALUE;
+    textSpanOptions.style = style;
+
+    richEditorPattern->InsertValueByPaste(TEST_VALUE);
+    richEditorPattern->AddTextSpan(textSpanOptions);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length() * 2);
+
     RangeOptions options;
-    options.start = TEST_START;
-    options.end = TEST_END;
+    options.start = TEST_VALUE.length();
+    options.end = TEST_VALUE.length() * 2;
 
     auto value = Converter::ArkValue<Opt_RichEditorRange>(options);
-    EXPECT_CALL(*mockRichEditorController_, GetSpansInfo(TEST_START, TEST_END)).Times(1);
-    accessor_->getSpans(peer_, &value);
+    auto spans = accessor_->getSpans(peer_, &value);
+
+    ASSERT_TRUE(spans.length == 1);
+    auto spansVec =
+        Converter::Convert<std::vector<Ark_Union_RichEditorImageSpanResult_RichEditorTextSpanResult>>(spans);
+    auto result = spansVec.front();
+    auto textStyle = result.value1.textStyle;
+    auto fzize = Converter::Convert<double>(textStyle.fontSize);
+    EXPECT_EQ(fzize, FONT_SIZE);
+    auto fontFamily = Converter::Convert<std::string>(textStyle.fontFamily);
+    EXPECT_EQ(fontFamily, FONT_FAMILIES[0]);
+    auto fontWeight = Converter::Convert<int32_t>(textStyle.fontWeight);
+    EXPECT_EQ(static_cast<OHOS::Ace::FontWeight>(fontWeight), FONT_WEIGHT);
+    auto fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(textStyle.fontStyle);
+    ASSERT_TRUE(fontStyle.has_value());
+    EXPECT_EQ(fontStyle.value(), FONT_STYLE);
+    auto fontColor = Converter::OptConvert<Color>(textStyle.fontColor);
+    ASSERT_TRUE(fontColor.has_value());
+    EXPECT_EQ(fontColor.value(), FONT_COLOUR);
 }
 
 /**
@@ -403,8 +455,46 @@ HWTEST_F(RichEditorControllerAccessorTest, getParagraphsTest, TestSize.Level1)
 HWTEST_F(RichEditorControllerAccessorTest, getSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getSelection, nullptr);
-    EXPECT_CALL(*mockRichEditorController_, GetSelectionSpansInfo()).Times(1);
-    accessor_->getSelection(peer_);
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextStyle style;
+    style.SetFontFamilies(FONT_FAMILIES);
+    style.SetFontSize(Dimension(FONT_SIZE));
+    style.SetFontWeight(FONT_WEIGHT);
+    style.SetFontStyle(FONT_STYLE);
+    style.SetTextColor(FONT_COLOUR);
+
+    TextSpanOptions textSpanOptions;
+    textSpanOptions.value = TEST_VALUE;
+    textSpanOptions.style = style;
+
+    richEditorPattern->InsertValueByPaste(TEST_VALUE);
+    richEditorPattern->AddTextSpan(textSpanOptions);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length() * 2);
+
+    auto selection = accessor_->getSelection(peer_);
+    EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value0), TEST_VALUE.length() * 2);
+    EXPECT_EQ(Converter::Convert<int32_t>(selection.selection.value1), TEST_VALUE.length() * 2);
+
+    auto spans = selection.spans;
+    ASSERT_TRUE(spans.length == 1);
+    auto spansVec =
+        Converter::Convert<std::vector<Ark_Union_RichEditorTextSpanResult_RichEditorImageSpanResult>>(spans);
+    auto result = spansVec.front();
+    auto textStyle = result.value0.textStyle;
+    auto fzize = Converter::Convert<double>(textStyle.fontSize);
+    EXPECT_EQ(fzize, FONT_SIZE);
+    auto fontFamily = Converter::Convert<std::string>(textStyle.fontFamily);
+    EXPECT_EQ(fontFamily, FONT_FAMILIES[0]);
+    auto fontWeight = Converter::Convert<int32_t>(textStyle.fontWeight);
+    EXPECT_EQ(static_cast<OHOS::Ace::FontWeight>(fontWeight), FONT_WEIGHT);
+    auto fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(textStyle.fontStyle);
+    ASSERT_TRUE(fontStyle.has_value());
+    EXPECT_EQ(fontStyle.value(), FONT_STYLE);
+    auto fontColor = Converter::OptConvert<Color>(textStyle.fontColor);
+    ASSERT_TRUE(fontColor.has_value());
+    EXPECT_EQ(fontColor.value(), FONT_COLOUR);
 }
 
 /**
@@ -415,10 +505,43 @@ HWTEST_F(RichEditorControllerAccessorTest, getSelectionTest, TestSize.Level1)
 HWTEST_F(RichEditorControllerAccessorTest, fromStyledStringTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->fromStyledString, nullptr);
-    RefPtr<SpanStringBase> updateSpanStyle = Referenced::MakeRefPtr<SpanString>(TEST_VALUE);
-    Ark_StyledString inValue = StyledStringPeer::Create(updateSpanStyle);
-    EXPECT_CALL(*mockRichEditorController_, FromStyledString(updateSpanStyle)).Times(1);
-    accessor_->fromStyledString(vmContext_, peer_, inValue);
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    TextStyle style;
+    style.SetFontSize(Dimension(FONT_SIZE));
+    style.SetFontWeight(FONT_WEIGHT);
+    style.SetFontStyle(FONT_STYLE);
+    style.SetTextColor(FONT_COLOUR);
+
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateFontSize = FONT_SIZE;
+    updateSpanStyle.updateTextColor = FONT_COLOUR;
+    updateSpanStyle.updateFontWeight = FONT_WEIGHT;
+    updateSpanStyle.updateItalicFontStyle = FONT_STYLE;
+
+    auto spanString = richEditorPattern->CreateStyledStringByTextStyle(TEST_VALUE, updateSpanStyle, style);
+    richEditorPattern->InsertSpanByBackData(spanString);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length());
+
+    Ark_StyledString inValue = StyledStringPeer::Create(spanString);
+    auto spans = accessor_->fromStyledString(vmContext_, peer_, inValue);
+    ASSERT_TRUE(spans.length == 1);
+    auto spansVec =
+        Converter::Convert<std::vector<Ark_RichEditorSpan>>(spans);
+    auto result = spansVec.front();
+    auto textStyle = result.value1.textStyle;
+    auto fzize = Converter::Convert<double>(textStyle.fontSize);
+    EXPECT_EQ(fzize, FONT_SIZE);
+    auto fontWeight = Converter::Convert<int32_t>(textStyle.fontWeight);
+    EXPECT_EQ(static_cast<OHOS::Ace::FontWeight>(fontWeight), FONT_WEIGHT);
+    auto fontStyle = Converter::OptConvert<OHOS::Ace::FontStyle>(textStyle.fontStyle);
+    ASSERT_TRUE(fontStyle.has_value());
+    EXPECT_EQ(fontStyle.value(), FONT_STYLE);
+    auto fontColor = Converter::OptConvert<Color>(textStyle.fontColor);
+    ASSERT_TRUE(fontColor.has_value());
+    EXPECT_EQ(fontColor.value(), FONT_COLOUR);
+
     StyledStringPeer::Destroy(inValue);
 }
 

@@ -108,7 +108,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
     str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value_or(CalcDimension()).ToString(), ctx);
     dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
-    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature);
+    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature, ctx);
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
