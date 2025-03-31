@@ -157,7 +157,7 @@ private:
     bool CustomSpanMeasure(const RefPtr<CustomSpanItem>& customSpanItem, LayoutWrapper* layoutWrapper);
     bool PlaceholderSpanMeasure(const RefPtr<PlaceholderSpanItem>& placeholderSpanItem,
         const RefPtr<LayoutWrapper>& layoutWrapper, const LayoutConstraintF& layoutConstrain);
-    void UpdateSymbolStyle(TextStyle& textStyle);
+    void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
