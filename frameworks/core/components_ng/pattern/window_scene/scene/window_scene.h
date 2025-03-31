@@ -68,15 +68,11 @@ private:
     void CleanBlankWindow();
     void SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void SetOpacityAnimation(RefPtr<FrameNode>& window);
-    void PostDelayTask();
-    void PostDelayTaskForSnapshot();
-    void CleanSnapshot();
 
     bool destroyed_ = false;
     OHOS::Rosen::WindowMode initWindowMode_ = OHOS::Rosen::WindowMode::WINDOW_MODE_UNDEFINED;
     CancelableCallback<void()> deleteWindowTask_;
     CancelableCallback<void()> removeStartingWindowTask_;
-    CancelableCallback<void()> removeSnapshotWindowTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowScene);
 };

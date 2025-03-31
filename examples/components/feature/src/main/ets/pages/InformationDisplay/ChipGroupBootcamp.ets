@@ -47,6 +47,13 @@ export struct ChipGroupBootcamp {
   @State enableChipGroupChipGroupPaddingBottom: boolean = false
   @State chipGroupChipGroupPaddingBottom: number = 14
 
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
+
   build() {
     NavDestination() {
       Drawer({
@@ -54,6 +61,9 @@ export struct ChipGroupBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic:() =>{
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -146,12 +156,13 @@ export struct ChipGroupBootcamp {
           console.log('chips on clicked, activated index ' + activatedChipsIndex)
         },
       })
+          .id('ChipGroup')
     }
   }
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'options.itemStyle.size',
@@ -238,6 +249,15 @@ export struct ChipGroupBootcamp {
           max: 28
         })
       }
+    }
+    .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+    Column(){
+
     }
     .height('52%')
   }

@@ -1663,8 +1663,7 @@ private:
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
     void UpdateTextFieldBgColor(const Color& color);
-    void ChangeMouseState(
-        const Offset location, int32_t frameId, bool isByPass = false);
+    void ChangeMouseState(const Offset location, int32_t frameId);
     void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);
@@ -1874,6 +1873,8 @@ private:
     void ProcessAutoFillOnFocus();
     bool IsStopEditWhenCloseKeyboard();
     void SetIsEnableSubWindowMenu();
+    void OnReportPasteEvent(const RefPtr<FrameNode>& frameNode);
+    void OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode);
 
     RectF frameRect_;
     RectF textRect_;

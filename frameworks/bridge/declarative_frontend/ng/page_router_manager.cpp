@@ -22,6 +22,7 @@
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
 #include "core/components_ng/pattern/stage/page_node.h"
@@ -443,12 +444,16 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     DialogProperties dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
+            { .text = dialogTheme->GetConfirmText(), .textColor = "" } },
         .onSuccess =
             [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
                 int32_t successType, int32_t successIndex) {

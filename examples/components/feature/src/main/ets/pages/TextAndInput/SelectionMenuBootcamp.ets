@@ -12,8 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { SelectionMenu, EditorMenuOptions, ExpandedMenuOptions, EditorEventInfo, SelectionMenuOptions } from '@kit.ArkUI'
+import {
+  SelectionMenu,
+  EditorMenuOptions,
+  ExpandedMenuOptions,
+  EditorEventInfo,
+  SelectionMenuOptions,
+  curves
+} from '@kit.ArkUI'
 import { Drawer, RadioBlock } from 'common';
+
 @Component
 export struct SelectionMenuBootcamp {
   controller: RichEditorController = new RichEditorController();
@@ -36,9 +44,12 @@ export struct SelectionMenuBootcamp {
   @State visibleValue: Visibility = Visibility.Visible;
   @State colorTransparent: Color = Color.Transparent;
   @State textStyle: RichEditorTextStyle = {};
+  @State selection: string | null = null;
+  scroller: Scroller = new Scroller()
   @State editorMenuOptions: Array<EditorMenuOptions> =
     [
-      { icon: $r('app.media.text_bold'), action: () => {
+      {
+        icon: $r('app.media.text_bold'), action: () => {
         if (this.controller) {
           let selection = this.controller.getSelection();
           let spans = selection.spans
@@ -62,8 +73,10 @@ export struct SelectionMenuBootcamp {
             }
           })
         }
-      } },
-      { icon: $r('app.media.text_tiltle'), action: () => {
+      }
+      },
+      {
+        icon: $r('app.media.text_tiltle'), action: () => {
         if (this.controller) {
           let selection = this.controller.getSelection();
           let spans = selection.spans;
@@ -87,39 +100,46 @@ export struct SelectionMenuBootcamp {
             }
           })
         }
-      } },
-      { icon: $r('app.media.underline'), action: () => {
-          if (this.controller) {
-            let selection = this.controller.getSelection();
-            let spans = selection.spans;
-            spans.forEach((item: RichEditorTextSpanResult | RichEditorImageSpanResult, index) => {
-              if (typeof (item as RichEditorTextSpanResult)['textStyle'] != 'undefined') {
-                let span = item as RichEditorTextSpanResult;
-                this.textStyle = span.textStyle;
-                let start = span.offsetInSpan[0];
-                let end = span.offsetInSpan[1];
-                let offset = span.spanPosition.spanRange[0];
-                if (this.textStyle.decoration) {
-                  if (this.textStyle.decoration.type == TextDecorationType.Underline) {
-                    this.textStyle.decoration.type = TextDecorationType.None;
-                  } else {
-                    this.textStyle.decoration.type = TextDecorationType.Underline;
-                  }
+      }
+      },
+      {
+        icon: $r('app.media.underline'), action: () => {
+        if (this.controller) {
+          let selection = this.controller.getSelection();
+          let spans = selection.spans;
+          spans.forEach((item: RichEditorTextSpanResult | RichEditorImageSpanResult, index) => {
+            if (typeof (item as RichEditorTextSpanResult)['textStyle'] != 'undefined') {
+              let span = item as RichEditorTextSpanResult;
+              this.textStyle = span.textStyle;
+              let start = span.offsetInSpan[0];
+              let end = span.offsetInSpan[1];
+              let offset = span.spanPosition.spanRange[0];
+              if (this.textStyle.decoration) {
+                if (this.textStyle.decoration.type == TextDecorationType.Underline) {
+                  this.textStyle.decoration.type = TextDecorationType.None;
                 } else {
-                  this.textStyle.decoration = { type: TextDecorationType.Underline, color: Color.Black }
+                  this.textStyle.decoration.type = TextDecorationType.Underline;
                 }
-                this.controller.updateSpanStyle({
-                  start: offset + start,
-                  end: offset + end,
-                  textStyle: this.textStyle
-                })
+              } else {
+                this.textStyle.decoration = { type: TextDecorationType.Underline, color: Color.Black }
               }
-            })
-          }
-        } },
-      { icon: $r('app.media.app_icon'), action: () => {},
-        builder: (): void => this.sliderPanel() },
-      { icon: $r('app.media.text_color'), action: () => {
+              this.controller.updateSpanStyle({
+                start: offset + start,
+                end: offset + end,
+                textStyle: this.textStyle
+              })
+            }
+          })
+        }
+      }
+      },
+      {
+        icon: $r('app.media.app_icon'), action: () => {
+      },
+        builder: (): void => this.sliderPanel()
+      },
+      {
+        icon: $r('app.media.text_color'), action: () => {
         if (this.controller) {
           let selection = this.controller.getSelection();
           let spans = selection.spans;
@@ -143,14 +163,23 @@ export struct SelectionMenuBootcamp {
             }
           })
         }
-      } }
+      }
+      }
     ]
-
   @State expandedMenuOptions: Array<ExpandedMenuOptions> =
     [
-      { startIcon: $r('app.media.icon'), content: '词典', action: () => {} },
-      { startIcon: $r('app.media.icon'), content: '翻译', action: () => {} },
-      { startIcon: $r('app.media.icon'), content: '搜索', action: () => {} }
+      {
+        startIcon: $r('app.media.icon'), content: '词典', action: () => {
+      }
+      },
+      {
+        startIcon: $r('app.media.icon'), content: '翻译', action: () => {
+      }
+      },
+      {
+        startIcon: $r('app.media.icon'), content: '搜索', action: () => {
+      }
+      }
     ]
   @State onCut: SelectionMenuOptions = {
     controller: this.controller,
@@ -208,7 +237,6 @@ export struct SelectionMenuBootcamp {
       }
     }
   }
-
   @State selectionMenuOptions: SelectionMenuOptions = {
     editorMenuOptions: this.editorMenuOptions,
     expandedMenuOptions: this.expandedMenuOptions,
@@ -258,6 +286,11 @@ export struct SelectionMenuBootcamp {
       }
     }
   }
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
+
   build() {
     NavDestination() {
       Drawer({
@@ -265,6 +298,9 @@ export struct SelectionMenuBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -277,7 +313,7 @@ export struct SelectionMenuBootcamp {
 
   @Builder
   Content() {
-    Column(){
+    Column() {
       Button('SetSelection')
         .onClick((event: ClickEvent) => {
           if (this.controller) {
@@ -307,7 +343,7 @@ export struct SelectionMenuBootcamp {
 
   @Builder
   Parameters() {
-    Scroll(){
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'selectionMenuOptions',
@@ -378,8 +414,52 @@ export struct SelectionMenuBootcamp {
     .height('52%')
   }
 
+  @Builder
+  ListItemGroupHeaders(str: string) {
+    Row() {
+      Text(str)
+        .fontColor($r('sys.color.ohos_id_color_text_primary'))
+        .fontWeight(FontWeight.Medium)
+      Blank()
+      Image($r('sys.media.ohos_ic_public_arrow_right'))
+        .fillColor($r('sys.color.ohos_id_color_fourth'))
+        .height(24)
+        .width(24)
+        .rotate({ angle: this.selection == str ? 90 : 0 })
+        .animation({ curve: curves.interpolatingSpring(0, 1, 228, 30) })
+    }
+    .borderRadius(20)
+    .width('100%')
+    .padding({
+      left: 8,
+      right: 8,
+      top: 18,
+      bottom: 18
+    })
 
-  @Builder Menu() {
+    .onClick(() => {
+      if (this.selection === str) {
+        this.selection = null;
+      } else {
+        this.selection = str;
+        AppStorage.setOrCreate('selection', this.selection)
+      }
+    })
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+      Column({ space: 8 }) {
+
+      }.width('100%')
+    }
+    .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Menu() {
     Column() {
       SelectionMenu({
         editorMenuOptions: this.editorMenuOptions,
@@ -391,7 +471,8 @@ export struct SelectionMenuBootcamp {
     .backgroundColor(Color.Transparent)
   }
 
-  @Builder sliderPanel() {
+  @Builder
+  sliderPanel() {
     Column() {
       Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
         Text('A').fontSize(15)
@@ -432,12 +513,11 @@ export struct SelectionMenuBootcamp {
     .padding(15)
     .height(48)
   }
-
 }
 
 @Preview
 @Component
-struct SelectionMenuBootcampPreviewer{
+struct SelectionMenuBootcampPreviewer {
   build() {
     SelectionMenuBootcamp({
       title: '文本选择菜单/SelectionMenu'

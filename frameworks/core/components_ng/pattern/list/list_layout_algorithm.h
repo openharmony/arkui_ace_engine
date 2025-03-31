@@ -368,7 +368,7 @@ public:
 
     void HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
 
-    void HandleJumpCenter(LayoutWrapper* layoutWrapper);
+    virtual void HandleJumpCenter(LayoutWrapper* layoutWrapper);
 
     void HandleJumpStart(LayoutWrapper* layoutWrapper);
 

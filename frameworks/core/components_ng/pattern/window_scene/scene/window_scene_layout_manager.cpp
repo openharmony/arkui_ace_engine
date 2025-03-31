@@ -98,7 +98,7 @@ uint64_t WindowSceneLayoutManager::GetScreenId(const RefPtr<FrameNode>& screenNo
     CHECK_NULL_RETURN(pattern, SCREEN_ID_INVALID);
     auto screenSession = pattern->GetScreenSession();
     CHECK_NULL_RETURN(screenSession, SCREEN_ID_INVALID);
-    return screenSession->GetScreenId();
+    return screenSession->GetRSScreenId();
 }
 
 void WindowSceneLayoutManager::UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,

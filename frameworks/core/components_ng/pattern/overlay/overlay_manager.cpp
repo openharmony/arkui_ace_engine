@@ -786,8 +786,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     ContainerScope scope(currentId);
     auto root = node->GetParent();
     CHECK_NULL_VOID(root);
-    node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_CLOSE);
     DeleteDialogHotAreas(node);
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "remove DialogNode/%{public}d from RootNode/%{public}d",
         node->GetId(), root->GetId());
@@ -849,8 +848,7 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
                            ? dialogPattern->GetOpenAnimation().value().GetDuration()
                            : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
-    node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
 }
 
 void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
@@ -964,8 +962,16 @@ void OverlayManager::SetDialogTransitionEffect(const RefPtr<FrameNode>& node, co
     MountToParentWithService(root, node, dialogProps.levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    node->OnAccessibilityEvent(
-        AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
+}
+void OverlayManager::SendDialogAccessibilityEvent(const RefPtr<FrameNode>& node, AccessibilityEventType eventType)
+{
+    auto dialogPattern = node->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    DialogProperties props = dialogPattern->GetDialogProperties();
+    if (!props.isMask) {
+        node->OnAccessibilityEvent(eventType, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+    }
 }
 
 void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
@@ -2736,10 +2742,6 @@ RefPtr<FrameNode> OverlayManager::SetDialogMask(const DialogProperties& dialogPr
     Maskarg.autoCancel = dialogProps.autoCancel;
     Maskarg.onWillDismiss = dialogProps.onWillDismiss;
     Maskarg.maskColor = dialogProps.maskColor;
-    Maskarg.onWillAppear = dialogProps.onWillAppear;
-    Maskarg.onDidAppear = dialogProps.onDidAppear;
-    Maskarg.onWillDisappear = dialogProps.onWillDisappear;
-    Maskarg.onDidDisappear = dialogProps.onDidDisappear;
     Maskarg.focusable = dialogProps.focusable;
     return ShowDialog(Maskarg, nullptr, false);
 }
@@ -3840,9 +3842,12 @@ int32_t OverlayManager::WebBackward(RefPtr<NG::FrameNode>& overlay)
     bool isNavDestination = false;
     FindWebNode(overlay, webNode, isNavDestination);
     if (webNode && InstanceOf<WebPattern>(webNode->GetPattern())) {
+        if (isNavDestination) {
+            return OVERLAY_NOTHING;
+        }
         auto webPattern = DynamicCast<WebPattern>(webNode->GetPattern());
         CHECK_NULL_RETURN(webPattern, OVERLAY_EXISTS);
-        if (webPattern->Backward() && !isNavDestination) {
+        if (webPattern->Backward()) {
             return OVERLAY_REMOVE;
         }
     }

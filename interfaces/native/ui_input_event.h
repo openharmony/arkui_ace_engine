@@ -887,7 +887,7 @@ int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* eve
 *
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the width of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetWidth(const ArkUI_UIInputEvent* event);
 
@@ -896,7 +896,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetWidth(const ArkUI_UIInputEvent* event)
 *
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the height of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetHeight(const ArkUI_UIInputEvent* event);
 
@@ -905,7 +905,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetHeight(const ArkUI_UIInputEvent* event
 *
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the X coordinate of the component hit by the event; returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetPositionX(const ArkUI_UIInputEvent* event);
 
@@ -915,7 +915,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetPositionX(const ArkUI_UIInputEvent* ev
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the Y coordinate of the component hit by the event;
 *         returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetPositionY(const ArkUI_UIInputEvent* event);
 
@@ -925,7 +925,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetPositionY(const ArkUI_UIInputEvent* ev
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the global X coordinate of the component hit by the event;
 *         returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(const ArkUI_UIInputEvent* event);
 
@@ -935,7 +935,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX(const ArkUI_UIInputEve
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns the global Y coordinate of the component hit by the event;
 *         returns <b>0.0f</b> if any parameter error occurs.
-* @since 18
+* @since 17
 */
 float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(const ArkUI_UIInputEvent* event);
 
@@ -945,7 +945,7 @@ float OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY(const ArkUI_UIInputEve
 * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
 * @return Returns <b>true</b> if the cursor is hovering over the current component.
 *         Returns <b>false</b> if the cursor is not hovering over the current component.
-* @since 18
+* @since 17
 */
 bool OH_ArkUI_HoverEvent_IsHovered(const ArkUI_UIInputEvent* event);
 
@@ -958,7 +958,7 @@ bool OH_ArkUI_HoverEvent_IsHovered(const ArkUI_UIInputEvent* event);
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_UIInputEvent_GetModifierKeyStates(const ArkUI_UIInputEvent* event, uint64_t* keys);
 
@@ -1026,7 +1026,7 @@ int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool propagation);
 
@@ -1035,7 +1035,7 @@ int32_t OH_ArkUI_AxisEvent_SetPropagation(const ArkUI_UIInputEvent* event, bool 
  *
  * @param event Pointer to the UI input event.
  * @return Returns the scroll step configuration of the mouse wheel axis event.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_AxisEvent_GetScrollStep(const ArkUI_UIInputEvent* event);
 

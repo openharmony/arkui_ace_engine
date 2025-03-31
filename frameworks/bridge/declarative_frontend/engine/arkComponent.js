@@ -5123,6 +5123,73 @@ class UICommonEvent {
   }
 }
 
+class UIScrollableCommonEvent extends UICommonEvent {
+  setOnReachStart(callback) {
+    this._onReachStartEvent = callback;
+    getUINativeModule().frameNode.setOnReachStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnReachEnd(callback) {
+    this._onReachEndEvent = callback;
+    getUINativeModule().frameNode.setOnReachEnd(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStart(callback) {
+    this._onScrollStartEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStop(callback) {
+    this._onScrollStopEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStop(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollFrameBegin(callback) {
+    this._onScrollFrameBeginEvent = callback;
+    getUINativeModule().frameNode.setOnScrollFrameBegin(this._nodePtr, callback, this._instanceId);
+  }
+  setOnWillScroll(callback) {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback) {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIListEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnListScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollVisibleContentChange(callback){
+    this._onScrollVisibleContentEvent = callback;
+    getUINativeModule().frameNode.setOnScrollVisibleContentChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIScrollEvent extends UIScrollableCommonEvent {
+  setOnWillScroll(callback) {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback) {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIGridEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onGridScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnGridScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIWaterFlowEvent extends UIScrollableCommonEvent {
+  setOnScrollIndex(callback) {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnWaterFlowScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
 function attributeModifierFunc(modifier, componentBuilder, modifierBuilder) {
   if (modifier === undefined || modifier === null) {
     ArkLogConsole.info("custom modifier is undefined");
@@ -5386,6 +5453,9 @@ function applyGesture(modifier, component) {
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -20188,10 +20258,6 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, MenuAlignModifier.identity, MenuAlignModifier, menuAlign);
     return this;
   }
-  avoidance(mode) {
-    modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
-    return this;
-  }
   menuBackgroundColor(value) {
     modifierWithKey(
       this._modifiersWithKeys, MenuBackgroundColorModifier.identity, MenuBackgroundColorModifier, value);
@@ -20238,6 +20304,10 @@ class ArkSelectComponent extends ArkComponent {
   menuOutline(outline) {
     modifierWithKey(
       this._modifiersWithKeys, MenuOutlineModifier.identity, MenuOutlineModifier, outline);
+    return this;
+  }
+  avoidance(mode) {
+    modifierWithKey(this._modifiersWithKeys, AvoidanceModifier.identity, AvoidanceModifier, mode);
     return this;
   }
 }
@@ -20456,22 +20526,6 @@ class MenuAlignModifier extends ModifierWithKey {
   }
 }
 MenuAlignModifier.identity = Symbol('selectMenuAlign');
-class AvoidanceModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().select.resetAvoidance(node);
-    } else {
-      getUINativeModule().select.setAvoidance(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-AvoidanceModifier.identity = Symbol('selectAvoidance');
 class SelectDividerModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -20814,6 +20868,22 @@ if (globalThis.Select !== undefined) {
     component.menuItemContentModifier(modifier);
   };
 }
+class AvoidanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetAvoidance(node);
+    } else {
+      getUINativeModule().select.setAvoidance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+AvoidanceModifier.identity = Symbol('selectAvoidance');
 
 /// <reference path='./import.ts' />
 class ArkRadioComponent extends ArkComponent {
@@ -30640,7 +30710,8 @@ class ListItemGroupInitializeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().listItemGroup.resetListItemGroupInitialize(node);
     } else {
-      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style, this.value?.headerComponent, this.value?.footerComponent);
+      getUINativeModule().listItemGroup.setListItemGroupInitialize(node, this.value?.space, this.value?.style,
+        this.value?.headerComponent, this.value?.footerComponent);
     }
   }
 }

@@ -440,7 +440,8 @@ void TabBarPattern::InitSurfaceChangedCallback()
 
 void TabBarPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = GetContext();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
@@ -1066,7 +1067,7 @@ void TabBarPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     InitTabBarProperties(theme);
     UpdateBackBlurStyle(theme);
-    
+
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     InitScrollableEvent(layoutProperty, gestureHub);
@@ -3684,5 +3685,19 @@ void TabBarPattern::UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_
     }
 
     std::swap(newInfo, info);
+}
+
+void TabBarPattern::ChangeIndex(int32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto totalCount = host->TotalChildCount() - MASK_COUNT;
+    if (NonPositive(totalCount)) {
+        return;
+    }
+    if (index < 0 || index >= totalCount) {
+        index = 0;
+    }
+    HandleClick(SourceType::NONE, index);
 }
 } // namespace OHOS::Ace::NG

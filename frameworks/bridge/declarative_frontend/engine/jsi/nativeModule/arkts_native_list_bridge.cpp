@@ -904,7 +904,7 @@ ArkUINativeModuleValue ListBridge::SetOnScrollIndex(ArkUIRuntimeCallInfo* runtim
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo)
+Local<panda::ObjectRef> ListBridge::SetListItemIndex(const EcmaVM* vm, const ListItemIndex indexInfo)
 {
     const char* keys[] = { "index", "itemIndexInGroup", "itemGroupArea" };
     auto indexInGroup = panda::NumberRef::Undefined(vm);

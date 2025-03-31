@@ -686,8 +686,12 @@ void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize,
         auto currentIndex = info_.endIndex_ + 1;
         cellAveLength_ = -1.0f;
         lastCross_ = 0;
+        auto childrenCount = info_.GetChildrenCount();
         for (uint32_t i = mainIter->second.size(); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
+            if (currentIndex >= childrenCount) {
+                break;
+            }
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
                 break;
@@ -856,11 +860,15 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
         (isTargetBackward && !info_.gridMatrix_.empty()) ? info_.gridMatrix_.rbegin()->first + 1 : 0;
     int32_t currentIndex = benchmarkIndex;
     int32_t headOfMainStartLine = currentIndex;
+    auto childrenCount = info_.GetChildrenCount();
 
     while (currentIndex < targetIndex) {
         int32_t crossGridReserve = info_.crossCount_;
         /* go through a new line */
         while ((crossGridReserve > 0) && (currentIndex <= targetIndex)) {
+            if (currentIndex >= childrenCount) {
+                return;
+            }
             auto currentWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex, false);
             CHECK_NULL_VOID(currentWrapper);
             auto layoutProperty = DynamicCast<GridItemLayoutProperty>(currentWrapper->GetLayoutProperty());
@@ -1064,6 +1072,21 @@ inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
 }
 } // namespace
 
+namespace {
+inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
+{
+    auto startLine = info_.gridMatrix_.find(info_.startMainLineIndex_);
+    if (startLine != info_.gridMatrix_.end() && !startLine->second.empty()) {
+        info_.startIndex_ = startLine->second.begin()->second;
+        return;
+    }
+
+    if (info_.endIndex_ < info_.childrenCount_ - 1) {
+        info_.startIndex_ = info_.endIndex_ + 1;
+    }
+}
+} // namespace
+
 bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
 {
     auto it = info_.gridMatrix_.find(line);
@@ -1107,7 +1130,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
         info_.currentOffset_ = mainLength;
         info_.prevOffset_ = info_.currentOffset_;
         info_.startMainLineIndex_ = line + 1;
-        info_.UpdateStartIndexByStartLine();
+        UpdateStartIndexByStartLine(info_);
     }
     return true;
 }
@@ -1958,6 +1981,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
 
     // if it fails to fill a new line backward, do [currentLine--]
     auto line = info_.gridMatrix_.find(currentLine);
+    auto childrenCount = info_.GetChildrenCount();
     if (info_.gridMatrix_.find(currentLine) != info_.gridMatrix_.end()) {
         if (line->second.size() < crossCount_) {
             lastCross_ = 0;
@@ -1969,9 +1993,10 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
             auto currentIndex = info_.endIndex_ + 1;
             for (uint32_t i = line->second.size(); i < crossCount_; i++) {
                 // Step1. Get wrapper of [GridItem]
+                CHECK_NULL_RETURN(currentIndex < childrenCount, -1.0f);
                 auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
                 if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-                    for (uint32_t y = i; y < crossCount_ && currentIndex < info_.GetChildrenCount(); y++) {
+                    for (uint32_t y = i; y < crossCount_ && currentIndex < childrenCount; y++) {
                         predictBuildList_.emplace_back(currentIndex++);
                     }
                     if (GreatOrEqual(cellAveLength_, 0.0f) &&
@@ -2014,13 +2039,13 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
     bool doneFillLine = false;
 
     for (uint32_t i = 0; i < crossCount_; i++) {
-        if (currentIndex >= info_.GetChildrenCount()) {
+        if (currentIndex >= childrenCount) {
             break;
         }
         // Step1. Get wrapper of [GridItem]
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper || itemWrapper->CheckNeedForceMeasureAndLayout()) {
-            for (uint32_t x = i; x < crossCount_ && currentIndex < info_.GetChildrenCount(); x++) {
+            for (uint32_t x = i; x < crossCount_ && currentIndex < childrenCount; x++) {
                 predictBuildList_.emplace_back(currentIndex++);
             }
             if (GreatOrEqual(cellAveLength_, 0.0f) &&

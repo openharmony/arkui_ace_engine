@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_EVENT_PASS_THROUGH_SUBSCRIBER_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_EVENT_PASS_THROUGH_SUBSCRIBER_H
 
+#include <mutex>
+
 #include "common_event_manager.h"
 #include "common_event_subscriber.h"
 #include "singleton.h"
@@ -40,6 +42,7 @@ public:
     bool EraseContainerAddCheckUnSubscribe(int32_t instanceId);
 private:
     std::set<int32_t> instanceMap_;
+    std::mutex instanceMapMutex_;
 };
 
 class EventPassThroughSubscribeProxy : public DelayedSingleton<EventPassThroughSubscribeProxy> {
@@ -55,6 +58,7 @@ public:
 private:
     std::shared_ptr<CommonEventSubscriber> eventReceiver_;
     std::shared_ptr<EventPassThroughSubscriber> eventPassThroughReceiver_;
+    std::mutex mutex_;
 };
 } // namespace OHOS::Ace
 

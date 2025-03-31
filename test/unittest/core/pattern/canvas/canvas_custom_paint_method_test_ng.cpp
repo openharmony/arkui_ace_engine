@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_mem.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
-#include "core/components_ng/pattern/canvas/canvas_paint_op.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"

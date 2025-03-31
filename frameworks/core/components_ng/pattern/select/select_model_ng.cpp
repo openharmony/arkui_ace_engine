@@ -364,11 +364,11 @@ void SelectModelNG::SetMenuAlign(const MenuAlign& menuAlign)
     pattern->SetMenuAlign(menuAlign);
 }
 
-void SelectModelNG::SetAvoidance(const Avoidance& avoidance)
+void SelectModelNG::SetAvoidance(AvoidanceMode mode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetAvoidance(avoidance);
+    pattern->SetAvoidance(mode);
 }
 
 void SelectModelNG::SetSelectChangeEvent(NG::SelectChangeEvent&& selectChangeEvent)
@@ -587,11 +587,11 @@ void SelectModelNG::SetMenuAlign(FrameNode* frameNode, const MenuAlign& menuAlig
     pattern->SetMenuAlign(menuAlign);
 }
 
-void SelectModelNG::SetAvoidance(FrameNode* frameNode, const Avoidance& avoidance)
+void SelectModelNG::SetAvoidance(FrameNode* frameNode, AvoidanceMode mode)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetAvoidance(avoidance);
+    pattern->SetAvoidance(mode);
 }
 
 void SelectModelNG::SetValue(FrameNode* frameNode, const std::string& value)
@@ -870,5 +870,34 @@ void SelectModelNG::SetMenuOutline(FrameNode* frameNode, const MenuParam& menuPa
     auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuOutline(menuParam);
+}
+
+void SelectModelNG::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTextModifierApply(textApply);
+}
+
+void SelectModelNG::SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowModifierApply(arrowApply);
+}
+
+void SelectModelNG::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOptionTextModifier(optionApply);
+}
+
+void SelectModelNG::SetSelectedOptionTextModifier(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedOptionTextModifier(optionSelectedApply);
 }
 } // namespace OHOS::Ace::NG

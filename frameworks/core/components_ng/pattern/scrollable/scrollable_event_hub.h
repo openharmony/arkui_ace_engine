@@ -107,6 +107,125 @@ public:
         return onReachEndEvent_;
     }
 
+    void SetJSFrameNodeOnReachStart(OnReachEvent&& onScroll)
+    {
+        onJSFrameNodeReachStartEvent_ = std::move(onScroll);
+    }
+
+    const OnReachEvent& GetJSFrameNodeOnReachStart() const
+    {
+        return onJSFrameNodeReachStartEvent_;
+    }
+
+    void ClearJSFrameNodeOnReachStart()
+    {
+        if (onJSFrameNodeReachStartEvent_) {
+            onJSFrameNodeReachStartEvent_ = nullptr;
+        }
+    }
+
+    void SetJSFrameNodeOnReachEnd(OnReachEvent&& onScroll)
+    {
+        onJSFrameNodeReachEndEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnReachEnd()
+    {
+        if (onJSFrameNodeReachEndEvent_) {
+            onJSFrameNodeReachEndEvent_ = nullptr;
+        }
+    }
+
+    const OnReachEvent& GetJSFrameNodeOnReachEnd() const
+    {
+        return onJSFrameNodeReachEndEvent_;
+    }
+
+    void SetJSFrameNodeOnScrollStart(OnScrollStartEvent&& onScroll)
+    {
+        onJSFrameNodeScrollStartEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollStart()
+    {
+        if (onJSFrameNodeScrollStartEvent_) {
+            onJSFrameNodeScrollStartEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollStartEvent& GetJSFrameNodeOnScrollStart() const
+    {
+        return onJSFrameNodeScrollStartEvent_;
+    }
+
+    void SetJSFrameNodeOnScrollStop(OnScrollStopEvent&& onScroll)
+    {
+        onJSFrameNodeScrollStopEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollStop()
+    {
+        if (onJSFrameNodeScrollStopEvent_) {
+            onJSFrameNodeScrollStopEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollStopEvent& GetJSFrameNodeOnScrollStop() const
+    {
+        return onJSFrameNodeScrollStopEvent_;
+    }
+
+    void SetJSFrameNodeOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScroll)
+    {
+        onJSFrameNodeScrollFrameBeginEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollFrameBegin()
+    {
+        if (onJSFrameNodeScrollFrameBeginEvent_) {
+            onJSFrameNodeScrollFrameBeginEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollFrameBeginEvent& GetJSFrameNodeOnScrollFrameBegin() const
+    {
+        return onJSFrameNodeScrollFrameBeginEvent_;
+    }
+
+    void SetJSFrameNodeOnWillScroll(OnWillScrollEvent&& onScroll)
+    {
+        onJSFrameNodeWillScrollEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnWillScroll()
+    {
+        if (onJSFrameNodeWillScrollEvent_) {
+            onJSFrameNodeWillScrollEvent_ = nullptr;
+        }
+    }
+
+    const OnWillScrollEvent& GetJSFrameNodeOnWillScroll() const
+    {
+        return onJSFrameNodeWillScrollEvent_;
+    }
+
+    void SetJSFrameNodeOnDidScroll(OnScrollEvent&& onScroll)
+    {
+        onJSFrameNodeDidScrollEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnDidScroll()
+    {
+        if (onJSFrameNodeDidScrollEvent_) {
+            onJSFrameNodeDidScrollEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollEvent& GetJSFrameNodeOnDidScroll() const
+    {
+        return onJSFrameNodeDidScrollEvent_;
+    }
+
 private:
     OnScrollEvent onScrollEvent_;
     OnWillScrollEvent onWillScrollEvent_;
@@ -116,6 +235,14 @@ private:
     OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
     OnReachEvent onReachStartEvent_;
     OnReachEvent onReachEndEvent_;
+
+    OnReachEvent onJSFrameNodeReachStartEvent_;
+    OnReachEvent onJSFrameNodeReachEndEvent_;
+    OnScrollStartEvent onJSFrameNodeScrollStartEvent_;
+    OnScrollStopEvent onJSFrameNodeScrollStopEvent_;
+    OnScrollFrameBeginEvent onJSFrameNodeScrollFrameBeginEvent_;
+    OnWillScrollEvent onJSFrameNodeWillScrollEvent_;
+    OnScrollEvent onJSFrameNodeDidScrollEvent_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_EVENT_HUB_H

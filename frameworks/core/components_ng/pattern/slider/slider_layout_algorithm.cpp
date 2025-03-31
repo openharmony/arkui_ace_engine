@@ -68,7 +68,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             frameNode->GetGeometryNode()->ResetContent();
         } else {
             frameNode->GetGeometryNode()->Reset();

@@ -206,6 +206,47 @@ const std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
         } },
 };
 
+const std::map<Placement, std::vector<Placement>> SELECT_PLACEMENT_STATES = {
+    { Placement::BOTTOM_LEFT,
+        {
+            Placement::BOTTOM_LEFT,
+            Placement::BOTTOM_RIGHT,
+            Placement::TOP_LEFT,
+            Placement::TOP_RIGHT,
+            Placement::RIGHT_TOP,
+            Placement::RIGHT_BOTTOM,
+            Placement::LEFT_TOP,
+            Placement::LEFT_BOTTOM,
+            Placement::NONE,
+        } },
+    { Placement::BOTTOM,
+        {
+            Placement::BOTTOM,
+            Placement::BOTTOM_LEFT,
+            Placement::BOTTOM_RIGHT,
+            Placement::TOP,
+            Placement::TOP_LEFT,
+            Placement::TOP_RIGHT,
+            Placement::RIGHT_TOP,
+            Placement::RIGHT_BOTTOM,
+            Placement::LEFT_TOP,
+            Placement::LEFT_BOTTOM,
+            Placement::NONE,
+        } },
+    { Placement::BOTTOM_RIGHT,
+        {
+            Placement::BOTTOM_RIGHT,
+            Placement::BOTTOM_LEFT,
+            Placement::TOP_RIGHT,
+            Placement::TOP_LEFT,
+            Placement::RIGHT_TOP,
+            Placement::RIGHT_BOTTOM,
+            Placement::LEFT_TOP,
+            Placement::LEFT_BOTTOM,
+            Placement::NONE,
+        } },
+};
+
 uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
 {
     CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
@@ -674,7 +715,7 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     if (isContainerModal) {
         wrapperOffset = OffsetF(0.0f, static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()));
         if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (wrapper->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 wrapperOffset += OffsetF(static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()),
                 static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
             } else {
@@ -2020,6 +2061,24 @@ OffsetF MenuLayoutAlgorithm::ComputeMenuPositionByOffset(
     return menuTrimOffset;
 }
 
+void MenuLayoutAlgorithm::ComputePlacementByAlignType(const RefPtr<MenuLayoutProperty>& menuProp)
+{
+    auto alignType = menuProp->GetAlignType().value_or(MenuAlignType::START);
+    switch (alignType) {
+        case MenuAlignType::START:
+            placement_ = Placement::BOTTOM_LEFT;
+            break;
+        case MenuAlignType::CENTER:
+            placement_ = Placement::BOTTOM;
+            break;
+        case MenuAlignType::END:
+            placement_ = Placement::BOTTOM_RIGHT;
+            break;
+        default:
+            break;
+    }
+}
+
 RefPtr<PipelineContext> MenuLayoutAlgorithm::GetCurrentPipelineContext()
 {
     // Get pipelineContext of main window or host window for UIExtension
@@ -2072,14 +2131,16 @@ OffsetF MenuLayoutAlgorithm::SelectLayoutAvoidAlgorithm(const RefPtr<MenuLayoutP
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0, 0));
     CHECK_NULL_RETURN(menuProp, OffsetF(0, 0));
     CHECK_NULL_RETURN(menuPattern, OffsetF(0, 0));
+    CHECK_NULL_RETURN(layoutWrapper, OffsetF(0, 0));
     float x = 0.0f;
     float y = 0.0f;
     if (targetSize_.Width() > 0.0 || targetSize_.Height() > 0.0) {
         placement_ = Placement::BOTTOM_LEFT;
+        ComputePlacementByAlignType(menuProp);
         if (layoutWrapper != nullptr) {
             PlacementRTL(layoutWrapper, placement_);
         }
-        auto selectChildOffset = GetSelectChildPosition(size, didNeedArrow);
+        auto selectChildOffset = GetSelectChildPosition(size, didNeedArrow, layoutWrapper);
         x = selectChildOffset.GetX();
         y = selectChildOffset.GetY();
     }
@@ -2206,7 +2267,6 @@ void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrap
 
     float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutProp);
@@ -2215,7 +2275,7 @@ void MenuLayoutAlgorithm::UpdateConstraintSelectHeight(LayoutWrapper* layoutWrap
     CHECK_NULL_VOID(geometryNode);
     float selectMenuWidth = geometryNode->GetFrameSize().Width();
     float xAvoid = wrapperRect_.Left() + paddingStart_;
-    float yAvoid = wrapperRect_.Top() + paddingTop_;
+    float yAvoid = wrapperRect_.Top() + paddingTop_ + param_.topSecurity;
     float maxWidth = wrapperSize_.Width() - paddingEnd_ - paddingStart_;
     Rect targetRect = Rect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
     auto bottomSpace = std::min<float>(wrapperRect_.Bottom() - targetRect.Bottom() -
@@ -2603,7 +2663,8 @@ OffsetF MenuLayoutAlgorithm::GetChildPosition(const SizeF& childSize, bool didNe
     return position;
 }
 
-OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool didNeedArrow)
+OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool didNeedArrow,
+    LayoutWrapper* layoutWrapper)
 {
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
         targetOffset_.GetY() + targetSize_.Height() + targetSpace_);
@@ -2614,23 +2675,15 @@ OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool
 
     OffsetF childPosition;
     OffsetF position = defaultPosition;
-    auto positionOffset = positionOffset_;
-    std::vector<Placement> currentPlacementStates = PLACEMENT_STATES.find(Placement::BOTTOM_LEFT)->second;
-    auto it = PLACEMENT_STATES.find(placement_);
-    if (it != PLACEMENT_STATES.end()) {
+    std::vector<Placement> currentPlacementStates = SELECT_PLACEMENT_STATES.find(Placement::BOTTOM_LEFT)->second;
+    auto it = SELECT_PLACEMENT_STATES.find(placement_);
+    if (it != SELECT_PLACEMENT_STATES.end()) {
         currentPlacementStates = it->second;
-    }
-    size_t step = ALIGNMENT_STEP_OFFSET;
-    if (placement_ <= Placement::BOTTOM) {
-        step += 1;
     }
     for (size_t i = 0, len = currentPlacementStates.size(); i < len; i++) {
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
-        }
-        if (i >= step) {
-            positionOffset_ = OffsetF(0.0f, 0.0f);
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
         position = FitToScreen(childPosition, childSize, didNeedArrow);
@@ -2640,13 +2693,36 @@ OffsetF MenuLayoutAlgorithm::GetSelectChildPosition(const SizeF& childSize, bool
         break;
     }
     if (placement_ == Placement::NONE) {
-        position = GetAdjustPosition(currentPlacementStates, step, childSize, topPosition, bottomPosition);
+        position = GetSelectAdjustPosition(currentPlacementStates, childSize, topPosition, bottomPosition);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            position = defaultPosition;
+            position = HandleNoValidPlacement(topPosition, bottomPosition, layoutWrapper);
         }
     }
-    positionOffset_ = positionOffset;
-    arrowPlacement_ = placement_;
+    return position;
+}
+
+OffsetF MenuLayoutAlgorithm::HandleNoValidPlacement(const OffsetF& topPosition, const OffsetF& bottomPosition,
+    LayoutWrapper* layoutWrapper)
+{
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(menuLayoutProperty, OffsetF(0.0f, 0.0f));
+
+    auto constraint = menuLayoutProperty->CreateChildConstraint();
+
+    float yAvoid = wrapperRect_.Top() + paddingTop_ + param_.topSecurity;
+    float maxSpaceHeight = wrapperRect_.Height() * HEIGHT_CONSTRAINT_FACTOR;
+    Rect targetRect(targetOffset_.GetX(), targetOffset_.GetY(), targetSize_.Width(), targetSize_.Height());
+    float bottomSpace = std::min<float>(wrapperRect_.Bottom() -
+        targetRect.Bottom() - targetSecurity_ - paddingBottom_, maxSpaceHeight);
+    float topSpace = std::min<float>(targetRect.Top() - yAvoid - targetSecurity_, maxSpaceHeight);
+    OffsetF position;
+    if (topSpace > bottomSpace) {
+        position = topPosition;
+        constraint.maxSize.SetHeight(topSpace);
+    } else {
+        position = bottomPosition;
+        constraint.maxSize.SetHeight(bottomSpace);
+    }
 
     return position;
 }
@@ -2660,6 +2736,33 @@ OffsetF MenuLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& currentPl
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
+        }
+        childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
+        position = AdjustPosition(childPosition, childSize.Width(), childSize.Height(), targetSecurity_);
+        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            i += step;
+            continue;
+        }
+        break;
+    }
+    return position;
+}
+
+OffsetF MenuLayoutAlgorithm::GetSelectAdjustPosition(std::vector<Placement>& currentPlacementStates,
+    const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition)
+{
+    OffsetF childPosition;
+    OffsetF position;
+    Placement firstPlacement = currentPlacementStates[0];
+    size_t step = firstPlacement == Placement::BOTTOM ? ALIGNMENT_STEP_OFFSET + 1 : ALIGNMENT_STEP_OFFSET;
+
+    for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
+        placement_ = currentPlacementStates[i];
+        if (placement_ == Placement::NONE) {
+            break;
+        }
+        if (firstPlacement == Placement::BOTTOM && placement_ == Placement::RIGHT_TOP) {
+            step = ALIGNMENT_STEP_OFFSET;
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
         position = AdjustPosition(childPosition, childSize.Width(), childSize.Height(), targetSecurity_);

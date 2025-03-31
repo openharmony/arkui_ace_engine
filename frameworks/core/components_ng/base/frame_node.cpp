@@ -827,7 +827,6 @@ void FrameNode::DumpCommonInfo()
     }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
-    DumpLayoutInfo();
     if (layoutProperty_->GetCalcLayoutConstraint()) {
         DumpLog::GetInstance().AddDesc(std::string("User defined constraint: ")
                                            .append(layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()));
@@ -855,6 +854,7 @@ void FrameNode::DumpCommonInfo()
     DumpAlignRulesInfo();
     DumpDragInfo();
     DumpOverlayInfo();
+    DumpLayoutInfo();
     if (frameProxy_->Dump().compare("totalCount is 0") != 0) {
         DumpLog::GetInstance().AddDesc(std::string("FrameProxy: ").append(frameProxy_->Dump().c_str()));
     }
@@ -1315,7 +1315,12 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
     CHECK_NULL_VOID(renderContext_);
     auto callback = LayoutInspector::GetRsProfilerNodeMountCallback();
     if (callback) {
-        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine() };
+        auto parent = GetParent();
+        int32_t parentId = -1;
+        if (parent != nullptr) {
+            parentId = parent->GetId();
+        }
+        FrameNodeInfo info { renderContext_->GetNodeId(), GetId(), GetTag(), GetDebugLine(),  parentId };
         callback(info);
     }
 #endif
@@ -3514,13 +3519,11 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            offsetCurrent = offsetCurrent * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        offsetCurrent = offsetCurrent * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
     return offset;
@@ -3547,13 +3550,11 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto windowManager = pipelineContext->GetWindowManager();
-        auto container = Container::CurrentSafely();
-        if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            auto windowScale = container->GetWindowScale();
-            nodeOffset = nodeOffset * windowScale;
-        }
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto container = Container::CurrentSafely();
+    if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
+        auto windowScale = container->GetWindowScale();
+        nodeOffset = nodeOffset * windowScale;
     }
     OffsetF offset(windowOffset.GetX() + nodeOffset.GetX(), windowOffset.GetY() + nodeOffset.GetY());
     return offset;
@@ -4716,13 +4717,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout) {
-        auto pipeline = GetContext();
-        CHECK_NULL_RETURN(pipeline, false);
+        CHECK_NULL_RETURN(context, false);
         if (GetInspectorId()) {
-            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+            context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
         if (eventHub_) {
-            eventHub_->FireLayoutNDKCallback(pipeline);
+            eventHub_->FireLayoutNDKCallback(context);
         }
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
@@ -6070,15 +6070,14 @@ void FrameNode::AddFrameNodeChangeInfoFlag(FrameNodeChangeInfoFlag changeFlag)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
-    context->AddFrameNodeChangeListener(WeakClaim(this));
+    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
+        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
+        context->SetIsTransFlag(true);
+    }
     if (changeInfoFlag_ == FRAME_NODE_CHANGE_INFO_NONE) {
         if (!context->AddChangedFrameNode(WeakClaim(this))) {
             return;
         }
-    }
-    if (changeFlag == FRAME_NODE_CHANGE_GEOMETRY_CHANGE || changeFlag == FRAME_NODE_CHANGE_TRANSITION_START ||
-        changeFlag == FRAME_NODE_CHANGE_TRANSFORM_CHANGE) {
-        context->SetIsTransFlag(true);
     }
     changeInfoFlag_ = changeInfoFlag_ | changeFlag;
 }
@@ -6632,5 +6631,12 @@ std::string FrameNode::PrintVisibilityDumpInfo() const
     }
     res += "]";
     return res;
+}
+
+int32_t FrameNode::OnRecvCommand(const std::string& command)
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    return pattern->OnRecvCommand(command);
 }
 } // namespace OHOS::Ace::NG

@@ -1201,7 +1201,7 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
         FireNavigationInner(node, isOnShow);
         return;
     }
-    const auto& children = node->GetChildren();
+    const auto children = node->GetChildren(true);
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         FireNavigationInner(child, isOnShow);
@@ -2790,6 +2790,9 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         toPathInfo = hostNode->GetNavigationPathInfo();
     }
     ACE_SCOPED_TRACE_COMMERCIAL("NavDestination Page from %s to %s", fromPathInfo.c_str(), toPathInfo.c_str());
+    if (PerfMonitor::GetPerfMonitor() != nullptr) {
+        PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
+    }
     ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
 
     // fire onWillHide

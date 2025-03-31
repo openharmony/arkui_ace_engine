@@ -2036,6 +2036,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern014, TestSize.Level1)
     std::string nodeInfo = "";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto timePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -2060,7 +2061,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern014, TestSize.Level1)
     timeCancelNode->MountToParent(buttonCancelNode);
     timePickerPattern->SetCancelNode(buttonCancelNode);
     timePickerPattern->OnLanguageConfigurationUpdate();
-    auto cancelNode = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    auto cancelNode = dialogTheme->GetCancelText();
     EXPECT_EQ(cancelNode, nodeInfo);
 }
 

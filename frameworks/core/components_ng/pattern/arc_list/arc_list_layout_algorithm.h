@@ -85,8 +85,13 @@ public:
     {
         headerStayNear_ = stay;
     }
+    void SetIsInitialized(bool value)
+    {
+        isInitialized_ = value;
+    }
 
 protected:
+    void HandleJumpCenter(LayoutWrapper* layoutWrapper) override;
     int32_t LayoutALineForward(
         LayoutWrapper* layoutWrapper, int32_t& currentIndex, float startPos, float& endPos) override;
     int32_t LayoutALineBackward(
@@ -107,6 +112,7 @@ private:
     static float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
+    float GetHeaderAreaSize() const;
 
     void MeasureHeader(LayoutWrapper* layoutWrapper) override;
     void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) override;
@@ -130,6 +136,7 @@ private:
     float oldHeaderSize_ = 0.0f;
     float oldFirstItemSize_ = -1.0f;
     bool headerStayNear_ = false;
+    bool isInitialized_ = false;
 };
 } // namespace OHOS::Ace::NG
 

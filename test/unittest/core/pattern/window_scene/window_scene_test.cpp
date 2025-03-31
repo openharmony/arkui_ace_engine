@@ -59,7 +59,6 @@ public:
     static sptr<Rosen::SceneSessionManager> ssm_;
 
     RefPtr<WindowScene> CreateWindowSceneForStartingWindowTest();
-    RefPtr<WindowScene> CreateWindowSceneForSnapshotWindowTest();
 };
 
 sptr<Rosen::SceneSessionManager> WindowSceneTest::ssm_ = nullptr;
@@ -120,34 +119,6 @@ RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest()
     CHECK_EQUAL_RETURN(windowScene->startingWindow_, nullptr, nullptr);
     windowScene->startingWindow_->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
     CHECK_EQUAL_RETURN(windowScene->startingWindow_->renderContext_, nullptr, nullptr);
-    return windowScene;
-}
-
-RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForSnapshotWindowTest()
-{
-    Rosen::SessionInfo sessionInfo = {
-        .abilityName_ = ABILITY_NAME,
-        .bundleName_ = BUNDLE_NAME,
-        .moduleName_ = MODULE_NAME,
-    };
-    auto session = ssm_->RequestSceneSession(sessionInfo);
-    CHECK_EQUAL_RETURN(session, nullptr, nullptr);
-    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
-    CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);
-
-    Rosen::RSSurfaceNodeConfig config = {
-        .SurfaceNodeName = "SurfaceNode"
-    };
-    session->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
-    CHECK_EQUAL_RETURN(session->surfaceNode_, nullptr, nullptr);
-    session->surfaceNode_->bufferAvailable_ = true;
-
-    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
-    windowScene->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
-    CHECK_EQUAL_RETURN(windowScene->snapshotWindow_, nullptr, nullptr);
-    windowScene->snapshotWindow_->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
-    CHECK_EQUAL_RETURN(windowScene->snapshotWindow_->renderContext_, nullptr, nullptr);
     return windowScene;
 }
 
@@ -432,83 +403,5 @@ HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
     windowScene->OnRemoveSnapshot();
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_EQ(windowScene->session_->GetSnapshot(), nullptr);
-}
-
-/**
- * @tc.name: PostDelayTask
- * @tc.desc: PostDelayTask Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneTest, PostDelayTask, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create windowScene.
-     */
-    auto windowScene = CreateWindowSceneForSnapshotWindowTest();
-    ASSERT_NE(windowScene, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
-    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ASSERT_NE(windowScene->GetHost(), nullptr);
-    /**
-     * @tc.steps: step2. Test and check snapshot window.
-     */
-    EXPECT_NE(windowScene->snapshotWindow_, nullptr);
-    windowScene->PostDelayTask();
-    usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, true);
-    EXPECT_EQ(windowScene->snapshotWindow_, nullptr);
-}
-
-/**
- * @tc.name: PostDelayTask
- * @tc.desc: PostDelayTask Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneTest, PostDelayTaskForSnapshot, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create windowScene.
-     */
-    auto windowScene = CreateWindowSceneForSnapshotWindowTest();
-    ASSERT_NE(windowScene, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
-    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ASSERT_NE(windowScene->GetHost(), nullptr);
-    /**
-     * @tc.steps: step2. Test and check snapshot window.
-     */
-    EXPECT_NE(windowScene->snapshotWindow_, nullptr);
-    windowScene->PostDelayTaskForSnapshot();
-    usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, true);
-    EXPECT_EQ(windowScene->snapshotWindow_, nullptr);
-}
-
-/**
- * @tc.name: PostDelayTask
- * @tc.desc: PostDelayTask Test
- * @tc.type: FUNC
- */
-HWTEST_F(WindowSceneTest, CleanSnapshot, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create windowScene.
-     */
-    auto windowScene = CreateWindowSceneForSnapshotWindowTest();
-    ASSERT_NE(windowScene, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
-    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    ASSERT_NE(windowScene->GetHost(), nullptr);
-    /**
-     * @tc.steps: step2. Test and check snapshot window.
-     */
-    EXPECT_NE(windowScene->snapshotWindow_, nullptr);
-    windowScene->CleanSnapshot();
-    usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(windowScene->session_->surfaceNode_->bufferAvailable_, true);
-    EXPECT_EQ(windowScene->snapshotWindow_, nullptr);
 }
 } // namespace OHOS::Ace::NG

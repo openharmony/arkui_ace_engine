@@ -44,7 +44,6 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     }
 }
 
-#ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
     static constexpr uint32_t suggestSize = 100000;
@@ -59,36 +58,25 @@ void CanvasPaintMethod::PushTask(const TaskFunc& task)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-#endif
 
 bool CanvasPaintMethod::HasTask() const
 {
-#ifndef USE_FAST_TASKPOOL
     return !tasks_.empty();
-#else
-    return fastTaskPool_ && !fastTaskPool_->Empty();
-#endif
 }
 
 void CanvasPaintMethod::FlushTask()
 {
-#ifndef USE_FAST_TASKPOOL
     ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
     tasks_.clear();
-#else
-    CHECK_NULL_VOID(fastTaskPool_);
-    fastTaskPool_->Draw(this);
-    fastTaskPool_->Reset();
-#endif
     needMarkDirty_ = true;
 }
 
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateContentModifier", GetId());
     auto host = frameNode_.Upgrade();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -111,12 +99,17 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     FireOnModifierUpdateFunc();
     recordingCanvas->Scale(1.0, 1.0);
     FlushTask();
-    CHECK_NULL_VOID(contentModifier_);
+    if (!contentModifier_) {
+        ACE_SCOPED_TRACE("Canvas[%d] contentModifier is NULL", GetId());
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] contentModifier is NULL", GetId());
+        return;
+    }
     contentModifier_->MarkModifierDirty();
 }
 
 void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateRecordingCanvas[%f, %f]", GetId(), width, height);
     rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);
@@ -414,6 +407,13 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->ResetMatrix();
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
+}
+
+int32_t CanvasPaintMethod::GetId() const
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
 }
 
 TextDirection CanvasPaintMethod::GetSystemDirection()

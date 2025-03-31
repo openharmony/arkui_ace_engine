@@ -265,40 +265,58 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     if (onDidScroll) {
         FireOnScroll(delta, onDidScroll);
     }
+    auto onJSFrameNodeDidScroll = eventHub->GetJSFrameNodeOnDidScroll();
+    if (onJSFrameNodeDidScroll) {
+        FireOnScroll(delta, onJSFrameNodeDidScroll);
+    }
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
+    auto onJsFrameNodeScrollIndex = eventHub->GetJSFrameNodeOnWaterFlowScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
         host->OnAccessibilityEvent(
             AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
     }
     auto onReachStart = eventHub->GetOnReachStart();
-    FireOnReachStart(onReachStart);
+    auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
+    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    FireOnReachEnd(onReachEnd);
-    OnScrollStop(eventHub->GetOnScrollStop());
+    auto onJSFrameNodeReachEnd = eventHub->GetJSFrameNodeOnReachEnd();
+    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
+    OnScrollStop(eventHub->GetOnScrollStop(), eventHub->GetJSFrameNodeOnScrollStop());
 }
 
-void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
     FireObserverOnReachStart();
-    CHECK_NULL_VOID(onReachStart);
+    CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-    onReachStart();
+    if (onReachStart) {
+        onReachStart();
+    }
+    if (onJSFrameNodeReachStart) {
+        onJSFrameNodeReachStart();
+    }
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
 }
 
-void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
-        CHECK_NULL_VOID(onReachEnd);
+        CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-        onReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+        if (onJSFrameNodeReachEnd) {
+            onJSFrameNodeReachEnd();
+        }
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
     } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
         FireObserverOnReachEnd();
@@ -328,6 +346,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->UpdateStartIndex();
     prevOffset_ = layoutInfo_->Offset();
     layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
@@ -551,12 +570,14 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
+                layoutInfo_->duringPositionCalc_ = true;
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         } else {
             UpdateStartIndex(index);
+            layoutInfo_->duringPositionCalc_ = true;
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }

@@ -156,6 +156,8 @@ ohos_unittest("ace_kit_test") {
 
   sources += [
     "abstract_view_factory_test.cpp",
+    "aging_adapation_dialog_util_test.cpp",
+    "animation_kit_test.cpp",
     "box_layout_algorithm_test.cpp",
     "content_modifier_test.cpp",
     "frame_node_test.cpp",

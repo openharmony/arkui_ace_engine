@@ -1201,6 +1201,8 @@ public:
     
     void OnDragAttach();
 
+    void SetNativeInnerWeb(bool isInnerWeb);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1425,7 +1427,6 @@ private:
     double dragResize_preHight_ = 0.0;
     double dragResize_preWidth_ = 0.0;
     bool enableFollowSystemFontWeight_ = false;
-    Offset windowRelativeOffset_;
 #endif
 };
 

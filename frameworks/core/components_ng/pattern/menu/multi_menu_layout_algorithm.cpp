@@ -309,6 +309,9 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         auto childGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(childGeometryNode);
         auto childHeight = childGeometryNode->GetMarginFrameSize().Height();
+        if (pattern->IsEmbedded()) {
+            childHeight = std::max(childHeight, childGeometryNode->GetContentSize().Height());
+        }
         contentHeight += childHeight;
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));

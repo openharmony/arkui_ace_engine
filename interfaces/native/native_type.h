@@ -1148,6 +1148,21 @@ typedef enum {
 } ArkUI_ColorMode;
 
 /**
+ * @brief Enumerates the activation policies for the background blur effect.
+ *
+ * @since 18
+ */
+typedef enum {
+    /** The blur effect changes according to the window's focus state;
+     *  it is inactive when the window is not in focus and active when the window is in focus. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_FOLLOWS_WINDOW_ACTIVE_STATE = 0,
+    /** The blur effect is always active. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE,
+    /** The blur effect is always inactive. */
+    ARKUI_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE,
+} ArkUI_BlurStyleActivePolicy;
+
+/**
  * @brief Enumerates the system color modes.
  *
  * @since 12
@@ -2315,7 +2330,7 @@ typedef enum {
 /**
  * @brief Enumerates the keyboard avoidance modes.
  *
- * @since 18
+ * @since 15
  */
 typedef enum {
     /** Automatically avoids the soft keyboard and compresses the height when reaching the maximum limit. */
@@ -2327,7 +2342,7 @@ typedef enum {
 /**
  * @brief Enumerates the types of display areas for the hover mode.
  *
- * @since 18
+ * @since 15
  */
 typedef enum {
     /** Upper half screen. */
@@ -4791,7 +4806,7 @@ bool OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus(ArkUI_CrossLanguageO
 /**
  * @brief Defines the parameters for visible area change events.
  *
- * @since 18
+ * @since 17
  */
 typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 
@@ -4799,7 +4814,7 @@ typedef struct ArkUI_VisibleAreaEventOptions ArkUI_VisibleAreaEventOptions;
 * @brief Creates an instance of visible area change event parameters
 *
 * @return Returns the created instance of visible area change event parameters.
-* @since 18
+* @since 17
 */
 ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 
@@ -4807,7 +4822,7 @@ ArkUI_VisibleAreaEventOptions* OH_ArkUI_VisibleAreaEventOptions_Create();
 * @brief Disposes of an instance of visible area change event parameters.
 *
 * @param option Instance to be destroyed.
-* @since 18
+* @since 17
 */
 void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* option);
 
@@ -4825,7 +4840,7 @@ void OH_ArkUI_VisibleAreaEventOptions_Dispose(ArkUI_VisibleAreaEventOptions* opt
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 18
+* @since 17
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t size);
 
@@ -4839,7 +4854,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetRatios(ArkUI_VisibleAreaEventOptions
 *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
 *         If an error code is returned, it may be due to a failure in parameter validation;
 *         the parameter must not be null.
-* @since 18
+* @since 17
 */
 int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
     ArkUI_VisibleAreaEventOptions *option, int32_t value);
@@ -4856,7 +4871,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval(
  *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the provided buffer size is insufficient.
  *         If an error code is returned, it may be due to a failure in parameter validation;
  *         the parameter must not be null.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions* option, float* value, int32_t* size);
 
@@ -4865,7 +4880,7 @@ int32_t OH_ArkUI_VisibleAreaEventOptions_GetRatios(ArkUI_VisibleAreaEventOptions
  *
  * @param option Instance of visible area change event parameters.
  * @return Returns the expected update interval, in ms.  Default value: <b>1000</b>.
- * @since 18
+ * @since 17
  */
 int32_t OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval(ArkUI_VisibleAreaEventOptions* option);
 

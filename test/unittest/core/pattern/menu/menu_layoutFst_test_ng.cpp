@@ -1971,9 +1971,16 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    auto menuWeakNode = WeakPtr<FrameNode>(menuNode);
     ASSERT_NE(menuNode, nullptr);
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(property, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProperty = AceType::MakeRefPtr<MenuLayoutProperty>();
+    LayoutWrapperNode layoutWrapper(menuWeakNode, geometryNode, layoutProperty);
+
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
     parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
@@ -1991,13 +1998,15 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     /**
      * @tc.cases: case1. parameter property is nullptr, return OffsetF(0.0, 0.0).
      */
-    auto resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(nullptr, menuPattern, size);
+    auto resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(nullptr, menuPattern,
+        size, false, &layoutWrapper);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 
     /**
      * @tc.cases: case2. parameter menuPattern is nullptr, return OffsetF(0.0, 0.0).
      */
-    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, nullptr, size);
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, nullptr,
+        size, false, &layoutWrapper);
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 
     /**
@@ -2007,8 +2016,9 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     menuLayoutAlgorithm->targetOffset_ = OffsetF(POSITION_OFFSET, POSITION_OFFSET);
     menuLayoutAlgorithm->wrapperSize_ = SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
     menuLayoutAlgorithm->wrapperRect_ = Rect(0, 0, FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern, size);
 
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern,
+        size, false, &layoutWrapper);
     float expectOffsetX = POSITION_OFFSET;
     float expectOffsetY = POSITION_OFFSET + TARGET_SIZE_HEIGHT + TARGET_SECURITY.ConvertToPx();
     EXPECT_EQ(resultOffset, OffsetF(expectOffsetX, expectOffsetY));
@@ -2017,7 +2027,8 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
      * @tc.cases: case4. targetSize_ is (0.0, 0.0).
      */
     menuLayoutAlgorithm->targetSize_ = SizeF(0.0f, 0.0f);
-    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern, size);
+    resultOffset = menuLayoutAlgorithm->SelectLayoutAvoidAlgorithm(property, menuPattern,
+        size, false, &layoutWrapper);
 
     EXPECT_EQ(resultOffset, OffsetF(0.0, 0.0));
 }

@@ -644,7 +644,7 @@ void SelectPattern::SetDisabledStyle()
     }
     spinner_->MarkModifyDone();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()
@@ -691,15 +691,28 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(theme);
 
     bool hasRowNode = HasRowNode();
-    bool hasTextNode = HasTextNode();
-    bool hasSpinnerNode = HasSpinnerNode();
     auto rowId = GetRowId();
-    auto textId = GetTextId();
-    auto spinnerId = GetSpinnerId();
-
     auto row = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(row);
+    if (textApply_ && textId_.has_value()) {
+        if (hasRowNode) {
+            row->RemoveChild(text_);
+            textId_.reset();
+        }
+    }
+    if ((arrowApply_ && SystemProperties::IsNeedSymbol() && spinnerId_.has_value()) ||
+        (textApply_ && !arrowApply_ && spinnerId_.has_value())) {
+        if (hasRowNode) {
+            row->RemoveChild(spinner_);
+            spinnerId_.reset();
+        }
+    }
+    bool hasTextNode = HasTextNode();
+    bool hasSpinnerNode = HasSpinnerNode();
+    auto textId = GetTextId();
+    auto spinnerId = GetSpinnerId();
+    
     row->SetInternal();
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
@@ -980,26 +993,104 @@ const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
     return options_;
 }
 
+void SelectPattern::ResetOptionToInitProps(
+    const RefPtr<MenuItemPattern>& optionPattern, const RefPtr<MenuItemPattern>& selectingOptionPattern)
+{
+    if (textOptionApply_) {
+        optionPattern->SetOptionTextModifier(textOptionApply_);
+    } else if (textSelectOptionApply_ && !textOptionApply_) {
+        optionPattern->ResetSelectTextProps();
+        optionPattern->ApplyOptionThemeStyles();
+    } else {
+        optionPattern->ApplyOptionThemeStyles();
+    }
+    if (selectingOptionPattern) {
+        optionPattern->SetBgColor(selectingOptionPattern->GetBgColor());
+    }
+}
+
+void SelectPattern::UpdateOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    if (optionFont_.FontColor.has_value()) {
+        optionPattern->SetFontColor(optionFont_.FontColor.value());
+    }
+    if (optionFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+    }
+    if (optionFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(optionFont_.FontSize.value());
+    }
+    if (optionFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+    }
+    if (optionFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+    }
+    if (optionBgColor_.has_value()) {
+        optionPattern->SetBgColor(optionBgColor_.value());
+    }
+}
+
+void SelectPattern::ResetSelectedOptionToInitProps(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    if (textSelectOptionApply_) {
+        optionPattern->SetSelectedOptionTextModifier(textSelectOptionApply_);
+    } else if (!textSelectOptionApply_ && textOptionApply_) {
+        optionPattern->ResetSelectTextProps();
+        optionPattern->ApplySelectedThemeStyles();
+    } else {
+        optionPattern->ApplySelectedThemeStyles();
+    }
+}
+
+void SelectPattern::UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    if (selectedFont_.FontColor.has_value()) {
+        optionPattern->SetFontColor(selectedFont_.FontColor.value());
+    }
+    if (selectedFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(selectedFont_.FontFamily.value());
+    } else if (optionFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+    }
+    if (selectedFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(selectedFont_.FontSize.value());
+    } else if (optionFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(optionFont_.FontSize.value());
+    }
+    if (selectedFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(selectedFont_.FontStyle.value());
+    } else if (optionFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+    }
+    if (selectedFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(selectedFont_.FontWeight.value());
+    } else if (optionFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+    }
+    if (selectedBgColor_.has_value()) {
+        optionPattern->SetBgColor(selectedBgColor_.value());
+    }
+}
+
+void SelectPattern::ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    optionPattern->SetSelected(false);
+    optionPattern->UpdateNextNodeDivider(true);
+    optionPattern->SetIsBGColorSetByUser(false);
+    optionPattern->SetIsTextColorSetByUser(false);
+    optionPattern->SetIsOptionFontColorSetByUser(false);
+    optionPattern->SetIsOptionBgColorSetByUser(false);
+}
+
 void SelectPattern::ResetOptionProps()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
-    auto textTheme = pipeline->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(selectTheme && textTheme);
-
     for (const auto& option : options_) {
         auto pattern = option->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSelected(false);
-        pattern->SetBgColor(optionBgColor_.value_or(selectTheme->GetBackgroundColor()));
-        pattern->SetFontSize(optionFont_.FontSize.value_or(selectTheme->GetMenuFontSize()));
-        pattern->SetItalicFontStyle(optionFont_.FontStyle.value_or(textTheme->GetTextStyle().GetFontStyle()));
-        pattern->SetFontWeight(optionFont_.FontWeight.value_or(textTheme->GetTextStyle().GetFontWeight()));
-        pattern->SetFontFamily(optionFont_.FontFamily.value_or(textTheme->GetTextStyle().GetFontFamilies()));
-        pattern->SetFontColor(optionFont_.FontColor.value_or(selectTheme->GetMenuFontColor()));
+        ResetOptionToInitProps(pattern);
+        UpdateOptionCustomProperties(pattern);
         pattern->SetIsBGColorSetByUser(false);
         pattern->SetIsTextColorSetByUser(false);
         pattern->SetIsOptionFontColorSetByUser(false);
@@ -1017,21 +1108,9 @@ void SelectPattern::UpdateLastSelectedProps(int32_t index)
         CHECK_NULL_VOID(options_[selected_]);
         auto lastSelected = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(lastSelected);
-
-        lastSelected->SetFontColor(newSelected->GetFontColor());
-        lastSelected->SetFontFamily(newSelected->GetFontFamily());
-        lastSelected->SetFontSize(newSelected->GetFontSize());
-        lastSelected->SetItalicFontStyle(newSelected->GetItalicFontStyle());
-        lastSelected->SetFontWeight(newSelected->GetFontWeight());
-        lastSelected->SetBorderColor(newSelected->GetBorderColor());
-        lastSelected->SetBorderWidth(newSelected->GetBorderWidth());
-        lastSelected->SetBgColor(newSelected->GetBgColor());
-        lastSelected->SetSelected(false);
-        lastSelected->UpdateNextNodeDivider(true);
-        lastSelected->SetIsBGColorSetByUser(false);
-        lastSelected->SetIsTextColorSetByUser(false);
-        lastSelected->SetIsOptionFontColorSetByUser(false);
-        lastSelected->SetIsOptionBgColorSetByUser(false);
+        ResetOptionToInitProps(lastSelected, newSelected);
+        UpdateOptionCustomProperties(lastSelected);
+        ResetLastSelectedOptionFlags(lastSelected);
         if (selectedBgColor_.has_value()) {
             newSelected->SetIsBGColorSetByUser(true);
             newSelected->SetBgColor(selectedBgColor_.value());
@@ -1069,41 +1148,8 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     CHECK_NULL_VOID(newSelected);
 
     // set newSelected props
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    if (selectedFont_.FontColor.has_value()) {
-        newSelected->SetFontColor(selectedFont_.FontColor.value());
-    } else {
-        auto selectedColorText = theme->GetSelectedColorText();
-        newSelected->SetFontColor(selectedColorText);
-    }
-    if (selectedFont_.FontFamily.has_value()) {
-        newSelected->SetFontFamily(selectedFont_.FontFamily.value());
-    }
-    if (selectedFont_.FontSize.has_value()) {
-        newSelected->SetFontSize(selectedFont_.FontSize.value());
-    } else if (!optionFont_.FontSize.has_value()) {
-        auto selectedFontSizeText = theme->GetSelectFontSizeText();
-        newSelected->SetFontSize(selectedFontSizeText);
-    }
-    if (selectedFont_.FontStyle.has_value()) {
-        newSelected->SetItalicFontStyle(selectedFont_.FontStyle.value());
-    }
-    if (selectedFont_.FontWeight.has_value()) {
-        newSelected->SetFontWeight(selectedFont_.FontWeight.value());
-    }
-    if (selectedBgColor_.has_value()) {
-        newSelected->SetBgColor(selectedBgColor_.value());
-    } else {
-        auto selectedColor = theme->GetSelectedColor();
-        newSelected->SetBgColor(selectedColor);
-    }
-    newSelected->SetBorderColor(theme->GetOptionSelectedBorderColor());
-    newSelected->SetBorderWidth(theme->GetOptionSelectedBorderWidth());
+    ResetSelectedOptionToInitProps(newSelected);
+    UpdateSelectedOptionCustomProperties(newSelected);
     newSelected->SetSelected(true);
     newSelected->UpdateNextNodeDivider(false);
     auto newSelectedNode = newSelected->GetHost();
@@ -1215,7 +1261,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         std::string optionWidth = std::to_string(optionPaintProperty->GetSelectModifiedWidthValue(0.0f));
         json->PutExtAttr("optionWidth", optionWidth.c_str(), filter);
     }
-    
+    ToJsonOptionMaxlines(json, filter);
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
@@ -1239,7 +1285,7 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
         CHECK_NULL_VOID(row);
         auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_VOID(rowProps);
-        json->PutExtAttr("space", rowProps->GetSpace()->ToString().c_str(), filter);
+        json->PutExtAttr("space", rowProps->GetSpaceValue(Dimension()).ToString().c_str(), filter);
 
         if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
             json->PutExtAttr("arrowPosition", "ArrowPosition.END", filter);
@@ -1255,6 +1301,23 @@ void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const I
     json->PutExtAttr("fontColor", fontColor.ColorToString().c_str(), filter);
     json->PutExtAttr("font", props->InspectorGetTextFont().c_str(), filter);
     json->PutExtAttr("controlSize", ConvertControlSizeToString(controlSize_).c_str(), filter);
+    auto maxLines = (props->GetMaxLines().has_value() ? std::to_string(props->GetMaxLines().value()) : "");
+    json->PutExtAttr("maxLines", maxLines.c_str(), filter);
+    if (arrowApply_ && spinner_->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolLayoutProperty = spinner_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(symbolLayoutProperty);
+        const std::unique_ptr<FontStyle>& symbolStyle = symbolLayoutProperty->GetFontStyle();
+        CHECK_NULL_VOID(symbolStyle);
+        auto fontSize = symbolStyle->GetFontSize();
+        json->PutExtAttr("symbolFontSize", (fontSize.has_value() ? fontSize.value().ToString() : "").c_str(), filter);
+        const std::optional<std::vector<Color>>& colorListOptional = symbolStyle->GetSymbolColorList();
+        if (colorListOptional.has_value()) {
+            std::string colorString = StringUtils::SymbolColorListToString(colorListOptional.value());
+            json->PutExtAttr("symbolColorList", colorString.c_str(), filter);
+        } else {
+            json->PutExtAttr("symbolColorList", "", filter);
+        }
+    }
 }
 
 void SelectPattern::ToJsonMenuBackgroundStyle(
@@ -1302,6 +1365,32 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
         } else {
             json->PutExtAttr("divider", "", filter);
         }
+    }
+}
+
+void SelectPattern::ToJsonOptionMaxlines(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (!options_.empty()) {
+        std::string optionMaxLines;
+        for (size_t i = 0; i < options_.size(); ++i) {
+            auto optionPattern = options_[i]->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(optionPattern);
+            auto textNode = AceType::DynamicCast<FrameNode>(optionPattern->GetTextNode());
+            CHECK_NULL_VOID(textNode);
+            auto props = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(props);
+            auto maxLines = (props->GetMaxLines().has_value() ? std::to_string(props->GetMaxLines().value()) : "");
+            if (static_cast<int32_t>(i) == selected_) {
+                json->PutExtAttr("selectedOptionMaxLines", maxLines.c_str(), filter);
+            } else if (optionMaxLines.empty()) {
+                optionMaxLines = maxLines;
+            }
+        }
+        json->PutExtAttr("optionMaxLines", optionMaxLines.c_str(), filter);
     }
 }
 
@@ -1453,14 +1542,13 @@ void SelectPattern::SetMenuAlign(const MenuAlign& menuAlign)
     menuLayoutProps->UpdateOffset(menuAlign.offset);
 }
 
-void SelectPattern::SetAvoidance(const Avoidance& avoidance)
+void SelectPattern::SetAvoidance(AvoidanceMode mode)
 {
-    avoidance_ = avoidance;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuLayoutProps);
-    menuLayoutProps->UpdateSelectAvoidanceMode(avoidance.mode);
+    menuLayoutProps->UpdateSelectAvoidanceMode(mode);
 }
 
 std::string SelectPattern::ProvideRestoreInfo()
@@ -1846,5 +1934,141 @@ void SelectPattern::SetMenuOutline(const MenuParam& menuParam)
     CHECK_NULL_VOID(renderContext);
     renderContext->SetOuterBorderWidth(menuParam.outlineWidth.value_or(BorderWidthProperty()));
     renderContext->SetOuterBorderColor(menuParam.outlineColor.value_or(BorderColorProperty()));
+}
+
+void SelectPattern::SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply)
+{
+    textApply_ = textApply;
+    if (textApply) {
+        auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        std::optional<Dimension> backupFontSize;
+        std::optional<Dimension> backupMaxFontSize;
+        std::optional<Dimension> backupMinFontSize;
+        if (textLayoutProperty->HasFontSize()) {
+            backupFontSize = textLayoutProperty->GetFontSizeValue(Dimension());
+        }
+        if (textLayoutProperty->HasAdaptMaxFontSize()) {
+            backupMaxFontSize = textLayoutProperty->GetAdaptMaxFontSizeValue(Dimension());
+        }
+        if (textLayoutProperty->HasAdaptMinFontSize()) {
+            backupMinFontSize = textLayoutProperty->GetAdaptMinFontSizeValue(Dimension());
+        }
+        textLayoutProperty->ResetFontSize();
+        textLayoutProperty->ResetAdaptMaxFontSize();
+        textLayoutProperty->ResetAdaptMinFontSize();
+        textApply(AceType::WeakClaim(AceType::RawPtr(text_)));
+        if (!textLayoutProperty->HasFontSize() && !textLayoutProperty->HasAdaptMinFontSize() &&
+            !textLayoutProperty->HasAdaptMaxFontSize()) {
+            // restore
+            if (backupFontSize.has_value()) {
+                textLayoutProperty->UpdateFontSize(backupFontSize.value());
+            }
+            if (backupMaxFontSize.has_value()) {
+                textLayoutProperty->UpdateAdaptMaxFontSize(backupMaxFontSize.value());
+            }
+            if (backupMinFontSize.has_value()) {
+                textLayoutProperty->UpdateAdaptMinFontSize(backupMinFontSize.value());
+            }
+        }
+        text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        text_->MarkModifyDone();
+    }
+}
+
+void SelectPattern::SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply)
+{
+    arrowApply_ = arrowApply;
+    if (arrowApply) {
+        arrowApply(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(spinner_)));
+        spinner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        spinner_->MarkModifyDone();
+    }
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& SelectPattern::GetTextModifier()
+{
+    return textApply_;
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& SelectPattern::GetArrowModifier()
+{
+    return arrowApply_;
+}
+
+void SelectPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& textOptionApply)
+{
+    textOptionApply_ = textOptionApply;
+    for (size_t i = 0; i < options_.size(); ++i) {
+        if (static_cast<int32_t>(i) == selected_ && textOptionApply_) {
+            continue;
+        }
+        auto pattern = options_[i]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetOptionTextModifier(textOptionApply);
+        if (textOptionApply) {
+            UpdateOptionFontFromPattern(pattern);
+        }
+    }
+}
+
+void SelectPattern::UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    if (optionFont_.FontColor.has_value()) {
+        optionPattern->SetFontColor(optionFont_.FontColor.value());
+    }
+    if (optionFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+    }
+    if (optionFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(optionFont_.FontSize.value());
+    }
+    if (optionFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+    }
+    if (optionFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+    }
+}
+
+void SelectPattern::SetSelectedOptionTextModifier(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& textSelectOptionApply)
+{
+    textSelectOptionApply_ = textSelectOptionApply;
+    if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
+        auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetSelectedOptionTextModifier(textSelectOptionApply);
+        if (textSelectOptionApply) {
+            UpdateSelectedOptionFontFromPattern(pattern);
+        }
+    }
+}
+
+void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern)
+{
+    if (selectedFont_.FontColor.has_value()) {
+        optionPattern->SetOptionFontColor(selectedFont_.FontColor.value());
+    }
+    if (selectedFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(selectedFont_.FontFamily.value());
+    } else if (optionFont_.FontFamily.has_value()) {
+        optionPattern->SetFontFamily(optionFont_.FontFamily.value());
+    }
+    if (selectedFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(selectedFont_.FontSize.value());
+    } else if (optionFont_.FontSize.has_value()) {
+        optionPattern->SetFontSize(optionFont_.FontSize.value());
+    }
+    if (selectedFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(selectedFont_.FontStyle.value());
+    } else if (optionFont_.FontStyle.has_value()) {
+        optionPattern->SetItalicFontStyle(optionFont_.FontStyle.value());
+    }
+    if (selectedFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(selectedFont_.FontWeight.value());
+    } else if (optionFont_.FontWeight.has_value()) {
+        optionPattern->SetFontWeight(optionFont_.FontWeight.value());
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1101,12 +1101,13 @@ RefPtr<NG::UINode> GetInitialParent(const RefPtr<NG::UINode>& uiNode)
     return nullptr;
 }
 
-void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, AccessibilityElementInfo& nodeInfo)
+void UpdateAccessibilityVisibleToRoot(const RefPtr<NG::UINode>& uiNode)
 {
     RefPtr<NG::UINode> parent = GetInitialParent(uiNode);
     bool isAllAncestorAccessibilityVisible = true;
     bool clipVisible = true;
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
     OHOS::Ace::NG::RectF frameRect;
     OHOS::Ace::NG::RectF visibleInnerRect;
     OHOS::Ace::NG::RectF visibleRect;
@@ -1134,7 +1135,7 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
         parent = parent->GetParent();
     }
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "Complete parent path:current id %{public}" PRId64 " %{public}s",
-        nodeInfo.GetAccessibilityId(), parentPath.c_str());
+        frameNode->GetAccessibilityId(), parentPath.c_str());
 
     bool nodeAccessibilityVisible =
         GetNodeAccessibilityVisible(frameNode, isAllAncestorAccessibilityVisible, clipVisible);
@@ -1142,13 +1143,20 @@ void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, Accessibility
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
             "Element %{public}" PRId64 " is invisible. isActive %{public}d, isVisible %{public}d"
             " isAllAncestorAccessibilityVisible:%{public}d clipVisible:%{public}d",
-            nodeInfo.GetAccessibilityId(), frameNode->IsActive(), frameNode->IsVisible(),
+            frameNode->GetAccessibilityId(), frameNode->IsActive(), frameNode->IsVisible(),
             isAllAncestorAccessibilityVisible, clipVisible);
     }
 
     if (frameNode->GetTag() != V2::PAGE_ETS_TAG) {
         frameNode->SetAccessibilityVisible(nodeAccessibilityVisible);
     }
+}
+
+void SetRootAccessibilityVisible(const RefPtr<NG::UINode>& uiNode, AccessibilityElementInfo& nodeInfo)
+{
+    UpdateAccessibilityVisibleToRoot(uiNode);
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
     nodeInfo.SetAccessibilityVisible(frameNode->GetAccessibilityVisible());
 }
 
@@ -2971,6 +2979,7 @@ void JsAccessibilityManager::InitializeCallback()
     CHECK_NULL_VOID(client);
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
+    client->IsScreenReaderEnabled(isScreenReaderEnabled_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
@@ -3248,8 +3257,12 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
 {
     UpdateExtensionComponentStatusVec(extensionComponentStatusVec_);
     ClearDefaultFocusList(defaultFocusList_);
+    RefPtr<NG::FrameNode> findeNode;
+    auto ngPipeline = FindPipelineByElementId(accessibilityEvent.nodeId, findeNode);
 
-    if (extensionComponentStatusVec_.empty() || defaultFocusList_.empty()) {
+    pageController_.Update();
+    bool isPageEventControllerEmpty = ngPipeline ? pageController_.CheckEmpty(ngPipeline->GetInstanceId()) : true;
+    if ((extensionComponentStatusVec_.empty() || defaultFocusList_.empty()) && isPageEventControllerEmpty) {
         return true;
     }
 
@@ -3261,7 +3274,7 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
             pageIdEventMap_[nodePageId] = std::nullopt;
         }
     }
-    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) {
+    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_) || (!isPageEventControllerEmpty)) {
         if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
             auto event = pageIdEventMap_[pageId].value();
             auto eventType = GetEventTypeByAccessibilityEvent(event);
@@ -3321,6 +3334,27 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
         SendAccessibilityAsyncEventInner(event);
         pageIdEventMap_[pageId] = std::nullopt;
     }
+}
+
+void JsAccessibilityManager::ReleaseCacheAccessibilityEvent(const int32_t pageId)
+{
+    if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
+        auto event = pageIdEventMap_[pageId].value();
+        SendAccessibilityAsyncEventInner(event);
+        pageIdEventMap_.erase(pageId);
+    }
+}
+
+void JsAccessibilityManager::ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController)
+{
+    if (pageController_.CheckNode(node, deleteController)) {
+        ReleaseCacheAccessibilityEvent(node->GetPageId());
+    }
+}
+
+void JsAccessibilityManager::AddToPageEventController(const RefPtr<NG::FrameNode>& node)
+{
+    pageController_.Add(node);
 }
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
@@ -5479,6 +5513,7 @@ RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromPipeline(
     CHECK_NULL_RETURN(pipeline, nullptr);
 
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(ngPipeline, nullptr);
     auto rootNode = ngPipeline->GetRootElement();
     CHECK_NULL_RETURN(rootNode, nullptr);
 
@@ -7628,6 +7663,9 @@ AccessibilityParentRectInfo JsAccessibilityManager::GetTransformRectInfoRelative
 {
     AccessibilityParentRectInfo rectInfo;
     CHECK_NULL_RETURN(node, rectInfo);
+    auto finalScale = node->GetTransformScaleRelativeToWindow();
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
     CHECK_NULL_RETURN(context, rectInfo);
     auto windowInfo = GenerateWindowInfo(node, context);
     auto rectFinal = GetFinalRealRect(node);
@@ -7703,4 +7741,12 @@ void JsAccessibilityManager::OnAccessbibilityDetachFromMainTree(const RefPtr<NG:
         RemoveAccessibilityFocusPaint(focusNode);
     }
 }
+
+bool JsAccessibilityManager::CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node)
+{
+    UpdateAccessibilityVisibleToRoot(node);
+    CHECK_NULL_RETURN(node, true);
+    return node->GetAccessibilityVisible();
+}
+
 } // namespace OHOS::Ace::Framework

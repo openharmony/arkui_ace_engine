@@ -40,6 +40,7 @@
 #include "base/mousestyle/mouse_style.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/thread/background_task_executor.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/font_change_observer.h"
@@ -82,6 +83,9 @@ constexpr int32_t MAX_FLUSH_COUNT = 2;
 constexpr int32_t MAX_RECORD_SECOND = 15;
 constexpr int32_t DEFAULT_RECORD_SECOND = 5;
 constexpr int32_t SECOND_TO_MILLISEC = 1000;
+constexpr int32_t USED_ID_FIND_FLAG = 3;
+constexpr int32_t USED_JSON_PARAM = 4;
+constexpr char PID_FLAG[] = "pidflag";
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -727,7 +731,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 
 void PipelineContext::FlushMouseEventVoluntarily()
 {
-    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+    if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE ||
+        windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -2762,7 +2767,7 @@ void PipelineContext::OnTouchEvent(
                 eventManager_->SetInnerFlag(true);
             }
         }
-        if (IsFormRender() && touchTestResults.find(point.id) != touchTestResults.end()) {
+        if (IsFormRenderExceptDynamicComponent() && touchTestResults.find(point.id) != touchTestResults.end()) {
             for (const auto& touchResult : touchTestResults[point.id]) {
                 auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
                 if (recognizer) {
@@ -3061,27 +3066,26 @@ void PipelineContext::DumpData(
     const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const
 {
     CHECK_NULL_VOID(node);
-    std::string pid = "";
-    for (auto param : params) {
-        if (param.find("-") == std::string::npos) {
-            pid = param;
-            LOGD("Find pid in element dump pipeline");
-        }
-    }
-
     int32_t depth = 0;
     if (IsDynamicRender()) {
         depth = GetDepthFromParams(params);
     }
-    if (pid == "") {
-        LOGD("Dump element without pid");
+    uint32_t used_id_flag = hasJson ? USED_JSON_PARAM : USED_ID_FIND_FLAG;
+    auto paramSize = params.size();
+    auto container = Container::GetContainer(instanceId_);
+    if (container && (container->IsUIExtensionWindow())) {
+        paramSize = std::distance(params.begin(), std::find(params.begin(), params.end(), PID_FLAG));
+    }
+    if (paramSize < used_id_flag) {
         node->DumpTree(depth, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
-    } else {
-        node->DumpTreeById(depth, params[PARAM_NUM], hasJson);
+    }
+    if (paramSize == used_id_flag && !node->DumpTreeById(depth, params[PARAM_NUM], hasJson)) {
+        DumpLog::GetInstance().Print(
+            "There is no id matching the ID in the parameter, please check whether the id is correct.");
     }
 }
 
@@ -3216,6 +3220,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         OnDumpRecorderStart(params);
     } else if (params[0] == "-end") {
         DumpRecorder::GetInstance().Stop();
+    } else if (params[0] == "-injection" && params.size() > PARAM_NUM) {
+#ifndef IS_RELEASE_VERSION
+        OnDumpInjection(params);
+#endif
     }
     return true;
 }
@@ -4582,7 +4590,6 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    std::string extraInfo = manager->GetExtraInfo();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -4590,48 +4597,15 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
             return;
         }
     }
-    if (action == DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER) {
-        manager->RequireSummary();
-        manager->OnDragStart(pointerEvent.GetPoint());
-        return;
-    }
-    if (action == DragEventAction::DRAG_EVENT_OUT) {
-        lastDragTime_ = GetTimeFromExternalTimer();
-        CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragMoveOut(pointerEvent);
-        manager->ClearSummary();
-        manager->ClearExtraInfo();
-        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
-        return;
-    }
 
-    if (action == DragEventAction::DRAG_EVENT_START) {
-        manager->ResetPreTargetFrameNode(GetInstanceId());
-        manager->RequireSummaryIfNecessary(pointerEvent);
-        manager->SetDragCursorStyleCore(DragCursorStyleCore::DEFAULT);
-        TAG_LOGI(AceLogTag::ACE_DRAG, "start drag, current windowId is %{public}d", container->GetWindowId());
-    }
-    if (action == DragEventAction::DRAG_EVENT_END) {
+    if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
+        action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
         lastDragTime_ = GetTimeFromExternalTimer();
         CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragEnd(pointerEvent, extraInfo, node);
+        manager->HandleDragEvent(pointerEvent, action, node);
         return;
     }
-    if (action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
-        lastDragTime_ = GetTimeFromExternalTimer();
-        CompensatePointerMoveEvent(pointerEvent, node);
-        manager->OnDragPullCancel(pointerEvent, extraInfo, node);
-        return;
-    }
-    HandleOnDragEventMove(pointerEvent, action, node);
-}
-
-void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
-    const RefPtr<NG::FrameNode>& node)
-{
-    auto manager = GetDragDropManager();
-    CHECK_NULL_VOID(manager);
-    std::string extraInfo = manager->GetExtraInfo();
+    manager->HandleDragEvent(pointerEvent, action, node);
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->SetDragAnimationPointerEvent(pointerEvent);
         dragEvents_[node].emplace_back(pointerEvent);
@@ -4640,9 +4614,6 @@ void PipelineContext::HandleOnDragEventMove(const DragPointerEvent& pointerEvent
     if (action != DragEventAction::DRAG_EVENT_MOVE &&
         historyPointsEventById_.find(pointerEvent.pointerId) != historyPointsEventById_.end()) {
         historyPointsEventById_.erase(pointerEvent.pointerId);
-    }
-    if (action != DragEventAction::DRAG_EVENT_MOVE) {
-        manager->OnDragMove(pointerEvent, extraInfo, node);
     }
 }
 
@@ -5742,7 +5713,14 @@ void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootN
     std::string responseRegion = GetResponseRegion(rootNode);
     std::string parameters = "thp#Location#" + responseRegion;
     LOGD("THP_UpdateViewsLocation responseRegion = %{public}s", parameters.c_str());
-    thpExtraMgr_->ThpExtraRunCommand("THP_UpdateViewsLocation", parameters.c_str());
+    auto task = [weak = WeakClaim(this), parameters]() {
+        ACE_SCOPED_TRACE("ThpExtraRunCommand");
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->thpExtraMgr_);
+        pipeline->thpExtraMgr_->ThpExtraRunCommand("THP_UpdateViewsLocation", parameters.c_str());
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
@@ -5907,8 +5885,7 @@ void PipelineContext::FlushMouseEventForHover()
         return;
     }
     CHECK_NULL_VOID(rootNode_);
-    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG ||
-        windowSizeChangeReason_ == WindowSizeChangeReason::MOVE) {
+    if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
     }
     CHECK_RUN_ON(UI);
@@ -5920,6 +5897,8 @@ void PipelineContext::FlushMouseEventForHover()
     event.screenX = lastMouseEvent_->screenX;
     event.screenY = lastMouseEvent_->screenY;
     event.button = lastMouseEvent_->button;
+    event.deviceId = lastMouseEvent_->deviceId;
+    event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
     event.action = lastMouseEvent_->action;
     event.time = lastMouseEvent_->time;
@@ -5972,10 +5951,19 @@ void PipelineContext::FlushMouseEventInVsync()
         FlushMouseEventForHover();
         isTransFlag_ = false;
     }
+    windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
 }
 
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;
+}
+
+void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) const
+{
+    auto nodeId = std::stoi(params[PARAM_NUM]);
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnRecvCommand(params[1]);
 }
 } // namespace OHOS::Ace::NG

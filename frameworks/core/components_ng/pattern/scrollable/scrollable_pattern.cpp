@@ -2522,12 +2522,20 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
     auto eventHub = GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
-    if (!context || !scrollFrameBeginCallback) {
+    auto onJSFrameNodeScrollFrameBegin = eventHub->GetJSFrameNodeOnScrollFrameBegin();
+    if (!context) {
         return;
     }
 
     auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
-    auto scrollRes = scrollFrameBeginCallback(-offset, state);
+    ScrollFrameResult scrollRes { .offset = -offset };
+    if (scrollFrameBeginCallback) {
+        scrollRes = scrollFrameBeginCallback(scrollRes.offset, state);
+    }
+    if (onJSFrameNodeScrollFrameBegin) {
+        scrollRes = onJSFrameNodeScrollFrameBegin(scrollRes.offset, state);
+    }
+
     mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
@@ -2739,7 +2747,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(hub);
     SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
-        OnScrollStop(hub->GetOnScrollStop());
+        OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
@@ -2759,10 +2767,16 @@ void ScrollablePattern::FireOnScrollStart()
     isScrolling_ = true;
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID(onScrollStart);
+    auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
+    CHECK_NULL_VOID(onScrollStart || onJSFrameNodeScrollStart);
     ACE_SCOPED_TRACE(
         "OnScrollStart, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    onScrollStart();
+    if (onScrollStart) {
+        onScrollStart();
+    }
+    if (onJSFrameNodeScrollStart) {
+        onJSFrameNodeScrollStart();
+    }
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_START);
 }
 
@@ -2896,7 +2910,8 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     }
 }
 
-void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
+void ScrollablePattern::OnScrollStop(
+    const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2913,15 +2928,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         }
         isScrolling_ = false;
         FireObserverOnScrollStop();
-        if (onScrollStop) {
-            ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
-                host->GetTag().c_str());
-            onScrollStop();
-            AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
-            SetScrollSource(SCROLL_FROM_NONE);
-            ResetLastSnapTargetIndex();
-            ResetScrollableSnapDirection();
-        }
+        FireOnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->ScheduleDisappearDelayTask();
@@ -2951,6 +2958,25 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
+}
+
+void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
+    const OnScrollStopEvent& onJSFrameNodeScrollStop)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
+        host->GetTag().c_str());
+    if (onScrollStop) {
+        onScrollStop();
+    }
+    if (onJSFrameNodeScrollStop) {
+        onJSFrameNodeScrollStop();
+    }
+    AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+    SetScrollSource(SCROLL_FROM_NONE);
+    ResetLastSnapTargetIndex();
+    ResetScrollableSnapDirection();
 }
 
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
@@ -2983,10 +3009,17 @@ float ScrollablePattern::FireOnWillScroll(float offset) const
     auto eventHub = GetEventHub<ScrollableEventHub>();
     CHECK_NULL_RETURN(eventHub, offset);
     auto onScroll = eventHub->GetOnWillScroll();
-    CHECK_NULL_RETURN(onScroll, offset);
+    auto onJSFrameNodeScroll = eventHub->GetJSFrameNodeOnWillScroll();
+    CHECK_NULL_RETURN(onScroll || onJSFrameNodeScroll, offset);
     auto offsetPX = Dimension(offset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-    auto scrollRes = onScroll(offsetVP, GetScrollState(), ConvertScrollSource(scrollSource_));
+    ScrollFrameResult scrollRes = { .offset = offsetVP};
+    if (onScroll) {
+        scrollRes = onScroll(scrollRes.offset, GetScrollState(), ConvertScrollSource(scrollSource_));
+    }
+    if (onJSFrameNodeScroll) {
+        scrollRes =  onJSFrameNodeScroll(scrollRes.offset, GetScrollState(), ConvertScrollSource(scrollSource_));
+    }
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
     return context->NormalizeToPx(scrollRes.offset);

@@ -45,10 +45,11 @@ std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto result = containerMap_.try_emplace(windowId, containerId);
-    if (!result.second) {
+    auto result = containerMap_.find(windowId);
+    if (result != containerMap_.end()) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Already have container of this windowId, windowId: %{public}u", windowId);
     }
+    containerMap_.emplace(windowId, containerId);
 }
 
 void SubwindowManager::RemoveContainerId(uint32_t windowId)
@@ -1308,15 +1309,26 @@ void SubwindowManager::HideToastSubWindowNG()
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID ?
-        GetDialogSubwindow(parentContainerId) : GetToastSubwindow(containerId);
-    if (!subwindow) {
+    std::vector<RefPtr<Subwindow>> serviceToastSubwindows;
+    auto subwindow = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
+                         ? GetDialogSubwindow(parentContainerId)
+                         : GetToastSubwindow(containerId);
+    if (subwindow) {
+        serviceToastSubwindows.push_back(subwindow);
+    }
+    auto systemToastWindow = GetSystemToastWindow(parentContainerId);
+    if (systemToastWindow) {
+        serviceToastSubwindows.push_back(systemToastWindow);
+    }
+    if (serviceToastSubwindows.empty()) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
             "Get Subwindow error, containerId = %{public}d, parentContainerId = %{public}d", containerId,
             parentContainerId);
         return;
     }
-    subwindow->ResizeWindowForFoldStatus(parentContainerId);
+    for (const auto& window : serviceToastSubwindows) {
+        window->ResizeWindowForFoldStatus(parentContainerId);
+    }
 }
 
 void MarkSubwindowSafeAreaDirtyByType(std::shared_ptr<SubwindowManager> manager,

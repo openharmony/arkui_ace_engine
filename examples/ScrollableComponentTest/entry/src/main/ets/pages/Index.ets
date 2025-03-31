@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
+import router from '@ohos.router';
 
 class TextList {
   public id: number;
   public text: string;
-  public uri: string;
+  public url: string;
 
-  constructor(id: number, text: string, uri: string) {
+  constructor(id: number, text: string, url: string) {
     this.id = id;
     this.text = text;
-    this.uri = uri;
+    this.url = url;
   }
 }
 
@@ -32,7 +32,11 @@ class TextList {
 struct IndexPage {
   scroll: Scroller = new Scroller()
   @State arr: TextList[] = [
-    new TextList(1, 'ScrollableMainPage', 'pages/Scrollable/ScrollableMainPage'),
+    new TextList(1, 'ScrollableMainPage', 'pages/scrollable/ScrollableMainPage'),
+    new TextList(2, 'TabsMainPage', 'pages/Tabs/TabsMainPage'),
+    new TextList(3, 'WaterFlowMainPage', 'pages/waterflow/WaterFlowMainPage'),
+    new TextList(4, 'SwiperMainPage', 'pages/Swiper/SwiperMainPage'),
+    new TextList(5, 'ListMainPage', 'pages/List/ListMainPage'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
@@ -46,7 +50,7 @@ struct IndexPage {
               .margin(10)
               .padding({ top: 5, bottom: 5 })
               .onClick(() => {
-                router.push({ uri: item.uri })
+                router.pushUrl({ url: item.url })
               })
           }, (item: TextList) => JSON.stringify(item.id))
         }

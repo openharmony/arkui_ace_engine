@@ -2544,7 +2544,7 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
             CHECK_NULL_RETURN(pipeline, false);
             ProcessVirtualKeyBoard(pipeline->GetRootWidth(), pipeline->GetRootHeight(), lastKeyboardHeight_);
         }
-        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_);
+        delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboardInSafeArea_ || keyboardGetready_);
         IsNeedResizeVisibleViewport();
         isKeyboardInSafeArea_ = false;
     } else {
@@ -2660,6 +2660,7 @@ void WebPattern::OnAreaChangedInner()
     CHECK_NULL_VOID(geometryNode);
     auto rect = renderContext->GetPaintRectWithoutTransform();
     auto size = Size(rect.Width(), rect.Height());
+    delegate_->OnAreaChange({ resizeOffset.GetX(), resizeOffset.GetY(), size.Width(), size.Height() });
     if (CheckSafeAreaIsExpand() &&
         ((size.Width() != areaChangeSize_.Width()) || (size.Height() != areaChangeSize_.Height()))) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnAreaChangedInner setbounds: height:%{public}f, offsetY:%{public}f",
@@ -3419,6 +3420,7 @@ void WebPattern::OnModifyDone()
         CHECK_NULL_VOID(webPattern);
         if (webPattern->IsRootNeedExportTexture() && webPattern->delegate_) {
             webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
+            webPattern->delegate_->SetNativeInnerWeb(true);
         }
     };
     PostTaskToUI(std::move(embedEnabledTask), "ArkUIWebUpdateNativeEmbedModeEnabled");
@@ -3624,6 +3626,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
     lastKeyboardHeight_ = keyboard;
+    keyboardGetready_ = true;
     taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), width, height]() {
             auto webPattern = weak.Upgrade();
@@ -3634,6 +3637,7 @@ bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double
                                                       height,
                                                       webPattern->lastKeyboardHeight_,
                                                       webPattern->GetDrawSize().Height());
+            webPattern->keyboardGetready_ = false;
         }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
     return true;
 }
@@ -3791,9 +3795,6 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
         if (overlayCreating_) {
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
-    }
-    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
-        WebRequestFocus();
     }
 }
 
@@ -3971,6 +3972,7 @@ void WebPattern::CloseSelectOverlay()
     CHECK_NULL_VOID(pipeline);
     if (webSelectOverlay_ && webSelectOverlay_->IsShowHandle()) {
         webSelectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+        webSelectOverlay_->SetIsShowHandle(false);
         for (auto& touchOverlayInfo : touchOverlayInfo_) {
             TAG_LOGI(AceLogTag::ACE_WEB, "SelectOverlay send touch up id:%{public}d", touchOverlayInfo.id);
             delegate_->HandleTouchUp(touchOverlayInfo.id, touchOverlayInfo.x, touchOverlayInfo.y, true);
@@ -6849,11 +6851,6 @@ void WebPattern::UnregisterWebComponentClickCallback()
     webComponentClickCallback_ = nullptr;
     textBlurAccessibilityEnable_ = false;
     SetAccessibilityState(false);
-}
-
-void WebPattern::RequestFocus()
-{
-    WebRequestFocus();
 }
 
 bool WebPattern::IsCurrentFocus()

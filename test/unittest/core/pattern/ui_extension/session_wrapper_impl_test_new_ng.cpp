@@ -59,6 +59,9 @@
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "accessibility_event_info.h"
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_transaction.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -775,6 +778,15 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg018, TestSize.L
     EXPECT_NE(sessionWrapper->session_, nullptr);
     bool ret = sessionWrapper->NotifyPointerEventAsync(pointerEvent);
     EXPECT_EQ(ret, false);
+
+    pointerEvent = nullptr;
+    ret = sessionWrapper->NotifyPointerEventAsync(pointerEvent);
+    EXPECT_EQ(ret, false);
+
+    pointerEvent = std::make_shared<OHOS::MMI::PointerEvent>(1);
+    sessionWrapper->session_ = nullptr;
+    ret = sessionWrapper->NotifyPointerEventAsync(pointerEvent);
+    EXPECT_EQ(ret, false);
 }
 
 /**
@@ -790,6 +802,10 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg019, TestSize.L
     sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
     EXPECT_NE(sessionWrapper->session_, nullptr);
     bool ret = sessionWrapper->NotifyKeyEventAsync(keyEvent);
+    EXPECT_EQ(ret, false);
+
+    keyEvent = std::make_shared<OHOS::MMI::KeyEvent>(2);
+    ret = sessionWrapper->NotifyKeyEventAsync(keyEvent);
     EXPECT_EQ(ret, false);
 }
 
@@ -863,7 +879,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg022, TestSize.L
 
 /**
  * @tc.name: SessionWrapperImplNewTestNg023
- * @tc.desc: Test the method NotifyDestroy.
+ * @tc.desc: Test the method OnConnect.
  * @tc.type: FUNC
  */
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg023, TestSize.Level1)
@@ -888,7 +904,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg023, TestSize.L
 
 /**
  * @tc.name: SessionWrapperImplNewTestNg024
- * @tc.desc: Test the method NotifyDestroy.
+ * @tc.desc: Test the method OnDisconnect.
  * @tc.type: FUNC
  */
 HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg024, TestSize.Level1)
@@ -1165,5 +1181,116 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg033, TestSize.L
     sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
     EXPECT_NE(patternUpgrade, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg034
+ * @tc.desc: Test the method InitAllCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg034, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+
+    sessionWrapper->taskExecutor_ = nullptr;
+    sessionWrapper->InitAllCallback();
+
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto sessionCallbacks = sessionWrapper->session_->GetExtensionSessionEventCallback();
+    sessionWrapper->InitAllCallback();
+    EXPECT_NE(sessionCallbacks, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg035
+ * @tc.desc: Test the method OnAccessibilityEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg035, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    Accessibility::AccessibilityEventInfo info;
+    int64_t offset = 1;
+    int32_t callSessionId = sessionWrapper->GetSessionId();
+    sessionWrapper->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    auto patternUpgrade = sessionWrapper->hostPattern_.Upgrade();
+
+    sessionWrapper->OnAccessibilityEvent(info, offset);
+    EXPECT_EQ(callSessionId, patternUpgrade->GetSessionId());
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg036
+ * @tc.desc: Test the method NotifyDisplayArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg036, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    RectF displayArea(100.0, 100.0, 100.0, 100.0);
+
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    auto pipeline = PipelineBase::GetCurrentContext();
+
+    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::UNDEFINED;
+    sessionWrapper->NotifyDisplayArea(displayArea);
+
+    std::shared_ptr<Rosen::RSTransaction> transaction;
+    auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
+    sessionWrapper->session_->reason_ = Rosen::SizeChangeReason::ROTATION;
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    EXPECT_EQ(transaction, transactionController->GetRSTransaction());
+
+    std::shared_ptr<Rosen::RSTransaction> sharedTransaction = std::make_shared<Rosen::RSTransaction>();
+    sessionWrapper->transaction_ = sharedTransaction;
+    sessionWrapper->NotifyDisplayArea(displayArea);
+    EXPECT_EQ(transaction, sessionWrapper->transaction_.lock());
+
+    transactionController->Destroy();
+    sessionWrapper->NotifyDisplayArea(displayArea);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg037
+ * @tc.desc: Test the method SendDataAsync.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg037, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    AAFwk::WantParams params;
+
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = nullptr;
+    sessionWrapper->SendDataAsync(params);
+
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    sessionWrapper->SendDataAsync(params);
+    EXPECT_NE(sessionWrapper->session_, nullptr);
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg038
+ * @tc.desc: Test the method RegisterDataConsumer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg038, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    Rosen::SessionInfo sessionInfo;
+    sessionWrapper->session_ = new Rosen::ExtensionSession(sessionInfo);
+    auto dataHandler = sessionWrapper->session_->GetExtensionDataHandler();
+
+    bool ret = sessionWrapper->RegisterDataConsumer();
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

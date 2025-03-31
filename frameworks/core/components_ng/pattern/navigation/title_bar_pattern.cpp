@@ -1474,7 +1474,8 @@ void TitleBarPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    auto theme = NavigationGetTheme();
+    std::string message = theme ? theme->GetNavigationBack() : "";
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 }
 

@@ -97,6 +97,21 @@ public:
         return mockColorMode_;
     }
 
+    bool IsSubContainer() const override
+    {
+        return isSubContainer_;
+    }
+
+    void ResetContainer()
+    {
+        CHECK_NULL_VOID(container_);
+        container_->isFormRender_ = false;
+        container_->isUIExtensionWindow_ = false;
+        container_->isSubContainer_ = false;
+        container_->isScenceBoardWindow_ = false;
+        container_->isCrossAxisWindow_ = false;
+    }
+
     int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
         bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
         const std::function<void()>& onFinish = nullptr,
@@ -136,6 +151,7 @@ private:
     RefPtr<PipelineBase> pipelineContext_;
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
+    bool isSubContainer_ = false;
     bool isScenceBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();

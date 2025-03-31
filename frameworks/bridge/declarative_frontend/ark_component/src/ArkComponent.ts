@@ -5202,6 +5202,92 @@ class UICommonEvent {
   }
 }
 
+class UIScrollableCommonEvent extends UICommonEvent {
+  private _onReachStartEvent?: () => void;
+  private _onReachEndEvent?: () => void;
+  private _onScrollStartEvent?: () => void;
+  private _onScrollStopEvent?: () => void;
+  private _onScrollFrameBeginEvent?: (offset: number, state: ScrollState) => { offsetRemain: number; };
+  private _onWillScrollEvent?: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult;
+  private _onDidScrollEvent?: (offset: number, scrollState: ScrollState) => void;
+
+  setOnReachStart(callback: () => void): void {
+    this._onReachStartEvent = callback;
+    getUINativeModule().frameNode.setOnReachStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnReachEnd(callback: () => void): void {
+    this._onReachEndEvent = callback;
+    getUINativeModule().frameNode.setOnReachEnd(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStart(callback: () => void): void {
+    this._onScrollStartEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStart(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollStop(callback): void {
+    this._onScrollStopEvent = callback;
+    getUINativeModule().frameNode.setOnScrollStop(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollFrameBegin(callback: (offset: number, state: ScrollState) => { offsetRemain: number; }): void {
+    this._onScrollFrameBeginEvent = callback;
+    getUINativeModule().frameNode.setOnScrollFrameBegin(this._nodePtr, callback, this._instanceId);
+  }
+  setOnWillScroll(callback: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback: (scrollOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIListEvent extends UIScrollableCommonEvent {
+  private _onScrollIndexEvent?: (start: number, end: number, center: number) => void;
+  private _onScrollVisibleContentEvent?: OnScrollVisibleContentChangeCallback;
+  setOnScrollIndex(callback: (start: number, end: number, center: number) => void): void {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnListScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+  setOnScrollVisibleContentChange(callback: OnScrollVisibleContentChangeCallback): void {
+    this._onScrollVisibleContentEvent = callback;
+    getUINativeModule().frameNode.setOnScrollVisibleContentChange(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIScrollEvent extends UIScrollableCommonEvent {
+  private _onWillScrollEvent?: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult;
+  private _onDidScrollEvent?: (xOffset: number, yOffset: number, scrollState: ScrollState) => void;
+  setOnWillScroll(callback: (xOffset: number, yOffset: number,
+    scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
+    this._onWillScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollWillScroll(this._nodePtr, callback, this._instanceId);
+  }
+  setOnDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
+    this._onDidScrollEvent = callback;
+    getUINativeModule().frameNode.setOnScrollDidScroll(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIGridEvent extends UIScrollableCommonEvent {
+  private _onGridScrollIndexEvent?: (first: number, last: number) => void;
+  setOnScrollIndex(callback: (first: number, last: number) => void): void {
+    this._onGridScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnGridScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
+class UIWaterFlowEvent extends UIScrollableCommonEvent {
+  private _onScrollIndexEvent?: (first: number, last: number) => void;
+  setOnScrollIndex(callback: (first: number, last: number) => void): void {
+    this._onScrollIndexEvent = callback;
+    getUINativeModule().frameNode.setOnWaterFlowScrollIndex(this._nodePtr, callback, this._instanceId);
+  }
+}
+
 function attributeModifierFunc<T>(modifier: AttributeModifier<T>,
   componentBuilder: (nativePtr: KNode) => ArkComponent,
   modifierBuilder: (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => ArkComponent)
@@ -5473,6 +5559,9 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
+  if (modifier === undefined || modifier === null) {
+    return;
+  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {

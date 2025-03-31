@@ -873,7 +873,7 @@ bool WaterFlowLayoutSW::RecoverCachedHelper(int32_t idx, bool front)
     return true;
 }
 
-void WaterFlowLayoutSW::MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward) const
+void WaterFlowLayoutSW::MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward)
 {
     for (int32_t idx = startIdx; idx <= endIdx; idx++) {
         auto item = wrapper_->GetChildByIndex(nodeIdx(idx));

@@ -35,6 +35,7 @@ CanvasPattern::~CanvasPattern()
 
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDetachFromFrameNode", GetId());
     DetachRenderContext();
 }
 
@@ -85,6 +86,7 @@ void CanvasPattern::FireOnContext2DDetach()
 
 void CanvasPattern::OnAttachToFrameNode()
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnAttachToFrameNode", GetId());
 #ifndef ACE_UNITTEST
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -106,7 +108,7 @@ RefPtr<NodePaintMethod> CanvasPattern::CreateNodePaintMethod()
 
 bool CanvasPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    ACE_SCOPED_TRACE("CanvasPattern::OnDirtyLayoutWrapperSwap");
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPattern::OnDirtyLayoutWrapperSwap", GetId());
     bool needReset = !(config.skipMeasure || dirty->SkipMeasureContent());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -173,266 +175,178 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetAntiAliasOp>(isEnabled);
-#endif
 }
 
 void CanvasPattern::FillRect(const Rect& rect)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.FillRect(rect);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<FillRectOp>(rect);
-#endif
 }
 
 void CanvasPattern::StrokeRect(const Rect& rect)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeRect(rect);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<StrokeRectOp>(rect);
-#endif
 }
 
 void CanvasPattern::ClearRect(const Rect& rect)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.ClearRect(rect);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ClearRectOp>(rect);
-#endif
 }
 
 void CanvasPattern::Fill()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<FillOp>();
-#endif
 }
 
 void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill(path);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<Fill2DOp>(path);
-#endif
 }
 
 void CanvasPattern::Stroke()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<StrokeOp>();
-#endif
 }
 
 void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Stroke(path);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<Stroke2DOp>(path);
-#endif
 }
 
 void CanvasPattern::Clip()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ClipOp>();
-#endif
 }
 
 void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip(path);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<Clip2DOp>(path);
-#endif
 }
 
 void CanvasPattern::BeginPath()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.BeginPath();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<BeginPathOp>();
-#endif
 }
 
 void CanvasPattern::ClosePath()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ClosePath();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ClosePathOp>();
-#endif
 }
 
 void CanvasPattern::MoveTo(double x, double y)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.MoveTo(x, y);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<MoveToOp>(x, y);
-#endif
 }
 
 void CanvasPattern::LineTo(double x, double y)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.LineTo(x, y);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<LineToOp>(x, y);
-#endif
 }
 
 void CanvasPattern::Arc(const ArcParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Arc(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ArcOp>(param);
-#endif
 }
 
 void CanvasPattern::ArcTo(const ArcToParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.ArcTo(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ArcToOp>(param);
-#endif
 }
 
 void CanvasPattern::AddRect(const Rect& rect)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rect](CanvasPaintMethod& paintMethod) {
         paintMethod.AddRect(rect);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<AddRectOp>(rect);
-#endif
 }
 
 void CanvasPattern::Ellipse(const EllipseParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Ellipse(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<EllipseOp>(param);
-#endif
 }
 
 void CanvasPattern::BezierCurveTo(const BezierCurveParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.BezierCurveTo(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<BezierCurveToOp>(param);
-#endif
 }
 
 void CanvasPattern::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.QuadraticCurveTo(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<QuadraticCurveToOp>(param);
-#endif
 }
 
 void CanvasPattern::FillText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
         paintMethod.FillText(text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<FillTextOp>(text, x, y, maxWidth);
-#endif
 }
 
 void CanvasPattern::StrokeText(const std::string& text, double x, double y, std::optional<double> maxWidth)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [text, x, y, maxWidth](CanvasPaintMethod& paintMethod) {
         paintMethod.StrokeText(text, x, y, maxWidth);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<StrokeTextOp>(text, x, y, maxWidth);
-#endif
 }
 
 TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const PaintState& state)
@@ -442,39 +356,27 @@ TextMetrics CanvasPattern::MeasureTextMetrics(const std::string& text, const Pai
 
 void CanvasPattern::DrawImage(const Ace::CanvasImage& image, double width, double height)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [image, width, height](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawImage(image, width, height);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<DrawImageOp>(image, width, height);
-#endif
 }
 
 void CanvasPattern::DrawSvgImage(
     RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawSvgImage(svgDom, image, imageFit);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<DrawSvgImageOp>(svgDom, image, imageFit);
-#endif
 }
 
 void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawPixelMap(pixelMap, image);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<DrawPixelMapOp>(pixelMap, image);
-#endif
 }
 
 std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double top, double width, double height)
@@ -499,40 +401,28 @@ void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageDat
 
 void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<PutImageDataOp>(imageData);
-#endif
 }
 
 #ifdef PIXEL_MAP_SUPPORTED
 void CanvasPattern::TransferFromImageBitmap(const RefPtr<PixelMap>& pixelMap)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [pixelMap](CanvasPaintMethod& paintMethod) {
         paintMethod.TransferFromImageBitmap(pixelMap);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<TransferFromImageBitmapOp>(pixelMap);
-#endif
 }
 #else
 void CanvasPattern::TransferFromImageBitmap(const Ace::ImageData& imageData)
 {
 #ifndef ACE_UNITTEST
-#ifndef USE_FAST_TASKPOOL
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<PutImageDataOp>(imageData);
-#endif
 #endif
 }
 #endif
@@ -544,347 +434,235 @@ void CanvasPattern::CloseImageBitmap(const std::string& src)
 
 void CanvasPattern::UpdateGlobalAlpha(double alpha)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [alpha](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAlpha(alpha);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetAlphaOp>(alpha);
-#endif
 }
 
 void CanvasPattern::UpdateCompositeOperation(CompositeOperation type)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [type](CanvasPaintMethod& paintMethod) {
         paintMethod.SetCompositeType(type);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetCompositeTypeOp>(type);
-#endif
 }
 
 void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [enabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingEnabled(enabled);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetSmoothingEnabledOp>(enabled);
-#endif
 }
 
 void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [quality](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingQuality(quality);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetSmoothingQualityOp>(quality);
-#endif
 }
 
 void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [cap](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineCap(cap);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLineCapOp>(cap);
-#endif
 }
 
 void CanvasPattern::UpdateLineDashOffset(double dash)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [dash](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDashOffset(dash);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLineDashOffsetOp>(dash);
-#endif
 }
 
 void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [join](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineJoin(join);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLineJoinOp>(join);
-#endif
 }
 
 void CanvasPattern::UpdateLineWidth(double width)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [width](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineWidth(width);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLineWidthOp>(width);
-#endif
 }
 
 void CanvasPattern::UpdateMiterLimit(double limit)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [limit](CanvasPaintMethod& paintMethod) {
         paintMethod.SetMiterLimit(limit);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetMiterLimitOp>(limit);
-#endif
 }
 
 void CanvasPattern::UpdateShadowBlur(double blur)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [blur](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowBlur(blur);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetShadowBlurOp>(blur);
-#endif
 }
 
 void CanvasPattern::UpdateShadowColor(const Color& color)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowColor(color);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetShadowColorOp>(color);
-#endif
 }
 
 void CanvasPattern::UpdateShadowOffsetX(double offsetX)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [offsetX](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetX(offsetX);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetShadowOffsetXOp>(offsetX);
-#endif
 }
 
 void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [offsetY](CanvasPaintMethod& paintMethod) {
         paintMethod.SetShadowOffsetY(offsetY);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetShadowOffsetYOp>(offsetY);
-#endif
 }
 
 void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetTextAlignOp>(align);
-#endif
     paintMethod_->SetMeasureTextAlign(align);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetTextBaselineOp>(baseline);
-#endif
     paintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokePatternNG(pattern);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetStrokePatternNGOp>(pattern);
-#endif
 }
 
 void CanvasPattern::UpdateStrokeColor(const Color& color)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeColor(color);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetStrokeColorOp>(color);
-#endif
 }
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
-#ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetStrokeGradientOp>(gradient);
-#endif
 }
 
 void CanvasPattern::UpdateFontWeight(FontWeight weight)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [weight](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontWeight(weight);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFontWeightOp>(weight);
-#endif
     paintMethod_->SetMeasureFontWeight(weight);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [style](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontStyle(style);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFontStyleOp>(style);
-#endif
     paintMethod_->SetMeasureFontStyle(style);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [families](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontFamilies(families);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFontFamiliesOp>(families);
-#endif
     paintMethod_->SetMeasureFontFamilies(families);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [size](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFontSize(size);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFontSizeOp>(size);
-#endif
     paintMethod_->SetMeasureFontSize(size);
 }
 
 void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [letterSpacing](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLetterSpacing(letterSpacing);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
-#endif
     paintMethod_->SetMeasureLetterSpacing(letterSpacing);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [color](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillColor(color);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFillColorOp>(color);
-#endif
 }
 
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
     CHECK_NULL_VOID(gradient);
-#ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradientObj);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFillGradientOp>(gradient);
-#endif
 }
 
 void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [pattern](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillPatternNG(pattern);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFillPatternNGOp>(pattern);
-#endif
 }
 
 void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFillRuleForPathOp>(rule);
-#endif
 }
 
 void CanvasPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath2D(rule);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFillRuleForPath2DOp>(rule);
-#endif
 }
 
 LineDashParam CanvasPattern::GetLineDash() const
@@ -894,118 +672,82 @@ LineDashParam CanvasPattern::GetLineDash() const
 
 void CanvasPattern::UpdateLineDash(const std::vector<double>& segments)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [segments](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineDash(segments);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetLineDashOp>(segments);
-#endif
     paintMethod_->SetLineDashParam(segments);
 }
 
 void CanvasPattern::Save()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Save();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SaveOp>();
-#endif
     paintMethod_->SaveProperties();
 }
 
 void CanvasPattern::Restore()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Restore();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<RestoreOp>();
-#endif
     paintMethod_->RestoreProperties();
 }
 
 void CanvasPattern::Scale(double x, double y)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Scale(x, y);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ScaleOp>(x, y);
-#endif
     paintMethod_->ScaleMatrix(x, y);
 }
 
 void CanvasPattern::Rotate(double angle)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [angle](CanvasPaintMethod& paintMethod) {
         paintMethod.Rotate(angle);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<RotateOp>(angle);
-#endif
     paintMethod_->RotateMatrix(angle);
 }
 
 void CanvasPattern::SetTransform(const TransformParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTransform(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetTransformOp>(param);
-#endif
     paintMethod_->SetTransformMatrix(param);
 }
 
 void CanvasPattern::ResetTransform()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.ResetTransform();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ResetTransformOp>();
-#endif
     paintMethod_->ResetTransformMatrix();
 }
 
 void CanvasPattern::Transform(const TransformParam& param)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [param](CanvasPaintMethod& paintMethod) {
         paintMethod.Transform(param);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<TransformOp>(param);
-#endif
     paintMethod_->TransformMatrix(param);
 }
 
 void CanvasPattern::Translate(double x, double y)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [x, y](CanvasPaintMethod& paintMethod) {
         paintMethod.Translate(x, y);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<TranslateOp>(x, y);
-#endif
     paintMethod_->TranslateMatrix(x, y);
 }
 
@@ -1040,12 +782,8 @@ void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, do
 
 void CanvasPattern::SetInvalidate()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {};
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetInvalidateOp>();
-#endif
 }
 
 void CanvasPattern::SetTextDirection(TextDirection direction)
@@ -1062,26 +800,18 @@ void CanvasPattern::SetTextDirection(TextDirection direction)
     if (direction == TextDirection::INHERIT) {
         direction = directionCommon;
     }
-#ifndef USE_FAST_TASKPOOL
     auto task = [direction](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextDirection(direction);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetTextDirectionOp>(direction);
-#endif
 }
 
 void CanvasPattern::SetFilterParam(const std::string& filterStr)
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [filterStr](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFilterParam(filterStr);
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SetFilterParamOp>(filterStr);
-#endif
 }
 
 TransformParam CanvasPattern::GetTransform() const
@@ -1091,26 +821,18 @@ TransformParam CanvasPattern::GetTransform() const
 
 void CanvasPattern::SaveLayer()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.SaveLayer();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<SaveLayerOp>();
-#endif
 }
 
 void CanvasPattern::RestoreLayer()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.RestoreLayer();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<RestoreLayerOp>();
-#endif
 }
 
 void CanvasPattern::EnableAnalyzer(bool enable)
@@ -1225,14 +947,10 @@ void CanvasPattern::DumpInfo()
 
 void CanvasPattern::Reset()
 {
-#ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Reset();
     };
     paintMethod_->PushTask(task);
-#else
-    paintMethod_->PushTask<ResetCanvasOp>();
-#endif
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
     paintMethod_->ResetMeasureTextState();

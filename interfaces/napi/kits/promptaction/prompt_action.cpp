@@ -17,12 +17,12 @@
 #include "prompt_controller.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -810,7 +810,11 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }

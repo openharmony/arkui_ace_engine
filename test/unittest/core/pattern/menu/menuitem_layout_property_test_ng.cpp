@@ -78,6 +78,7 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float INTERVAL = 0.0f;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -1143,5 +1144,40 @@ HWTEST_F(MenuItemLayoutPropertyTestNg, SetFontStyle001, TestSize.Level1)
      */
     ASSERT_TRUE(itemProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(itemProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+}
+
+/**
+ * @tc.name: ExtendTextAndRowNode001
+ * @tc.desc: Verify ExtendTextAndRowNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemLayoutPropertyTestNg, ExtendTextAndRowNode001, TestSize.Level1)
+{
+    auto menuItemLayoutAlgorithm = AceType::MakeRefPtr<MenuItemLayoutAlgorithm>();
+    ASSERT_NE(menuItemLayoutAlgorithm, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        std::move(frameNode), AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(layoutWrapperNode, nullptr);
+    SizeF optSize;
+    LayoutConstraintF constraint;
+    menuItemLayoutAlgorithm->ExtendTextAndRowNode(layoutWrapperNode, optSize, INTERVAL, constraint);
+    EXPECT_TRUE(layoutWrapperNode->GetAllChildrenWithBuild().empty());
+    auto frameNodeChildOne = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeChildOne, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNodeOne = AceType::MakeRefPtr<LayoutWrapperNode>(
+        std::move(frameNodeChildOne), AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(layoutWrapperNodeOne, nullptr);
+    auto frameNodeChildTwo = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNodeChildTwo, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNodeTwo = AceType::MakeRefPtr<LayoutWrapperNode>(
+        std::move(frameNodeChildTwo), nullptr, AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(layoutWrapperNodeTwo, nullptr);
+    layoutWrapperNode->cachedList_.push_back(nullptr);
+    layoutWrapperNode->cachedList_.push_back(layoutWrapperNodeOne);
+    layoutWrapperNode->cachedList_.push_back(layoutWrapperNodeTwo);
+    menuItemLayoutAlgorithm->ExtendTextAndRowNode(layoutWrapperNode, optSize, INTERVAL, constraint);
+    ASSERT_NE(layoutWrapperNode->GetGeometryNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG

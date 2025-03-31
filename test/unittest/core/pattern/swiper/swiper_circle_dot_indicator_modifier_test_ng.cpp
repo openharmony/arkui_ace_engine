@@ -840,4 +840,94 @@ HWTEST_F(CircleDotIndicatorModifierTestNg, UpdateDilatePaintProperty002, TestSiz
         hoverItemSizes, vectorBlackPointAngle, vectorBlackPointRadius, longPointCenterX);
     EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
 }
+
+/**
+ * @tc.name: PlayLongPointAnimation001
+ * @tc.desc: Test PlayLongPointAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(CircleDotIndicatorModifierTestNg, PlayLongPointAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto paintMethod1 = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(nullptr);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+
+    /**
+     * @tc.steps: step2. call PlayLongPointAnimation.
+     */
+    const std::pair<float, float> longPointAngle = { 0.0f, 0.0f };
+    GestureState gestureState = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.emplace_back(20.f);
+    vectorBlackPointAngle.emplace_back(20.f);
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = false;
+    modifier->PlayLongPointAnimation(longPointAngle, gestureState, vectorBlackPointAngle);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ || modifier->longPointRightAnimEnd_);
+}
+
+/**
+ * @tc.name: PlayLongPointAnimation002
+ * @tc.desc: Test PlayLongPointAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(CircleDotIndicatorModifierTestNg, PlayLongPointAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto paintMethod1 = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(nullptr);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+
+    /**
+     * @tc.steps: step2. call PlayLongPointAnimation.
+     */
+    const std::pair<float, float> longPointAngle = { 0.0f, 0.0f };
+    GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.emplace_back(20.f);
+    vectorBlackPointAngle.emplace_back(20.f);
+    modifier->longPointLeftAnimEnd_ = false;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->PlayLongPointAnimation(longPointAngle, gestureState, vectorBlackPointAngle);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ || modifier->longPointRightAnimEnd_);
+}
+
+/**
+ * @tc.name: PlayLongPointAnimation003
+ * @tc.desc: Test PlayLongPointAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(CircleDotIndicatorModifierTestNg, PlayLongPointAnimation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto paintMethod1 = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(nullptr);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+
+    /**
+     * @tc.steps: step2. call PlayLongPointAnimation.
+     */
+    const std::pair<float, float> longPointAngle = { 0.0f, 0.0f };
+    GestureState gestureState = GestureState::GESTURE_STATE_INIT;
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.emplace_back(20.f);
+    vectorBlackPointAngle.emplace_back(20.f);
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->PlayLongPointAnimation(longPointAngle, gestureState, vectorBlackPointAngle);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ || modifier->longPointRightAnimEnd_);
+}
 } // namespace OHOS::Ace::NG

@@ -2063,7 +2063,7 @@ bool AceContainer::DumpCommon(const std::vector<std::string>& params, std::vecto
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     if (IsUIExtensionWindow()) {
-        DumpLog::GetInstance().SetSeparator(";");
+        DumpLog::GetInstance().SetUIExtFlag(true);
     }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
@@ -2084,6 +2084,10 @@ bool AceContainer::DumpDynamicUiContent(const std::vector<std::string>& params, 
 {
     LOGI("DumpDynamicUiContent");
     ContainerScope scope(instanceId_);
+    paramUie_.assign(params.begin(), params.end());
+    if (std::find(params.begin(), params.end(), "-simplify") != params.end()) {
+        paramUie_.push_back("-nouie");
+    }
     return DumpInfo(params);
 }
 

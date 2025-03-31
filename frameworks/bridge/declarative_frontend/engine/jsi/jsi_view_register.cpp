@@ -617,6 +617,9 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     }
     int32_t intValue = firstArg->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
+    if (nodeInfo == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
