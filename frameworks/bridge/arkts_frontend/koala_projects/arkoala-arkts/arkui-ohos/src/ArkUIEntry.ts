@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks } from "@koalaui/runtime"
+import { ComputableState, IncrementalNode, GlobalStateManager, StateManager, StateContext, memoEntry, MutableState, createAnimationTimer, callScheduledCallbacks, StateMgmtLoop } from "@koalaui/runtime"
 import { int32, int64 } from "@koalaui/common"
 import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
@@ -222,6 +222,10 @@ export class Application {
     private updateState() {
         // NativeModule._NativeLog("ARKTS: updateState")
         this.updateStates(this.manager!, this.rootState!)
+        while (StateMgmtLoop.callbacks.length) {
+            StateMgmtLoop.consume();
+            this.updateStates(this.manager!, this.rootState!)
+        }
         // Here we request to draw a frame and call custom components callbacks.
         let root = this.rootState!.value
         ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)

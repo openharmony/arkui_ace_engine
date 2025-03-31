@@ -148,7 +148,9 @@ export {
 } from "./states/State"
 export {
     StateDecoratedVariable,
-    LinkDecoratedVariable
+    LinkDecoratedVariable,
+    PropDecoratedVariable,
+    StateMgmtLoop
 } from './states/StateMgmt'
 export {
     __context,
