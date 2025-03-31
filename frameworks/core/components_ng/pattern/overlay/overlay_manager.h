@@ -379,6 +379,10 @@ public:
     {
         filterColumnNodeWeak_ = columnNode;
     }
+    RefPtr<FrameNode> GetFilterColumnNode() const
+    {
+        return filterColumnNodeWeak_.Upgrade();
+    }
     void MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene);
     void MountPixelMapToWindowScene(
         const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene, bool isDragPixelMap = false);
