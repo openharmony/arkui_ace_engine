@@ -20,6 +20,8 @@ import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterializ
 import { ArkUIGeneratedNativeModule, Inspector, ComponentObserver } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr, KNativePointer } from "@koalaui/interop"
+import { _animateTo } from "./handwritten"
+import { AnimateParam } from './generated'
 
 interface FrameRaterRangeOptions {
     min: number
@@ -76,6 +78,12 @@ export class UIContext {
     public getUIInspector(): UIInspector {
         let uiInspector = new UIInspector(this.instanceId_);
         return uiInspector;
+    }
+
+    public animateTo(param: AnimateParam, event: (() => void)): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        _animateTo(param, event);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
     }
 }
 export abstract class FrameCallback {
