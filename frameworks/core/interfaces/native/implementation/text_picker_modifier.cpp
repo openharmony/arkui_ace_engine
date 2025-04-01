@@ -550,8 +550,21 @@ void OnScrollStop0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetOnScrollStop0(frameNode, convValue);
+    auto onScrollStop = [arkCallback = CallbackHelper(*value)](const std::vector<std::string>& values,
+                                                               const std::vector<double>&selecteds) {
+        Converter::ArkArrayHolder<Array_String> stringHolder(values);
+        Array_String stringArrayValues = stringHolder.ArkValue();
+        auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
+        std::vector<int32_t> selectedIndexes;
+    for (const auto tmp : selecteds) {
+        selectedIndexes.push_back(static_cast<int32_t>(tmp));
+    }
+    Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
+    Array_Number intArrayValues = numberHolder.ArkValue();
+    auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+    arkCallback.Invoke(value, index);
+};
+TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollStop1Impl(Ark_NativePointer node,
                        const Opt_TextPickerScrollStopCallback* value)
@@ -567,8 +580,22 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextPickerModelNG::SetOnEnterSelectedArea(frameNode, convValue);
+    auto onEnterSelectedArea = [arkCallback = CallbackHelper(*value)](const std::vector<std::string>& values,
+                                                                      const std::vector<double>&selecteds) {
+        Converter::ArkArrayHolder<Array_String> stringHolder(values);
+        Array_String stringArrayValues = stringHolder.ArkValue();
+        auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
+        std::vector<int32_t> selectedIndexes;
+        for (const auto tmp : selecteds) {
+            selectedIndexes.push_back(static_cast<int32_t>(tmp));
+        }
+        Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
+        Array_Number intArrayValues = numberHolder.ArkValue();
+        auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+        arkCallback.Invoke(value, index);
+    };
+    //TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onEnterSelectedArea));
+    TextPickerModelNG::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
 void SelectedIndex0Impl(Ark_NativePointer node,
                         const Ark_Union_Number_Array_Number* value)

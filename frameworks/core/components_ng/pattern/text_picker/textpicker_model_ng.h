@@ -144,6 +144,7 @@ public:
     static void SetDisableTextStyleAnimation(FrameNode* frameNode, const bool value);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop);
+    static void SetOnEnterSelectedArea(FrameNode* frameNode, TextCascadeChangeEvent&& onEnterSelectedArea);
     static int32_t GetSelectedSize(FrameNode* frameNode);
     static int32_t GetColumnWidthsSize(FrameNode* frameNode);
     static std::string getTextPickerValues(FrameNode* frameNode);

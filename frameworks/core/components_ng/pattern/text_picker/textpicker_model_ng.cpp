@@ -550,6 +550,14 @@ void TextPickerModelNG::SetOnEnterSelectedArea(TextCascadeChangeEvent&& onEnterS
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
+void TextPickerModelNG::SetOnEnterSelectedArea(FrameNode* frameNode, TextCascadeChangeEvent&& onEnterSelectedArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+}
+
 void TextPickerModelNG::SetValue(const std::string& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, value);
