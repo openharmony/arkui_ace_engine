@@ -16,11 +16,13 @@
 
 #include <ani.h>
 
-#include "interfaces/inner_api/ace/constants.h"
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
+#include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace {
 UIContentErrorCode ArktsFrontend::RunPage(
     const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
@@ -45,7 +47,8 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;:Larkui/ArkUIEntry/Application;",
+    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;Larkui/UserView/EntryPoint;:Larkui/ArkUIEntry/"
+    "Application;",
     "start",
     ":J",
     "enter",
@@ -69,7 +72,7 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         LOGE("[%{public}s] Cannot load main class %{public}s", __func__, KOALA_APP_INFO.className);
         return;
     }
- 
+
     ani_method enter = nullptr;
     if (env->Class_FindMethod(appClass, KOALA_APP_INFO.enterMethodName, KOALA_APP_INFO.enterMethodSig, &enter) !=
         ANI_OK) {
@@ -77,7 +80,7 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         // TryEmitError(env);
         return;
     }
- 
+
     ani_int arg0 = 0;
     ani_int arg1 = 0;
     ani_boolean result;
@@ -93,9 +96,73 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 }
 } // namespace
 
+ani_object LegacyLoadPage(ani_env* env)
+{
+    do {
+        ani_status state;
+        ani_ref linkerRef;
+        if ((state = static_cast<ani_status>(ArktsAniUtils::GetNearestNonBootRuntimeLinker(env, linkerRef))) !=
+            ANI_OK) {
+            LOGE("Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
+            break;
+        }
+
+        std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
+        ani_string entryClassStr;
+        env->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
+        ani_class entryClass = nullptr;
+        ani_ref entryClassRef = nullptr;
+
+        ani_class cls = nullptr;
+        if ((state = env->FindClass("Lstd/core/RuntimeLinker;", &cls)) != ANI_OK) {
+            LOGE("FindClass RuntimeLinker failed, %{public}d", state);
+            break;
+        }
+
+        ani_method loadClassMethod;
+        if ((state = env->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",
+                 &loadClassMethod)) != ANI_OK) {
+            LOGE("Class_FindMethod loadClass failed, %{public}d", state);
+            break;
+        }
+
+        ani_object isInit;
+        if ((state = static_cast<ani_status>(ArktsAniUtils::CreateAniBoolean(env, false, isInit))) != ANI_OK) {
+            LOGE("Create Boolean object failed, %{public}d", state);
+            break;
+        }
+
+        if ((state = env->Object_CallMethod_Ref(
+                 (ani_object)linkerRef, loadClassMethod, &entryClassRef, entryClassStr, isInit)) != ANI_OK) {
+            LOGE("Object_CallMethod_Ref loadClassMethod failed");
+            ani_error errorInfo;
+            env->GetUnhandledError(&errorInfo);
+            env->ResetError();
+            break;
+        }
+        entryClass = static_cast<ani_class>(entryClassRef);
+
+        ani_method entryMethod = nullptr;
+        if (env->Class_FindMethod(entryClass, "<ctor>", ":V", &entryMethod) != ANI_OK) {
+            LOGE("Class_FindMethod ctor failed");
+            break;
+        }
+
+        ani_object entryObject = nullptr;
+        if (env->Object_New(entryClass, entryMethod, &entryObject) != ANI_OK) {
+            LOGE("Object_New AbcRuntimeLinker failed");
+            break;
+        }
+        return entryObject;
+    } while (false);
+    return nullptr;
+}
+
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
     ani_class appClass;
+    EntryLoader entryLoader(url, env_);
+
     if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
@@ -111,66 +178,19 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 
     std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
     std::string appParams = "ArkTSLoaderParam";
-
-    ani_status state;
-    ani_ref linkerRef;
-    if ((state = static_cast<ani_status>(ArktsAniUtils::GetNearestNonBootRuntimeLinker(env_, linkerRef))) != ANI_OK) {
-        LOGE("Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
-        return UIContentErrorCode::INVALID_URL;
-    }
-
-    std::string entryPath = "entry/src/main/ets/pages/Index/ComExampleTrivialApplication";
-    ani_string entryClassStr;
-    env_->String_NewUTF8(entryPath.c_str(), entryPath.length(), &entryClassStr);
-    ani_class entryClass = nullptr;
-    ani_ref entryClassRef = nullptr;
-
-    ani_class cls = nullptr;
-    if ((state = env_->FindClass("Lstd/core/RuntimeLinker;", &cls)) != ANI_OK) {
-        LOGE("FindClass RuntimeLinker failed, %{public}d", state);
-        return UIContentErrorCode::INVALID_URL;
-    }
-    ani_method loadClassMethod;
-    if ((state = env_->Class_FindMethod(
-             cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;", &loadClassMethod)) != ANI_OK) {
-        LOGE("Class_FindMethod loadClass failed, %{public}d", state);
-        return UIContentErrorCode::INVALID_URL;
-    }
-
-    ani_object isInit;
-    if ((state = static_cast<ani_status>(ArktsAniUtils::CreateAniBoolean(env_, false, isInit))) != ANI_OK) {
-        LOGE("Create Boolean object failed, %{public}d", state);
-        return UIContentErrorCode::INVALID_URL;
-    }
-
-    if ((state = env_->Object_CallMethod_Ref(
-             (ani_object)linkerRef, loadClassMethod, &entryClassRef, entryClassStr, isInit)) != ANI_OK) {
-        LOGE("Object_CallMethod_Ref loadClassMethod failed");
-        return UIContentErrorCode::INVALID_URL;
-    }
-    entryClass = static_cast<ani_class>(entryClassRef);
-
-    ani_method entryMethod = nullptr;
-    if (env_->Class_FindMethod(entryClass, "<ctor>", ":V", &entryMethod) != ANI_OK) {
-        LOGE("Class_FindMethod ctor failed");
-        return UIContentErrorCode::INVALID_URL;
-    }
-
-    ani_object entryObject = nullptr;
-    if (env_->Object_New(entryClass, entryMethod, &entryObject) != ANI_OK) {
-        LOGE("Object_New AbcRuntimeLinker failed");
-        return UIContentErrorCode::INVALID_URL;
-    }
-    // end find app class
-
     ani_string aniUrl;
     env_->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
     ani_string aniParams;
     env_->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
 
     ani_ref appLocal;
-    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, entryObject) !=
-        ANI_OK) {
+    ani_ref optionalEntry;
+    env_->GetUndefined(&optionalEntry);
+    auto entryPointObj = entryLoader.GetPageEntryObj();
+    auto legacyEntryPointObj = LegacyLoadPage(env_);
+    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false,
+            legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
+            entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
         LOGE("createApplication returned null");
         // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;

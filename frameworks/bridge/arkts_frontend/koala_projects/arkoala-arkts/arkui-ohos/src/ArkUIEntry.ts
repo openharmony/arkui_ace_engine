@@ -19,7 +19,7 @@ import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLi
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
 import { EventEmulator } from "./generated/ArkEventEmulatorMaterialized"
-import { UserView, UserViewBuilder } from "./UserView"
+import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
 import { ClickEvent, ClickEventInternal } from "./component/common"
 import { checkEvents, setCustomEventsChecker } from "./generated/Events"
 import { checkArkoalaCallbacks } from "./generated/peers/CallbacksChecker"
@@ -147,14 +147,16 @@ export class Application {
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
     private exitApp: boolean = false
-    private userView: UserView | undefined = undefined
+    private userView?: UserView
+    private entryPoint?: EntryPoint
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(userView: UserView, useNativeLog: boolean) {
-        this.userView = userView
+    constructor(useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint) {
         this.useNativeLog = useNativeLog
+        this.userView = userView
+        this.entryPoint = entryPoint
     }
 
     static createMemoRootState(manager: StateManager,
@@ -188,7 +190,14 @@ export class Application {
             this.manager = GlobalStateManager.instance
             this.timer = createAnimationTimer(this.manager!)
             /** @memo */
-            let builder = this.userView!.getBuilder()
+            let builder: UserViewBuilder
+            if (this.entryPoint) {
+                builder = this.entryPoint!.entry
+            } else if (this.userView) {
+                builder = this.userView!.getBuilder()
+            } else {
+                throw new Error("Invalid EntryPoint")
+            }
             this.rootState = Application.createMemoRootState(this.manager!, builder)
             root = this.computeRoot()
         } catch (e) {
@@ -352,13 +361,16 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, userView: UserView): Application {
+    static createApplication(appUrl: string, params: string, useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint): Application {
+        if (!userView && !entryPoint) {
+            throw new Error(`Invalid EntryPoint`)
+        }
         registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
-        return new Application(userView, useNativeLog)
+        return new Application(useNativeLog, userView, entryPoint)
     }
 }
 
