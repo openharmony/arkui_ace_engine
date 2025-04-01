@@ -893,8 +893,8 @@ UIContentErrorCode UIContentImpl::InitializeInner(
         errorCode = CommonInitializeForm(window, contentInfo, storage);
         CHECK_ERROR_CODE_RETURN(errorCode);
     }
-    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    LOGI("[%{public}s][%{public}s][%{public}d]: Initialize: %{public}s", bundleName_.c_str(), moduleName_.c_str(),
+        instanceId_, startUrl_.c_str());
     // run page.
     errorCode = Platform::AceContainer::RunPage(instanceId_, startUrl_, "", isNamedRouter);
     CHECK_ERROR_CODE_RETURN(errorCode);
@@ -1975,6 +1975,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
+    // if (bundleName_ == "com.example.trivial.application") { // TODO: use AbilityContext to distinguish ArktsFrontend
+    //     frontendType = FrontendType::KOALA;
+    // }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(

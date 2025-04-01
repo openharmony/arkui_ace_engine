@@ -1309,5 +1309,13 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 {
     windowSizeChangeReason_ = reason;
 }
+
+void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
+{
+    vsyncListener_ = std::move(vsync);
+}
+
+void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
+    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================
