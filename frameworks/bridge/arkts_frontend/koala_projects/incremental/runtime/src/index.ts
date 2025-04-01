@@ -150,7 +150,11 @@ export {
     StateDecoratedVariable,
     LinkDecoratedVariable,
     PropDecoratedVariable,
-    StateMgmtLoop
+    StateMgmtLoop,
+    AppStorage,
+    LocalStorage,
+    StorageLinkDecoratedVariable,
+    StoragePropDecoratedVariable
 } from './states/StateMgmt'
 export {
     __context,
