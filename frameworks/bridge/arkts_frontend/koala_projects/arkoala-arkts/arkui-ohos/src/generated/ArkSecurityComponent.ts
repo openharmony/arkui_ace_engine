@@ -25,7 +25,7 @@ import { ArkSecurityComponentMethodPeer } from "./peers/ArkSecurityComponentPeer
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./../component/units"
 import { SecurityComponentLayoutDirection, SecurityComponentMethod } from "./../component/securityComponent"
 import { FontStyle, FontWeight, BorderStyle } from "./../component/enums"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 /** @memo:stable */
 export class ArkSecurityComponentMethodComponent extends ComponentBase implements SecurityComponentMethod {
     getPeer(): ArkSecurityComponentMethodPeer {

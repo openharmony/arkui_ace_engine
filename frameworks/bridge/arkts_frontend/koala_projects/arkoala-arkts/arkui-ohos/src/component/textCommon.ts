@@ -27,7 +27,7 @@ import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface } from "./styledString"
 import { RectWidthStyle, RectHeightStyle } from "./../generated/ArkArkuiExternalInterfaces"
 import { ResourceStr, ResourceColor, Length } from "./units"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_String_Void } from "./gridRow"
 import { TextDecorationType, TextDecorationStyle } from "./enums"

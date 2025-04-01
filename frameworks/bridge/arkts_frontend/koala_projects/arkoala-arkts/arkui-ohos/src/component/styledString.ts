@@ -25,7 +25,7 @@ import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { ResourceColor, SizeOptions, ResourceStr, Margin, Padding, BorderRadiuses } from "./units"
 import { FontStyle, Color, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, ImageSpanAlignment, ImageFit, FontWeight } from "./enums"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { LengthMetrics, LengthMetricsInternal } from "./../generated/ArkLengthMetricsMaterialized"
 import { ShadowOptions, DrawContext, Callback_ClickEvent_Void, ClickEvent } from "./common"
 import { TextBackgroundStyle } from "./span"

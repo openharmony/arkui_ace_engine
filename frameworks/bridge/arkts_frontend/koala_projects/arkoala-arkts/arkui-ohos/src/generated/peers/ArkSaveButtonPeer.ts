@@ -27,7 +27,7 @@ import { ArkSecurityComponentMethodPeer, ArkSecurityComponentMethodAttributes } 
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./../../component/securityComponent"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../../component/units"
 import { FontStyle, FontWeight, BorderStyle, Color } from "./../../component/enums"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_ClickEvent_SaveButtonOnClickResult_Void, SaveButtonOnClickResult, SaveButtonAttribute, SaveButtonOptions } from "./../../component/saveButton"
 import { ClickEvent } from "./../../component/common"
 import { CallbackKind } from "./CallbackKind"

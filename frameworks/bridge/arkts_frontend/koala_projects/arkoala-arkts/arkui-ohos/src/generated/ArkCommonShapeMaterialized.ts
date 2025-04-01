@@ -18,7 +18,7 @@
 
 import { Position, ResourceColor } from "./../component/units"
 import { Color } from "./../component/enums"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"

@@ -28,7 +28,7 @@ import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_Tou
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, ColorFilter } from "./../component/units"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, ImageFit, CopyOptions } from "./../component/enums"
 import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_Void } from "./../component/abilityComponent"
 import { FocusBoxStyle, FocusPriority } from "./../component/focus"
 import { CircleShape } from "./ArkCircleShapeMaterialized"

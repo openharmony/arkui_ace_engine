@@ -25,7 +25,7 @@ import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
 import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
 import { ResizableOptions } from "./image"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
 import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"

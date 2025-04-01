@@ -24,7 +24,7 @@ import { ClickEvent } from "./common"
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./securityComponent"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./units"
 import { FontStyle, FontWeight, BorderStyle } from "./enums"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { ArkPasteButtonComponent } from "./../generated/ArkPasteButton"
 import { ArkPasteButtonPeer } from "./../generated/peers/ArkPasteButtonPeer"
 export enum PasteIconStyle {

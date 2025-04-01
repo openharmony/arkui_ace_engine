@@ -1,4 +1,4 @@
-import { Resource } from "../generated";
+import { Resource } from "global/resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { Serializer } from "../generated/peers/Serializer";

@@ -22,7 +22,7 @@ import { ButtonType, LabelStyle } from '@arkoala/arkui/ArkButtonInterfaces'
 import { BlurOptions, SheetTitleOptions, CustomBuilder } from "@arkoala/arkui/ArkCommonInterfaces"
 import { ResourceStr,Font } from "@arkoala/arkui/ArkUnitsInterfaces"
 
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Literal_Alignment_align } from './SyntheticDeclarations'
 
 import { Alignment, TextOverflow, TextHeightAdaptivePolicy } from "@arkoala/arkui/ArkEnumsInterfaces"

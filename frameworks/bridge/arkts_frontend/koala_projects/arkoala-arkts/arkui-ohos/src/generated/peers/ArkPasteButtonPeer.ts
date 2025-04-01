@@ -27,7 +27,7 @@ import { ArkSecurityComponentMethodPeer, ArkSecurityComponentMethodAttributes } 
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./../../component/securityComponent"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../../component/units"
 import { FontStyle, FontWeight, BorderStyle, Color } from "./../../component/enums"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_ClickEvent_PasteButtonOnClickResult_Void, PasteButtonOnClickResult, PasteButtonAttribute, PasteButtonOptions } from "./../../component/pasteButton"
 import { ClickEvent } from "./../../component/common"
 import { CallbackKind } from "./CallbackKind"

@@ -24,7 +24,7 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { VoidCallback, ResourceStr, ResourceColor, Dimension, BorderRadiuses, LocalizedBorderRadiuses, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, EdgeStyles } from "./units"
 import { Callback_Void } from "./abilityComponent"
 import { DismissReason, Rectangle, BlurStyle, TransitionEffect, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./common"
