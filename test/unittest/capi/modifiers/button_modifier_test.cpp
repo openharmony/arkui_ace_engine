@@ -58,9 +58,9 @@ namespace {
     const auto ATTRIBUTE_STATE_EFFECT_DEFAULT_VALUE("true");
     const auto ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE("ControlSize.NORMAL");
     const auto ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE("ButtonStyleMode.EMPHASIZED");
-    const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE("#FFFFFFFF");
-    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("16.00fp");
-    const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE("FontWeight.Normal");
+    const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE("#FF000000");
+    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("0.00px");
+    const auto ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE("FontWeight.Medium");
     const auto ATTRIBUTE_FONT_STYLE_DEFAULT_VALUE("FontStyle.Normal");
     const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE("0.000000");
     const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE("2147483648.000000");
@@ -932,7 +932,7 @@ HWTEST_F(ButtonModifierTest, setRoleTestInvalidValues, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestDefaultValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setFontColorTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1072,7 +1072,7 @@ HWTEST_F(ButtonModifierTest, setFontColorTestInvalidNumberValues, TestSize.Level
  * @tc.desc: Check the functionality of ButtonModifier.setFontColor
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestInvalidStringValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setFontColorTestInvalidStringValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1096,7 +1096,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontColorTestInvalidStringValues, TestS
  * @tc.desc: Check the functionality of setFontSizeTest
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestDefaultValue, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setFontSizeTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_SIZE_NAME);
@@ -1138,7 +1138,7 @@ HWTEST_F(ButtonModifierTest, setFontSizeTestValidValues, TestSize.Level1)
  * @tc.desc: Check the functionality of setFontSizeTest
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setFontSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
@@ -1163,7 +1163,7 @@ HWTEST_F(ButtonModifierTest, DISABLED_setFontSizeTestInvalidValues, TestSize.Lev
  * @tc.desc: Check the functionality of setFontWeight.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setFontWeightTestDefaultValue, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setFontWeightTestDefaultValue, TestSize.Level1)
 {
     auto jsonValue = GetJsonValue(node_);
     auto result = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_WEIGHT_NAME);
@@ -1200,8 +1200,10 @@ HWTEST_F(ButtonModifierTest, setFontWeightTestInvalidValues, TestSize.Level1)
     std::string result;
 
     const std::vector<ArkFontWeightTest> testPlan = {
-        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(1000)), "FontWeight.Medium" },
-        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("1000")), "FontWeight.Medium" },
+        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(ArkValue<Ark_Number>(1000)),
+            ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
+        { ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(ArkValue<Ark_String>("1000")),
+            ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
     };
     for (const auto &[weight, expectValue] : testPlan) {
         modifier_->setFontWeight(node_, &weight);
@@ -1512,7 +1514,7 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightValidValues, TestSize.Le
  * @tc.desc: Check the functionality of ButtonModifier.setLabelStyle
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, setLabelStyleTestFontWeightInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultLabelStyle;
@@ -1521,8 +1523,10 @@ HWTEST_F(ButtonModifierTest, DISABLED_setLabelStyleTestFontWeightInvalidValues, 
     Ark_LabelStyle inputValueLabelStyle;
     Ark_Font fontLabel;
     const std::vector<OptArkFontWeightTest> testPlan = {
-        { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(1000)), "FontWeight.Normal" },
-        { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("1000")), "FontWeight.Normal" },
+        { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(ArkValue<Ark_Number>(1000)),
+            ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
+        { ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(ArkValue<Ark_String>("1000")),
+            ATTRIBUTE_FONT_WEIGHT_DEFAULT_VALUE },
     };
     for (auto &[value, expectValue]: testPlan) {
         fontLabel.weight = value;

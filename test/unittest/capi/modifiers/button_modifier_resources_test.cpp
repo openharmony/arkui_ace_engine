@@ -44,7 +44,7 @@ namespace {
     const auto ATTRIBUTE_LABEL_STYLE_FONT_NAME = "font";
     const auto ATTRIBUTE_LABEL_STYLE_FONT_FAMILY_NAME("family");
 
-    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("16.00fp");
+    const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE("0.00px");
 
     using ButtonLabelResourceTest = std::tuple<Ark_ResourceStr, std::string>;
 
@@ -205,10 +205,9 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, Te
 /*
  * @tc.name: setFontSizeTestResourcesInvalidResources
  * @tc.desc: check setFontSize from resource
- * Disabled because FontSize default value is invalid
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierResourcesTest, DISABLED_setFontSizeTestResourcesInvalidResources, TestSize.Level1)
+HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesInvalidResources, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string result;
