@@ -2549,7 +2549,6 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
 SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
 {
     auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
-    CHECK_NULL_RETURN(isAPI20Plus, selectionInfo);
     auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
     for (auto& resObj : resultObjects) {
         CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
@@ -5633,7 +5632,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
     bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
-    bool allowPreviewText = previewTextRecord_.needReplacePreviewText || (previewTextRecord_.needReplaceText && !isAPI20Plus);
+    bool allowPreviewText = previewTextRecord_.needReplacePreviewText;
     CHECK_NULL_VOID((allowContentChange && allowImeInput) || allowPreviewText);
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord);
 }
@@ -6110,7 +6109,7 @@ std::u16string RichEditorPattern::DeleteForwardOperation(int32_t length)
     int32_t currentPosition = caretPosition_;
     if (currentPosition == GetTextContentLength()) {
         info.SetLength(0);
-        IF_TRUE(isAPI20Plus, DoDeleteActions(currentPosition, 0, info));
+        DoDeleteActions(currentPosition, 0, info);
         return deleteText;
     }
     info.SetLength(length);
@@ -7553,8 +7552,7 @@ void RichEditorPattern::HandleMouseSelect(const Offset& localOffset)
         return;
     }
     Offset textOffset = ConvertTouchOffsetToTextOffset(localOffset);
-    auto position = paragraphs_.GetIndex(textOffset);
-    IF_TRUE(isAPI20Plus && (GetTextContentLength() == 0), position = 0);
+    auto position = GetTextContentLength() == 0 ? 0 : paragraphs_.GetIndex(textOffset);
     UpdateSelector(textSelector_.baseOffset, position);
     if (!isFirstMouseSelect_) {
         AdjustCursorPosition(position);
