@@ -34,7 +34,8 @@ class SwipeGestureIntrfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUISwipeGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getSwipeGestureInterfaceAccessor, SwipeGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>();
         return accessor_->ctor(&value);
     }

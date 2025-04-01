@@ -72,7 +72,8 @@ class LongPressGestureIntrfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUILongPressGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getLongPressGestureInterfaceAccessor, LongPressGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>();
         return accessor_->ctor(&value);
     }

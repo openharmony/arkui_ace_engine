@@ -59,7 +59,8 @@ class RotationGestureInterfaceAccessorTest :
     public AccessorTestCtorBase<GENERATED_ArkUIRotationGestureInterfaceAccessor,
     &GENERATED_ArkUIAccessors::getRotationGestureInterfaceAccessor, RotationGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_Literal_Number_angle_fingers>();
         return accessor_->ctor(&value);
     }

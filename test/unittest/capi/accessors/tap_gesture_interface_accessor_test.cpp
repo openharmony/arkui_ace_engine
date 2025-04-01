@@ -48,7 +48,8 @@ class TapGestureInterfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUITapGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getTapGestureInterfaceAccessor, TapGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_TapGestureParameters>();
         return accessor_->ctor(&value);
     }

@@ -514,6 +514,7 @@ namespace Converter {
     template<> PickerSelectedType Convert(const Ark_Number& src);
     template<> PickerSelectedType Convert(const Array_Number& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
+    template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
     template<> PickerTime Convert(const Ark_Date& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_String& src);

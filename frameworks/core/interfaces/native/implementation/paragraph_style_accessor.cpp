@@ -122,7 +122,7 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
 {
     auto invalid = Converter::ArkValue<Opt_Union_Number_LeadingMarginPlaceholder>();
     CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->span,invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
         Ark_LeadingMarginPlaceholder>(style.leadingMargin);

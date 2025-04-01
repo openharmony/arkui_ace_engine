@@ -75,7 +75,8 @@ class PinchGestureInterfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIPinchGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getPinchGestureInterfaceAccessor, PinchGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_Literal_Number_distance_fingers>();
         return accessor_->ctor(&value);
     }

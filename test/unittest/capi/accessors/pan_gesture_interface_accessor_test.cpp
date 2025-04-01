@@ -81,7 +81,8 @@ class PanGestureIntrfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIPanGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getPanGestureInterfaceAccessor, PanGestureInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         auto value = Converter::ArkValue<Opt_Type_PanGestureInterface_value>();
         return accessor_->ctor(&value);
     }

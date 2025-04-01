@@ -48,7 +48,8 @@ class GestureGroupInterfaceAccessorTest
     : public AccessorTestCtorBase<GENERATED_ArkUIGestureGroupInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getGestureGroupInterfaceAccessor, GestureGroupInterfacePeer> {
 public:
-    void *CreatePeerInstance() override {
+    void *CreatePeerInstance() override
+    {
         Ark_GestureMode mode = ARK_GESTURE_MODE_SEQUENCE;
         Array_GestureType gesture{};
         return accessor_->ctor(mode, &gesture);
