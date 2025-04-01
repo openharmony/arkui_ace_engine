@@ -130,6 +130,8 @@ constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
 const std::u16string PLACEHOLDER_MARK = u"![id";
 const std::string SPACE_CHARS = "^\\s+|\\s+$";
+const std::string RICHEDITOR = "RichEditor.";
+const std::string EVENT = "event";
 const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 const auto URL_SPAN_FILTER = [](const RefPtr<SpanItem>& span){ return (span->urlOnRelease); };
 } // namespace
@@ -337,7 +339,8 @@ void RichEditorPattern::HandleStyledStringInsertion(RefPtr<SpanString> insertSty
     host->MarkModifyDone();
 }
 
-void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput)
+void RichEditorPattern::InsertValueInStyledString(
+    const std::u16string& insertValue, bool shouldCommitInput, bool isPaste)
 {
     CHECK_NULL_VOID(styledString_);
     IF_TRUE(shouldCommitInput && previewTextRecord_.IsValid(), FinishTextPreviewInner());
@@ -373,6 +376,7 @@ void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertVa
     HandleStyledStringInsertion(insertStyledString, record, subValue, needReplaceInTextPreview, shouldCommitInput);
     IF_TRUE(shouldCommitInput, undoManager_->RecordInsertOperation(record));
     AfterStyledStringChange(record);
+    IF_TRUE(!isPaste, OnReportRichEditorEvent("onIMEInputComplete"));
 }
 
 RefPtr<SpanString> RichEditorPattern::CreateStyledStringByTextStyle(
@@ -492,6 +496,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     if (isIME) {
         AfterStyledStringChange(record);
     }
+    OnReportRichEditorEvent("onDeleteComplete");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -5908,6 +5913,7 @@ bool RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     TextRange onDidIMEInputRange{ caretPosition_, caretPosition_ + insertValueLength };
     MoveCaretAfterTextChange();
     eventHub->FireOnIMEInputComplete(retInfo);
+    OnReportRichEditorEvent("onIMEInputComplete");
     eventHub->FireOnDidIMEInput(onDidIMEInputRange);
     return true;
 }
@@ -5927,7 +5933,7 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
         DeleteByDeleteValueInfo(info);
         IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
         eventHub->FireOnDeleteComplete();
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
+        OnReportRichEditorEvent("OnDeleteComplete");
     }
     return doDelete;
 }
@@ -8098,7 +8104,7 @@ void RichEditorPattern::InsertValueByPaste(const std::u16string& pasteStr)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "InsertValueByPaste");
     if (isSpanStringMode_) {
-        InsertValueInStyledString(pasteStr, true);
+        InsertValueInStyledString(pasteStr, true, true);
         return;
     }
     InsertValueByOperationType(pasteStr, OperationType::DEFAULT);
@@ -8110,6 +8116,7 @@ void RichEditorPattern::HandleOnPaste()
     CHECK_NULL_VOID(eventHub);
     TextCommonEvent event;
     eventHub->FireOnPaste(event);
+    OnReportRichEditorEvent("onPasteComplete");
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "HandleOnPaste, preventDefault=%{public}d", event.IsPreventDefault());
     if (event.IsPreventDefault()) {
         CloseSelectOverlay();
@@ -10187,6 +10194,7 @@ void RichEditorPattern::DeleteForward(int32_t currentPosition, int32_t length)
     info.SetLength(length);
     CalcDeleteValueObj(currentPosition, length, info);
     DeleteByDeleteValueInfo(info);
+    OnReportRichEditorEvent("onDeleteComplete");
 }
 
 int32_t RichEditorPattern::HandleOnDragDeleteForward()
@@ -12228,5 +12236,13 @@ RectF RichEditorPattern::GetCaretRelativeRect()
     CHECK_NULL_RETURN(overlayMod_, RectF(0, 0, 0, 0));
     auto caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
     return RectF(caretOffset.GetX(), caretOffset.GetY(), caretWidth, caretHeight);
+}
+
+void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
+{
+    std::string value = RICHEDITOR + event;
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
+        event.c_str());
 }
 } // namespace OHOS::Ace::NG
