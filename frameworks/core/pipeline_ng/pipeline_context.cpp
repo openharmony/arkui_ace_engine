@@ -827,11 +827,11 @@ void PipelineContext::ProcessDelayTasks()
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 {
-    int32_t id = -1;
+    int32_t currentId = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
-        id = Container::CurrentId();
+        currentId = Container::CurrentId();
     }
-    OTHER_DURATION(id);
+    OTHER_DURATION(currentId);
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
