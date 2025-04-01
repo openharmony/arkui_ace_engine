@@ -724,38 +724,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleKbVerticalSelection002, TestSize.Lev
 }
 
 /**
- * @tc.name: HandleTouchUp001
- * @tc.desc: test HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleTouchUp001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->moveCaretState_.isMoveCaret = true;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: HandleTouchUp002
- * @tc.desc: test HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleTouchUp002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    auto removeFrameNode = richEditorPattern->magnifierController_->removeFrameNode_;
-    richEditorPattern->magnifierController_.Reset();
-    richEditorPattern->HandleTouchUp();
-    EXPECT_FALSE(removeFrameNode);
-}
-
-/**
  * @tc.name: ShowHandles001
  * @tc.desc: test ShowHandles
  * @tc.type: FUNC

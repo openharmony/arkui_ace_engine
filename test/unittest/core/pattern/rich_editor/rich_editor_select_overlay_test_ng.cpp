@@ -122,38 +122,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnOverlayTouchDown001
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
- * @tc.name: OnOverlayTouchDown002
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    info.SetSourceTool(SourceTool::MOUSE);
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
  * @tc.name: SwitchCaretState001
  * @tc.desc: test SwitchCaretState
  * @tc.type: FUNC

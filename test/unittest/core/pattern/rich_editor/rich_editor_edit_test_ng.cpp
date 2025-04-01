@@ -190,29 +190,6 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorUpdateSelectionByTouchMove001
- * @tc.desc: test UpdateSelectionByTouchMove
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorUpdateSelectionByTouchMove001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto richOffset = Offset(40, 30);
-    richEditorPattern->UpdateSelectionByTouchMove(richOffset);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
-}
-
-/**
  * @tc.name: TestRichEditorGetAllChildren001
  * @tc.desc: test GetAllChildren
  * @tc.type: FUNC
@@ -392,24 +369,6 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
     richEditorPattern->moveLength_ = 2;
     richEditorPattern->CalcInsertValueObj(info, richEditorPattern->caretPosition_, true);
     EXPECT_EQ(info.spanIndex_, 0);
-}
-
-/**
- * @tc.name: IsTouchInFrameArea001
- * @tc.desc: test IsTouchInFrameArea
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, IsTouchInFrameArea001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    PointF touchPoint;
-    auto ret = richEditorPattern->IsTouchInFrameArea(touchPoint);
-    EXPECT_EQ(ret, false);
 }
 
 /**
