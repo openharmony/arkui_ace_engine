@@ -599,6 +599,16 @@ typedef struct {
      * @note This method must be called before the <b>show</b> method.
      * @param handle Indicates the pointer to the custom dialog box controller.
      * @param backgroundBlurStyleOptions Background blur effect options.
+     *        Format of the {@link ArkUI_AttributeItem} parameter: \n
+     *        .value[0].i32: color mode. The value is an enum of {@link ArkUI_ColorMode}. \n
+     *        .value[1]?.i32: adaptive color mode. The value is an enum of {@link ArkUI_AdaptiveColor}. \n
+     *        .value[2]?.f32: blur degree. The value range is [0.0, 1.0]. \n
+     *        .value[3]?.u32: brightness of black in the grayscale blur. The value range is [0, 127]. \n
+     *        .value[4]?.u32: degree of darkening the white color in the grayscale blur. The value range is [0, 127]. \n
+     *        .value[5]?.i32: blur activation policy. The value is an enum of {@link ArkUI_BlurStyleActivePolicy}. \n
+     *        .value[6]?.u32: background color, in 0xARGB format, of the components within the window after the window
+     *                        loses focus (in which case, the blur effect on the components within the window is
+     *                        removed). \n
      * @return Returns the result code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
@@ -613,6 +623,18 @@ typedef struct {
      * @note This method must be called before the <b>show</b> method.
      * @param handle Indicates the pointer to the custom dialog box controller.
      * @param backgroundEffect Background effect.
+     *        Format of the {@link ArkUI_AttributeItem} parameter: \n
+     *        .value[0].f32: blur radius, in vp. \n
+     *        .value[1]?.f32: saturation. \n
+     *        .value[2]?.f32: brightness. \n
+     *        .value[3]?.u32: color, in 0xARGB format. \n
+     *        .value[4]?.i32: adaptive color mode. The value is an enum of {@link ArkUI_AdaptiveColor}. \n
+     *        .value[5]?.u32: brightness of black in the grayscale blur. The value range is [0, 127]. \n
+     *        .value[6]?.u32: degree of darkening the white color in the grayscale blur. The value range is [0, 127]. \n
+     *        .value[7]?.i32: blur activation policy. The value is an enum of {@link ArkUI_BlurStyleActivePolicy}. \n
+     *        .value[8]?.u32: background color, in 0xARGB format, of the components within the window after the window
+     *                        loses focus (in which case, the blur effect on the components within the window is
+     *                        removed). \n
      * @return Returns the result code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
@@ -1070,6 +1092,15 @@ int32_t OH_ArkUI_CustomDialog_RegisterOnDidDisappearCallback(
  *
  * @param options Dialog box parameters.
  * @param backgroundBlurStyleOptions Background blur effect options of the dialog box.
+ *        Format of the {@link ArkUI_AttributeItem} parameter: \n
+ *        .value[0].i32: color mode. The value is an enum of {@link ArkUI_ColorMode}. \n
+ *        .value[1]?.i32: adaptive color mode. The value is an enum of {@link ArkUI_AdaptiveColor}. \n
+ *        .value[2]?.f32: blur degree. The value range is [0.0, 1.0]. \n
+ *        .value[3]?.u32: brightness of black in the grayscale blur. The value range is [0, 127]. \n
+ *        .value[4]?.u32: degree of darkening the white color in the grayscale blur. The value range is [0, 127]. \n
+ *        .value[5]?.i32: blur activation policy. The value is an enum of {@link ArkUI_BlurStyleActivePolicy}. \n
+ *        .value[6]?.u32: background color, in 0xARGB format, of the components within the window after the window loses
+ *                        focus (in which case, the blur effect on the components within the window is removed). \n
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
@@ -1083,6 +1114,17 @@ int32_t OH_ArkUI_CustomDialog_SetBackgroundBlurStyleOptions(
  *
  * @param options Dialog box parameters.
  * @param backgroundEffect Background effect of the dialog box.
+ *        Format of the {@link ArkUI_AttributeItem} parameter: \n
+ *        .value[0].f32: blur radius, in vp. \n
+ *        .value[1]?.f32: saturation. \n
+ *        .value[2]?.f32: brightness. \n
+ *        .value[3]?.u32: color, in 0xARGB format. \n
+ *        .value[4]?.i32: adaptive color mode. The value is an enum of {@link ArkUI_AdaptiveColor}. \n
+ *        .value[5]?.u32: brightness of black in the grayscale blur. The value range is [0, 127]. \n
+ *        .value[6]?.u32: degree of darkening the white color in the grayscale blur. The value range is [0, 127]. \n
+ *        .value[7]?.i32: blur activation policy. The value is an enum of {@link ArkUI_BlurStyleActivePolicy}. \n
+ *        .value[8]?.u32: background color, in 0xARGB format, of the components within the window after the window loses
+ *                        focus (in which case, the blur effect on the components within the window is removed). \n
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
