@@ -91,6 +91,21 @@ public:
         return retValue;
     }
 
+    // use for callbacks that return other callbacks (e.g. drag start which returns a builder callback)
+    template <typename ArkResultType, typename ContinuationType, typename... Params>
+    std::unique_ptr<CallbackHelper<ArkResultType>> InvokeWithObtainCallback(Params&&... args) const
+    {
+        std::unique_ptr<CallbackHelper<ArkResultType>> retValue = nullptr;
+        auto handler = [&retValue](const void *valuePtr) {
+            retValue = std::make_unique<CallbackHelper<ArkResultType>>(*(
+                reinterpret_cast<const ArkResultType *>(valuePtr)));
+        };
+        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
+            handler, *this, std::forward<Params>(args)...
+        );
+        return std::move(retValue);
+    }
+
     template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
     std::optional<ResultType> InvokeWithOptConvertResult(Params&&... args) const
     {
