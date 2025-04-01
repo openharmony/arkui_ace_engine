@@ -111,12 +111,12 @@ RefPtr<FrameNode> BuildMenuItem(WeakPtr<ContainerModalPatternEnhance>&& weakPatt
     auto containerTitleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
 
-    using StrPair = std::tuple<std::string, std::string, InternalResource::ResourceId>;
+    using StrPair = std::tuple<std::string, InternalResource::ResourceId>;
     const StrPair strs[] = {
-        { "window.leftSide", "EnhanceMenuScreenLeftRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L },
-        { "window.rightSide", "EnhanceMenuScreenRightRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N }};
+        { "EnhanceMenuScreenLeftRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L },
+        { "EnhanceMenuScreenRightRow", InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N }};
     const auto& sideSrc = isLeftSplit ? strs[0] : strs[1];
-    containerTitleRow->UpdateInspectorId(std::get<1>(sideSrc));
+    containerTitleRow->UpdateInspectorId(std::get<0>(sideSrc));
 
     // setRadius 8vp
     auto render = containerTitleRow->GetRenderContext();
@@ -134,12 +134,15 @@ RefPtr<FrameNode> BuildMenuItem(WeakPtr<ContainerModalPatternEnhance>&& weakPatt
         CalcLength(MENU_ITEM_PADDING_V));
     layoutProperty->UpdatePadding(padding);
 
-    auto icon = ContainerModalViewEnhance::BuildMenuItemIcon(std::get<2>(sideSrc));
+    auto icon = ContainerModalViewEnhance::BuildMenuItemIcon(std::get<1>(sideSrc));
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto titleLabel =
         FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), textPattern);
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters(std::get<0>(sideSrc)));
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    textLayoutProperty->UpdateContent(theme->GetWindowScreen(isLeftSplit));
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateFontSize(TITLE_TEXT_FONT_SIZE);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -385,7 +388,11 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
 RefPtr<FrameNode> ContainerModalPatternEnhance::GetOrCreateMenuList(const RefPtr<FrameNode>& targetNode)
 {
     MeasureContext textCtx;
-    textCtx.textContent = Localization::GetInstance()->GetEntryLetters("window.rightSide");
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
+    textCtx.textContent = theme->GetWindowScreen(true);
+
     textCtx.fontSize = TITLE_TEXT_FONT_SIZE;
     auto textSize = MeasureUtil::MeasureTextSize(textCtx);
     textWidth_ = textSize.Width();
