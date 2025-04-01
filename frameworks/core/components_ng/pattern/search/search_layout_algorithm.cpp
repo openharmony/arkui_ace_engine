@@ -378,7 +378,7 @@ void SearchLayoutAlgorithm::DividerMeasure(LayoutWrapper* layoutWrapper)
 
     auto iconHeight = searchTheme->GetIconHeight().ConvertToPx();
     auto dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(iconHeight));
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto defaultDividerHeight = DEFAULT_DIVIDER_HEIGHT.ConvertToPx();
         dividerHeight = std::min(static_cast<float>(searchHeight_), static_cast<float>(defaultDividerHeight));
     }

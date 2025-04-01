@@ -60,12 +60,12 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (propColor_.has_value()) {
                 json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
             } else {
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
                 auto pipeline = host->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 auto themeManager = pipeline->GetThemeManager();

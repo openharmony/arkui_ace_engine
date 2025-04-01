@@ -1140,7 +1140,9 @@ void TextFieldPattern::ClearFocusStyle()
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -3406,7 +3408,7 @@ void TextFieldPattern::OnModifyDone()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         InitCancelButtonMouseEvent();
         InitPasswordButtonMouseEvent();
     }
@@ -8687,10 +8689,12 @@ void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& res
 
 void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CHECK_NULL_VOID(cleanNodeResponseArea_);
         GetIconPaintRect(cleanNodeResponseArea_, paintRect);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             cleanNodeResponseArea_->CreateIconRect(paintRect, true);
             float cornerRadius = paintRect.GetRect().Width() / 2;
             paintRect.SetCornerRadius(cornerRadius);
@@ -8699,7 +8703,7 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
             GetIconPaintRect(responseArea_, paintRect);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 responseArea_->CreateIconRect(paintRect, true);
             }
             float cornerRadius = paintRect.GetRect().Width() / 2;
