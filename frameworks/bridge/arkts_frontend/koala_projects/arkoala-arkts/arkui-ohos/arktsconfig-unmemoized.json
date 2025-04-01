@@ -14,11 +14,12 @@
             "@koalaui/common": ["../../../../../incremental/common/src"],
             "@koalaui/compat": ["../../../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["../../../../../incremental/runtime/build/unmemoized/src"],
-            "#helpindexarkui": ["index.ts"]
+            "#helpindexarkui": ["index.ts"],
+            "@ohos.arkui.UIContext": ["../ohos.arkui.UIContext.ts"]
         }
     },
     "include": [
-        "build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts"
+        "build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts", "build/unmemoized/ohos.arkui.UIContext.ts"
     ],
     "exclude": [
         "**/index.ts",
