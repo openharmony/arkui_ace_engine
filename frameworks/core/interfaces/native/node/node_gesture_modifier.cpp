@@ -917,14 +917,22 @@ ArkUI_Int32 getPanGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUI
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 getSwipeGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction)
+ArkUI_Int32 getSwipeGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
     CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
-    *direction = static_cast<ArkUISwipeGestureDirection>(swipeRecognizer->GetDirection().type);
+    if (swipeRecognizer->GetDirection().type == SwipeDirection::HORIZONTAL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_HORIZONTAL);
+    } else if (swipeRecognizer->GetDirection().type == SwipeDirection::VERTICAL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_VERTICAL);
+    } else if (swipeRecognizer->GetDirection().type == SwipeDirection::ALL) {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_ALL);
+    } else {
+        *direction = static_cast<ArkUIGestureDirection>(ArkUI_GESTURE_DIRECTION_NONE);
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -968,7 +976,7 @@ ArkUI_Int32 getPanGestureDistance(ArkUIGestureRecognizer* recognizer, double* di
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distance = static_cast<bool>(panRecognizer->GetDistance());
+    *distance = static_cast<double>(panRecognizer->GetDistance());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -979,7 +987,7 @@ ArkUI_Int32 getPinchGestureDistance(ArkUIGestureRecognizer* recognizer, double* 
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(pinchRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distance = static_cast<bool>(pinchRecognizer->GetDistance());
+    *distance = RoundToMaxPrecision(static_cast<double>(pinchRecognizer->GetDistance()));
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -990,7 +998,7 @@ ArkUI_Int32 getSwipeGestureSpeed(ArkUIGestureRecognizer* recognizer, double* spe
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
-    *speed = static_cast<bool>(swipeRecognizer->GetSpeed());
+    *speed = RoundToMaxPrecision(static_cast<double>(swipeRecognizer->GetSpeed()));
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1001,7 +1009,7 @@ ArkUI_Int32 getLongPressGestureDuration(ArkUIGestureRecognizer* recognizer, int*
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(longPressRecognizer, ERROR_CODE_PARAM_INVALID);
-    *duration = static_cast<bool>(longPressRecognizer->GetDuration());
+    *duration = static_cast<int32_t>(longPressRecognizer->GetDuration());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1012,7 +1020,7 @@ ArkUI_Int32 getRotationGestureAngle(ArkUIGestureRecognizer* recognizer, double* 
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(rotationRecognizer, ERROR_CODE_PARAM_INVALID);
-    *angle = static_cast<bool>(rotationRecognizer->GetAngle());
+    *angle = static_cast<double>(rotationRecognizer->GetAngle());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1023,7 +1031,7 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(tapRecognizer, ERROR_CODE_PARAM_INVALID);
-    *distanceThreshold = static_cast<bool>(tapRecognizer->GetDistanceThreshold());
+    *distanceThreshold = static_cast<double>(tapRecognizer->GetDistanceThreshold());
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
