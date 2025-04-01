@@ -9119,6 +9119,31 @@ std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackIn
     };
 }
 
+std::function<std::string()> JsGetCustomMapFunc(const JSCallbackInfo& info, int32_t nodeId)
+{
+    auto* vm = info.GetVm();
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyMapString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params, 1);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
 std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
@@ -9170,7 +9195,8 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     auto nodeId = frameNode->GetId();
     auto getFunc = ParseJsGetFunc(info, nodeId);
     auto func = ParseJsFunc(info, nodeId);
-    frameNode->SetJSCustomProperty(func, getFunc);
+    auto getMapFunc = JsGetCustomMapFunc(info, nodeId);
+    frameNode->SetJSCustomProperty(func, getFunc, std::move(getMapFunc));
 }
 
 void JSViewAbstract::JsLinearGradient(const JSCallbackInfo& info)
