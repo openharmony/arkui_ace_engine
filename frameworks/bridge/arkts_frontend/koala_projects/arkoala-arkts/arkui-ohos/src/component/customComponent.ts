@@ -15,6 +15,7 @@
 
 import { ArkStructBase } from "../ArkStructBase"
 import { ArkCommonMethodComponent } from "../generated/ArkCommon"
+import { UIContext } from "@ohos.arkui.UIContext"
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
     ArkStructBase<CustomDelegate<T, T_Options>, T_Options> {
@@ -105,6 +106,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
     onPageShow(): void {}
     onPageHide(): void {}
     onBackPress(): boolean { return false; }
+    getUIContext(): UIContext { return new UIContext(100000); }
 
     build(): void {};
 

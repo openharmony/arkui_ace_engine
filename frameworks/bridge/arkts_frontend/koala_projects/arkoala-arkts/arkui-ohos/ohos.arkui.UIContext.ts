@@ -16,12 +16,12 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterialized"
+import { FrameNode, FrameNodeInternal } from "./src/generated/ArkFrameNodeMaterialized"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
-import { _animateTo } from "./handwritten"
-import { AnimateParam } from './generated'
+import { _animateTo } from "./src/handwritten"
+import { AnimateParam } from './src/generated'
 
 export class UIContext {
     instanceId_: int32 = 10001;

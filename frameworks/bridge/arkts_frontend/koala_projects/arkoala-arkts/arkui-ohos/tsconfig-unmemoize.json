@@ -36,12 +36,16 @@
             ],
             "#components": [
                 "./src/generated/ts"
+            ],
+            "@ohos.arkui.UIContext": [
+                "./ohos.arkui.UIContext.ts"
             ]
         },
         "rootDir": "."
     },
     "include": [
-        "./src/**/*.ts"
+        "./src/**/*.ts",
+        "./ohos.arkui.UIContext.ts"
     ],
     "exclude": [
         "./src/generated/arkts",
