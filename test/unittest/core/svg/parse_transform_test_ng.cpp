@@ -74,6 +74,7 @@
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
+#include "core/components_ng/svg/parse/svg_transform.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -550,6 +551,94 @@ HWTEST_F(SvgTransformTestNg, ParseTransformOriginInvalidTest002, TestSize.Level1
     std::vector<NG::TransformInfo> transformVec = attributes.transformVec;
     EXPECT_EQ(Dimension(0.0f), attributes.transformOrigin.first);
     EXPECT_EQ(Dimension(0.0_px), attributes.transformOrigin.second);
+}
+
+/**
+ * @tc.name: ObjectBoundingBoxTransformTest001
+ * @tc.desc: ObjectBoundingBoxTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, ObjectBoundingBoxTransformTest001, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 2, 2);
+    Size viewPort(2, 2);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::OBJECT_BOUNDING_BOX);
+    SvgLengthType svgLengthType = SvgLengthType::HORIZONTAL;
+    double srcLength = 1.0;
+    auto dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 2.0);
+    svgLengthType = SvgLengthType::VERTICAL;
+    dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 2.0);
+    svgLengthType = SvgLengthType::OTHER;
+    dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 0.0);
+}
+
+/**
+ * @tc.name: ObjectBoundingBoxTransformTest002
+ * @tc.desc: ObjectBoundingBoxTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, ObjectBoundingBoxTransformTest002, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 2, 2);
+    Size viewPort(2, 2);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    SvgLengthType svgLengthType = SvgLengthType::HORIZONTAL;
+    double srcLength = 1.0;
+    auto dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 1.0);
+    svgLengthType = SvgLengthType::VERTICAL;
+    dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 1.0);
+    svgLengthType = SvgLengthType::OTHER;
+    dstLength = NGSvgTransform::ObjectBoundingBoxTransform(srcLength, rule, svgLengthType);
+    EXPECT_FLOAT_EQ(dstLength, 0.0);
+}
+
+/**
+ * @tc.name: ApplyTransformTest001
+ * @tc.desc: ApplyTransform paramVec empty test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, ApplyTransformTest001, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    Testing::TestingPath rSPath;
+    svgNode->ApplyTransform(rSPath, rule);
+}
+
+/**
+ * @tc.name: ApplyTransformTest002
+ * @tc.desc: ApplyTransform test
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgTransformTestNg, ApplyTransformTest002, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    Testing::TestingPath rSPath;
+    std::vector<std::string> paramVec;
+    paramVec.push_back("100");
+    NG::TransformInfo transformInfo {"translate", paramVec};
+    svgNode->attributes_.transformVec.push_back(transformInfo);
+    svgNode->ApplyTransform(rSPath, rule);
 }
 
 /**
