@@ -686,8 +686,8 @@ void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Parag
         // for content such as Hellow Wrold, update text style for three parts:
         // [0, selStart), [selStart, selEnd), [selEnd, content.length) through UpdateContentTextStyle
         auto contentLength = static_cast<int32_t>(content.length());
-        CHECK_NULL_VOID(selEnd > 0);
         selStart = selStart < 0 ? 0: selStart;
+        selEnd = selEnd < 0 ? 0 : selEnd;
         selEnd = selEnd > contentLength ? contentLength : selEnd;
         if (content.empty()) {
             builder->PushStyle(textStyle);
