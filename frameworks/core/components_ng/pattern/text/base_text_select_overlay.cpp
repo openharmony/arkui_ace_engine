@@ -41,6 +41,7 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
     if (!PreProcessOverlay(request) || AnimationUtils::IsImplicitAnimationOpen()) {
         return;
     }
+    isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
     auto checkClipboard = [weak = WeakClaim(this), request](bool hasData) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HasData callback from clipboard, data available ? %{public}d", hasData);
         auto overlay = weak.Upgrade();
@@ -1570,29 +1571,18 @@ bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
 
 void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
 {
-    auto host = GetOwner();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    auto isExpandDisplay = selectTheme->GetExpandDisplay();
-    auto isFreeMultiWindow = container->IsFreeMultiWindow();
-    if (!isFreeMultiWindow && !isExpandDisplay) {
-        return;
-    }
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->IsRightClickSubWindowMenu()) {
-        CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+        if (NeedsProcessMenuOnWinChange()) {
+            CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+        }
     } else if (overlayManager->IsSelectOverlaySubWindowMenu()) {
-        if (SystemProperties::IsSuperFoldDisplayDevice()) {
+        if (isSuperFoldDisplayDevice_ && NeedsProcessMenuOnWinChange()) {
             CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
             return;
         }
-        if (overlayManager->IsMenuShow()) {
+        if (overlayManager->IsMenuShow() && NeedsProcessMenuOnWinChange()) {
             HideMenu(true);
             TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
         }
@@ -1608,5 +1598,18 @@ bool BaseTextSelectOverlay::IsEnableSelectionMenu()
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, true);
     return textOverlayTheme->GetEnableSelectionMenu();
+}
+
+bool BaseTextSelectOverlay::NeedsProcessMenuOnWinChange()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, false);
+    return selectTheme->GetExpandDisplay() || container->IsFreeMultiWindow();
 }
 } // namespace OHOS::Ace::NG

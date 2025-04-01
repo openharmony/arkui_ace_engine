@@ -815,9 +815,8 @@ void SelectOverlayLayoutAlgorithm::UpdateMainWindowOffset(LayoutWrapper* layoutW
     auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto isExpandDisplay = selectTheme->GetExpandDisplay();
-    auto isFreeMultiWindow = container->IsFreeMultiWindow();
     auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
-    if (isExpandDisplay || isFreeMultiWindow) {
+    if (isExpandDisplay || container->IsFreeMultiWindow()) {
         mainWindowOffset_ = OffsetF(displayWindowRect.Left(), displayWindowRect.Top());
     }
     containerModalOffset_ = info_->containerModalOffset;

@@ -396,6 +396,7 @@ private:
     bool CheckAndUpdateHostGlobalPaintRect();
     bool CheckHasTransformMatrix(const RefPtr<RenderContext>& context);
     bool IsEnableSelectionMenu();
+    bool NeedsProcessMenuOnWinChange();
     bool isHandleDragging_ = false;
     bool isSingleHandle_ = false;
     bool isShowPaste_ = false;
@@ -420,6 +421,7 @@ private:
      * the menu window may conflict with the autofill window.
      */
     bool isHostNodeEnableSubWindowMenu_ = true;
+    bool isSuperFoldDisplayDevice_ = false;
 };
 
 } // namespace OHOS::Ace::NG
