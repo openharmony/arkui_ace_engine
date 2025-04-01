@@ -46,10 +46,9 @@ struct TextRange {
 
     std::string ToString() const
     {
-        auto jsonValue = JsonUtil::Create(true);
-        JSON_STRING_PUT_INT(jsonValue, start);
-        JSON_STRING_PUT_INT(jsonValue, end);
-        return jsonValue->ToString();
+        std::stringstream ss;
+        ss << "[start:" << start << "," << "end:" << end << "]";
+        return ss.str();
     }
 
     void Reset()
