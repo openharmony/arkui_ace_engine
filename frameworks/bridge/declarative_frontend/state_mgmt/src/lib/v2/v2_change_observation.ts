@@ -27,7 +27,7 @@
 // stackOfRenderedComponentsItem[0] and stackOfRenderedComponentsItem[1] is faster than
 // the stackOfRenderedComponentsItem.id and the stackOfRenderedComponentsItem.cmp.
 // So use the array to keep id and cmp.
-type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase];
+type StackOfRenderedComponentsItem = [number, MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase];
 
 // in the case of ForEach, Repeat, AND If, two or more UINodes / elementIds can render at the same time
 // e.g. ForEach -> ForEach child Text, Repeat -> Nested Repeat, child Text
@@ -36,7 +36,7 @@ type StackOfRenderedComponentsItem = [number, IView | MonitorV2 | ComputedV2 | P
 class StackOfRenderedComponents {
   private stack_: Array<StackOfRenderedComponentsItem> = new Array<StackOfRenderedComponentsItem>();
 
-  public push(id: number, cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase): void {
+  public push(id: number, cmp: MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase): void {
     this.stack_.push([id, cmp]);
   }
 
@@ -79,8 +79,17 @@ class ObserveV2 {
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private stackOfRenderedComponents_ : StackOfRenderedComponents = new StackOfRenderedComponents();
 
-  // Map bindId to WeakRef<ViewPU> | MonitorV2
-  private id2cmp_: { number: WeakRef<Object> } = {} as { number: WeakRef<Object> };
+  // Map bindId to WeakRef<ViewBuildNodeBase>
+  public id2cmp_: { number: WeakRef<ViewBuildNodeBase> } = {} as { number: WeakRef<ViewBuildNodeBase> };
+
+  // Map bindId to WeakRef<MonitorV2>
+  private id2Monitor_: { number: WeakRef<MonitorV2> } = {} as { number: WeakRef<MonitorV2> };
+
+  // Map bindId to WeakRef<ComputedV2>
+  private id2Computed_: { number: WeakRef<ComputedV2> } = {} as { number: WeakRef<ComputedV2> };
+
+  // Map bindId to WeakRef<PersistenceV2Impl>
+  private id2Persistence_: { number: WeakRef<PersistenceV2Impl> } = {} as { number: WeakRef<PersistenceV2Impl> };
 
   // Map bindId -> Set of @ObservedV2 class objects
   // reverse dependency map for quickly removing all dependencies of a bindId
@@ -144,7 +153,7 @@ class ObserveV2 {
 
   // At the start of observeComponentCreation or
   // MonitorV2 observeObjectAccess
-  public startRecordDependencies(cmp: IView | MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase, id: number, doClearBinding: boolean = true): void {
+  public startRecordDependencies(cmp: MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase, id: number, doClearBinding: boolean = true): void {
     if (cmp != null) {
       doClearBinding && this.clearBinding(id);
       this.stackOfRenderedComponents_.push(id, cmp);
@@ -162,11 +171,22 @@ class ObserveV2 {
 
     // only add IView | MonitorV2 | ComputedV2 if at least one dependency was
     // recorded when rendering this ViewPU/ViewV2/Monitor/ComputedV2
-    // ViewPU is the likely case where no dependecy gets recorded
+    // ViewPU is the likely case where no dependency gets recorded
     // for others no dependencies are unlikely to happen
 
     // once set, the value remains unchanged
-    this.id2cmp_[bound[0]] = new WeakRef<Object>(bound[1]);
+    let id: number = bound[0];
+    let cmp: MonitorV2 | ComputedV2 | PersistenceV2Impl | ViewBuildNodeBase = bound[1];
+
+    if (cmp instanceof ViewBuildNodeBase) {
+      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase>(cmp);
+    } else if (cmp instanceof ComputedV2) {
+      this.id2Computed_[id] = new WeakRef<ComputedV2>(cmp);
+    } else if (cmp instanceof MonitorV2) {
+      this.id2Monitor_[id] = new WeakRef<MonitorV2>(cmp);
+    } else if (cmp instanceof PersistenceV2Impl) {
+      this.id2Persistence_[id] = new WeakRef<PersistenceV2Impl>(cmp);
+    }
   }
 
   // clear any previously created dependency view model object to elmtId
@@ -199,7 +219,6 @@ class ObserveV2 {
 
     delete this.id2targets_[id];
 
-    stateMgmtConsole.propertyAccess(`clearBinding (at the end): id2cmp_ length=${Object.keys(this.id2cmp_).length}, entries=${JSON.stringify(Object.keys(this.id2cmp_))} `);
     stateMgmtConsole.propertyAccess(`... id2targets_ length=${Object.keys(this.id2targets_).length}, entries=${JSON.stringify(Object.keys(this.id2targets_))} `);
   }
 
@@ -230,7 +249,7 @@ class ObserveV2 {
     while (this.idleTasks_.first < this.idleTasks_.end) {
       const [func, ...args] = this.idleTasks_[this.idleTasks_.first++] || [];
       func?.apply(this, args);
-      if (Date.now() >= deadline) {
+      if (this.idleTasks_.first % 100 === 0 && Date.now() >= deadline - 1) {
         return;
       }
     }
@@ -242,15 +261,39 @@ class ObserveV2 {
   public runIdleCleanup(deadline: number): void {
     stateMgmtConsole.debug(`UINodeRegisterProxy.runIdleCleanup()`);
 
-    if (Date.now() >= deadline) {
+    if (Date.now() >= deadline - 1) {
       return;
     }
 
+    let iterationCount: number = 0;
+
     for (let id in this.id2targets_) {
-      if (!this.id2targets_[id]?.size) delete this.id2targets_[id];
+      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
+        return;
+      }
+      if (!this.id2targets_[id]?.size) {
+        delete this.id2targets_[id];
+      }
     }
-    for (let id in this.id2cmp_) {
-      if (!this.id2cmp_[id]?.deref()) delete this.id2cmp_[id];
+
+    // only need to clean up the ComputedId and MonitorId here, 
+    // element id will clean up in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
+    for (let id in this.id2Computed_) {
+      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
+        return;
+      }
+      if (!this.id2Computed_[id]?.deref()) {
+        delete this.id2Computed_[id];
+      }
+    }
+
+    for (let id in this.id2Monitor_) {
+      if (iterationCount++ % 100 === 0 && Date.now() >= deadline - 1) {
+        return;
+      }
+      if (!this.id2Monitor_[id]?.deref()) {
+        delete this.id2Monitor_[id];
+      }
     }
   }
 
@@ -481,7 +524,7 @@ class ObserveV2 {
     // enable this trace marker for more fine grained tracing of the update pipeline
     // note: two (!) end markers need to be enabled
     let changedIdSet = target[ObserveV2.SYMBOL_REFS][attrName];
-    if (!changedIdSet || !(changedIdSet instanceof Set)) {
+    if (changedIdSet instanceof Set === false) {
       return;
     }
 
@@ -504,15 +547,16 @@ class ObserveV2 {
       // that will run after the current call stack has unwound.
       // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
-      if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
-        /* update not already in progress */ !this.startDirty_ &&
-        /* no reuse on-going */ this.currentReuseId_ === ObserveV2.NO_REUSE) {
-        Promise.resolve()
-        .then(this.updateDirty.bind(this))
-        .catch(error => {
-          stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
-          _arkUIUncaughtPromiseError(error);
-        });
+      const hasPendingChanges = (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size) > 0;
+      const isReuseInProgress = (this.currentReuseId_ !== ObserveV2.NO_REUSE);
+      const shouldUpdateDirty = (!hasPendingChanges && !this.startDirty_ && !isReuseInProgress);
+
+      if (shouldUpdateDirty) {
+        Promise.resolve().then(this.updateDirty.bind(this))
+          .catch(error => {
+            stateMgmtConsole.applicationError(`Exception occurred during the update process involving @Computed properties, @Monitor functions or UINode re-rendering`, error);
+            _arkUIUncaughtPromiseError(error);
+          });
       }
 
       // add bindId to the correct Set of pending changes.
@@ -604,7 +648,7 @@ class ObserveV2 {
     stateMgmtConsole.debug(`ObservedV2.updateDirtyComputedProps ${computed.length} props: ${JSON.stringify(computed)} ...`);
     aceDebugTrace.begin(`ObservedV2.updateDirtyComputedProps ${computed.length} @Computed`);
     computed.forEach((id) => {
-      const comp = this.id2cmp_[id]?.deref();
+      const comp = this.id2Computed_[id]?.deref();
       if (comp instanceof ComputedV2) {
         const target = comp.getTarget();
         if (target instanceof ViewV2 && !target.isViewActive()) {
@@ -636,7 +680,7 @@ class ObserveV2 {
   public updateDirtyMonitorsOnReuse(monitors: Set<number>): void {
     let monitor: MonitorV2 | undefined;
     monitors.forEach((watchId) => {
-      monitor = this.id2cmp_[watchId]?.deref();
+      monitor = this.id2Monitor_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
         // only update dependency and reset value, no call monitor.
         monitor.notifyChangeOnReuse();
@@ -652,7 +696,7 @@ class ObserveV2 {
     let monitorTarget: Object;
 
     monitors.forEach((watchId) => {
-      monitor = this.id2cmp_[watchId]?.deref();
+      monitor = this.id2Monitor_[watchId]?.deref();
       if (monitor instanceof MonitorV2) {
         monitorTarget = monitor.getTarget();
         if (monitorTarget instanceof ViewV2 && !monitorTarget.isViewActive()) {
@@ -905,13 +949,13 @@ class ObserveV2 {
   }
 
   public getComputedInfoById(computedId: number): string {
-    let weak = this.id2cmp_[computedId];
+    let weak = this.id2Computed_[computedId];
     let computedV2: ComputedV2;
     return (weak && (computedV2 = weak.deref()) && (computedV2 instanceof ComputedV2)) ? computedV2.getComputedFuncName() : '';
   }
 
   public getMonitorInfoById(computedId: number): string {
-    let weak = this.id2cmp_[computedId];
+    let weak = this.id2Monitor_[computedId];
     let monitorV2: MonitorV2;
     return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
   }

@@ -106,7 +106,7 @@ export struct SegmentButtonBootcamp {
   @State @Watch('onChange') directions: Direction = Direction.Auto;
   @State @Watch('onChange') enableBackgroundBlurStyles: boolean = false;
   @State @Watch('onChange') backgroundBlurStyles: BlurStyle = BlurStyle.NONE;
-  @State @Watch('onChange') tabSelectedIndex: number[] = [1]
+  @State tabSelectedIndex: number[] = [1]
   @State singleSelectCapsuleOptions: SegmentButtonOptions = SegmentButtonOptions.capsule({
     multiply: useEnabled(this.enableMultiply, this.multiply),
     buttons: [{ text: '按钮1' }, { text: '按钮2' }, { text: '按钮3' }],
@@ -181,7 +181,6 @@ export struct SegmentButtonBootcamp {
     backgroundBlurStyle: useEnabled(this.enableBackgroundBlurStyles,
       this.backgroundBlurStyles)
   })
-  @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
   aboutToAppear(): void {
@@ -375,12 +374,14 @@ export struct SegmentButtonBootcamp {
     ))
     .hideTitleBar(true)
   }
+
   @Builder
   Content() {
     Column() {
       SegmentButton({ options: this.singleSelectCapsuleOptions, selectedIndexes: $tabSelectedIndex })
     }.width('90%')
   }
+
   @Builder
   Parameters() {
     Scroll(this.scroller) {
@@ -764,6 +765,7 @@ export struct SegmentButtonBootcamp {
     .id('scroll')
   }
 }
+
 @Preview
 @Component
 struct SegmentButtonBootcampPreviewer {

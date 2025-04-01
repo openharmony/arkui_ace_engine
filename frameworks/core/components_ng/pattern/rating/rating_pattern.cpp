@@ -940,12 +940,12 @@ void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        HandleEnabled();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        HandleEnabled();
+    }
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);

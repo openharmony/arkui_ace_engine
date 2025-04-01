@@ -26,6 +26,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 
@@ -97,7 +98,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
-            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
+            SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode);
             contentModifier->ModifyTextStyle(textStyle);
         }
         contentModifier->SetFontReady(false);
@@ -352,7 +353,7 @@ void MultipleParagraphLayoutAlgorithm::SetDecorationPropertyToModifier(const Ref
 }
 
 void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty,
-    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle)
+    const RefPtr<TextContentModifier>& modifier, const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     SetFontSizePropertyToModifier(layoutProperty, modifier, textStyle);
     auto fontWeight = layoutProperty->GetFontWeight();
@@ -367,11 +368,13 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     } else {
         modifier->SetTextColor(textStyle.GetTextColor(), true);
     }
-    auto symbolColors = layoutProperty->GetSymbolColorList();
-    if (symbolColors && symbolColors.has_value()) {
-        modifier->SetSymbolColor(symbolColors.value());
-    } else {
-        modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto symbolColors = layoutProperty->GetSymbolColorList();
+        if (symbolColors && symbolColors.has_value()) {
+            modifier->SetSymbolColor(symbolColors.value());
+        } else {
+            modifier->SetSymbolColor(textStyle.GetSymbolColorList(), true);
+        }
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {
@@ -961,28 +964,5 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
-}
-
-std::string MultipleParagraphLayoutAlgorithm::SpansToString()
-{
-    std::stringstream ss;
-    for (auto& list : spans_) {
-        ss << "[";
-        for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
-            ss << "[" << item->interval.first << "," << item->interval.second << ":"
-               << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
-        });
-        ss << "], ";
-    }
-    return ss.str();
-}
-
-std::vector<ParagraphManager::ParagraphInfo> MultipleParagraphLayoutAlgorithm::GetParagraphs()
-{
-    std::vector<ParagraphManager::ParagraphInfo> paragraphInfo;
-    if (paragraphManager_) {
-        paragraphInfo = paragraphManager_->GetParagraphs();
-    }
-    return paragraphInfo;
 }
 } // namespace OHOS::Ace::NG

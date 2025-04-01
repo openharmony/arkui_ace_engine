@@ -70,24 +70,24 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
-class MyModifier implements AttributeModifier<CheckboxGroupAttribute> {
-  applyNormalAttribute(instance: CheckboxGroupAttribute) {
+class MyModifier implements AttributeModifier<FlexAttribute> {
+  applyNormalAttribute(instance: FlexAttribute) {
     instance.backgroundColor('#0A59F7')
   }
 
-  applyPressedAttribute(instance: CheckboxGroupAttribute) {
+  applyPressedAttribute(instance: FlexAttribute) {
     instance.backgroundColor('#ED6F21')
   }
 
-  applyFocusedAttribute(instance: CheckboxGroupAttribute) {
+  applyFocusedAttribute(instance: FlexAttribute) {
     instance.backgroundColor(Color.Gray)
   }
 
-  applyDisabledAttribute(instance: CheckboxGroupAttribute) {
+  applyDisabledAttribute(instance: FlexAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
 
-  applySelectedAttribute(instance: CheckboxGroupAttribute) {
+  applySelectedAttribute(instance: FlexAttribute) {
     instance.backgroundColor('#ffedea21')
   }
 }

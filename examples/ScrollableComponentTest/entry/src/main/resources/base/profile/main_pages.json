@@ -17,6 +17,11 @@
     "pages/Swiper/OnContentWillScrollListNest",
     "pages/Swiper/CachedCountIsShownNormal",
     "pages/List/ListMainPage",
-    "pages/List/childrenMainSize/ListItemGroupScenario"
+    "pages/List/childrenMainSize/ListItemGroupScenario",
+    "pages/alphabetIndexer/AlphabetIndexerMainPage",
+    "pages/alphabetIndexer/AutoCollapse",
+    "pages/alphabetIndexer/PopupPosition",
+    "pages/refresh/RefreshMainPage",
+    "pages/refresh/RefreshingContent"
   ]
 }

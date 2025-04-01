@@ -102,12 +102,12 @@ void RadioPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    if (!makeFunc_.has_value() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!makeFunc_.has_value() && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateIndicatorType();
     }
     UpdateState();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto* pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
@@ -573,7 +573,7 @@ void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
         FireBuilder();
     }
     frameNode->MarkNeedRenderOnly();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         startExitAnimation();
     }
     if (preCheck_) {
@@ -776,7 +776,7 @@ void RadioPattern::UpdateGroupCheckStatus(
     const RefPtr<FrameNode>& frameNode, const RefPtr<GroupManager>& groupManager, bool check)
 {
     frameNode->MarkNeedRenderOnly();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         if (!isFirstCreated_ && check) {
             startEnterAnimation();
         }
@@ -863,12 +863,14 @@ void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern RadioPattern::GetFocusPattern() const
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, FocusPattern());
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_RETURN(radioTheme, FocusPattern());
     FocusPaintParam focusPaintParam;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto focusColor = radioTheme->GetFocusColor();
         focusPaintParam.SetPaintColor(focusColor);
     } else {
@@ -947,7 +949,7 @@ void RadioPattern::HandleEnabled()
     auto radioPaintProperty = GetHost()->GetPaintProperty<RadioPaintProperty>();
     if (enabled_ != enabled) {
         enabled_ = enabled;
-        if (!enabled_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (!enabled_ && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             if (!radioModifier_) {
                 radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
             }

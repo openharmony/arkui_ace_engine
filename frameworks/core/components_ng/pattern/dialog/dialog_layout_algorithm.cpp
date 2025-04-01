@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,6 +68,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
+    hasAddMaskNode_ = (dialogPattern->GetDialogProperties().maskTransitionEffect != nullptr ||
+                       dialogPattern->GetDialogProperties().dialogTransitionEffect != nullptr) &&
+                       isModal_ && !isShowInSubWindow_;
     auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
     hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
@@ -506,6 +508,16 @@ int32_t DialogLayoutAlgorithm::GetDeviceColumns(GridSizeType type, DeviceType de
     return deviceColumns;
 }
 
+void DialogLayoutAlgorithm::ClipCustomMaskNode(const RefPtr<FrameNode>& dialog, const RectF& rect)
+{
+    auto maskNode = AceType::DynamicCast<FrameNode>(dialog->GetChildByIndex(1));
+    CHECK_NULL_VOID(maskNode);
+    auto ctx = maskNode->GetRenderContext();
+    CHECK_NULL_VOID(ctx);
+    ctx->ClipWithRect(rect);
+    ctx->UpdateClipEdge(true);
+}
+
 void DialogLayoutAlgorithm::ProcessMaskRect(
     std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog, bool isMask)
 {
@@ -529,8 +541,12 @@ void DialogLayoutAlgorithm::ProcessMaskRect(
         rect == RectF(0.0, 0.0, PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight());
     auto clipMask = isModal_ && isMask && !isMaskFullScreen;
     if (!isShowInSubWindow_ && clipMask) {
-        dialogContext->ClipWithRect(rect);
-        dialogContext->UpdateClipEdge(true);
+        if (hasAddMaskNode_) {
+            ClipCustomMaskNode(dialog, rect);
+        } else {
+            dialogContext->ClipWithRect(rect);
+            dialogContext->UpdateClipEdge(true);
+        }
     }
     if (isUIExtensionSubWindow_ && isModal_) {
         ClipUIExtensionSubWindowContent(dialog);
@@ -562,6 +578,23 @@ std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<Fra
     return maskRect;
 }
 
+void DialogLayoutAlgorithm::UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog)
+{
+    auto maskNodePtr = dialog->GetChildByIndex(1);
+    CHECK_NULL_VOID(maskNodePtr);
+    auto maskNode = AceType::DynamicCast<FrameNode>(maskNodePtr);
+    CHECK_NULL_VOID(maskNode);
+    auto maskNodeLayoutProp = maskNode->GetLayoutProperty();
+    CHECK_NULL_VOID(maskNodeLayoutProp);
+    auto maskGeometryNode = maskNode->GetGeometryNode();
+    CHECK_NULL_VOID(maskGeometryNode);
+    maskNodeLayoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+    maskGeometryNode->SetFrameOffset(OffsetF(0, 0));
+    maskNode->Measure(dialog->GetLayoutConstraint());
+    maskNode->Layout();
+}
+
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -584,6 +617,9 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (isModal_ && dialogPattern->GetDialogProperties().maskRect.has_value()) {
         std::optional<DimensionRect> maskRect = GetMaskRect(frameNode);
         ProcessMaskRect(maskRect, frameNode, true);
+    }
+    if (hasAddMaskNode_) {
+        UpdateCustomMaskNodeLayout(frameNode);
     }
     auto child = children.front();
     auto childSize = child->GetGeometryNode()->GetMarginFrameSize();

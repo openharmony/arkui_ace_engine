@@ -20,8 +20,6 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/common/container.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -109,11 +107,11 @@ void TxtParagraph::PopStyle()
 void TxtParagraph::AddText(const std::u16string& text)
 {
     ACE_TEXT_SCOPED_TRACE("TxtParagraph::AddText:%d", static_cast<uint32_t>(text.length()));
+    CHECK_NULL_VOID(!hasExternalParagraph_);
     if (!builder_) {
         CreateBuilder();
     }
     text_ += text;
-    CHECK_NULL_VOID(!hasExternalParagraph_);
     builder_->AppendText(text);
 }
 

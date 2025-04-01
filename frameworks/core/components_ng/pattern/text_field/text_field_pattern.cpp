@@ -4190,8 +4190,7 @@ void TextFieldPattern::RestoreDefaultMouseState()
     pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
 }
 
-void TextFieldPattern::ChangeMouseState(
-    const Offset location, int32_t frameId, bool isByPass)
+void TextFieldPattern::ChangeMouseState(const Offset location, int32_t frameId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4217,7 +4216,7 @@ void TextFieldPattern::ChangeMouseState(
         } else {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ChangeMouseState Id:%{public}d, winId:%{public}d", frameId, windowId);
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
         }
     } else {
         RestoreDefaultMouseState();
@@ -4244,7 +4243,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
+    if (info.GetAction() != MouseAction::WINDOW_LEAVE) {
+        ChangeMouseState(info.GetLocalLocation(), frameId);
+    }
 
     if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
         selectOverlay_->SetUsingMouse(true);
@@ -6006,17 +6007,6 @@ bool TextFieldPattern::IsModalCovered()
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetIsModalCovered();
-}
-
-void TextFieldPattern::OnVisibleChange(bool isVisible)
-{
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "visible change to %{public}d", isVisible);
-    if (!isVisible && HasFocus()) {
-        CloseKeyboard(true);
-        if (SelectOverlayIsOn()) {
-            StartTwinkling();
-        }
-    }
 }
 
 void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)

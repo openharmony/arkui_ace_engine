@@ -2767,7 +2767,7 @@ void PipelineContext::OnTouchEvent(
                 eventManager_->SetInnerFlag(true);
             }
         }
-        if (IsFormRender() && touchTestResults.find(point.id) != touchTestResults.end()) {
+        if (IsFormRenderExceptDynamicComponent() && touchTestResults.find(point.id) != touchTestResults.end()) {
             for (const auto& touchResult : touchTestResults[point.id]) {
                 auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
                 if (recognizer) {
@@ -3220,6 +3220,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         OnDumpRecorderStart(params);
     } else if (params[0] == "-end") {
         DumpRecorder::GetInstance().Stop();
+    } else if (params[0] == "-injection" && params.size() > PARAM_NUM) {
+#ifndef IS_RELEASE_VERSION
+        OnDumpInjection(params);
+#endif
     }
     return true;
 }
@@ -4792,6 +4796,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
+    currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
         ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
     }
@@ -5953,5 +5958,13 @@ void PipelineContext::FlushMouseEventInVsync()
 void PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reason)
 {
     windowSizeChangeReason_ = reason;
+}
+
+void PipelineContext::OnDumpInjection(const std::vector<std::string>& params) const
+{
+    auto nodeId = std::stoi(params[PARAM_NUM]);
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnRecvCommand(params[1]);
 }
 } // namespace OHOS::Ace::NG

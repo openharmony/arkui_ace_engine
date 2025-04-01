@@ -13,11 +13,9 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/text_emoji_processor.h"
+#include <cstdint>
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -278,23 +276,5 @@ void TextGestureSelector::DoTextSelectionTouchMove(const TouchEventInfo& info)
     auto start = std::min(index, start_);
     auto end = std::max(index, end_);
     OnTextGestureSelectionUpdate(start, end, info);
-}
-
-void TextGestureSelector::StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
-{
-    start_ = start;
-    end_ = end;
-    isStarted_ = start_ <= end_;
-    startOffset_ = startOffset;
-}
-
-void TextGestureSelector::ResetGestureSelection()
-{
-    start_ = -1;
-    end_ = -1;
-    isStarted_ = false;
-    startOffset_.Reset();
-    isSelecting_ = false;
-    selectingFingerId_ = -1;
 }
 }

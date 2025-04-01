@@ -152,6 +152,10 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     if (GetValidFingersCount() == fingers_) {
+        if (refereeState_ == RefereeState::SUCCEED && repeat_) {
+            StartRepeatTimer();
+            return;
+        }
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);

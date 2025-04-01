@@ -146,6 +146,7 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetOldHeaderSize(oldHeaderSize_);
     listLayoutAlgorithm->SetOldFirstItemSize(oldFirstItemSize_);
     listLayoutAlgorithm->SetHeaderStayNear(headerStayNear_);
+    listLayoutAlgorithm->SetIsInitialized(isInitialized_);
     return listLayoutAlgorithm;
 }
 
@@ -156,69 +157,6 @@ bool ArcListPattern::OnScrollCallback(float offset, int32_t source)
     }
     offset = FixScrollOffset(offset, source);
     return ListPattern::OnScrollCallback(offset, source);
-}
-
-void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
-{
-    scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        return list->startMainPos_ + list->GetChainDelta(list->startIndex_) - list->currentDelta_;
-    });
-    scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (!list->itemPosition_.empty()) {
-            float endItemHeight =
-                list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
-        }
-        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
-        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
-    });
-    scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        if (!list->itemPosition_.empty()) {
-            float startItemHeight =
-                list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
-        }
-
-        return list->contentStartOffset_;
-    });
-    scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (!list->itemPosition_.empty()) {
-            float endItemHeight =
-                list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
-        }
-        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
-        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
-    });
-    scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        if (!list->itemPosition_.empty()) {
-            float startItemHeight =
-                list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
-        }
-
-        return list->contentStartOffset_;
-    });
 }
 
 std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
@@ -500,6 +438,14 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
     }
 
     return fixOffset;
+}
+
+bool ArcListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
+{
+    if (IsAtTop() && NearZero(snapAnimationOptions.animationVelocity)) {
+        return false;
+    }
+    return ListPattern::StartSnapAnimation(snapAnimationOptions);
 }
 
 float ArcListPattern::GetScrollUpdateFriction(float overScroll)

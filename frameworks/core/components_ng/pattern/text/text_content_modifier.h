@@ -25,6 +25,9 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/property/property.h"
+#include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -119,7 +122,7 @@ protected:
 
 private:
     double NormalizeToPx(const Dimension& dimension);
-    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle);
+    void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMinFontSize(const TextStyle& textStyle);
     void SetDefaultAdaptMaxFontSize(const TextStyle& textStyle);

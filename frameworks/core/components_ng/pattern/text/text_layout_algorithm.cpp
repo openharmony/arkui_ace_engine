@@ -15,7 +15,13 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
+#include "base/geometry/dimension.h"
+#include "base/log/ace_trace.h"
+#include "base/utils/utf_helper.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
+#include "core/components/hyperlink/hyperlink_theme.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -148,7 +154,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         auto result = BuildTextRaceParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
         return result;
     }
-    if (isSpanStringMode_ && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (isSpanStringMode_ && host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         BuildParagraph(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper);
     } else {
         if (!AddPropertiesAndAnimations(textStyle_.value(), textLayoutProperty, contentConstraint, layoutWrapper)) {
@@ -346,7 +352,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
             paraStyle = externalParagraphStyle.value();
         }
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || isSpanStringMode_) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
             textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     }

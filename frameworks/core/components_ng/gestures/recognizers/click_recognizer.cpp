@@ -229,7 +229,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->IsFormRender()) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         touchDownTime_ = event.time;
     }
     if (IsRefereeFinished()) {
@@ -331,7 +331,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
-    if (pipeline && pipeline->IsFormRender() && IsFormRenderClickRejected(event)) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent() && IsFormRenderClickRejected(event)) {
         return;
     }
     if (IsRefereeFinished()) {
@@ -388,7 +388,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     // In form scenario, if move more than 20vp, reject click gesture.
     // Remove form scenario when formal solution is completed.
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    if (pipeline && pipeline->IsFormRender()) {
+    if (pipeline && pipeline->IsFormRenderExceptDynamicComponent()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
