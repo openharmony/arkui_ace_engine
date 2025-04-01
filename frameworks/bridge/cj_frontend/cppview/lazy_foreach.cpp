@@ -44,6 +44,7 @@ std::pair<std::string, RefPtr<NG::UINode>> CJLazyForEachBuilder::OnGetChildByInd
     if (cachedIter != cachedItems.end()) {
         result.first = key;
         result.second = cachedIter->second.second;
+        cachedItems.erase(cachedIter);
         return result;
     }
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
