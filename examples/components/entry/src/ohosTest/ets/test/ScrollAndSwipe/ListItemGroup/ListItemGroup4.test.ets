@@ -25,7 +25,7 @@ import {
   Slide,
   sliderDrag,
   ToggleClick
-} from '../../../utils';
+} from '../';
 import { ListItemGroupStart } from './ListItemGroup.test';
 
 /*初始化与UI元素交互的驱动对象*/

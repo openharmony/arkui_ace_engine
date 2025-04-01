@@ -511,7 +511,7 @@ export struct ActionSheetBootcamp {
         })
 
         IconBlock({
-          title: '是否显示后缀图标',
+          title: 'SuffixIcon',
           isEnabled: $enableSheetsIcon,
           icon: $sheetsIcon,
         })

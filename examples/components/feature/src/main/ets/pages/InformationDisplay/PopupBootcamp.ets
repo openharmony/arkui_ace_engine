@@ -67,6 +67,9 @@ export struct PopupBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -124,6 +127,14 @@ export struct PopupBootcamp {
           },] as [PopupButtonOptions?, PopupButtonOptions?],
       })
     }.justifyContent(FlexAlign.Center)
+  }
+
+  @Builder
+  Generic() {
+    Scroll(this.scroller) {
+
+    }.height('52%')
+    .id('scroll')
   }
 
   @Builder

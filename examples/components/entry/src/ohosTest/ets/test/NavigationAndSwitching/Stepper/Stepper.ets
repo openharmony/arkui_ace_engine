@@ -25,7 +25,7 @@ export async function StepperStart(done:Function) {
     });
     await driver.delayMs(4500);
 
-    let atomNavigates: Component = await driver.findComponent(ON.text('导航类'));
+    let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
     await atomNavigates.click();
     await driver.delayMs(3500);
 

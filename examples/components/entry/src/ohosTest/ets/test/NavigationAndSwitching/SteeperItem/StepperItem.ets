@@ -27,7 +27,7 @@ export async function SteeperItemStart(done:Function) {
 
   await driver.delayMs(5000);
 
-  let atomDisplays: Component = await driver.findComponent(ON.text('导航类'));
+  let atomDisplays: Component = await driver.findComponent(ON.text('导航与切换'));
   await atomDisplays.click();
   await driver.delayMs(3500);
 
