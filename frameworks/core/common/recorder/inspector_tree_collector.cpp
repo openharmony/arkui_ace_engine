@@ -48,7 +48,6 @@ void InspectorTreeCollector::UpdateTaskNum(int32_t num)
 {
     taskNum_ += num;
     if (taskNum_ == 0) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree UpdateTaskNum send tree");
         if (!root_) {
             return;
         }
@@ -61,7 +60,6 @@ void InspectorTreeCollector::UpdateTaskNum(int32_t num)
         if (taskExecutor_ && isBackground_) {
             taskExecutor_->PostTask(
                 [collector = shared_from_this()]() {
-                    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree UpdateTaskNum clear cache");
                     collector->cacheNodes_.clear();
                 },
                 TaskExecutor::TaskType::UI, "InspectorTreeCollector");
