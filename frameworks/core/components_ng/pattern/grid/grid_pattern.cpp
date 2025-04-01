@@ -1293,6 +1293,34 @@ void GridPattern::DumpAdvanceInfo()
     }
 }
 
+void GridPattern::GetEventDumpInfo()
+{
+    ScrollablePattern::GetEventDumpInfo();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
+                  : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+}
+
+void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    ScrollablePattern::GetEventDumpInfo(json);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+}
+
 std::string GridPattern::GetIrregularIndexesString() const
 {
     auto property = GetLayoutProperty<GridLayoutProperty>();

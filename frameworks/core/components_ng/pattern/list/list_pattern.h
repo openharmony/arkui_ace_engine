@@ -354,6 +354,8 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {

@@ -869,6 +869,34 @@ void WaterFlowPattern::DumpAdvanceInfo()
     }
 }
 
+void WaterFlowPattern::GetEventDumpInfo()
+{
+    ScrollablePattern::GetEventDumpInfo();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
+                  : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+}
+
+void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    ScrollablePattern::GetEventDumpInfo(json);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+}
+
 void WaterFlowPattern::DumpInfoAddSections()
 {
     DumpLog::GetInstance().AddDesc("-----------start print sections_------------");
