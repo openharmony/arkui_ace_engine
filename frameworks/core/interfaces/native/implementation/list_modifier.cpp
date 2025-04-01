@@ -500,8 +500,9 @@ void OnItemDragStartImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         auto builder =
-            callback.InvokeWithObtainResult<CustomNodeBuilder, Callback_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
-        return CallbackHelper(builder).BuildSync(node);
+            callback.InvokeWithObtainCallback<CustomNodeBuilder, Callback_CustomBuilder_Void>(
+                arkDragInfo, arkItemIndex);
+        return builder->BuildSync(node);
     };
     ListModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
