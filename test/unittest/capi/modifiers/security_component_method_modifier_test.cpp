@@ -2488,30 +2488,25 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPaddingTestTopBottomIn
 }
 
 /*
- * @tc.name: setFontFamilyTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestDefaultValues, TestSize.Level1)
-{
-    ASSERT_TRUE(false);
-}
-
-/*
  * @tc.name: setFontFamilyTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setFontFamilyTestValidValues, TestSize.Level1)
 {
     auto checkValue = [this](const std::string& input, const Ark_Union_String_Resource& value,
         const std::string& expectedStr)
     {
         modifier_->setFontFamily(node_, &value);
-        OnModifyDone();
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FAMILY_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << input;
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+        ASSERT_TRUE(layoutProperty);
+        ASSERT_TRUE(layoutProperty->HasFontFamily()) <<
+            "Input value is: " << input << ", method: setFontFamily";
+        auto resultStr = GetFontFamilyInJson(layoutProperty->GetFontFamilyValue());
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFamily";
     };
 
     for (const auto &[input, value, expectedStr]: Fixtures::testFixtureFontFamilyStringValidValues) {
@@ -2528,8 +2523,35 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestValidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setFontFamilyTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, setFontFamilyTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_TRUE(false);
+    Ark_Union_String_Resource initValueFontFamily;
+
+    // Initial setup
+    initValueFontFamily = ArkUnion<Ark_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
+
+    auto checkValue = [this, &initValueFontFamily](const std::string& input, const Ark_Union_String_Resource& value) {
+        Ark_Union_String_Resource inputValueFontFamily = initValueFontFamily;
+
+        modifier_->setFontFamily(node_, &inputValueFontFamily);
+        inputValueFontFamily = value;
+        modifier_->setFontFamily(node_, &inputValueFontFamily);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto layoutProperty = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+        ASSERT_TRUE(layoutProperty);
+        EXPECT_FALSE(layoutProperty->HasFontFamily()) <<
+            "Input value is: " << input << ", method: setFontFamily, attribute: fontFamily";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontFamilyStringInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_String_Resource, Ark_String>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_String_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG
