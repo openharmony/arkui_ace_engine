@@ -23,6 +23,7 @@ ace_unittest("pipeline_context_test_ng") {
   ]
   sources = [
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
+    "$ace_root/adapter/ohos/osal/thp_extra_manager_impl.cpp",
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
     "$ace_root/frameworks/base/mousestyle/mouse_style.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
