@@ -831,7 +831,6 @@ void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
 void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
 {
     RemoveDeadlineTimer();
-    DoDragReset();
     auto container = Container::Current();
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
@@ -859,6 +858,7 @@ void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
     ClearSummary();
     ClearExtraInfo();
     ClearVelocityInfo();
+    DoDragReset();
 }
 
 void DragDropManager::OnDragStartForDragEvent(const DragPointerEvent& pointerEvent,
