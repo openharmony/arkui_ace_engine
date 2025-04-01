@@ -172,17 +172,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<string> | undefined
+        let params_buf : Array<Object> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<string> = new Array<string>(params_buf__length)
+            let params_buf_ : Array<Object> = new Array<Object>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<string> | undefined = params_buf
+        const params_result : Array<Object> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : number | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
