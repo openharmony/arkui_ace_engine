@@ -761,7 +761,7 @@ void PipelineContext::FlushMouseEventVoluntarily()
 void PipelineContext::FlushWindowPatternInfo()
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    OTHER_DRRATION();
+    OTHER_DURATION();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (!container->IsScenceBoardWindow()) {
@@ -823,7 +823,7 @@ void PipelineContext::ProcessDelayTasks()
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 {
-    OTHER_DRRATION();
+    OTHER_DURATION();
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
@@ -856,7 +856,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
-    OTHER_DRRATION();
+    OTHER_DURATION();
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     if (scheduleTasks_.empty()) {
@@ -909,7 +909,7 @@ void PipelineContext::HandleSpecialContainerNode()
 
 void PipelineContext::FlushMessages()
 {
-    OTHER_DRRATION();
+    OTHER_DURATION();
     ACE_FUNCTION_TRACE_COMMERCIAL();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
