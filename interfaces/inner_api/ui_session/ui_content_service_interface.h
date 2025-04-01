@@ -51,6 +51,7 @@ public:
         GET_CURRENT_PAGE_NAME,
         SENDCOMMAND_ASYNC_EVENT,
         SENDCOMMAND_EVENT,
+        GET_VISIBLE_TREE
     };
 
     /**
@@ -58,7 +59,7 @@ public:
      * @return: result number
      */
     virtual int32_t GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
-
+    virtual int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback) = 0;
     /**
      * @description: define SA process and current process connect interface
      * @return: result number

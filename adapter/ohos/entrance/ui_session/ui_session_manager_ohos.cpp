@@ -186,11 +186,20 @@ bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 
 void UiSessionManagerOhos::GetInspectorTree()
 {
+    webTaskNums_.store(0);
     WebTaskNumsChange(1);
     std::unique_lock<std::mutex> lock(mutex_);
     jsonValue_ = InspectorJsonUtil::Create(true);
-    webTaskNums_.store(0);
-    inspectorFunction_();
+    if (inspectorFunction_) {
+        inspectorFunction_(false);
+    }
+}
+
+void UiSessionManagerOhos::GetVisibleInspectorTree()
+{
+    if (inspectorFunction_) {
+        inspectorFunction_(true);
+    }
 }
 
 void UiSessionManagerOhos::SaveInspectorTreeFunction(InspectorFunction&& function)

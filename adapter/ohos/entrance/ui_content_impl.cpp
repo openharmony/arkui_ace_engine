@@ -4934,7 +4934,7 @@ void UIContentImpl::SetTopWindowBoundaryByID(const std::string& stringId)
 void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
 {
     // set get inspector tree function for ui session manager
-    auto callback = [weakContext = WeakPtr(pipeline)]() {
+    auto callback = [weakContext = WeakPtr(pipeline)](bool onlyNeedVisible) {
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
         if (pipeline == nullptr) {
             pipeline = NG::PipelineContext::GetCurrentContextSafely();
@@ -4943,12 +4943,16 @@ void UIContentImpl::InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline)
         auto taskExecutor = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
-            [weakContext = WeakPtr(pipeline)]() {
+            [weakContext = WeakPtr(pipeline), onlyNeedVisible]() {
                 auto pipeline = AceType::DynamicCast<NG::PipelineContext>(weakContext.Upgrade());
                 CHECK_NULL_VOID(pipeline);
                 ContainerScope scope(pipeline->GetInstanceId());
-                pipeline->GetInspectorTree();
-                UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+                if (onlyNeedVisible) {
+                    pipeline->GetInspectorTree(true);
+                } else {
+                    pipeline->GetInspectorTree(false);
+                    UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+                }
             },
             TaskExecutor::TaskType::UI, "UiSessionGetInspectorTree",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));

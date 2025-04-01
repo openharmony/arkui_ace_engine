@@ -120,6 +120,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetCurrentImagesShowingInner(data, reply, option);
             break;
         }
+        case GET_VISIBLE_TREE: {
+            GetVisibleInspectorTreeInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -304,6 +308,12 @@ int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, Message
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
     reply.WriteInt32(GetCurrentImagesShowing(nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    GetVisibleInspectorTree(nullptr);
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

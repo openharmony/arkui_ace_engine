@@ -23,11 +23,9 @@
 #include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "frameworks/core/components_ng/base/inspector.h"
-#endif
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -5532,16 +5530,30 @@ void PipelineContext::RegisterFocusCallback()
     });
 }
 
-void PipelineContext::GetInspectorTree()
+void PipelineContext::GetInspectorTree(bool onlyNeedVisible)
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    bool needThrow = false;
-    NG::InspectorFilter filter;
-    filter.AddFilterAttr("content");
-    auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
-    UiSessionManager::GetInstance()->AddValueForTree(0, nodeInfos);
-#endif
-    rootNode_->GetInspectorValue();
+    if (onlyNeedVisible) {
+        auto root = JsonUtil::Create(true);
+        RefPtr<NG::FrameNode> topNavNode;
+        uiTranslateManager_->FindTopNavDestination(rootNode_, topNavNode);
+        if (topNavNode != nullptr) {
+            topNavNode->DumpSimplifyTree(0, root);
+        } else {
+            rootNode_->DumpSimplifyTree(0, root);
+        }
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        auto res = JsonUtil::Create(true);
+        res->Put("0", json.c_str());
+        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+    } else {
+        bool needThrow = false;
+        NG::InspectorFilter filter;
+        filter.AddFilterAttr("content");
+        auto nodeInfos = NG::Inspector::GetInspector(false, filter, needThrow);
+        UiSessionManager::GetInstance()->AddValueForTree(0, nodeInfos);
+        rootNode_->GetInspectorValue();
+    }
 }
 
 void PipelineContext::AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node)
