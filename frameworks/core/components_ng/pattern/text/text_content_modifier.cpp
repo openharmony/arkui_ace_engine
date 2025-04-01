@@ -411,7 +411,10 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         }
         if (!CheckMarqueeState(MarqueeState::RUNNING)) {
             auto paintOffsetY = paintOffset_.GetY();
-            textPattern->DumpRecord(",Paint id:" + std::to_string(host->GetId()));
+            auto logTag = "DrawText paintOffset:" + paintOffset_.ToString() +
+                          " ,IncludeIndent:" + std::to_string(pManager->GetTextWidthIncludeIndent());
+            textPattern->DumpRecord(logTag);
+            textPattern->LogForFormRender(logTag);
             auto paragraphs = pManager->GetParagraphs();
             for (auto && info : paragraphs) {
                 auto paragraph = info.paragraph;
