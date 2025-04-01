@@ -3721,6 +3721,9 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
     if (!isReceivedArkDrag_) {
         ResetDragAction();
     }
+    if (isDragging_) {
+        ResetDragStateValue();
+    }
     HideMagnifier();
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
