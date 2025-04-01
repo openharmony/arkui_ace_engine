@@ -751,4 +751,92 @@ HWTEST_F(RichEditorSelectionTestNg, AdjustWordCursorAndSelect01, TestSize.Level1
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
 }
+
+/**
+ * @tc.name: AdjustPlaceholderSelection001
+ * @tc.desc: test AdjustPlaceholderSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem2);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    int32_t start = 10;
+    int32_t end = 20;
+    Offset touchPos(11.0f, 11.0f);
+    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
+    EXPECT_NE(start, end);
+}
+
+/**
+ * @tc.name: AdjustPlaceholderSelection002
+ * @tc.desc: test AdjustPlaceholderSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, AdjustPlaceholderSelection002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    AddSpan(INIT_VALUE_1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem2);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem3 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem3);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(300.0f));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 10.0, 20.0, 30.0, 40.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    CaretMetricsF metrics = { { 10.0f, 50.0f }, 20.0f };
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metrics), Return(true)));
+    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 40.0, 50.0, 60.0, 70.0 } } };
+    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
+    AddParagraph(paragraphItemSec);
+    TestParagraphRect paragraphRectThi = { .start = 13, .end = 18, .rects = { { 80.0, 90.0, 100.0, 110.0 } } };
+    TestParagraphItem paragraphItemThi = { .start = 13, .end = 18, .testParagraphRects = { paragraphRectThi } };
+    AddParagraph(paragraphItemThi);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    int32_t start = 8;
+    int32_t end = 10;
+    Offset touchPos(8.0f, 350.0f);
+    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
+
+    for (auto iter : richEditorPattern->spans_) {
+        iter->position = start;
+    }
+    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
+    EXPECT_NE(start, end);
+}
+
 } // namespace OHOS::Ace::NG

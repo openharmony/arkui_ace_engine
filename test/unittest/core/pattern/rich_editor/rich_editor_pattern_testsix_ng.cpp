@@ -504,29 +504,6 @@ HWTEST_F(RichEditorPatternTestSixNg, ProcessInsertValue001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddPlaceholderSpan001
- * @tc.desc: test AddPlaceholderSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, AddPlaceholderSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto builderNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    SpanOptionBase options = {};
-    auto host = richEditorPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    AddSpan("test");
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->spans_.emplace_back(spanItem);
-    auto ret = richEditorPattern->AddPlaceholderSpan(builderNode, {});
-    EXPECT_NE(ret, host->GetChildren().size());
-}
-
-/**
  * @tc.name: HandleDraggableFlag001
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC

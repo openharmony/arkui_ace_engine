@@ -439,37 +439,6 @@ HWTEST_F(RichEditorPatternTestNg, IsClickBoundary001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustPlaceholderSelection001
- * @tc.desc: test AdjustPlaceholderSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, AdjustPlaceholderSelection001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem1);
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem2);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    int32_t start = 10;
-    int32_t end = 20;
-    Offset touchPos(11.0f, 11.0f);
-    richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
-    EXPECT_NE(start, end);
-}
-
-/**
  * @tc.name: UpdateChildrenOffset001
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC

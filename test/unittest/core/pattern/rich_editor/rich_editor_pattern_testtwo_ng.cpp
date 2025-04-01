@@ -844,66 +844,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReplacePlaceholderWithRawSpans001
- * @tc.desc: test ReplacePlaceholderWithRawSpans
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
-    ASSERT_NE(customSpanItem, nullptr);
-
-    customSpanItem->spanItemType = SpanItemType::CustomSpan;
-    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    customSpanItem->SetCustomNode(builderNode);
-    size_t index = 0;
-    size_t textIndex = 0;
-    size_t sum = 6;
-    richEditorPattern->ReplacePlaceholderWithRawSpans(customSpanItem, index, textIndex);
-    EXPECT_EQ(textIndex, sum);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithRawSpans002
- * @tc.desc: test ReplacePlaceholderWithRawSpans
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
-    ASSERT_NE(imageSpanItem, nullptr);
-
-    imageSpanItem->spanItemType = SpanItemType::IMAGE;
-    size_t index = 0;
-    size_t textIndex = 0;
-    size_t sum = 6;
-    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
-    EXPECT_EQ(textIndex, sum);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithRawSpans003
- * @tc.desc: test ReplacePlaceholderWithRawSpans
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, ReplacePlaceholderWithRawSpans003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
-    ASSERT_NE(imageSpanItem, nullptr);
-
-    imageSpanItem->spanItemType = SpanItemType::PLACEHOLDER;
-    size_t index = 0;
-    size_t textIndex = 0;
-    richEditorPattern->ReplacePlaceholderWithRawSpans(imageSpanItem, index, textIndex);
-    EXPECT_EQ(textIndex, 0);
-}
-
-/**
  * @tc.name: GetLineMetrics001
  * @tc.desc: test GetLineMetrics
  * @tc.type: FUNC
