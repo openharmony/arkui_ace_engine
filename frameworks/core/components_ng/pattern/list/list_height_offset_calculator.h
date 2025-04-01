@@ -19,7 +19,6 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -114,11 +113,8 @@ public:
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
-                CalculateLazyForEachNode(child);
-            } else if (AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
-                CalculateLazyForEachNode(child);
-            } else if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
                 CalculateLazyForEachNode(child);
             } else {
                 CalculateUINode(child, false);

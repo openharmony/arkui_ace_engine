@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
@@ -114,16 +113,10 @@ bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>&
     RefPtr<UINode> node = weak.Upgrade();
     CHECK_NULL_RETURN(node, false);
 
-    while (node->GetParent() && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG)) {
-        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) != nullptr) {
-            break;
-        }
-        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node->GetParent()) != nullptr) {
-            break;
-        }
-        node = node->GetParent();
+    while ((node->GetParent()) && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG) &&
+           (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) == nullptr)) {
+            node = node->GetParent();
     }
-
     bool result = ((node->GetParent() == nullptr) || (node->GetParent()->GetTag() == V2::JS_VIEW_ETS_TAG) ||
                    (node->IsAllowReusableV2Descendant()));
     return result;

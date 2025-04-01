@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,11 +86,9 @@ class __RepeatItemV2<T> implements RepeatItem<T>, __IRepeatItemInternal<T> {
     }
 
     public updateIndex(newIndex: number): void {
-        this.index = newIndex;
-    }
-
-    public hasBindingToIndex(): boolean {
-        return this[ObserveV2.SYMBOL_REFS]?.index?.size > 0;
+        if (this.index !== undefined) {
+            this.index = newIndex;
+        }
     }
 }
 
@@ -142,11 +140,9 @@ interface __RepeatConfig<T> {
     arr?: Array<T>;
     itemGenFuncs?: { [type: string]: RepeatItemGenFunc<T> };
     keyGenFunc?: RepeatKeyGenFunc<T>;
-    keyGenFuncSpecified?: boolean;
-    ttypeGenFunc?: RepeatTTypeGenFunc<T>;
+    typeGenFunc?: RepeatTypeGenFunc<T>;
     totalCountSpecified?: boolean;
-    totalCount?: number | (() => number);
-    onLazyLoading?: (index : number) => void,
+    totalCount?: number;
     templateOptions?: { [type: string]: RepeatTemplateImplOptions };
     mkRepeatItem?: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     onMoveHandler?: OnMoveHandler;
@@ -154,16 +150,11 @@ interface __RepeatConfig<T> {
     reusable?: boolean;
 };
 
-// should be empty string, don't change it
-const RepeatEachFuncTtype: string = '';
-// API Version 20
-const VERSION_TWENTY: number = 20;
-
 // __Repeat implements ForEach with child re-use for both existing state observation
 // and deep observation , for non-virtual and virtual code paths (TODO)
 class __Repeat<T> implements RepeatAPI<T> {
     private config: __RepeatConfig<T> = {};
-    private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T> | __RepeatVirtualScroll2Impl<T>;
+    private impl: __RepeatImpl<T> | __RepeatVirtualScrollImpl<T>;
     private isVirtualScroll = false;
 
     constructor(owningView: ViewV2 | ViewPU, arr: Array<T>) {
@@ -171,9 +162,7 @@ class __Repeat<T> implements RepeatAPI<T> {
         this.config.arr = arr ?? [];
         this.config.itemGenFuncs = {};
         this.config.keyGenFunc = __RepeatDefaultKeyGen.funcWithIndex;
-        this.config.keyGenFuncSpecified = false;
-        this.config.ttypeGenFunc = undefined;
-
+        this.config.typeGenFunc = ((): string => '');
         this.config.totalCountSpecified = false;
         this.config.totalCount = this.config.arr.length;
         this.config.templateOptions = {};
@@ -192,37 +181,24 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public each(itemGenFunc: RepeatItemGenFunc<T>): RepeatAPI<T> {
-        this.config.itemGenFuncs[RepeatEachFuncTtype] = itemGenFunc;
-        this.config.templateOptions[RepeatEachFuncTtype] = this.normTemplateOptions({});
+        this.config.itemGenFuncs[''] = itemGenFunc;
+        this.config.templateOptions[''] = this.normTemplateOptions({});
         return this;
     }
 
     public key(keyGenFunc: RepeatKeyGenFunc<T>): RepeatAPI<T> {
         this.config.keyGenFunc = keyGenFunc;
-        this.config.keyGenFuncSpecified = true;
         return this;
     }
 
-    public virtualScroll(options? : {
-        totalCount?: number, onTotalCount?: () => number, onLazyLoading?: (index: number) => void, reusable?: boolean
-    }): RepeatAPI<T> {
-        // use array length by default
-        this.config.totalCount = this.config.arr?.length;
-        this.config.totalCountSpecified = false;
-
-        // options.totalCount must be 0 or a positive integer, or undefined
-        if (Number.isInteger(options?.totalCount) && (options?.totalCount as number) >= 0) {
-            this.config.totalCount = options?.totalCount;
+    public virtualScroll(options? : { totalCount?: number, reusable?: boolean }): RepeatAPI<T> {
+        if (Number.isInteger(options?.totalCount)) {
+            this.config.totalCount = options.totalCount;
             this.config.totalCountSpecified = true;
+        } else {
+            this.config.totalCountSpecified = false;
         }
-        // available since API 20
-        if (options?.onTotalCount) {
-            this.config.totalCount = options.onTotalCount;
-            this.config.totalCountSpecified = true;
-        }
-        if (options?.onTotalCount && options?.totalCount !== undefined) {
-            stateMgmtConsole.error(`Error: Both totalCount and onTotalCount() are defined`);
-        }
+        this.isVirtualScroll = true;
 
         if (typeof options?.reusable === 'boolean') {
             this.config.reusable = options.reusable;
@@ -233,26 +209,40 @@ class __Repeat<T> implements RepeatAPI<T> {
         } else {
             this.config.reusable = true;
         }
-        if (options?.onLazyLoading) {
-            this.config.onLazyLoading = options.onLazyLoading;
-        }
-
-        this.isVirtualScroll = true;
         return this;
     }
 
     // function to decide which template to use, each template has an ttype
-    public templateId(ttypeGenFunc: RepeatTTypeGenFunc<T>): RepeatAPI<T> {
-        this.config.ttypeGenFunc = ttypeGenFunc;
+    public templateId(typeGenFunc: RepeatTypeGenFunc<T>): RepeatAPI<T> {
+        const typeGenFuncImpl = (item: T, index: number): string => {
+            try {
+                return typeGenFunc(item, index);
+            } catch (e) {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Exception in templateId():`, e?.message);
+                return '';
+            }
+        };
+        // typeGenFunc wrapper with ttype validation
+        const typeGenFuncSafe = (item: T, index: number): string => {
+            const itemType = typeGenFuncImpl(item, index);
+            const itemFunc = this.config.itemGenFuncs[itemType];
+            if (typeof itemFunc !== 'function') {
+                stateMgmtConsole.applicationError(`Repeat with virtual scroll. Missing Repeat.template for ttype '${itemType}'`);
+                return '';
+            }
+            return itemType;
+        };
+
+        this.config.typeGenFunc = typeGenFuncSafe;
         return this;
     }
 
     // template: ttype + builder function to render specific type of data item 
-    public template(ttype: string, itemGenFunc: RepeatItemGenFunc<T>,
+    public template(type: string, itemGenFunc: RepeatItemGenFunc<T>,
         options?: RepeatTemplateOptions): RepeatAPI<T>
     {
-        this.config.itemGenFuncs[ttype] = itemGenFunc;
-        this.config.templateOptions[ttype] = this.normTemplateOptions(options);
+        this.config.itemGenFuncs[type] = itemGenFunc;
+        this.config.templateOptions[type] = this.normTemplateOptions(options);
         return this;
     }
 
@@ -262,23 +252,17 @@ class __Repeat<T> implements RepeatAPI<T> {
     }
 
     public render(isInitialRender: boolean): void {
-        if (!this.config.itemGenFuncs?.[RepeatEachFuncTtype]) {
+        if (!this.config.itemGenFuncs?.['']) {
             throw new Error(`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
-            // Repeat
-            this.impl ??= new __RepeatImpl<T>();
-            this.impl.render(this.config, isInitialRender);
-            return;
-        }
-        if (!Utils.isApiVersionEQAbove(VERSION_TWENTY)) {
-            // RepeatVirtualScroll
-            this.impl ??= new __RepeatVirtualScrollImpl<T>();
-            this.impl.render(this.config, isInitialRender);
+          // Repeat
+          this.impl ??= new __RepeatImpl<T>();
+          this.impl.render(this.config, isInitialRender);
         } else {
-            // RepeatVirtualScroll v2
-            this.impl ??= new __RepeatVirtualScroll2Impl<T>();
-            this.impl.render(this.config, isInitialRender);
+          // RepeatVirtualScroll
+          this.impl ??= new __RepeatVirtualScrollImpl<T>();
+          this.impl.render(this.config, isInitialRender);
         }
     }
 

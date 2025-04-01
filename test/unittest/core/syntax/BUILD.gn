@@ -56,12 +56,6 @@ ace_unittest("repeat_node_cache_syntax_test") {
   ]
 }
 
-ace_unittest("repeat_node_cache_2_syntax_test") {
-  type = "new"
-  module_output = "syntaxs"
-  sources = [ "repeat_node_cache_2_syntax_test.cpp" ]
-}
-
 group("core_syntax_unittest") {
   testonly = true
   deps = [
@@ -70,7 +64,6 @@ group("core_syntax_unittest") {
     ":if_else_syntax_test_ng",
     ":lazy_for_each_builder_syntax_test_ng",
     ":lazy_for_each_syntax_test_ng",
-    ":repeat_node_cache_2_syntax_test",
     ":repeat_node_cache_syntax_test",
   ]
 }
