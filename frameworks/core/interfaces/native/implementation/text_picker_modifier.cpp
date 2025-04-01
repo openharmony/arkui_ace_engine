@@ -594,7 +594,6 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
-    //TextPickerModelNG::SetOnCascadeChange(frameNode, std::move(onEnterSelectedArea));
     TextPickerModelNG::SetOnEnterSelectedArea(frameNode, std::move(onEnterSelectedArea));
 }
 void SelectedIndex0Impl(Ark_NativePointer node,
