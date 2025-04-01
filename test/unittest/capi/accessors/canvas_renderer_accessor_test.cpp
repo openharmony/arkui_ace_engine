@@ -780,7 +780,7 @@ HWTEST_F(CanvasRendererAccessorTest, setTransform0Test, TestSize.Level1)
         for (const auto& [y, expectedY] : ARK_NUMBER_TEST_PLAN) {
             TransformParam target;
             EXPECT_CALL(*renderingModel_, SetTransform(_, EXPECTED_TRUE)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setTransform0(peer_, &arkS, &x, &y, &arkS, &arkD, &arkD);
+            accessor_->setTransform0(peer_, &arkS, &y, &x, &arkS, &arkD, &arkD);
             EXPECT_NEAR(target.skewX, expectedX, FLT_PRECISION);
             EXPECT_NEAR(target.skewY, expectedY, FLT_PRECISION);
         }

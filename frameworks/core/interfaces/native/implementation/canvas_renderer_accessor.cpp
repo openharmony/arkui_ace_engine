@@ -680,8 +680,8 @@ void SetTransform0Impl(Ark_CanvasRenderer peer,
     }
     auto param = TransformParam {
         .scaleX = static_cast<double>(Converter::Convert<float>(*a)),
-        .skewX = static_cast<double>(Converter::Convert<float>(*b)),
-        .skewY = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewX = static_cast<double>(Converter::Convert<float>(*c)),
+        .skewY = static_cast<double>(Converter::Convert<float>(*b)),
         .scaleY = static_cast<double>(Converter::Convert<float>(*d)),
         .translateX = static_cast<double>(Converter::Convert<float>(*e)),
         .translateY = static_cast<double>(Converter::Convert<float>(*f)) };
