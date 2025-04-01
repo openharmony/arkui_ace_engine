@@ -444,6 +444,7 @@ void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
     auto container = Platform::AceContainer::GetContainer(hostInstanceId_);
     CHECK_NULL_VOID(container);
     container->RemoveOnConfigurationChange(uiContent_->GetInstanceId());
+    container->RegisterContainerHandler(nullptr);
 }
 
 void DynamicComponentRendererImpl::AttachRenderContext()

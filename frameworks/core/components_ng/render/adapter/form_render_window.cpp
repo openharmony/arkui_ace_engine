@@ -187,7 +187,7 @@ void FormRenderWindow::InitOnVsyncCallback()
             auto container = Container::Current();
             CHECK_NULL_VOID(container);
             bool isReportFrameEvent = false;
-            auto containerHandler = container->GetContainerHandler().Upgrade();
+            auto containerHandler = container->GetContainerHandler();
             if (containerHandler) {
                 isReportFrameEvent = containerHandler->GetHostConfig().isReportFrameEvent;
             }

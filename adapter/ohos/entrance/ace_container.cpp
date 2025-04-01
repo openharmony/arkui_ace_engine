@@ -467,6 +467,7 @@ void AceContainer::Destroy()
     }
     DestroyToastSubwindow(instanceId_);
     DestroySelectOverlaySubwindow(instanceId_);
+    RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
 }

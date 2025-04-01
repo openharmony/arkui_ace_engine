@@ -86,6 +86,7 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
+    void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     // UI content event process
