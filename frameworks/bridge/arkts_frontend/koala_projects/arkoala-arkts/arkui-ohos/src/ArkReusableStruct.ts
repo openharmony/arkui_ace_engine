@@ -28,32 +28,30 @@ export abstract class ArkReusableStruct<T, T_Options> extends ArkCustomComponent
 
     /** @memo */
     static _instantiate<T extends ArkReusableStruct<T, T_Options>, T_Options>(
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
         factory: () => T,
+        arg2?: T_Options,
         /** @memo */
         arg1?: () => void,
-        arg2?: T_Options,
         reuseId?: string
-    ): void {
+    ): T {
+        const component = remember(()=>factory())
         /* need to wrap both states and build() of @Component */
         NodeAttach(() => ArkColumnPeer.create(), (node: ArkColumnPeer) => {
-            const component = remember(() => {
-                const instance = factory()
-                instance.__initializeStruct(arg1, arg2);
+            remember(() => {
+                component.__initializeStruct(arg1, arg2);
                 node.setOnRecycle(() =>
-                    instance.aboutToRecycle()
+                    component.aboutToRecycle()
                 )
-                return instance
-            });
+            })
             node.setOnReuse(
                 () => {
                     component.__rebindStates(arg2) // re-initialize
                     component.aboutToReuse(new Object())
                 }
             )
-            component._buildWrapper(attributes, arg1, arg2);
+            component._buildWrapper(arg1, arg2);
         }, reuseId)
+        return component
     }
 
     /**
@@ -70,22 +68,18 @@ export abstract class ArkReusableStruct<T, T_Options> extends ArkCustomComponent
     /** @memo */
     _buildWrapper(
         /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
-        /** @memo */
         content?: () => void,
         initializers?: T_Options,
     ): void {
         ArkComponentRoot(this,
             () => {
                 this.__updateStruct(initializers)
-                this.__build(attributes, content, initializers)
+                this.__build(content, initializers)
             })
     }
 
     /** @memo */
     abstract __build(
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
         /** @memo */
         content?: () => void,
         initializers?: T_Options
