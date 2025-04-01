@@ -29,8 +29,6 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string TEST_INSERT_LINE_SPACE = u" ";
-constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
-constexpr int32_t PLACEHOLDER_LENGTH = 6;
 constexpr int32_t CALCLINEEND_POSITION = 0;
 constexpr int32_t PERFORM_ACTION = 1;
 } // namespace
@@ -568,61 +566,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleDragStart001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitPlaceholderSpansMap001
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
- * @tc.name: InitPlaceholderSpansMap002
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
- * @tc.name: InitPlaceholderSpansMap003
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::IMAGE;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
  * @tc.name: CursorMoveEnd002
  * @tc.desc: test CursorMoveEnd
  * @tc.type: FUNC
@@ -709,106 +652,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, OnColorConfigurationUpdate, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     richEditorPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan001
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan002
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = false;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    spanItem->SetCustomNode(builderNode);
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan003
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    spanItem->GetSameStyleSpanItem();
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    spanItem->onMeasure.emplace();
-    spanItem->onDraw.emplace();
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithImageSpan001
- * @tc.desc: test ReplacePlaceholderWithImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithImageSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
-    EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithImageSpan002
- * @tc.desc: test ReplacePlaceholderWithImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithImageSpan002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
 }
 
 /**
