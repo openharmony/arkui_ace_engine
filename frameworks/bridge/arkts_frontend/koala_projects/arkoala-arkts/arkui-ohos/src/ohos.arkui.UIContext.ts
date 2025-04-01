@@ -20,6 +20,8 @@ import { FrameNode, FrameNodeInternal } from "./generated/ArkFrameNodeMaterializ
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
+import { _animateTo } from "./handwritten"
+import { AnimateParam } from './generated'
 
 export class UIContext {
     instanceId_: int32 = 10001;
@@ -38,6 +40,12 @@ export class UIContext {
         }
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
         return null;
+    }
+
+    public animateTo(param: AnimateParam, event: (() => void)): void {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        _animateTo(param, event);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
     }
 }
 export abstract class FrameCallback {

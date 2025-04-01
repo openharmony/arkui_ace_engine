@@ -49,6 +49,8 @@ import { Callback_Number_Number_Void } from "./grid"
 import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./scroll"
 import { ScrollState } from "./list"
 import { GlobalScope } from "./../generated/peers/GlobalScope"
+import { _animateTo } from "../handwritten"
+
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -3584,7 +3586,7 @@ export function dollar_rawfile(value: string): Resource {
     return GlobalScope.dollar_rawfile(value)
 }
 export function animateTo(value: AnimateParam, event: (() => void)): void {
-    GlobalScope.animateTo(value, event)
+    _animateTo(value, event)
 }
 export function animateToImmediately(value: AnimateParam, event: (() => void)): void {
     GlobalScope.animateToImmediately(value, event)
