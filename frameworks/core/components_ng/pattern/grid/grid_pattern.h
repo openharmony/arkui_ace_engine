@@ -210,6 +210,8 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
     void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
 

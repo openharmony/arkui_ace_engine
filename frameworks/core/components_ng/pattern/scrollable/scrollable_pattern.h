@@ -684,8 +684,8 @@ public:
     void GetPaintPropertyDumpInfo();
     void GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json);
 
-    void GetEventDumpInfo();
-    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
+    virtual void GetEventDumpInfo();
+    virtual void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
