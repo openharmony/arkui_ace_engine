@@ -20,8 +20,10 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace {
-class UiSessionManagerPreview : public UiSessionManager {};
-
+class UiSessionManagerPreview : public UiSessionManager {
+    void AddValueForTree(int32_t id, const std::string& value) override;
+    void ReportInspectorTreeValue(const std::string& value) override;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_MANAGER_PREVIEW_H

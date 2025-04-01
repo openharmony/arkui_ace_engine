@@ -51,6 +51,7 @@ private:
     int32_t GetCurrentPageNameInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t EndWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_H

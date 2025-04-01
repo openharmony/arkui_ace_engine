@@ -1031,7 +1031,7 @@ public:
         return isDensityChanged_;
     }
 
-    void GetInspectorTree();
+    void GetInspectorTree(bool onlyNeedVisible);
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
