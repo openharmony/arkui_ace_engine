@@ -301,7 +301,7 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
     if (layoutProperty->GetPaddingProperty()) {
         return frameNode;
@@ -314,6 +314,14 @@ RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
     PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
         CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
     layoutProperty->UpdatePadding(defaultPadding);
+
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        // undefined use ROUNDED_RECTANGLE type.
+        layoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+    } else {
+        // undefined use capsule type.
+        layoutProperty->UpdateType(ButtonType::CAPSULE);
+    }
     return frameNode;
 }
 
