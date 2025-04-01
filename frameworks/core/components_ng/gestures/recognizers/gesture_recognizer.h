@@ -478,6 +478,7 @@ protected:
 
     int64_t deviceId_ = 0;
     SourceType deviceType_ = SourceType::NONE;
+    SourceTool deviceTool_ = SourceTool::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     int32_t transId_ = 0;
 

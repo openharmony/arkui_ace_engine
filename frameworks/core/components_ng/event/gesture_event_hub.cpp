@@ -1126,11 +1126,30 @@ void GestureEventHub::SetPanEvent(
     panEventActuator_->ReplacePanEvent(panEvent);
 }
 
+// Set by user define, which will replace old one.
+void GestureEventHub::SetPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+{
+    if (!panEventActuator_) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+    }
+    panEventActuator_->ReplacePanEvent(panEvent);
+}
+
 void GestureEventHub::AddPanEvent(
     const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
+    }
+    panEventActuator_->AddPanEvent(panEvent);
+}
+
+void GestureEventHub::AddPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+{
+    if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
     }
     panEventActuator_->AddPanEvent(panEvent);
 }

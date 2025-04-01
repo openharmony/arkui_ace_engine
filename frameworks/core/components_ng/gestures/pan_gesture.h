@@ -36,6 +36,7 @@ public:
         fingers_ = fingers;
         direction_ = direction;
         distance_ = distance;
+        distanceMap_[SourceTool::UNKNOWN] = distance_;
         isLimitFingerCount_ = isLimitFingerCount;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
@@ -44,6 +45,8 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE, GestureTypeName::PAN_GESTURE, false);
         }
     };
+    PanGesture(int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap,
+        bool isLimitFingerCount = false);
     explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
     {
         panGestureOption_ = panGestureOption;
@@ -70,6 +73,7 @@ protected:
 private:
     PanDirection direction_;
     double distance_ = 0.0;
+    PanDistanceMap distanceMap_;
     RefPtr<PanGestureOption> panGestureOption_;
     Matrix4 matrix_;
 };
