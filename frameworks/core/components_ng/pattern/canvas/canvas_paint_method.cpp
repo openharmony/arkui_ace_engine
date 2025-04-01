@@ -88,7 +88,7 @@ void CanvasPaintMethod::FlushTask()
 
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateContentModifier", GetId());
     auto host = frameNode_.Upgrade();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -111,12 +111,17 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     FireOnModifierUpdateFunc();
     recordingCanvas->Scale(1.0, 1.0);
     FlushTask();
-    CHECK_NULL_VOID(contentModifier_);
+    if (!contentModifier_) {
+        ACE_SCOPED_TRACE("Canvas[%d] contentModifier is NULL", GetId());
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] contentModifier is NULL", GetId());
+        return;
+    }
     contentModifier_->MarkModifierDirty();
 }
 
 void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateRecordingCanvas[%f, %f]", GetId(), width, height);
     rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);
@@ -415,6 +420,14 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
 }
+
+int32_t CanvasPaintMethod::GetId() const
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
 #ifndef ACE_UNITTEST
 void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
