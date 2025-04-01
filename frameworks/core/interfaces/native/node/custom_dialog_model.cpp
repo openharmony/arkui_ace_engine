@@ -999,9 +999,7 @@ ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, A
     blurStyleOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_1]);
     blurStyleOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_2]);
     blurStyleOption.scale = scale;
-    std::vector<float> greyVec(2); // 2 number
-    greyVec[0] = (*uintArray)[NUM_0];
-    greyVec[1] = (*uintArray)[NUM_1];
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
     blurStyleOption.blurOption.grayscale = greyVec;
     blurStyleOption.inactiveColor = Color((*uintArray)[NUM_2]);
     blurStyleOption.isValidColor = isValidColor;
@@ -1024,9 +1022,7 @@ ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float
     effectOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_0]);
     effectOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_1]);
     effectOption.color = Color((*uintArray)[NUM_0]);
-    std::vector<float> greyVec(2); // 2 number
-    greyVec[0] = (*uintArray)[NUM_1];
-    greyVec[1] = (*uintArray)[NUM_2];
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
     effectOption.blurOption.grayscale = greyVec;
     effectOption.inactiveColor = Color((*uintArray)[NUM_3]);
     effectOption.isValidColor = isValidColor;
