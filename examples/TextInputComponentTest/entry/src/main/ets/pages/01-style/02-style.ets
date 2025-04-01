@@ -13,15 +13,21 @@
  * limitations under the License.
  */
 
-{
-  "module": {
-    "name": "entry_test",
-    "type": "feature",
-    "deviceTypes": [
-      "default",
-      "tablet"
-    ],
-    "deliveryWithInstall": true,
-    "installationFree": false
+@Entry
+@Component
+struct struct_01_style_02_style {
+  build() {
+    Scroll() {
+      Column() {
+        Column() {
+          Text('规格：style 异常值取 TextInputStyle.Default').fontColor(Color.Blue)
+          TextInput({ placeholder: '.style(TextInputStyle.Default)' }).style(TextInputStyle.Default)
+          TextInput({ placeholder: '未设置style' })
+          TextInput({ placeholder: '.style(undefined)' }).style(undefined)
+        }.borderWidth(2)
+      }
+    }
+    .height('100%')
+    .width('100%')
   }
 }

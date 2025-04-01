@@ -13,15 +13,8 @@
  * limitations under the License.
  */
 
-{
-  "module": {
-    "name": "entry_test",
-    "type": "feature",
-    "deviceTypes": [
-      "default",
-      "tablet"
-    ],
-    "deliveryWithInstall": true,
-    "installationFree": false
-  }
+import abilityTest from './Ability.test';
+
+export default function testsuite() {
+  abilityTest();
 }
