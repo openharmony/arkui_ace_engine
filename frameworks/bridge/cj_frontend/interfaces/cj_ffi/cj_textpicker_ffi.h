@@ -76,11 +76,11 @@ struct CJTextArrayParamMulti {
     void (*valuesChangeEvent)(VectorStringPtr valuechange);
 };
 
-CJ_EXPORT VectorRangeContentHandle FFICJVectorCreateRangeContent(int64_t size);
+CJ_EXPORT VectorRangeContentHandle FFICJCreateVectorRangeContent(int64_t size);
 CJ_EXPORT void FFICJVectorRangeContentDelete(VectorRangeContentHandle vec);
 CJ_EXPORT void FFICJVectorRangeContentSetElement(
     VectorRangeContentHandle vec, int64_t index, CJRangeContent rangeContentOptions);
-CJ_EXPORT VectorTextCascadePickerOptionsHandle FFICJVectorCreateTextCascadePickerOptions(int64_t size);
+CJ_EXPORT VectorTextCascadePickerOptionsHandle FFICJCreateVectorTextCascadePickerOptions(int64_t size);
 CJ_EXPORT void FFICJVectorTextCascadePickerOptionsDelete(VectorTextCascadePickerOptionsHandle vec);
 CJ_EXPORT void FFICJVectorTextCascadePickerOptionsSetElement(
     VectorTextCascadePickerOptionsHandle vec, int64_t index, CJTextCascadePickerOptions textCascadeOptions);

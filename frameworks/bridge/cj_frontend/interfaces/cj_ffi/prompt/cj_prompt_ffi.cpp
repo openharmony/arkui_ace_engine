@@ -21,7 +21,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components/dialog/dialog_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -136,7 +136,7 @@ void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<B
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
     ButtonInfo buttonInfo = { .text = theme->GetCancelText(), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
