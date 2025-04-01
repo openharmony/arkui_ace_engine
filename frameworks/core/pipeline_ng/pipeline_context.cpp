@@ -771,7 +771,7 @@ void PipelineContext::FlushWindowPatternInfo()
     OTHER_DURATION(id);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (!container->IsScenceBoardWindow()) {
+    if (!container->IsSceneBoardWindow()) {
         return;
     }
     auto screenNode = screenNode_.Upgrade();
@@ -2355,7 +2355,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
     SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
     float caretPos = manager->GetFocusedNodeCaretRect().Top() - GetRootRect().GetOffset().GetY() -
-        GetSafeAreaManager()->GetKeyboardOffsetDirectly();
+        GetSafeAreaManager()->GetKeyboardOffset(true);
     auto onFocusField = manager->GetOnFocusTextField().Upgrade();
     float adjust = 0.0f;
     if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
@@ -2367,7 +2367,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
     if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
         height = rootSize.Height() - positionY;
     }
-    auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffsetDirectly();
+    auto lastKeyboardOffset = safeAreaManager_->GetKeyboardOffset(true);
     auto newKeyboardOffset = CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
     if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
         (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
@@ -2410,7 +2410,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
     auto paintOffset = host->GetPaintRectOffset(false, true);
     auto frameSize = geometryNode->GetFrameSize();
-    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffset(true),
         frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }
@@ -4609,7 +4609,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
             manager->SetIsWindowConsumed(false);
             return;
@@ -5946,7 +5946,7 @@ void PipelineContext::FlushMouseEventForHover()
     if (windowSizeChangeReason_ == WindowSizeChangeReason::MAXIMIZE) {
         event.action = MouseAction::WINDOW_ENTER;
     }
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         eventManager_->MouseTest(event, lastMouseEvent_->node.Upgrade(), touchRestrict);
     } else {
         eventManager_->MouseTest(event, rootNode_, touchRestrict);

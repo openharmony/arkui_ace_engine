@@ -478,7 +478,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
+    if (container->IsSceneBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;

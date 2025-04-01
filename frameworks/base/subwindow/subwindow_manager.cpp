@@ -911,7 +911,7 @@ ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
     if (parentContainer->IsMainWindow() || parentContainer->IsSubWindow() ||
         parentContainer->IsDialogWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_APP_SUB_WINDOW;
-    } else if (parentContainer->IsScenceBoardWindow()) {
+    } else if (parentContainer->IsSceneBoardWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_SYSTEM_FLOAT;
     } else if (parentContainer->IsSystemWindow()) {
         return ToastWindowType::TOAST_IN_TYPE_SYSTEM_SUB_WINDOW;
@@ -945,10 +945,10 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
     } else {
         // for ability
         auto parentContainer = Container::GetContainer(containerId);
-        // in scenceboard, system_top_most needs to go the old way,
+        // in sceneboard, system_top_most needs to go the old way,
         // default and top_most need to go showToastNG
         if (toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
-            (parentContainer && parentContainer->IsScenceBoardWindow() &&
+            (parentContainer && parentContainer->IsSceneBoardWindow() &&
             toastInfo.showMode != NG::ToastShowMode::SYSTEM_TOP_MOST)) {
             ShowToastNG(toastInfo, std::move(callback));
             return;
@@ -1598,7 +1598,7 @@ bool SubwindowManager::IsWindowEnableSubWindowMenu(
         return false;
     }
 
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         if (!container->IsSceneBoardEnabled()) {
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Disabled sceneBoard does not support create subwindow menu.");
             return false;

@@ -313,12 +313,12 @@ bool CheckInSceneBoardWindow()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsSubContainer()) {
-        return container->IsScenceBoardWindow();
+        return container->IsSceneBoardWindow();
     }
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     container = Container::GetContainer(parentContainerId);
     CHECK_NULL_RETURN(container, false);
-    return container->IsScenceBoardWindow();
+    return container->IsSceneBoardWindow();
 }
 
 void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)

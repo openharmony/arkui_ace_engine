@@ -74,7 +74,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsModal, bool, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsScenceBoardDialog, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsSceneBoardDialog, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DialogButtonDirection, DialogButtonDirection, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Width, CalcDimension, PROPERTY_UPDATE_MEASURE);
@@ -102,7 +102,7 @@ public:
         json->PutExtAttr("autoCancel", propAutoCancel_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("isModal", propIsModal_.value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("isScenceBoardDialog", propIsScenceBoardDialog_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("isSceneBoardDialog", propIsSceneBoardDialog_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("buttonDirection", DialogButtonDirectionUtils::ConvertDialogButtonDirectionToString(
                                          propDialogButtonDirection_.value_or(DialogButtonDirection::AUTO))
                                          .c_str(), filter);

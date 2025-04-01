@@ -1550,7 +1550,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogControllerModelNGTest002, TestSize.Lev
     props.isShowInSubWindow = true;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     props.isModal = true;
-    props.isScenceBoardDialog = false;
+    props.isSceneBoardDialog = false;
     controllerModel.SetOpenDialogWithNode(props, nullptr);
     EXPECT_TRUE(props.isShowInSubWindow);
 }

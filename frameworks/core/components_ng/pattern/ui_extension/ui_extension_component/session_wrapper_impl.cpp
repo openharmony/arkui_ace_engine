@@ -956,9 +956,9 @@ void SessionWrapperImpl::NotifyForeground()
     auto hostWindowId = pipeline->GetFocusWindowId();
     int32_t windowSceneId = GetWindowSceneId();
     UIEXT_LOGI("NotifyForeground, persistentid = %{public}d, hostWindowId = %{public}u,"
-        " windowSceneId = %{public}d, IsScenceBoardWindow: %{public}d, componentId=%{public}d.",
-        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsScenceBoardWindow(), GetFrameNodeId());
-    if (container->IsScenceBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
+        " windowSceneId = %{public}d, IsSceneBoardWindow: %{public}d, componentId=%{public}d.",
+        session_->GetPersistentId(), hostWindowId, windowSceneId, container->IsSceneBoardWindow(), GetFrameNodeId());
+    if (container->IsSceneBoardWindow() && windowSceneId != INVALID_WINDOW_ID) {
         hostWindowId = static_cast<uint32_t>(windowSceneId);
     }
     auto pattern = hostPattern_.Upgrade();
@@ -1288,7 +1288,7 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto curWindow = pipeline->GetCurrentWindowRect();
     auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
     CHECK_NULL_RETURN(container, false);
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         Rosen::WSRect rect = GetWindowSceneRect();
         curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }

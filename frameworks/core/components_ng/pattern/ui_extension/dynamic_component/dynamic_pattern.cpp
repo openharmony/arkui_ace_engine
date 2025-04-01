@@ -140,7 +140,7 @@ DCResultCode DynamicPattern::CheckConstraint()
         return DCResultCode::DC_NOT_SUPPORT_UI_CONTENT_TYPE;
     }
 
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         return DCResultCode::DC_NO_ERRORS;
     }
 

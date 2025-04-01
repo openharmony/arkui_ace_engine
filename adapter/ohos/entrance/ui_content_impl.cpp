@@ -459,7 +459,7 @@ public:
                 return;
             }
         }
-        if (container->IsScenceBoardWindow()) {
+        if (container->IsSceneBoardWindow()) {
             TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SceneBoard window, no keyboard avoidance");
             return;
         }
@@ -3121,7 +3121,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     if (instanceId_ >= MIN_SUBCONTAINER_ID) {
         auto parentContainer = Platform::AceContainer::GetContainer(container->GetParentId());
         CHECK_NULL_VOID(parentContainer);
-        if (parentContainer->IsScenceBoardWindow()) {
+        if (parentContainer->IsSceneBoardWindow()) {
             auto parentPipeline = parentContainer->GetPipelineContext();
             CHECK_NULL_VOID(parentPipeline);
             modifyConfig.SetDensity(parentPipeline->GetDensity());

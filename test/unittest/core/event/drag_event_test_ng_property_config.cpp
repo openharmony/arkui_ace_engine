@@ -1439,7 +1439,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
     MockContainer::SetUp();
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto manager = pipelineContext->GetOverlayManager();
@@ -1451,7 +1451,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest019, TestSize.Leve
     dragEventActuator->SetFilter(dragEventActuatorTwo);
     manager->hasFilter_ = true;
     dragEventActuator->SetFilter(dragEventActuatorTwo);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     MockContainer::TearDown();
     EXPECT_EQ(manager->hasFilter_, true);
 }
@@ -1485,14 +1485,14 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest021, TestSize.Leve
     dragEventActuator->SetPixelMap(dragEventActuator);
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     manager->SetHasPixelMap(false);
     dragEventActuator->SetPixelMap(dragEventActuator);
     manager->SetHasPixelMap(false);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     dragEventActuator->SetPixelMap(dragEventActuator);
     MockContainer::TearDown();
-    EXPECT_EQ(container->isScenceBoardWindow_, false);
+    EXPECT_EQ(container->isSceneBoardWindow_, false);
 }
 
 /**
@@ -1682,9 +1682,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest025, TestSize.Leve
     manager->hasEvent_ = false;
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     manager->hasEvent_ = false;
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
     (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
@@ -1777,11 +1777,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest027, TestSize.Leve
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo(2);
     MockContainer::SetUp();
     auto container = MockContainer::Current();
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragEventActuator->MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     MockContainer::TearDown();
-    EXPECT_EQ(container->isScenceBoardWindow_, false);
+    EXPECT_EQ(container->isSceneBoardWindow_, false);
 }
 
 /**

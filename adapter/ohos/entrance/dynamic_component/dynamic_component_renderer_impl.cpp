@@ -231,7 +231,7 @@ void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
     CHECK_NULL_VOID(container);
     auto context = container->GetPipelineContext();
     CHECK_NULL_VOID(context);
-    if (container->IsScenceBoardWindow()) {
+    if (container->IsSceneBoardWindow()) {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
         dynamicInitialConfig.hostWindowInfo.realHostWindowId = GetWindowSceneId();
     } else {

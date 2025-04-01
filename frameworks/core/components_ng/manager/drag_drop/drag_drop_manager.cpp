@@ -289,7 +289,7 @@ void DragDropManager::AddItemDrag(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_VOID(pipeline);
     auto rootNode = pipeline->GetRootElement();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto host = eventHub->GetFrameNode();
         CHECK_NULL_VOID(host);
         auto overlayManager = pipeline->GetOverlayManager();
@@ -775,7 +775,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 {
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
             return;
@@ -805,7 +805,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
 void DragDropManager::OnDragThrow(const DragPointerEvent& pointerEvent)
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
             return;
@@ -835,7 +835,7 @@ void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
     DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
             return;
@@ -963,7 +963,7 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
             return;
@@ -1025,7 +1025,7 @@ void DragDropManager::ResetDragDropStatus(const Point& point, const DragDropRet&
 void DragDropManager::ResetPreTargetFrameNode(int32_t instanceId)
 {
     auto container = Container::GetContainer(instanceId);
-    if (container && (container->IsScenceBoardWindow() || container->IsUIExtensionWindow())) {
+    if (container && (container->IsSceneBoardWindow() || container->IsUIExtensionWindow())) {
         return;
     }
     // pull-in subwindow, need to notify showMenu and update menu offset.
@@ -1140,7 +1140,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     auto container = Container::Current();
     auto containerId = container->GetInstanceId();
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager is dragged or window consumed. WindowId is %{public}d",
                 container->GetWindowId());
@@ -3102,8 +3102,8 @@ bool DragDropManager::CheckIsFolderSubwindowBoundary(float x, float y, int32_t i
         return false;
     }
     auto isCrossWindow = container->IsCrossAxisWindow();
-    auto isScenceBoard = container->IsScenceBoardWindow();
-    if (isCrossWindow || isScenceBoard) {
+    auto isSceneBoard = container->IsSceneBoardWindow();
+    if (isCrossWindow || isSceneBoard) {
         return false;
     }
     auto subwindow = SubwindowManager::GetInstance()->GetCurrentWindow();

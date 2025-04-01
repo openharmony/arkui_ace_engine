@@ -151,13 +151,13 @@ void TextFieldManagerNG::TriggerAvoidOnCaretChange()
     } else {
         ScrollTextFieldToSafeArea();
         auto keyboardInset = safeAreaManager->GetKeyboardInset();
-        lastKeyboardOffset_ = safeAreaManager->GetKeyboardOffsetDirectly();
+        lastKeyboardOffset_ = safeAreaManager->GetKeyboardOffset(true);
         Rect keyboardRect;
         keyboardRect.SetRect(0, 0, 0, keyboardInset.Length());
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect,
             GetFocusedNodeCaretRect().Top(), GetHeight());
     }
-    auto currentKeyboardOffset = safeAreaManager->GetKeyboardOffsetDirectly();
+    auto currentKeyboardOffset = safeAreaManager->GetKeyboardOffset(true);
     if (currentKeyboardOffset != lastKeyboardOffset_) {
         AvoidKeyboardInSheet(host);
     }
