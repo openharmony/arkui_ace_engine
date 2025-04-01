@@ -35,6 +35,10 @@ public:
     static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
         const AnimationCallback& callback, const AnimationCallback& finishCallback = nullptr,
         const AnimationCallback& repeatCallback = nullptr, bool flushUITasks = true);
+    static void PauseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    static void ResumeAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
+    // need to reset the attribute of arkui node after Reverse in case of attribute inconsistent
+    static void ReverseAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace::Kit
