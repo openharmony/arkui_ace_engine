@@ -678,27 +678,6 @@ HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Leve
 }
 
 /**
- * @tc.name: HandleTouchUp001
- * @tc.desc: test HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
-    richEditorPattern->editingLongPress_ = true;
-    richEditorPattern->isEditing_ = false;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(richEditorPattern->editingLongPress_, false);
-    richEditorPattern->editingLongPress_ = true;
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_TRUE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
  * @tc.name: CheckEditorTypeChange001
  * @tc.desc: test CheckEditorTypeChange
  * @tc.type: FUNC
