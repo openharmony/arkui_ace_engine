@@ -300,6 +300,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdatePlacement(param->GetPlacement());
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     layoutProps->UpdateBlockEvent(param->IsBlockEvent());
+    layoutProps->UpdateEnableHoverMode(param->EnableHoverMode());
     if (param->GetArrowHeight().has_value()) {
         layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
     }
