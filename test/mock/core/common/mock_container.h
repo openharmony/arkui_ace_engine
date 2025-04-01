@@ -143,6 +143,9 @@ public:
     MOCK_METHOD(void, DumpHeapSnapshot, (bool isPrivate), (override));
     MOCK_METHOD(void, TriggerGarbageCollection, (), (override));
     MOCK_METHOD(bool, WindowIsShow, (), (const, override));
+    MOCK_METHOD(bool, IsPcOrPadFreeMultiWindowMode, (), (const, override));
+    MOCK_METHOD(bool, IsMainWindow, (), (const, override));
+    MOCK_METHOD(bool, IsFullScreenWindow, (), (const, override));
     static RefPtr<MockContainer> container_;
     static ColorMode mockColorMode_;
 
