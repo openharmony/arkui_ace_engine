@@ -817,10 +817,9 @@ public:
 
     void CompareCommonSubType(const std::optional<NG::SymbolEffectOptions>& options,
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
- 
-    void CompareAnimationMode(SymbolEffectType effectType, const std::optional<NG::SymbolEffectOptions>& options,
+    void CompareAnimationMode(const std::optional<NG::SymbolEffectOptions>& options,
         const std::optional<NG::SymbolEffectOptions>& oldOptions);
- 
+    void SetWhenOnlyOneOptionIsValid(const std::optional<NG::SymbolEffectOptions>& options);
     void SetSymbolEffectOptions(const std::optional<NG::SymbolEffectOptions>& symbolEffectOptions);
  
     const std::optional<NG::SymbolEffectOptions> GetSymbolEffectOptions() const

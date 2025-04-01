@@ -63,6 +63,9 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     textStyle.SetTextStyleUid(frameNode->GetId() + 1);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        textStyle.SetSymbolUid(frameNode->GetId() + 1);
+    }
     if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
         return;
     }
@@ -80,22 +83,17 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG,
         frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-    auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
-    textStyle.SetSymbolType(symbolType);
-    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        // Update Symbol TextStyle
-        textStyle.SetSymbolUid(frameNode->GetId() + 1);
-        UpdateSymbolStyle(textStyle);
+    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
+    std::vector<std::string> fontFamilies;
+    auto fontManager = pipeline->GetFontManager();
+    if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
+        !(textLayoutProperty->GetFontFamily().has_value())) {
+        fontFamilies = Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont());
     } else {
-        auto fontManager = pipeline->GetFontManager();
-        if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
-            !(textLayoutProperty->GetFontFamily().has_value())) {
-            textStyle.SetFontFamilies(Framework::ConvertStrToFontFamilies(fontManager->GetAppCustomFont()));
-        } else {
-            textStyle.SetFontFamilies(
-                textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
-        }
+        fontFamilies = textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies());
     }
+    UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
             SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle, frameNode);
@@ -113,26 +111,37 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     inheritTextStyle_ = textStyle;
 }
 
-void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle)
+void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& textStyle,
+    std::vector<std::string>& fontFamilies, bool isSymbol)
 {
-    textStyle.isSymbolGlyph_ = true;
-    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
-    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
+    if (!isSymbol) {
+        textStyle.SetFontFamilies(fontFamilies);
+        return;
+    }
     auto symbolType = textStyle.GetSymbolType();
-    std::vector<std::string> fontFamilies;
+    std::vector<std::string> symbolFontFamilies;
     if (symbolType == SymbolType::CUSTOM) {
-        auto symbolFontFamily = textStyle.GetFontFamilies();
-        for (auto& name : symbolFontFamily) {
+        for (auto& name : fontFamilies) {
             if (name.find(CUSTOM_SYMBOL_SUFFIX) != std::string::npos) {
-                fontFamilies.push_back(name);
+                symbolFontFamilies.push_back(name);
                 break;
             }
         }
-        textStyle.SetFontFamilies(fontFamilies);
+        textStyle.SetFontFamilies(symbolFontFamilies);
     } else {
-        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
-        textStyle.SetFontFamilies(fontFamilies);
+        symbolFontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        textStyle.SetFontFamilies(symbolFontFamilies);
     }
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
+{
+    if (!isSymbol) {
+        return;
+    }
+    textStyle.isSymbolGlyph_ = true;
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
