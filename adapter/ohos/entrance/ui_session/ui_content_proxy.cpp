@@ -42,6 +42,28 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetVisibleInspectorTree write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterGetInspectorTreeCallback(eventCallback);
+    if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
+        LOGW("GetVisibleInspectorTree send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;

@@ -20,6 +20,7 @@
 #include <functional>
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include <iremote_object.h>
+
 #include "ui_report_stub.h"
 #endif
 
@@ -34,7 +35,7 @@
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
-    using InspectorFunction = std::function<void()>;
+    using InspectorFunction = std::function<void(bool onlyNeedVisible)>;
     using NotifyAllWebFunction = std::function<void(bool isRegister)>;
     using GetPixelMapFunction = std::function<void()>;
     using NotifySendCommandFunction = std::function<void(int32_t id, const std::string& command)>;
@@ -136,6 +137,8 @@ public:
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
 #endif
+    virtual void GetVisibleInspectorTree() {};
+
     virtual bool IsHasReportObject()
     {
         return false;
