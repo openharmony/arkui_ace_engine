@@ -981,13 +981,4 @@ void DatePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     datePickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
-#ifdef SUPPORT_DIGITAL_CROWN
-void DatePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
-    CHECK_NULL_VOID(datePickerPattern);
-    datePickerPattern->SetDigitalCrownSensitivity(sensitivity);
-}
-#endif
 } // namespace OHOS::Ace::NG

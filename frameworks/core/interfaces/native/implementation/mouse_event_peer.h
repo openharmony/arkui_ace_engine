@@ -17,8 +17,12 @@
 
 #include "core/event/mouse_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct MouseEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::MouseInfo> {
+protected:
+    MouseEventPeer() = default;
     ~MouseEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

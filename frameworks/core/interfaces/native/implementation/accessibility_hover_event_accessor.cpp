@@ -26,11 +26,11 @@ const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 } // namespace
 void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_AccessibilityHoverEvent CtorImpl()
 {
-    return new AccessibilityHoverEventPeer();
+    return PeerUtils::CreatePeer<AccessibilityHoverEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

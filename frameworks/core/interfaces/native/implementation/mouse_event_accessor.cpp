@@ -53,11 +53,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
 void DestroyPeerImpl(Ark_MouseEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_MouseEvent CtorImpl()
 {
-    return new MouseEventPeer();
+    return PeerUtils::CreatePeer<MouseEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

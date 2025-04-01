@@ -17,8 +17,12 @@
 
 #include "core/event/key_event.h"
 #include "core/interfaces/native/implementation/base_event_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct KeyEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::KeyEventInfo> {
+protected:
+    KeyEventPeer() = default;
     ~KeyEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

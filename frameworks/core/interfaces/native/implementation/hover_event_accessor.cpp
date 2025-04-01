@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace HoverEventAccessor {
 void DestroyPeerImpl(Ark_HoverEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_HoverEvent CtorImpl()
 {
-    return new HoverEventPeer();
+    return PeerUtils::CreatePeer<HoverEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
