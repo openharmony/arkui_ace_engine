@@ -2958,5 +2958,104 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg230, TestSize.Level1)
     EXPECT_EQ(size, 0);
 }
 
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test FlushDragEvents of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg231, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps: make dragDropManager_ is nullptr.
+     */
+    context_->dragDropManager_ = nullptr;
+    context_->FlushDragEvents();
+    auto isEmpty = context_->dragEvents_.empty();
+    EXPECT_TRUE(isEmpty);
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test FlushDragEvents of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg232, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps: make dragDropManager_ is not nullptr.
+     */
+    auto manager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->SetDragFwkShow(true);
+    context_->dragDropManager_ = manager;
+    /**
+     * @tc.steps: make context_->dragEvents_.empty() is true.
+     */
+    context_->dragEvents_.clear();
+
+    context_->FlushDragEvents();
+    auto isEmpty = context_->nodeToPointEvent_.empty();
+    EXPECT_TRUE(isEmpty);
+    EXPECT_TRUE(context_->canUseLongPredictTask_);
+}
+
+/**
+ * @tc.name: GetCurrentPageNameCallback
+ * @tc.desc: Test FlushDragEvents of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg233, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps: make dragDropManager_ is not nullptr.
+     */
+    auto manager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->SetDragFwkShow(true);
+    context_->dragDropManager_ = manager;
+   
+    /**
+     * @tc.steps: make context_->dragEvents_.empty() is false.
+     */
+    RefPtr<FrameNode> frameNode1 = FrameNode::GetOrCreateFrameNode("frameNode1", 1, nullptr);
+    RefPtr<FrameNode> frameNode2 = FrameNode::GetOrCreateFrameNode("frameNode2", 2, nullptr);
+    DragPointerEvent dragPointEvent1;
+    dragPointEvent1.pointerEventId = 1;
+    dragPointEvent1.windowX = 0.0f;
+    dragPointEvent1.windowY = 10.0f;
+    dragPointEvent1.displayX = 0.0;
+    dragPointEvent1.displayY = 0.0;
+
+    DragPointerEvent dragPointEvent2;
+    dragPointEvent2.pointerEventId = 1;
+    dragPointEvent2.windowX = 0.0f;
+    dragPointEvent2.windowY = 10.0f;
+    dragPointEvent2.displayX = 0.0;
+    dragPointEvent2.displayY = 10.0;
+
+    context_->dragEvents_[frameNode1].emplace_back(dragPointEvent1);
+    context_->dragEvents_[frameNode2].emplace_back(dragPointEvent2);
+
+    context_->FlushDragEvents();
+    auto isEmpty = context_->nodeToPointEvent_.empty();
+    EXPECT_FALSE(isEmpty);
+    EXPECT_FALSE(context_->canUseLongPredictTask_);
+}
+
 } // namespace NG
 } // namespace OHOS::Ace
