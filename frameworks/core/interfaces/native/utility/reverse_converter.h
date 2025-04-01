@@ -53,6 +53,7 @@
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/hover_event_peer.h"
@@ -81,6 +82,11 @@ namespace OHOS::Ace::NG::Converter {
     struct IsArray : std::false_type {};
     template<typename T>
     struct IsArray<T, std::void_t<decltype(T().array), decltype(T().length)>> : std::true_type {};
+    // Map trait
+    template<typename T, typename = void>
+    struct IsMap : std::false_type {};
+    template<typename T>
+    struct IsMap<T, std::void_t<decltype(T().size), decltype(T().keys), decltype(T().values)>> : std::true_type {};
 
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
@@ -103,6 +109,15 @@ namespace OHOS::Ace::NG::Converter {
             T result;
             result.length = size;
             result.array = static_cast<decltype(T().array)>(Allocate(size * sizeof(*result.array)));
+            return result;
+        }
+        template<typename T>
+        T AllocateMap(std::size_t size)
+        {
+            T result;
+            result.size = size;
+            result.keys = static_cast<decltype(T().keys)>(Allocate(size * sizeof(*result.keys)));
+            result.values = static_cast<decltype(T().values)>(Allocate(size * sizeof(*result.values)));
             return result;
         }
     private:
@@ -148,6 +163,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
+    void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
@@ -323,7 +339,10 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     // Adapter for simple types. Checking for optionals to avoid ambiguous resolution.
-    template<typename To, typename From, std::enable_if_t<!IsOptional<To>::value && !IsArray<To>::value, bool> = false>
+    template<typename To, typename From,
+        std::enable_if_t<!IsOptional<To>::value &&
+            !IsArray<To>::value &&
+            !IsMap<To>::value, bool> = false>
     void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
     {
         AssignArkValue(dts, src);
@@ -366,6 +385,21 @@ namespace OHOS::Ace::NG::Converter {
         dst = ctx->AllocateArray<To>(src.size());
         std::transform(src.begin(), src.end(), dst.array, [ctx](const typename Cont::value_type& src) {
             return ArkValue<Val>(src, ctx);
+        });
+    }
+
+    // Array with context
+    template<typename To, typename Cont>
+    std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
+    {
+        using Key = std::remove_pointer_t<decltype(dst.keys)>;
+        using Val = std::remove_pointer_t<decltype(dst.values)>;
+        dst = ctx->AllocateMap<To>(src.size());
+        int index = 0;
+        std::for_each(src.begin(), src.end(), [&index, &dst, ctx](const typename Cont::value_type& src) {
+            dst.keys[index] = ArkValue<Key>(src.first, ctx);
+            dst.values[index] = ArkValue<Val>(src.second, ctx);
+            index++;
         });
     }
 
@@ -716,6 +750,7 @@ namespace OHOS::Ace::NG::Converter {
 
     using ArkAccessibilityHoverEventSync = SyncEvent<Ark_AccessibilityHoverEvent>;
     using ArkClickEventSync = SyncEvent<Ark_ClickEvent>;
+    using ArkFocusAxisEventSync = SyncEvent<Ark_FocusAxisEvent>;
     using ArkGestureEventSync = SyncEvent<Ark_GestureEvent>;
     using ArkHoverEventSync = SyncEvent<Ark_HoverEvent>;
     using ArkKeyEventSync = SyncEvent<Ark_KeyEvent>;
