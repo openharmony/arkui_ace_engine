@@ -127,7 +127,7 @@ void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEve
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(point);
+        dragDropManager->UpdatePointInfoForFinger(touchEvent.id, point);
     }
 }
 

@@ -1969,7 +1969,11 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetDragMoveLastPoint(touchPoint);
+    for (const auto& touchInfo : info.GetTouches()) {
+        auto point = Point(touchInfo.GetGlobalLocation().GetX(), touchInfo.GetGlobalLocation().GetY(),
+            touchInfo.GetScreenLocation().GetX(), touchInfo.GetScreenLocation().GetY());
+        dragDropManager->UpdatePointInfoForFinger(touchInfo.GetFingerId(), point);
+    }
     if (isRestartDrag) {
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
