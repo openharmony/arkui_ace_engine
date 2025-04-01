@@ -2379,8 +2379,9 @@ void JSViewAbstract::ParseBackgroundImageOption(const JSCallbackInfo& info, int3
 
 void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)
 {
-    if (jsBlurOption->GetProperty("grayscale")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsBlurOption->GetProperty("grayscale"));
+    auto blurOptionProperty = jsBlurOption->GetProperty("grayscale");
+    if (blurOptionProperty->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(blurOptionProperty);
         auto grey1 = params->GetValueAt(0)->ToNumber<uint32_t>();
         auto grey2 = params->GetValueAt(1)->ToNumber<uint32_t>();
         std::vector<float> greyVec(2); // 2 number
@@ -2477,28 +2478,34 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, BrightnessOption& brightnessOption)
 {
     double rate = 1.0f;
-    if (jsOption->GetProperty("rate")->IsNumber()) {
-        rate = jsOption->GetProperty("rate")->ToNumber<double>();
+    auto jsRate = jsOption->GetProperty("rate");
+    if (jsRate->IsNumber()) {
+        rate = jsRate->ToNumber<double>();
     }
     double lightUpDegree = 0.0f;
-    if (jsOption->GetProperty("lightUpDegree")->IsNumber()) {
-        lightUpDegree = jsOption->GetProperty("lightUpDegree")->ToNumber<double>();
+    auto jslightUpDegree = jsOption->GetProperty("lightUpDegree");
+    if (jslightUpDegree->IsNumber()) {
+        lightUpDegree = jslightUpDegree->ToNumber<double>();
     }
     double cubicCoeff = 0.0f;
-    if (jsOption->GetProperty("cubicCoeff")->IsNumber()) {
-        cubicCoeff = jsOption->GetProperty("cubicCoeff")->ToNumber<double>();
+    auto jsCubicCoeff = jsOption->GetProperty("cubicCoeff");
+    if (jsCubicCoeff->IsNumber()) {
+        cubicCoeff = jsCubicCoeff->ToNumber<double>();
     }
     double quadCoeff = 0.0f;
-    if (jsOption->GetProperty("quadCoeff")->IsNumber()) {
-        quadCoeff = jsOption->GetProperty("quadCoeff")->ToNumber<double>();
+    auto jsQuadCoeff = jsOption->GetProperty("quadCoeff");
+    if (jsQuadCoeff->IsNumber()) {
+        quadCoeff = jsQuadCoeff->ToNumber<double>();
     }
     double saturation = 1.0f;
-    if (jsOption->GetProperty("saturation")->IsNumber()) {
-        saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
+    auto jsSaturation = jsOption->GetProperty("saturation");
+    if (jsSaturation->IsNumber()) {
+        saturation = jsSaturation->ToNumber<double>();
     }
     std::vector<float> posRGB(3, 0.0);
-    if (jsOption->GetProperty("posRGB")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("posRGB"));
+    auto jsPosRGB = jsOption->GetProperty("posRGB");
+    if (jsPosRGB->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsPosRGB);
         auto r = params->GetValueAt(0)->ToNumber<double>();
         auto g = params->GetValueAt(1)->ToNumber<double>();
         auto b = params->GetValueAt(2)->ToNumber<double>();
@@ -2507,8 +2514,9 @@ void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, Brig
         posRGB[2] = b;
     }
     std::vector<float> negRGB(3, 0.0);
-    if (jsOption->GetProperty("negRGB")->IsArray()) {
-        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsOption->GetProperty("negRGB"));
+    auto jsNegRGB = jsOption->GetProperty("negRGB");
+    if (jsNegRGB->IsArray()) {
+        JSRef<JSArray> params = JSRef<JSArray>::Cast(jsNegRGB);
         auto r = params->GetValueAt(0)->ToNumber<double>();
         auto g = params->GetValueAt(1)->ToNumber<double>();
         auto b = params->GetValueAt(2)->ToNumber<double>();
@@ -2517,8 +2525,9 @@ void JSViewAbstract::ParseBrightnessOption(const JSRef<JSObject>& jsOption, Brig
         negRGB[2] = b;
     }
     double fraction = 1.0f;
-    if (jsOption->GetProperty("fraction")->IsNumber()) {
-        fraction = jsOption->GetProperty("fraction")->ToNumber<double>();
+    auto jsFraction = jsOption->GetProperty("fraction");
+    if (jsFraction->IsNumber()) {
+        fraction = jsFraction->ToNumber<double>();
         fraction = std::clamp(fraction, 0.0, 1.0);
     }
     brightnessOption = { rate, lightUpDegree, cubicCoeff, quadCoeff, saturation, posRGB, negRGB, fraction };
