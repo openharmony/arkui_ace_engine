@@ -7140,30 +7140,35 @@ bool WebPattern::GetAccessibilityVisible(int64_t accessibilityId)
 
 void WebPattern::DumpInfo()
 {
-    float totalSize = DumpGpuInfo();
+    DumpSurfaceInfo();
+    DumpGpuInfo();
+}
+
+void WebPattern::DumpGpuInfo()
+{
+    float totalSize = 0.0f;
+    if (delegate_ != nullptr && delegate_->GetNweb() != nullptr) {
+        totalSize = delegate_->GetNweb()->DumpGpuInfo();
+    }
     if (totalSize > GPU_SERIOUS_ABNORMAL_VALUE) {
-        totalSize = totalSize / SIZE_UNIT / SIZE_UNIT; // 转换成MB
+        totalSize /= SIZE_UNIT * SIZE_UNIT; // 转换成MB
     } else if (totalSize > GPU_ABNORMAL_VALUE) {
-        totalSize = totalSize / SIZE_UNIT;
+        totalSize /= SIZE_UNIT;
     }
     totalSize = std::round(totalSize * FLOAT_UNIT) / FLOAT_UNIT; // 变为浮点数
     // 使用ostringstream来格式化数字为字符串
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
-    std::string formattedSize = oss.str(); // 获取格式化后的字符串
+    std::string formattedSize = oss.str();                               // 获取格式化后的字符串
     DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
     DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
 }
 
-float WebPattern::DumpGpuInfo()
+void WebPattern::DumpSurfaceInfo()
 {
-    if (delegate_ != nullptr) {
-        if (delegate_->GetNweb() != nullptr) {
-            float totalSize = delegate_->GetNweb()->DumpGpuInfo();
-            return totalSize;
-        }
+    if (renderSurface_ != nullptr) {
+        DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(renderSurface_->GetUniqueId()));
     }
-    return 0;
 }
 
 RefPtr<WebEventHub> WebPattern::GetWebEventHub()
