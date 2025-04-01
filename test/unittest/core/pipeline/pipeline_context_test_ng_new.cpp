@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+#include "base/log/dump_log.h"
+#include "core/interfaces/native/node/node_utils.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
@@ -1722,6 +1724,180 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg007, TestSize.Level1)
      */
     taskScheduler.AddLayoutNode(layoutNode);
     EXPECT_EQ(taskScheduler.layoutNodes_.size(), 1);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg008
+ * @tc.desc: SetLayoutNodeRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    auto layoutNode = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>(), false);
+    taskScheduler.AddLayoutNode(layoutNode);
+    layoutNode->isFind_ = true;
+
+    /**
+     * @tc.steps: step2. test SetLayoutNodeRect.
+     */
+    taskScheduler.SetLayoutNodeRect();
+    EXPECT_EQ(layoutNode->isFind_, false);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg009
+ * @tc.desc: AddDirtyRenderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    taskScheduler.dirtyRenderNodes_.clear();
+
+    /**
+     * @tc.steps: step2. test AddDirtyRenderNode.
+     */
+    taskScheduler.AddDirtyRenderNode(frameNode);
+    taskScheduler.AddDirtyRenderNode(frameNode);
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("Fail to emplace"));
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg010
+ * @tc.desc: FlushLayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.isLayouting_ = true;
+
+    /**
+     * @tc.steps: step2. test FlushLayoutTask.
+     */
+    taskScheduler.FlushLayoutTask(false);
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("you are already"));
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg011
+ * @tc.desc: FlushRenderTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    FrameInfo frameInfo;
+    bool res = false;
+    taskScheduler.StartRecordFrameInfo(&frameInfo);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->SetInDestroying();
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps: step2. test FlushLayoutTask.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    taskScheduler.FlushRenderTask(res);
+    EXPECT_NE(res, true);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg012
+ * @tc.desc: FlushTaskWithCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    int record = taskScheduler.multiLayoutCount_;
+    taskScheduler.isLayouting_ = true;
+
+    /**
+     * @tc.steps: step2. test FlushTaskWithCheck.
+     */
+    taskScheduler.FlushTaskWithCheck();
+    EXPECT_EQ(record + 1, taskScheduler.multiLayoutCount_);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg013
+ * @tc.desc: FlushAllSingleNodeTasks、RequestFrameOnLayoutCountExceeds、FlushPersistAfterLayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function and test FlushAllSingleNodeTasks.
+     */
+    UITaskScheduler taskScheduler;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    taskScheduler.AddSingleNodeToFlush(frameNode);
+    taskScheduler.FlushAllSingleNodeTasks();
+
+    /**
+     * @tc.steps: step2. test FlushPersistAfterLayoutTask.
+     */
+    taskScheduler.AddPersistAfterLayoutTask([]() {});
+    taskScheduler.AddPersistAfterLayoutTask(nullptr);
+    taskScheduler.FlushPersistAfterLayoutTask();
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test RequestFrameOnLayoutCountExceeds.
+     */
+    UITaskScheduler taskScheduler2;
+    RefPtr<NG::UINode> previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    ElementRegister::GetInstance()->AddUINode(previewCustomNode);
+    NG::FrameNode* frameNode2 = ElementRegister::GetInstance()->GetFrameNodePtrById(1);
+    taskScheduler2.AddSafeAreaPaddingProcessTask(frameNode2);
+    taskScheduler2.FlushSafeAreaPaddingProcess();
+
+    auto res = taskScheduler.RequestFrameOnLayoutCountExceeds();
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: UITaskSchedulerTestNg014
+ * @tc.desc: FlushSafeAreaPaddingProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    UITaskScheduler taskScheduler;
+    RefPtr<NG::UINode> previewCustomNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    ElementRegister::GetInstance()->AddUINode(previewCustomNode);
+    NG::FrameNode* frameNode = ElementRegister::GetInstance()->GetFrameNodePtrById(1);
+
+    /**
+     * @tc.steps: step1. test FlushSafeAreaPaddingProcess.
+     */
+    taskScheduler.AddSafeAreaPaddingProcessTask(frameNode);
+    taskScheduler.FlushSafeAreaPaddingProcess();
+    bool isempty = taskScheduler.safeAreaPaddingProcessTasks_.empty();
+    EXPECT_EQ(isempty, true);
 }
 
 /**
