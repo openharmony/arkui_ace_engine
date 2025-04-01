@@ -940,9 +940,6 @@ void RatingPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        HandleEnabled();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
