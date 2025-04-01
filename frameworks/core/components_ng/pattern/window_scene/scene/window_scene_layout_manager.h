@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_WINDOW_SCENE_LAYOUT_MANAGER_H
 
 #include <event_handler.h>
+#include <unordered_set>
 
 #include "core/components_ng/base/frame_node.h"
 
@@ -85,6 +86,9 @@ private:
     void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
+    void RemoveAbnormalId();
+    std::unordered_set<uint64_t> abnormalNodeDfxSet_;
+    std::unordered_set<uint64_t> windowSceneOnTreeDfxSet_;
     std::unordered_map<uint64_t, WeakPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;

@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "hisysevent.h"
 #include "parameters.h"
 #include "session/host/include/session.h"
 #include "session_manager/include/scene_session_manager.h"
@@ -214,6 +215,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.interactive_ = WindowSceneHelper::IsPanelScene(node->GetWindowPatternType());
     }
     res.uiParams_[windowId] = std::move(uiParam);
+    windowSceneOnTreeDfxSet_.insert(windowId);
 }
 
 // once return false: need sync position; else not sync
@@ -261,6 +263,7 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
         DumpFlushInfo(screenId, res);
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "------------------- End FlushWindowPatternInfo ------------------");
     }
+    RemoveAbnormalId();
     // cannot post ui task, since flush may not excute on next frame
     Rosen::SceneSessionManager::GetInstance().FlushUIParams(screenId, std::move(res.uiParams_));
 }
@@ -286,6 +289,19 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
     return session->GetSystemTouchable();
 }
 
+void WindowSceneLayoutManager::RemoveAbnormalId()
+{
+    for (auto it = abnormalNodeDfxSet_.begin(); it != abnormalNodeDfxSet_.end();) {
+        if (windowSceneOnTreeDfxSet_.find(*it) == windowSceneOnTreeDfxSet_.end()) {
+            TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "remove: %{public}" PRIu64, *it);
+            it = abnormalNodeDfxSet_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    windowSceneOnTreeDfxSet_.clear();
+}
+
 void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -298,10 +314,26 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
     CHECK_NULL_VOID(session);
     auto surfaceNode = session->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    if (!surfaceNode->GetParent()) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s is on ui tree but not rs tree,"
-            "screenId:%{public}" PRIu64, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
+    auto nodeId = GetWindowId(node);
+    if (surfaceNode->GetParent() ||
+        abnormalNodeDfxSet_.find(nodeId) != abnormalNodeDfxSet_.end()) {
+        return;
     }
+    abnormalNodeDfxSet_.insert(nodeId);
+    auto rsNode = GetRSNode(node);
+    int32_t eventRet = HiSysEventWrite(
+        OHOS::HiviewDFX::HiSysEvent::Domain::WINDOW_MANAGER,
+        "WINDOW_STATE_ERROR",
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+        "PID", getpid(),
+        "PERSISTENT_ID", nodeId,
+        "TYPE", "WINDOW_PATTERN_EXCEPTION",
+        "WINDOW_NAME", GetWindowName(node).c_str(),
+        "FRAME_NODE_ID", node->GetId(),
+        "RS_NODE_ID", rsNode ? rsNode->GetId() : 0,
+        "DISPLAY_ID", GetScreenId(node));
+    TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "ret:%{public}d node:%{public}d name:%{public}s on ui tree not rs tree,"
+        "screenId:%{public}" PRIu64, eventRet, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
 }
 
 void WindowSceneLayoutManager::FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo)
