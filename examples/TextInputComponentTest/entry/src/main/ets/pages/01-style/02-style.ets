@@ -24,6 +24,18 @@ struct struct_01_style_02_style {
           TextInput({ placeholder: '.style(TextInputStyle.Default)' }).style(TextInputStyle.Default)
           TextInput({ placeholder: '未设置style' })
           TextInput({ placeholder: '.style(undefined)' }).style(undefined)
+
+          Column({ space: 5 }) {
+            Text('规格：内联模式第一次获焦时不弹手柄，后续单击操作允许弹手柄').fontColor(Color.Blue)
+            TextInput({ text: `文本框点击两次，第三次点击光标` }).style(TextContentStyle.INLINE)
+            TextInput({ text: `文本框点击两次，第三次点击光标` }).style(TextInputStyle.Inline)
+          }.borderWidth(2)
+
+          Column({ space: 5 }) {
+            Text('规格：TextInput 内联模式，全选多行文本，显示空行连接线（2vp）').fontColor(Color.Blue)
+            TextInput({ text: `ABC CDE，点击全选` }).style(TextInputStyle.Inline)
+          }.borderWidth(2)
+
         }.borderWidth(2)
       }
     }
