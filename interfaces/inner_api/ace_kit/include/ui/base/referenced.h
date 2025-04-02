@@ -188,6 +188,11 @@ public:
         return rawPtr_ != nullptr;
     }
 
+    T* GetRawPtr() const
+    {
+        return rawPtr_;
+    }
+
     // Use 'Swap' to implement overloaded operator '='.
     // Construct a temporary 'RefPtr' by different parameters to increase strong reference count of the new instance,
     // swap with 'this', and then decrease strong reference of the old instance while destroying the temporary 'RefPtr'.
