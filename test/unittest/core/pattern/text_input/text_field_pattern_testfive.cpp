@@ -129,6 +129,11 @@ HWTEST_F(TextFieldPatternTestFive, TextInputTypeToString001, TestSize.Level0)
     ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NUMBER_DECIMAL");
     layoutProperty->UpdateMaxLines(1);
     ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.NUMBER_DECIMAL");
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE);
+    layoutProperty->UpdateMaxLines(2);
+    ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.ONE_TIME_CODE");
+    layoutProperty->UpdateMaxLines(1);
+    ASSERT_EQ(pattern_->TextInputTypeToString(), "InputType.ONE_TIME_CODE");
     layoutProperty->UpdateTextInputType(static_cast<TextInputType>(999));
     pattern_->isTextInput_ = false;
     ASSERT_EQ(pattern_->TextInputTypeToString(), "TextAreaType.NORMAL");

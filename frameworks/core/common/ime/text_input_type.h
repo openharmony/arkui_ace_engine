@@ -39,7 +39,10 @@ enum class TextInputType {
     NEW_PASSWORD = 11,
     NUMBER_DECIMAL = 12,
     JS_ENUM_URL = 13,
-    END = JS_ENUM_URL,
+    // [ONE TIME CODE] received by the inputMethod is 13.
+    ONE_TIME_CODE = JS_ENUM_URL,
+    JS_ONE_TIME_CODE = 14,
+    END = JS_ONE_TIME_CODE,
 };
 
 TextInputType CastToTextInputType(int32_t value);
