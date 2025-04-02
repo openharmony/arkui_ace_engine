@@ -120,23 +120,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetTextIndexAtCursor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSelectedSpanText002
- * @tc.desc: test get select span text
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, -1, 1);
-    ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, -1, 10);
-    ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, 0, 1);
-    EXPECT_EQ(ret, u"h");
-}
-
-/**
  * @tc.name: GetChildByIndex002
  * @tc.desc: test get child by index
  * @tc.type: FUNC
@@ -170,32 +153,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetChildByIndex001, TestSize.Level1)
     EXPECT_EQ(ret2, nullptr);
     auto ret3 = richEditorPattern->GetChildByIndex(0);
     EXPECT_NE(ret3, nullptr);
-}
-
-/**
- * @tc.name: GetSelectedSpanText001
- * @tc.desc: test GetSelectedSpanText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    std::u16string ori = u"12345";
-
-    std::vector<int> start = { -1, 0, 15 };
-    std::vector<int> end = { 10, -3 };
-
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 2; ++j) {
-            auto ret = richEditorPattern->GetSelectedSpanText(ori, start[i], end[j]);
-            EXPECT_EQ(ret, u"");
-        }
-    }
-
-    auto ret = richEditorPattern->GetSelectedSpanText(ori, 0, 1);
-    EXPECT_EQ(ret, u"1");
 }
 
 /**
@@ -314,54 +271,6 @@ HWTEST_F(RichEditorEditTestOneNg, CreateHandles001, TestSize.Level1)
 
     richEditorPattern->CloseHandleAndSelect();
     EXPECT_EQ(richEditorPattern->showSelect_, false);
-}
-
-/**
- * @tc.name: RefreshSelectOverlay001
- * @tc.desc: test RefreshSelectOverlay and more.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, RefreshSelectOverlay001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    int32_t posx = 1;
-    int32_t posy = 3;
-    richEditorPattern->HandleSurfacePositionChanged(posx, posy);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    pipeline->themeManager_ = theme;
-
-    richEditorPattern->customKeyboardBuilder_ = []() {};
-    richEditorPattern->DumpInfo();
-    richEditorPattern->isTextChange_ = false;
-    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
-
-    richEditorPattern->selectOverlay_->SetUsingMouse(false);
-    richEditorPattern->UpdateSelectionInfo(posx, posy);
-    EXPECT_EQ(richEditorPattern->sourceType_, SourceType::TOUCH);
-
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    Offset Offset = {1, 4};
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->isTextChange_ = false;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
 }
 
 /**

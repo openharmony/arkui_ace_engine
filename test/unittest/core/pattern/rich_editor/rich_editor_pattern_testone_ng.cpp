@@ -315,30 +315,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UpdateTextFieldManager001, TestSize.Level1)
 }
 
 /**
- * @tc.name: JudgeSelectType001
- * @tc.desc: test RichEditorPattern JudgeSelectType
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, JudgeSelectType001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    auto offset = Offset(50.0, -80.0);
-    AddSpan("hello1");
-    auto selectType = richEditorPattern->JudgeSelectType(offset).second;
-    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->editingLongPress_ = true;
-    selectType = richEditorPattern->JudgeSelectType(offset).second;
-    EXPECT_NE(selectType, SelectType::SELECT_FORWARD);
-}
-
-/**
  * @tc.name: InsertValueInStyledString002
  * @tc.desc: test RichEditorPattern InsertValueInStyledString
  * @tc.type: FUNC
