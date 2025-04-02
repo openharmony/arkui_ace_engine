@@ -438,7 +438,8 @@ public:
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage) override;
 
     UIContentErrorCode InitializeWithAniStorage(OHOS::Rosen::Window* window,
-        const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage, const std::string& contentName) override;
+        const std::shared_ptr<std::vector<uint8_t>>& content, ani_object storage,
+        const std::string& contentName) override;
 
     UIContentErrorCode InitializeByNameWithAniStorage(
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage) override;
