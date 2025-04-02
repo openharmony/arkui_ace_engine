@@ -122,8 +122,6 @@ const LinearMapNode<void (*)(std::shared_ptr<RSImage>&, std::shared_ptr<RSShader
 CustomPaintPaintMethod::CustomPaintPaintMethod()
 {
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    // The default value of the font size in canvas is 14px.
-    SetMeasureFontSize(DEFAULT_FONT_SIZE);
 }
 
 bool CustomPaintPaintMethod::CheckFilterProperty(FilterType filterType, const std::string& filterParam)
@@ -503,7 +501,8 @@ void CustomPaintPaintMethod::DrawSvgImage(
     rsCanvas_->Restore();
 }
 
-void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, const std::shared_ptr<RSImage>& image)
+void CustomPaintPaintMethod::DrawImageInternal(
+    const Ace::CanvasImage& canvasImage, const std::shared_ptr<RSImage>& image)
 {
     CHECK_NULL_VOID(rsCanvas_);
     RSBrush compositeOperationpBrush;
@@ -518,29 +517,29 @@ void CustomPaintPaintMethod::DrawImageInternal(const Ace::CanvasImage& info, con
         imageBrush_.SetAlphaF(state_.globalState.GetAlpha());
     }
     if (HasShadow()) {
-        bool isSupported = (info.flag == DrawImageType::THREE_PARAMS) &&
-            (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
-        auto width = info.dx + (isSupported ? image->GetWidth() : info.dWidth);
-        auto height = info.dy + (isSupported ? image->GetHeight() : info.dHeight);
-        RSRect rsRect = RSRect(info.dx, info.dy, width, height);
+        RSRect rsRect = RSRect(
+            canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx, canvasImage.dHeight + canvasImage.dy);
         RSPath path;
         path.AddRect(rsRect);
         PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
             (state_.globalState.GetType() != CompositeOperation::SOURCE_OVER) ? &slo : nullptr);
     }
     rsCanvas_->AttachBrush(imageBrush_);
-    switch (info.flag) {
+    switch (canvasImage.flag) {
         case DrawImageType::THREE_PARAMS:
-            rsCanvas_->DrawImage(*image, info.dx, info.dy, sampleOptions_);
+            rsCanvas_->DrawImage(*image, canvasImage.dx, canvasImage.dy, sampleOptions_);
             break;
         case DrawImageType::FIVE_PARAMS: {
-            RSRect rect = RSRect(info.dx, info.dy, info.dWidth + info.dx, info.dHeight + info.dy);
+            RSRect rect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
             rsCanvas_->DrawImageRect(*image, rect, sampleOptions_);
             break;
         }
         case DrawImageType::NINE_PARAMS: {
-            RSRect dstRect = RSRect(info.dx, info.dy, info.dWidth + info.dx, info.dHeight + info.dy);
-            RSRect srcRect = RSRect(info.sx, info.sy, info.sWidth + info.sx, info.sHeight + info.sy);
+            RSRect dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dWidth + canvasImage.dx,
+                canvasImage.dHeight + canvasImage.dy);
+            RSRect srcRect = RSRect(canvasImage.sx, canvasImage.sy, canvasImage.sWidth + canvasImage.sx,
+                canvasImage.sHeight + canvasImage.sy);
             rsCanvas_->DrawImageRect(*image, srcRect, dstRect, sampleOptions_,
                 RSSrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
             break;
@@ -566,7 +565,7 @@ void CustomPaintPaintMethod::DrawImage(const Ace::CanvasImage& canvasImage, doub
             return;
         }
         RSBitmap bitmap;
-        RSBitmapFormat format = GetBitmapFormat();
+        RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
         bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
         bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
         image->BuildFromBitmap(bitmap);
@@ -586,7 +585,7 @@ void CustomPaintPaintMethod::PutImageData(const Ace::ImageData& imageData)
         return;
     }
     RSBitmap bitmap;
-    RSBitmapFormat format = GetBitmapFormat();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     bitmap.Build(imageData.dirtyWidth, imageData.dirtyHeight, format);
     bitmap.SetPixels(const_cast<void*>(reinterpret_cast<const void*>(imageData.data.data())));
     RSBrush brush;
@@ -1562,11 +1561,7 @@ void CustomPaintPaintMethod::SetGrayFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#sepiaEquivalent
@@ -1592,11 +1587,7 @@ void CustomPaintPaintMethod::SetSepiaFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#saturateEquivalent
@@ -1623,11 +1614,7 @@ void CustomPaintPaintMethod::SetSaturateFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#huerotateEquivalent
@@ -1668,11 +1655,7 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1697,11 +1680,7 @@ void CustomPaintPaintMethod::SetInvertFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1724,11 +1703,7 @@ void CustomPaintPaintMethod::SetOpacityFilter(const std::string& percent)
     matrix[18] = percentNum;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1748,11 +1723,7 @@ void CustomPaintPaintMethod::SetBrightnessFilter(const std::string& percent)
     matrix[18] = 1.0f;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 /*
@@ -1773,11 +1744,7 @@ void CustomPaintPaintMethod::SetContrastFilter(const std::string& percent)
     matrix[18] = 1;
     RSColorMatrix colorMatrix;
     colorMatrix.SetArray(matrix);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-        colorMatrix_.PostConcat(colorMatrix);
-    } else {
-        colorMatrix_.PreConcat(colorMatrix);
-    }
+    colorMatrix_.PreConcat(colorMatrix);
 }
 
 // https://drafts.fxtf.org/filter-effects/#blurEquivalent
@@ -1962,7 +1929,6 @@ void CustomPaintPaintMethod::SaveProperties()
 {
     matrixStates_.push_back(matrix_);
     lineDashStates_.push_back(lineDash_);
-    measureTextStates_.push_back(measureTextState_);
 }
 
 void CustomPaintPaintMethod::RestoreProperties()
@@ -1975,10 +1941,6 @@ void CustomPaintPaintMethod::RestoreProperties()
         lineDash_ = lineDashStates_.back();
         lineDashStates_.pop_back();
     }
-    if (!measureTextStates_.empty()) {
-        measureTextState_ = measureTextStates_.back();
-        measureTextStates_.pop_back();
-    }
 }
 
 void CustomPaintPaintMethod::ResetTransformMatrix()
@@ -1990,14 +1952,6 @@ void CustomPaintPaintMethod::ResetLineDash()
 {
     std::vector<double>().swap(lineDash_.lineDash);
     lineDash_.dashOffset = 0.0;
-}
-
-void CustomPaintPaintMethod::ResetMeasureTextState()
-{
-    std::vector<PaintState>().swap(measureTextStates_);
-    measureTextState_ = PaintState();
-    // The default value of the font size in canvas is 14px.
-    SetMeasureFontSize(DEFAULT_FONT_SIZE);
 }
 
 void CustomPaintPaintMethod::RotateMatrix(double angle)
@@ -2121,17 +2075,15 @@ void CustomPaintPaintMethod::SetTransform(const TransformParam& param)
 TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, const PaintState& state)
 {
 #ifndef ACE_UNITTEST
-    PaintState paintState =
-        (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) ? measureTextState_ : state;
     TextMetrics textMetrics;
     RSParagraphStyle style;
-    style.textAlign = Constants::ConvertTxtTextAlign(paintState.GetTextAlign());
+    style.textAlign = Constants::ConvertTxtTextAlign(state.GetTextAlign());
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     CHECK_NULL_RETURN(fontCollection, textMetrics);
     std::unique_ptr<RSParagraphBuilder> builder = RSParagraphBuilder::Create(style, fontCollection);
     RSTextStyle txtStyle;
-    ConvertTxtStyle(paintState.GetTextStyle(), txtStyle);
-    txtStyle.fontSize = paintState.GetTextStyle().GetFontSize().Value();
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
+    txtStyle.fontSize = state.GetTextStyle().GetFontSize().Value();
     builder->PushStyle(txtStyle);
     builder->AppendText(StringUtils::Str8ToStr16(text));
 
@@ -2146,8 +2098,8 @@ TextMetrics CustomPaintPaintMethod::MeasureTextMetrics(const std::string& text, 
     auto glyphsBoundsBottom = paragraph->GetGlyphsBoundsBottom();
     auto glyphsBoundsLeft = paragraph->GetGlyphsBoundsLeft();
     auto glyphsBoundsRight = paragraph->GetGlyphsBoundsRight();
-    auto textAlign = paintState.GetTextAlign();
-    auto textBaseLine = paintState.GetTextStyle().GetTextBaseline();
+    auto textAlign = state.GetTextAlign();
+    auto textBaseLine = state.GetTextStyle().GetTextBaseline();
     const double baseLineY = GetFontBaseline(fontMetrics, textBaseLine);
     const double baseLineX = GetFontAlign(textAlign, paragraph);
 

@@ -38,6 +38,11 @@ void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     DetachRenderContext();
 }
 
+void CanvasPattern::OnDetachFromMainTree()
+{
+    DetachRenderContext();
+}
+
 void CanvasPattern::AttachRenderContext()
 {
     isAttached_ = true;
@@ -708,7 +713,6 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 #else
     paintMethod_->PushTask<SetTextAlignOp>(align);
 #endif
-    paintMethod_->SetMeasureTextAlign(align);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
@@ -721,7 +725,6 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 #else
     paintMethod_->PushTask<SetTextBaselineOp>(baseline);
 #endif
-    paintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
@@ -771,7 +774,6 @@ void CanvasPattern::UpdateFontWeight(FontWeight weight)
 #else
     paintMethod_->PushTask<SetFontWeightOp>(weight);
 #endif
-    paintMethod_->SetMeasureFontWeight(weight);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
@@ -784,7 +786,6 @@ void CanvasPattern::UpdateFontStyle(FontStyle style)
 #else
     paintMethod_->PushTask<SetFontStyleOp>(style);
 #endif
-    paintMethod_->SetMeasureFontStyle(style);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
@@ -797,7 +798,6 @@ void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 #else
     paintMethod_->PushTask<SetFontFamiliesOp>(families);
 #endif
-    paintMethod_->SetMeasureFontFamilies(families);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
@@ -810,7 +810,6 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
 #else
     paintMethod_->PushTask<SetFontSizeOp>(size);
 #endif
-    paintMethod_->SetMeasureFontSize(size);
 }
 
 void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
@@ -823,7 +822,6 @@ void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
 #else
     paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
 #endif
-    paintMethod_->SetMeasureLetterSpacing(letterSpacing);
 }
 
 void CanvasPattern::UpdateFillColor(const Color& color)
@@ -1234,7 +1232,6 @@ void CanvasPattern::Reset()
 #endif
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
-    paintMethod_->ResetMeasureTextState();
     SetTextDirection(TextDirection::INHERIT);
 }
 
