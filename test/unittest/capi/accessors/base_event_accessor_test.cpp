@@ -69,7 +69,7 @@ HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
         { {"shift", "ctrl", "alt"}, {KeyCode::KEY_CTRL_LEFT}, false },
         { {"fn"}, {KeyCode::KEY_CTRL_LEFT}, false }
     };
-    
+
     for (auto& [param, value, expected] : TEST_PLAN) {
         Converter::ArkArrayHolder<Array_String> stringHolder(param);
         Array_String stringArrayValues = stringHolder.ArkValue();
@@ -158,7 +158,7 @@ HWTEST_F(BaseEventAccessorTest, GetTimeStampTest, TestSize.Level1)
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
 
-    const std::vector<std::pair<int, Duration>> TEST_PLAN = {
+    const std::vector<std::pair<int64_t, Duration>> TEST_PLAN = {
         { 123, Duration(std::chrono::nanoseconds(123)) },
         { 10000, Duration(std::chrono::nanoseconds(10000)) }
     };
@@ -166,7 +166,7 @@ HWTEST_F(BaseEventAccessorTest, GetTimeStampTest, TestSize.Level1)
     for (auto& [expected, value] : TEST_PLAN) {
         baseEvent_->SetTimeStamp(TimeStamp() + value);
         auto timeStamp = accessor_->getTimestamp(peer_);
-        EXPECT_EQ(Converter::Convert<int32_t>(timeStamp), expected);
+        EXPECT_EQ(Converter::Convert<int64_t>(timeStamp), expected);
     }
 }
 
@@ -179,13 +179,13 @@ HWTEST_F(BaseEventAccessorTest, SetTimeStampTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
-    const std::vector<std::pair<Ark_Number, Duration>> TEST_PLAN = {
-        { Converter::ArkValue<Ark_Number>(123), Duration(std::chrono::nanoseconds(123)) },
-        { Converter::ArkValue<Ark_Number>(10000), Duration(std::chrono::nanoseconds(10000)) }
+    const std::vector<std::pair<Ark_Int64, Duration>> TEST_PLAN = {
+        { 123, Duration(std::chrono::nanoseconds(123)) },
+        { 10000, Duration(std::chrono::nanoseconds(10000)) }
     };
 
     for (auto& [value, duration] : TEST_PLAN) {
-        accessor_->setTimestamp(peer_, &value);
+        accessor_->setTimestamp(peer_, value);
         auto timeStamp = baseEvent_->GetTimeStamp();
         TimeStamp expected = TimeStamp() + duration;
         EXPECT_EQ(timeStamp, expected);
@@ -394,7 +394,7 @@ HWTEST_F(BaseEventAccessorTest, GetDeviceIdTest, TestSize.Level1)
     for (auto& [value, expected] : testFixtureInt32Values) {
         baseEvent_->SetDeviceId(expected);
         auto deviceId = accessor_->getDeviceId(peer_);
-        EXPECT_EQ(Converter::Convert<int32_t>(deviceId), expected);
+        EXPECT_EQ(Converter::OptConvert<int32_t>(deviceId), expected);
     }
 }
 

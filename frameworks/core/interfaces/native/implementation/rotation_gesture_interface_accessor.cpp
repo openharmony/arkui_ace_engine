@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_RotationGestureInterface peer)
 {
     delete peer;
 }
-Ark_RotationGestureInterface CtorImpl()
+Ark_RotationGestureInterface CtorImpl(const Opt_Literal_Number_angle_fingers* value)
 {
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double angleNum = 0;

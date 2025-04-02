@@ -235,7 +235,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartTest, TestSize.Level1)
         CallbackHelper(continuation).Invoke(builder);
     };
     auto arkCallback =
-        ArkValue<onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+        ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
     modifier_->setOnItemDragStart(node_, &arkCallback);
 
     // imitate the test case
@@ -295,7 +295,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDragStartInvalidTest, TestSize.Leve
         CallbackHelper(continuation).Invoke(builder);
     };
     auto arkCallback =
-        ArkValue<onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
+        ArkValue<GridAttribute_onItemDragStart_event_type>(nullptr, onItemDragStartSyncFunc, expectedResourceId);
     modifier_->setOnItemDragStart(node_, &arkCallback);
 
     // imitate the test case

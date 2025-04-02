@@ -217,7 +217,7 @@ void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo
     AssignArkValue(dst.touchObject, src);
     dst.size = ArkValue<Ark_Number>(src.GetSize());
     dst.force = ArkValue<Ark_Number>(src.GetForce());
-    dst.timestamp = ArkValue<Ark_Number>(src.GetTimeStamp().time_since_epoch().count());
+    dst.timestamp = ArkValue<Ark_Int64>(src.GetTimeStamp().time_since_epoch().count());
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
@@ -2229,7 +2229,7 @@ ImageSpanSize Convert(const Ark_SizeOptions& value)
 template<>
 TextRange Convert(const Ark_TextRange& src)
 {
-    TextRange dst; // intialized by default
+    TextRange dst; // initialized by default
     auto start = Converter::OptConvert<int32_t>(src.start);
     auto end = Converter::OptConvert<int32_t>(src.end);
     if (start.has_value()) {

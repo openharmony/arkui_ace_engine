@@ -166,7 +166,7 @@ HWTEST_F(TouchEventAccessorTest, GetHistoricalPointsTest, TestSize.Level1)
     EXPECT_EQ(history.array->touchObject.type, Ark_TouchType::ARK_TOUCH_TYPE_DOWN);
     EXPECT_EQ(Converter::Convert<float>(history.array->force), expectedForce);
     EXPECT_EQ(Converter::Convert<float>(history.array->size), expectedSize);
-    EXPECT_EQ(Converter::Convert<int32_t>(history.array->timestamp), expectedTime);
+    EXPECT_EQ(Converter::Convert<int64_t>(history.array->timestamp), expectedTime);
 }
 
 /**

@@ -28,8 +28,8 @@ class ExternalDataKeeper : public virtual Referenced {
 public:
     ExternalDataKeeper() = default;
     ~ExternalDataKeeper() override = default;
-    explicit ExternalDataKeeper(const Ark_CustomObject& data): data_(data) {}
-    Ark_CustomObject data_;
+    explicit ExternalDataKeeper(const Ark_Object& data): data_(data) {}
+    Ark_Object data_;
     ACE_DISALLOW_COPY_AND_MOVE(ExternalDataKeeper);
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
@@ -100,7 +100,7 @@ class NavigationStack;
 constexpr bool DEFAULT_ANIMATED = true;
 constexpr LaunchMode DEFAULT_LAUNCH_MODE = LaunchMode::STANDARD;
 
-// this dublicates the functionality of JS NavPathStack class
+// this duplicates the functionality of JS NavPathStack class
 // (frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js)
 class PathStack : public virtual Referenced {
 public:
@@ -260,9 +260,9 @@ private:
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_Object& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
 void AssignArkValue(Ark_NavPathInfo& dst, const GeneratedModifier::NavigationContext::PathInfo& src);
-template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_CustomObject& src);
+template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_Object& src);
 template<> GeneratedModifier::NavigationContext::PathInfo Convert(const Ark_NavPathInfo& src);
 } // namespace OHOS::Ace::NG::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H

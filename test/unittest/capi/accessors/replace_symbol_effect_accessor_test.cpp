@@ -13,31 +13,25 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "accessor_test_base.h"
-#include "gmock/gmock.h"
 
 #include "core/interfaces/native/implementation/symbol_effect_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
-
 using namespace testing;
 using namespace testing::ext;
-using namespace Converter;
 
-    class ReplaceSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIReplaceSymbolEffectAccessor,
-        &GENERATED_ArkUIAccessors::getReplaceSymbolEffectAccessor, ReplaceSymbolEffectPeer> {
-    public:
+class ReplaceSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUIReplaceSymbolEffectAccessor,
+    &GENERATED_ArkUIAccessors::getReplaceSymbolEffectAccessor, ReplaceSymbolEffectPeer> {
+public:
     void* CreatePeerInstance() override
     {
-        Opt_EffectScope scope = {};
+        auto scope = Converter::ArkValue<Opt_EffectScope>();
         return accessor_->ctor(&scope);
-    }
-    void DestroyPeer(ReplaceSymbolEffectPeer* peer)
-    {
-        finalyzer_(peer);
-        peer = nullptr;
     }
 };
 
@@ -54,9 +48,8 @@ HWTEST_F(ReplaceSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
     auto aceScope = peer_->scope.value();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
-    Ark_EffectScope arkScope = accessor_->getScope(peer_);
+    auto arkScope = Converter::GetOpt(accessor_->getScope(peer_));
     ASSERT_EQ(arkScope, ARK_EFFECT_SCOPE_WHOLE);
 }
 
 } // namespace OHOS::Ace::NG
- 

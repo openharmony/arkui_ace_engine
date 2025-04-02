@@ -28,9 +28,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-
-const auto ARK_STRING = Converter::ArkValue<Ark_String>("PX");
-const auto DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_LengthMetricsUnit>(Ark_LengthMetricsUnit{ARK_STRING});
+const auto DEFAULT_SETTING_UNITS = Converter::ArkValue<Opt_LengthMetricsUnit>(ARK_LENGTH_METRICS_UNIT_PX);
 const double DEFAULT_VALUE = -1;
 const double DEFAULT_DENSITY = 1.0;
 const double DENSITY_1_25 = 1.25;
@@ -175,7 +173,7 @@ HWTEST_F(DrawingRenderingContextAccessorTest, getCanvasTest, TestSize.Level1)
     ASSERT_NE(holder->rsCallback, nullptr);
     std::shared_ptr<RSCanvas> rsCanvas = std::make_shared<RSCanvas>();
     holder->rsCallback(rsCanvas.get(), DEFAULT_VALUE, DEFAULT_VALUE);
-  
+
     Ark_DrawingCanvas result = accessor_->getCanvas(peer_);
 
     ASSERT_NE(result, nullptr);

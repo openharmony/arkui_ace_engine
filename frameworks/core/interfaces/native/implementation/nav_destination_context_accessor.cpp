@@ -84,7 +84,7 @@ void SetPathStackImpl(Ark_NavDestinationContext peer,
 {
     LOGE("NavDestinationContext doesn't support set nav path stack");
 }
-Ark_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
+Opt_String GetNavDestinationIdImpl(Ark_NavDestinationContext peer)
 {
     LOGE("NavDestinationContext doesn't support a return value"); // temp
     CHECK_NULL_RETURN(peer && peer->handler, {});

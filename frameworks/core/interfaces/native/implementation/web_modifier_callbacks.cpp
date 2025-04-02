@@ -600,7 +600,7 @@ bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* val
     Ark_OnSslErrorEventReceiveEvent parameter;
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
-    parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(vecHolder.ArkValue());
+    parameter.certChainData = vecHolder.OptValue<Opt_Array_Buffer>();
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;

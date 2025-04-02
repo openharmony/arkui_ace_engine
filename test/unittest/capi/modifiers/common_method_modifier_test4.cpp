@@ -941,11 +941,11 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues, TestSize.L
     std::vector<Ark_SafeAreaType> vecTypes = {ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_CUTOUT,
         ARK_SAFE_AREA_TYPE_KEYBOARD};
     Converter::ArkArrayHolder<Array_SafeAreaType> vecHolderT(vecTypes);
-    auto optArrayArkTypes = Converter::ArkValue<Opt_Array_SafeAreaType>(vecHolderT.ArkValue());
+    auto optArrayArkTypes = vecHolderT.OptValue<Opt_Array_SafeAreaType>();
     std::vector<Ark_SafeAreaEdge> vecEdges = {ARK_SAFE_AREA_EDGE_TOP, ARK_SAFE_AREA_EDGE_BOTTOM,
         ARK_SAFE_AREA_EDGE_START, ARK_SAFE_AREA_EDGE_END};
     Converter::ArkArrayHolder<Array_SafeAreaEdge> vecHolderE(vecEdges);
-    auto optArrayArkEdge = Converter::ArkValue<Opt_Array_SafeAreaEdge>(vecHolderE.ArkValue());
+    auto optArrayArkEdge = vecHolderE.OptValue<Opt_Array_SafeAreaEdge>();
     modifier_->setExpandSafeArea(node_, &optArrayArkTypes, &optArrayArkEdge);
     checkExpandSafeArea(node_, expectedTypes, expectedEdges);
 }
@@ -961,10 +961,10 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestValidValues2, TestSize.
     std::vector<std::string> expectedEdges = {"SafeAreaEdge.TOP", "SafeAreaEdge.END"};
     std::vector<Ark_SafeAreaType> vecTypes = {ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_KEYBOARD};
     Converter::ArkArrayHolder<Array_SafeAreaType> vecHolderT(vecTypes);
-    auto optArrayArkTypes = Converter::ArkValue<Opt_Array_SafeAreaType>(vecHolderT.ArkValue());
+    auto optArrayArkTypes = vecHolderT.OptValue<Opt_Array_SafeAreaType>();
     std::vector<Ark_SafeAreaEdge> vecEdges = {ARK_SAFE_AREA_EDGE_TOP, ARK_SAFE_AREA_EDGE_END};
     Converter::ArkArrayHolder<Array_SafeAreaEdge> vecHolderE(vecEdges);
-    auto optArrayArkEdge = Converter::ArkValue<Opt_Array_SafeAreaEdge>(vecHolderE.ArkValue());
+    auto optArrayArkEdge = vecHolderE.OptValue<Opt_Array_SafeAreaEdge>();
     modifier_->setExpandSafeArea(node_, &optArrayArkTypes, &optArrayArkEdge);
     checkExpandSafeArea(node_, expectedTypes, expectedEdges);
 }
@@ -981,10 +981,10 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestInvalidValues1, TestSiz
     std::vector<Ark_SafeAreaType> vecTypes = {ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_SYSTEM,
         ARK_SAFE_AREA_TYPE_SYSTEM, ARK_SAFE_AREA_TYPE_KEYBOARD, ARK_SAFE_AREA_TYPE_KEYBOARD};
     Converter::ArkArrayHolder<Array_SafeAreaType> vecHolderT(vecTypes);
-    auto optArrayArkTypes = Converter::ArkValue<Opt_Array_SafeAreaType>(vecHolderT.ArkValue());
+    auto optArrayArkTypes = vecHolderT.OptValue<Opt_Array_SafeAreaType>();
     std::vector<Ark_SafeAreaEdge> vecEdges = {ARK_SAFE_AREA_EDGE_TOP, ARK_SAFE_AREA_EDGE_END};
     Converter::ArkArrayHolder<Array_SafeAreaEdge> vecHolderE(vecEdges);
-    auto optArrayArkEdge = Converter::ArkValue<Opt_Array_SafeAreaEdge>(vecHolderE.ArkValue());
+    auto optArrayArkEdge = vecHolderE.OptValue<Opt_Array_SafeAreaEdge>();
     modifier_->setExpandSafeArea(node_, &optArrayArkTypes, &optArrayArkEdge);
     checkExpandSafeArea(node_, expectedTypes, expectedEdges);
 }
@@ -1001,10 +1001,10 @@ HWTEST_F(CommonMethodModifierTest4, setExpandSafeAreaTestInvalidValues2, TestSiz
     std::vector<Ark_SafeAreaType> vecTypes = {static_cast<Ark_SafeAreaType>(-100), ARK_SAFE_AREA_TYPE_KEYBOARD,
         static_cast<Ark_SafeAreaType>(100), ARK_SAFE_AREA_TYPE_KEYBOARD, static_cast<Ark_SafeAreaType>(2)};
     Converter::ArkArrayHolder<Array_SafeAreaType> vecHolderT(vecTypes);
-    auto optArrayArkTypes = Converter::ArkValue<Opt_Array_SafeAreaType>(vecHolderT.ArkValue());
+    auto optArrayArkTypes = vecHolderT.OptValue<Opt_Array_SafeAreaType>();
     std::vector<Ark_SafeAreaEdge> vecEdges = {ARK_SAFE_AREA_EDGE_TOP, ARK_SAFE_AREA_EDGE_END};
     Converter::ArkArrayHolder<Array_SafeAreaEdge> vecHolderE(vecEdges);
-    auto optArrayArkEdge = Converter::ArkValue<Opt_Array_SafeAreaEdge>(vecHolderE.ArkValue());
+    auto optArrayArkEdge = vecHolderE.OptValue<Opt_Array_SafeAreaEdge>();
     modifier_->setExpandSafeArea(node_, &optArrayArkTypes, &optArrayArkEdge);
     checkExpandSafeArea(node_, expectedTypes, expectedEdges);
 }

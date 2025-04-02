@@ -69,12 +69,17 @@ public:
 };
 
 class LongPressGestureIntrfaceAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUILongPressGestureInterfaceAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUILongPressGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getLongPressGestureInterfaceAccessor, LongPressGestureInterfacePeer> {
 public:
+    void *CreatePeerInstance() override
+    {
+        auto value = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>();
+        return accessor_->ctor(&value);
+    }
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         peer_->gesture =
             AceType::MakeRefPtr<MockLongPressGesture>(DEFAULT_FINGERS, DEFAULT_REPEAT, DEFAULT_DURATION);
     }

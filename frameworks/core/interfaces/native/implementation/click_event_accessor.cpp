@@ -201,7 +201,7 @@ void SetYImpl(Ark_ClickEvent peer,
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
 }
-Ark_InteractionHand GetHandImpl(Ark_ClickEvent peer)
+Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
 {
     return {};
 }

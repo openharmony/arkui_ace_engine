@@ -70,10 +70,6 @@ template<>
 OptRequestFormInfo Convert(const Ark_FormInfo& src)
 {
     OptRequestFormInfo dst;
-    auto id = Converter::OptConvert<Dimension>(src.id);
-    if (id) {
-        dst.id = (int64_t)(*id).Value();
-    }
     dst.name = Converter::Convert<std::string>(src.name);
     dst.bundle = Converter::Convert<std::string>(src.bundle);
     dst.ability = Converter::Convert<std::string>(src.ability);
@@ -236,7 +232,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
 
     auto onAcquired = [arkCallback = CallbackHelper(*value)](const std::string& param) {
-        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+        int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
@@ -245,11 +241,11 @@ void OnAcquiredImpl(Ark_NativePointer node,
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                id = static_cast<uint32_t>(result);
+                id = result;
             }
         }
         Ark_FormCallbackInfo parameter = {
-            .id = Converter::ArkValue<Ark_Number>(id),
+            .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
@@ -310,7 +306,7 @@ void OnUninstallImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
 
     auto onUninstall = [arkCallback = CallbackHelper(*value)](const std::string& param) {
-        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+        int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
@@ -319,11 +315,11 @@ void OnUninstallImpl(Ark_NativePointer node,
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
             if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                id = static_cast<uint32_t>(result);
+                id = result;
             }
         }
         Ark_FormCallbackInfo parameter = {
-            .id = Converter::ArkValue<Ark_Number>(id),
+            .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString)
         };
         arkCallback.Invoke(parameter);

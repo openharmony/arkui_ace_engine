@@ -92,21 +92,19 @@ void SetTargetImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(target);
     peer->GetBaseInfo()->SetTarget(Converter::Convert<EventTarget>(*target));
 }
-Ark_Number GetTimestampImpl(Ark_BaseEvent peer)
+Ark_Int64 GetTimestampImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), -1);
     auto tstamp = std::chrono::duration_cast<std::chrono::nanoseconds>(
         peer->GetBaseInfo()->GetTimeStamp().time_since_epoch()).count();
-    LOGE("BaseEventAccessor.GetTimestampImpl returns Ark_Int32");
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(tstamp));
+    return Converter::ArkValue<Ark_Int64>(tstamp);
 }
 void SetTimestampImpl(Ark_BaseEvent peer,
-                      const Ark_Number* timestamp)
+                      Ark_Int64 timestamp)
 {
     CHECK_NULL_VOID(peer && peer->GetBaseInfo());
     CHECK_NULL_VOID(timestamp);
-    LOGE("BaseEventAccessor.SetTimestampImpl uses Ark_Number");
-    int64_t value = Converter::Convert<int32_t>(*timestamp);
+    int64_t value = Converter::Convert<int64_t>(timestamp);
     std::chrono::high_resolution_clock::duration duration = std::chrono::nanoseconds(value);
     std::chrono::time_point<std::chrono::high_resolution_clock> time_point(duration);
     peer->GetBaseInfo()->SetTimeStamp(time_point);
@@ -126,7 +124,7 @@ void SetSourceImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceDevice(*value);
     }
 }
-Ark_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisHorizontalImpl does nothing");
     return {};
@@ -136,7 +134,7 @@ void SetAxisHorizontalImpl(Ark_BaseEvent peer,
 {
     LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
 }
-Ark_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
+Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
     LOGE("BaseEventAccessor.GetAxisVerticalImpl does nothing");
     return {};
@@ -199,10 +197,14 @@ void SetSourceToolImpl(Ark_BaseEvent peer,
         peer->GetBaseInfo()->SetSourceTool(*value);
     }
 }
-Ark_Number GetDeviceIdImpl(Ark_BaseEvent peer)
+Opt_Number GetDeviceIdImpl(Ark_BaseEvent peer)
 {
-    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), DefaultValueArkNumber);
-    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId()));
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer && peer->GetBaseInfo(), invalid);
+    // GetDeviceId returns int64_t, but it is int32_t in MMI
+    // Need to change return type if int64_t is ever required
+    int32_t value = static_cast<int32_t>(peer->GetBaseInfo()->GetDeviceId());
+    return Converter::ArkValue<Opt_Number>(value);
 }
 void SetDeviceIdImpl(Ark_BaseEvent peer,
                      const Ark_Number* deviceId)
@@ -211,7 +213,7 @@ void SetDeviceIdImpl(Ark_BaseEvent peer,
     CHECK_NULL_VOID(deviceId);
     peer->GetBaseInfo()->SetDeviceId(Converter::Convert<int>(*deviceId));
 }
-Ark_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
+Opt_Number GetTargetDisplayIdImpl(Ark_BaseEvent peer)
 {
     return {};
 }

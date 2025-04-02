@@ -483,12 +483,12 @@ void OnCopyImpl(Ark_NativePointer node,
     RichEditorModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         Ark_EditMenuOptions value)
+                         const Ark_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
     //RichEditorModelNG::SetEditMenuOptions(frameNode, convValue);
     LOGW("RichEditor modifier :: EditMenuOptionsImpl() needs onCreateMenuCallback, onMenuItemClick input");
 }

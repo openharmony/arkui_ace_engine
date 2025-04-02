@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace EditMenuOptionsAccessor {
-void DestroyPeerImpl(Ark_EditMenuOptions peer)
+namespace VisualEffectAccessor {
+void DestroyPeerImpl(Ark_VisualEffect peer)
 {
 }
-Ark_EditMenuOptions CtorImpl()
+Ark_VisualEffect CtorImpl()
 {
     return nullptr;
 }
@@ -30,28 +30,24 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Array_TextMenuItem OnCreateMenuImpl(Ark_EditMenuOptions peer,
-                                    const Array_TextMenuItem* menuItems)
+Ark_VisualEffect BackgroundColorBlenderImpl(Ark_VisualEffect peer,
+                                            const Ark_BrightnessBlender* blender)
 {
     return {};
 }
-Ark_Boolean OnMenuItemClickImpl(Ark_EditMenuOptions peer,
-                                const Ark_TextMenuItem* menuItem,
-                                const Ark_TextRange* range)
+} // VisualEffectAccessor
+const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor()
 {
-    return {};
-}
-} // EditMenuOptionsAccessor
-const GENERATED_ArkUIEditMenuOptionsAccessor* GetEditMenuOptionsAccessor()
-{
-    static const GENERATED_ArkUIEditMenuOptionsAccessor EditMenuOptionsAccessorImpl {
-        EditMenuOptionsAccessor::DestroyPeerImpl,
-        EditMenuOptionsAccessor::CtorImpl,
-        EditMenuOptionsAccessor::GetFinalizerImpl,
-        EditMenuOptionsAccessor::OnCreateMenuImpl,
-        EditMenuOptionsAccessor::OnMenuItemClickImpl,
+    static const GENERATED_ArkUIVisualEffectAccessor VisualEffectAccessorImpl {
+        VisualEffectAccessor::DestroyPeerImpl,
+        VisualEffectAccessor::CtorImpl,
+        VisualEffectAccessor::GetFinalizerImpl,
+        VisualEffectAccessor::BackgroundColorBlenderImpl,
     };
-    return &EditMenuOptionsAccessorImpl;
+    return &VisualEffectAccessorImpl;
 }
 
+struct VisualEffectPeer {
+    virtual ~VisualEffectPeer() = default;
+};
 }

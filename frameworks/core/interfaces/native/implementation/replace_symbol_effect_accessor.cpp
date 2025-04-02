@@ -38,22 +38,16 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
+Opt_EffectScope GetScopeImpl(Ark_ReplaceSymbolEffect peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_EFFECT_SCOPE_LAYER);
-    CHECK_NULL_RETURN(peer->scope, ARK_EFFECT_SCOPE_LAYER);
-    switch (peer->scope.value()) {
-        case OHOS::Ace::ScopeType::LAYER:
-            return ARK_EFFECT_SCOPE_LAYER;
-        case OHOS::Ace::ScopeType::WHOLE:
-            return ARK_EFFECT_SCOPE_WHOLE;
-        default:
-            return ARK_EFFECT_SCOPE_LAYER;
-    }
+    auto invalid = Converter::ArkValue<Opt_EffectScope>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ReplaceSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
     peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
 } // ReplaceSymbolEffectAccessor
@@ -68,5 +62,4 @@ const GENERATED_ArkUIReplaceSymbolEffectAccessor* GetReplaceSymbolEffectAccessor
     };
     return &ReplaceSymbolEffectAccessorImpl;
 }
-
 }

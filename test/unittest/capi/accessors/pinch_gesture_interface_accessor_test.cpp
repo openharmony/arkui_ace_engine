@@ -72,12 +72,17 @@ public:
 };
 
 class PinchGestureInterfaceAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIPinchGestureInterfaceAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUIPinchGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getPinchGestureInterfaceAccessor, PinchGestureInterfacePeer> {
 public:
+    void *CreatePeerInstance() override
+    {
+        auto value = Converter::ArkValue<Opt_Literal_Number_distance_fingers>();
+        return accessor_->ctor(&value);
+    }
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         gesture_ = AceType::MakeRefPtr<MockRotationGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
         peer_->gesture = gesture_;
     }

@@ -91,7 +91,9 @@ namespace OHOS::Ace::NG::Converter {
     // Forward declaration for use in custom AssignArkValue() functions
     template<typename To, typename From = Ark_Empty>
     To ArkValue(const From& src = Ark_Empty(), class ConvContext *ctx = nullptr);
-    template<typename To, typename From, std::enable_if_t<!std::is_trivially_copyable_v<From> &&
+    template<typename To, typename From, std::enable_if_t<(IsArray<To>::value || std::is_same_v<To, Ark_String> ||
+        (IsOptional<To>::value && !std::is_same_v<From, Ark_Empty> &&
+            (IsArray<decltype(To().value)>::value || std::is_same_v<decltype(To().value), Ark_String>))) &&
         (std::is_rvalue_reference_v<From> || !std::is_reference_v<From>), bool> = false>
     To ArkValue(From&& src) = delete; // Constructing Ark_ values from r-value is prohibited
 
@@ -160,6 +162,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // SORTED_SECTION
     void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAction& src);
+    void AssignArkValue(Ark_Affinity& dst, const TextAffinity& src);
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
@@ -249,9 +252,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
-    void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
-    void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
+    void AssignArkValue(Ark_Position& dst, const OffsetF& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);
     void AssignArkValue(Ark_RectResult& dst, const OHOS::Ace::Rect& src);
@@ -300,15 +302,15 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
+    void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
     void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src);
-    void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextOverflow& dst, const TextOverflow& src);
-    void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src);
+    void AssignArkValue(Ark_TextRange& dst, const TextRange& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);

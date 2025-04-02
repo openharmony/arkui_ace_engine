@@ -311,15 +311,15 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sence. Not implemented...");
+    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sense. Not implemented...");
 }
-Ark_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Ark_Number>(info->GetRawDeltaX());
+    return Converter::ArkValue<Opt_Number>(info->GetRawDeltaX());
 }
 void SetRawDeltaXImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaX)
@@ -330,13 +330,13 @@ void SetRawDeltaXImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(info);
     info->SetRawDeltaX(Converter::Convert<float>(*rawDeltaX));
 }
-Ark_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
 {
-    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    const auto errValue = Converter::ArkValue<Opt_Number>();
     CHECK_NULL_RETURN(peer, errValue);
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, errValue);
-    return Converter::ArkValue<Ark_Number>(info->GetRawDeltaY());
+    return Converter::ArkValue<Opt_Number>(info->GetRawDeltaY());
 }
 void SetRawDeltaYImpl(Ark_MouseEvent peer,
                       const Ark_Number* rawDeltaY)
@@ -347,12 +347,13 @@ void SetRawDeltaYImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(info);
     info->SetRawDeltaY(Converter::Convert<float>(*rawDeltaY));
 }
-Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
+Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    auto invalid = Converter::ArkValue<Opt_Array_MouseButton>();
+    CHECK_NULL_RETURN(peer, invalid);
     auto info = peer->GetEventInfo();
-    CHECK_NULL_RETURN(info, {});
-    return Converter::ArkValue<Array_MouseButton>(info->GetPressedButtons(), Converter::FC);
+    CHECK_NULL_RETURN(info, invalid);
+    return Converter::ArkValue<Opt_Array_MouseButton>(info->GetPressedButtons(), Converter::FC);
 }
 void SetPressedButtonsImpl(Ark_MouseEvent peer,
                            const Array_MouseButton* pressedButtons)

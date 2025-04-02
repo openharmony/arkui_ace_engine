@@ -62,16 +62,14 @@ HWTEST_F(RenderingContextSettingsAccessorTest, ctorRenderingContextSettingsPeerT
     auto optValue = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     auto peer = CreatePeerInstanceT(&optValue);
     auto result = peer->antialias;
-    ASSERT_NE(result, std::nullopt);
     finalyzer_(peer);
-    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE) <<
+    EXPECT_EQ(result, std::nullopt) <<
         "Input value is: empty, method: GetRepeat";
 
     peer = CreatePeerInstanceT(nullptr);
     result = peer->antialias;
     finalyzer_(peer);
-    ASSERT_NE(result, std::nullopt);
-    EXPECT_EQ(result, ANTIALIAS_DEFAULT_VALUE) <<
+    EXPECT_EQ(result, std::nullopt) <<
         "Input value is: nullptr, method: GetRepeat";
 }
 
@@ -84,7 +82,7 @@ HWTEST_F(RenderingContextSettingsAccessorTest, getAntialiasTest, TestSize.Level1
 {
     for (const auto& [input, expected, value] : AccessorTestFixtures::testFixtureBooleanValues) {
         peer_->antialias = value;
-        auto result = accessor_->getAntialias(peer_);
+        auto result = Converter::GetOpt(accessor_->getAntialias(peer_));
         EXPECT_EQ(result, expected) <<
             "Input value is: " << input << ", method: GetRepeat";
     }

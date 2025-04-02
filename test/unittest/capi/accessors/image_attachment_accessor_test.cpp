@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
+#include <gmock/gmock.h>
+
 #include "accessor_test_base.h"
 #include "accessor_test_fixtures.h"
-#include "gmock/gmock.h"
-#include "node_api.h"
 
 #include "core/interfaces/native/implementation/color_filter_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
@@ -58,8 +58,8 @@ RefPtr<PixelMap> ImageAttachmentAccessorTest::CreatePixelMap(std::string& src)
 }
 
 namespace {
-const CalcLength TEST_CALC_LENGHT(123.0_vp);
-const auto TEST_DIMENSION = TEST_CALC_LENGHT.GetDimension();
+const CalcLength TEST_CALC_LENGTH(123.0_vp);
+const auto TEST_DIMENSION = TEST_CALC_LENGTH.GetDimension();
 
 inline const std::vector<float> EMPTY_VECTOR = {};
 inline std::vector<float> INVALID_MATRIX_LESS = { 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 };
@@ -77,19 +77,19 @@ inline ArkArrayHolder<Array_Number> VALID_HOLDER_1(VALID_MATRIX_1);
 inline ArkArrayHolder<Array_Number> VALID_HOLDER_2(VALID_MATRIX);
 inline ArkArrayHolder<Array_Number> DEFAULT_VALUE_MATRIX(INVALID_MATRIX_MORE);
 
-const std::vector<std::tuple<std::string, Array_Number, std::vector<float>>> floatMatrixTest {
-    { "EMPTY_VECTOR", ArkValue<Array_Number>(EMPTY_HOLDER.ArkValue()), EMPTY_VECTOR },
+const std::vector<std::tuple<std::string, Array_Number, std::optional<std::vector<float>>>> floatMatrixTest {
+    { "EMPTY_VECTOR", ArkValue<Array_Number>(EMPTY_HOLDER.ArkValue()), std::nullopt },
     { "VALID_HOLDER_0", ArkValue<Array_Number>(VALID_HOLDER_0.ArkValue()), VALID_MATRIX_0 },
-    { "INVALID_HOLDER_0", ArkValue<Array_Number>(INVALID_HOLDER_0.ArkValue()), EMPTY_VECTOR },
+    { "INVALID_HOLDER_0", ArkValue<Array_Number>(INVALID_HOLDER_0.ArkValue()), std::nullopt },
     { "VALID_HOLDER_1", ArkValue<Array_Number>(VALID_HOLDER_1.ArkValue()), VALID_MATRIX_1 },
-    { "INVALID_HOLDER_1", ArkValue<Array_Number>(INVALID_HOLDER_1.ArkValue()), EMPTY_VECTOR },
+    { "INVALID_HOLDER_1", ArkValue<Array_Number>(INVALID_HOLDER_1.ArkValue()), std::nullopt },
     { "VALID_HOLDER_2", ArkValue<Array_Number>(VALID_HOLDER_2.ArkValue()), VALID_MATRIX }
 };
 
-const MarginProperty MARGIN_PADDING_PROPERTY = { .left = TEST_CALC_LENGHT,
-    .right = TEST_CALC_LENGHT,
-    .top = TEST_CALC_LENGHT,
-    .bottom = TEST_CALC_LENGHT };
+const MarginProperty MARGIN_PADDING_PROPERTY = { .left = TEST_CALC_LENGTH,
+    .right = TEST_CALC_LENGTH,
+    .top = TEST_CALC_LENGTH,
+    .bottom = TEST_CALC_LENGTH };
 const BorderRadiusProperty BORDER_RADIUES_PROPERTY(TEST_DIMENSION);
 
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
@@ -142,7 +142,7 @@ MATCHER_P(CompareArkColorFilterType, expected, "Compare ColorFilter and DrawingC
         [&expectedTest, &result](const Ark_ColorFilter& filter) {
             if (filter) {
                 result = filter->GetColorFilterMatrix() == expectedTest;
-            } else if (expectedTest.size() == 0) {
+            } else if (expectedTest->size() == 0) {
                 result = true;
             }
             GeneratedModifier::GetColorFilterAccessor()->destroyPeer(filter);
@@ -150,7 +150,8 @@ MATCHER_P(CompareArkColorFilterType, expected, "Compare ColorFilter and DrawingC
         [](const Ark_DrawingColorFilter& colorStrategy) {
             LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
         },
-        []() {
+        [&expectedTest, &result]() {
+            result = !expectedTest.has_value();
         });
     return result;
 }
@@ -393,7 +394,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
         };
         auto peer = accessor_->ctor(&value);
         ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        if (expected.size() > 0) {
+        if (expected) {
             ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->colorFilterMatrix);
             EXPECT_EQ(peer->imageSpan->GetImageAttribute()->colorFilterMatrix, expected);
         } else {
@@ -479,7 +480,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestValidValues, TestSize.
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        EXPECT_EQ(accessor_->getVerticalAlign(peer), test);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), test);
         accessor_->destroyPeer(peer);
     }
 }
@@ -496,7 +497,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSiz
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        EXPECT_EQ(accessor_->getVerticalAlign(peer), INVALID_ENUM_VAL<Ark_ImageSpanAlignment>);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), std::nullopt);
         accessor_->destroyPeer(peer);
     }
 }
@@ -513,7 +514,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestValidValues, TestSize.Leve
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        EXPECT_EQ(accessor_->getObjectFit(peer), test);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), test);
         accessor_->destroyPeer(peer);
     }
 }
@@ -530,7 +531,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        EXPECT_EQ(accessor_->getObjectFit(peer), INVALID_ENUM_VAL<Ark_ImageFit>);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), std::nullopt);
         accessor_->destroyPeer(peer);
     }
 }
@@ -547,8 +548,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestOptional, TestSize.Level
         .layoutStyle = getImageLayoutStyleOptional(),
     };
     auto peer = accessor_->ctor(&value);
-    auto arkGetValue = accessor_->getLayoutStyle(peer);
+    auto optGetValue = Converter::GetOpt(accessor_->getLayoutStyle(peer));
     ASSERT_TRUE(expected);
+    ASSERT_TRUE(optGetValue);
+    auto arkGetValue = *optGetValue;
     EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
     EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
     EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));
@@ -567,8 +570,10 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestFilled, TestSize.Level1)
         .layoutStyle = getImageLayoutStyleFilled(),
     };
     auto peer = accessor_->ctor(&value);
-    auto arkGetValue = accessor_->getLayoutStyle(peer);
+    auto optGetValue = Converter::GetOpt(accessor_->getLayoutStyle(peer));
     ASSERT_TRUE(expected);
+    ASSERT_TRUE(optGetValue);
+    auto arkGetValue = *optGetValue;
     EXPECT_THAT(arkGetValue.margin, CompareOptMarginsPaddings(expected->margin));
     EXPECT_THAT(arkGetValue.padding, CompareOptMarginsPaddings(expected->padding));
     EXPECT_THAT(arkGetValue.borderRadius, CompareOptBorderRadius(expected->borderRadius));

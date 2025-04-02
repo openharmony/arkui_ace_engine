@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_SwipeGestureInterface peer)
 {
     delete peer;
 }
-Ark_SwipeGestureInterface CtorImpl()
+Ark_SwipeGestureInterface CtorImpl(const Opt_Literal_Number_fingers_speed_SwipeDirection_direction* value)
 {
     int32_t fingersNum = DEFAULT_SLIDE_FINGER;
     double speedNum = DEFAULT_SLIDE_SPEED;

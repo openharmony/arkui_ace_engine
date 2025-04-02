@@ -366,7 +366,7 @@ public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
-        renderingModel_ = AceType::MakeRefPtr<MockCanvasRenderingContext2DModel>();
+        renderingModel_ = AceType::MakeRefPtr<NiceMock<MockCanvasRenderingContext2DModel>>();
         reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer_)->SetRenderingContext2DModel(
             renderingModel_);
     }
@@ -1156,7 +1156,7 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
     RefPtr<AceType> target;
     EXPECT_CALL(*renderingModel_, TransferFromImageBitmap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-    RefPtr<MockImageBitmapPeer> bitmap = AceType::MakeRefPtr<MockImageBitmapPeer>();
+    auto bitmap = AceType::MakeRefPtr<NiceMock<MockImageBitmapPeer>>();
     Ark_ImageBitmap arkBitmap = Referenced::RawPtr(bitmap);
     const RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     EXPECT_CALL(*bitmap, GetPixelMap()).WillOnce(Return(pixelMap));
@@ -1175,7 +1175,7 @@ HWTEST_F(CanvasRendererAccessorTest, transferFromImageBitmapTest, TestSize.Level
 {
     ASSERT_NE(accessor_->transferFromImageBitmap, nullptr);
     Ark_ImageBitmap arkBitmap;
-    auto peer = new MockImageBitmapPeer();
+    auto peer = new NiceMock<MockImageBitmapPeer>();
     arkBitmap = peer;
     for (const auto& expectedW : SIZE_TEST_PLAN) {
         for (const auto& expectedH : SIZE_TEST_PLAN) {
@@ -1934,7 +1934,7 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createPattern, nullptr);
     Ark_ImageBitmap arkBitmap;
-    auto bitmapPeer = new MockImageBitmapPeer();
+    auto bitmapPeer = new NiceMock<MockImageBitmapPeer>();
     arkBitmap = bitmapPeer;
     auto repetition = Converter::ArkValue<Opt_String>(REPEAT_STRING);
     for (const auto& actualW : NUMBER_TEST_PLAN) {

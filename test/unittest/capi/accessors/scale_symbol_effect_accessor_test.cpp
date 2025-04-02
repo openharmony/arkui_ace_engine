@@ -35,13 +35,8 @@ public:
         Opt_EffectDirection direction = {};
         return accessor_->ctor(&scope, &direction);
     }
-    void DestroyPeer(ScaleSymbolEffectPeer* peer)
-    {
-        finalyzer_(peer);
-        peer = nullptr;
-    }
 };
- 
+
 /**
  * @tc.name: scopeTest
  * @tc.desc:
@@ -55,7 +50,7 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, scopeTest, TestSize.Level1)
     auto aceScope = peer_->scope.value();
     ASSERT_EQ(aceScope, OHOS::Ace::ScopeType::WHOLE);
 
-    Ark_EffectScope arkScope = accessor_->getScope(peer_);
+    auto arkScope = Converter::GetOpt(accessor_->getScope(peer_));
     ASSERT_EQ(arkScope, ARK_EFFECT_SCOPE_WHOLE);
 }
 
@@ -72,9 +67,8 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, directionTest, TestSize.Level1)
     auto aceDirection = peer_->direction.value();
     ASSERT_EQ(aceDirection, OHOS::Ace::CommonSubType::UP);
 
-    Ark_EffectDirection arkDirection = accessor_->getDirection(peer_);
+    auto arkDirection = Converter::GetOpt(accessor_->getDirection(peer_));
     ASSERT_EQ(arkDirection, ARK_EFFECT_DIRECTION_UP);
 }
 
 } // namespace OHOS::Ace::NG
- 

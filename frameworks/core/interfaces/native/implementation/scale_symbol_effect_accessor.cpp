@@ -43,40 +43,28 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
+Opt_EffectScope GetScopeImpl(Ark_ScaleSymbolEffect peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_EFFECT_SCOPE_LAYER);
-    CHECK_NULL_RETURN(peer->scope, ARK_EFFECT_SCOPE_LAYER);
-    switch (peer->scope.value()) {
-        case OHOS::Ace::ScopeType::LAYER:
-            return ARK_EFFECT_SCOPE_LAYER;
-        case OHOS::Ace::ScopeType::WHOLE:
-            return ARK_EFFECT_SCOPE_WHOLE;
-        default:
-            return ARK_EFFECT_SCOPE_LAYER;
-    }
+    auto invalid = Converter::ArkValue<Opt_EffectScope>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectScope>(peer->scope);
 }
 void SetScopeImpl(Ark_ScaleSymbolEffect peer,
                   Ark_EffectScope scope)
 {
+    CHECK_NULL_VOID(peer);
     peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(scope);
 }
-Ark_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
+Opt_EffectDirection GetDirectionImpl(Ark_ScaleSymbolEffect peer)
 {
-    CHECK_NULL_RETURN(peer, ARK_EFFECT_DIRECTION_DOWN);
-    CHECK_NULL_RETURN(peer->direction, ARK_EFFECT_DIRECTION_DOWN);
-    switch (peer->direction.value()) {
-        case OHOS::Ace::CommonSubType::UP:
-            return ARK_EFFECT_DIRECTION_UP;
-        case OHOS::Ace::CommonSubType::DOWN:
-            return ARK_EFFECT_DIRECTION_DOWN;
-        default:
-            return ARK_EFFECT_DIRECTION_DOWN;
-    }
+    auto invalid = Converter::ArkValue<Opt_EffectDirection>();
+    CHECK_NULL_RETURN(peer, invalid);
+    return Converter::ArkValue<Opt_EffectDirection>(peer->direction);
 }
 void SetDirectionImpl(Ark_ScaleSymbolEffect peer,
                       Ark_EffectDirection direction)
 {
+    CHECK_NULL_VOID(peer);
     peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(direction);
 }
 } // ScaleSymbolEffectAccessor
@@ -93,5 +81,4 @@ const GENERATED_ArkUIScaleSymbolEffectAccessor* GetScaleSymbolEffectAccessor()
     };
     return &ScaleSymbolEffectAccessorImpl;
 }
-
 }

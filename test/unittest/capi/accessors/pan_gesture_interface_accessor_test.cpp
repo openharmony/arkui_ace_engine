@@ -78,12 +78,17 @@ public:
 };
 
 class PanGestureIntrfaceAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIPanGestureInterfaceAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUIPanGestureInterfaceAccessor,
         &GENERATED_ArkUIAccessors::getPanGestureInterfaceAccessor, PanGestureInterfacePeer> {
 public:
+    void *CreatePeerInstance() override
+    {
+        auto value = Converter::ArkValue<Opt_Type_PanGestureInterface_value>();
+        return accessor_->ctor(&value);
+    }
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         peer_->gesture =
             AceType::MakeRefPtr<MockPanGesture>(DEFAULT_FINGERS, DEFAULT_PAN_DIRECTION, DEFAULT_DISTANCE);
     }

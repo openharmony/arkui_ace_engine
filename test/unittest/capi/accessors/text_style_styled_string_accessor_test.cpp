@@ -30,7 +30,7 @@ const Ark_Color g_fontColor = ARK_COLOR_BLUE;
 const std::string g_fontFamily = "Arial";
 const Dimension g_fontSize = 55._px;
 const std::string g_fontWeight = "200";
-const Ace::FontStyle g_fontSyle = Ace::FontStyle::ITALIC;
+const Ace::FontStyle g_fontStyle = Ace::FontStyle::ITALIC;
 } // namespace
 
 class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyle_styled_stringAccessor,
@@ -52,7 +52,7 @@ public:
             .fontSize = Converter::ArkValue<Opt_LengthMetrics>(g_fontSize),
             .fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(
                 g_fontWeight, Converter::FC),
-            .fontStyle = Converter::ArkValue<Opt_FontStyle>(g_fontSyle)
+            .fontStyle = Converter::ArkValue<Opt_FontStyle>(g_fontStyle)
         };
         Opt_TextStyleInterface optionsOpt = Converter::ArkValue<Opt_TextStyleInterface>(options);
         return accessor_->ctor(&optionsOpt);
@@ -71,13 +71,10 @@ HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
 
     // create new peer
     peer_ = accessor_->ctor(nullptr);
-    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getFontFamily(peer_)), "");
-    EXPECT_NEAR(Converter::Convert<float>(accessor_->getFontSize(peer_)), 0, FLT_EPSILON);
-    EXPECT_EQ(static_cast<Ace::FontWeight>(Converter::Convert<int32_t>(accessor_->getFontWeight(peer_))),
-        Ace::FontWeight::W100);
-    std::optional<Ace::FontStyle> fontStyleOpt = Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_));
-    ASSERT_TRUE(fontStyleOpt.has_value());
-    EXPECT_EQ(fontStyleOpt.value(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(Converter::OptConvert<std::string>(accessor_->getFontFamily(peer_)), std::nullopt);
+    EXPECT_EQ(Converter::OptConvert<float>(accessor_->getFontSize(peer_)), std::nullopt);
+    EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getFontWeight(peer_)), std::nullopt);
+    EXPECT_EQ(Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_)), std::nullopt);
 }
 
 /*
@@ -88,7 +85,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, emptyOptionsTest, TestSize.Level1)
 HWTEST_F(TextStyleStyledStringAccessorTest, getFontFamilyTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontFamily, nullptr);
-    EXPECT_EQ(Converter::Convert<std::string>(accessor_->getFontFamily(peer_)), g_fontFamily);
+    EXPECT_EQ(Converter::OptConvert<std::string>(accessor_->getFontFamily(peer_)), g_fontFamily);
 }
 
 /*
@@ -99,7 +96,9 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontFamilyTest, TestSize.Level1)
 HWTEST_F(TextStyleStyledStringAccessorTest, getFontSizeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontSize, nullptr);
-    EXPECT_NEAR(Converter::Convert<float>(accessor_->getFontSize(peer_)), g_fontSize.ConvertToPx(), FLT_EPSILON);
+    auto fontSize = Converter::OptConvert<float>(accessor_->getFontSize(peer_));
+    ASSERT_TRUE(fontSize);
+    EXPECT_FLOAT_EQ(*fontSize, g_fontSize.ConvertToPx());
 }
 
 /*
@@ -110,8 +109,8 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontSizeTest, TestSize.Level1)
 HWTEST_F(TextStyleStyledStringAccessorTest, getFontWeightTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontWeight, nullptr);
-    EXPECT_EQ(static_cast<Ace::FontWeight>(Converter::Convert<int32_t>(accessor_->getFontWeight(peer_))),
-        Ace::FontWeight::W200);
+    EXPECT_EQ(Converter::OptConvert<int32_t>(accessor_->getFontWeight(peer_)),
+        static_cast<int32_t>(Ace::FontWeight::W200));
 }
 
 /*
@@ -124,7 +123,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
     ASSERT_NE(accessor_->getFontStyle, nullptr);
     std::optional<Ace::FontStyle> fontStyleOpt = Converter::OptConvert<Ace::FontStyle>(accessor_->getFontStyle(peer_));
     ASSERT_TRUE(fontStyleOpt.has_value());
-    EXPECT_EQ(fontStyleOpt.value(), g_fontSyle);
+    EXPECT_EQ(fontStyleOpt.value(), g_fontStyle);
 }
 
 /*
@@ -135,7 +134,7 @@ HWTEST_F(TextStyleStyledStringAccessorTest, getFontStyleTest, TestSize.Level1)
 HWTEST_F(TextStyleStyledStringAccessorTest, getFontColorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontColor, nullptr);
-    Ark_ResourceColor arkResColor = accessor_->getFontColor(peer_);
+    auto arkResColor = accessor_->getFontColor(peer_);
     auto colorOpt = Converter::OptConvert<Color>(arkResColor);
     auto expectedColor = Converter::OptConvert<Color>(g_fontColor);
     ASSERT_TRUE(colorOpt.has_value());

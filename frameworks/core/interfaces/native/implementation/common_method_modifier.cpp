@@ -2117,39 +2117,39 @@ void ForegroundEffectImpl(Ark_NativePointer node,
     ViewAbstract::SetForegroundEffect(frameNode, convValue);
 }
 void VisualEffectImpl(Ark_NativePointer node,
-                      const Ark_VisualEffect* value)
+                      Ark_VisualEffect value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetVisualEffect(frameNode, convValue);
 }
 void BackgroundFilterImpl(Ark_NativePointer node,
-                          const Ark_Filter* value)
+                          Ark_Filter value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetBackgroundFilter(frameNode, convValue);
 }
 void ForegroundFilterImpl(Ark_NativePointer node,
-                          const Ark_Filter* value)
+                          Ark_Filter value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetForegroundFilter(frameNode, convValue);
 }
 void CompositingFilterImpl(Ark_NativePointer node,
-                           const Ark_Filter* value)
+                           Ark_Filter value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetCompositingFilter(frameNode, convValue);
 }
 void Opacity0Impl(Ark_NativePointer node,
@@ -4902,8 +4902,8 @@ void AdvancedBlendModeImpl(Ark_NativePointer node,
             blendApplyType = BlendApplyType::OFFSCREEN;
             ViewAbstract::SetBlendMode(frameNode, blendMode);
         },
-        [](const Ark_Blender& value) {
-            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_Blender is not supported yet.");
+        [](const Ark_BrightnessBlender& value) {
+            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_BrightnessBlender is not supported yet.");
         },
         []() {}
     );

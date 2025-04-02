@@ -27,7 +27,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // AbilityComponentModifier
 namespace AbilityComponentInterfaceModifier {
 void SetAbilityComponentOptionsImpl(Ark_NativePointer node,
-                                    const Ark_Literal_Want_want* value)
+                                    const Ark_Literal__want* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -23,7 +23,11 @@ void PathInfo::InvokeOnPop(const PopInfo& popInfo)
 {
     Ark_PopInfo arkPopInfo {
         .info = ::OHOS::Ace::NG::Converter::ArkValue<Ark_NavPathInfo>(popInfo.info),
-        .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_CustomObject>(popInfo.result),
+#ifdef WRONG_GEN
+        .result = ::OHOS::Ace::NG::Converter::ArkValue<Ark_Object>(popInfo.result),
+#else
+        .result = Ark_CustomObject{},
+#endif
     };
     onPop_.Invoke(arkPopInfo);
 }
@@ -757,7 +761,7 @@ bool NavigationStack::LoadDestinationByBuilder(const std::string& name, const Pa
         return false;
     }
     auto arkName = Converter::ArkValue<Ark_String>(name);
-    auto arkParam = Converter::ArkValue<Ark_CustomObject>(param);
+    auto arkParam = Converter::ArkValue<Ark_Object>(param);
     navDestBuilderFunc_.Invoke(arkName, arkParam);
     TAG_LOGE(AceLogTag::ACE_NAVIGATION, "NavigationContext::NavigationStack::LoadDestination"
         ", No way to obtain the FrameNode in result of the build func execution.");

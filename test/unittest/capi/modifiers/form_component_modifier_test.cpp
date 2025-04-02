@@ -465,7 +465,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
     static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
     auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
         std::pair<uint32_t, std::string> info;
-        info.first = Converter::Convert<uint32_t>(parameter.id);
+        info.first = Converter::Convert<int64_t>(parameter.id);
         info.second = Converter::Convert<std::string>(parameter.idString);
         formInfo = info;
     };
@@ -542,10 +542,10 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
     auto onUninstall = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-        std::pair<uint32_t, std::string> info;
-        info.first = Converter::Convert<uint32_t>(parameter.id);
+        std::pair<int64_t, std::string> info;
+        info.first = Converter::Convert<int64_t>(parameter.id);
         info.second = Converter::Convert<std::string>(parameter.idString);
         formInfo = info;
     };
@@ -612,8 +612,8 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
 {
     Ark_FormInfo initValue;
     // Initial setup
-    auto id = Converter::ArkValue<Ark_Number>(-1);
-    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+    int64_t id = -1;
+    initValue.id = Converter::ArkUnion<Ark_Union_I64_String, Ark_Int64>(id);
     initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
@@ -648,8 +648,8 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, Test
 {
     Ark_FormInfo initValue;
     // Initial setup
-    auto id = Converter::ArkValue<Ark_Number>(-1);
-    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+    int64_t id = -1;
+    initValue.id = Converter::ArkUnion<Ark_Union_I64_String, Ark_Int64>(id);
     initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);

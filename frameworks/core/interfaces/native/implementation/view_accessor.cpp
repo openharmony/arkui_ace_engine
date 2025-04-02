@@ -30,8 +30,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_CustomObject CreateImpl(Ark_View peer,
-                            const Ark_CustomObject* value)
+Ark_Object CreateImpl(Ark_View peer,
+                      const Ark_Object* value)
 {
     return {};
 }
