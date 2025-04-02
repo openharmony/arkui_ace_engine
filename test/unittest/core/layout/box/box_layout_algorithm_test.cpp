@@ -16,6 +16,8 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#define protected public
+#define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
@@ -32,6 +34,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
