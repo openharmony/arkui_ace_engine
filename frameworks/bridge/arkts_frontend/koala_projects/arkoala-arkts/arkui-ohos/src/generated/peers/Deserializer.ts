@@ -85,7 +85,7 @@ import { Callback_DatePickerResult_Void, DatePickerResult, LunarSwitchStyle, Dat
 import { Scene, Component3DAttribute, ModelType, SceneOptions } from "./../../component/component3d"
 import { AnimationRange_Number, onItemDragStart_event_type, AsyncCallback_image_PixelMap_Void, Callback_WithThemeAttribute_Void, Callback_WebResourceResponse_Void, Callback_WebKeyboardOptions_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_Tuple_Number_Number_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_TouchResult_Void, Callback_Pointer_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_Array_String_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_OffsetResult_Void, Callback_Literal_Number_offsetRemain_Void, Callback_IsolatedComponentAttribute_Void, Callback_HitTestMode_Void, Callback_GestureRecognizer_Void, Callback_GestureJudgeResult_Void, Callback_CustomBuilder_Void, Callback_ComputedBarAttribute_Void, Callback_Array_String_Void } from "./../SyntheticDeclarations"
 import { DrawingCanvas, DrawingCanvasInternal } from "./../ArkDrawingCanvasMaterialized"
-import { FrameNode, FrameNodeInternal } from "./../ArkFrameNodeMaterialized"
+import { FrameNode, FrameNodeInternal } from "../../FrameNode"
 import { BadgePosition, BadgeStyle, BadgeParamWithString, BadgeParam, BadgeParamWithNumber } from "./../../component/badge"
 import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetOffset, ActionSheetButtonOptions, ActionSheetOptions, SheetInfo } from "./../../component/actionSheet"
 import { Profiler } from "./../../component/inspector"
