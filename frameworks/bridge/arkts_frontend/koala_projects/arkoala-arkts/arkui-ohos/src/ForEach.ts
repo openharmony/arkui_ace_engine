@@ -15,9 +15,16 @@
 
 import { int32, hashCodeFromString } from "@koalaui/common"
 import { RepeatByArray } from "@koalaui/runtime"
+import { DynamicNode } from "./component/common"
+
+interface ForEachAttribute extends DynamicNode<ForEachAttribute> {
+}
 
 /** @memo */
-export function ForEach<T>(data: Array<T>,
+export function ForEach<T>(
+    /** @memo */
+    style: ((attributes: ForEachAttribute) => void) | undefined,
+    data: Array<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
