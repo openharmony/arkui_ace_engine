@@ -20,9 +20,4 @@ ace_unittest("box_layout_algorithm_test_ng") {
     "box_layout_algorithm_test.cpp",
     "old_cases/box_layout_algorithm_test_old.cpp",
   ]
-
-  cflags = [
-    "-Dprivate=public",
-    "-Dprotected=public",
-  ]
 }
