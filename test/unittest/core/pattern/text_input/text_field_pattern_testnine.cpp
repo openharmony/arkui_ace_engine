@@ -619,9 +619,13 @@ HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
     });
     GetFocus();
 
+    auto host = pattern_->GetHost();
+    auto pipeline = host->GetContext();
+    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    auto size = textFieldManager->textFieldInfoMap_.size();
     pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
     pattern_->OnModifyDone();
-    EXPECT_TRUE(pattern_->firstAutoFillContainerNode_.Upgrade());
+    EXPECT_EQ(textFieldManager->textFieldInfoMap_.size(), size + 1);
 }
 
 /**
@@ -642,11 +646,13 @@ HWTEST_F(TextFieldPatternTestNine, TriggerAvoidWhenCaretGoesDown001, TestSize.Le
     context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
     pattern_->TriggerAvoidWhenCaretGoesDown();
     EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
-
+ 
+    /* lastCarePos < 74  return 74 */
     pattern_->SetLastCaretPos(30);
     pattern_->TriggerAvoidWhenCaretGoesDown();
     EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
 
+    /* lastCarePos > 74  return lastCarePos */
     pattern_->SetLastCaretPos(123);
     pattern_->TriggerAvoidWhenCaretGoesDown();
     EXPECT_EQ(pattern_->GetLastCaretPos(), 123);
@@ -673,14 +679,12 @@ HWTEST_F(TextFieldPatternTestNine, RecordTextInputEvent001, TestSize.Level0)
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
-    auto size = Recorder::EventController::Get().cacheEvents_.size();
     pattern_->RecordTextInputEvent();
-    EXPECT_TRUE(size == Recorder::EventController::Get().cacheEvents_.size());
+    EXPECT_EQ(Recorder::EventController::Get().cacheEvents_.size(), 0);
 
     layoutProperty->UpdateTextInputType(TextInputType::DATETIME);
     Recorder::EventController::Get().hasCached_ = false;
-    auto size2 = Recorder::EventController::Get().cacheEvents_.size();
     pattern_->RecordTextInputEvent();
-    EXPECT_TRUE(size2 < Recorder::EventController::Get().cacheEvents_.size());
+    EXPECT_EQ(Recorder::EventController::Get().cacheEvents_.size(), 1);
 }
 } // namespace OHOS::Ace::NG,
