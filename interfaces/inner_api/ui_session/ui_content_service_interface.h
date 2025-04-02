@@ -51,7 +51,8 @@ public:
         GET_CURRENT_PAGE_NAME,
         SENDCOMMAND_ASYNC_EVENT,
         SENDCOMMAND_EVENT,
-        GET_VISIBLE_TREE
+        GET_VISIBLE_TREE,
+        SEND_COMMAND,
     };
 
     /**
@@ -114,6 +115,12 @@ public:
      *          13: Failure due to no nodes.
      */
     virtual int32_t SendCommandAsync(int32_t id, const std::string& command) = 0;
+
+    /**
+     * @description: define register a callback on Send keycode command occur to execute interface
+     * @return: result number
+     */
+    virtual int32_t SendCommand(const std::string command) = 0;
 
     /**
      * @description: define unregister the click event occur callback last register interface

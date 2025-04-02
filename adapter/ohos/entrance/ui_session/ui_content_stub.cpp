@@ -124,6 +124,10 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetVisibleInspectorTreeInner(data, reply, option);
             break;
         }
+        case SEND_COMMAND: {
+            SendCommandKeyCodeInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -199,6 +203,13 @@ int32_t UiContentStub::SendCommandInnerAsync(
 {
     int32_t id = data.ReadInt32();
     return SendCommandAsync(id, data.ReadString());
+}
+
+int32_t UiContentStub::SendCommandKeyCodeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string command = data.ReadString();
+    reply.WriteInt32(SendCommand(command));
+    return NO_ERROR;
 }
 
 int32_t UiContentStub::UnregisterClickEventCallbackInner(
