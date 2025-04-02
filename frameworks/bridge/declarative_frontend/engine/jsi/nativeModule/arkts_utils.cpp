@@ -1195,7 +1195,7 @@ bool FillResultForResIdNumIsNegative(const EcmaVM* vm, const Local<JSValueRef>& 
     auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
     if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::STRING)) {
         auto originStr = resourceWrapper->GetStringByName(param->ToString(vm)->ToString(vm));
-        ReplaceHolder(vm, originStr, params, 0);
+        ReplaceHolder(vm, originStr, params, 1);
         result = originStr;
     } else if (type->Uint32Value(vm) == static_cast<uint32_t>(ResourceType::PLURAL)) {
         auto countJsVal = panda::ArrayRef::GetValueAt(vm, params, 1);
