@@ -887,7 +887,7 @@ bool TextPattern::IsShowTranslate()
 bool TextPattern::IsShowSearch()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     auto host = GetHost();

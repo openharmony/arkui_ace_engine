@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG {
 WindowSceneLayoutManager* WindowSceneLayoutManager::GetInstance()
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow() || !Rosen::Session::IsScbCoreEnabled()) {
+    if (!container || !container->IsSceneBoardWindow() || !Rosen::Session::IsScbCoreEnabled()) {
         return nullptr;
     }
     static WindowSceneLayoutManager* instance = nullptr;

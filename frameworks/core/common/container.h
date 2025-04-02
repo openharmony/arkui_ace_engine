@@ -532,7 +532,7 @@ public:
         return false;
     }
 
-    virtual bool IsScenceBoardWindow()
+    virtual bool IsSceneBoardWindow()
     {
         return false;
     }

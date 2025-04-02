@@ -127,8 +127,8 @@ void StageManager::PageChangeCloseKeyboard()
         if (!container) {
             return;
         }
-        if (!container->IsScenceBoardWindow()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
+        if (!container->IsSceneBoardWindow()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
             InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }

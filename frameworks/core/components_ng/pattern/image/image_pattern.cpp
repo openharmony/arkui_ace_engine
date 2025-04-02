@@ -2100,9 +2100,9 @@ void ImagePattern::InitDefaultValue()
         interpolationDefault_ = ImageInterpolation::LOW;
     }
     auto container = Container::Current();
-    // If the default value is set to false, the ScenceBoard memory increases.
-    // Therefore the default value is different in the ScenceBoard.
-    if (container && container->IsScenceBoardWindow()) {
+    // If the default value is set to false, the SceneBoard memory increases.
+    // Therefore the default value is different in the SceneBoard.
+    if (container && container->IsSceneBoardWindow()) {
         autoResizeDefault_ = true;
         interpolationDefault_ = ImageInterpolation::NONE;
     }

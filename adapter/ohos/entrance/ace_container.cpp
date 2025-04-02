@@ -885,7 +885,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -964,7 +964,7 @@ void AceContainer::UnActiveWindow(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowActivate(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -3343,7 +3343,7 @@ void AceContainer::GetImageDataFromAshmem(
     }
 }
 
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;

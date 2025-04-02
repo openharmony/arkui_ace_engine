@@ -626,7 +626,7 @@ void DragAnimationHelper::MountGatherNode(const RefPtr<OverlayManager>& overlayM
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Mount gather node");
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = overlayManager->FindWindowScene(frameNode);
         overlayManager->MountGatherNodeToWindowScene(gatherNode, gatherNodeInfo, windowScene);
     } else {
@@ -1110,7 +1110,7 @@ void DragAnimationHelper::MountPixelMap(const RefPtr<OverlayManager>& manager,
     CHECK_NULL_VOID(hub);
     hub->SetPixelMap(gestureHub->GetPixelMap());
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto frameNode = gestureHub->GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto windowScene = manager->FindWindowScene(frameNode);

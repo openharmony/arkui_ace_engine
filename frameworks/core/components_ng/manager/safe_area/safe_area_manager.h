@@ -175,11 +175,6 @@ public:
 
     float GetKeyboardOffset(bool withoutProcess = false) const;
 
-    float GetKeyboardOffsetDirectly() const
-    {
-        return keyboardOffset_;
-    }
-
     void SetKeyboardInfo(float height);
 
     int32_t GetKeyboardOrientation() const

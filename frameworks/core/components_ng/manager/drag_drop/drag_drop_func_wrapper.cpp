@@ -1466,7 +1466,7 @@ RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
         SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
     auto container = Container::GetContainer(mainContainerId);
     CHECK_NULL_RETURN(container, dragDropManager);
-    if (!container->IsScenceBoardWindow()) {
+    if (!container->IsSceneBoardWindow()) {
         return dragDropManager;
     }
     CHECK_NULL_RETURN(subWindow, dragDropManager);

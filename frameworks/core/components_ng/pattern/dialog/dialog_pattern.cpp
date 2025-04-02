@@ -1758,7 +1758,7 @@ void DialogPattern::DumpBoolProperty()
     DumpLog::GetInstance().AddDesc("IsMenu: " + GetBoolStr(dialogProperties_.isMenu));
     DumpLog::GetInstance().AddDesc("IsMask: " + GetBoolStr(dialogProperties_.isMask));
     DumpLog::GetInstance().AddDesc("IsModal: " + GetBoolStr(dialogProperties_.isModal));
-    DumpLog::GetInstance().AddDesc("IsScenceBoardDialog: " + GetBoolStr(dialogProperties_.isScenceBoardDialog));
+    DumpLog::GetInstance().AddDesc("IsSceneBoardDialog: " + GetBoolStr(dialogProperties_.isSceneBoardDialog));
     DumpLog::GetInstance().AddDesc("IsSysBlurStyle: " + GetBoolStr(dialogProperties_.isSysBlurStyle));
     DumpLog::GetInstance().AddDesc("IsShowInSubWindow: " + GetBoolStr(dialogProperties_.isShowInSubWindow));
 }
@@ -1944,7 +1944,7 @@ void DialogPattern::DumpBoolProperty(std::unique_ptr<JsonValue>& json)
     json->Put("IsMenu", GetBoolStr(dialogProperties_.isMenu).c_str());
     json->Put("IsMask", GetBoolStr(dialogProperties_.isMask).c_str());
     json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
-    json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());
     json->Put("IsShowInSubWindow", GetBoolStr(dialogProperties_.isShowInSubWindow).c_str());
 }
@@ -2152,8 +2152,8 @@ void DialogPattern::DumpSimplifyBoolProperty(std::unique_ptr<JsonValue>& json)
     if (dialogProperties_.isModal) {
         json->Put("IsModal", GetBoolStr(dialogProperties_.isModal).c_str());
     }
-    if (dialogProperties_.isScenceBoardDialog) {
-        json->Put("IsScenceBoardDialog", GetBoolStr(dialogProperties_.isScenceBoardDialog).c_str());
+    if (dialogProperties_.isSceneBoardDialog) {
+        json->Put("IsSceneBoardDialog", GetBoolStr(dialogProperties_.isSceneBoardDialog).c_str());
     }
     if (dialogProperties_.isSysBlurStyle) {
         json->Put("IsSysBlurStyle", GetBoolStr(dialogProperties_.isSysBlurStyle).c_str());

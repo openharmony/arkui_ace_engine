@@ -639,7 +639,7 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
     auto isNonUIExtensionSubwindow = isShowInSubWindow_ && !isUIExtensionSubWindow_;
-    if ((!isModal_ || isNonUIExtensionSubwindow) && !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+    if ((!isModal_ || isNonUIExtensionSubwindow) && !dialogProp->GetIsSceneBoardDialog().value_or(false)) {
         ProcessMaskRect(
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
@@ -702,7 +702,7 @@ void DialogLayoutAlgorithm::SetSubWindowHotarea(
 
     std::vector<Rect> rects;
     Rect rect;
-    if (!dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+    if (!dialogProp->GetIsSceneBoardDialog().value_or(false)) {
         rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
     } else {
         rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());

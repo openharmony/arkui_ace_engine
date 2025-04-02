@@ -253,7 +253,7 @@ HWTEST_F(TextFieldPatternTestNine, IsShowAIWrite001, TestSize.Level0)
     auto ret = pattern_->IsShowAIWrite();
     EXPECT_FALSE(ret);
     auto container = MockContainer::Current();
-    container->SetIsScenceBoardWindow(false);
+    container->SetIsSceneBoardWindow(false);
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateCopyOptions(CopyOptions::None);

@@ -1824,7 +1824,7 @@ void TextFieldPattern::HandleOnPaste()
 bool TextFieldPattern::IsShowTranslate()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
 
@@ -1838,7 +1838,7 @@ bool TextFieldPattern::IsShowTranslate()
 bool TextFieldPattern::IsShowSearch()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     auto host = GetHost();
@@ -9758,7 +9758,7 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 bool TextFieldPattern::IsShowAIWrite()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
 

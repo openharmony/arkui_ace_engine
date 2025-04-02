@@ -207,8 +207,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
     }
 
     auto isCrossWindow = parentContainer->IsCrossAxisWindow();
-    auto isScenceBoard = parentContainer->IsScenceBoardWindow();
-    if (isCrossWindow || isScenceBoard) {
+    auto isSceneBoard = parentContainer->IsSceneBoardWindow();
+    if (isCrossWindow || isSceneBoard) {
         auto display = Rosen::DisplayManager::GetInstance().GetVisibleAreaDisplayInfoById(DEFAULT_DISPLAY_ID);
         if (!display) {
             TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "failed to GetVisibleAreaDisplayInfoById");
@@ -219,8 +219,8 @@ Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
 
     auto parentWindowId = parentContainer->GetWindowId();
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
-        "parentWindow windowId: %{public}d isScenceBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
-        parentWindowId, isScenceBoard, isCrossWindow, size.ToString().c_str());
+        "parentWindow windowId: %{public}d isSceneBoard: %{public}d isCrossWindow: %{public}d displaySize: %{public}s",
+        parentWindowId, isSceneBoard, isCrossWindow, size.ToString().c_str());
     return size;
 }
 
@@ -250,7 +250,7 @@ void SubwindowOhos::InitContainer()
             auto mainWindowId = isSelectOverlay ? parentWindowId : GetMainWindowId();
             SetToastWindowOption(parentContainer, windowOption, toastWindowType, mainWindowId);
             windowTag = isSelectOverlay ? "TEXT_MENU_" : "TOAST_TOPMOST_";
-        } else if (parentContainer->IsScenceBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
+        } else if (parentContainer->IsSceneBoardWindow() || windowType == Rosen::WindowType::WINDOW_TYPE_DESKTOP) {
             windowOption->SetWindowType(Rosen::WindowType::WINDOW_TYPE_SYSTEM_FLOAT);
         } else if (windowType == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION) {
             auto hostWindowId = parentPipeline->GetFocusWindowId();
@@ -793,7 +793,7 @@ void SubwindowOhos::HideWindow()
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
         return;
     }
-    if (parentContainer->IsScenceBoardWindow()) {
+    if (parentContainer->IsSceneBoardWindow()) {
         window_->SetTouchable(true);
     }
 
@@ -1568,7 +1568,7 @@ void SubwindowOhos::ShowToastForAbility(const NG::ToastInfo& toastInfo, std::fun
     ContainerScope scope(childContainerId_);
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
     CHECK_NULL_VOID(parentContainer);
-    if (parentContainer->IsScenceBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
+    if (parentContainer->IsSceneBoardWindow() || toastInfo.showMode == NG::ToastShowMode::TOP_MOST ||
         toastInfo.showMode == NG::ToastShowMode::SYSTEM_TOP_MOST) {
         ResizeWindow();
         // Recover current subwindow in subwindow manager to ensure popup/menu can close the right subwindow

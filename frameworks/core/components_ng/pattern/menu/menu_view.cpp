@@ -837,7 +837,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
         }
         // set filter
-        if (container->IsScenceBoardWindow()) {
+        if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
             manager->ShowFilterAnimation(columnNode);

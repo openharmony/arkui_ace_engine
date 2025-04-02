@@ -654,7 +654,7 @@ HWTEST_F(TextFieldPatternTestEight, IsShowTranslate001, TestSize.Level0)
     GetFocus();
 
     auto container = MockContainer::Current();
-    container->SetIsScenceBoardWindow(true);
+    container->SetIsSceneBoardWindow(true);
     pattern_->IsShowTranslate();
     auto textFieldTheme = pattern_->GetTheme();
     EXPECT_NE(textFieldTheme, nullptr);
@@ -673,7 +673,7 @@ HWTEST_F(TextFieldPatternTestEight, IsShowSearch001, TestSize.Level0)
     GetFocus();
 
     auto container = MockContainer::Current();
-    container->SetIsScenceBoardWindow(true);
+    container->SetIsSceneBoardWindow(true);
     pattern_->IsShowSearch();
     auto textFieldTheme = pattern_->GetTheme();
     EXPECT_NE(textFieldTheme, nullptr);

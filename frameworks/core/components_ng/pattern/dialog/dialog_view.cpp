@@ -84,7 +84,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
-    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
+    dialogLayoutProp->UpdateIsSceneBoardDialog(param.isSceneBoardDialog);
     dialogLayoutProp->UpdateEnableHoverMode(param.enableHoverMode);
     if (param.width.has_value() && NonNegative(param.width.value().Value())) {
         dialogLayoutProp->UpdateWidth(param.width.value());
@@ -109,7 +109,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
-    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+    if (dialogLayoutProp->GetIsSceneBoardDialog().value_or(false)) {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
     SetDialogAccessibilityHoverConsume(dialog);

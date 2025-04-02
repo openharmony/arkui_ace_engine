@@ -927,7 +927,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         // set filter
         TAG_LOGI(AceLogTag::ACE_DRAG, "User Device use default Filter");
         auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
+        if (container && container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(frameNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
         } else {
@@ -1103,7 +1103,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = manager->FindWindowScene(frameNode);
         manager->MountPixelMapToWindowScene(columnNode, windowScene);
     } else {
@@ -1228,7 +1228,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -1815,7 +1815,7 @@ void DragEventActuator::MountGatherNode(const RefPtr<OverlayManager>& overlayMan
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Mount gather node");
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = overlayManager->FindWindowScene(frameNode);
         overlayManager->MountGatherNodeToWindowScene(gatherNode, gatherNodeChildrenInfo, windowScene);
     } else {

@@ -1698,7 +1698,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage062, TestSi
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragDropManager->OnDragMoveOut(point);
     dragDropManager->isDragged_ = true;
     dragDropManager->OnDragMoveOut(point);
@@ -1710,7 +1710,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage062, TestSi
     dragDropManager->OnDragMoveOut(point);
     dragDropManager->isDragged_ = false;
     dragDropManager->isWindowConsumed_ = false;
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1730,7 +1730,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage063, TestSi
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragDropManager->OnDragMove(point, EXTRA_INFO, frameNode);
     dragDropManager->isDragged_ = true;
     dragDropManager->OnDragMove(point, EXTRA_INFO, frameNode);
@@ -1742,7 +1742,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage063, TestSi
     dragDropManager->OnDragMove(point, EXTRA_INFO, frameNode);
     dragDropManager->isDragged_ = false;
     dragDropManager->isWindowConsumed_ = false;
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1762,7 +1762,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage064, TestSi
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     dragDropManager->OnDragEnd(point, EXTRA_INFO, frameNode);
     dragDropManager->isDragged_ = true;
     dragDropManager->OnDragEnd(point, EXTRA_INFO, frameNode);
@@ -1774,7 +1774,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage064, TestSi
     dragDropManager->OnDragEnd(point, EXTRA_INFO, frameNode);
     dragDropManager->isDragged_ = false;
     dragDropManager->isWindowConsumed_ = false;
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     EXPECT_NE(frameNode, nullptr);
 }
 
@@ -1818,7 +1818,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage066, TestSi
     point.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
-    container->isScenceBoardWindow_ = true;
+    container->isSceneBoardWindow_ = true;
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDisableDataPrefetch(true);
@@ -1977,7 +1977,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage071, TestSi
     pointerEvent.y = 1;
     auto container = MockContainer::Current();
     ASSERT_NE(container, nullptr);
-    container->isScenceBoardWindow_ = false;
+    container->isSceneBoardWindow_ = false;
     dragDropManager->isDragCancel_ = false;
     Point point = pointerEvent.GetPoint();
     auto ret = dragDropManager->HandleUIExtensionComponentDragCancel(
@@ -2008,7 +2008,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage072, TestSi
     dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER, frameNode);
     EXPECT_EQ(dragDropManager->dragDropState_, DragDropMgrState::DRAGGING);
 
-    MockContainer::Current()->SetIsScenceBoardWindow(false);
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
     dragDropManager->isReDragStart_ = true;
     dragDropManager->HandleDragEvent(pointerEvent, DragEventAction::DRAG_EVENT_OUT, frameNode);
     EXPECT_EQ(dragDropManager->isReDragStart_, false);

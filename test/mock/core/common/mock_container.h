@@ -72,14 +72,14 @@ public:
         isUIExtensionWindow_ = isUIExtensionWindow;
     }
 
-    bool IsScenceBoardWindow() override
+    bool IsSceneBoardWindow() override
     {
-        return isScenceBoardWindow_;
+        return isSceneBoardWindow_;
     }
 
-    void SetIsScenceBoardWindow(bool isScenceBoardWindow)
+    void SetIsSceneBoardWindow(bool isSceneBoardWindow)
     {
-        isScenceBoardWindow_ = isScenceBoardWindow;
+        isSceneBoardWindow_ = isSceneBoardWindow;
     }
 
     bool IsCrossAxisWindow()
@@ -108,7 +108,7 @@ public:
         container_->isFormRender_ = false;
         container_->isUIExtensionWindow_ = false;
         container_->isSubContainer_ = false;
-        container_->isScenceBoardWindow_ = false;
+        container_->isSceneBoardWindow_ = false;
         container_->isCrossAxisWindow_ = false;
     }
 
@@ -155,7 +155,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isSubContainer_ = false;
-    bool isScenceBoardWindow_ = false;
+    bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
     RefPtr<DisplayInfo> displayInfo_ = MakeRefPtr<DisplayInfo>();
 };

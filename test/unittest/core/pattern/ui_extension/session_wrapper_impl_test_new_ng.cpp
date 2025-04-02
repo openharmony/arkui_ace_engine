@@ -838,7 +838,7 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg020, TestSize.L
     patternUpgrade->viewportConfigChanged_ = true;
 
     sessionWrapper->NotifyForeground();
-    EXPECT_TRUE(container->IsScenceBoardWindow());
+    EXPECT_TRUE(container->IsSceneBoardWindow());
 }
 
 /**

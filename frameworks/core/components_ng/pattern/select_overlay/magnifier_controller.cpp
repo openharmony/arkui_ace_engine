@@ -167,7 +167,7 @@ RefPtr<FrameNode> MagnifierController::GetRootNode()
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, rootNode);
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto root = FindWindowScene(host);
         rootNode = DynamicCast<FrameNode>(root);
     }

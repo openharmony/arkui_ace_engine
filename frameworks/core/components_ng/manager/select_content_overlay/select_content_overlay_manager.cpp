@@ -691,7 +691,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(shareOverlayInfo_, rootNode);
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto root = FindWindowScene(shareOverlayInfo_->callerFrameNode.Upgrade());
         rootNode = DynamicCast<FrameNode>(root);
     } else if (rootNode && selectOverlayHolder_ && selectOverlayHolder_->IsEnableContainerModal()) {
@@ -713,7 +713,7 @@ const RefPtr<FrameNode> SelectContentOverlayManager::GetSelectOverlayRoot()
 RefPtr<UINode> SelectContentOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
