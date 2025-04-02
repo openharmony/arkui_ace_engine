@@ -78,6 +78,12 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     style.isEndAddParagraphSpacing = paraStyle.isEndAddParagraphSpacing;
     style.paragraphSpacing = paraStyle.paragraphSpacing.ConvertToPx();
     style.defaultTextStyleUid = paraStyle.textStyleUid;
+    if (paraStyle.isOnlyBetweenLines) {
+        style.textHeightBehavior =
+            paraStyle.isFirstParagraphLineSpacing
+                ? static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_ALL)
+                : static_cast<OHOS::Rosen::TextHeightBehavior>(TextHeightBehavior::DISABLE_LAST_ASCENT);
+    }
 #if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
     // keep WordBreak define same with WordBreakType in minikin
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

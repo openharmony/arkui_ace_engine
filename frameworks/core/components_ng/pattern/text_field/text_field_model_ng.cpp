@@ -999,6 +999,11 @@ void TextFieldModelNG::SetLineSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value);
 }
 
+void TextFieldModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines);
+}
+
 void TextFieldModelNG::SetTextDecoration(Ace::TextDecoration value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextDecoration, value);
@@ -1830,9 +1835,11 @@ void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
 }
 
-void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
 }
 
 void TextFieldModelNG::TextFieldModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)

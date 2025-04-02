@@ -230,7 +230,10 @@ void SpanNode::DumpInfo()
     }
     dumpLog.AddDesc(std::string("FontSize: ").append(textStyle->GetFontSize().ToString()));
     dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle->GetLineHeight().ToString()));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle->GetLineSpacing().ToString()));
+    dumpLog.AddDesc(std::string("LineSpacing: ")
+            .append(textStyle->GetLineSpacing().ToString())
+            .append(" isOnlyBetweenLines: ")
+            .append((textStyle->GetIsOnlyBetweenLines()) ? "true" : "false"));
     dumpLog.AddDesc(std::string("BaselineOffset: ").append(textStyle->GetBaselineOffset().ToString()));
     dumpLog.AddDesc(std::string("WordSpacing: ").append(textStyle->GetWordSpacing().ToString()));
     dumpLog.AddDesc(std::string("TextIndent: ").append(textStyle->GetTextIndent().ToString()));
@@ -440,12 +443,8 @@ bool SpanItem::CheckSpanNeedReCreate(int32_t index)
         }                                                                                                      \
     } while (false)
 
-void SpanItem::UpdateReLayoutTextStyle(
-    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+void SpanItem::UpdateFontStyle(TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor)
 {
-    // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
-    // depend on its value.
-    UPDATE_SPAN_TEXT_STYLE(textLineStyle, AllowScale, AllowScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MinFontScale, MinFontScale);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, MaxFontScale, MaxFontScale);
     if (!isRichEditor) {
@@ -479,7 +478,15 @@ void SpanItem::UpdateReLayoutTextStyle(
     } else {
         UPDATE_SPAN_TEXT_STYLE(fontStyle, FontFamily, FontFamilies);
     }
+}
 
+void SpanItem::UpdateReLayoutTextStyle(
+    TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor)
+{
+    // The setting of AllowScale, MinFontScale, MaxFontScale must be done before any Dimension-type properties that
+    // depend on its value.
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, AllowScale, AllowScale);
+    UpdateFontStyle(spanTextStyle, textStyle, isSymbol, isRichEditor);
     if (!isRichEditor) {
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, LineHeight, LineHeight);
         UPDATE_TEXT_STYLE_DIMENSION_TYPE(textLineStyle, BaselineOffset, BaselineOffset);
@@ -497,6 +504,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, WordBreak, WordBreak);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
 }
 
@@ -1414,7 +1422,11 @@ void PlaceholderSpanItem::DumpInfo() const
             .append(textLineStyle
                         ? textLineStyle->GetLineHeight().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
                         : "Na"));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
+    dumpLog.AddDesc(
+        std::string("LineSpacing: ")
+            .append(textStyle.GetLineSpacing().ToString())
+            .append(" isOnlyBetweenLines: ")
+            .append((textStyle.GetIsOnlyBetweenLines()) ? "true" : "false"));
     dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
     dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
@@ -1457,6 +1469,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("FontSize", textStyle->GetFontSize().ToString().c_str());
     json->Put("LineHeight", textStyle->GetLineHeight().ToString().c_str());
     json->Put("LineSpacing", textStyle->GetLineSpacing().ToString().c_str());
+    json->Put("isOnlyBetweenLines", (textStyle->GetIsOnlyBetweenLines()) ? "true" : "false");
     json->Put("BaselineOffset", textStyle->GetBaselineOffset().ToString().c_str());
     json->Put("WordSpacing", textStyle->GetWordSpacing().ToString().c_str());
     json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());

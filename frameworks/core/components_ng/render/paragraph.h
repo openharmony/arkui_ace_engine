@@ -131,6 +131,13 @@ struct LeadingMargin {
     }
 };
 
+enum TextHeightBehavior {
+    ALL = 0x0,
+    DISABLE_FIRST_ASCENT = 0x1,
+    DISABLE_LAST_ASCENT = 0x2,
+    DISABLE_ALL = 0x1 | 0x2,
+};
+
 struct ParagraphStyle {
     TextDirection direction = TextDirection::AUTO;
     TextAlign align = TextAlign::LEFT;
@@ -149,6 +156,8 @@ struct ParagraphStyle {
     Dimension paragraphSpacing;
     bool isEndAddParagraphSpacing = false;
     int32_t textStyleUid = 0;
+    bool isOnlyBetweenLines = false;
+    bool isFirstParagraphLineSpacing = true;
 
     bool operator==(const ParagraphStyle others) const
     {
@@ -157,7 +166,7 @@ struct ParagraphStyle {
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
                leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
                halfLeading == others.halfLeading && indent == others.indent &&
-               paragraphSpacing == others.paragraphSpacing;
+               paragraphSpacing == others.paragraphSpacing && isOnlyBetweenLines == others.isOnlyBetweenLines;
     }
 
     bool operator!=(const ParagraphStyle others) const

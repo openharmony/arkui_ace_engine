@@ -361,6 +361,7 @@ public:
     virtual void SetLineHeight(const Dimension& value) {};
     virtual void SetHalfLeading(bool value) {};
     virtual void SetLineSpacing(const Dimension& value) {};
+    virtual void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {};

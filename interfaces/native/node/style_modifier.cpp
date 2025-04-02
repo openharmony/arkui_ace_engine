@@ -10939,7 +10939,7 @@ int32_t SetLineSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextLineSpacing(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), item->value[1].f32);
     }
     return ERROR_CODE_NO_ERROR;
 }

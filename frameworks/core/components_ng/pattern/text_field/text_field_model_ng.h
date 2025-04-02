@@ -118,6 +118,7 @@ public:
     void SetLineHeight(const Dimension& value) override;
     void SetHalfLeading(bool value) override;
     void SetLineSpacing(const Dimension& value) override;
+    void SetIsOnlyBetweenLines(bool isOnlyBetweenLines) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
@@ -142,7 +143,7 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
-    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
+    static void SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);

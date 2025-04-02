@@ -950,11 +950,11 @@ ArkUI_CharPtr GetTextFontFeature(ArkUINodeHandle node)
     return g_strValue.c_str();
 }
 
-void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextLineSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, ArkUI_Bool isOnlyBetweenLines)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    TextModelNG::SetLineSpacing(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)), isOnlyBetweenLines);
 }
 
 float GetTextLineSpacing(ArkUINodeHandle node)
@@ -968,7 +968,7 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING);
+    TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING, false);
 }
 
 void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)

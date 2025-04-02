@@ -1884,6 +1884,21 @@ void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
         value.Reset();
     }
     TextFieldModel::GetInstance()->SetLineSpacing(value);
+    if (info.Length() < 2) { // 2 : two args
+        return;
+    }
+    auto jsonValue = info[1];
+    if (!jsonValue->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("onlyBetweenLines");
+    if (!param->IsBoolean() || param->IsUndefined() || param->IsNull()) {
+        TextFieldModel::GetInstance()->SetIsOnlyBetweenLines(false);
+    } else {
+        auto isOnlyBetweenLines = param->ToBoolean();
+        TextFieldModel::GetInstance()->SetIsOnlyBetweenLines(isOnlyBetweenLines);
+    }
 }
 
 void JSTextField::SetFontFeature(const JSCallbackInfo& info)
