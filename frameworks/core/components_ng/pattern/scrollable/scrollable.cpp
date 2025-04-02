@@ -61,6 +61,8 @@ constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
 constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
 constexpr float SPRING_ACCURACY = 0.1;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
+constexpr float SCROLL_SNAP_MIN_STEP_THRESHOLD = 10.0f;
+constexpr float SCROLL_SNAP_MIN_STEP = 1.0f;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -80,7 +82,6 @@ constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
 constexpr float CROWN_START_FRICTION_VELOCITY_THRESHOLD = 6.0f;
-constexpr float SCROLL_SNAP_MIN_STEP = 1.0f;
 #else
 constexpr float RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 #endif
@@ -1437,22 +1438,32 @@ void Scrollable::ProcessSpringMotion(double position)
     currentPos_ = position;
 }
 
+double Scrollable::CalcNextStep(double position, double mainDelta)
+{
+    auto finalDelta = finalPosition_ - currentPos_;
+    if (GreatNotEqual(std::abs(finalDelta), SCROLL_SNAP_MIN_STEP_THRESHOLD)) {
+        return mainDelta;
+    }
+    if (LessOrEqual(std::abs(finalDelta), SCROLL_SNAP_MIN_STEP)) {
+        return finalDelta;
+    }
+    if (nextStep_.has_value()) {
+        return nextStep_.value();
+    }
+    if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
+        nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
+        mainDelta = nextStep_.value();
+    }
+    return mainDelta;
+}
+
 void Scrollable::ProcessScrollMotion(double position, int32_t source)
 {
-    currentVelocity_ = frictionVelocity_;
     currentVelocity_ = state_ == AnimationState::SNAP ? snapVelocity_ : frictionVelocity_;
     auto mainDelta = position - currentPos_;
 #ifdef SUPPORT_DIGITAL_CROWN
     if (state_ == AnimationState::SNAP) {
-        if (LessOrEqual(std::abs(finalPosition_ - currentPos_), SCROLL_SNAP_MIN_STEP)) {
-            mainDelta = finalPosition_ - currentPos_;
-            StopSnapAnimation();
-        } else if (nextStep_.has_value()) {
-            mainDelta = nextStep_.value();
-        } else if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
-            nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
-            mainDelta = nextStep_.value();
-        }
+        mainDelta = CalcNextStep(position, mainDelta);
         position = currentPos_ + mainDelta;
     }
 #endif
@@ -1474,7 +1485,11 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         StopFrictionAnimation();
     }
     currentPos_ = position;
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (state_ == AnimationState::SNAP && NearEqual(currentPos_, finalPosition_)) {
+        StopSnapAnimation();
+    }
+#endif
     // spring effect special process
     if ((canOverScroll_ && source != SCROLL_FROM_AXIS) || needScrollSnapChange_) {
         ACE_SCOPED_TRACE("scrollPause set true to stop ProcessScrollMotion, canOverScroll:%u, needScrollSnapChange:%u, "
@@ -1755,7 +1770,9 @@ void Scrollable::StopSnapAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                scroll->snapOffsetProperty_->Set(scroll->currentPos_);
+                auto position = NearEqual(scroll->currentPos_, scroll->finalPosition_) ?
+                    scroll->finalPosition_ - 1.f : scroll->currentPos_;
+                scroll->snapOffsetProperty_->Set(position);
             },
             nullptr);
     }
