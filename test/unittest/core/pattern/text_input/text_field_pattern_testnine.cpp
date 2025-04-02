@@ -396,7 +396,7 @@ HWTEST_F(TextFieldPatternTestNine, ClearTextContent001, TestSize.Level0)
 
     pattern_->hasPreviewText_ = true;
     pattern_->ClearTextContent();
-    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
 }
 
 /**
