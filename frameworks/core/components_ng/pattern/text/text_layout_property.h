@@ -276,6 +276,7 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propNeedReCreateParagraph_ = true;
     }
 
 private:
