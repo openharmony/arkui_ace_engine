@@ -49,8 +49,6 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
-    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopeDelegate);
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
@@ -86,8 +84,6 @@ void CloseImplicitAnimationImpl()
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
-    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopeDelegate);
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
