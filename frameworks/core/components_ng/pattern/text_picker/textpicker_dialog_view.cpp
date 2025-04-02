@@ -507,7 +507,7 @@ void TextPickerDialogView::UpdateButtonConfirmLayoutProperty(const RefPtr<FrameN
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonConfirmNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -861,7 +861,7 @@ void TextPickerDialogView::UpdateButtonCancelLayoutProperty(
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonCancelNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -888,7 +888,7 @@ void TextPickerDialogView::UpdateButtonForwardLayoutProperty(
     auto buttonForwardLayoutProperty = buttonForwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonForwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
     buttonForwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonForwardNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonForwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonForwardLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -916,7 +916,7 @@ void TextPickerDialogView::UpdateButtonBackwardLayoutProperty(
     auto buttonBackwardLayoutProperty = buttonBackwardNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonBackwardLayoutProperty->UpdateLabel(GetDialogAgingButtonText(false));
     buttonBackwardLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonBackwardNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonBackwardLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonBackwardLayoutProperty->UpdateType(ButtonType::CAPSULE);

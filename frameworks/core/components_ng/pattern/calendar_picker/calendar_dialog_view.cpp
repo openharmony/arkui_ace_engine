@@ -681,7 +681,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
         buttonLayoutProperty->UpdateLabel(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
