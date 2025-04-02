@@ -93,9 +93,6 @@ const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 
 constexpr int32_t JUMP_NEAR_VALUE = 3;
-constexpr float MASS = 1.0f;
-constexpr float STIFFNESS = 328.0f;
-constexpr float DAMPING = 34.0f;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
@@ -1310,18 +1307,27 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
                             LessNotEqual(iter->second.endPos - iter->second.startPos, CalculateVisibleSize());
         float offset = isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
         targetPos -= offset;
+        std::optional<float> pixelRoundTargetPos;
+#ifdef SUPPORT_DIGITAL_CROWN
+        // translate property will be pixel rounded in common scenarios.
+        if (!isNeedOffset && !IsHorizontalAndRightToLeft() && SwiperUtils::CheckIsSingleCase(props) &&
+            iter->second.node && iter->second.node->GetRenderContext()) {
+            auto paintRect = iter->second.node->GetRenderContext()->GetPaintRectWithoutTransform();
+            pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
+        }
+#endif
         if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_) {
             // If property animation is running and the target index is the same as the running target index, the
             // animation is not played
             return;
         }
-        context->AddAfterLayoutTask(
-            [weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f), nextIndex = iter->first]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
-                swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
-            });
+        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, pixelRoundTargetPos,
+                                        velocity = velocity_.value_or(0.0f), nextIndex = iter->first]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false, pixelRoundTargetPos);
+            swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
+        });
         runningTargetIndex_ = targetIndex_;
     } else {
         PlayTranslateAnimation(
@@ -3672,7 +3678,7 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
 }
 
 void SwiperPattern::PlayPropertyTranslateAnimation(
-    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
+    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay, std::optional<float> pixelRoundTargetPos)
 {
     if (NearZero(translate)) {
         SetIndicatorChangeIndexStatus(false, GetLoopIndex(currentIndex_));
@@ -3754,6 +3760,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             adOffset.SetY(-adOffset.GetY());
         }
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (pixelRoundTargetPos.has_value()) {
+        if (GetDirection() == Axis::HORIZONTAL) {
+            adOffset.SetX(pixelRoundTargetPos.value());
+        } else {
+            adOffset.SetY(pixelRoundTargetPos.value());
+        }
+    }
+#endif
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset = adOffset]() {
         auto swiperPattern = swiper.Upgrade();
@@ -3929,6 +3944,16 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
 }
 
+void SwiperPattern::InitAnimationCurve()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    animationCurveStiffness_ = swiperTheme->GetAnimationCurveStiffness();
+    animationCurveDamping_ = swiperTheme->GetAnimationCurveDamping();
+}
+
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 {
     auto curve = GetCurve();
@@ -3964,16 +3989,20 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 #endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
-    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, MASS, STIFFNESS, DAMPING);
+    InitAnimationCurve();
+    return AceType::MakeRefPtr<InterpolatingSpring>(
+        motionVelocity_, SWIPER_CURVE_MASS, animationCurveStiffness_, animationCurveDamping_);
 }
 
-RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve() const
+RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve()
 {
     auto curve = GetCurve();
     auto maxMotionVelocity = static_cast<float>(MAX_INDICATOR_VELOCITY / DEFAULT_INDICATOR_HEAD_DISTANCE.ConvertToPx());
     auto motionVelocity = std::min(motionVelocity_, maxMotionVelocity);
     if (!curve) {
-        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity, MASS, STIFFNESS, DAMPING);
+        InitAnimationCurve();
+        return AceType::MakeRefPtr<InterpolatingSpring>(
+            motionVelocity, SWIPER_CURVE_MASS, animationCurveStiffness_, animationCurveDamping_);
     }
 
     if (InstanceOf<SpringCurve>(curve)) {
