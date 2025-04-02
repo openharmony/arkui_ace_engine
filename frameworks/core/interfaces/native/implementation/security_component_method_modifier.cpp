@@ -166,6 +166,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
+    Validator::ValidateNonEmpty(families);
     SecurityComponentModelNG::SetFontFamily(frameNode, families);
 }
 void FontColorImpl(Ark_NativePointer node,
