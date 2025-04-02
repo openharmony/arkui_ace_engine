@@ -627,10 +627,14 @@ void InputFilterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(error);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::string& val) {
-        auto errortArkString = Converter::ArkValue<Ark_String>(val);
+    std::optional<Callback_String_Void> arkErrorEvent = error ? Converter::GetOpt(*error) : std::nullopt;
+    std::function<void(const std::string&)> errorEvent = nullptr;
+    if (arkErrorEvent)
+        errorEvent = [callback = CallbackHelper(*arkErrorEvent), frameNode](const std::string& val) {
+        Converter::ConvContext ctx;
+        auto errortArkString = Converter::ArkValue<Ark_String>(val, &ctx);
+        callback.Invoke(errortArkString);
     };
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
