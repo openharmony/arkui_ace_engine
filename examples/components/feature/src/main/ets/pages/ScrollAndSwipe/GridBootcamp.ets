@@ -996,6 +996,10 @@ export struct GridBootcamp {
     return Array.from({ length: this.totalCount }, (_: ESObject, index: number) => `${index}`);
   }
 
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
+
   build() {
     NavDestination() {
       Drawer({
