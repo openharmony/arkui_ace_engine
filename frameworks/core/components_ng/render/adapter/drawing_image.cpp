@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 
 #include "include/core/SkGraphics.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
-#include "frameworks/core/image/sk_image_cache.h"
+#include "frameworks/core/image/image_cache.h"
 #include "core/pipeline/pipeline_base.h"
-#ifdef ENABLE_ROSEN_BACKEND
 #include "pipeline/rs_recording_canvas.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,16 +83,6 @@ bool ConvertSlice(const ImagePaintConfig& config, RectF& result, float rawImageW
     return true;
 }
 
-#ifndef USE_ROSEN_DRAWING
-void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
-{
-    if (config.colorFilter_.colorFilterMatrix_) {
-        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_.colorFilterMatrix_->data()));
-    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
-        paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
-    }
-}
-#else
 void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
 {
     if (config.colorFilter_.colorFilterMatrix_) {
@@ -113,7 +101,6 @@ void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
         filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
     }
 }
-#endif
 } // namespace
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
@@ -278,7 +265,6 @@ bool DrawingImage::DrawImageLattice(
     const auto& config = GetPaintConfig();
     const auto& drawingLattice = config.resizableLattice_;
     CHECK_NULL_RETURN(drawingLattice, false);
-#ifdef ENABLE_ROSEN_BACKEND
     auto latticeSptrAddr =
         static_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(drawingLattice->GetDrawingLatticeSptrAddr());
     RSBrush brush;
@@ -318,8 +304,6 @@ bool DrawingImage::DrawImageLattice(
     recordingCanvas.DrawImageLattice(image_.get(), *(*latticeSptrAddr), dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
-#endif
-    return false;
 }
 
 bool DrawingImage::DrawImageNine(
@@ -330,10 +314,6 @@ bool DrawingImage::DrawImageNine(
     CHECK_NULL_RETURN(slice.Valid(), false);
     RectF centerRect;
     CHECK_NULL_RETURN(ConvertSlice(config, centerRect, GetWidth(), GetHeight()), false);
-#ifdef ENABLE_ROSEN_BACKEND
-#ifndef USE_ROSEN_DRAWING
-    return false;
-#endif
     RSBrush brush;
     auto filterMode = RSFilterMode::NEAREST;
     switch (config.imageInterpolation_) {
@@ -369,13 +349,10 @@ bool DrawingImage::DrawImageNine(
     recordingCanvas.DrawImageNine(image_.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;
-#endif
-    return false;
 }
 
 bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     RSBrush brush;
     auto config = GetPaintConfig();
     RSSamplingOptions options;
@@ -404,14 +381,10 @@ bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusA
     recordingCanvas.DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, options);
     recordingCanvas.DetachBrush();
     return true;
-#else // !ENABLE_ROSEN_BACKEND
-    return false;
-#endif
 }
 
 void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
     RSBrush brush;
     RSSamplingOptions options;
@@ -421,8 +394,6 @@ void DrawingImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRec
     auto imagePtr = GetImage();
     recordingCanvas.DrawImageRect(*imagePtr, src, dst, options);
     recordingCanvas.DetachBrush();
-#else // !ENABLE_ROSEN_BACKEND
-#endif
 }
 } // namespace OHOS::Ace::NG
 

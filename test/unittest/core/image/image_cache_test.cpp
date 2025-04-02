@@ -16,7 +16,7 @@
 #include "core/image/test/unittest/image_cache_test.h"
 
 #include "gtest/gtest.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #include "core/components_ng/image_provider/adapter/skia_image_data.h"
 
 using namespace testing;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/rosen/drawing_painter.h"
+#include "core/components_ng/render/adapter/drawing_painter.h"
 
 #include "render/rs_pixel_map_shader.h"
 

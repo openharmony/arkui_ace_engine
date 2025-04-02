@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"

@@ -27,7 +27,7 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"

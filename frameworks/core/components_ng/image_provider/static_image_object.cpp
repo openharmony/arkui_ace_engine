@@ -18,7 +18,7 @@
 #include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_utils.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "frameworks/core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {
