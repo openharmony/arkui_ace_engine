@@ -78,7 +78,9 @@ public:
         CHECK_NULL_VOID(json);
         auto bubbleRenderProperty = JsonUtil::Create(true);
         bubbleRenderProperty->Put("arrowOffset", GetArrowOffset().value_or(Dimension()).ToString().c_str());
-        bubbleRenderProperty->Put("autoCancel", GetAutoCancel().value_or(true)); // !hasAction
+        bubbleRenderProperty->Put("autoCancel", GetAutoCancel().value_or(true));
+        bubbleRenderProperty->Put("primaryButtonShow", GetPrimaryButtonShow().value_or(false));
+        bubbleRenderProperty->Put("secondaryButtonShow", GetSecondaryButtonShow().value_or(false));
 
         auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;

@@ -96,11 +96,19 @@ public:
         bubbleLayoutProperty->Put("followTransformOfTarget", GetFollowTransformOfTarget().value_or(false));
         bubbleLayoutProperty->Put("blockEvent", GetBlockEvent().value_or(true));
         bubbleLayoutProperty->Put("positionOffset", GetPositionOffset().value_or(OffsetF()).ToString().c_str());
+        bubbleLayoutProperty->Put("arrowWidth", GetArrowWidth().value_or(Dimension(16.0_vp)).ToString().c_str());
+        bubbleLayoutProperty->Put("arrowHeight", GetArrowHeight().value_or(Dimension(8.0_vp)).ToString().c_str());
+        bubbleLayoutProperty->Put("showInSubWindow", GetShowInSubWindow().value_or(false));
 
         auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
         auto defaultTargetSpace = theme ? theme->GetTargetSpace() : Dimension();
         bubbleLayoutProperty->Put("targetSpace", GetTargetSpace().value_or(defaultTargetSpace).ToString().c_str());
+
+        auto defaultRadius = theme ?
+            Dimension(theme->GetRadius().GetX().Value(), theme->GetRadius().GetX().Unit()) :
+            Dimension(20._vp);
+        bubbleLayoutProperty->Put("radius", GetRadius().value_or(defaultRadius).ToString().c_str());
 
         json->PutExtAttr("bubbleLayoutProperty", bubbleLayoutProperty, filter);
     }

@@ -42,6 +42,16 @@ public:
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD(void, UpdateBackgroundEffect, (const std::optional<EffectOption>&), (override));
 
+    void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override
+    {
+        chainedTransitionEffect_ = effect;
+    }
+
+    const RefPtr<NG::ChainedTransitionEffect> GetChainedTransitionEffect()
+    {
+        return chainedTransitionEffect_;
+    }
+
     void SetVisible(bool visible) override
     {
         isVisible_ = visible;
@@ -190,6 +200,7 @@ public:
     std::function<void()> transitionOutCallback_;
     BlurOption backdropBlurOption;
     BlurOption foregroundBlurOption;
+    RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_CONTEXT_H

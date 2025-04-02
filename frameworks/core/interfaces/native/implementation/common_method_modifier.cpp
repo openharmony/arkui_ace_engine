@@ -187,8 +187,7 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     if (arkOnStateChange) {
         auto onStateChangeCallback = [arkCallback = CallbackHelper(arkOnStateChange.value())](
             const std::string& param) {
-            auto json = JsonUtil::Create(true);
-            json->Put("isVisible", param.c_str());
+            auto json = JsonUtil::ParseJsonString(param);
             Ark_Literal_Boolean_isVisible event;
             event.isVisible = Converter::ArkValue<Ark_Boolean>(json->GetBool("isVisible", false));
             arkCallback.Invoke(event);
