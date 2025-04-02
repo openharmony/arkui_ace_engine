@@ -26,7 +26,7 @@ import { ArkSaveButtonPeer } from "./peers/ArkSaveButtonPeer"
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./../component/securityComponent"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./../component/units"
 import { FontStyle, FontWeight, BorderStyle } from "./../component/enums"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_ClickEvent_SaveButtonOnClickResult_Void, SaveButtonOnClickResult, SaveButtonAttribute, SaveButtonOptions } from "./../component/saveButton"
 import { ClickEvent } from "./../component/common"
 /** @memo:stable */

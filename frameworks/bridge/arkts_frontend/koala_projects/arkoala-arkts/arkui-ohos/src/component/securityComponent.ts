@@ -21,7 +21,7 @@ import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./units"
 import { FontStyle, FontWeight, BorderStyle } from "./enums"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 export enum SecurityComponentLayoutDirection {
     HORIZONTAL = 0,
     VERTICAL = 1

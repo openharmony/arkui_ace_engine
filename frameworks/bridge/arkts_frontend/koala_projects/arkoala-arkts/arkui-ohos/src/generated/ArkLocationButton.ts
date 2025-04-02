@@ -26,7 +26,7 @@ import { ArkLocationButtonPeer } from "./peers/ArkLocationButtonPeer"
 import { SecurityComponentMethod, SecurityComponentLayoutDirection } from "./../component/securityComponent"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions } from "./../component/units"
 import { FontStyle, FontWeight, BorderStyle } from "./../component/enums"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_ClickEvent_LocationButtonOnClickResult_Void, LocationButtonOnClickResult, LocationButtonAttribute, LocationButtonOptions } from "./../component/locationButton"
 import { ClickEvent } from "./../component/common"
 /** @memo:stable */

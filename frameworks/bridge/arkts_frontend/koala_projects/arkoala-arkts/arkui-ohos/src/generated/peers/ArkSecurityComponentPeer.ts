@@ -26,7 +26,7 @@ import { ArkUIGeneratedNativeModule } from "#components"
 import { Dimension, Position, Edges, LocalizedEdges, ResourceColor, Padding, Length, SizeOptions, ConstraintSizeOptions, PX, VP, FP, LPX, Percentage } from "./../../component/units"
 import { SecurityComponentLayoutDirection } from "./../../component/securityComponent"
 import { FontStyle, FontWeight, BorderStyle, Color } from "./../../component/enums"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { CallbackKind } from "./CallbackKind"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { TypeChecker } from "#components"

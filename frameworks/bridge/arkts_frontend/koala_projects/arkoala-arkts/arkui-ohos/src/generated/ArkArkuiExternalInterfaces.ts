@@ -20,7 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { BusinessError } from "./ArkBaseInterfaces"
-import { Resource } from "./ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "./../component/enums"
 export interface NodeController {
 }

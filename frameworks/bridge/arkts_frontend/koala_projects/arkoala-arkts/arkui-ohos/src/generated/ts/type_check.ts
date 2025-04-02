@@ -14,7 +14,7 @@ import { DrawingCanvas } from "./../ArkDrawingCanvasMaterialized"
 import { PixelMap } from "./../ArkPixelMapMaterialized"
 import { NodeController, TextModifier, RectWidthStyle, RectHeightStyle, Want, LengthUnit, WebHeader, SnapshotOptions, PerfMonitorActionType, PerfMonitorSourceType, ShapeSize, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, FontOptions, FontInfo, MeasureOptions, EffectDirection, EffectScope, SymbolEffect, ErrorCallback } from "./../ArkArkuiExternalInterfaces"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { ColorMetrics } from "./../ArkColorMetricsMaterialized"
 import { ResourceColor, Position, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback, Offset, Font, LengthMetricsUnit, MarkStyle, Bias, EdgeWidth, DirectionalEdgesT, ColorFilter, LengthConstrain, DividerStyleOptions, VP, PX, LPX, TouchPoint } from "./../../component/units"
 import { WebviewController } from "./../ArkWebviewControllerMaterialized"

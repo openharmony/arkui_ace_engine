@@ -28,7 +28,7 @@ import { DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, Touc
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, EdgeEffect } from "./../../component/enums"
 import { LengthMetrics } from "./../ArkLengthMetricsMaterialized"
 import { ResizableOptions } from "./../../component/image"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_Void } from "./../../component/abilityComponent"
 import { FocusBoxStyle, FocusPriority } from "./../../component/focus"
 import { CircleShape } from "./../ArkCircleShapeMaterialized"

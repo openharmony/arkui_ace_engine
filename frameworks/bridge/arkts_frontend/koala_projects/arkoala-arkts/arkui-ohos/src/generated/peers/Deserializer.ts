@@ -55,7 +55,7 @@ import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderCha
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../../component/textArea"
 import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, ColorFilter, ColorFilterInternal, DirectionalEdgesT, Bias, MarkStyle } from "./../../component/units"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../../component/withTheme"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TextCase, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../../component/enums"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
@@ -172,17 +172,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<string> | undefined
+        let params_buf : Array<Object> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<string> = new Array<string>(params_buf__length)
+            let params_buf_ : Array<Object> = new Array<Object>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<string> | undefined = params_buf
+        const params_result : Array<Object> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : number | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))

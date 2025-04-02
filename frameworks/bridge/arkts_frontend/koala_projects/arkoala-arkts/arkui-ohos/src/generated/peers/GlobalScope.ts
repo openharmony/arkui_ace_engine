@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { Context, AnimateParam } from "./../../component/common"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_Void } from "./../../component/abilityComponent"
 import { Profiler } from "./../../component/inspector"
 import { PointerStyle } from "./../ArkArkuiCustomInterfaces"

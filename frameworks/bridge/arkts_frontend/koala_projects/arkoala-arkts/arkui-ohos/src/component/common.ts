@@ -27,7 +27,7 @@ import { Callback_Void } from "./abilityComponent"
 import { MouseButton, MouseAction, AccessibilityHoverType, TouchType, KeyType, KeySource, Color, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, ColoringStrategy, BorderStyle, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, GradientDirection, HitTestMode, Alignment, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, PixelRoundCalcPolicy, BarState, EdgeEffect, IlluminatedType } from "./enums"
 import { UnifiedData, UnifiedDataInternal } from "./../generated/ArkUnifiedDataMaterialized"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, Length, Bias, Area, Font, BorderRadiuses, EdgeWidths, LocalizedEdgeWidths, SizeOptions, ResourceStr, Dimension, EdgeColors, LocalizedEdgeColors, EdgeStyles, Position, LocalizedBorderRadiuses, Margin, ChainWeightOptions, Padding, LocalizedPadding, LocalizedMargin, BorderOptions, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, EdgeWidth } from "./units"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
 import { PointerStyle } from "./../generated/ArkArkuiCustomInterfaces"

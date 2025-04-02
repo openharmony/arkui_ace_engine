@@ -22,7 +22,7 @@ import { ComponentBase } from "../ComponentBase"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { ArkCommonMethodPeer, ArkCommonMethodAttributes } from "./../generated/peers/ArkCommonPeer"
 import { SystemBarStyle, NavigationCommonTitle, NavigationCustomTitle, NavigationMenuItem, NavigationOperation, NavigationMode, InterceptionModeCallback, NavigationInterception, NavigationInterface, ToolbarItemStatus, ToolbarItem, BarStyle, NavigationTitleOptions, NavigationToolbarOptions, NavigationTitleMode, NavContentInfo, NavigationAnimatedTransition, NavBarPosition } from "./../component/navigation"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { CustomBuilder, SymbolGlyphModifier, LayoutSafeAreaType, LayoutSafeAreaEdge } from "./../component/common"
 import { Length, ResourceStr, Dimension } from "./../component/units"
 import { NavPathStack } from "./../component/navigation"

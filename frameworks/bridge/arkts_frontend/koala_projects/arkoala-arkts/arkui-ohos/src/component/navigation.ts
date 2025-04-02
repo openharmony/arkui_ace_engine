@@ -24,7 +24,7 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "./../generated/ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { CustomBuilder, SymbolGlyphModifier, BlurStyle } from "./common"
 import { TitleHeight } from "./enums"
 import { Length, ResourceStr, ResourceColor, Dimension } from "./units"

@@ -39,13 +39,17 @@
             ],
             "@ohos.arkui.UIContext": [
                 "./ohos.arkui.UIContext.ts"
+            ],
+            "global/resource": [
+                "./global/resource/resource.ts"
             ]
         },
         "rootDir": "."
     },
     "include": [
         "./src/**/*.ts",
-        "./ohos.arkui.UIContext.ts"
+        "./ohos.arkui.UIContext.ts",
+        "./global/**/*.ts"
     ],
     "exclude": [
         "./src/generated/arkts",

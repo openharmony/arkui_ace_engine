@@ -59,7 +59,7 @@ import { StyledString } from "./../../component/styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
 import { Callback_RangeUpdate } from "./../ArkArkuiCustomInterfaces"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../../component/refresh"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, Type_TextPickerAttribute_onChange_callback } from "./../../component/textPicker"
 import { Callback_String_Void } from "./../../component/gridRow"
 import { Callback_SwipeActionState_Void, SwipeActionState } from "./../../component/listItem"

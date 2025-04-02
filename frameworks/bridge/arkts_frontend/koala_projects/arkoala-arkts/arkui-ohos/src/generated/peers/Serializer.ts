@@ -14,7 +14,7 @@
  */
 
 import { SerializerBase, Tags, RuntimeType, runtimeType, toPeerPtr, MaterializedBase, nullptr, KPointer } from "@koalaui/interop"
-import { int32, float32, unsafeCast, int64 } from "@koalaui/common"
+import { int32, float32, unsafeCast, int64, parseNumber } from "@koalaui/common"
 import { NativeBuffer, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule } from "@koalaui/interop"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
@@ -51,7 +51,7 @@ import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderCha
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../../component/textArea"
 import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, ColorFilter, ColorFilterInternal, DirectionalEdgesT, Bias, MarkStyle } from "./../../component/units"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../../component/withTheme"
-import { Resource } from "./../ArkResourceInterfaces"
+import { Resource } from "global/resource";
 import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TextCase, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../../component/enums"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
 import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
@@ -211,8 +211,16 @@ export class Serializer extends SerializerBase {
             const value_params_value  = value_params!
             valueSerializer.writeInt32(value_params_value.length as int32)
             for (let i = 0; i < value_params_value.length; i++) {
-                const value_params_value_element : string = value_params_value[i]
-                valueSerializer.writeString(value_params_value_element)
+                const value_params_value_type = runtimeType(value_params_value[i])
+                if (value_params_value_type == RuntimeType.STRING) {
+                    const value_params_value_element: string = value_params_value[i] as string
+                    valueSerializer.writeString(value_params_value_element)
+                } else if (value_params_value_type == RuntimeType.NUMBER) {
+                    const value_params_value_element : number = value_params_value[i] as number
+                    valueSerializer.writeString(String(value_params_value_element))
+                } else {
+                    throw new Error("Unsupported params type, expect string or number.")
+                }
             }
         }
         const value_type  = value.type
