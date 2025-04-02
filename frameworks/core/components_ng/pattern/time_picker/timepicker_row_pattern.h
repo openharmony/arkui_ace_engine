@@ -488,6 +488,7 @@ public:
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("start", startTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("end", endTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("enableCascade", V2::ConvertBoolToString(isEnableCascade_).c_str(), filter);
         json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
     }
 
