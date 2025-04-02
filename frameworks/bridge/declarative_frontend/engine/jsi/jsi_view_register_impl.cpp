@@ -154,6 +154,7 @@
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
 #include "bridge/declarative_frontend/jsview/js_texttimer.h"
 #include "bridge/declarative_frontend/jsview/js_toggle.h"
+#include "bridge/declarative_frontend/jsview/js_toolbaritem.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "bridge/declarative_frontend/jsview/js_water_flow.h"
@@ -598,6 +599,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "StepperItem", JSStepperItem::JSBind },
 #endif
     { "Toggle", JSToggle::JSBind },
+    { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
 #ifndef ARKUI_WEARABLE

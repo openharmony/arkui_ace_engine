@@ -81,6 +81,8 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_model.h"
+#include "core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h"
 #include "core/event/key_event.h"
 
 namespace OHOS::Ace::NG {
@@ -1605,6 +1607,28 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 void JSViewAbstract::JsHeight(const JSCallbackInfo& info)
 {
     JsHeight(info[0]);
+}
+
+void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
+{
+    // Check the parameters
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> toolbarObj = JSRef<JSObject>::Cast(info[0]);
+    auto builder = toolbarObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    };
+    ToolBarItemModel::GetInstance()->SetIsFirstCreate(true);
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Toolbar");
+        func->Execute();
+    };
+    ViewAbstractModel::GetInstance()->SetToolbarBuilder(std::move(buildFunc));
 }
 
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
@@ -6903,6 +6927,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("width", &JSViewAbstract::JsWidth);
     JSClass<JSViewAbstract>::StaticMethod("height", &JSViewAbstract::JsHeight);
+    JSClass<JSViewAbstract>::StaticMethod("toolbar", &JSViewAbstract::JsToolbar);
     JSClass<JSViewAbstract>::StaticMethod("responseRegion", &JSViewAbstract::JsResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("mouseResponseRegion", &JSViewAbstract::JsMouseResponseRegion);
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);

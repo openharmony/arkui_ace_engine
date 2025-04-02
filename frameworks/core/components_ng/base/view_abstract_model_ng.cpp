@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -518,6 +519,29 @@ void ViewAbstractModelNG::BindDragWithContextMenuParams(FrameNode* targetNode, c
     } else {
         TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
     }
+}
+
+void ViewAbstractModelNG::SetToolbarBuilder(std::function<void()>&& buildFunc)
+{
+    CHECK_NULL_VOID(buildFunc);
+    auto buildNodeFunc = [func = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        func();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto pipelineContext = NG::PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerMode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_VOID(containerMode);
+    auto pattern = containerMode->GetPattern<NG::ContainerModalPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto parent = frameNode.Upgrade();
+    CHECK_NULL_VOID(parent);
+    pattern->SetToolbarBuilder(parent, std::move(buildNodeFunc));
 }
 
 void ViewAbstractModelNG::BindBackground(std::function<void()>&& buildFunc, const Alignment& align)

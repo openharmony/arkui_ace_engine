@@ -1333,6 +1333,8 @@ public:
         ViewAbstract::DismissPopup();
     }
 
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
+
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
 
     int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId) override

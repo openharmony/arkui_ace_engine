@@ -608,6 +608,18 @@ private:
     RefPtr<UINode> FindNavDestinationNodeInPreList(const uint64_t navDestinationId) const;
     bool IsStandardPage(const RefPtr<UINode>& uiNode) const;
     void UpdateDividerBackgroundColor();
+    void UpdateNavBarToolBarManager(bool isShow, float width);
+    void UpdateDividerToolBarManager(float dividerWidth);
+    void UpdateNavDestToolBarManager(float width);
+
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+        }
+    }
 
     void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -638,6 +650,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<PanEvent> dragBarPanEvent_;
+    RefPtr<ToolbarManager> toolbarManager_;
     std::vector<RefPtr<NavigationTransitionProxy>> proxyList_;
     RectF dragRect_;
     RectF dragBarRect_;
