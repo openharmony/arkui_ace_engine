@@ -1529,6 +1529,34 @@ std::function<std::string(const std::string&)> ParseGetFunc(ArkUIRuntimeCallInfo
     };
 }
 
+std::function<std::string()> JsGetCustomMapFunc(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t nodeId)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    return [vm, nodeId]() -> std::string {
+        std::string resultString = std::string();
+        CHECK_NULL_RETURN(vm, resultString);
+        panda::LocalScope scope(vm);
+        auto global = JSNApi::GetGlobalObject(vm);
+        if (global.IsNull()) {
+            return resultString;
+        }
+        auto getCustomProperty = global->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getCustomPropertyMapString__"));
+        if (getCustomProperty->IsUndefined() || !getCustomProperty->IsFunction(vm)) {
+            return resultString;
+        }
+        auto obj = getCustomProperty->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = obj;
+        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, nodeId) };
+        auto function = panda::CopyableGlobal(vm, func);
+        auto callValue = function->Call(vm, function.ToLocal(), params, 1);
+        if (callValue.IsNull() || callValue->IsUndefined() || !callValue->IsString(vm)) {
+            return resultString;
+        }
+        auto value = callValue->ToString(vm)->ToString(vm);
+        return value;
+    };
+}
+
 std::function<bool()> ParseFunc(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1597,8 +1625,10 @@ ArkUINativeModuleValue FrameNodeBridge::SetCustomPropertyModiferByKey(ArkUIRunti
     std::function<bool()> funcCallback = ParseFunc(runtimeCallInfo);
     CHECK_NULL_RETURN(funcCallback, panda::BooleanRef::New(vm, false));
     std::function<std::string(const std::string&)> getFuncCallback = ParseGetFunc(runtimeCallInfo, nodeId);
+    std::function<std::string()> getCustomPropertyMapCallback = JsGetCustomMapFunc(runtimeCallInfo, nodeId);
     GetArkUINodeModifiers()->getFrameNodeModifier()->setCustomPropertyModiferByKey(
-        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback));
+        nativeNode, reinterpret_cast<void*>(&funcCallback), reinterpret_cast<void*>(&getFuncCallback),
+            reinterpret_cast<void*>(&getCustomPropertyMapCallback));
     return defaultReturnValue;
 }
 

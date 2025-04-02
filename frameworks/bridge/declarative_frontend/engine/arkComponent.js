@@ -5523,6 +5523,31 @@ function __getCustomPropertyString__(nodeId, key) {
   return undefined;
 }
 
+function __getCustomPropertyMapString__(nodeId) {
+  const customProperties = __elementIdToCustomProperties__.get(nodeId);
+  if (customProperties === undefined) {
+    return undefined;
+  }
+  const resultObj = Object.create(null);
+  const obj = Object.fromEntries(customProperties);
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
+    let str = "{}";
+    try {
+      str = JSON.stringify(value);
+    } catch (err) {
+      resultObj[key] = "Unsupported Type";
+      return;
+    }
+    if ((value !== "{}" && str === "{}") || str == null) {
+      resultObj[key] = "Unsupported Type";
+    } else {
+      resultObj[key] = value;
+    }
+  });
+  return JSON.stringify(resultObj);
+}
+
 function __setCustomProperty__(nodeId, key, value) {
   if (value !== undefined) {
     __setValidCustomProperty__(nodeId, key, value);
