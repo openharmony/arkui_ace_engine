@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -849,12 +850,12 @@ bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType
 
 void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touch event");
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touchDown");
         ResetSkipGestureEvents();
         if (fingerId_ != -1) {
             return;
@@ -862,6 +863,8 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         fingerId_ = touchInfo.GetFingerId();
         HandleTouchDown(touchInfo.GetLocalLocation(), info.GetSourceDevice());
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touchUp, isVisibleArea:%{public}d, isShow:%{public}d",
+            isVisibleArea_, isShow_);
         ResetSkipGestureEvents();
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
