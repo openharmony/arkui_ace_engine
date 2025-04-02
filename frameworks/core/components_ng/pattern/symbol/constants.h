@@ -31,6 +31,13 @@ enum class SymbolEffectType {
     REPLACE,
 };
 
+// need check
+enum class RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY
+};
+
 enum class CommonSubType {
     DOWN = 0,
     UP,
