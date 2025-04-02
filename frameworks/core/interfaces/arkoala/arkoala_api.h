@@ -1340,7 +1340,10 @@ struct ArkUIKeyEvent {
     ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
     ArkUI_Uint64 modifierKeyState;
-
+    ArkUI_Bool isNumLockOn;
+    ArkUI_Bool isCapsLockOn;
+    ArkUI_Bool isScrollLockOn;
+    
     // user input.
     bool isConsumed;
     bool stopPropagation;

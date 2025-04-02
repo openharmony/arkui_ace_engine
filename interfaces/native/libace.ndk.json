@@ -2616,6 +2616,18 @@
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsNumLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsCapsLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsScrollLockOn"
+    },
+    {
         "first_introduced": "16",
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
