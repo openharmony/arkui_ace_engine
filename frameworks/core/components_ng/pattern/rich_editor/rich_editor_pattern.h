@@ -590,6 +590,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle) override;
     void HandleExtendAction(int32_t action) override;
     bool BeforeStatusCursorMove(bool isLeft);
     bool CursorMoveLeft();

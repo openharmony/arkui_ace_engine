@@ -7100,6 +7100,15 @@ bool RichEditorPattern::OnKeyEvent(const KeyEvent& keyEvent)
     return TextInputClient::HandleKeyEvent(keyEvent);
 }
 
+void RichEditorPattern::HandleSetSelection(int32_t start, int32_t end, bool showHandle)
+{
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleSetSelection, range=[%{public}d,%{public}d], showHandle=%{public}d",
+        start, end, showHandle);
+    SelectionOptions options;
+    options.handlePolicy = showHandle ? HandlePolicy::SHOW : HandlePolicy::HIDE;
+    SetSelection(start, end, options);
+}
+
 void RichEditorPattern::HandleExtendAction(int32_t action)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleExtendAction %{public}d", action);
@@ -8849,6 +8858,12 @@ void RichEditorPattern::SetSelection(int32_t start, int32_t end, const std::opti
 
 void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<SelectionOptions>& options)
 {
+    if (options.has_value()) {
+        auto handlePolicy = options.value().handlePolicy;
+        IF_TRUE(handlePolicy == HandlePolicy::SHOW, selectOverlay_->ProcessOverlay({ .animation = true }));
+        IF_TRUE(handlePolicy == HandlePolicy::HIDE, CloseSelectOverlay());
+        CHECK_NULL_VOID(handlePolicy == HandlePolicy::DEFAULT);
+    }
     if (!IsShowHandle()) {
         CloseSelectOverlay();
     } else if (!options.has_value() || options.value().menuPolicy == MenuPolicy::DEFAULT) {
