@@ -301,6 +301,7 @@ struct ArkUITouchEvent {
     ArkUI_Int32 changedPointerId;
     ArkUI_Int32 targetDisplayId;
     void* rawPointerEvent;
+    ArkUI_Float64 rollAngle;
 };
 
 struct ArkUIMouseEvent {
@@ -1370,6 +1371,7 @@ struct ArkUIClickEvent {
     ArkUI_Float32 height;
     ArkUI_Int64 deviceId;
     ArkUI_Uint64 modifierKeyState;
+    ArkUI_Float64 rollAngle;
 };
 
 struct ArkUIHoverEvent {
