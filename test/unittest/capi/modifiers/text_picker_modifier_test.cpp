@@ -2258,4 +2258,104 @@ HWTEST_F(TextPickerModifierTest, defaultTextColor, TestSize.Level1)
         EXPECT_EQ(checkVal, expectVal);
     }
 }
-} // namespace OHOS::Ace::NG
+
+/*
+ * @tc.name: setOnScrollStop
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnScrollStop, TestSize.Level1)
+{
+    const std::vector<std::string> values = {"ab", "cd"};
+    const std::vector<double> indexes = {0.0, 1.0};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(textPickerEventHub, nullptr);
+    static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
+        const Ark_Union_Number_Array_Number selecteds) {
+        std::vector<std::string> stdValues;
+        if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
+            auto pickerValue = pickerValueOpt.value();
+            if (auto value = std::get_if<std::string>(&pickerValue); value) {
+                    stdValues.push_back(*value);
+            } else {
+                stdValues = std::move(std::get<std::vector<std::string>>(pickerValue));
+            }
+        }
+        std::vector<uint32_t> stdSelecteds;
+        std::vector<double> stdDoubleSelecteds;
+        if (auto pickerSelectedOpt = Converter::OptConvert<PickerSelectedType>(selecteds); pickerSelectedOpt) {
+            auto pickerSelected = pickerSelectedOpt.value();
+            if (auto selected = std::get_if<uint32_t>(&pickerSelected); selected) {
+                stdSelecteds.push_back(*selected);
+            } else {
+                stdSelecteds = std::move(std::get<std::vector<uint32_t>>(pickerSelected));
+            }
+        }
+        for (auto index: stdSelecteds) {
+            stdDoubleSelecteds.push_back(static_cast<double>(index));
+        }
+        checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
+    };
+    auto arkCallback = ArkValue<TextPickerScrollStopCallback>(checkCallback, CONTEXT_ID);
+    textPickerEventHub->FireScrollStopEvent(values, indexes);
+    ASSERT_FALSE(checkInvoke.has_value());
+    modifier_->setOnScrollStop0(node_, &arkCallback);
+    textPickerEventHub->FireScrollStopEvent(values, indexes);
+    ASSERT_TRUE(checkInvoke.has_value());
+    EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);
+    checkVectors(std::get<INVOKE_POS_1>(checkInvoke.value()), values);
+    checkVectors(std::get<INVOKE_POS_2>(checkInvoke.value()), indexes);
+}
+
+/*
+ * @tc.name: setOnEnterSelectedArea
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
+{
+    const std::vector<std::string> values = {"ab", "cd"};
+    const std::vector<double> indexes = {2.0, 3.0};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textPickerEventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    ASSERT_NE(textPickerEventHub, nullptr);
+    static std::optional<std::tuple<int32_t, std::vector<std::string>,  std::vector<double>>> checkInvoke;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Union_String_Array_String values,
+        const Ark_Union_Number_Array_Number selecteds) {
+        std::vector<std::string> stdValues;
+        if (auto pickerValueOpt = Converter::OptConvert<PickerValueType>(values); pickerValueOpt) {
+            auto pickerValue = pickerValueOpt.value();
+            if (auto value = std::get_if<std::string>(&pickerValue); value) {
+                    stdValues.push_back(*value);
+            } else {
+                stdValues = std::move(std::get<std::vector<std::string>>(pickerValue));
+            }
+        }
+        std::vector<uint32_t> stdSelecteds;
+        std::vector<double> stdDoubleSelecteds;
+        if (auto pickerSelectedOpt = Converter::OptConvert<PickerSelectedType>(selecteds); pickerSelectedOpt) {
+            auto pickerSelected = pickerSelectedOpt.value();
+            if (auto selected = std::get_if<uint32_t>(&pickerSelected); selected) {
+                stdSelecteds.push_back(*selected);
+            } else {
+                stdSelecteds = std::move(std::get<std::vector<uint32_t>>(pickerSelected));
+            }
+        }
+        for (auto index: stdSelecteds) {
+            stdDoubleSelecteds.push_back(static_cast<double>(index));
+        }
+        checkInvoke = { resourceId, stdValues, stdDoubleSelecteds };
+    };
+    auto arkCallback = ArkValue<TextPickerEnterSelectedAreaCallback>(checkCallback, CONTEXT_ID);
+    textPickerEventHub->FireEnterSelectedAreaEvent(values, indexes);
+    ASSERT_FALSE(checkInvoke.has_value());
+    modifier_->setOnEnterSelectedArea(node_, &arkCallback);
+    textPickerEventHub->FireEnterSelectedAreaEvent(values, indexes);
+    ASSERT_TRUE(checkInvoke.has_value());
+    EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);
+    checkVectors(std::get<INVOKE_POS_1>(checkInvoke.value()), values);
+    checkVectors(std::get<INVOKE_POS_2>(checkInvoke.value()), indexes);
+}
+}
