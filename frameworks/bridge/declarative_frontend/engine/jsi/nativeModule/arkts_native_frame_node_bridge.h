@@ -98,6 +98,7 @@ public:
     static ArkUINativeModuleValue SetOnDisappear(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnAttach(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnDetach(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> CreateKeyEventInfoObj(EcmaVM* vm, KeyEventInfo& info);
     static ArkUINativeModuleValue SetOnKeyEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnFocus(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
