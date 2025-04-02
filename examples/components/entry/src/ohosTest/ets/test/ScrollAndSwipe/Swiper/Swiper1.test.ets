@@ -18,7 +18,15 @@ import { SwiperStart } from './Swiper'
 import { Driver } from '@kit.TestKit';
 import {
   buttonClick,
-  JsonType, KeyStruct, radioClick, Search, Slide, sliderDrag, titleSearch, ToggleClick } from '../../../utils';
+  JsonType,
+  KeyStruct,
+  radioClick,
+  Search,
+  Slide,
+  sliderDrag,
+  titleSearch,
+  ToggleClick
+} from '../../../utils';
 
 const driver = Driver.create();
 
@@ -27,7 +35,7 @@ export default function Swiper1Test() {
     beforeAll(async (done: Function) => {
       // Presets an action, which is performed only once before all test cases of the test suite start.
       // This API supports only one parameter: preset action function.
-     await SwiperStart(done)
+      await SwiperStart(done)
 
     })
     /**
@@ -430,11 +438,11 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0050', 0, async (done: Function) => {
 
-      await Search('参数列表', 'autoPlay')
+      await Search('参数列表', 'loop')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
-          toggleClickObj: 'autoPlay',
+          toggleClickObj: 'loop',
           toggleClickType: ToggleClick.Open
         },
         id: 'Swiper',
@@ -507,7 +515,6 @@ export default function Swiper1Test() {
      * 测试组件vertical且获取属性正确
      */
     it('ArkUI_Swiper_0053', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'vertical')
       await radioClick({
@@ -807,7 +814,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0066', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'curve')
       await radioClick({
         radioClickObj: 5,
@@ -827,7 +833,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0067', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'curve')
       await radioClick({
@@ -849,7 +854,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0068', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'curve')
       await radioClick({
         radioClickObj: 7,
@@ -869,7 +873,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0069', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'curve')
       await radioClick({
@@ -891,7 +894,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0070', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'curve')
       await radioClick({
         radioClickObj: 9,
@@ -912,7 +914,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0071', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'curve')
       await radioClick({
         radioClickObj: 10,
@@ -932,7 +933,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0072', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'curve')
       await radioClick({
@@ -976,7 +976,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0074', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayCount')
       await sliderDrag({
         slideStar: Slide.start,
@@ -1013,7 +1012,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0075', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayCount.swipeByGroup')
       await radioClick({
         radioClickObj: 0,
@@ -1033,7 +1031,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0076', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayCount.swipeByGroup')
       await radioClick({
@@ -1057,7 +1054,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0077', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'effectMode')
       await radioClick({
         radioClickObj: 0,
@@ -1078,7 +1074,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0078', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'effectMode')
       await radioClick({
         radioClickObj: 1,
@@ -1098,7 +1093,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0079', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'effectMode')
       await radioClick({
@@ -1162,7 +1156,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0082', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.isSidebarMiddle')
       await radioClick({
         radioClickObj: 0,
@@ -1182,7 +1175,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0083', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.isSidebarMiddle')
       await radioClick({
@@ -1206,7 +1198,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0084', 0, async (done: Function) => {
       //无法取到子组件状态
-
 
       await Search('参数列表', 'displayArrow.backgroundSize')
       await sliderDrag({
@@ -1274,7 +1265,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0087', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.backgroundColor')
       await buttonClick({
         buttonClickObj: 2,
@@ -1294,7 +1284,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0088', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.backgroundColor')
       await buttonClick({
@@ -1317,7 +1306,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0089', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.backgroundColor')
       await buttonClick({
         buttonClickObj: 4,
@@ -1338,7 +1326,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0090', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.backgroundColor')
       await buttonClick({
@@ -1362,7 +1349,6 @@ export default function Swiper1Test() {
      * 测试组件displayArrow.arrowSize且获取属性正确
      */
     it('ArkUI_Swiper_0091', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.arrowSize')
       await sliderDrag({
@@ -1400,7 +1386,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0092', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
         buttonClickObj: 0,
@@ -1421,7 +1406,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0093', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
@@ -1444,7 +1428,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0094', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
         buttonClickObj: 2,
@@ -1464,7 +1447,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0095', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
@@ -1487,7 +1469,6 @@ export default function Swiper1Test() {
 
     it('ArkUI_Swiper_0096', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
         buttonClickObj: 4,
@@ -1508,7 +1489,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0097', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.arrowColor')
       await buttonClick({
@@ -1535,7 +1515,6 @@ export default function Swiper1Test() {
     it('ArkUI_Swiper_0098', 0, async (done: Function) => {
       //无法取到子组件状态
 
-
       await Search('参数列表', 'displayArrow.isHoverShow')
       await radioClick({
         radioClickObj: 0,
@@ -1550,7 +1529,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0099', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'displayArrow.isHoverShow')
       await radioClick({
@@ -1567,7 +1545,6 @@ export default function Swiper1Test() {
      * 测试组件nextMargin且获取属性正确
      */
     it('ArkUI_Swiper_0100', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'nextMargin')
       await sliderDrag({
@@ -1605,7 +1582,6 @@ export default function Swiper1Test() {
      */
     it('ArkUI_Swiper_0101', 0, async (done: Function) => {
 
-
       await Search('参数列表', 'nextMargin.ignoreBlank')
       await radioClick({
         radioClickObj: 0,
@@ -1625,7 +1601,6 @@ export default function Swiper1Test() {
     })
 
     it('ArkUI_Swiper_0102', 0, async (done: Function) => {
-
 
       await Search('参数列表', 'nextMargin.ignoreBlank')
       await radioClick({
@@ -1791,14 +1766,14 @@ export default function Swiper1Test() {
     /**
      * 测试组件width且获取属性正确
      */
-    it('ArkUI_Column_Comp_0001', 0, async (done: Function) => {
+    it('ArkUI_Swiper_Comp_0001', 0, async (done: Function) => {
       await titleSearch('基础属性', 'width');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -1810,7 +1785,7 @@ export default function Swiper1Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'Swiper',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
