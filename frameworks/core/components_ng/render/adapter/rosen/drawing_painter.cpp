@@ -61,6 +61,34 @@ void ProcessIndices(uint16_t* indices, int32_t row, int32_t column)
         ++indexIndices;
     }
 }
+
+RSPen::CapStyle ConvertLineCapStyleToRSPenCapStyle(LineCapStyle lineCap)
+{
+    switch (lineCap) {
+        case LineCapStyle::ROUND:
+            return RSPen::CapStyle::ROUND_CAP;
+        case LineCapStyle::SQUARE:
+            return RSPen::CapStyle::SQUARE_CAP;
+        case LineCapStyle::BUTT:
+            return RSPen::CapStyle::FLAT_CAP;
+        default:
+            return RSPen::CapStyle::FLAT_CAP;
+    }
+}
+
+RSPen::JoinStyle ConvertJoinStyleToRSPenJoinStyle(LineJoinStyle lineJoin)
+{
+    switch (lineJoin) {
+        case LineJoinStyle::ROUND:
+            return RSPen::JoinStyle::ROUND_JOIN;
+        case LineJoinStyle::BEVEL:
+            return RSPen::JoinStyle::BEVEL_JOIN;
+        case LineJoinStyle::MITER:
+            return RSPen::JoinStyle::MITER_JOIN;
+        default:
+            return RSPen::JoinStyle::MITER_JOIN;
+    }
+}
 } // namespace
 void DrawingPainter::DrawPath(
     RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)
@@ -102,40 +130,14 @@ bool DrawingPainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProp
         pen.SetAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
     }
 
-    if (shapePaintProperty.HasStrokeLineCap()) {
-        int lineCap = shapePaintProperty.GetStrokeLineCapValue();
-        if (static_cast<int>(LineCapStyle::ROUND) == lineCap) {
-            pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-        } else if (static_cast<int>(LineCapStyle::SQUARE) == lineCap) {
-            pen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
-        } else {
-            pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
-        }
-    } else {
-        pen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
-    }
-
-    if (shapePaintProperty.HasStrokeLineJoin()) {
-        int lineJoin = shapePaintProperty.GetStrokeLineJoinValue();
-        if (static_cast<int>(LineJoinStyle::ROUND) == lineJoin) {
-            pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
-        } else if (static_cast<int>(LineJoinStyle::BEVEL) == lineJoin) {
-            pen.SetJoinStyle(RSPen::JoinStyle::BEVEL_JOIN);
-        } else {
-            pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
-        }
-    } else {
-        pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
-    }
-
-    Color strokeColor = Color::BLACK;
-    if (shapePaintProperty.HasStroke()) {
-        strokeColor = shapePaintProperty.GetStrokeValue();
-    }
-    double curOpacity = shapePaintProperty.STROKE_OPACITY_DEFAULT;
-    if (shapePaintProperty.HasStrokeOpacity()) {
-        curOpacity = shapePaintProperty.GetStrokeOpacityValue();
-    }
+    RSPen::CapStyle cap = ConvertLineCapStyleToRSPenCapStyle(static_cast<LineCapStyle>(
+        shapePaintProperty.GetStrokeLineCapValue(static_cast<int>(RSPen::CapStyle::FLAT_CAP))));
+    pen.SetCapStyle(cap);
+    RSPen::JoinStyle join = ConvertJoinStyleToRSPenJoinStyle(static_cast<LineJoinStyle>(
+        shapePaintProperty.GetStrokeLineJoinValue(static_cast<int>(RSPen::JoinStyle::MITER_JOIN))));
+    pen.SetJoinStyle(join);
+    Color strokeColor = shapePaintProperty.GetStrokeValue(Color::BLACK);
+    double curOpacity = shapePaintProperty.GetStrokeOpacityValue(shapePaintProperty.STROKE_OPACITY_DEFAULT);
     pen.SetColor(strokeColor.BlendOpacity(curOpacity).GetValue());
 
     if (shapePaintProperty.HasStrokeDashArray()) {
@@ -159,20 +161,10 @@ bool DrawingPainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProp
 
 void DrawingPainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
 {
-    Color fillColor = Color::BLACK;
-    if (shapePaintProperty.HasFill()) {
-        fillColor = shapePaintProperty.GetFillValue();
-    }
-    double curOpacity = shapePaintProperty.FILL_OPACITY_DEFAULT;
-    if (shapePaintProperty.HasFillOpacity()) {
-        curOpacity = shapePaintProperty.GetFillOpacityValue();
-    }
+    Color fillColor = shapePaintProperty.GetFillValue(Color::BLACK);
+    double curOpacity = shapePaintProperty.GetFillOpacityValue(shapePaintProperty.FILL_OPACITY_DEFAULT);
     brush.SetColor(fillColor.BlendOpacity(curOpacity).GetValue());
-    if (shapePaintProperty.HasAntiAlias()) {
-        brush.SetAntiAlias(shapePaintProperty.GetAntiAliasValue());
-    } else {
-        brush.SetAntiAlias(shapePaintProperty.ANTIALIAS_DEFAULT);
-    }
+    brush.SetAntiAlias(shapePaintProperty.GetAntiAliasValue(shapePaintProperty.ANTIALIAS_DEFAULT));
 }
 
 void DrawingPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)
