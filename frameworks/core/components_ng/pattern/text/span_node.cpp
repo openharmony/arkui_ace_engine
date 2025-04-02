@@ -496,6 +496,7 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, WordBreak, WordBreak);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
 }
 
@@ -1420,7 +1421,11 @@ void PlaceholderSpanItem::DumpInfo() const
             .append(textLineStyle
                         ? textLineStyle->GetLineHeight().value_or(Dimension(0.0, DimensionUnit::FP)).ToString()
                         : "Na"));
-    dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
+    dumpLog.AddDesc(
+        std::string("LineSpacing: ")
+            .append(textStyle.GetLineSpacing().ToString())
+            .append(" isOnlyBetweenLines: ")
+            .append((textStyle.GetIsOnlyBetweenLines()) ? "true" : "false"));
     dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
     dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
     dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
@@ -1463,6 +1468,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("FontSize", textStyle->GetFontSize().ToString().c_str());
     json->Put("LineHeight", textStyle->GetLineHeight().ToString().c_str());
     json->Put("LineSpacing", textStyle->GetLineSpacing().ToString().c_str());
+    json->Put("isOnlyBetweenLines", (textStyle->GetIsOnlyBetweenLines()) ? "true" : "false");
     json->Put("BaselineOffset", textStyle->GetBaselineOffset().ToString().c_str());
     json->Put("WordSpacing", textStyle->GetWordSpacing().ToString().c_str());
     json->Put("TextIndent", textStyle->GetTextIndent().ToString().c_str());

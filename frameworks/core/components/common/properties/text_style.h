@@ -656,6 +656,8 @@ public:
     ACE_DEFINE_TEXT_STYLE(TextShadows, std::vector<Shadow>, TextStyleAttribute::SHADOWS);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HalfLeading, bool, false, TextStyleAttribute::HALF_LEADING);
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
+        IsOnlyBetweenLines, bool, false, ParagraphStyleAttribute::TEXT_HEIGHT_BEHAVIOR);
+    ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         EllipsisMode, EllipsisMode, EllipsisMode::TAIL, ParagraphStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(Locale, std::string, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE_OPTIONAL_TYPE(TextBackgroundStyle, TextBackgroundStyle, TextStyleAttribute::BACKGROUND_RECT);

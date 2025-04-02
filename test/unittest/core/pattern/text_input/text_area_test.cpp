@@ -1596,6 +1596,45 @@ HWTEST_F(TextFieldUXTest, TextAreaLineSpacing001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaLineSpacing002
+ * @tc.desc: test TextArea lineSpacing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaLineSpacing002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetIsOnlyBetweenLines(true);
+        model.SetLineSpacing(2.0_fp);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text will wrap
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetLineSpacing(), 2.0_fp);
+    EXPECT_EQ(layoutProperty_->GetIsOnlyBetweenLines(), true);
+}
+
+/**
  * @tc.name: TextAreaLineBreakStrategy001
  * @tc.desc: test testArea text lineBreakStrategy
  * @tc.type: FUNC

@@ -212,6 +212,8 @@ void TextModelImpl::SetLetterSpacing(const Dimension& value)
 
 void TextModelImpl::SetLineSpacing(const Dimension& value) {}
 
+void TextModelImpl::SetIsOnlyBetweenLines(bool isOnlyBetweenLines) {}
+
 void TextModelImpl::SetAdaptMinFontSize(const Dimension& value)
 {
     auto component = GetComponent();

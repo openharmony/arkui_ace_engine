@@ -212,6 +212,9 @@ RefPtr<FrameNode> TextBases::CreateTextParagraph(const std::u16string& createVal
     if (testProperty.lineSpacingValue.has_value()) {
         textModel.SetLineSpacing(testProperty.lineSpacingValue.value());
     }
+    if (testProperty.isOnlyBetweenLines.has_value()) {
+        textModel.SetIsOnlyBetweenLines(testProperty.isOnlyBetweenLines.value());
+    }
     if (testProperty.textDecorationValue.has_value()) {
         textModel.SetTextDecoration(testProperty.textDecorationValue.value());
     }

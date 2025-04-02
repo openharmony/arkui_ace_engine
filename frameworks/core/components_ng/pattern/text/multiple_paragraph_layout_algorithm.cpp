@@ -472,7 +472,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(const TextSty
         .textOverflow = textStyle.GetTextOverflow(),
         .indent = textStyle.GetTextIndent(),
         .halfLeading = textStyle.GetHalfLeading(),
-        .paragraphSpacing = textStyle.GetParagraphSpacing()
+        .paragraphSpacing = textStyle.GetParagraphSpacing(),
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
         };
 }
 
@@ -778,6 +779,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(
                 paraStyleSpanItem->textLineStyle->HasParagraphSpacing() &&
                 Positive(paraStyleSpanItem->textLineStyle->GetParagraphSpacingValue().ConvertToPx()) &&
                 std::next(groupIt) != spans_.end();
+            spanParagraphStyle.isFirstParagraphLineSpacing = (groupIt == spans_.begin());
         }
         auto&& paragraph = GetOrCreateParagraph(group, spanParagraphStyle, aiSpanMap);
         CHECK_NULL_RETURN(paragraph, false);
