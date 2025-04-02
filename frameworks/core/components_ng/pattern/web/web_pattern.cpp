@@ -5289,12 +5289,13 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
     if (!isSmoothDragResizeEnabled) {
                 return;
     }
-    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG) {
+    if (type == WindowSizeChangeReason::DRAG_START || type == WindowSizeChangeReason::DRAG ||
+        type == WindowSizeChangeReason::SPLIT_DRAG_START || type == WindowSizeChangeReason::SPLIT_DRAG) {
         dragWindowFlag_ = true;
         delegate_->SetDragResizeStartFlag(true);
         WindowDrag(width, height);
     }
-    if (type == WindowSizeChangeReason::DRAG_END) {
+    if (type == WindowSizeChangeReason::DRAG_END || type == WindowSizeChangeReason::SPLIT_DRAG_END) {
         delegate_->SetDragResizeStartFlag(false);
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
