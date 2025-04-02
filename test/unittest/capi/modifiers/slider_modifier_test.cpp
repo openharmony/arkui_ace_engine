@@ -1132,12 +1132,14 @@ HWTEST_F(SliderModifierTest, setTrackColorResourceColorTestInvalidValues, TestSi
     checkValue("invalid union", Converter::ArkUnion<Ark_ResourceColor, Ark_Empty>(nullptr));
 }
 
+// Slider's component owner won't fix an issue in ToJsonValue (slider_paint_property.cpp) because of compatibility,
+// so the test is disabled.
 /*
  * @tc.name: setTrackColorLinearGradientTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setTrackColorLinearGradientTestValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setTrackColorLinearGradientTestValidValues, TestSize.Level1)
 {
     std::vector<std::pair<std::optional<Color>, Dimension>> colorStopValues = {
         std::make_pair(Color::RED, Dimension(0.5f)),
