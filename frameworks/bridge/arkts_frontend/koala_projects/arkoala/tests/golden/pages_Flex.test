@@ -1,0 +1,103 @@
+{
+  "rootElement": {
+    "nodeId": 1260,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1261,
+        "kind": "Flex",
+        "children": []
+      },
+      {
+        "nodeId": 1262,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {}
+      },
+      {
+        "nodeId": 1263,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "direction": 0,
+          "wrap": 0,
+          "justifyContent": 1,
+          "alignItems": 0,
+          "alignContent": 1
+        }
+      },
+      {
+        "nodeId": 1264,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "direction": 1,
+          "wrap": 1,
+          "justifyContent": 2,
+          "alignItems": 1,
+          "alignContent": 2
+        }
+      },
+      {
+        "nodeId": 1265,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "direction": 2,
+          "wrap": 2,
+          "justifyContent": 3,
+          "alignItems": 2,
+          "alignContent": 3
+        }
+      },
+      {
+        "nodeId": 1266,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "direction": 3,
+          "justifyContent": 6,
+          "alignItems": 3,
+          "alignContent": 6
+        }
+      },
+      {
+        "nodeId": 1267,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "justifyContent": 7,
+          "alignItems": 4,
+          "alignContent": 7
+        }
+      },
+      {
+        "nodeId": 1268,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "justifyContent": 8,
+          "alignItems": 5,
+          "alignContent": 8
+        }
+      },
+      {
+        "nodeId": 1269,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "alignItems": 0,
+          "alignContent": 2
+        }
+      },
+      {
+        "nodeId": 1270,
+        "kind": "Flex",
+        "children": [],
+        "setFlexOptions_value": {
+          "direction": 0
+        }
+      }
+    ]
+  }
+}

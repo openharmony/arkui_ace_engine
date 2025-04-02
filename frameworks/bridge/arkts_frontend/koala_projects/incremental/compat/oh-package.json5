@@ -1,0 +1,29 @@
+{
+  "name": "@koalaui/compat",
+  "version": "1.4.0+devel",
+  "description": "",
+  "main": "build/typescript/index.js",
+  "types": "build/typescript/index.d.ts",
+  "files": [
+    "build/typescript/**/*.js",
+    "build/typescript/**/*.d.ts"
+  ],
+  "exports": {
+    ".": "./build/typescript/index.js"
+  },
+  "scripts": {
+    "compile": "tsc -b .",
+    "clean": "rimraf build dist",
+    "compile:arkts": "bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig.json --ets-module"
+  },
+  "keywords": [],
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "source-map-support": "^0.5.21"
+  }
+}

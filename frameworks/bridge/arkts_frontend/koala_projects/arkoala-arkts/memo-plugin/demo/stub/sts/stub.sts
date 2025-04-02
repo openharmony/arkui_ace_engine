@@ -1,0 +1,5 @@
+import { memo, __memo_context_type, __memo_id_type } from "@koalaui/runtime"
+
+export class MemoStub {
+    @memo static memo_stub(s: String): void { }
+}

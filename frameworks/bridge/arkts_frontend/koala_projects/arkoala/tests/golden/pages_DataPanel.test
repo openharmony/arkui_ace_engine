@@ -1,0 +1,31 @@
+{
+  "rootElement": {
+    "nodeId": 1284,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1285,
+        "kind": "DataPanel",
+        "children": [],
+        "setDataPanelOptions_options": {
+          "values": [
+            11,
+            22,
+            33,
+            44,
+            55
+          ],
+          "max": 77,
+          "type": 4
+        },
+        "closeEffect_value": 1,
+        "trackBackgroundColor_value": "0xabcdef",
+        "strokeWidth_value": "5px",
+        "valueColors_value": [
+          "0x123456",
+          "0x654321"
+        ]
+      }
+    ]
+  }
+}

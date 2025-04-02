@@ -1,0 +1,21 @@
+/** @memo */
+function ui(__memo_context: __memo_context_type, __memo_id: __memo_id_type) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("4___key_id_DIRNAME/variable_declaration.test.ts" as __memo_id_type));
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    /** @memo */
+    let x1 = f, y1 = f;
+    x1(__memo_context, __memo_id + ("1___key_id_DIRNAME/variable_declaration.test.ts" as __memo_id_type));
+    y1(__memo_context, __memo_id + ("2___key_id_DIRNAME/variable_declaration.test.ts" as __memo_id_type));
+    const 
+    /** @memo */
+    x2 = f, y2 = f;
+    x2(__memo_context, __memo_id + ("3___key_id_DIRNAME/variable_declaration.test.ts" as __memo_id_type));
+    y2();
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

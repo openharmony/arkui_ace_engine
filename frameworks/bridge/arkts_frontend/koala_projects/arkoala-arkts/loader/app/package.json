@@ -1,0 +1,23 @@
+{
+    "name": "@koalaui/app",
+    "version": "1.4.1",
+    "description": "",
+    "scripts": {
+        "clean": "rimraf shopping/entry/build shopping/generated shopping/oh_modules shopping/.hvigor",
+
+        "ets-plugin": "npm run arkoala:plugin --prefix ../../..",
+
+        "har:arm32": "npm run arkoala:har-arm32 --prefix ../../..",
+        "har:arm64": "npm run arkoala:har-arm64 --prefix ../../..",
+
+        "ohpm": "cd shopping && node ../../../../arkoala/ohos-sdk/scripts/cli.mjs oh-build --install-ohpm-deps-only",
+        "build": "cd shopping && node ../../../../arkoala/ohos-sdk/scripts/cli.mjs oh-build",
+        "sign": "cd shopping && node ../../../../arkoala/ohos-sdk/scripts/cli.mjs oh-sign",
+        "run": "cd shopping && node ../../../../arkoala/ohos-sdk/scripts/cli.mjs oh-exec -i -r",
+        "rebuild": "rm -rf shopping/entry/build && npm run build && npm run sign",
+        "launch": "npm run clean && npm run ohpm && npm run build && npm run sign && npm run run",
+
+        "all:arm32": "npm run ets-plugin && npm run clean && npm run har:arm32 && npm run launch",
+        "all:arm64": "npm run ets-plugin && npm run clean && npm run har:arm64 && npm run launch"
+    }
+}

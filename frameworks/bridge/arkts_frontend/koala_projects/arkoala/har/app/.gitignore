@@ -1,0 +1,11 @@
+.hvigor
+node_modules
+oh_modules
+rawfile
+libs
+generated
+test.log
+test-images
+build*
+!build-profile.json5
+ohpm

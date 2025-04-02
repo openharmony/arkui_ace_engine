@@ -1,0 +1,17 @@
+{
+    "extends": "@koalaui/ets-plugin/base-tsconfig.ets.json",
+    "include": [
+        "./Rewrite.ets",
+        "./Rewrite2.ets",
+        "./Rewrite3.ets"
+    ],
+    "compilerOptions": {
+        "plugins": [
+            {
+                "transform": "@koalaui/ets-plugin/build/lib/src/ArkExpander.js",
+                "destination": "../generated/arkts",
+                "arkui": "@koalaui/arkts-arkui"
+            }
+        ]
+    }
+}

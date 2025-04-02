@@ -1,0 +1,12 @@
+[dependencies]
+[package]
+  cjc-version = "0.56.4"
+  compile-option = ""
+  description = "config file for cj build"
+  link-option = ""
+  name = "Interop"
+  output-type = "static"
+  src-dir = "."
+  target-dir = "./build/cj"
+  version = "1.0.0"
+  package-configuration = {}

@@ -1,0 +1,29 @@
+{
+    "name": "@koalaui/arkts-framework",
+    "version": "1.4.1",
+    "description": "",
+    "scripts": {
+        "clean": "rimraf build generated unmemoized js_output abc lib app/user/build app/user/libs app/.hvigor .ninja_log",
+        "distclean": "rimraf command-line-tools",
+        "compile:plugin": "cd ../../../arkoala/ets-plugin && npm run compile",
+        "compile:ets": "npm run compile:plugin && cd src/ets && ets-tsc -p ./etsconfig.json",
+        "unmemoize": "npm run compile:ets && ets-tsc -p tsconfig-unmemoize.json",
+        "unmemoize:runtime": "npm run unmemoize --prefix ../../../incremental/runtime",
+        "unmemoize:arkui-no-common": "npm run unmemoize --prefix ../../arkui",
+        "unmemoize:arkui-common": "npm run unmemoize --prefix ../../../arkoala/arkui-common",
+        "unmemoize:all": "npm run unmemoize:runtime && npm run unmemoize:arkui-no-common && npm run unmemoize:arkui-common && npm run unmemoize",
+        "build:user": "npm run unmemoize:all && npm run build:user:inc",
+        "build:user:inc": "fast-arktsc --input-files ./arktsconfig-run-unmemoized.json --output-dir ./build --compiler ../../../incremental/tools/panda/arkts/arktsc --link-name user && ninja -f build/build.ninja",
+
+        "pack": "npm run cli-tools:check && cd app && DEVECO_SDK_HOME=../../../../arkoala/ohos-sdk/ohos-sdk ../../../command-line-tools/hvigor/bin/hvigorw --no-daemon --mode module -p product=default -p module=user@default assembleHar",
+        "har-arm32": "npm run build:user && npm run --prefix ../../../arkoala/ohos-sdk download && node scripts/build-har.mjs --name user --arch arm32 && npm run pack",
+        "har-arm64": "npm run build:user && npm run --prefix ../../../arkoala/ohos-sdk download && node scripts/build-har.mjs --name user --arch arm64 && npm run pack",
+
+        "cli-tools:chmod:bz": "node ../../../arkoala/ohos-sdk/scripts/openlab-cli.mjs chmod -p ../../command-line-tools/ohpm/bin -b 755 && node ../../../arkoala/ohos-sdk/scripts/openlab-cli.mjs chmod -p ../../command-line-tools/hvigor/bin -b 755",
+        "cli-tools:chmod:yz": "node ../../../arkoala/ohos-sdk/scripts/gitlab-cli.mjs chmod -p ../../command-line-tools/ohpm/bin -b 755 && node ../../../arkoala/ohos-sdk/scripts/gitlab-cli.mjs chmod -p ../../command-line-tools/hvigor/bin -b 755",
+        "cli-tools:download:bz": "node ../../../arkoala/ohos-sdk/scripts/openlab-cli.mjs download -p command-line-tools -v 5.0.3502 -f command-line-tools.5.0.3502.zip -d ../../command-line-tools && npm run cli-tools:chmod:bz",
+        "cli-tools:download:yz": "node ../../../arkoala/ohos-sdk/scripts/gitlab-cli.mjs download -p deveco-tools -v 5.0.1300 -f deveco-tools.5.0.1300.zip -d ../../command-line-tools && npm run cli-tools:chmod:yz",
+        "cli-tools:download": "test \"$KOALA_BZ\" = \"0\" && npm run cli-tools:download:yz || npm run cli-tools:download:bz",
+        "cli-tools:check": "test -d ../../command-line-tools || npm run cli-tools:download"
+    }
+}
