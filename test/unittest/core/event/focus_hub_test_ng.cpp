@@ -575,7 +575,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
     focusHub->currentFocus_ = true;
     bool flagCbk1 = false;
     bool flagCbk2 = false;
-    focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onFocusInternal_ = [&flagCbk1](FocusReason reason) { flagCbk1 = !flagCbk1; };
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
     focusHub->OnFocus();

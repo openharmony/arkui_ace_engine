@@ -2687,7 +2687,7 @@ void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusInternal();

@@ -1236,7 +1236,7 @@ bool DialogPattern::OnKeyEvent(const KeyEvent& event)
 
 void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto onFocus = [wp = WeakClaim(this)]() {
+    auto onFocus = [wp = WeakClaim(this)](FocusReason reason) {
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();

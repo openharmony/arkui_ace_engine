@@ -1556,7 +1556,7 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (!pattern) {
             return;

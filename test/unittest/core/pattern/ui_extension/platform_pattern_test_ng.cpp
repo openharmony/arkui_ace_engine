@@ -259,7 +259,7 @@ HWTEST_F(PlatformPatternTestNg, InitKeyEvent001, TestSize.Level1)
 
     focusHub->SetIsNodeNeedKey(true);
     platformPattern->InitKeyEvent(focusHub);
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     KeyEvent keyEvent;
@@ -271,7 +271,7 @@ HWTEST_F(PlatformPatternTestNg, InitKeyEvent001, TestSize.Level1)
     
     platformPattern = nullptr;
     focusHub->SetIsNodeNeedKey(true);
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     ret = focusHub->onPaintFocusStateCallback_();

@@ -576,7 +576,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
      */
     auto focusHub = uiExtensionNode->GetFocusHub();
     pattern->InitKeyEvent(focusHub);
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     focusHub->onPaintFocusStateCallback_();
@@ -596,7 +596,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
 
     pattern = nullptr;
     uiExtensionNode->pattern_ = nullptr;
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     focusHub->onPaintFocusStateCallback_();

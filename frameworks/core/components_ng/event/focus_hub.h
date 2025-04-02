@@ -559,7 +559,7 @@ public:
 
     bool HasFocusedChild();
 
-    void SetOnFocusInternal(OnFocusFunc&& onFocusInternal)
+    void SetOnFocusInternal(std::function<void(FocusReason reason)>&& onFocusInternal)
     {
         onFocusInternal_ = std::move(onFocusInternal);
     }
@@ -965,7 +965,7 @@ private:
 
     bool IsLastWeakNodeFocused() const;
 
-    OnFocusFunc onFocusInternal_;
+    std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
     OnPreFocusFunc onPreFocusCallback_;

@@ -1349,7 +1349,7 @@ void FocusHub::OnFocusNode(bool currentHasFocused)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
-        onFocusInternal_();
+        onFocusInternal_(focusReason_);
     }
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);

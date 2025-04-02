@@ -2292,7 +2292,7 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
