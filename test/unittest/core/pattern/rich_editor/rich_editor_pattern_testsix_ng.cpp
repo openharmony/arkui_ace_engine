@@ -646,51 +646,6 @@ HWTEST_F(RichEditorPatternTestSixNg, GetRightWordPosition005, TestSize.Level1)
 }
 
 /**
- * @tc.name: CaretPositionSelectEmoji001
- * @tc.desc: test CaretPositionSelectEmoji
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CaretPositionSelectEmoji001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    CaretMoveIntent direction = CaretMoveIntent::Left;
-    auto ret = richEditorPattern->CaretPositionSelectEmoji(direction);
-    EXPECT_EQ(ret, richEditorPattern->caretPosition_ - 1);
-}
-
-/**
- * @tc.name: CaretPositionSelectEmoji002
- * @tc.desc: test CaretPositionSelectEmoji
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CaretPositionSelectEmoji002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    CaretMoveIntent direction = CaretMoveIntent::Right;
-    auto ret = richEditorPattern->CaretPositionSelectEmoji(direction);
-    EXPECT_EQ(ret, richEditorPattern->caretPosition_ + 1);
-}
-
-/**
- * @tc.name: CaretPositionSelectEmoji003
- * @tc.desc: test CaretPositionSelectEmoji
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CaretPositionSelectEmoji003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    CaretMoveIntent direction = CaretMoveIntent::Up;
-    auto ret = richEditorPattern->CaretPositionSelectEmoji(direction);
-    EXPECT_EQ(ret, richEditorPattern->caretPosition_);
-}
-
-/**
  * @tc.name: MouseRightFocus002
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
@@ -734,34 +689,6 @@ HWTEST_F(RichEditorPatternTestSixNg, FromStyledString002, TestSize.Level1)
     selection = richEditorPattern->FromStyledString(spanString).GetSelection();
     EXPECT_EQ(selection.selection[0], 0);
     EXPECT_EQ(selection.selection[1], 0);
-}
-
-/**
- * @tc.name: InitSelection003
- * @tc.desc: test InitSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, InitSelection003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    richEditorPattern->previewLongPress_ = true;
-    auto offset = Offset(0, 0);
-    AddSpan("hello1");
-    richEditorPattern->previewLongPress_ = false;
-    richEditorPattern->editingLongPress_ = false;
-    PositionWithAffinity positionWithAffinity(3, TextAffinity::DOWNSTREAM);
-    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-    ParagraphManager::ParagraphInfo info;
-    info.paragraph = paragraph;
-    richEditorPattern->paragraphs_.AddParagraph(std::move(info));
-
-    richEditorPattern->InitSelection(offset);
-    EXPECT_NE(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_NE(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /**

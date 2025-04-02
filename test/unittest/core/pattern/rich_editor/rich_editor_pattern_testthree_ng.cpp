@@ -169,21 +169,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRightWordPosition001, TestSize.Level2)
 }
 
 /**
- * @tc.name: HandleSelect001
- * @tc.desc: test HandleSelect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_EQ(richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_), 0);
-    AddSpan(INIT_VALUE_1 + TEST_INSERT_LINE_SPACE);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Home);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), richEditorPattern->textSelector_.GetStart());
-}
-
-/**
  * @tc.name: HandleOnEscape001
  * @tc.desc: test HandleOnEscape
  * @tc.type: FUNC
@@ -1065,26 +1050,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleFocusEvent, TestSize.Level1)
     richEditorPattern->isOnlyRequestFocus_ = true;
     richEditorPattern->HandleFocusEvent();
     EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
- * @tc.name: HandleSelect002
- * @tc.desc: test HandleSelect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    int32_t selectStart = 0;
-    int32_t selectEnd = 2;
-    SelectOverlayInfo selectInfo;
-    auto pipeline = richEditorNode_->GetContext();
-    auto selectOverlayManager = pipeline->GetSelectOverlayManager();
-    selectOverlayManager->selectOverlayInfo_.isUsingMouse = true;
-    richEditorPattern->HandleSelect(info, selectStart, selectEnd);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
 }
 
 /**

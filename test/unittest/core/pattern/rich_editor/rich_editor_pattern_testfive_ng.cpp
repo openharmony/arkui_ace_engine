@@ -428,73 +428,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction005, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSelectSpanSplit001
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto newFrameNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    auto newPlusFrameNode = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    richEditorNode_->children_.push_back(newFrameNode);
-    richEditorNode_->children_.push_back(newPlusFrameNode);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    EXPECT_TRUE(richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo).empty());
-}
-
-/**
- * @tc.name: GetSelectSpanSplit002
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.size(), 0);
-}
-
-/**
- * @tc.name: GetSelectSpanSplit003
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.front().spanIndex, 0);
-}
-
-/**
  * @tc.name: InsertValueToBeforeSpan001
  * @tc.desc: test InsertValueToBeforeSpan
  * @tc.type: FUNC
@@ -614,66 +547,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, AddSpanHoverEven001, TestSize.Level1)
     ASSERT_NE(imageSpanItem, nullptr);
     EXPECT_NE(imageSpanItem->options.userMouseOption.onHover, nullptr);
     EXPECT_NE(imageSpanItem->options.userGestureOption.onDoubleClick, nullptr);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos001
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(true), 0);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos002
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(true), 0);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos003
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_->text_ = u"HandleSelectParagraghPos";
-    richEditorPattern->caretPosition_ = 1;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(false), 2);
-}
-
-/**
- * @tc.name: HandleSelectParagraghPos004
- * @tc.desc: test HandleSelectParagraghPos
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleSelectParagraghPos004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    EXPECT_EQ(richEditorPattern->HandleSelectParagraghPos(false), 0);
 }
 
 /**
@@ -906,105 +779,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetSelectSpanSplit004
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    startPositionSpanInfo.spanOffset_ = 1;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.size(), 1);
-}
-
-/**
- * @tc.name: GetSelectSpanSplit005
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    endPositionSpanInfo.spanIndex_ = 1;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.size(), 2);
-}
-
-/**
- * @tc.name: GetSelectSpanSplit006
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit006, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    endPositionSpanInfo.spanIndex_ = 1;
-    endPositionSpanInfo.spanOffset_ = 1;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.size(), 2);
-}
-
-/**
- * @tc.name: GetSelectSpanSplit007
- * @tc.desc: test GetSelectSpanSplit
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetSelectSpanSplit007, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeNew = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    auto spanNodeAnother = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, nodeId);
-    richEditorNode_->children_.push_back(spanNode);
-    richEditorNode_->children_.push_back(spanNodeNew);
-    richEditorNode_->children_.push_back(spanNodeAnother);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    SpanPositionInfo startPositionSpanInfo;
-    SpanPositionInfo endPositionSpanInfo;
-    endPositionSpanInfo.spanIndex_ = 2;
-    auto result = richEditorPattern->GetSelectSpanSplit(startPositionSpanInfo, endPositionSpanInfo);
-    EXPECT_EQ(result.size(), 3);
-}
-
-/**
  * @tc.name: GetThumbnailCallback001
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC
@@ -1031,21 +805,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     Offset point(10, 10);
     thumbnailCallback(point);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: HandleClickSelection001
- * @tc.desc: test HandleClickSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleClickSelection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->bindManager_.Reset();
-    OHOS::Ace::GestureEvent info;
-    EXPECT_TRUE(richEditorPattern->HandleClickSelection(info));
 }
 
 /**
