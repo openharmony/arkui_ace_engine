@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -2794,7 +2796,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         PerfMonitor::GetPerfMonitor()->SetPageName(toNavDestinationName);
     }
     ResSchedReport::GetInstance().HandlePageTransition(fromNavDestinationName, toNavDestinationName, "navigation");
-
+    UiSessionManager::GetInstance()->OnRouterChange(toPathInfo.c_str(), "navigationPathChange");
     // fire onWillHide
     if (!isPopPage && !preDestination && navigationMode_ == NavigationMode::STACK) {
         // NavBar will be covered in STACK mode

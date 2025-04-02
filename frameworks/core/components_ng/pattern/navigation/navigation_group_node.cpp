@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -767,7 +766,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         SetNeedSetInvisible(false);
     }
     isOnAnimation_ = true;
-    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPopPage");
 }
 
 void NavigationGroupNode::RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
@@ -1030,7 +1028,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             AceScopedPerformanceCheck::RecordPerformanceCheckData(nodeMap, endTime - startTime, path);
         });
     }
-    UiSessionManager::GetInstance()->OnRouterChange(navigationPathInfo_, "navigationPushPage");
 #if !defined(ACE_UNITTEST)
     TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(curNode,
         curNavDestination->GetNavDestinationPathInfo());
