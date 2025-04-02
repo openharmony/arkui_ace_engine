@@ -5425,7 +5425,7 @@ void RichEditorPattern::FinishTextPreview()
     }
     auto previewContent = previewTextRecord_.previewContent;
     FinishTextPreviewInner();
-    ProcessInsertValue(previewContent, OperationType::IME, false);
+    ProcessInsertValue(previewContent, OperationType::IME, true);
 }
 
 void RichEditorPattern::FinishTextPreviewInner(bool deletePreviewText)

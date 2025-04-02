@@ -149,6 +149,7 @@ void RichEditorUndoManager::RecordUndoOperation(const UndoRedoRecord& record)
 void RichEditorUndoManager::RecordPreviewInputtingStart(int32_t start, int32_t length)
 {
     previewInputRecord_.Reset();
+    CHECK_NULL_VOID(length > 0);
     UpdateRecordBeforeChange(start, length, previewInputRecord_);
 }
 
@@ -163,6 +164,7 @@ bool RichEditorUndoManager::RecordPreviewInputtingEnd(const UndoRedoRecord& reco
     previewInputRecord_.SetOperationAfter(rangeAfter, styledString);
     CHECK_NULL_RETURN(previewInputRecord_.IsValid(), false);
     RecordOperation(previewInputRecord_);
+    previewInputRecord_.Reset();
     return true;
 }
 
