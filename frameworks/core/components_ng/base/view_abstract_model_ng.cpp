@@ -947,6 +947,16 @@ void ViewAbstractModelNG::ResetOnAccessibilityFocus()
     accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
 }
 
+void ViewAbstractModelNG::SetOnAccessibilityActionIntercept(
+    NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityActionIntercept(onActionAccessibilityActionIntercept);
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1114,4 +1124,12 @@ void ViewAbstractModelNG::ResetOnAccessibilityFocus(FrameNode* frameNode)
     accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
 }
 
+void ViewAbstractModelNG::SetOnAccessibilityActionIntercept(
+    FrameNode* frameNode, NG::ActionAccessibilityActionIntercept&& onActionAccessibilityActionIntercept)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityActionIntercept(onActionAccessibilityActionIntercept);
+}
 } // namespace OHOS::Ace::NG

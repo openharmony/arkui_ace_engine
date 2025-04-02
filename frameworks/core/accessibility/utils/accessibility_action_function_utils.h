@@ -29,14 +29,24 @@ class accessibilityProperty;
 
 class AccessibilityFunctionUtils {
 public:
-    template <typename T>
-    static bool CheckCurrentHasFunc(T& ptr, const RefPtr<FrameNode>& node)
+    static bool CheckCurrentHasFunc(ActionNotifyChildAction& ptr, const RefPtr<FrameNode>& node)
     {
         ptr = nullptr;
         CHECK_NULL_RETURN(node, false);
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
-        ptr = accessibilityProperty->GetFunc();
+        ptr = accessibilityProperty->GetNotifyChildActionFunc();
+        CHECK_NULL_RETURN(ptr, false);
+        return true;
+    }
+
+    static bool CheckCurrentHasFunc(ActionAccessibilityActionIntercept& ptr, const RefPtr<FrameNode>& node)
+    {
+        ptr = nullptr;
+        CHECK_NULL_RETURN(node, false);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        ptr = accessibilityProperty->GetAccessibilityActionInterceptFunc();
         CHECK_NULL_RETURN(ptr, false);
         return true;
     }
@@ -71,6 +81,29 @@ public:
             result = HandleNotifyChildAction(parentNode, type);
         }
         return result;
+    }
+
+    static AccessibilityActionInterceptResult HandleAccessibilityActionIntercept(const RefPtr<FrameNode>& node,
+        AccessibilityInterfaceAction action)
+    {
+        auto result = AccessibilityActionInterceptResult::ACTION_CONTINUE;
+        CHECK_NULL_RETURN(node, result);
+
+        ActionAccessibilityActionIntercept func = nullptr;
+        auto currentHasFunc = CheckCurrentHasFunc(func, node);
+        CHECK_EQUAL_RETURN(currentHasFunc, false, result);
+        CHECK_NULL_RETURN(func, result);
+        result = func(action);
+        if (result != AccessibilityActionInterceptResult::ACTION_RISE) {
+            return result;
+        }
+
+        RefPtr<FrameNode> parentNode = nullptr;
+        if (CheckAncestorHasFunc(func, node, parentNode)) {
+            return HandleAccessibilityActionIntercept(parentNode, action);
+        } else {
+            return AccessibilityActionInterceptResult::ACTION_CONTINUE;
+        }
     }
 };
 } // namespace OHOS::Ace::NG

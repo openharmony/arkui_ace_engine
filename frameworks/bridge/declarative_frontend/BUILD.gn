@@ -221,6 +221,7 @@ template("declarative_js_engine") {
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
+      "engine/functions/js_accessibility_function.cpp",
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
@@ -786,6 +787,7 @@ template("declarative_js_engine_ng") {
     sources = [
       "engine/bindings_implementation.cpp",
       "engine/declarative_engine_loader.cpp",
+      "engine/functions/js_accessibility_function.cpp",
       "engine/functions/js_animator_function.cpp",
       "engine/functions/js_click_function.cpp",
       "engine/functions/js_clipboard_function.cpp",
