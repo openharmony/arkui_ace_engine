@@ -695,6 +695,36 @@ HWTEST_F(GestureGroupTestNg, RecognizerGroupTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RecognizerGroupTest009
+ * @tc.desc: Test RecognizerGroup function: HandleEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureGroupTestNg, RecognizerGroupTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create RecognizerGroup
+     */
+    RefPtr<ClickRecognizer> clickRecognizer1 = AceType::MakeRefPtr<ClickRecognizer>();
+    RefPtr<ClickRecognizer> clickRecognizer2 = AceType::MakeRefPtr<ClickRecognizer>();
+
+    std::vector<RefPtr<NGGestureRecognizer>> recognizers = {clickRecognizer1, clickRecognizer2};
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+
+    /**
+     * @tc.steps: step2. call function and compare result.
+     * @tc.steps: case1: recognizers_ receive event
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    bool result;
+    touchEvent.id = 0;
+    clickRecognizer1->BeginReferee(0);
+    result = exclusiveRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(clickRecognizer1->refereeState_, RefereeState::READY);
+}
+
+/**
  * @tc.name: GestureGroupTest001
  * @tc.desc: Test GestureGroup CreateRecognizer function
  */

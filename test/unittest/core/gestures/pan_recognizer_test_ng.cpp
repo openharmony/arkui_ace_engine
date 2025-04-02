@@ -671,23 +671,23 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step2. case9: GetX <= GetY, GetY > distance_, GetY > 0, PanDirection::UP.
-     * @tc.expected: step2. return REJECT.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::UP;
     panRecognizer->averageDistance_ = Offset(-1, 1);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case10: GetX <= GetY, GetY = distance_ = 0, PanDirection::UP.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::UP;
     panRecognizer->averageDistance_ = Offset(-1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
 
 /**
@@ -1730,7 +1730,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest007, TestSize
 
     /**
      * @tc.steps: step2. case3: GetX > GetY, GetX < distance, PanDirection::HORIZONTAL.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
@@ -1746,7 +1746,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest007, TestSize
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case5: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
@@ -1916,7 +1916,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest010, TestSize
 
     /**
      * @tc.steps: step2. case3: GetX > GetY, GetX < distance, PanDirection::HORIZONTAL.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::HORIZONTAL;
     panRecognizer->averageDistance_ = Offset(0, -1);
@@ -1932,7 +1932,7 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest010, TestSize
     panRecognizer->currentFingers_ = panRecognizer->fingers_;
     panRecognizer->refereeState_ = RefereeState::DETECTING;
     panRecognizer->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case5: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
@@ -1978,67 +1978,67 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerHandleTouchMoveEventTest011, TestSize
     
     /**
      * @tc.steps: step2. case1: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
-     * @tc.expected: step2. return REJECT.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case2: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case3: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
-     * @tc.expected: step2. return REJECT.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case4: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(touchEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
     
     /**
      * @tc.steps: step2. case5: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
-     * @tc.expected: step2. return REJECT.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::LEFT;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 
     /**
      * @tc.steps: step2. case6: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
-     * @tc.expected: step2. return DETECTING.
+     * @tc.expected: step2. return ACCEPT.
      */
     panRecognizer->direction_.type = PanDirection::VERTICAL;
     panRecognizer->averageDistance_ = Offset(1, 0);
     panRecognizer->distanceMap_[SourceTool::UNKNOWN] = 0;
     result = panRecognizer->IsPanGestureAccept();
     panRecognizer->HandleTouchMoveEvent(axisEvent);
-    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
+    EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
 }
 
 /**

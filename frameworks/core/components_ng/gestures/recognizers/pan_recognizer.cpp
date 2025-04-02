@@ -677,9 +677,7 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAcceptInVerticalDi
 PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
 {
     auto judgeDistance = GetDistanceConfigFor(deviceTool_);
-    // when version >= 20, if distance_ = 0, panGesture will accept when receive Down event
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) &&
-        NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
+    if (NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
     if ((direction_.type & PanDirection::ALL) == PanDirection::ALL) {
