@@ -418,9 +418,9 @@ interface StorageLinkPropRegistration {
   
 export class LocalStorage {
 
-    private storage_: Map<string, StateDecoratedVariable<Object>>;
-    private nextLinkPropId: StorageLinkPropIdType = 1;
-    private linksPropRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
+  private storage_: Map<string, StateDecoratedVariable<Object>>; 
+  private nextLinkPropId: StorageLinkPropIdType = 1;
+  private linksPropRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
 
   constructor() {
     this.storage_ = new Map<string, StateDecoratedVariable<Object>>();
@@ -447,22 +447,22 @@ export class LocalStorage {
     return p ? p!.get() as T: undefined;
   }
 
-  public set(propName: string, newValue: Object): boolean {
+  public set<T>(propName: string, newValue: T): boolean {
     const p: StateDecoratedVariable<Object> | undefined = this.storage_.get(propName);
     if (p === undefined) {
       return false;
     }
-    p.set(newValue);
+    p.set(newValue as Object);
     return true;
   }
 
-  public setOrCreate(propName: string, newValue: Object): boolean {
+  public setOrCreate<T>(propName: string, newValue: T): boolean {
     let p: StateDecoratedVariable<Object> | undefined = this.storage_.get(propName);
     if (p !== undefined) {
-      p.set(newValue);
+      p.set(newValue as Object);
       return true;
     }
-    this.addNewPropertyInternal(propName, newValue);
+    this.addNewPropertyInternal(propName, newValue as Object);
     return true;
   }
 
@@ -612,11 +612,11 @@ export class AppStorage extends LocalStorage {
         return AppStorage.getOrCreate().get<T>(key);
     }
 
-    public static set(key: string, newValue: Object): boolean {
+    public static set<T>(key: string, newValue: T): boolean {
         return AppStorage.getOrCreate().set(key, newValue);
     }
 
-    public static setOrCreate(key: string, newValue: Object): void {
+    public static setOrCreate<T>(key: string, newValue: T): void {
         AppStorage.getOrCreate().setOrCreate(key, newValue);
     }
 
