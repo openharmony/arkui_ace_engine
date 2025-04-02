@@ -3086,7 +3086,7 @@ void TextPattern::GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& su
         if (span == nullptr) {
             continue; // skip null
         }
-        if ((span->nodeId_ >= 0) || (span->unicode > 0)) {
+        if ((span->spanItemType == SpanItemType::IMAGE) || (span->unicode > 0)) {
             continue;  // skip ImageSpan and SymbolSpan
         }
         if (span->spanItemType == SpanItemType::CustomSpan) {
