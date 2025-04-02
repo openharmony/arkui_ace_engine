@@ -467,6 +467,7 @@ private:
     void UpdateCachedItemPosition(int32_t cacheCount);
     void UpdateLayoutedItemInfo();
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    bool IsRoundingMode(LayoutWrapper* layoutWrapper);
 
     bool isCardStyle_ = false;
     int32_t headerIndex_;

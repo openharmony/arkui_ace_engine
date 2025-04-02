@@ -372,7 +372,8 @@ public:
         return host->GetInstanceId();
     }
 
-    PipelineContext* GetContext() {
+    PipelineContext* GetContext() const
+    {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, nullptr);
         return frameNode->GetContext();
