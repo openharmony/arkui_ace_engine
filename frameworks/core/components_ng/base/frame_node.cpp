@@ -6376,7 +6376,7 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
     if (!getCustomProperty_) {
         getCustomProperty_ = getFunc;
     }
-    if (!getCustomPropertyMapFunc_) {
+    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
         getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
     }
 }

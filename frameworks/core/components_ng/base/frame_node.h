@@ -474,9 +474,9 @@ public:
     }
 
     void ChangeSensitiveStyle(bool isSensitive);
-    
+
     bool IsJsCustomPropertyUpdated() const;
-    
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
@@ -1218,7 +1218,7 @@ public:
     }
 
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
-        std::function<std::string()>&& getCustomPropertyMapFunc);
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
