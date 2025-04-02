@@ -23,15 +23,12 @@
 namespace OHOS::Ace::Napi {
 static napi_value JSCreateContainerWithoutWindow(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
     napi_value result = nullptr;
 
     napi_value thisVal = nullptr;
     std::size_t argc = 1;
     napi_value argv = nullptr;
     void *context = nullptr;
-
-    napi_open_handle_scope(env, &scope);
 
     napi_get_cb_info(env, info, &argc, &argv, &thisVal, nullptr);
     if (argc != 1) {
@@ -55,10 +52,11 @@ static napi_value JSCreateContainerWithoutWindow(napi_env env, napi_callback_inf
     }
 
     auto frontend = container->GetFrontend();
-    CHECK_NULL_RETURN(frontend, result);
+    if (!frontend) {
+        return result;
+    }
     result = frontend->GetContextValue();
 
-    napi_close_handle_scope(env, scope);
     return result;
 }
 
