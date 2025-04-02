@@ -3091,7 +3091,7 @@ void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
         CHECK_NULL_VOID(ngPipeline);
         auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
         CHECK_NULL_VOID(container);
-        auto containerHandler = container->GetContainerHandler().Upgrade();
+        auto containerHandler = container->GetContainerHandler();
         CHECK_NULL_VOID(containerHandler);
 
         HandlerData data = {

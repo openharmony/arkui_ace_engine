@@ -113,6 +113,7 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -2156,6 +2157,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     // set focus window id for ui extension after pipeline context created.
     if (focusWindowId != 0) {
         container->SetFocusWindowId(focusWindowId);
+        auto uIExtensionContainerHandler = AceType::MakeRefPtr<NG::UIExtensionContainerHandler>();
+        uIExtensionContainerHandler->SetHostParams(hostWindowInfo_.hostWantParams);
+        container->RegisterContainerHandler(uIExtensionContainerHandler);
     }
 
     auto realHostWindowId = window_->GetRealParentId();
@@ -3412,6 +3416,23 @@ void UIContentImpl::SetUIContentType(UIContentType uIContentType)
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     container->SetUIContentType(uIContentType);
+}
+
+void UIContentImpl::SetHostParams(const OHOS::AAFwk::WantParams& params)
+{
+    if (hostWindowInfo_.hostWantParams == nullptr) {
+        hostWindowInfo_.hostWantParams = std::make_shared<OHOS::AAFwk::Want>();
+    }
+
+    hostWindowInfo_.hostWantParams->SetParams(params);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto containerHandler = container->GetContainerHandler();
+    CHECK_NULL_VOID(containerHandler);
+    auto uIExtensionContainerHandler =
+        AceType::DynamicCast<NG::UIExtensionContainerHandler>(containerHandler);
+    CHECK_NULL_VOID(uIExtensionContainerHandler);
+    uIExtensionContainerHandler->SetHostParams(hostWindowInfo_.hostWantParams);
 }
 
 void UIContentImpl::UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode)

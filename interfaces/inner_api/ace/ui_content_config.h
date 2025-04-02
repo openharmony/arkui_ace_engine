@@ -19,11 +19,17 @@
 #include <string>
 #include <vector>
 
-namespace OHOS::Ace {
+namespace OHOS {
+namespace AAFwk {
+    class Want;
+}; // namespace AAFwk
+
+namespace Ace {
 struct HostWindowInfo {
     int32_t hostInstanceId;
     uint32_t focusWindowId = 0;
     uint32_t realHostWindowId = 0;
+    std::shared_ptr<OHOS::AAFwk::Want> hostWantParams;
 };
 
 struct DynamicInitialConfig {
@@ -34,6 +40,7 @@ struct DynamicInitialConfig {
     std::vector<std::string> registerComponents;
     HostWindowInfo hostWindowInfo;
 };
-} // namespace OHOS::Ace
+} // namespace Ace
+} // namespace OHOS
 
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_CONFIG_H
