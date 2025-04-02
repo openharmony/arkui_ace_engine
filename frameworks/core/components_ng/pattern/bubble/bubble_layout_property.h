@@ -102,7 +102,7 @@ public:
 
         auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         auto theme = context ? context->GetTheme<PopupTheme>() : nullptr;
-        auto defaultTargetSpace = theme ? theme->GetTargetSpace() : Dimension(8._vp);
+        auto defaultTargetSpace = theme ? theme->GetTargetSpace() : Dimension();
         bubbleLayoutProperty->Put("targetSpace", GetTargetSpace().value_or(defaultTargetSpace).ToString().c_str());
 
         auto defaultRadius = theme ?
