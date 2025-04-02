@@ -618,7 +618,7 @@ private:
         std::vector<RefPtr<NavDestinationNodeBase>>& invisibleNodes,
         std::vector<RefPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
-    void UpdateSystemBarConfigForSizeChanged();
+    void UpdatePageLevelConfigForSizeChanged();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
     void ShowOrHideSystemBarIfNeeded(bool isShow,
         std::optional<std::pair<bool, bool>> preStatusBarConfig, std::optional<bool> showStatusBar,
@@ -695,6 +695,7 @@ private:
     std::optional<std::pair<bool, bool>> preStatusBarConfig_;
     std::optional<bool> showNavIndicator_;
     std::optional<bool> preNavIndicatorConfig_;
+    bool isTransitionAnimationAborted_ = false;
 };
 
 } // namespace OHOS::Ace::NG
