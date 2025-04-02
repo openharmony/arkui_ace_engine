@@ -55,10 +55,10 @@ private:
         const std::shared_ptr<SimplifiedInspectorTree>& treeNode, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray);
     RectF deviceRect_;
     int32_t containerId_;
-    int pageId_;
+    int pageId_ = 0;
     TreeParams params_;
     InspectorConfig inspectorCfg_;
-    size_t size_;
+    size_t size_ = 0;
     bool isAsync_ = false;
     bool isBackground_ = false;
     std::shared_ptr<Recorder::InspectorTreeCollector> collector_;
