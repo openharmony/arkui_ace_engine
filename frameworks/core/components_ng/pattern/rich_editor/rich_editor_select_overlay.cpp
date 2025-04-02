@@ -296,7 +296,6 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
-    menuInfo.menuType = IsUsingMouse() ? OptionMenuType::MOUSE_MENU : OptionMenuType::TOUCH_MENU;
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
 
@@ -609,10 +608,6 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     bool needRecreate = (lastMenuParams_ == nullptr) ^ (menuParams == nullptr);
     if (!needRecreate) {
         UpdateHandleOffset();
-        if (IsShowMouseMenu()) {
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
-            return;
-        }
         IF_TRUE(IsMenuShow(), UpdateMenuOffset());
         return;
     }
