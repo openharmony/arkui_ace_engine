@@ -552,18 +552,16 @@ void OnScrollStop0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onScrollStop = [arkCallback = CallbackHelper(*value)](const std::vector<std::string>& values,
                                                                const std::vector<double>&selecteds) {
-        Converter::ArkArrayHolder<Array_String> stringHolder(values);
-        Array_String stringArrayValues = stringHolder.ArkValue();
+        Array_String stringArrayValues = Converter::ArkValue<Array_String>(values, Converter::FC);
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
         std::vector<int32_t> selectedIndexes;
-    for (const auto tmp : selecteds) {
-        selectedIndexes.push_back(static_cast<int32_t>(tmp));
-    }
-    Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
-    Array_Number intArrayValues = numberHolder.ArkValue();
-    auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
-    arkCallback.Invoke(value, index);
-};
+        for (const auto tmp : selecteds) {
+            selectedIndexes.push_back(static_cast<int32_t>(tmp));
+        }
+        Array_Number intArrayValues = Converter::ArkValue<Array_Number>(selectedIndexes, Converter::FC);
+        auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
+        arkCallback.Invoke(value, index);
+    };
 TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 void OnScrollStop1Impl(Ark_NativePointer node,
@@ -582,15 +580,13 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onEnterSelectedArea = [arkCallback = CallbackHelper(*value)](const std::vector<std::string>& values,
                                                                       const std::vector<double>&selecteds) {
-        Converter::ArkArrayHolder<Array_String> stringHolder(values);
-        Array_String stringArrayValues = stringHolder.ArkValue();
+        Array_String stringArrayValues = Converter::ArkValue<Array_String>(values, Converter::FC);
         auto value = Converter::ArkUnion<Ark_Union_String_Array_String, Array_String>(stringArrayValues);
         std::vector<int32_t> selectedIndexes;
         for (const auto tmp : selecteds) {
             selectedIndexes.push_back(static_cast<int32_t>(tmp));
         }
-        Converter::ArkArrayHolder<Array_Number> numberHolder(selectedIndexes);
-        Array_Number intArrayValues = numberHolder.ArkValue();
+        Array_Number intArrayValues = Converter::ArkValue<Array_Number>(selectedIndexes, Converter::FC);
         auto index = Converter::ArkUnion<Ark_Union_Number_Array_Number, Array_Number>(intArrayValues);
         arkCallback.Invoke(value, index);
     };
