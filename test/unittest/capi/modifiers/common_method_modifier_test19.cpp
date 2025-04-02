@@ -28,12 +28,143 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+    static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_INDEXER_COMPONENT, "alphabetindexer" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_BADGE_COMPONENT, "badge" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_BLANK, "blank" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON, "button" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_BACK_BUTTON, "backbutton" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SHEET_DRAG_BAR, "sheetdragbar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CALENDAR_PICKER, "calendarpicker" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CALENDAR, "calendar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS, "canvas" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_GRADIENT, "canvasgradient" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_PATTERN, "canvaspattern" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CHECKBOX, "checkbox" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CHECKBOX_GROUP, "checkboxgroup" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CIRCLE, "circle" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_COLUMN_SPLIT, "columnsplit" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_COLUMN, "column" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_RENDERING_CONTEXT_2D, "canvasrenderingcontext2d" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CHART, "chart" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_COUNTER, "counter" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_CONTAINER_MODAL, "containermodal" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_DATA_PANEL, "datapanel" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_DATE_PICKER, "datepicker" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_DIALOG, "dialog" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_DIVIDER, "divider" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_DRAG_BAR, "dragbar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_EFFECT_COMPONENT, "effectcomponent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ELLIPSE, "ellipse" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_FLEX, "flex" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_FLOW_ITEM, "flowitem" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_FORM_COMPONENT, "formcomponent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_FORM_LINK, "formlink" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GAUGE, "gauge" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GRID, "grid" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_COL, "gridcol" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_CONTAINER, "gridcontainer" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_ITEM, "griditem" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_ROW, "grid-row" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_HYPERLINK, "hyperlink" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE, "image" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_ANIMATOR, "imageanimator" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_BITMAP, "imagebitmap" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_DATA, "imagedata" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_SPAN, "imagespan" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LABEL, "label" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LINE, "line" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LIST, "list" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LIST_ITEM, "listitem" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LIST_ITEM_GROUP, "listitemgroup" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_LOADING_PROGRESS, "loadingprogress" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_MARQUEE, "marquee" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_MATRIX2D, "matrix2d" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_MENU, "menu" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_MENU_ITEM, "menuitem" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_MENU_ITEM_GROUP, "menuitemgroup" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAV_DESTINATION, "navdestination" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAV_ROUTER, "navrouter" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION, "navigation" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION_BAR, "navigation-bar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION_MENU, "navigation-menu" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATOR, "navigator" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_OFFSCREEN_CANVAS, "offscreencanvas" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_OFFSCREEN_CANVAS_RENDERING_CONTEXT2D, "offscreencanvasrenderingcontext2d" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_OPTION, "option" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PANEL, "panel" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PAPER_PAGE, "paperpage" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PATH, "path" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PATH2D, "path2d" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PATTERN_LOCK, "patternlock" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PICKER, "picker" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PICKER_VIEW, "picker-view" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PLUGIN_COMPONENT, "plugincomponent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_POLYGON, "polygon" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_POLYLINE, "polyline" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_POPUP, "popup" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_PROGRESS, "progress" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_QRCODE, "qrcode" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RADIO, "radio" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RATING, "rating" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RECT, "rect" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_REFRESH, "refresh" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RELATIVE_CONTAINER, "relativecontainer" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_REMOTE_WINDOW, "remotewindow" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RICH_EDITOR, "richeditor" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_RICH_TEXT, "richtext" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ROLE_PAGER, "rolepager" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ROW, "row" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ROW_SPLIT, "rowsplit" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SCROLL, "scroll" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SCROLL_BAR, "scrollbar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SEARCH, "search" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SEARCH_FIELD, "searchfield" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SELECT, "select" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SHAPE, "shape" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SIDEBAR_CONTAINER, "sidebarcontainer" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SLIDER, "slider" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SPAN, "span" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_STACK, "stack" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_STEPPER, "stepper" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_STEPPER_ITEM, "stepperitem" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SWIPER, "swiper" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SWIPER_INDICATOR, "swiperindicator" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SWITCH, "switch" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_SYMBOL_GLYPH, "symbolglyph" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TAB_CONTENT, "tabcontent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TAB_BAR, "tab-bar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TABS, "tabs" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT, "text" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_CLOCK, "textclock" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_ENTRY, "textentry" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_INPUT, "textinput" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_PICKER, "textpicker" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_TIMER, "texttimer" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_AREA, "textarea" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_FIELD, "textfield" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TIME_PICKER, "timepicker" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TITLE_BAR, "titlebar" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_TOGGLER, "toggler" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_UI_EXTENSION_COMPONENT, "uiextensioncomponent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_VIDEO, "video" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_WATER_FLOW, "waterflow" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_WEB, "web" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_XCOMPONENT, "xcomponent" },
+        { ARK_ACCESSIBILITY_ROLE_TYPE_ROLE_NONE, "NULL" }
+    };
+}
+
 namespace GeneratedModifier {
     const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
     const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
 }
 
-class CommonMethodModifierTest17lm : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
+class CommonMethodModifierTest19 : public ModifierTestBase<GENERATED_ArkUICommonMethodModifier,
     &GENERATED_ArkUINodeModifiers::getCommonMethodModifier,
     GENERATED_ARKUI_BLANK // test common methods on frameNode for Blank component
     > {
@@ -54,7 +185,7 @@ public:
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, TabStopTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, TabStopTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -69,7 +200,7 @@ HWTEST_F(CommonMethodModifierTest17lm, TabStopTestDefaultValues, TestSize.Level1
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, TabStopTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, TabStopTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTabStop, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -92,7 +223,7 @@ HWTEST_F(CommonMethodModifierTest17lm, TabStopTestValidValues, TestSize.Level1)
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityNextFocusIdTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -107,7 +238,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityNextFocusIdTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityNextFocusIdTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityNextFocusId, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -130,7 +261,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityNextFocusIdTestValidValues, 
 // * @tc.desc:
 // * @tc.type: FUNC
 // */
-HWTEST_F(CommonMethodModifierTest17lm, DISABLED_AccessibilityDefaultFocusTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestDefaultValues, TestSize.Level1)
 {
     LOGE("AccessibilityManager::SendFrameNodeToAccessibility(...) is empty body");
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -142,7 +273,7 @@ HWTEST_F(CommonMethodModifierTest17lm, DISABLED_AccessibilityDefaultFocusTestDef
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, DISABLED_AccessibilityDefaultFocusTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestValidValues, TestSize.Level1)
 {
     LOGE("AccessibilityManager::SendFrameNodeToAccessibility(...) is empty body");
     ASSERT_NE(modifier_->setAccessibilityDefaultFocus, nullptr);
@@ -167,7 +298,7 @@ HWTEST_F(CommonMethodModifierTest17lm, DISABLED_AccessibilityDefaultFocusTestVal
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -183,7 +314,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestDefaultValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityUseSamePage, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -193,8 +324,8 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestValidValues, 
 
     using TestStep = std::tuple<Ark_AccessibilitySamePageMode, std::string>;
     static const std::vector<TestStep> testPlan = {
-        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT, "FULL_SILENT"},
-        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT, "SEMI_SILENT"}};
+        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT, "fullsilent"},
+        {ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT, "semisilent"}};
 
     for (auto [inputValue, expectedValue]: testPlan) {
         modifier_->setAccessibilityUseSamePage(node_, inputValue);
@@ -208,7 +339,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestValidValues, 
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityUseSamePageTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityUseSamePage, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -228,7 +359,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityUseSamePageTestInvalidValues
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -244,22 +375,16 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestDefaultValues, TestS
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-
-    using TestStep = std::tuple<Ark_AccessibilityRoleType, std::string>;
-    static const std::vector<TestStep> testPlan = {
-        {Ark_AccessibilityRoleType::ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "ACTION_SHEET"},
-        {Ark_AccessibilityRoleType::ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "ALERT_DIALOG"}};
-
     EXPECT_FALSE(accessibilityProperty->HasAccessibilityCustomRole());
 
-    for (auto [inputValue, expectedValue]: testPlan) {
+    for (auto [inputValue, expectedValue]: ACCESSIBILITY_ROLE_MAP) {
         modifier_->setAccessibilityRole(node_, inputValue);
         EXPECT_TRUE(accessibilityProperty->HasAccessibilityCustomRole());
         EXPECT_EQ(accessibilityProperty->GetAccessibilityCustomRole(), expectedValue);
@@ -271,7 +396,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestValidValues, TestSiz
 * @tc.desc:
 * @tc.type: FUNC
 */
-HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, AccessibilityRoleTestInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityRole, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -292,7 +417,7 @@ HWTEST_F(CommonMethodModifierTest17lm, AccessibilityRoleTestInvalidValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest17lm, SetOnKeyEventDispatchTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest19, SetOnKeyEventDispatchTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnKeyEventDispatch, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
