@@ -2302,10 +2302,10 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
         .levelOrder = GetLevelOrderParam(env, asyncContext),
+        .focusable = GetFocusableParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
-        .focusable = GetFocusableParam(env, asyncContext),
     };
     return promptDialogAttr;
 }
