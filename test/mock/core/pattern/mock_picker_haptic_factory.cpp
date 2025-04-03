@@ -14,7 +14,7 @@
  */
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_stub.h"
+#include "mock_picker_haptic_impl.h"
 
 namespace OHOS::Ace::NG {
 std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::instance_ { nullptr };
@@ -26,7 +26,7 @@ std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance(
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (instance_ == nullptr) {
-            instance_ = std::make_shared<PickerAudioHapticStub>();
+            instance_ = std::make_shared<MockPickerAudioHapticImpl>();
         }
     }
     return instance_;

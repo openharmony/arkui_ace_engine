@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H
+#ifndef FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H
+#define FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H
 
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
-class PickerAudioHapticStub : public IPickerAudioHaptic {
+class MockPickerAudioHapticImpl : public IPickerAudioHaptic {
 public:
     enum class ThreadStatus {
         NONE,
@@ -29,22 +29,27 @@ public:
         PLAY_ONCE,
         HANDLE_DELTA,
     };
-    PickerAudioHapticStub() = default;
-    ~PickerAudioHapticStub() = default;
-    void Play(size_t speed)
+
+    void Play(size_t speed) override
     {
         playThreadStatus_ = ThreadStatus::PLAYING;
     }
-    void PlayOnce()
+
+    void PlayOnce() override
     {
         playThreadStatus_ = ThreadStatus::PLAY_ONCE;
     }
-    void Stop() {}
-    void HandleDelta(double dy)
+
+    void Stop() override
+    {
+    }
+
+    void HandleDelta(double dy) override
     {
         playThreadStatus_ = ThreadStatus::HANDLE_DELTA;
     }
+
     ThreadStatus playThreadStatus_ = ThreadStatus::NONE;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H
+#endif // FOUNDATION_ACE_TEST_CORE_PATTERN_MOCK_PICKER_HAPTIC_IMPL_H
