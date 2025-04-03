@@ -245,7 +245,9 @@ HWTEST_F(UICommonEventAccessorTest, setOnHoverTest, TestSize.Level1)
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
-
+    frameNode->GetEventHub<EventHub>()->AttachHost(frameNode);
+    auto inputHub = frameNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
 
     auto onHoverFunc = [](Ark_VMContext context,
                         const Ark_Int32 resourceId,
@@ -255,17 +257,16 @@ HWTEST_F(UICommonEventAccessorTest, setOnHoverTest, TestSize.Level1)
             .resourceId = Converter::Convert<int32_t>(resourceId),
         };
     };
-
     auto arkCallback = Converter::ArkValue<HoverCallback>(nullptr, onHoverFunc, RES_ID);
     auto optCallback = Converter::ArkValue<Opt_HoverCallback>(arkCallback);
     ASSERT_NE(peer_, nullptr);
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnHover(peer_, &optCallback);
 
-    auto inputHub = frameNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    ASSERT_NE(inputHub, nullptr);
+
     const OffsetF& off {};
     TouchTestResult result;
+    inputHub->SetHoverEffect(HoverEffectType::SCALE);
     inputHub->ProcessMouseTestHit(off, result);
     auto target = AceType::DynamicCast<HoverEventTarget>(result.front());
     ASSERT_NE(target, nullptr);
@@ -287,6 +288,9 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
     const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     peer_->node = frameNode;
+    frameNode->GetEventHub<EventHub>()->AttachHost(frameNode);
+    auto inputHub = frameNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    ASSERT_NE(inputHub, nullptr);
 
     auto onMouseFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_MouseEvent event) {
         testEvent = {
@@ -299,8 +303,6 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
     ASSERT_NE(accessor_, nullptr);
     accessor_->setOnMouse(peer_, &optCallback);
 
-  /*  auto inputHub = frameNode->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
-    ASSERT_NE(inputHub, nullptr);
     const OffsetF& off {};
     TouchTestResult result;
     inputHub->ProcessMouseTestHit(off, result);
@@ -311,7 +313,7 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
 
     ASSERT_TRUE(testEvent);
     EXPECT_EQ(testEvent->resourceId, RES_ID);
-    */
+    
 }
 
 /**
@@ -337,6 +339,61 @@ HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnVisibleAreaApproximateChangeTe
     ASSERT_NE(accessor_, nullptr);
     Ark_VisibleAreaEventOptions options {};
     accessor_->setOnVisibleAreaApproximateChange(peer_, &options, &optCallback);
+}
+
+/**
+ * @tc.name: setOnKeyEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(UICommonEventAccessorTest, DISABLED_setOnKeyEventTest, TestSize.Level1)
+{
+    static std::optional<TestEvent> testEvent = std::nullopt;
+    const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+
+    auto focusHub = frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
+
+    auto onKeyEventFunc = [](const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+        testEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(onKeyEventFunc, RES_ID);
+    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Void>(arkCallback);
+    accessor_->setOnKeyEvent(peer_, &optCallback);
+}
+
+/**
+ * @tc.name: setOnSizeChangeEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(UICommonEventAccessorTest, setOnSizeChangeEventTest, TestSize.Level1)
+{
+    static std::optional<TestEvent> testEvent = std::nullopt;
+    const auto frameNode = AceType::MakeRefPtr<FrameNode>("TEST", 0, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    peer_->node = frameNode;
+    auto hub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(hub, nullptr);
+
+    auto onSizeChangeFunc = [](const Ark_Int32 resourceId,
+                                const Ark_SizeOptions oldValue,
+                                const Ark_SizeOptions newValue) {
+        testEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+    };
+    auto arkCallback = Converter::ArkValue<SizeChangeCallback>(onSizeChangeFunc, RES_ID);
+    auto optCallback = Converter::ArkValue<Opt_SizeChangeCallback>(arkCallback);
+    accessor_->setOnSizeChange(peer_, &optCallback);
+    RectF oldRect {};
+    RectF newRect {};
+    hub->FireOnSizeChanged(oldRect, newRect);
+    ASSERT_TRUE(testEvent);
+    EXPECT_EQ(testEvent->resourceId, RES_ID);
 }
 } // namespace OHOS::Ace::NG
  
