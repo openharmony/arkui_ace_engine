@@ -59,6 +59,28 @@ public:
         Release(continuation.resource.resourceId);
     }
 
+    template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
+    static void InvokeWithResultHandlerAsync(
+        std::function<void(const void *)> &&handler, const CallbackHelper &helper, Params&&... args)
+    {
+        // create continuation
+        ContinuationType continuation {
+            .resource = GetNextResource(),
+            .call = &ReceiveResult<ArkResultType>,
+            .callSync = &ReceiveResultSync<ArkResultType>
+        };
+
+        auto handlerWrapper = [handler = std::move(handler), continuation](const void *valuePtr) {
+            handler(valuePtr);
+            Release(continuation.resource.resourceId);
+        };
+
+        // register handler
+        storage_[continuation.resource.resourceId] = { 1, std::move(handlerWrapper) }; // +1 for automatic Hold
+
+        helper.Invoke(std::forward<Params>(args)..., continuation);
+    }
+
     template <typename CallbackType>
     static CallbackType DefineReverseCallback(ReverseHandler &&handler)
     {
