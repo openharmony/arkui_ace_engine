@@ -147,17 +147,8 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
     }
 
     if (HasShadow()) {
-        auto tempPixelMap = pixelMap->GetPixelMapSharedPtr();
-        CHECK_NULL_VOID(tempPixelMap);
-        RSRect rec;
-        if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
-            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
-            rec = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
-        } else {
-            rec = RSRect(canvasImage.dx, canvasImage.dy,
-                canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
-        }
+        RSRect rec = RSRect(
+            canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth, canvasImage.dy + canvasImage.dHeight);
         RSPath path;
         path.AddRect(rec);
         PaintImageShadow(path, state_.shadow, &imageBrush_, nullptr,
@@ -237,7 +228,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         return nullptr;
     }
 
-    RSBitmapFormat format = GetBitmapFormat();
+    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
     RSBitmap tempCache;
     tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;
