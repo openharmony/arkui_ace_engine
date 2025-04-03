@@ -222,6 +222,36 @@ void SpanModelNG::ClearOnClick(UINode* uiNode)
     ACE_UPDATE_NODE_SPAN_PROPERTY(OnClickEvent, nullptr, uiNode);
 }
 
+void SpanModelNG::SetOnLongPress(UINode* uiNode, GestureEventFunc&& onLongPress)
+{
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
+        ACE_UPDATE_NODE_SPAN_PROPERTY(OnLongPressEvent, std::move(onLongPress), uiNode);
+    } else {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        CHECK_NULL_VOID(frameNode);
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto focusHub = eventHub->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnLongPressCallback(std::move(onLongPress));
+    }
+}
+
+void SpanModelNG::ClearOnLongPress(UINode* uiNode)
+{
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
+        ACE_UPDATE_NODE_SPAN_PROPERTY(OnLongPressEvent, nullptr, uiNode);
+    } else {
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        CHECK_NULL_VOID (frameNode);
+        auto eventHub = frameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto focusHub = eventHub->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetOnLongPressCallback(std::move(nullptr));
+    }
+}
+
 void SpanModelNG::SetAccessibilityText(const std::string& text)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());

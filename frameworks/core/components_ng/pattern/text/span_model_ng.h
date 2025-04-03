@@ -103,6 +103,8 @@ public:
     static std::vector<Shadow> GetTextShadow(UINode* uiNode);
     static void SetOnClick(UINode* uiNode, GestureEventFunc&& click);
     static void ClearOnClick(UINode* uiNode);
+    static void SetOnLongPress(UINode* uiNode, GestureEventFunc&& onLongPress);
+    static void ClearOnLongPress(UINode* uiNode);
     static void SetAccessibilityText(UINode* uiNode, const std::string& text);
     static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
     static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);

@@ -368,6 +368,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_CHECKBOX_GROUP_CHANGE;
         case NODE_ON_AXIS:
             return ON_AXIS;
+        case NODE_TEXT_SPAN_ON_LONG_PRESS:
+            return ON_TEXT_SPAN_LONG_PRESS;
         default:
             return -1;
     }
@@ -606,6 +608,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
         case ON_AXIS:
             return NODE_ON_AXIS;
+        case ON_TEXT_SPAN_LONG_PRESS:
+            return NODE_TEXT_SPAN_ON_LONG_PRESS;
         default:
             return -1;
     }

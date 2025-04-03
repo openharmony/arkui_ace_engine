@@ -431,6 +431,7 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler TEXT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnDetectResultUpdate,
+    NodeModifier::SetOnTextSpanLongPress,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
@@ -655,6 +656,7 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 
 const ResetComponentAsyncEventHandler TEXT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnDetectResultUpdate,
+    NodeModifier::ResetOnTextSpanLongPress,
 };
 
 const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

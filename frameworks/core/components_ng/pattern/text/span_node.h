@@ -539,6 +539,11 @@ public:
         spanItem_->onClick = std::move(onClick);
     }
 
+    void UpdateOnLongPressEvent(GestureEventFunc&& onLongPress)
+    {
+        spanItem_->onLongPress = std::move(onLongPress);
+    }
+    
     void OnInspectorIdUpdate(const std::string& inspectorId) override
     {
         spanItem_->inspectId = inspectorId;
