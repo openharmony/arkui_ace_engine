@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include "modifier_test_base.h"
-#include "modifiers_test_utils.h"
+#include "select_modifier_test.h"
 
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -22,79 +21,15 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
+using namespace SelectTest;
 
 namespace {
-const auto THEME_SPACE = Dimension(23, DimensionUnit::PX);
-const double THEME_FONT_OPACITY = 0.5;
-const Color THEME_BACKGROUND_COLOR(0xFFAABBC1);
-const Color THEME_FONT_COLOR(0xFFAABBC3);
-const Color THEME_SELECTED_OPTION_FONT_COLOR(0xFFAABBC4);
-
-const auto DEFAULT_FONT_SIZE = "14.00px";
-const auto DEFAULT_FONT_WEIGHT = "FontWeight.Normal";
-const auto DEFAULT_FONT_FAMILY = "";
-const auto DEFAULT_FONT_STYLE = "FontStyle.Normal";
-
-const Ark_Font TEST_ARK_FONT = {
-    .size = ArkValue<Opt_Length>(12._px),
-    .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
-    .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
-    .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),
-};
-const auto EXPECTED_FONT_SIZE = "12.00px";
-const auto EXPECTED_FONT_WEIGHT = "FontWeight.Bold";
-const auto EXPECTED_FONT_FAMILY = "TestFontFamily";
-const auto EXPECTED_FONT_STYLE = "FontStyle.Italic";
-
-const auto SELECTED_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(1);
-const auto INVALID_INDEX = ArkUnion<Ark_Union_Number_Resource, Ark_Number>(-1);
-
-const std::vector<Ark_SelectOption> SELECT_PARAMS = {
-    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option A") },
-    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option B") },
-    { .value = ArkUnion<Ark_ResourceStr, Ark_String>("Option C") },
-};
-
-// length values
-const Ark_Float32 AFLT32_POS(1.234f);
-const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
-const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
-static const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
-static const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
-
-// check length
-const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
-const std::string CHECK_NEGATIVE_VALUE_INT("-2147483648.00px");
-const std::string CHECK_POSITIVE_VALUE_FLOAT("1.23vp");
-const std::string CHECK_POSITIVE_VALUE_FLOAT_PX("1.23px");
-const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
-
-const auto FONT_ATTR("font");
-const auto SELECTED_OPTION_FONT_ATTR("selectedOptionFont");
-const auto OPTION_FONT_ATTR("optionFont");
-const auto FONT_SIZE("size");
-const auto FONT_FAMILY("family");
-const auto FONT_WEIGHT("weight");
-const auto FONT_STYLE("style");
-
-const auto FONT_FAMILY_RES_NAME = "Family resource name";
-const auto FONT_FAMILY_RES_VALUE = "FontFamilyA,FontFamilyB,   FontFamilyC";
-
-const auto VALUE_RES_NAME = "Value resource name";
-const auto VALUE_RES_VALUE = "Select value";
-
-const auto OPTIONS_VALUE_RES_NAME = "SelectOption value resource name";
-const auto OPTIONS_VALUE_RES_VALUE = "SelectOption value";
-const auto OPTIONS_ICON_RES_NAME = "SelectOption icon resource name";
-const auto OPTIONS_ICON_RES_VALUE = "SelectOption icon";
 
 using FontTestStep = std::tuple<Ark_Font, std::string>;
 
@@ -187,54 +122,6 @@ float strToFloat(const std::string& str)
     return (ptr == str.c_str()) ? std::numeric_limits<float>::min() : result;
 }
 } // namespace
-
-class SelectModifierTest : public ModifierTestBase<GENERATED_ArkUISelectModifier,
-    &GENERATED_ArkUINodeModifiers::getSelectModifier, GENERATED_ARKUI_SELECT> {
-public:
-    static void SetUpTestCase()
-    {
-        ModifierTestBase::SetUpTestCase();
-
-        // set test values to Theme Pattern as data for the Theme building
-        auto themeStyle = SetupThemeStyle("select_pattern");
-        themeStyle->SetAttr("content_spinner_padding", { .value = THEME_SPACE });
-        themeStyle->SetAttr("bg_color", { .value = THEME_BACKGROUND_COLOR });
-        themeStyle->SetAttr("text_color", { .value = THEME_FONT_COLOR });
-        themeStyle->SetAttr("text_color_selected", { .value = THEME_SELECTED_OPTION_FONT_COLOR });
-        themeStyle->SetAttr("menu_text_primary_alpha", { .value = THEME_FONT_OPACITY });
-
-        SetupTheme<SelectTheme>();
-        SetupTheme<TextTheme>();
-        SetupTheme<IconTheme>();
-
-        AddResource(FONT_FAMILY_RES_NAME, FONT_FAMILY_RES_VALUE);
-        AddResource(VALUE_RES_NAME, VALUE_RES_VALUE);
-        AddResource(OPTIONS_VALUE_RES_NAME, OPTIONS_VALUE_RES_VALUE);
-        AddResource(OPTIONS_ICON_RES_NAME, OPTIONS_ICON_RES_VALUE);
-    }
-
-    void SetUp(void) override
-    {
-        ModifierTestBase::SetUp();
-
-        ASSERT_NE(modifier_->setSelectOptions, nullptr);
-        auto arrayHolder = ArkArrayHolder<Array_SelectOption>(SELECT_PARAMS);
-        auto arkArray = arrayHolder.ArkValue();
-        modifier_->setSelectOptions(node_, &arkArray);
-
-        auto frameNode = reinterpret_cast<FrameNode*>(node_);
-        ASSERT_TRUE(frameNode);
-        auto selectPattern = frameNode->GetPatternPtr<SelectPattern>();
-        ASSERT_TRUE(selectPattern);
-        std::vector<RefPtr<FrameNode>> options = selectPattern->GetOptions();
-        ASSERT_FALSE(options.empty());
-        auto optionFrameNode = options[0];
-        ASSERT_TRUE(optionFrameNode);
-        auto pattern = optionFrameNode->GetPattern();
-        ASSERT_TRUE(pattern);
-        pattern->OnModifyDone(); // Init selectTheme
-    }
-};
 
 /**
  * @tc.name: setFontColorTest
