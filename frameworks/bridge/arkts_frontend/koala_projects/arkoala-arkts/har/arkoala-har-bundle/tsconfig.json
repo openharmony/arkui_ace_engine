@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "lib": ["ESNext"],
+        "types": []
+    },
+    // "files": ["bundle.d.ts"]
+    "include": [
+        "bundle.d.ts",
+        // "**/*.ts",
+        "../../../incremental/compat/typescript/Types.d.ts",
+        "../../arkui-common/interface_sdk-js/api/@internal/component/ets/**/*.ts",
+        "../../arkui-common/interface_sdk-js/api/@internal/ets/**/*.ts",
+        "../../arkui-common/interface_sdk-js/api/@system.app.d.ts"
+    ]
+}

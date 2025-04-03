@@ -1,0 +1,27 @@
+{
+    "name": "@koalaui/arkoala-har",
+    "description": "",
+    "version": "1.4.1+devel",
+    "engines": {
+        "npm": ">= 8",
+        "node": ">= 18"
+    },
+    "keywords": [],
+    "dependencies": {
+        "@microsoft/api-extractor": "^7.42.3",
+        "@rollup/plugin-commonjs": "^25.0.7",
+        "@rollup/plugin-inject": "^5.0.5",
+        "@rollup/plugin-node-resolve": "^15.2.3",
+        "@rollup/plugin-replace": "5.0.5",
+        "@rollup/plugin-terser": "^0.4.4",
+        "rollup": "^4.13.0"
+    },
+    "scripts": {
+        "clean": "rimraf app/arkoala/build app/arkoala/libs app/arkoala/bundle.js arkoala-har-bundle/dist",
+        "pack": "npm run cli-tools:download && cd app && DEVECO_SDK_HOME=../../../arkoala/ohos-sdk/ohos-sdk ../../command-line-tools/hvigor/bin/hvigorw --no-daemon --mode module -p product=default -p module=arkoala@default assembleHar",
+        "har-arm32": "npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-arkoala-har.mjs --arch arm32 --vmkind ani && npm run pack",
+        "har-arm64": "npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-arkoala-har.mjs --arch arm64 --vmkind ani && npm run pack",
+        "har-universal": "npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-arkoala-har-universal.mjs --vmkind ani && npm run pack",
+        "cli-tools:download": "node ../../arkoala/ohos-sdk/scripts/oh-sdk-cli.mjs cli-tools -d ../"
+    }
+}

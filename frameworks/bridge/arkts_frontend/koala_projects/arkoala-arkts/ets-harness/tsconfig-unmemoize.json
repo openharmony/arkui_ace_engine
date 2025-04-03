@@ -1,0 +1,56 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "rootDir": ".",
+        "module": "CommonJS",
+        "plugins": [
+            {
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
+                "trace": false,
+                "only_unmemoize": true,
+                "unmemoizeDir": "./build/unmemoized"
+            }
+        ],
+        "outDir": "./build/lib",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/arkui-common": [
+                "../../arkoala/arkui-common/src/arkts"
+            ],
+            "@koalaui/runtime": [
+                "../../incremental/runtime/src"
+            ],
+            "@koalaui/harness": [
+                "../../incremental/harness"
+            ],
+            "@koalaui/arkts-arkui": [
+                "../arkui/src"
+            ],
+            "@koalaui/arkts-arkui/ohos.router": [
+                "../arkui/src/ohos.router.ts"
+            ],
+            "#arkcompat": [
+                "../../arkoala/arkui-common/src/arkts"
+            ],
+            "#components": [
+                "../arkui/src/generated/ts"
+            ],
+        }
+    },
+    "include": [
+        "./build/generated",
+        "./src/Page.ts"
+    ],
+    "exclude": [
+    ],
+    "references": [
+        { "path": "../arkui" },
+        { "path": "../../arkoala/arkui-common" },
+        { "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json" },
+        { "path": "../arkui/tsconfig-unmemoize.json" },
+        { "path": "../../incremental/runtime" },
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../incremental/common" },
+        { "path": "../../incremental/harness" }
+    ]
+}

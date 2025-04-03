@@ -1,0 +1,30 @@
+{
+    "extends": "../../../../arkui/config/etsconfig-base.json",
+    "include": [
+        "./**/*.ets"
+    ],
+    "compilerOptions": {
+        "types": [],
+        "baseUrl": ".",
+        "rootDirs": [
+            "."
+        ],
+        "outDir": "../../build/ets-junk",
+        "plugins": [
+            {
+                "transform": "@koalaui/ets-plugin/build/lib/src/ArkExpander.js",
+                "destination": "../../build/generated",
+                "arkui": "@koalaui/arkts-arkui"
+            }
+        ],
+        "paths": {
+            "@ohos.*": [
+                "../../../../../arkoala/arkui-common/interface_sdk-js/api/@ohos.*"
+            ],
+            "@system.*": [
+                "../../../../../arkoala/arkui-common/interface_sdk-js/api/@system.*"
+            ]
+        }
+
+    }
+}

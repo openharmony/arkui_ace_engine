@@ -1,0 +1,20 @@
+{
+  "rootElement": {
+    "nodeId": 1286,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1287,
+        "kind": "FormLink",
+        "children": [],
+        "setFormLinkOptions_options": {
+          "action": "router",
+          "moduleName": "Module",
+          "bundleName": "Bundle",
+          "abilityName": "MainAbility",
+          "uri": "Uri"
+        }
+      }
+    ]
+  }
+}

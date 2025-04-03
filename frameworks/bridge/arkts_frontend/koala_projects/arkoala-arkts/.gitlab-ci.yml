@@ -1,0 +1,358 @@
+install node modules (arkoala-arkts):
+  stage: install-deps
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (incremental)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm i --no-audit --no-fund --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala-arkts/node_modules
+    expire_in: 1 day
+
+<ArkTS> build ArkoalaNative (linux, linux, node+panda):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run compile:native:node-host --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala/framework/native/build-node-host-vmloader/ArkoalaLoader.node
+      - arkoala/framework/native/build-node-host-vmloader/libvmloader.so
+      - arkoala/framework/native/build-panda-host/libArkoalaNative_linux_arm64_ark.so
+      - arkoala/framework/native/build-panda-host/libace_compatible_mock.so
+    expire_in: 1 day
+
+<ArkTS> build ArkoalaNative (linux, linux, node+panda-ani):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run compile:native:node-host-ani --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala/framework/native/build-node-host-vmloader/ArkoalaLoader.node
+      - arkoala/framework/native/build-node-host-vmloader/libvmloader.so
+      - arkoala/framework/native/build-panda-ani-host/libArkoalaNative_linux_arm64_ani.so
+      - arkoala/framework/native/build-panda-ani-host/libace_compatible_mock.so
+    expire_in: 1 day
+
+<ArkTS> build ArkoalaNative (linux, ohos-arm32, hzvm+panda):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run compile:native:hzvm-ohos-arm32 --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala/framework/build/libArkoalaLoader.so
+      - arkoala/framework/build/libvmloader.so
+      - arkoala/framework/build/libArkoalaNative_ark.so
+      - arkoala/framework/build/libc++.so
+    expire_in: 1 day
+
+<ArkTS> build arkui-common.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:arkui-common:inc --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala/arkui-common/build/arkui-common.abc
+    expire_in: 1 day
+
+<ArkTS> build arkui-no-common.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:arkui-no-common:inc --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala-arkts/arkui/build/arkui-no-common.abc
+    expire_in: 1 day
+
+<ArkTS> build incremental.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:incremental:inc --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - incremental/runtime/build/incremental.abc
+    expire_in: 1 day
+
+<ArkTS> build compat (w/plugin):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - !reference [.setup, regenerate-plugin-api]
+  script:
+    - npm run build:compat:inc:capi --prefix incremental/compat
+
+<ArkTS> build common (w/plugin):
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - !reference [.setup, regenerate-plugin-api]
+  script:
+    - npm run build:common:inc:capi --prefix incremental/common
+
+<ArkTS> run capi plugin demo (w/plugin):
+  stage: build
+  interruptible: true
+  allow_failure: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+    - <ArkTS> build incremental.abc
+  before_script:
+    - !reference [.setup, script]
+    - !reference [.setup, regenerate-plugin-api]
+    - npm run compile --prefix incremental/compat
+    - npm run compile --prefix incremental/common
+    - npm run compile --prefix incremental/compiler-plugin
+    - npm run compile --prefix incremental/runtime
+    - npm run unmemoize --prefix incremental/runtime
+    - npm run compile --prefix arkoala-arkts/memo-plugin
+  script:
+    - npm run run:user:pure-sts --prefix arkoala-arkts/trivial/user
+
+<ArkTS> build interop.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:interop:inc --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - interop/build/interop.abc
+    expire_in: 1 day
+
+<ArkTS> link arkoala.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+    - <ArkTS> build arkui-common.abc
+    - <ArkTS> build arkui-no-common.abc
+    - <ArkTS> build incremental.abc
+    - <ArkTS> build interop.abc
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run link:arkoala --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala-arkts/build/arkoala.abc
+    expire_in: 1 day
+
+<ArkTS> build user.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:user --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala-arkts/trivial/user/build/user.abc
+    expire_in: 1 day
+
+<ArkTS> build shopping.abc:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+    - npm run ohos-sdk --prefix arkoala/arkui-common
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run build:shopping --prefix arkoala-arkts
+  artifacts:
+    paths:
+      - arkoala-arkts/shopping/build/shopping.abc
+    expire_in: 1 day
+
+
+<ArkTS> run:node:ci (linux, linux, node+panda):
+  stage: test
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+    - <ArkTS> link arkoala.abc
+    - <ArkTS> build user.abc
+    - <ArkTS> build ArkoalaNative (linux, linux, node+panda)
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - mkdir -p arkoala-arkts/build && cp arkoala-arkts/trivial/user/build/user.abc arkoala-arkts/build
+    - npm run build:loader:node --prefix arkoala-arkts
+    - npm run run:node:ci --prefix arkoala-arkts
+
+<ArkTS> arkoala-arkts-32.har:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+    - <ArkTS> link arkoala.abc
+    - <ArkTS> build ArkoalaNative (linux, ohos-arm32, hzvm+panda)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run har-arm32 --prefix arkoala-arkts/har
+    - mv arkoala-arkts/har/app/arkoala/build/default/outputs/default/arkoala.har arkoala-arkts-arm32.har
+  artifacts:
+    paths:
+      - arkoala-arkts-arm32.har
+    expire_in: 1 day
+
+<ArkTS> user-32.har:
+  stage: build
+  interruptible: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+    - <ArkTS> build user.abc
+  before_script:
+    - !reference [.setup, script]
+    - npm run panda:sdk:install --prefix arkoala-arkts
+  script:
+    - npm run har-arm32 --prefix arkoala-arkts/trivial/user
+    - mv arkoala-arkts/trivial/user/app/user/build/default/outputs/default/user.har user-arm32.har
+  artifacts:
+    paths:
+      - user-arm32.har
+    expire_in: 1 day
+
+unmemoize arkoala-arkts/arkui:
+  allow_failure: true
+  extends:
+    - .linux-vm-shell-task
+  needs:
+    - install node modules (arkoala)
+    - install node modules (arkoala-arkts)
+    - install node modules (incremental)
+    - install node modules (interop)
+  before_script:
+    - !reference [.setup, script]
+  script:
+    - npm run unmemoize --prefix arkoala-arkts/arkui

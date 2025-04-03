@@ -1,0 +1,35 @@
+{
+  "name": "simple-koala-setup",
+  "description": "",
+  "main": "build/src/main.js",
+  "bin": "lib/js/main.js",
+  "dependencies": {
+    "node-loader": "^2.0.0",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "private": true,
+  "keywords": [],
+  "pkg": {
+    "scripts": "lib/js/app.js",
+    "outputPath": "dist"
+  },
+  "scripts": {
+    "compile": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js",
+    "compile:unmemoize": "ets-tsc -b tsconfig-unmemoize.json",
+    "compile:run-unmemoized": "npm run compile -- --env tsconfig=tsconfig-run-unmemoized.json --env unmemoized=unmemoized",
+    "compile:unmemoizing": "npm run compile:unmemoize && npm run compile:run-unmemoized",
+    "compile:arkts": "bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig.json",
+    "compile:arkts:unmemoize": "ets-tsc -b tsconfig-unmemoize.json",
+    "compile:arkts:unmemoized": "bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig-run-unmemoized.json build/unmemoized/src/main.ts --output build/unmemoized/src/main.abc",
+    "compile:arkts:unmemoizing": "npm run compile:unmemoize && npm run compile:arkts:unmemoized",
+    "panda:sdk:install": "cd ../tools/panda && npm run panda:sdk:install",
+    "run": "npm run compile && node lib/js/app.js",
+    "run:unmemoizing": "npm run compile:unmemoizing && node lib/unmemoized/js/app.js",
+    "run:panda": "bash ../tools/panda/arkts/ark build/abc/src/main.abc --ark-boot-files $(find ../compat/build/abc ../common/build/abc/ ../runtime/build/abc/ -name '*.abc' | paste -sd ':' -) --ark-entry-point main.ETSGLOBAL::main",
+    "run:panda:unmemoizing:linked": "bash ../tools/panda/arkts/ark build/unmemoized/src/main.abc --ark-boot-files ../runtime/build/incremental.abc --ark-entry-point @koalaui.demo.build.unmemoized.src.main.ETSGLOBAL::main",
+    "run:panda:unmemoizing": "npm run compile:arkts:unmemoizing && npm run build:incremental:inc --prefix ../runtime && npm run run:panda:unmemoizing:linked",
+    "clean:unmemoized": "rimraf unmemoized",
+    "clean": "rimraf build unmemoized"
+  }
+}

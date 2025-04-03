@@ -1,0 +1,12 @@
+{
+    "name": "compiler-installer",
+    "version": "1.0.0",
+    "description": "",
+    "scripts": {
+        "install:toolchain": "node install.mjs toolchain",
+        "install:sysroot:arm64": "node install.mjs sysroot arm64",
+        "install:sysroot:arm32": "node install.mjs sysroot arm32",
+        "copy:libcpp:arm64": "cp sysroot-arm64/libc++.so ../../framework/build",
+        "copy:libcpp:arm32": "cp sysroot-arm/libc++.so ../../framework/build"
+    }
+}

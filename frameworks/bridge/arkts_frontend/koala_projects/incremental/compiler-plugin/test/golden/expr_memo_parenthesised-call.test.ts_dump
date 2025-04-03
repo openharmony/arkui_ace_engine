@@ -1,0 +1,20 @@
+/** @memo */
+function expr_memo(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("10___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type));
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    f(__memo_context, __memo_id + ("2___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type));
+    f(__memo_context, __memo_id + ("3___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type));
+    f(__memo_context, __memo_id + ("4___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type));
+    f(__memo_context, __memo_id + ("5___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type));
+    g(__memo_context, __memo_id + ("6___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type), 1, 2);
+    g(__memo_context, __memo_id + ("7___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type), 3, 4);
+    g(__memo_context, __memo_id + ("8___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type), 5, 6);
+    g(__memo_context, __memo_id + ("9___key_id_DIRNAME/parenthesised-call.test.ts" as __memo_id_type), 7, 8);
+    {
+        __memo_scope.recache();
+        return;
+    }
+}

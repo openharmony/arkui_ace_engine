@@ -1,0 +1,23 @@
+{
+  "name": "root",
+  "private": true,
+  "//": "DO NOT ADD dependencies or devDependencies clauses to this level! Keep subfolders autonomous.",
+  "scripts": {
+    "prepare": "cd incremental && npm i && cd .. && cd interop && npm i && cd .. && cd arkoala && npm i && cd .. && cd arkoala-arkts && npm i",
+    "compile": "npm run compile --prefix incremental && npm run compile --prefix interop",
+    "release": "npm run compile && node tools/release.mjs", 
+    "ohos-sdk": "npm run ohos-sdk --prefix arkoala/arkui-common",
+    "ohos-sdk:full": "npm run download --prefix arkoala/ohos-sdk",
+    "ohos-sdk:prebuilt": "npm run download:prebuilt --prefix arkoala/ohos-sdk",
+    "ohos-sdk:patch": "npm run ohos-sdk:prebuilt && node arkoala/ohos-sdk/scripts/oh-sdk-patch.mjs",
+    "ets:plugin:compile": "npm run compile --prefix arkoala/ets-plugin",
+    "compiler:plugin:compile": "npm run compile --prefix incremental/compiler-plugin",
+    "plugins:compile": "npm run compiler:plugin:compile && npm run ets:plugin:compile",
+    "arkoala:plugin": "npm run plugins:compile && cd arkoala/tools/arkoala-transformer && npx rollup -c && cp -f arkoala-plugin.js ../../../arkoala/ohos-sdk/ohos-sdk/HarmonyOS-NEXT-DB1/openharmony/ets/build-tools/ets-loader/lib/fast_build/ets_ui",
+    "arkoala:har": "npm run all --prefix arkoala/har",
+    "arkoala:har-arm64": "npm run arkoala:har",
+    "arkoala:har-arm32": "npm run all-arm32 --prefix arkoala/har",
+    "arkoala:har-universal": "npm run all-universal --prefix arkoala/har",
+    "arkoala:abc": "npm run build:arkoala:ohos --prefix arkoala-arkts"
+  }
+}

@@ -1,0 +1,27 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/garbage",
+        "lib": ["ES2020"],
+        "rootDirs": ["src", "test"],
+        "baseUrl": ".",
+        "module": "CommonJS",
+        "experimentalDecorators": true,
+        "plugins": [
+            { "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js", "trace": false, "only_unmemoize": true }
+        ],
+        "paths": {
+            "#arkcompat": ["../arkui-common/src/typescript"],
+            "#arkcompat/*": ["../arkui-common/src/typescript/*"],
+            "@koalaui/arkui-common": ["../arkui-common/src/typescript"]
+        }
+    },
+    "include": ["src/**/*"],
+    "references": [
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../interop" },
+        { "path": "../../incremental/runtime/tsconfig-unmemoize.json" },
+        { "path": "../arkui-common/tsconfig-unmemoize-ts.json" },
+        { "path": "../framework/tsconfig-unmemoize.json" }
+    ]
+}

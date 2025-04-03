@@ -1,0 +1,29 @@
+{
+  "rootElement": {
+    "nodeId": 1312,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1313,
+        "kind": "Path",
+        "children": [],
+        "setPathOptions_value": {
+          "width": 5,
+          "height": 7,
+          "commands": "M0 0 L600 0"
+        }
+      },
+      {
+        "nodeId": 1314,
+        "kind": "Path",
+        "children": [],
+        "setPathOptions_value": {
+          "width": 9,
+          "height": 8,
+          "commands": "M0 0 L600 0"
+        },
+        "commands_value": "L555 0 M1 0"
+      }
+    ]
+  }
+}

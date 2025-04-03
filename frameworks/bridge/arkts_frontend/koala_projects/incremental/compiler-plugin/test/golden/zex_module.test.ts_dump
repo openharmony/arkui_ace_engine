@@ -1,0 +1,16 @@
+/** @memo */
+export function zex(__memo_context: __memo_context_type, __memo_id: __memo_id_type, 
+/** @memo */
+content: (__memo_context: __memo_context_type, __memo_id: __memo_id_type) => void) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + ("1___key_id_DIRNAME/module.test.ts" as __memo_id_type));
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    log("I'm zex");
+    content(__memo_context, __memo_id + ("0___key_id_DIRNAME/module.test.ts" as __memo_id_type));
+    {
+        __memo_scope.recache();
+        return;
+    }
+}
