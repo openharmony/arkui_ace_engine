@@ -169,7 +169,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     RefPtr<WaterFlowLayoutBase> algorithm;
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         auto sw = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
-        sw->EnableSkip(AnimateStoped() && !IsOutOfBoundary(true));
+        sw->EnableSkip((AnimateStoped() && !IsOutOfBoundary(true)) || IsBackToTopRunning());
         algorithm = sw;
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));

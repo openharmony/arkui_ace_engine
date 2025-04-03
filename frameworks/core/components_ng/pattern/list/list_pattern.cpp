@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -967,7 +968,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
-    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING || source == SCROLL_FROM_STATUSBAR) {
         isNeedCheckOffset_ = true;
     }
     if (!NearZero(offset)) {
