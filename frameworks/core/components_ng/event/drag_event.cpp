@@ -275,6 +275,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         IsBelongToMultiItemNode(frameNode)) {
         return;
     }
+    RecordTouchDownPoint(touchRestrict.touchEvent);
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
     dragDropManager->SetIsDragNodeNeedClean(false);
