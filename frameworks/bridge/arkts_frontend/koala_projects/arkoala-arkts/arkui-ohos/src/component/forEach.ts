@@ -15,7 +15,7 @@
 
 import { int32, hashCodeFromString } from "@koalaui/common"
 import { RepeatByArray } from "@koalaui/runtime"
-import { DynamicNode } from "./component/common"
+import { DynamicNode } from "./common"
 
 interface ForEachAttribute extends DynamicNode<ForEachAttribute> {
 }
