@@ -16,15 +16,15 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { UIContext } from "./../component/common"
-import { Position } from "./../component/units"
+import { UIContext } from "./component/common"
+import { Position } from "./component/units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { Serializer } from "./generated/peers/Serializer"
+import { CallbackKind } from "./generated/peers/CallbackKind"
+import { Deserializer } from "./generated/peers/Deserializer"
+import { CallbackTransformer } from "./generated/peers/CallbackTransformer"
 export class FrameNodeInternal {
     public static fromPtr(ptr: KPointer): FrameNode {
         const obj : FrameNode = new FrameNode(undefined)
