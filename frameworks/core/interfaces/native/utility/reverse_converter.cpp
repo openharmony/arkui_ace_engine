@@ -628,7 +628,7 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+    dst = time * SEC_TO_MILLISEC;
 }
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
