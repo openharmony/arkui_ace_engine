@@ -124,7 +124,6 @@ constexpr static int32_t NONE_SELECT_TYPE = -1;
 
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
-constexpr int32_t RICH_DEFAULT_AI_WORD = 100;
 constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
@@ -6366,7 +6365,12 @@ bool RichEditorPattern::CursorMoveDown()
 void RichEditorPattern::CursorMoveToNextWord(CaretMoveIntent direction)
 {
     CHECK_NULL_VOID(direction == CaretMoveIntent::LeftWord || direction == CaretMoveIntent::RightWord);
-    auto newPos = direction == CaretMoveIntent::LeftWord ? GetLeftWordIndex() : GetRightWordIndex();
+    bool isDirectionLeft = direction == CaretMoveIntent::LeftWord;
+    auto index = caretPosition_;
+    if (!textSelector_.SelectNothing()) {
+        index = isDirectionLeft ? textSelector_.GetTextStart() + 1 : textSelector_.GetTextEnd() - 1;
+    }
+    auto newPos = isDirectionLeft ? GetLeftWordIndex(index) : GetRightWordIndex(index);
     CloseSelectOverlay();
     ResetSelection();
     SetCaretPosition(newPos);
@@ -6377,9 +6381,8 @@ void RichEditorPattern::CursorMoveToNextWord(CaretMoveIntent direction)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-int32_t RichEditorPattern::GetLeftWordIndex()
+int32_t RichEditorPattern::GetLeftWordIndex(int32_t index)
 {
-    int32_t index = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.GetTextStart() + 1;
     AdjustIndexSkipSpace(index, MoveDirection::BACKWARD);
     int32_t newPos = std::max(0, index - 1);
     AdjustWordSelection(newPos, index);
@@ -6387,9 +6390,8 @@ int32_t RichEditorPattern::GetLeftWordIndex()
     return newPos;
 }
 
-int32_t RichEditorPattern::GetRightWordIndex()
+int32_t RichEditorPattern::GetRightWordIndex(int32_t index)
 {
-    int32_t index = textSelector_.SelectNothing() ? caretPosition_ : textSelector_.GetTextEnd() - 1;
     int32_t newPos = std::min(index + 1, GetTextContentLength());
     AdjustWordSelection(index, newPos);
     AdjustSelector(newPos, HandleType::SECOND);
@@ -11399,18 +11401,10 @@ int32_t RichEditorPattern::HandleSelectWrapper(CaretMoveIntent direction, int32_
         case CaretMoveIntent::Down:
             return HandleKbVerticalSelection(false);
         case CaretMoveIntent::LeftWord: {
-            int32_t startPosition = 0;
-            int32_t aiContentStart = 0;
-            aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-            AIDeleteComb(aiContentStart, index, startPosition, true);
-            return startPosition;
+            return GetLeftWordIndex(index);
         }
         case CaretMoveIntent::RightWord: {
-            int32_t endPosition = 0;
-            int32_t aiContentEnd = GetTextContentLength();
-            aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-            AIDeleteComb(index, aiContentEnd, endPosition, false);
-            return endPosition;
+            return GetRightWordIndex(index);
         }
         case CaretMoveIntent::ParagraghBegin:
             return HandleSelectParagraghPos(true);
