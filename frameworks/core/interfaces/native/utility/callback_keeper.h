@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <unordered_map>
 #include "base/log/log_wrapper.h"
+#include "core/interfaces/native/utility/base_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
@@ -36,17 +36,17 @@ private:
     TCallbackType arkCallback_;
 };
 
-class CallbackKeeper {
+class CallbackKeeper : public BaseKeeper<std::function<void(const void *)>> {
 public:
-    using ResultHandler = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
 
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
-    static void InvokeWithResultHandler(ResultHandler &&handler, const CallbackHelper &helper, Params&&... args)
+    static void InvokeWithResultHandler(std::function<void(const void *)> &&handler,
+        const CallbackHelper &helper, Params&&... args)
     {
         // create continuation
         ContinuationType continuation {
-            .resource = GetNextCallbackResource(),
+            .resource = GetNextResource(),
             .call = &ReceiveResult<ArkResultType>,
             .callSync = &ReceiveResultSync<ArkResultType>
         };
@@ -64,7 +64,7 @@ public:
     {
         // create continuation
         CallbackType callback {
-            .resource = GetNextCallbackResource(),
+            .resource = GetNextResource(),
             .call = &InvokeReverseInternal,
             .callSync = &InvokeReverseInternalSync
         };
@@ -91,32 +91,6 @@ public:
     }
 
 private:
-    static void Hold(Ark_Int32 resourceId)
-    {
-        storage_[resourceId].counter++;
-    }
-
-    static void Release(Ark_Int32 resourceId)
-    {
-        auto it = storage_.find(resourceId);
-        if (it == storage_.end()) {
-            return;
-        }
-        (it->second.counter)--;
-        if (it->second.counter == 0) {
-            storage_.erase(it);
-        }
-    }
-
-    static Ark_CallbackResource GetNextCallbackResource()
-    {
-        return {
-            .resourceId = ++currentId_,
-            .hold = &Hold,
-            .release = &Release
-        };
-    }
-
     template <typename ArkResultType>
     inline static void ReceiveResult(const Ark_Int32 resourceId, const ArkResultType value)
     {
@@ -129,18 +103,10 @@ private:
         ReceiveResultInternal(resourceId, &value);
     }
 
-    struct CallbackData {
-        int32_t counter = 0;
-        ResultHandler handler;
-    };
-
-    inline static std::unordered_map<Ark_Int32, CallbackData> storage_;
-    inline static Ark_Int32 currentId_ = 0;
-
     static void ReceiveResultInternal(const Ark_Int32 resourceId, const void* valuePtr)
     {
         if (auto it = storage_.find(resourceId); it != storage_.end()) {
-            it->second.handler(valuePtr);
+            it->second.data(valuePtr);
         }
     }
 

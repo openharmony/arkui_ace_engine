@@ -16,10 +16,22 @@
 #include "reverse_converter.h"
 
 #include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/decoration_style_peer.h"
+#include "core/interfaces/native/implementation/image_attachment_peer.h"
+#include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
+#include "core/interfaces/native/implementation/letter_spacing_style_peer.h"
+#include "core/interfaces/native/implementation/line_height_style_peer.h"
+#include "core/interfaces/native/implementation/paragraph_style_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/text_shadow_style_peer.h"
+#include "core/interfaces/native/implementation/text_style_styled_string_peer.h"
+#include "core/interfaces/native/implementation/url_style_peer.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "validators.h"
 
 namespace OHOS::Ace {
@@ -367,6 +379,65 @@ void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
 {
     dst.headerKey = Converter::ArkValue<Ark_String>(src.headerKey, ctx);
     dst.headerValue = Converter::ArkValue<Ark_String>(src.headerValue, ctx);
+}
+
+template<typename PeerType, typename AceSpan>
+void CreateStylePeer(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
+{
+    PeerType* peer = PeerUtils::CreatePeer<PeerType>();
+    peer->span = AceType::DynamicCast<AceSpan>(src);
+    dst.styledValue = Converter::ArkUnion<Ark_StyledStringValue, PeerType*>(peer);
+}
+
+void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
+{
+    dst.start = Converter::ArkValue<Ark_Number>(src->GetStartIndex());
+    dst.length = Converter::ArkValue<Ark_Number>(src->GetEndIndex() - src->GetStartIndex());
+    dst.styledKey = Converter::ArkValue<Ark_StyledStringKey>(src->GetSpanType());
+    switch (src->GetSpanType()) {
+        case Ace::SpanType::Font:
+            CreateStylePeer<TextStyle_styled_stringPeer, OHOS::Ace::FontSpan>(dst, src);
+            break;
+        case Ace::SpanType::Decoration:
+            CreateStylePeer<DecorationStylePeer, OHOS::Ace::DecorationSpan>(dst, src);
+            break;
+        case Ace::SpanType::BaselineOffset:
+            CreateStylePeer<BaselineOffsetStylePeer, OHOS::Ace::BaselineOffsetSpan>(dst, src);
+            break;
+        case Ace::SpanType::LetterSpacing:
+            CreateStylePeer<LetterSpacingStylePeer, OHOS::Ace::LetterSpacingSpan>(dst, src);
+            break;
+        case Ace::SpanType::TextShadow:
+            CreateStylePeer<TextShadowStylePeer, OHOS::Ace::TextShadowSpan>(dst, src);
+            break;
+        case Ace::SpanType::LineHeight:
+            CreateStylePeer<LineHeightStylePeer, OHOS::Ace::LineHeightSpan>(dst, src);
+            break;
+        case Ace::SpanType::BackgroundColor:
+            CreateStylePeer<BackgroundColorStylePeer, OHOS::Ace::BackgroundColorSpan>(dst, src);
+            break;
+        case Ace::SpanType::Url:
+            CreateStylePeer<UrlStylePeer, OHOS::Ace::UrlSpan>(dst, src);
+            break;
+        case Ace::SpanType::Gesture:
+            CreateStylePeer<GestureStylePeer, OHOS::Ace::GestureSpan>(dst, src);
+            break;
+        case Ace::SpanType::ParagraphStyle:
+            CreateStylePeer<ParagraphStylePeer, OHOS::Ace::ParagraphStyleSpan>(dst, src);
+            break;
+        case Ace::SpanType::Image:
+            CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
+            break;
+        case Ace::SpanType::CustomSpan: {
+            LOGE("Converter::AssignArkValue(Ark_SpanStyle) the Ark_CustomSpan is not implemented.");
+            break;
+        }
+        case Ace::SpanType::ExtSpan: {
+            LOGE("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
+            break;
+        }
+        default: LOGE("Unexpected enum value in SpanType: %{public}d", src->GetSpanType());
+    }
 }
 
 void AssignArkValue(Ark_Resource& dst, const std::variant<int32_t, std::string>& src, ConvContext *ctx)

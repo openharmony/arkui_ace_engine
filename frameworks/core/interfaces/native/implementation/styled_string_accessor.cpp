@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/buffer_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
@@ -138,8 +139,8 @@ Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* val
             },
             [&peer](const Ark_ImageAttachment& arkImageAttachment) {
                 ImageAttachmentPeer* peerImageAttachment = arkImageAttachment;
-                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->imageSpan);
-                auto options = peerImageAttachment->imageSpan->GetImageSpanOptions();
+                CHECK_NULL_VOID(peerImageAttachment && peerImageAttachment->span);
+                auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<SpanString>(options);
             },
             [](const Ark_CustomSpan& arkCustomSpan) {
@@ -188,9 +189,7 @@ Array_SpanStyle GetStylesImpl(Ark_VMContext vmContext,
     } else {
         spans = peer->spanString->GetSpans(spanStart, spanLength);
     }
-    // spans need to be returned
-    LOGE("StyledStringAccessor::GetStylesImpl - return value need to be supported");
-    return {};
+    return Converter::ArkValue<Array_SpanStyle>(spans, Converter::FC);
 }
 Ark_Boolean EqualsImpl(Ark_StyledString peer,
                        Ark_StyledString other)
@@ -250,11 +249,9 @@ Ark_Buffer MarshallingImpl(Ark_StyledString styledString)
     CHECK_NULL_RETURN(styledString->spanString, {});
     std::vector<uint8_t> tlvData;
     styledString->spanString->EncodeTlv(tlvData);
-
-    size_t bufferSize = tlvData.size();
-    auto data = tlvData.data();
-    LOGE("StyledStringAccessor::MarshallingImpl - return value need to be supported");
-    return {};
+    Ark_Buffer result = BufferKeeper::Allocate(tlvData.size());
+    copy(tlvData.begin(), tlvData.end(), reinterpret_cast<uint8_t*>(result.data));
+    return result;
 }
 void UnmarshallingImpl(Ark_VMContext vmContext,
                        Ark_AsyncWorkerPtr asyncWorker,
