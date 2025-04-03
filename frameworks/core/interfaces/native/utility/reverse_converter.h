@@ -390,26 +390,24 @@ namespace OHOS::Ace::NG::Converter {
         });
     }
 
-    // Array with context
+    // Map with context
     template<typename To, typename Cont>
     std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using KeyT = std::remove_pointer_t<decltype(dst.keys)>;
         using ValT = std::remove_pointer_t<decltype(dst.values)>;
-        dst = { .keys = nullptr, .values = nullptr, .size = src.size() };
-        CHECK_NULL_VOID(dst.size);
-        if (ctx) {
-            dst = ctx->AllocateMap<To>(dst.size);
-        } else {
-            dst.keys = new KeyT[dst.size];
-            dst.values = new ValT[dst.size];
-        }
+        dst = {};
+        CHECK_NULL_VOID(ctx);
+        CHECK_NULL_VOID(src.size());
+        dst = ctx->AllocateMap<To>(src.size());
         KeyT* keys = dst.keys;
         ValT* values = dst.values;
-        for (const auto &item: src) {
+        CHECK_NULL_VOID(keys && values);
+        for (const auto& item: src) {
             *keys++ = ArkValue<KeyT>(item.first, ctx);
-            *values++ = ArkValue<ValT>(item.second);
+            *values++ = ArkValue<ValT>(item.second, ctx);
         }
+        dst.size = src.size();
     }
 
     /**
