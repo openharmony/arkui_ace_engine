@@ -40,6 +40,13 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     }
 }
 
+void MenuItemModelNG::AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(customNode);
+    frameNode->AddChild(customNode);
+}
+
 /*
  * The structure of menu item is designed as follows :
  * |--menu_item
@@ -151,6 +158,13 @@ void MenuItemModelNG::AddRowChild(FrameNode* frameNode, const MenuItemProperties
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+}
+
+RefPtr<FrameNode> MenuItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    return frameNode;
 }
 
 void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)
