@@ -650,6 +650,46 @@ int32_t OH_ArkUI_GetGestureParam_distanceThreshold(ArkUI_GestureRecognizer* reco
     return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
 }
 
+ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
+    ArkUI_GestureRecognizer* recognizer, int size, int* toolTypeArray, double* distanceArray)
+{
+    if (!recognizer || !toolTypeArray || !distanceArray) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gesture = reinterpret_cast<ArkUIGesture*>(recognizer->gesture);
+    if (!gesture) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (recognizer->type == PAN_GESTURE) {
+        auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                          ->getNodeModifiers()
+                          ->getGestureModifier()
+                          ->setDistanceMap(gesture, size, toolTypeArray, distanceArray);
+        return static_cast<ArkUI_ErrorCode>(result);
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
+ArkUI_ErrorCode OH_ArkUI_PanGesture_GetDistanceByToolType(
+    ArkUI_GestureRecognizer* recognizer, int toolType, double* distance)
+{
+    if (!recognizer || !distance) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (recognizer->type == PAN_GESTURE) {
+        auto result = OHOS::Ace::NodeModel::GetFullImpl()
+                            ->getNodeModifiers()
+                            ->getGestureModifier()
+                            ->getDistanceByToolType(gestureRecognizer, toolType, distance);
+        return static_cast<ArkUI_ErrorCode>(result);
+    }
+    return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
+}
+
 namespace OHOS::Ace::GestureModel {
 
 constexpr int32_t DEFAULT_PAN_FINGERS = 1;

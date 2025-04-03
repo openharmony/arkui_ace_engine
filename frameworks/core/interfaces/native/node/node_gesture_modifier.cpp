@@ -1035,6 +1035,34 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
+{
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+    for (int i = 0; i < size; i++) {
+        distanceMap[static_cast<SourceTool>(toolTypeArray[i])] = distanceArray[i];
+    }
+    auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+    CHECK_NULL_RETURN(gestureForDistanceMap, ERROR_CODE_PARAM_INVALID);
+    gestureForDistanceMap->SetDistanceMap(distanceMap);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolType, double* distance)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
+    PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
+    auto iter = distanceMap.find(static_cast<SourceTool>(toolType));
+    if (iter == distanceMap.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    *distance = static_cast<double>(iter->second);
+    return ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -1149,6 +1177,8 @@ const ArkUIGestureModifier* GetGestureModifier()
         .getLongPressGestureDuration = getLongPressGestureDuration,
         .getRotationGestureAngle = getRotationGestureAngle,
         .getTapGestureDistanceThreshold = getTapGestureDistanceThreshold,
+        .setDistanceMap = setDistanceMap,
+        .getDistanceByToolType = getDistanceByToolType,
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,

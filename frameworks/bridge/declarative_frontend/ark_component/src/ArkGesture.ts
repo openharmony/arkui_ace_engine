@@ -113,6 +113,7 @@ class PanGestureHandler extends GestureHandler {
     direction?: PanDirection;
     distance?: number;
     limitFingerCount?: boolean;
+    distanceMap?: Map<SourceTool, number>;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -126,6 +127,12 @@ class PanGestureHandler extends GestureHandler {
             this.direction = options.direction;
             this.distance = options.distance;
             this.limitFingerCount = options.isFingerCountLimited;
+            if (options.distanceMap !== undefined && options.distanceMap !== null) {
+                this.distanceMap = new Map();
+                options.distanceMap.forEach((value, key) => {
+                    this.distanceMap.set(key, value);
+                });
+            }
         }
     }
 
