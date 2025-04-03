@@ -116,6 +116,8 @@ const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
+constexpr size_t MAX_PLACEHODER_SIZE = 256;
+constexpr size_t MAX_ABILITY_NAME_SIZE = 32;
 #endif
 
 // need to be moved to formatter
@@ -4535,9 +4537,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u",
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u"
+        " placeholderLength:%{public}d",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
-        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType);
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType,
+        CountUtf16Chars(textConfig.inputAttribute.placeholder));
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -4627,6 +4631,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto textPaintOffset = GetPaintRectGlobalOffset();
     double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
              textPaintOffset.GetY() + offset - positionY;
+    std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHODER_SIZE);
+    std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
+        .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
     GetInlinePositionYAndHeight(positionY, height);
 
@@ -4644,7 +4651,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = hasSupportedPreviewText_,
-        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .placeholder = placeholder,
+        .abilityName = abilityName };
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },

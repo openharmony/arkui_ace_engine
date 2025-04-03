@@ -90,6 +90,8 @@ namespace {
 constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
+constexpr size_t MAX_PLACEHODER_SIZE = 256;
+constexpr size_t MAX_ABILITY_NAME_SIZE = 32;
 #endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
@@ -4952,9 +4954,11 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     CHECK_NULL_RETURN(inputMethod, false);
     auto miscTextConfig = GetMiscTextConfig();
     CHECK_NULL_RETURN(miscTextConfig.has_value(), false);
-    TAG_LOGD(
-        AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u", miscTextConfig->windowId);
     MiscServices::TextConfig textconfig = miscTextConfig.value();
+    TAG_LOGD(
+        AceLogTag::ACE_RICH_TEXT, "RequestKeyboard set calling window id is : %{public}u"
+        " RequestKeyboard set placeholder length is : %{public}d", miscTextConfig->windowId,
+        CountUtf16Chars(textconfig.inputAttribute.placeholder));
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -4994,14 +4998,7 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
 
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
-    if (NearZero(caretHeight)) {
-        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-        caretHeight = overlayModifier ? overlayModifier->GetCaretHeight() : DEFAULT_CARET_HEIGHT;
-    }
-    if (NearZero(caretHeight)) {
-        auto [caretAdjustOffset, caretAdjustHeight] = CalculateCaretOffsetAndHeight();
-        caretHeight = caretAdjustHeight;
-    }
+    caretHeight = CalcCursorHeight(caretHeight);
 
     // richeditor relative to root node offset(without transform)
     auto parentGlobalOffset = renderContext->GetPaintRectWithoutTransform().GetOffset() -
@@ -5010,6 +5007,9 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     auto caretTop = caretOffset.GetY() + parentGlobalOffset.GetY();
     double positionY = parentGlobalOffset.GetY();
     double height = caretTop + caretHeight + KEYBOARD_AVOID_OFFSET.ConvertToPx() - positionY;
+    std::u16string placeholder = TruncateText(UtfUtils::Str8ToStr16(GetPlaceHolder()), MAX_PLACEHODER_SIZE);
+    std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
+        .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
 
     if (auto manager = pipeline->GetSafeAreaManager(); manager) {
         auto keyboardOffset = manager->GetKeyboardOffset();
@@ -5028,7 +5028,9 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
         .isTextPreviewSupported = isTextPreviewSupported_ && (!isSpanStringMode_ || isAPI18Plus),
-        .immersiveMode = static_cast<int32_t>(keyboardAppearance_) };
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_),
+        .placeholder = placeholder,
+        .abilityName = abilityName };
     auto start = textSelector_.IsValid() ? textSelector_.GetStart() : caretPosition_;
     auto end = textSelector_.IsValid() ? textSelector_.GetEnd() : caretPosition_;
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
@@ -5039,6 +5041,20 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .height = height };
     return textConfig;
 }
+
+float RichEditorPattern::CalcCursorHeight(float& caretHeight)
+{
+    if (NearZero(caretHeight)) {
+        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        caretHeight = overlayModifier ? overlayModifier->GetCaretHeight() : DEFAULT_CARET_HEIGHT;
+    }
+    if (NearZero(caretHeight)) {
+        auto [caretAdjustOffset, caretAdjustHeight] = CalculateCaretOffsetAndHeight();
+        caretHeight = caretAdjustHeight;
+    }
+    return caretHeight;
+}
+
 #else
 bool RichEditorPattern::UnableStandardInput(bool isFocusViewChanged)
 {

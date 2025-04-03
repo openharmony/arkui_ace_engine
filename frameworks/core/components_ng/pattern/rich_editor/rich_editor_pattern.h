@@ -24,6 +24,7 @@
 
 #include "base/log/event_report.h"
 #include "base/utils/device_config.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ai/ai_write_adapter.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -1409,6 +1410,7 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
+    float CalcCursorHeight(float& caretHeight);
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
 #endif
