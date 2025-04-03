@@ -37,6 +37,11 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr int32_t NUM_0 = 0;
+constexpr int32_t NUM_1 = 1;
+constexpr int32_t NUM_2 = 2;
+constexpr int32_t NUM_3 = 3;
+constexpr int32_t NUM_4 = 4;
 const std::string YEAR = "year";
 const std::string MONTH = "month";
 const std::string DAY = "day";
@@ -319,7 +324,7 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+    dst = time * SEC_TO_MILLISEC;
 }
 
 void AssignArkValue(Ark_Date& dst, const std::string& src)
@@ -538,5 +543,100 @@ void AssignArkValue(Ark_TextRange& dst, const SelectionInfo& src)
 {
     dst.start = ArkValue<Opt_Number>(src.GetSelection().selection[0]);
     dst.end = ArkValue<Opt_Number>(src.GetSelection().selection[1]);
+}
+
+void AssignArkValue(Ark_Length& dst, const std::string& src)
+{
+    char *suffixPtr = nullptr;
+    dst.type = INTEROP_TAG_FLOAT32;
+    dst.value = std::strtof(src.c_str(), &suffixPtr);
+    dst.unit = -NUM_1;
+    if (!suffixPtr || suffixPtr == src.c_str()) { return; }
+    if (suffixPtr[NUM_0] == '\0' || (suffixPtr[NUM_0] == 'v' && suffixPtr[NUM_1] == 'p')) {
+        dst.unit = NUM_1;
+    } else if (suffixPtr[NUM_0] == '%') {
+        dst.unit = NUM_3;
+    } else if (suffixPtr[NUM_0] == 'p' && suffixPtr[NUM_1] == 'x') {
+        dst.unit = NUM_0;
+    } else if (suffixPtr[NUM_0] == 'l' && suffixPtr[NUM_1] == 'p' && suffixPtr[NUM_2] == 'x') {
+        dst.unit = NUM_4;
+    } else if (suffixPtr[NUM_0] == 'f' && suffixPtr[NUM_1] == 'p') {
+        dst.unit = NUM_2;
+    }
+}
+
+void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
+{
+    dst.id = ArkValue<Ark_Number>(src.resource);
+    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
+    dst.params = ArkValue<Opt_Array_String>();
+}
+
+void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src)
+{
+    Offset globalOffset = src.GetGlobalLocation();
+    Offset localOffset = src.GetLocalLocation();
+    Offset screenOffset = src.GetScreenLocation();
+
+    dst.displayX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.displayX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
+    dst.displayY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.displayY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
+
+    dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
+    dst.id.i32 = static_cast<int32_t>(src.GetTouchDeviceId());
+
+    dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.screenX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.screenY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    dst.type = static_cast<Ark_TouchType>(src.GetTouchType());
+
+    dst.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.windowX.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.windowY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.windowY.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+
+    dst.x.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.x.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    dst.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
+    dst.y.f32 = static_cast<float>(
+        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+}
+
+void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
+{
+    AssignArkValue(dst.touchObject, src);
+    dst.size = ArkValue<Ark_Number>(src.GetSize());
+    dst.force = ArkValue<Ark_Number>(src.GetForce());
+    dst.timestamp = src.GetTimeStamp().time_since_epoch().count();
+}
+
+void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
+{
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
+}
+
+void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
+{
+    dst.width = Converter::ArkValue<Ark_Number>(src.GetWidth());
+    dst.height = Converter::ArkValue<Ark_Number>(src.GetHeight());
+    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
+    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
+    dst.loadingStatus = Converter::ArkValue<Ark_Number>(src.GetLoadingStatus());
+    dst.contentWidth = Converter::ArkValue<Ark_Number>(src.GetContentWidth());
+    dst.contentHeight = Converter::ArkValue<Ark_Number>(src.GetContentHeight());
+    dst.contentOffsetX = Converter::ArkValue<Ark_Number>(src.GetContentOffsetX());
+    dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
 }
 } // namespace OHOS::Ace::NG::Converter

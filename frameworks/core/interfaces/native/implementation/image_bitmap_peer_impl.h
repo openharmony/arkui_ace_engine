@@ -33,7 +33,7 @@ public:
     void SetWidth(double width);
     double GetHeight();
     void SetHeight(double height);
-    std::string GetSrc();
+    virtual std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
 
     virtual OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> GetPixelMap() const
@@ -48,7 +48,7 @@ public:
     {
         imageData_ = imageData;
     }
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> GetSvgDom()
+    virtual OHOS::Ace::RefPtr<OHOS::Ace::NG::SvgDomBase> GetSvgDom()
     {
         return svgDom_;
     }
@@ -60,11 +60,11 @@ public:
     {
         return instanceId_;
     }
-    bool IsSvg()
+    virtual bool IsSvg()
     {
         return sourceInfo_.IsSvg();
     }
-    OHOS::Ace::ImageFit GetImageFit()
+    virtual OHOS::Ace::ImageFit GetImageFit()
     {
         return imageFit_;
     }

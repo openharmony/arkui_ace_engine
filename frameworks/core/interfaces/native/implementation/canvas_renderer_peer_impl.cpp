@@ -732,7 +732,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetFillColor(Color(colorNum), false);
+    renderingContext2DModel_->SetFillColor(Color(ColorAlphaAdapt(colorNum)), false);
 }
 void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
 {

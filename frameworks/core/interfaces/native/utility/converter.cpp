@@ -145,101 +145,6 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
 void stubCall(const Ark_Int32 _) {}
 void stubHoldRelease(Ark_Int32 _) {}
 
-void AssignArkValue(Ark_Length& dst, const std::string& src)
-{
-    char *suffixPtr = nullptr;
-    dst.type = INTEROP_TAG_FLOAT32;
-    dst.value = std::strtof(src.c_str(), &suffixPtr);
-    dst.unit = -NUM_1;
-    if (!suffixPtr || suffixPtr == src.c_str()) { return; }
-    if (suffixPtr[NUM_0] == '\0' || (suffixPtr[NUM_0] == 'v' && suffixPtr[NUM_1] == 'p')) {
-        dst.unit = NUM_1;
-    } else if (suffixPtr[NUM_0] == '%') {
-        dst.unit = NUM_3;
-    } else if (suffixPtr[NUM_0] == 'p' && suffixPtr[NUM_1] == 'x') {
-        dst.unit = NUM_0;
-    } else if (suffixPtr[NUM_0] == 'l' && suffixPtr[NUM_1] == 'p' && suffixPtr[NUM_2] == 'x') {
-        dst.unit = NUM_4;
-    } else if (suffixPtr[NUM_0] == 'f' && suffixPtr[NUM_1] == 'p') {
-        dst.unit = NUM_2;
-    }
-}
-
-void AssignArkValue(Ark_Resource& dst, const Ark_Length& src)
-{
-    dst.id = ArkValue<Ark_Number>(src.resource);
-    dst.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::FLOAT));
-    dst.params = ArkValue<Opt_Array_String>();
-}
-
-void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& info)
-{
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-
-    touch.displayX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.displayX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    touch.displayY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.displayY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-    touch.id.tag = Ark_Tag::INTEROP_TAG_INT32;
-    touch.id.i32 = static_cast<int32_t>(info.GetTouchDeviceId());
-
-    touch.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.screenX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    touch.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.screenY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    touch.type = static_cast<Ark_TouchType>(info.GetTouchType());
-
-    touch.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.windowX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    touch.windowY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.windowY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    touch.x.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.x.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    touch.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    touch.y.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-}
-
-void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)
-{
-    AssignArkValue(dst.touchObject, src);
-    dst.size = ArkValue<Ark_Number>(src.GetSize());
-    dst.force = ArkValue<Ark_Number>(src.GetForce());
-    dst.timestamp = ArkValue<Ark_Int64>(src.GetTimeStamp().time_since_epoch().count());
-}
-
-void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
-{
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
-    dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
-}
-
-void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
-{
-    dst.width = Converter::ArkValue<Ark_Number>(src.GetWidth());
-    dst.height = Converter::ArkValue<Ark_Number>(src.GetHeight());
-    dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
-    dst.componentHeight = Converter::ArkValue<Ark_Number>(src.GetComponentHeight());
-    dst.loadingStatus = Converter::ArkValue<Ark_Number>(src.GetLoadingStatus());
-    dst.contentWidth = Converter::ArkValue<Ark_Number>(src.GetContentWidth());
-    dst.contentHeight = Converter::ArkValue<Ark_Number>(src.GetContentHeight());
-    dst.contentOffsetX = Converter::ArkValue<Ark_Number>(src.GetContentOffsetX());
-    dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
-}
-
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -2238,6 +2143,26 @@ TextRange Convert(const Ark_TextRange& src)
     if (end.has_value()) {
         dst.end = end.value();
     }
+    return dst;
+}
+
+template<>
+OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
+{
+    OHOS::Ace::TextMetrics dst;
+    dst.actualBoundingBoxAscent = static_cast<double>(Converter::Convert<float>(src.actualBoundingBoxAscent));
+    dst.actualBoundingBoxDescent = static_cast<double>(Converter::Convert<float>(src.actualBoundingBoxDescent));
+    dst.actualBoundingBoxLeft = static_cast<double>(Converter::Convert<float>(src.actualBoundingBoxLeft));
+    dst.actualBoundingBoxRight = static_cast<double>(Converter::Convert<float>(src.actualBoundingBoxRight));
+    dst.alphabeticBaseline = static_cast<double>(Converter::Convert<float>(src.alphabeticBaseline));
+    dst.emHeightAscent = static_cast<double>(Converter::Convert<float>(src.emHeightAscent));
+    dst.emHeightDescent = static_cast<double>(Converter::Convert<float>(src.emHeightDescent));
+    dst.fontBoundingBoxAscent = static_cast<double>(Converter::Convert<float>(src.fontBoundingBoxAscent));
+    dst.fontBoundingBoxDescent = static_cast<double>(Converter::Convert<float>(src.fontBoundingBoxDescent));
+    dst.hangingBaseline = static_cast<double>(Converter::Convert<float>(src.hangingBaseline));
+    dst.ideographicBaseline = static_cast<double>(Converter::Convert<float>(src.ideographicBaseline));
+    dst.width = static_cast<double>(Converter::Convert<float>(src.width));
+    dst.height = static_cast<double>(Converter::Convert<float>(src.height));
     return dst;
 }
 } // namespace OHOS::Ace::NG::Converter
