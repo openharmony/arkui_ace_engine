@@ -13,13 +13,8 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
-#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
