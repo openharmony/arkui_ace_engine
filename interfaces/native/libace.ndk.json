@@ -2768,27 +2768,27 @@
         "name": "OH_ArkUI_KeyframeAnimateOption_GetExpectedFrameRate"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Create"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_Dispose"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetRatios"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_SetExpectedUpdateInterval"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetRatios"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_VisibleAreaEventOptions_GetExpectedUpdateInterval"
     },
     {
