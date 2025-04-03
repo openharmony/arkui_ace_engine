@@ -394,15 +394,22 @@ namespace OHOS::Ace::NG::Converter {
     template<typename To, typename Cont>
     std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
-        using Key = std::remove_pointer_t<decltype(dst.keys)>;
-        using Val = std::remove_pointer_t<decltype(dst.values)>;
-        dst = ctx->AllocateMap<To>(src.size());
-        int index = 0;
-        std::for_each(src.begin(), src.end(), [&index, &dst, ctx](const typename Cont::value_type& src) {
-            dst.keys[index] = ArkValue<Key>(src.first, ctx);
-            dst.values[index] = ArkValue<Val>(src.second, ctx);
-            index++;
-        });
+        using KeyT = std::remove_pointer_t<decltype(dst.keys)>;
+        using ValT = std::remove_pointer_t<decltype(dst.values)>;
+        dst = { .keys = nullptr, .values = nullptr, .size = src.size() };
+        CHECK_NULL_VOID(dst.size);
+        if (ctx) {
+            dst = ctx->AllocateMap<To>(dst.size);
+        } else {
+            dst.keys = new KeyT[dst.size];
+            dst.values = new ValT[dst.size];
+        }
+        KeyT* keys = dst.keys;
+        ValT* values = dst.values;
+        for (const auto &item: src) {
+            *keys++ = ArkValue<KeyT>(item.first, ctx);
+            *values++ = ArkValue<ValT>(item.second);
+        }
     }
 
     /**
