@@ -312,11 +312,11 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd001
- * @tc.desc: test OnTextGenstureSelectionEnd.
+ * @tc.name: OnTextGestureSelectionEnd001
+ * @tc.desc: test OnTextGestureSelectionEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd001, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -327,17 +327,17 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
     pattern->magnifierController_->magnifierNodeExist_ = true;
     auto secondHandle_ = pattern->textSelector_.secondHandle;
     TouchLocationInfo locationInfo(0);
-    pattern->OnTextGenstureSelectionEnd(locationInfo);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_NE(secondHandle_, pattern->textSelector_.secondHandle);
     EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd002
- * @tc.desc: test OnTextGenstureSelectionEnd.
+ * @tc.name: OnTextGestureSelectionEnd002
+ * @tc.desc: test OnTextGestureSelectionEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd002, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -346,7 +346,7 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
     pattern->textForDisplay_ = u"";
     auto secondHandle_ = pattern->textSelector_.secondHandle;
     TouchLocationInfo locationInfo(0);
-    pattern->OnTextGenstureSelectionEnd(locationInfo);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
 }
 
