@@ -99,6 +99,12 @@ static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 class RichEditorModifierTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
     &GENERATED_ArkUINodeModifiers::getRichEditorModifier, GENERATED_ARKUI_RICH_EDITOR> {
 public:
+    void SetUp(void) override
+    {
+        ModifierTestBase::SetUp();
+        checkEvent = std::nullopt;
+    }
+
     CustomNodeBuilder getBuilderCb()
     {
         auto checkCallback = [](
@@ -114,8 +120,20 @@ public:
                 CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
             }
         };
+        auto checkCallbackAsync = [](
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
         CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+            Converter::ArkValue<CustomNodeBuilder>(checkCallbackAsync, checkCallback, TEST_RESOURCE_ID);
         return customBuilder;
     }
 };
@@ -528,7 +546,6 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
-    checkEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
@@ -536,7 +553,6 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     EXPECT_TRUE(g_onAppear);
     selectInfo.menuCallback.onDisappear();
     EXPECT_TRUE(g_onDisappear);
-    checkEvent = std::nullopt;
     uiNode = std::nullopt;
 }
 
@@ -564,7 +580,6 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     // Testing callback
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
-    checkEvent = std::nullopt;
     bool built = pattern->RequestCustomKeyboard();
     EXPECT_TRUE(built);
     ASSERT_EQ(checkEvent.has_value(), true);
@@ -574,7 +589,6 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_VALUE);
-    checkEvent = std::nullopt;
     uiNode = std::nullopt;
 }
 

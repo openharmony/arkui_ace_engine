@@ -138,14 +138,14 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
         ASSERT_TRUE(selectInfo.has_value());
         ASSERT_NE(selectInfo->menuInfo.menuBuilder, nullptr);
         selectInfo->menuInfo.menuBuilder();
-        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+        EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 
         modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options2);
         selectInfo = GetSelectionMenuParams_Patched(frameNode, spanType, responseType);
         ASSERT_TRUE(selectInfo.has_value());
         ASSERT_NE(selectInfo->menuInfo.menuBuilder, nullptr);
         selectInfo->menuInfo.menuBuilder();
-        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+        EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);

@@ -76,11 +76,10 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     RefPtr<UINode> customNode;
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(value->builder);
     if (arkBuilder) {
-        customNode = CallbackHelper(arkBuilder.value()).BuildSync(node);
-    }
-    if (customNode) {
-        RefreshModelNG::SetCustomBuilder(frameNode, customNode);
-        RefreshModelNG::SetIsCustomBuilderExist(frameNode, true);
+        CallbackHelper(arkBuilder.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            RefreshModelNG::SetCustomBuilder(frameNode, uiNode);
+            RefreshModelNG::SetIsCustomBuilderExist(frameNode, true);
+            }, node);
     } else {
         RefreshModelNG::SetIsCustomBuilderExist(frameNode, false);
     }

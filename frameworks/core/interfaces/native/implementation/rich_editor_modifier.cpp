@@ -682,22 +682,21 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(responseType);
     CHECK_NULL_VOID(options);
+    CHECK_NULL_VOID(content);
     auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
     auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
     auto response = aceResponseType.value_or(TextResponseType::NONE);
     auto span = aceSpanType.value_or(TextSpanType::NONE);
-    std::function<void()> convBuildFunc;
-    if (content) {
-        convBuildFunc = [callback = CallbackHelper(*content), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-    }
     auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
-    if (convMenuParam.has_value()) {
-        RichEditorModelNG::BindSelectionMenu(
-            frameNode, span, response, convBuildFunc, convMenuParam.value());
-    }
+    CHECK_NULL_VOID(convMenuParam);
+    CallbackHelper(*content).BuildAsync([frameNode, span, response, convMenuParam = convMenuParam.value()](
+        const RefPtr<UINode>& uiNode) {
+        std::function<void()> builder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        RichEditorModelNG::BindSelectionMenu(frameNode, const_cast<TextSpanType&>(span),
+            const_cast<TextResponseType&>(response), builder, const_cast<SelectMenuParam&>(convMenuParam));
+        }, node);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const CustomNodeBuilder* value,
@@ -711,11 +710,12 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
     }
-    auto builder = [callback = CallbackHelper(*value), node]() {
-        auto builderNode = callback.BuildSync(node);
-        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    };
-    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
+    CallbackHelper(*value).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+        auto builder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
+        }, node);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

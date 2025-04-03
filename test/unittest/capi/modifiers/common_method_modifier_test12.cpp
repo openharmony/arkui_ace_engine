@@ -165,7 +165,7 @@ HWTEST_F(CommonMethodModifierTest12, AccessibilityVirtualNodeTest, TestSize.Leve
     CustomNodeBuilderTestHelper<CommonMethodModifierTest12> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setAccessibilityVirtualNode(node_, &builder);
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 //////// Overlay
@@ -241,7 +241,7 @@ HWTEST_F(CommonMethodModifierTest12, OverlayTest_Union_String_CustomNodeBuilder_
     auto unionCustomNodeBuilderValue = Converter::ArkUnion<Ark_Union_String_CustomBuilder_ComponentContent,
         CustomNodeBuilder>(builder);
     modifier_->setOverlay(node_, &unionCustomNodeBuilderValue, &optOverlayOptions);
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 }

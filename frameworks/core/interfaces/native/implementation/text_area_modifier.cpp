@@ -705,10 +705,11 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     auto keyboardOptions = options ? Converter::OptConvert<Ark_KeyboardOptions>(*options) : std::nullopt;
     bool supportAvoidance = keyboardOptions &&
         Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
-    auto uiNode = CallbackHelper(*value).BuildSync(node);
-    auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
-    TextFieldModelNG::SetCustomKeyboard(
-        frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
+    CallbackHelper(*value).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+        auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
+        TextFieldModelNG::SetCustomKeyboard(
+            frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
+        }, node);
 }
 void _onChangeEvent_textImpl(Ark_NativePointer node,
                              const Callback_ResourceStr_Void* callback)

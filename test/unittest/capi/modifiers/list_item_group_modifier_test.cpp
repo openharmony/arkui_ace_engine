@@ -54,7 +54,6 @@ public:
             isFooter = true;
         }
         auto checkCallback = [](
-            Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
@@ -69,7 +68,7 @@ public:
             }
         };
         CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+            Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr, TEST_RESOURCE_ID);
         return customBuilder;
     }
 };

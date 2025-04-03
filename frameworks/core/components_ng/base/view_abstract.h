@@ -417,6 +417,9 @@ public:
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
+    static void SetOverlayBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc,
+        const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+        const std::optional<Dimension>& offsetY);
     static void SetOverlayBuilder(std::function<void()>&& buildFunc,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);

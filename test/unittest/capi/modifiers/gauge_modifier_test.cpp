@@ -702,7 +702,7 @@ HWTEST_F(GaugeModifierTest, setDescriptionTest_CustomNodeBuilder, TestSize.Level
     CustomNodeBuilderTestHelper<GaugeModifierTest> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setDescription(node_, &builder);
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 /*
