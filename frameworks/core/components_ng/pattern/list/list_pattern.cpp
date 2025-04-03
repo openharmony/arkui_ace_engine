@@ -2347,10 +2347,9 @@ void ListPattern::UpdateScrollBarOffset()
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
-    if (!IsScrollSnapAlignCenter() || childrenSize_) {
-        currentOffset += contentStartOffset_;
-        estimatedHeight += contentStartOffset_ + contentEndOffset_;
-    }
+
+    currentOffset += contentStartOffset_;
+    estimatedHeight += contentStartOffset_ + contentEndOffset_;
 
     // calculate padding offset of list
     auto layoutPriority = host->GetLayoutProperty();
