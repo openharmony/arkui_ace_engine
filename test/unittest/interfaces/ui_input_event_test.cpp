@@ -3744,7 +3744,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle001, TestSize.Level
     setEvent.inputEvent = &clickEvent;
     setEvent.eventTypeId = C_CLICK_EVENT_ID;
     res = OH_ArkUI_PointerEvent_GetRollAngle(&setEvent, &rollAngle);
-    EXPECT_EQ(res, 401);
+    EXPECT_EQ(res, 0);
 }
 
 /**

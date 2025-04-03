@@ -1549,9 +1549,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle, TestSize.Level1)
     event.inputEvent = nullptr;
     ArkUITouchEvent touchEvent;
     touchEvent.actionTouchPoint.rollAngle = 3.0;
-    ArkUITouchPoint pointes[3];
-    pointes[2].rollAngle = 4.0;
-    touchEvent.touchPointes = pointes;
+    touchEvent.rollAngle = 4.0;
     touchEvent.touchPointSize = 0;
     touchEvent.subKind = ON_AXIS;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);
