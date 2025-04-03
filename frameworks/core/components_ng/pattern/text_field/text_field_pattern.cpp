@@ -9779,8 +9779,6 @@ bool TextFieldPattern::IsShowAIWrite()
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Failed to obtain AI write package name!");
         return false;
     }
-    aiWriteAdapter_->SetBundleName(bundleName);
-    aiWriteAdapter_->SetAbilityName(abilityName);
 
     auto isAISupport = false;
     if (textFieldTheme->GetAIWriteIsSupport() == "true") {
@@ -9788,18 +9786,30 @@ bool TextFieldPattern::IsShowAIWrite()
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Whether the device supports AI write: %{public}d, nodeId: %{public}d",
         isAISupport, host->GetId());
+    if (isAISupport) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        aiWriteAdapter_ = pipeline->GetOrCreateAIWriteAdapter(); // initialize TextFieldPattern's aiWriteAdapter_ here.
+        auto aiWriteAdapter = aiWriteAdapter_.Upgrade();
+        CHECK_NULL_RETURN(aiWriteAdapter, false);
+        aiWriteAdapter->SetBundleName(bundleName);
+        aiWriteAdapter->SetAbilityName(abilityName);
+    }
+
     return isAISupport;
 }
 
 void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
 {
+    auto aiWriteAdapter = aiWriteAdapter_.Upgrade();
+    CHECK_NULL_VOID(aiWriteAdapter);
     // serialize the selected text
     info.selectStart = selectController_->GetStartIndex();
     info.selectEnd = selectController_->GetEndIndex();
     auto selectContent = contentController_->GetSelectedValue(info.selectStart, info.selectEnd);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContent);
     spanString->EncodeTlv(info.selectBuffer);
-    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter->GetSelectLengthOnlyText(spanString->GetU16string()));
     TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "Selected range=[%{public}d--%{public}d], content size=%{public}zu",
         info.selectStart, info.selectEnd, spanString->GetString().size());
 
@@ -9809,13 +9819,13 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
     auto sentenceStart = 0;
     auto sentenceEnd = textSize;
     for (int32_t i = info.selectStart; i >= 0; --i) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceStart = i + 1;
             break;
         }
     }
     for (int32_t i = info.selectEnd; i < textSize; i++) {
-        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+        if (aiWriteAdapter->IsSentenceBoundary(contentAll[i])) {
             sentenceEnd = i;
             break;
         }
@@ -9840,6 +9850,8 @@ void TextFieldPattern::GetAIWriteInfo(AIWriteInfo& info)
 
 void TextFieldPattern::HandleOnAIWrite()
 {
+    auto aiWriteAdapter = aiWriteAdapter_.Upgrade();
+    CHECK_NULL_VOID(aiWriteAdapter);
     AIWriteInfo info;
     GetAIWriteInfo(info);
     CloseSelectOverlay();
@@ -9849,14 +9861,15 @@ void TextFieldPattern::HandleOnAIWrite()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
-        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        auto weakAiWriteAdapter = pattern->aiWriteAdapter_;
+        auto aiWriteAdapter = weakAiWriteAdapter.Upgrade();
         CHECK_NULL_VOID(aiWriteAdapter);
         aiWriteAdapter->CloseModalUIExtension();
     };
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
-    aiWriteAdapter_->SetPipelineContext(pipeline);
-    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+    aiWriteAdapter->SetPipelineContext(pipeline);
+    aiWriteAdapter->ShowModalUIExtension(info, callback);
 }
 
 void TextFieldPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
