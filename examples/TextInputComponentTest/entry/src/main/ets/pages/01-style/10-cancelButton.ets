@@ -15,7 +15,7 @@
 
 @Entry
 @Component
-struct struct_01_style_09_maxLines {
+struct struct_01_style_10_cancelButton {
   @Builder
   itemEnd() {
     Select([{ value: 'KB' },
