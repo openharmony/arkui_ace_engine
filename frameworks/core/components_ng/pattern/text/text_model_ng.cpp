@@ -1258,4 +1258,12 @@ void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     CHECK_NULL_VOID(textPattern);
     textPattern->SetEnableHapticFeedback(state);
 }
+
+size_t TextModelNG::GetLineCount(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, 0);
+    return textPattern->GetLineCount();
+}
 } // namespace OHOS::Ace::NG
