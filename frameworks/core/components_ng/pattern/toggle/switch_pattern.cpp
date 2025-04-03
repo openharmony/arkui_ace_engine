@@ -799,14 +799,14 @@ void SwitchPattern::DumpInfo()
     if (paintProperty->HasSelectedColor()) {
         DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetSelectedColor().value().ToString());
     }
+    if (paintProperty->HasUnselectedColor()) {
+        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColor().value().ToString());
+    }
     if (paintProperty->HasSwitchPointColor()) {
         DumpLog::GetInstance().AddDesc("SwitchPointColor: " + paintProperty->GetSwitchPointColor().value().ToString());
     }
     if (paintProperty->HasPointRadius()) {
         DumpLog::GetInstance().AddDesc("PointRadius: " + paintProperty->GetPointRadius().value().ToString());
-    }
-    if (paintProperty->HasUnselectedColor()) {
-        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColor().value().ToString());
     }
     if (paintProperty->HasTrackBorderRadius()) {
         DumpLog::GetInstance().AddDesc(

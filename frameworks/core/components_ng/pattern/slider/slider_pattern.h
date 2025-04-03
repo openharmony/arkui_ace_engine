@@ -365,6 +365,7 @@ private:
     {
         return skipGestureEvents_;
     }
+    void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

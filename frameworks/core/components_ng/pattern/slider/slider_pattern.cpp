@@ -2300,6 +2300,9 @@ void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)
     if (paintProperty->HasStepColor()) {
         DumpLog::GetInstance().AddDesc("StepColor: " + paintProperty->GetStepColor().value().ToString());
     }
+    if (paintProperty->HasStepSize()) {
+        DumpLog::GetInstance().AddDesc("StepSize: " + paintProperty->GetStepSize().value().ToString());
+    }
     if (paintProperty->HasTrackBorderRadius()) {
         DumpLog::GetInstance().AddDesc(
             "TrackBorderRadius: " + paintProperty->GetTrackBorderRadius().value().ToString());
@@ -2323,9 +2326,6 @@ void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)
     if (paintProperty->HasBlockShape()) {
         DumpLog::GetInstance().AddDesc(
             "BlockShape: " + ToString(paintProperty->GetBlockShape().value()->GetBasicShapeType()));
-    }
-    if (paintProperty->HasStepSize()) {
-        DumpLog::GetInstance().AddDesc("StepSize: " + paintProperty->GetStepSize().value().ToString());
     }
     if (paintProperty->HasSliderInteractionMode()) {
         DumpLog::GetInstance().AddDesc(
