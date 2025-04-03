@@ -66,6 +66,11 @@ public:
             theme->showTimeDistance_ = pattern->GetAttr<Dimension>("default_showtime_distance", 96.0_vp);
             theme->textStyle_.SetFontWeight(FontWeight(pattern->GetAttr<int>("textfield_font_weight",
                 TEXT_FIELD_FONT_WEIGHT)));
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                theme->ratio_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio_api_eighteen", 5.0f);
+            } else {
+                theme->ratio_ = pattern->GetAttr<double>("refresh_over_edge_following_ratio", 1.848f);
+            }
         }
     };
 
@@ -116,6 +121,11 @@ public:
         return backgroundColor_;
     }
 
+    float GetRatio() const
+    {
+        return ratio_;
+    }
+
 protected:
     RefreshTheme() = default;
 
@@ -129,6 +139,7 @@ private:
     TextStyle textStyle_;
     Color progressColor_;
     Color backgroundColor_;
+    float ratio_ = 1.848f;
 };
 
 } // namespace OHOS::Ace
