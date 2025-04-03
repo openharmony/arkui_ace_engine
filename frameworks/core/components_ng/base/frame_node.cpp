@@ -1211,7 +1211,9 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         for (const auto &iter : customPropertyMap_) {
             jsonNode->Put(iter.first.c_str(), iter.second.c_str());
         }
-        json->Put("customProperty", jsonNode->ToString().c_str());
+        if (!customPropertyMap_.empty()) {
+            json->Put("customProperty", jsonNode->ToString().c_str());
+        }
     } else if (getCustomPropertyMapFunc_) {
         json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
     }
