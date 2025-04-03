@@ -373,7 +373,8 @@ private:
     bool HandleDirectionKey(KeyCode code);
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
-    void GetAnimationColor(uint32_t index, uint32_t showCount, Color& color);
+    void GetAnimationColor(uint32_t index, uint32_t showCount, Color& color, bool selectedMark = false);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);
