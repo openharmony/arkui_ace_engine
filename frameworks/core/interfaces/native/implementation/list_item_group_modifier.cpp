@@ -51,17 +51,21 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelNG::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
-        auto builder = [callback = CallbackHelper(header.value()), node]() -> RefPtr<UINode> {
-            return callback.BuildSync(node);
-        };
-        ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
+        CallbackHelper(header.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            auto builder = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
+            }, node);
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
-        auto builder = [callback = CallbackHelper(footer.value()), node]() -> RefPtr<UINode> {
-            return callback.BuildSync(node);
-        };
-        ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
+        CallbackHelper(footer.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            auto builder = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
+            }, node);
     }
 }
 } // ListItemGroupInterfaceModifier

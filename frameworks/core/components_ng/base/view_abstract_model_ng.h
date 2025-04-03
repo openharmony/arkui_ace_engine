@@ -1579,6 +1579,9 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
+    static void BindBackground(FrameNode* frameNode,
+        std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
+
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(

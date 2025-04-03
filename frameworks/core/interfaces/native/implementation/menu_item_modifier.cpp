@@ -115,11 +115,9 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
             MenuItemModelNG::UpdateMenuProperty(frameNode, menuItemProps);
         },
         [frameNode, node](const CustomNodeBuilder& value1) {
-            RefPtr<UINode> customNode;
-            customNode = CallbackHelper(value1).BuildSync(node);
-            if (customNode) {
-                MenuItemModelNG::AddChild(frameNode, customNode);
-            }
+            CallbackHelper(value1).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                MenuItemModelNG::AddChild(frameNode, uiNode);
+                }, node);
         },
         []() {}
     );

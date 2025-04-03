@@ -53,19 +53,16 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 
     Converter::VisitUnion(arg,
         [isStartArea, frameNode, node](const CustomNodeBuilder& value) {
-            auto customNode = CallbackHelper(value).BuildSync(node);
-            CHECK_NULL_VOID(customNode);
-            ListItemModelNG::SetDeleteArea(
-                frameNode, customNode.GetRawPtr(), nullptr, nullptr, nullptr, nullptr,
-                Dimension(0, DimensionUnit::VP), isStartArea);
+            CallbackHelper(value).BuildAsync([isStartArea, frameNode](const RefPtr<UINode>& uiNode) {
+                CHECK_NULL_VOID(uiNode);
+                ListItemModelNG::SetDeleteArea(
+                    frameNode, Referenced::RawPtr(uiNode), nullptr, nullptr, nullptr, nullptr,
+                    Dimension(0, DimensionUnit::VP), isStartArea);
+                }, node);
         },
         [isStartArea, frameNode, node](const Ark_SwipeActionItem& value) {
+            auto length = Converter::OptConvert<Dimension>(value.actionAreaDistance);
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-            RefPtr<UINode> customNode;
-            if (builder) {
-                customNode = CallbackHelper(builder.value()).BuildSync(node);
-            }
-
             OnDeleteEvent onActionCallback;
             AssignVoidCallback(onActionCallback, value.onAction);
 
@@ -77,12 +74,24 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
 
             OnStateChangedEvent onStateChangeCallback;
             AssignOnStateChangedEventCallback(onStateChangeCallback, value.onStateChange);
-
-            auto length = Converter::OptConvert<Dimension>(value.actionAreaDistance);
-
-            ListItemModelNG::SetDeleteArea(frameNode, customNode.GetRawPtr(), std::move(onActionCallback),
-                std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
-                std::move(onStateChangeCallback), length, isStartArea);
+            if (builder.has_value()) {
+                CallbackHelper(builder.value()).BuildAsync([
+                    frameNode, length, isStartArea,
+                    onAction = std::cref(onActionCallback),
+                    onEnterActionArea = std::cref(onEnterActionAreaCallback),
+                    onExitActionArea = std::cref(onExitActionAreaCallback),
+                    onStateChange = std::cref(onStateChangeCallback)
+                ](const RefPtr<UINode>& uiNode) {
+                    ListItemModelNG::SetDeleteArea(frameNode, Referenced::RawPtr(uiNode),
+                        OnDeleteEvent(onAction.get()), OnEnterDeleteAreaEvent(onEnterActionArea.get()),
+                        OnExitDeleteAreaEvent(onExitActionArea.get()), OnStateChangedEvent(onStateChange.get()),
+                        length, isStartArea);
+                    }, node);
+            } else {
+                ListItemModelNG::SetDeleteArea(frameNode, nullptr, std::move(onActionCallback),
+                    std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
+                    std::move(onStateChangeCallback), length, isStartArea);
+            }
         },
         []() {}
     );

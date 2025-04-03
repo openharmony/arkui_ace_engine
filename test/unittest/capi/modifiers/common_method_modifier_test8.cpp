@@ -148,8 +148,20 @@ public:
                 CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
             }
         };
+        auto checkCallbackAsync = [](
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkBuilderEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
         CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, EXPECTED_CONTEXT_ID);
+            Converter::ArkValue<CustomNodeBuilder>(checkCallbackAsync, checkCallback, EXPECTED_CONTEXT_ID);
         return customBuilder;
     }
     Opt_Callback_DismissContentCoverAction_Void CreateDissmisCallback(FrameNode* frameNode)

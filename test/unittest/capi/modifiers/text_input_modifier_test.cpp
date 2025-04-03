@@ -150,7 +150,6 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
     static std::optional<RefPtr<UINode>> uiNode = node;
 
     auto checkCallback = [](
-        Ark_VMContext context,
         const Ark_Int32 resourceId,
         const Ark_NativePointer parentNode,
         const Callback_Pointer_Void continuation) {
@@ -166,7 +165,7 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
 
     static constexpr int32_t contextId = 123;
     CustomNodeBuilder customBuilder =
-        Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
+        Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr, contextId);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     EXPECT_EQ(pattern->GetUnitNode(), nullptr);

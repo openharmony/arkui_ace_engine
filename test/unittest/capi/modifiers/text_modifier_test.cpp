@@ -139,7 +139,6 @@ public:
     CustomNodeBuilder getBuilderCb()
     {
         auto checkCallback = [](
-            Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
@@ -152,7 +151,7 @@ public:
             }
         };
         CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+            Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr, TEST_RESOURCE_ID);
         return customBuilder;
     }
 };
@@ -1263,6 +1262,7 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
+    checkCBEvent = std::nullopt;
     modifier_->setBindSelectionMenu(node_,
         Ark_TextSpanType::ARK_TEXT_SPAN_TYPE_TEXT, &buildFunc,
         Ark_TextResponseType::ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK, &options);
@@ -1274,7 +1274,6 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
     pattern->CopySelectionMenuParams(selectInfo);
     ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
-    checkCBEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
     ASSERT_EQ(checkCBEvent.has_value(), true);
     EXPECT_EQ(checkCBEvent->resourceId, TEST_RESOURCE_ID);
