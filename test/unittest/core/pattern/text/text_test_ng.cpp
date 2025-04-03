@@ -4718,4 +4718,21 @@ HWTEST_F(TextTestNg, UpdateParagraphBySpan005, TestSize.Level1)
     auto paragraphInfo = paragraphs.begin();
     EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE2);
 }
+
+
+/**
+* @tc.name: GetLineCount001
+* @tc.desc: Test the maxlines of UpdateParagraphBySpan with different maxLines settings for each span.
+* @tc.type: FUNC
+*/
+HWTEST_F(TextTestNg, GetLineCount001, TestSize.Level1)
+{
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    textModelNG.SetTextContentWithStyledString(frameNode, nullptr);
+    auto line = textModelNG.GetLineCount(frameNode);
+    ASSERT_EQ(line, 0);
+}
 } // namespace OHOS::Ace::NG
