@@ -434,4 +434,50 @@ HWTEST_F(DragEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
     }
 }
 
+/**
+ * @tc.name: GetSummaryTestDefault
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetSummaryTestDefault, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSummary, nullptr);
+    auto check = accessor_->getSummary(peer_);
+    EXPECT_EQ(check.summary.size, 0);
+    EXPECT_EQ(check.summary.keys, nullptr);
+    EXPECT_EQ(check.summary.values, nullptr);
+    EXPECT_EQ(check.totalSize, 0);
+}
+
+/**
+ * @tc.name: GetSummaryTestValid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventAccessorTest, GetSummaryTestValid, TestSize.Level1)
+{
+    std::map<std::string, int64_t> expectedMap = {
+        {"a", 23},
+        {"b", 45},
+        {"c", 67},
+    };
+    ASSERT_NE(peer_->dragInfo, nullptr);
+    peer_->dragInfo->SetSummary(expectedMap);
+
+    ASSERT_NE(accessor_->getSummary, nullptr);
+    auto check = accessor_->getSummary(peer_);
+    EXPECT_EQ(check.summary.size, expectedMap.size());
+    ASSERT_NE(check.summary.keys, nullptr);
+    ASSERT_NE(check.summary.values, nullptr);
+
+    int64_t expectedTotal = 0;
+    int idx = 0;
+    for (auto item: expectedMap) {
+        EXPECT_EQ(Converter::Convert<std::string>(check.summary.keys[idx]), item.first);
+        EXPECT_EQ(Converter::Convert<int64_t>(check.summary.values[idx]), item.second);
+        expectedTotal += item.second;
+        idx++;
+    }
+    EXPECT_EQ(Converter::Convert<int64_t>(check.totalSize), expectedTotal);
+}
 } // namespace OHOS::Ace::NG

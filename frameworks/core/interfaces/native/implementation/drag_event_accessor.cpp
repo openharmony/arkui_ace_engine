@@ -137,12 +137,16 @@ Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
 }
 Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    Ark_Summary arkValue = { .summary = {}, .totalSize = 0 };
+    CHECK_NULL_RETURN(peer, arkValue);
     auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, {});
+    CHECK_NULL_RETURN(info, arkValue);
     auto summary = info->GetSummary();
-    LOGE("DragEventAccessor::GetSummaryImpl wrong return data");
-    return {};
+    arkValue.summary = Converter::ArkValue<Map_String_Int64>(summary, Converter::FC);
+    for (const auto &item: summary) {
+        arkValue.totalSize += ArkValue<Ark_Int64>(item.second);
+    }
+    return arkValue;
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
