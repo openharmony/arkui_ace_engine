@@ -313,7 +313,6 @@ HWTEST_F(UICommonEventAccessorTest, setOnMouseTest, TestSize.Level1)
 
     ASSERT_TRUE(testEvent);
     EXPECT_EQ(testEvent->resourceId, RES_ID);
-    
 }
 
 /**
