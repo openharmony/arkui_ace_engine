@@ -104,10 +104,12 @@ protected:
     RefPtr<FrameNode> appWindow_;
     RefPtr<FrameNode> snapshotWindow_;
     RefPtr<FrameNode> blankWindow_;
+    RefPtr<FrameNode> newAppWindow_;
     std::string startingWindowName_ = "StartingWindow";
     std::string appWindowName_ = "AppWindow";
     std::string snapshotWindowName_ = "SnapshotWindow";
     std::string blankWindowName_ = "BlankWindow";
+    const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
 
