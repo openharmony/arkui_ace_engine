@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_font_manager.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/common/recorder/event_controller.h"
 
 #include "core/text/text_emoji_processor.h"
 #include "base/i18n/localization.h"
@@ -605,5 +606,87 @@ HWTEST_F(TextFieldPatternTestNine, ProcessSelection002, TestSize.Level0)
     pattern_->isSelecting_ = true;
     pattern_->ProcessSelection();
     EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 4);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test text_field_pattern.cpp OnModifyDone function,
+    case IsGestureSelectingText(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, OnModifyDone001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto pipeline = host->GetContext();
+    auto textFieldManager = AIWriteAdapter::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    auto size = textFieldManager->textFieldInfoMap_.size();
+    pattern_->firstAutoFillContainerNode_ =  pattern_->frameNode_;
+    pattern_->OnModifyDone();
+    EXPECT_EQ(textFieldManager->textFieldInfoMap_.size(), size + 1);
+}
+
+/**
+ * @tc.name: TriggerAvoidWhenCaretGoesDown001
+ * @tc.desc: test text_field_pattern.cpp TriggerAvoidWhenCaretGoesDown function,
+    case context->UsingCaretAvoidMode() && HasFocus() && textFieldManager,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, TriggerAvoidWhenCaretGoesDown001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    auto host = pattern_->GetHost();
+    auto context = host->GetContext();
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
+ 
+    /* lastCarePos < 74  return 74 */
+    pattern_->SetLastCaretPos(30);
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 74);
+
+    /* lastCarePos > 74  return lastCarePos */
+    pattern_->SetLastCaretPos(123);
+    pattern_->TriggerAvoidWhenCaretGoesDown();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), 123);
+}
+
+/**
+ * @tc.name: RecordTextInputEvent001
+ * @tc.desc: test text_field_pattern.cpp RecordTextInputEvent function,
+    case isPwdType,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, RecordTextInputEvent001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    GetFocus();
+
+    for (int i = 0; i < 10; i++)
+    {
+        Recorder::EventRecorder::Get().globalSwitch_[i] = true;
+        Recorder::EventRecorder::Get().eventSwitch_[i] = true;
+    }
+    auto host = pattern_->GetHost();
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    pattern_->RecordTextInputEvent();
+    EXPECT_EQ(Recorder::EventController::Get().cacheEvents_.size(), 0);
+
+    layoutProperty->UpdateTextInputType(TextInputType::DATETIME);
+    Recorder::EventController::Get().hasCached_ = false;
+    pattern_->RecordTextInputEvent();
+    EXPECT_EQ(Recorder::EventController::Get().cacheEvents_.size(), 1);
 }
 } // namespace OHOS::Ace::NG,
