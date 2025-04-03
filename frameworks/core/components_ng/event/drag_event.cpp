@@ -300,6 +300,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     if (!IsGlobalStatusSuitableForDragging() || !IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
         return;
     }
+    RecordTouchDownPoint(touchRestrict.touchEvent);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture = focusHub == nullptr
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
