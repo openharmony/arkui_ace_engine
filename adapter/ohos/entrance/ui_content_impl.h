@@ -368,11 +368,13 @@ public:
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
+        std::lock_guard<std::mutex> lock(destructMutex_);
         destructCallbacks_.emplace(key, callback);
     }
 
     void RemoveDestructCallback(void* key)
     {
+        std::lock_guard<std::mutex> lock(destructMutex_);
         destructCallbacks_.erase(key);
     }
 
@@ -513,6 +515,7 @@ private:
     OHOS::Rosen::WindowSizeChangeReason cachedReason_;
     std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
+    std::mutex destructMutex_;
 };
 
 } // namespace OHOS::Ace
