@@ -70,7 +70,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         if (self->snapshotWindow_) {
             self->BufferAvailableCallbackForSnapshot();
         }
-        if (self->newAppWindow_ != nullptr && self->appWindow_ != nullptr) {
+        if (self->newAppWindow_ && self->appWindow_) {
             self->BufferAvailableCallback();
         }
     };
@@ -339,7 +339,7 @@ void WindowScene::BufferAvailableCallback()
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (isAbilityHook && self->appWindow_ != nullptr && self->newAppWindow_ != nullptr) {
+        if (isAbilityHook && self->appWindow_ && self->newAppWindow_) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "reuseDelegatorWindow from true to false");
             self->RemoveChild(host, self->appWindow_, self->appWindowName_, true);
             self->appWindow_.Reset();
@@ -358,7 +358,7 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    if (session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady() && !isAbilityHook) {
+    if (!isAbilityHook && session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
         auto taskExecutor = pipelineContext->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
         removeStartingWindowTask_.Cancel();

@@ -109,7 +109,7 @@ protected:
     std::string appWindowName_ = "AppWindow";
     std::string snapshotWindowName_ = "SnapshotWindow";
     std::string blankWindowName_ = "BlankWindow";
-    std::string newAppWindowName_ = "NewAppWindow";
+    const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
 

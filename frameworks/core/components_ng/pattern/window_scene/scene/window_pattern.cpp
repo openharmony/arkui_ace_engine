@@ -266,7 +266,7 @@ void WindowPattern::CreateAppWindow()
         context->SetRSNode(surfaceNode);
         surfaceNode->SetVisible(true);
     }
-    (appWindow_ == nullptr) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
+    (!appWindow_) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
 }
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
