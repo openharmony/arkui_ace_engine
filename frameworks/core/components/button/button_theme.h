@@ -186,6 +186,8 @@ public:
                 ControlSize::NORMAL, buttonPattern->GetAttr<Dimension>("button_border_radius_normal", 20.0_vp)));
             theme->borderRadiusMap_.insert(std::pair<ControlSize, Dimension>(
                 ControlSize::SMALL, buttonPattern->GetAttr<Dimension>("button_border_radius_small", 14.0_vp)));
+            theme->pasteText_ = buttonPattern->GetAttr<std::string>("textoverlay_paste", "");
+            theme->cancelText_ = buttonPattern->GetAttr<std::string>("common_cancel_text", "");
         }
     };
 
@@ -534,6 +536,16 @@ public:
         return isApplyFontSize_;
     }
 
+    const std::string& GetPasteText() const
+    {
+        return pasteText_;
+    }
+
+    const std::string& GetCancelText() const
+    {
+        return cancelText_;
+    }
+
 protected:
     ButtonTheme() = default;
 
@@ -603,6 +615,8 @@ private:
     Dimension agingSmallPadding_;
     uint32_t agingTextMaxLines_ = 2;
     bool isApplyFontSize_ = false;
+    std::string pasteText_;
+    std::string cancelText_;
 };
 
 } // namespace OHOS::Ace
