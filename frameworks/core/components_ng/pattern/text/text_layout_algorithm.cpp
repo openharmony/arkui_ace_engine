@@ -520,6 +520,10 @@ bool TextLayoutAlgorithm::AdaptMinTextSize(TextStyle& textStyle, const std::u16s
         }
         return true;
     }
+    if (NonPositive(contentConstraint.maxSize.Width())) {
+        textStyle.SetFontSize(Dimension(minFontSize));
+        return CreateParagraphAndLayout(textStyle, content, contentConstraint, layoutWrapper);
+    }
     // Get suitableSize and set
     auto ret = GetSuitableSize(textStyle, content, contentConstraint, layoutWrapper);
     if (!ret.first) {
