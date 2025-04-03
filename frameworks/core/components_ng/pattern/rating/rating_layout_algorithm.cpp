@@ -99,10 +99,16 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     SizeF singleStarSize(singleWidth, ratingSize.Height());
 
     // step2: make 3 images canvas and set its dst size as single star size.
-    foregroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
-    secondaryLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
-    backgroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
-    if (pattern->IsNeedFocusStyle()) {
+    if (foregroundLoadingCtx_) {
+        foregroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    }
+    if (secondaryLoadingCtx_) {
+        secondaryLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    }
+    if (backgroundLoadingCtx_) {
+        backgroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    }
+    if (backgroundFocusLoadingCtx_ && pattern->IsNeedFocusStyle()) {
         backgroundFocusLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
     }
 }
