@@ -281,8 +281,10 @@ void WindowScene::BufferAvailableCallback()
 {
     bool isAbilityHook = session_->GetSessionInfo().reuseDelegatorWindow;
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-        "isAbilityHook: %{public}d,BufferAvailableCallback id: %{public}d, enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
-        isAbilityHook, session_->GetPersistentId(), session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
+        "isAbilityHook: %{public}d,BufferAvailableCallback id: %{public}d,"
+        "enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
+        isAbilityHook, session_->GetPersistentId(),
+        session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
     auto uiTask = [weakThis = WeakClaim(this), isAbilityHook]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
         auto self = weakThis.Upgrade();
