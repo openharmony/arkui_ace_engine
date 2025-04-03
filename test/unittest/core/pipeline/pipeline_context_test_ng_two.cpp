@@ -1639,5 +1639,640 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg180, TestSize.Level1)
     bool result = context_->OnDumpInfo(params);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg181
+ * @tc.desc: Test the function HandleSpecialContainerNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg181, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: containerDeleteFlag_ is true and call HandleSpecialContainerNode function.
+     * @tc.expected: positionZNodes_ is null.
+     */
+    ASSERT_NE(context_, nullptr);
+    SystemProperties::containerDeleteFlag_ = true;
+    context_->HandleSpecialContainerNode();
+    EXPECT_EQ(context_->GetPositionZNodes().size(), 0);
+
+    /**
+     * @tc.steps2: initialize parameters and call HandleSpecialContainerNode function.
+     * @tc.expected: element is false and positionZNodes_ is null.
+     */
+    RefPtr<FrameNode> parentNode = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> frameNode1 = FrameNode::CreateFrameNode("test1", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> frameNode2 = FrameNode::CreateFrameNode("test2", 2, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> overlayNode = FrameNode::CreateFrameNode("overlayNode", 3, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> focusPaintNode = FrameNode::CreateFrameNode("overlayNode", 4, AceType::MakeRefPtr<Pattern>());
+    auto element = ElementRegister::GetInstance()->AddReferenced(1, frameNode1);
+    element = ElementRegister::GetInstance()->AddReferenced(2, frameNode2);
+    EXPECT_FALSE(element);
+    frameNode2->SetParent(parentNode);
+    context_->AddPositionZNode(-1);
+    context_->AddPositionZNode(1);
+    context_->AddPositionZNode(2);
+    context_->HandleSpecialContainerNode();
+    EXPECT_EQ(context_->GetPositionZNodes().size(), 0);
+
+    /**
+     * @tc.steps3: overlayNode and focusPaintNode are not null, call HandleSpecialContainerNode function.
+     * @tc.expected: element is false and positionZNodes_ is null.
+     */
+    context_->AddPositionZNode(2);
+    parentNode->SetOverlayNode(overlayNode);
+    parentNode->SetFocusPaintNode(focusPaintNode);
+    parentNode->renderContext_ = nullptr;
+    context_->HandleSpecialContainerNode();
+    EXPECT_EQ(context_->GetPositionZNodes().size(), 0);
+
+    /**
+     * @tc.steps4: renderContext_ is null and call HandleSpecialContainerNode function.
+     * @tc.expected: element is false and positionZNodes_ is null.
+     */
+    context_->AddPositionZNode(2);
+    overlayNode->renderContext_ = nullptr;
+    focusPaintNode->renderContext_ = nullptr;
+    context_->HandleSpecialContainerNode();
+    EXPECT_EQ(context_->GetPositionZNodes().size(), 0);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg182
+ * @tc.desc: Test the function FlushMessages.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg182, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: isFreezeFlushMessage_ is true and call FlushMessages function.
+     * @tc.expected: isFreezeFlushMessage_ is false.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetIsFreezeFlushMessage(true);
+    context_->FlushMessages();
+    EXPECT_FALSE(context_->IsFreezeFlushMessage());
+
+    /**
+     * @tc.steps2: navigationMgr_ is null and call FlushMessages function.
+     * @tc.expected: isFreezeFlushMessage_ is false.
+     */
+    context_->navigationMgr_ = nullptr;
+    context_->FlushMessages();
+    EXPECT_FALSE(context_->IsFreezeFlushMessage());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg183
+ * @tc.desc: Test the function FlushUITaskWithSingleDirtyNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg183, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call FlushUITaskWithSingleDirtyNode function.
+     * @tc.expected: singleDirtyNodesToFlush_.size() is 1.
+     */
+    RefPtr<FrameNode> node = FrameNode::CreateFrameNode("node", 0, AceType::MakeRefPtr<Pattern>());
+    context_->taskScheduler_->SetIsLayouting(true);
+    context_->FlushUITaskWithSingleDirtyNode(node);
+    context_->FlushAfterLayoutCallbackInImplicitAnimationTask();
+    EXPECT_EQ(context_->taskScheduler_->singleDirtyNodesToFlush_.size(), 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg184
+ * @tc.desc: Test the function FlushFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg184, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: add dirty focus and call FlushFocus function.
+     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->AddDirtyFocus(frameNode_);
+    context_->FlushFocus();
+    EXPECT_EQ(context_->dirtyFocusScope_.Upgrade(), nullptr);
+
+    /**
+     * @tc.steps2: set focus type to SCOPE and call FlushFocus function.
+     * @tc.expected: The dirtyFocusNode_ is changed to nullptr.
+     */
+    auto eventHub = frameNode_->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto focusHub = eventHub->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    context_->AddDirtyFocus(frameNode_);
+    context_->FlushFocus();
+    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg185
+ * @tc.desc: Test the function FlushFocusWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg185, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call FlushFocusWithNode function.
+     * @tc.expected: singleDirtyNodesToFlush_.size() is 1.
+     */
+    ASSERT_NE(context_, nullptr);
+    RefPtr<FrameNode> focusNode = FrameNode::CreateFrameNode("focusNode", 0, AceType::MakeRefPtr<Pattern>());
+    bool isScope = true;
+    context_->FlushFocusWithNode(focusNode, isScope);
+    EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg186
+ * @tc.desc: Test the function FlushFrameRate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg186, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call FlushFrameRate function.
+     * @tc.expected: lastAnimatorExpectedFrameRate_ is -1.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->lastAnimatorExpectedFrameRate_ = 0;
+    context_->FlushFrameRate();
+    EXPECT_EQ(context_->lastAnimatorExpectedFrameRate_, -1);
+
+    /**
+     * @tc.steps2: isRateChanged_ is true and call FlushFrameRate function.
+     * @tc.expected: isRateChanged_ is true is false and lastAnimatorExpectedFrameRate_ is -1.
+     */
+    context_->frameRateManager_->SetIsRateChanged(true);
+    context_->FlushFrameRate();
+    EXPECT_EQ(context_->lastAnimatorExpectedFrameRate_, -1);
+    EXPECT_FALSE(context_->frameRateManager_->IsRateChanged());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg187
+ * @tc.desc: Test the function StartWindowSizeChangeAnimate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg187, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: type is FULL_TO_SPLIT and call StartWindowSizeChangeAnimate function.
+     * @tc.expected: designWidthScale_ not change.
+     */
+    ASSERT_NE(context_, nullptr);
+    int32_t width = 0;
+    int32_t height = 0;
+    WindowSizeChangeReason type = WindowSizeChangeReason::FULL_TO_SPLIT;
+    context_->StartWindowSizeChangeAnimate(width, height, type);
+    EXPECT_EQ(context_->designWidthScale_, 1);
+
+    /**
+     * @tc.steps2: type is MAXIMIZE_TO_SPLIT and call StartWindowSizeChangeAnimate function.
+     * @tc.expected: designWidthScale_ not change.
+     */
+    type = WindowSizeChangeReason::MAXIMIZE_TO_SPLIT;
+    context_->StartWindowSizeChangeAnimate(width, height, type);
+    EXPECT_EQ(context_->designWidthScale_, 1);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg188
+ * @tc.desc: Test the function PostKeyboardAvoidTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg188, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call PostKeyboardAvoidTask function.
+     * @tc.expected: laterAvoid is false.
+     */
+    ASSERT_NE(context_, nullptr);
+    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    manager->SetLaterAvoid(true);
+    context_->textFieldManager_ = manager;
+    context_->PostKeyboardAvoidTask();
+    EXPECT_FALSE(manager->GetLaterAvoid());
+
+    /**
+     * @tc.steps2: usingCustomKeyboardAvoid_ is true and call PostKeyboardAvoidTask function.
+     * @tc.expected: laterAvoid is true.
+     */
+    manager->SetLaterAvoid(true);
+    manager->SetUsingCustomKeyboardAvoid(true);
+    context_->textFieldManager_ = manager;
+    context_->PostKeyboardAvoidTask();
+    EXPECT_TRUE(manager->GetLaterAvoid());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg189
+ * @tc.desc: Test CompensatePointerMoveEventFromUnhandledEvents.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg189, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    DragPointerEvent event;
+    event.pointerEventId = 1;
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    DragPointerEvent PointerEvent1;
+    PointerEvent1.pointerEventId = 2;
+    DragPointerEvent PointerEvent2;
+    PointerEvent2.pointerEventId = 3;
+    std::list<DragPointerEvent> dragEvents;
+    dragEvents.push_back(PointerEvent1);
+    dragEvents.push_back(PointerEvent2);
+    context_->dragEvents_[rootNode] = dragEvents;
+
+    /**
+     * @tc.steps2: Call the function CompensatePointerMoveEventFromUnhandledEvents.
+     * @tc.expected: Test the member dragEvents_ is not empty and The result is false.
+     */
+    EXPECT_FALSE(context_->CompensatePointerMoveEventFromUnhandledEvents(event, rootNode));
+
+    /**
+     * @tc.steps3: Call the function CompensatePointerMoveEventFromUnhandledEvents.
+     * @tc.expected: Test The parameter rootNode2 is not in dragEvents_ and The result is false.
+     */
+    RefPtr<FrameNode> rootNode2 = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_FALSE(context_->CompensatePointerMoveEventFromUnhandledEvents(event, rootNode2));
+
+    /**
+     * @tc.steps4: Push the event into dragEvents_.
+     * @tc.expected: The result is TRUE.
+     */
+    context_->dragEvents_[rootNode].push_back(event);
+    EXPECT_TRUE(context_->CompensatePointerMoveEventFromUnhandledEvents(event, rootNode));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg190
+ * @tc.desc: Test AddFrameCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg190, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.let delayMillis is equal to 0;
+     */
+    ASSERT_NE(context_, nullptr);
+    int64_t delayMillis = 0;
+    FrameCallbackFunc frameCallbackFunc2 = nullptr;
+    FrameCallbackFunc idleCallbackFunc2 = nullptr;
+
+    /**
+     * @tc.steps2:
+     * Test the parameters frameCallbackFunc and idleCallbackFunc are nullptr, and delayMillis is equal to 0.
+     * @tc.expected: The member frameCallbackFuncs_ is empty
+     */
+    context_->AddFrameCallback(std::move(frameCallbackFunc2), std::move(idleCallbackFunc2), delayMillis);
+    EXPECT_TRUE(context_->frameCallbackFuncs_.empty());
+    FrameCallbackFunc frameCallbackFunc = [](uint64_t nanoTimestamp) {
+        return;
+    };
+    FrameCallbackFunc idleCallbackFunc = [](uint64_t nanoTimestamp) {
+        return;
+    };
+
+    /**
+     * @tc.steps3:
+     * Test the parameters frameCallbackFunc and idleCallbackFunc are not nullptr, and delayMillis is equal to 0.
+     * @tc.expected: The member frameCallbackFuncs_ is not empty
+     */
+    context_->AddFrameCallback(std::move(frameCallbackFunc), std::move(idleCallbackFunc), delayMillis);
+    EXPECT_FALSE(context_->frameCallbackFuncs_.empty());
+
+    /**
+     * @tc.steps4:
+     * Test the parameters frameCallbackFunc and idleCallbackFunc are nullptr, and delayMillis is granter than 0.
+     * @tc.expected: The member frameCallbackFuncs_ is empty
+     */
+    delayMillis = 1;
+    context_->frameCallbackFuncs_.clear();
+    context_->AddFrameCallback(std::move(frameCallbackFunc2), std::move(idleCallbackFunc2), delayMillis);
+    EXPECT_TRUE(context_->frameCallbackFuncs_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg191
+ * @tc.desc: Test AddCAPIFrameCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg191, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    FrameCallbackFuncFromCAPI frameCallbackFuncFromCAPI = [](uint64_t nanoTimestamp, uint32_t frameCount) {
+        return;
+    };
+
+    /**
+     * @tc.steps2:
+     * Test the parameters frameCallbackFuncFromCAPI is not nullptr.
+     * @tc.expected: The member frameCallbackFuncFromCAPI is not empty
+     */
+    context_->AddCAPIFrameCallback(std::move(frameCallbackFuncFromCAPI));
+    EXPECT_FALSE(context_->frameCallbackFuncsFromCAPI_.empty());
+
+    /**
+     * @tc.steps3:
+     * Test the parameters frameCallbackFuncFromCAPI is nullptr.
+     * @tc.expected: The member frameCallbackFuncFromCAPI is empty
+     */
+    frameCallbackFuncFromCAPI = nullptr;
+    context_->frameCallbackFuncsFromCAPI_.clear();
+    context_->AddCAPIFrameCallback(std::move(frameCallbackFuncFromCAPI));
+    EXPECT_TRUE(context_->frameCallbackFuncsFromCAPI_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg192
+ * @tc.desc: Test TriggerIdleCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg192, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    FrameCallbackFunc callback = [](uint64_t nanoTimestamp) {
+        return;
+    };
+    /**
+     * @tc.steps2:
+     * Test the parameters deadline is near to currentTime.
+     * @tc.expected: The member idleCallbackFuncs_ is not empty
+     */
+    context_->idleCallbackFuncs_.push_back(callback);
+    int64_t deadline = GetSysTimestamp();
+    context_->TriggerIdleCallback(deadline);
+    EXPECT_FALSE(context_->idleCallbackFuncs_.empty());
+
+    /**
+     * @tc.steps3:
+     * Test current time is less than the minimum idle time.
+     * @tc.expected: The member idleCallbackFuncs_ is not empty
+     */
+    context_->idleCallbackFuncs_.push_back(callback);
+    deadline = GetSysTimestamp() + 10000;
+    context_->TriggerIdleCallback(deadline);
+    EXPECT_TRUE(context_->idleCallbackFuncs_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg193
+ * @tc.desc: Test EnableContainerModalGesture.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg193, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    ASSERT_NE(context_, nullptr);
+    bool isEnable = 0;
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
+    context_->rootNode_->children_.push_front(node);
+    
+    /**
+     * @tc.steps2:
+     * Call function EnableContainerModalGesture.
+     * @tc.expected: children.front() is not nullptr
+     */
+    context_->EnableContainerModalGesture(isEnable);
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
+
+    context_->rootNode_->children_.clear();
+    node.Reset();
+    context_->rootNode_->children_.push_front(node);
+
+    /**
+     * @tc.steps3:
+     * Call function EnableContainerModalGesture.
+     * @tc.expected: children.front() is nullptr
+     */
+    context_->EnableContainerModalGesture(isEnable);
+    EXPECT_FALSE(AceType::DynamicCast<FrameNode>(context_->rootNode_->GetChildren().front()));
+
+    context_->rootNode_->children_.clear();
+
+    /**
+     * @tc.steps4:
+     * Call function EnableContainerModalGesture.
+     * @tc.expected: children is empty
+     */
+    context_->EnableContainerModalGesture(isEnable);
+    EXPECT_TRUE(context_->rootNode_->GetChildren().empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg194
+ * @tc.desc: Test SetCursor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg194, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.let delayMillis is less than 0;
+     * @tc.expected: The isUserSetCursor_ is false
+     */
+    ASSERT_NE(context_, nullptr);
+    int32_t cursorValue = -1;
+    context_->SetCursor(cursorValue);
+    EXPECT_FALSE(context_->eventManager_->GetMouseStyleManager()->userSetCursor_);
+
+    /**
+     * @tc.steps2: let delayMillis is greater than RUNNING;
+     * @tc.expected: The isUserSetCursor_ is false
+     */
+    cursorValue = static_cast<int32_t>(MouseFormat::ALIAS);
+    context_->SetCursor(cursorValue);
+    EXPECT_FALSE(context_->eventManager_->GetMouseStyleManager()->userSetCursor_);
+
+    /**
+     * @tc.steps3: let delayMillis is greater than 0 and less than RUNNING;
+     * @tc.expected: The isUserSetCursor_ is true
+     */
+    cursorValue = 10;
+    context_->SetCursor(cursorValue);
+    EXPECT_TRUE(context_->eventManager_->GetMouseStyleManager()->userSetCursor_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg195
+ * @tc.desc: Test FlushWindowActivateChangedCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg195, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function FlushWindowActivateChangedCallback;
+     * @tc.expected: The onWindowActivateChangedCallbacks_ is empty
+     */
+    ASSERT_NE(context_, nullptr);
+    bool isActivate = false;
+    context_->onWindowActivateChangedCallbacks_.clear();
+    context_->FlushWindowActivateChangedCallback(isActivate);
+    EXPECT_TRUE(context_->onWindowActivateChangedCallbacks_.empty());
+
+    /**
+     * @tc.steps2: Call function FlushWindowActivateChangedCallback;
+     * @tc.expected: The onWindowActivateChangedCallbacks_ is empty
+     */
+    context_->onWindowActivateChangedCallbacks_.insert(10);
+    context_->FlushWindowActivateChangedCallback(isActivate);
+    EXPECT_TRUE(context_->onWindowActivateChangedCallbacks_.empty());
+
+    /**
+     * @tc.steps3: Call function FlushWindowActivateChangedCallback;
+     * @tc.expected: The onWindowActivateChangedCallbacks_ is not empty
+     */
+    context_->onWindowActivateChangedCallbacks_.insert(10);
+    ElementIdType elmtId = 10;
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+    WeakPtr<FrameNode> referenced = AceType::WeakClaim(AceType::RawPtr(rootNode));
+    ElementRegister::GetInstance()->AddReferenced(elmtId, referenced);
+    context_->FlushWindowActivateChangedCallback(isActivate);
+    EXPECT_TRUE(!context_->onWindowActivateChangedCallbacks_.empty());
+
+    /**
+     * @tc.steps4: Call function FlushWindowActivateChangedCallback;
+     * @tc.expected: The onWindowActivateChangedCallbacks_ is not empty
+     */
+    isActivate = true;
+    context_->FlushWindowActivateChangedCallback(isActivate);
+    EXPECT_TRUE(!context_->onWindowActivateChangedCallbacks_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg196
+ * @tc.desc: Test SetIsWindowSizeDragging.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg196, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function SetIsWindowSizeDragging;
+     * @tc.expected: The isWindowSizeDragging_ is true
+     */
+    ASSERT_NE(context_, nullptr);
+    bool isDragging = true;
+    context_->SetIsWindowSizeDragging(isDragging);
+    EXPECT_TRUE(context_->isWindowSizeDragging_);
+
+    /**
+     * @tc.steps2: Call function SetIsWindowSizeDragging;
+     * @tc.expected: The isWindowSizeDragging_ is false and onWindowSizeDragEndCallbacks_ is empty
+     */
+    isDragging = false;
+    std::function<void()> callback = nullptr;
+    context_->onWindowSizeDragEndCallbacks_.clear();
+    context_->AddWindowSizeDragEndCallback(std::move(callback));
+    context_->SetIsWindowSizeDragging(isDragging);
+    EXPECT_FALSE(context_->isWindowSizeDragging_);
+
+    /**
+     * @tc.steps3: Call function SetIsWindowSizeDragging;
+     * @tc.expected: The isWindowSizeDragging_ is false and onWindowSizeDragEndCallbacks_ is not empty
+     */
+    callback = []() {
+        return;
+    };
+    context_->onWindowSizeDragEndCallbacks_.clear();
+    context_->AddWindowSizeDragEndCallback(std::move(callback));
+    isDragging = false;
+    context_->SetIsWindowSizeDragging(isDragging);
+    EXPECT_FALSE(context_->isWindowSizeDragging_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg197
+ * @tc.desc: Test RequireSummary.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg197, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function RequireSummary;
+     * @tc.expected: The manager is nullptr
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->RequireSummary();
+    EXPECT_TRUE(context_->GetDragDropManager());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg198
+ * @tc.desc: Test UpdateFormLinkInfos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg198, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function UpdateFormLinkInfos;
+     * @tc.expected: The formLinkInfoUpdateHandler_ is nullptr
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->UpdateFormLinkInfos();
+    EXPECT_EQ(context_->formLinkInfoUpdateHandler_, nullptr);
+
+    /**
+     * @tc.steps2: Call function UpdateFormLinkInfos;
+     * @tc.expected: The formLinkInfoMap_ is empty
+     */
+    std::string info = "test";
+    context_->formLinkInfoMap_[1] = info;
+    context_->UpdateFormLinkInfos();
+    EXPECT_FALSE(context_->formLinkInfoMap_.empty());
+
+    /**
+     * @tc.steps3: Call function UpdateFormLinkInfos;
+     * @tc.expected: The formLinkInfoUpdateHandler_ is not nullptr
+     */
+    std::function<void(const std::vector<std::string>&)>
+        formLinkInfoUpdateHandler = [](const std::vector<std::string> hander) {
+        return;
+    };
+    context_->SetFormLinkInfoUpdateHandler(std::move(formLinkInfoUpdateHandler));
+    context_->UpdateFormLinkInfos();
+    EXPECT_NE(context_->formLinkInfoUpdateHandler_, nullptr);
+
+    /**
+     * @tc.steps4: Call function UpdateFormLinkInfos;
+     * @tc.expected: The formLinkInfoMap_ is not empty
+     */
+    context_->formLinkInfoMap_.clear();
+    context_->UpdateFormLinkInfos();
+    EXPECT_TRUE(context_->formLinkInfoMap_.empty());
+}
+
+/**
+ * @tc.name: PipelineContextTestNg199
+ * @tc.desc: Test ContainerModalUnFocus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg199, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call function RequireSummary;
+     * @tc.expected: The windowModal_ is not equal to CONTAINER_MODAL
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->windowModal_ = WindowModal::DIALOG_MODAL;
+    context_->ContainerModalUnFocus();
+    EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
+}
 } // namespace NG
 } // namespace OHOS::Ace
