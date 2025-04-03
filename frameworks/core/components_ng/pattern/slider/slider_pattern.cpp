@@ -2261,8 +2261,12 @@ void SliderPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc("BlockColor: " + paintProperty->GetBlockColor().value().ToString());
     }
     if (paintProperty->HasTrackBackgroundColor()) {
-        DumpLog::GetInstance().AddDesc(
-            "TrackBackgroundColor: " + paintProperty->GetTrackBackgroundColor().value().ToString());
+        std::vector<GradientColor> gradientColors = paintProperty->GetTrackBackgroundColor().value().GetColors();
+        std::ostringstream oss;
+        for (const auto& gradientColor : gradientColors) {
+            oss << gradientColor.GetLinearColor().ToColor().ToString() << " ";
+        }
+        DumpLog::GetInstance().AddDesc("TrackBackgroundColor: " + oss.str());
     }
     if (paintProperty->HasSelectColor()) {
         DumpLog::GetInstance().AddDesc("SelectColor: " + paintProperty->GetSelectColor().value().ToString());

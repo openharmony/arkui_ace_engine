@@ -885,8 +885,9 @@ void ButtonPattern::DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty)
     }
     if (layoutProperty->HasFontFamily()) {
         std::ostringstream oss;
-        for (const auto& str : layoutProperty->GetFontFamilyValue()) {
-            oss << str << ", ";
+        auto vec = layoutProperty->GetFontFamilyValue();
+        for (size_t i = 0; i < vec.size(); ++i) {
+            oss << ((i == 0) ? "" : ",") << vec[i];
         }
         DumpLog::GetInstance().AddDesc("FontFamily: " + oss.str());
     }

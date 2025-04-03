@@ -110,8 +110,8 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
 static std::string ConvertVectorToString(std::vector<std::string> vec)
 {
     std::ostringstream oss;
-    for (const auto& str : vec) {
-        oss << str << ", ";
+    for (size_t i = 0; i < vec.size(); ++i) {
+        oss << ((i == 0) ? "" : ",") << vec[i];
     }
     return oss.str();
 }
