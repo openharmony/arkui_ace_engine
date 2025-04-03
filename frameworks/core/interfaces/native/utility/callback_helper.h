@@ -126,6 +126,19 @@ public:
             InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(std::forward<Params>(args)...)));
     }
 
+    template <typename... Params>
+    void BuildAsync(const std::function<void(const RefPtr<UINode>&)>&& builderHandler, Params&&... args) const
+    {
+        auto handler = [builderHandler = std::move(builderHandler)](const void *valuePtr) {
+            auto retValue = *(reinterpret_cast<const Ark_NativePointer *>(valuePtr));
+            auto node = Referenced::Claim(reinterpret_cast<UINode*>(retValue));
+            builderHandler(node);
+        };
+        CallbackKeeper::InvokeWithResultHandlerAsync<Ark_NativePointer, Callback_Pointer_Void>(
+            std::move(handler), *this, std::forward<Params>(args)...
+        );
+    }
+
     bool IsValid() const
     {
         return callback_.call != nullptr;

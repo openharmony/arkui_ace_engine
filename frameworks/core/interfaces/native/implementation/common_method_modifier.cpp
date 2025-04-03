@@ -3377,24 +3377,35 @@ void DragPreviewImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     DragDropInfo dragDropInfo;
     Converter::VisitUnion(*value,
-        [&dragDropInfo](const Ark_String& val) {
+        [frameNode, &dragDropInfo](const Ark_String& val) {
             dragDropInfo.inspectorId = Converter::Convert<std::string>(val);
+            ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
         },
-        [node, frameNode, &dragDropInfo](const CustomNodeBuilder& val) {
-            dragDropInfo.customNode = CallbackHelper(val).BuildSync(node);
+        [node, frameNode](const CustomNodeBuilder& val) {
+            CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo({ .customNode = uiNode }));
+                }, node);
         },
         [node, frameNode, &dragDropInfo](const Ark_DragItemInfo& value) {
-            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-            if (builder) {
-                dragDropInfo.customNode = CallbackHelper(builder.value()).BuildSync(node);
-            }
             dragDropInfo.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
             dragDropInfo.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            if (builder) {
+                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo](const RefPtr<UINode>& uiNode) {
+                    ViewAbstract::SetDragPreview(frameNode, DragDropInfo({
+                        .customNode = uiNode,
+                        .pixelMap = dragDropInfo.pixelMap,
+                        .extraInfo = dragDropInfo.extraInfo }));
+                    }, node);
+            } else {
+                ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
+            }
         },
-        []() {
+        [frameNode]() {
             LOGE("DragPreviewImpl(): Invalid union argument");
+            std::optional<DragDropInfo> empty = std::nullopt;
+            ViewAbstract::SetDragPreview(frameNode, empty);
         });
-    ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Callback_PreDragStatus_Void* value)
