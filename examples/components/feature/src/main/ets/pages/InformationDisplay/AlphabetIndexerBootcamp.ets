@@ -115,6 +115,10 @@ export struct AlphabetIndexerBootcamp {
     'H', 'I', 'J', 'K', 'L', 'M', 'N',
     'O', 'P', 'Q', 'R', 'S', 'T', 'U',
     'V', 'W', 'X', 'Y', 'Z']
+  private arrayA: string[] = ['安']
+  private arrayB: string[] = ['卜', '白', '包', '毕', '丙']
+  private arrayC: string[] = ['曹', '成', '陈', '催']
+  private arrayL: string[] = ['刘', '李', '楼', '梁', '雷', '吕', '柳', '卢']
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableAlphabetIndexerColor: boolean = false
@@ -1550,7 +1554,7 @@ export struct AlphabetIndexerBootcamp {
             ) + '%'
           }) : null
         )
-        .mask(this.progress)
+        .mask(this.enableCompMask ? this.progress : null)
         .maskShape(this.enableCompMaskShape ? new Circle({
           width: useEnabled(
             this.enableCompMaskShapeWidth,
@@ -2079,7 +2083,17 @@ export struct AlphabetIndexerBootcamp {
         })
         .onRequestPopupData((index:number)=>{
           this.compEventTriggeredLog('弹窗二级索引项内容事件onRequestPopupData触发')
-          return []
+          if (this.value[index] == 'A') {
+            return this.arrayA
+          } else if (this.value[index] == 'B') {
+            return this.arrayB
+          } else if (this.value[index] == 'C') {
+            return this.arrayC
+          } else if (this.value[index] == 'L') {
+            return this.arrayL
+          } else {
+            return []
+          }
         })
         .onPopupSelect((index:number)=>{
           this.compEventTriggeredLog('弹窗二级索引选中事件onPopupSelect触发')
