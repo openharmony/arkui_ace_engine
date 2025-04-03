@@ -26,7 +26,7 @@ import {
   Search,
   searchToggle,
   getToggle
-} from '../../utils';
+} from '../../../utils';
 import { NavDestination } from './NavDestination';
 import { Driver, ON } from '@kit.TestKit';
 
