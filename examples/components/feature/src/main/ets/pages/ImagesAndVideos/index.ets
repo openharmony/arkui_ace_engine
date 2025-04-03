@@ -15,7 +15,7 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { ImageAnimatorBootcamp } from './ImageAnimatorBootcamp';
-import { ImageboxGroupBootcamp } from './ImageBootcamp';
+import { ImageBootcamp } from './ImageBootcamp';
 
 
 export const imagesAndVideosRoute: RouteGroup = {
@@ -31,7 +31,7 @@ export const imagesAndVideosRoute: RouteGroup = {
 @Builder
 export function imagesAndVideosDestination(name: string, route: Route) {
   if (name === 'ImagesAndVideos/Image') {
-    ImageboxGroupBootcamp({title: route.label})
+    ImageBootcamp({title: route.label})
   }else if (name === 'ImagesAndVideos/ImageAnimator'){
     ImageAnimatorBootcamp({title: route.label})
   }
