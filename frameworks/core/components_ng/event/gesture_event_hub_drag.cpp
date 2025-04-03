@@ -296,11 +296,11 @@ float GestureEventHub::GetDefaultPixelMapScale(
     CHECK_NULL_RETURN(pixelMap, defaultPixelMapScale);
     // use menuPreviewScale for drag framework. this is not final solution.
     if (!frameNode->GetDragPreview().onlyForLifting && isMenuShow && GreatNotEqual(menuPreviewScale_, 0.0f)) {
-        auto menuPreviewRect = DragDropManager::GetMenuPreviewRect();
+        auto menuPreviewRectWidth = frameNodeSize_.Width();
         int32_t originPixelMapWidth = pixelMap->GetWidth();
-        if (GreatNotEqual(menuPreviewRect.Width(), 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
-            menuPreviewRect.Width() < originPixelMapWidth * menuPreviewScale_) {
-            defaultPixelMapScale = menuPreviewRect.Width() / originPixelMapWidth;
+        if (GreatNotEqual(menuPreviewRectWidth, 0.0f) && GreatNotEqual(originPixelMapWidth, 0.0f) &&
+            menuPreviewRectWidth < originPixelMapWidth * menuPreviewScale_) {
+            defaultPixelMapScale = menuPreviewRectWidth / originPixelMapWidth;
         } else {
             defaultPixelMapScale = menuPreviewScale_;
         }
@@ -618,6 +618,8 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         SetMouseDragMonitorState(true);
     }
 
+    CalcFrameNodeOffsetAndSize(frameNode, DragDropGlobalController::GetInstance().IsMenuShowing());
+
     // create drag event
     auto event = CreateDragEvent(info, pipeline, frameNode);
 
@@ -701,9 +703,6 @@ void GestureEventHub::DoOnDragStartHandling(const GestureEvent& info, const RefP
     DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event, DragDropInfo dragPreviewInfo,
     const RefPtr<PipelineContext>& pipeline)
 {
-    bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
-    CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
-
     // set drag pointer status
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
