@@ -2971,11 +2971,26 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
 
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
+    TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache in");
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
     if (cachedAnimateFlag_.load()) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
-        UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
-        cachedAnimateFlag_.store(false);
+        const uint32_t delay = 50;
+        auto task = [cachedConfig = cachedConfig_, cachedReason = cachedReason_,
+            cachedRsTransaction = cachedRsTransaction_, cachedAvoidAreas = cachedAvoidAreas_,
+            UICONTENT_IMPL_HELPER(content)] () {
+            UICONTENT_IMPL_HELPER_GUARD(content, return);
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache");
+            UICONTENT_IMPL_PTR(content)->UpdateViewportConfig(cachedConfig, cachedReason,
+                cachedRsTransaction, cachedAvoidAreas);
+        };
+        taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delay,
+            "ArkUIExecKeyFrameCachedAnimateTask", PriorityType::HIGH);
     }
+    cachedAnimateFlag_.store(false);
 }
 
 void UIContentImpl::KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context)
