@@ -3522,6 +3522,7 @@ export interface OnWillScrollCallback {
 export type OnScrollCallback = (scrollOffset: number, scrollState: ScrollState) => void;
 export type OnMoveHandler = (from: number, to: number) => void;
 export interface DynamicNode<T> {
+    onMove(handler: OnMoveHandler | undefined): T
 }
 export interface EdgeEffectOptions {
     alwaysEnabled: boolean;
