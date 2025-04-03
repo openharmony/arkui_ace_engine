@@ -3598,10 +3598,8 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     container->InitFoldStatusFromListener();
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
-    if (IfNeedTouchOutsideListener(window_->GetWindowName())) {
-        touchOutsideListener_ = new TouchOutsideListener(instanceId_);
-        window_->RegisterTouchOutsideListener(touchOutsideListener_);
-    }
+    touchOutsideListener_ = new TouchOutsideListener(instanceId_);
+    window_->RegisterTouchOutsideListener(touchOutsideListener_);
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);

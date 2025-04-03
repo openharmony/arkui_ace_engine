@@ -108,9 +108,6 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        HandleEnabled();
-    }
     SetAccessibilityAction();
 #ifdef SUPPORT_DIGITAL_CROWN
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
