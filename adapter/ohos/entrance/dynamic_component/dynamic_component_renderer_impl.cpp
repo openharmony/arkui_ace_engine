@@ -233,7 +233,7 @@ void DynamicComponentRendererImpl::BuildDynamicInitialConfig(
     CHECK_NULL_VOID(context);
     if (container->IsSceneBoardWindow()) {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
-        dynamicInitialConfig.hostWindowInfo.realHostWindowId = GetWindowSceneId();
+        dynamicInitialConfig.hostWindowInfo.realHostWindowId = static_cast<uint32_t>(GetWindowSceneId());
     } else {
         dynamicInitialConfig.hostWindowInfo.focusWindowId = context->GetFocusWindowId();
         dynamicInitialConfig.hostWindowInfo.realHostWindowId = context->GetRealHostWindowId();
