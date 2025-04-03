@@ -57,10 +57,13 @@ public:
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
     static void AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode);
+    static void AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
+    static void DoMountRow(const RefPtr<NG::FrameNode>& menuItem);
+    static void UpdateRadius(const RefPtr<NG::FrameNode>& menuItem);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

@@ -111,6 +111,7 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
                 menuItemProps.endApply = endApply ? endApply.value() : nullptr;
             }
             LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+            MenuItemModelNG::AddRowChild(frameNode, menuItemProps);
             MenuItemModelNG::UpdateMenuProperty(frameNode, menuItemProps);
         },
         [frameNode, node](const CustomNodeBuilder& value1) {
