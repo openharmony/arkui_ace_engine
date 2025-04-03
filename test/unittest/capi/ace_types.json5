@@ -2556,7 +2556,6 @@
             "themes": ["RadioTheme"],
             "disable": [
                 "setRadioOptionsTestOptionsIndicatorTypeValidValues", // Wrong enum format for RadioIndicatorType
-                "setChecked1TestCheckedValidValues", // new api
             ],
             "attributes": [
                 {

@@ -283,7 +283,7 @@ HWTEST_F(RadioModifierTest, setChecked1TestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, DISABLED_setChecked1TestCheckedValidValues, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setChecked1TestCheckedValidValues, TestSize.Level1)
 {
     Opt_Boolean initValueChecked;
 

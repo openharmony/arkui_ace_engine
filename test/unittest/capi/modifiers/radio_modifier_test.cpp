@@ -510,6 +510,35 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
     EXPECT_TRUE(checkEvent->value);
 }
 
+/**
+ * @tc.name: RadioEventTest001
+ * @tc.desc: Test Radio onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, setOnChange1, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    struct CheckEvent {
+        int32_t nodeId;
+        bool value;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Boolean parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .value = Converter::Convert<bool>(parameter)
+        };
+    };
+    OnRadioChangeCallback arkCallback = Converter::ArkValue<OnRadioChangeCallback>(checkCallback, frameNode->GetId());
+    Opt_OnRadioChangeCallback optCb = Converter::ArkValue<Opt_OnRadioChangeCallback>(arkCallback);
+    modifier_->setOnChange1(node_, &optCb);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_TRUE(checkEvent->value);
+}
+
 /*
  * @tc.name: setOnChangeEventCheckedImpl
  * @tc.desc:
