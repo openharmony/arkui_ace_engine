@@ -107,19 +107,19 @@ DragDropManager::DragDropManager()
     DragDropGlobalController::GetInstance().SetIsAppGlobalDragEnabled(state);
 }
 
-void DragDropManager::SetDragMoveLastPoint(Point point) noexcept
+const Point DragDropManager::GetDragMoveLastPointByCurrentPointer(int32_t pointerId)
 {
-    dragMoveLastPoint_ = point;
+    return fingerPointInfo_[pointerId];
+}
+
+void DragDropManager::UpdatePointInfoForFinger(int32_t pointerId, Point point)
+{
+    fingerPointInfo_[pointerId] = point;
 }
 
 void DragDropManager::SetDelayDragCallBack(const std::function<void()>& cb) noexcept
 {
     DragDropGlobalController::GetInstance().SetAsyncDragCallback(cb);
-}
-
-const Point DragDropManager::GetDragMoveLastPoint() const
-{
-    return dragMoveLastPoint_;
 }
 
 void DragDropManager::ExecuteDeadlineTimer()
@@ -1063,7 +1063,7 @@ void DragDropManager::DoDragReset()
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
     isAnyDraggableHit_ = false;
-    dragMoveLastPoint_= Point(0, 0);
+    fingerPointInfo_.clear();
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 
@@ -2161,20 +2161,21 @@ Offset DragDropManager::CalculateNewOffset(
 {
     Offset newOffset = { 0, 0 };
     CHECK_NULL_RETURN(frameNode, newOffset);
+    auto dragMoveLastPoint = GetDragMoveLastPointByCurrentPointer(event.GetPointerId());
     if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT || !info_.isMenuShow) {
         if (info_.textNode) {
             newOffset =
                 isDragStartPending
-                    ? CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
-                        static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
+                    ? CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint.GetX()),
+                        static_cast<int32_t>(dragMoveLastPoint.GetY()), info_)
                     : CalcDragMoveOffsetWithTextNode(PRESERVE_HEIGHT,
                         static_cast<int32_t>(event.GetGlobalLocation().GetX()),
                             static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
         } else {
             newOffset =
                 isDragStartPending
-                    ? CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
-                        static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
+                    ? CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint.GetX()),
+                        static_cast<int32_t>(dragMoveLastPoint.GetY()), info_)
                     : CalcDragMoveOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
                         static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
         }
@@ -2184,8 +2185,8 @@ Offset DragDropManager::CalculateNewOffset(
         info_.isMenuShow) {
         newOffset =
             isDragStartPending
-                ? CalcContentTrationOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint_.GetX()),
-                                           static_cast<int32_t>(dragMoveLastPoint_.GetY()), info_)
+                ? CalcContentTrationOffset(PRESERVE_HEIGHT, static_cast<int32_t>(dragMoveLastPoint.GetX()),
+                                           static_cast<int32_t>(dragMoveLastPoint.GetY()), info_)
                 : CalcContentTrationOffset(PRESERVE_HEIGHT, static_cast<int32_t>(event.GetGlobalLocation().GetX()),
                                            static_cast<int32_t>(event.GetGlobalLocation().GetY()), info_);
     }
