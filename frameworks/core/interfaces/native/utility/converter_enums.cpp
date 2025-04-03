@@ -366,6 +366,7 @@ template<>
 void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src)
 {
     switch (src) {
+        case ARK_COLORING_STRATEGY_INVERT: dst = ShadowColorStrategy::NONE; break;
         case ARK_COLORING_STRATEGY_AVERAGE: dst = ShadowColorStrategy::AVERAGE; break;
         case ARK_COLORING_STRATEGY_PRIMARY: dst = ShadowColorStrategy::PRIMARY; break;
         default: LOGE("Unexpected enum value in Ark_ColoringStrategy: %{public}d", src);
