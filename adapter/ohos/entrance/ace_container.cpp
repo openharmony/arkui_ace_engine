@@ -90,7 +90,7 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
-const std::string THEME_JSON = "theme_config.json";
+constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -184,27 +184,59 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
+    CHECK_NULL_VOID(assetManager);
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    std::string themeConfigFilePath = hapModuleInfo->systemTheme;
+    if (themeConfigFilePath.empty()) {
+        LOGW("not found systemTheme in HapModuleInfo, loading default OHOS_THEME");
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    constexpr char profilePrefix[] = "$profile:";
+    constexpr char themeConfigDefaultName[] = "theme_config";
+    constexpr char jsonSubfix[] = ".json";
+    constexpr char themePrefix[] = "$theme:";
+    if (!StringUtils::StartWith(themeConfigFilePath,
+        std::string(profilePrefix) + std::string(themeConfigDefaultName))) { // start with: "$profile:theme_config"
+        LOGW("path: %{public}s doesn't start with %{public}s%{public}s, loading default OHOS_THEME",
+            themeConfigFilePath.c_str(), profilePrefix, themeConfigDefaultName);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    themeConfigFilePath = themeConfigFilePath.substr(sizeof(profilePrefix) - 1) + jsonSubfix; // e.g. theme_config.json
     std::string themeJsonContent;
-    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    bool loadThemeJsonFlag =
+        OHOS::Ace::Framework::GetAssetContentImpl(assetManager, themeConfigFilePath, themeJsonContent);
     if (loadThemeJsonFlag) {
         auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
         if (themeRootJson) {
-            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
-            if (systemThemeId != -1) {
+            std::string systemThemeValue = themeRootJson->GetString("systemTheme", ""); // e.g. $theme:125829872
+            if (!systemThemeValue.empty() && StringUtils::StartWith(systemThemeValue, themePrefix) &&
+                systemThemeValue.size() > sizeof(themePrefix) - 1) {
+                auto systemThemeId = std::stoi(systemThemeValue.substr(sizeof(themePrefix) - 1));
                 auto themeManager = pipelineContext->GetThemeManager();
-                themeManager->LoadSystemTheme(systemThemeId);
+                CHECK_NULL_VOID(themeManager);
+                themeManager->SetSystemThemeId(systemThemeId);
                 auto checkTheme = themeManager->GetSystemTheme();
-                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+                LOGI("get systemThemeId from json success, systemTheme id = %{public}d", checkTheme);
             } else {
-                LOGW("get systemTheme id from json failed, not a number");
+                LOGW("get systemThemeId from json failed, not a valid id");
             }
         } else {
-            LOGW("get systemTheme id from json failed, parse theme json file failed");
+            LOGW("get systemThemeId from json failed, parse theme json file failed");
         }
     } else {
-        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+        LOGW("get systemTheme id from json failed, %{public}s not found", themeConfigFilePath.c_str());
     }
 }
 
@@ -238,7 +270,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
-    LoadSystemThemeFromJson(assetManager, pipelineContext);
+    LoadSystemThemeFromJson(assetManager, pipelineContext, context);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
