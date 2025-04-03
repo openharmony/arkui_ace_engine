@@ -193,6 +193,8 @@ public:
 
     void DumpInfo() override;
 
+    void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;

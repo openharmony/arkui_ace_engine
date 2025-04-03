@@ -794,22 +794,23 @@ void SwitchPattern::DumpInfo()
     auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->HasIsOn()) {
-        DumpLog::GetInstance().AddDesc("IsOn: " + std::string(paintProperty->GetIsOnValue() ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc("IsOn: " + std::string(paintProperty->GetIsOn().value() ? "true" : "false"));
     }
     if (paintProperty->HasSelectedColor()) {
-        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetSelectedColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetSelectedColor().value().ToString());
     }
     if (paintProperty->HasSwitchPointColor()) {
-        DumpLog::GetInstance().AddDesc("SwitchPointColor: " + paintProperty->GetSwitchPointColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("SwitchPointColor: " + paintProperty->GetSwitchPointColor().value().ToString());
     }
     if (paintProperty->HasPointRadius()) {
-        DumpLog::GetInstance().AddDesc("PointRadius: " + paintProperty->GetPointRadiusValue().ToString());
+        DumpLog::GetInstance().AddDesc("PointRadius: " + paintProperty->GetPointRadius().value().ToString());
     }
     if (paintProperty->HasUnselectedColor()) {
-        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("UnselectedColor: " + paintProperty->GetUnselectedColor().value().ToString());
     }
     if (paintProperty->HasTrackBorderRadius()) {
-        DumpLog::GetInstance().AddDesc("TrackBorderRadius: " + paintProperty->GetTrackBorderRadiusValue().ToString());
+        DumpLog::GetInstance().AddDesc(
+            "TrackBorderRadius: " + paintProperty->GetTrackBorderRadius().value().ToString());
     }
 }
 

@@ -1075,33 +1075,33 @@ void RatingPattern::DumpInfo()
     auto renderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(renderProperty);
 
-    if (layoutProperty->HasRatingScore()) {
-        DumpLog::GetInstance().AddDesc("RatingScore: " + std::to_string(layoutProperty->GetRatingScoreValue()));
+    if (renderProperty->HasRatingScore()) {
+        DumpLog::GetInstance().AddDesc("RatingScore: " + std::to_string(renderProperty->GetRatingScoreValue()));
     }
-    if (layoutProperty->HasStepSize()) {
-        DumpLog::GetInstance().AddDesc("StepSize: " + std::to_string(layoutProperty->GetStepSizeValue()));
+    if (renderProperty->HasStepSize()) {
+        DumpLog::GetInstance().AddDesc("StepSize: " + std::to_string(renderProperty->GetStepSizeValue()));
     }
 
     auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasIndicator()) {
         DumpLog::GetInstance().AddDesc(
-            "Indicator: " + std::string(layoutProperty->GetIndicatorValue() ? "true" : "false"));
+            "Indicator: " + std::string(layoutProperty->GetIndicator().value() ? "true" : "false"));
     }
     if (layoutProperty->HasStars()) {
-        DumpLog::GetInstance().AddDesc("Stars: " + std::to_string(layoutProperty->GetStarsValue()));
+        DumpLog::GetInstance().AddDesc("Stars: " + std::to_string(layoutProperty->GetStars().value()));
     }
     if (layoutProperty->HasForegroundImageSourceInfo()) {
         DumpLog::GetInstance().AddDesc(
-            "ForegroundImageSourceInfo: " + layoutProperty->GetForegroundImageSourceInfoValue().ToString());
+            "ForegroundImageSourceInfo: " + layoutProperty->GetForegroundImageSourceInfo().value().ToString());
     }
     if (layoutProperty->HasSecondaryImageSourceInfo()) {
         DumpLog::GetInstance().AddDesc(
-            "SecondaryImageSourceInfo: " + layoutProperty->GetSecondaryImageSourceInfoValue().ToString());
+            "SecondaryImageSourceInfo: " + layoutProperty->GetSecondaryImageSourceInfo().value().ToString());
     }
     if (layoutProperty->HasBackgroundImageSourceInfo()) {
         DumpLog::GetInstance().AddDesc(
-            "BackgroundImageSourceInfo: " + layoutProperty->GetBackgroundImageSourceInfoValue().ToString());
+            "BackgroundImageSourceInfo: " + layoutProperty->GetBackgroundImageSourceInfo().value().ToString());
     }
 }
 

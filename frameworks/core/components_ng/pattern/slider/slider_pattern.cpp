@@ -118,6 +118,18 @@ inline std::string ToString(const SliderModel::SliderInteraction& interaction)
     auto iter = BinarySearchFindIndex(table, ArraySize(table), interaction);
     return iter != -1 ? table[iter].value : "";
 }
+
+inline std::string ToString(const BasicShapeType& type)
+{
+    static const LinearEnumMapNode<BasicShapeType, std::string> table[] = {
+        { BasicShapeType::NONE, "NONE" },  { BasicShapeType::INSET, "INSET" },
+        { BasicShapeType::CIRCLE, "CIRCLE" }, { BasicShapeType::ELLIPSE, "ELLIPSE" },
+        { BasicShapeType::POLYGON, "POLYGON" }, { BasicShapeType::PATH, "PATH" },
+        { BasicShapeType::RECT, "RECT" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), type);
+    return iter != -1 ? table[iter].value : "";
+}
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -2224,48 +2236,48 @@ void SliderPattern::DumpInfo()
     CHECK_NULL_VOID(paintProperty);
 
     if (paintProperty->HasValue()) {
-        DumpLog::GetInstance().AddDesc("Value: " + std::to_string(paintProperty->GetValueValue()));
+        DumpLog::GetInstance().AddDesc("Value: " + std::to_string(paintProperty->GetValue().value()));
     }
     if (paintProperty->HasMin()) {
-        DumpLog::GetInstance().AddDesc("Min: " + std::to_string(paintProperty->GetMinValue()));
+        DumpLog::GetInstance().AddDesc("Min: " + std::to_string(paintProperty->GetMin().value()));
     }
     if (paintProperty->HasMax()) {
-        DumpLog::GetInstance().AddDesc("Max: " + std::to_string(paintProperty->GetMaxValue()));
+        DumpLog::GetInstance().AddDesc("Max: " + std::to_string(paintProperty->GetMax().value()));
     }
     if (paintProperty->HasStep()) {
-        DumpLog::GetInstance().AddDesc("Step: " + std::to_string(paintProperty->GetStepValue()));
+        DumpLog::GetInstance().AddDesc("Step: " + std::to_string(paintProperty->GetStep().value()));
     }
     if (paintProperty->HasSliderMode()) {
-        DumpLog::GetInstance().AddDesc("Style: " + ToString(paintProperty->GetSliderModeValue()));
+        DumpLog::GetInstance().AddDesc("Style: " + ToString(paintProperty->GetSliderMode().value()));
     }
     if (paintProperty->HasDirection()) {
-        DumpLog::GetInstance().AddDesc("Direction: " + ToString(paintProperty->GetDirectionValue()));
+        DumpLog::GetInstance().AddDesc("Direction: " + ToString(paintProperty->GetDirection().value()));
     }
     if (paintProperty->HasReverse()) {
         DumpLog::GetInstance().AddDesc(
-            "Reverse: " + std::string(paintProperty->GetReverseValue() ? "true" : "false"));
+            "Reverse: " + std::string(paintProperty->GetReverse().value() ? "true" : "false"));
     }
     if (paintProperty->HasBlockColor()) {
-        DumpLog::GetInstance().AddDesc("BlockColor: " + paintProperty->GetBlockColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("BlockColor: " + paintProperty->GetBlockColor().value().ToString());
     }
     if (paintProperty->HasTrackBackgroundColor()) {
         DumpLog::GetInstance().AddDesc(
-            "TrackBackgroundColor: " + paintProperty->GetTrackBackgroundColorValue().ToString());
+            "TrackBackgroundColor: " + paintProperty->GetTrackBackgroundColor().value().ToString());
     }
     if (paintProperty->HasSelectColor()) {
-        DumpLog::GetInstance().AddDesc("SelectColor: " + paintProperty->GetSelectColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("SelectColor: " + paintProperty->GetSelectColor().value().ToString());
     }
     if (paintProperty->HasMinResponsiveDistance()) {
         DumpLog::GetInstance().AddDesc(
-            "MinResponsiveDistance: " + std::to_string(paintProperty->GetMinResponsiveDistanceValue()));
+            "MinResponsiveDistance: " + std::to_string(paintProperty->GetMinResponsiveDistance().value()));
     }
     if (paintProperty->HasShowSteps()) {
         DumpLog::GetInstance().AddDesc(
-            "ShowSteps: " + std::string(paintProperty->GetShowStepsValue() ? "true" : "false"));
+            "ShowSteps: " + std::string(paintProperty->GetShowSteps().value() ? "true" : "false"));
     }
     if (paintProperty->HasShowTips()) {
         DumpLog::GetInstance().AddDesc(
-            "ShowTips: " + std::string(paintProperty->GetShowTipsValue() ? "true" : "false"));
+            "ShowTips: " + std::string(paintProperty->GetShowTips().value() ? "true" : "false"));
     }
 
     DumpSubInfo(paintProperty);
@@ -2277,46 +2289,50 @@ void SliderPattern::DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty)
     CHECK_NULL_VOID(layoutProperty);
 
     if (layoutProperty->HasThickness()) {
-        DumpLog::GetInstance().AddDesc("Thickness: " + layoutProperty->GetThicknessValue().ToString());
+        DumpLog::GetInstance().AddDesc("Thickness: " + layoutProperty->GetThickness().value().ToString());
     }
     if (paintProperty->HasBlockBorderColor()) {
-        DumpLog::GetInstance().AddDesc("BlockBorderColor: " + paintProperty->GetBlockBorderColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("BlockBorderColor: " + paintProperty->GetBlockBorderColor().value().ToString());
     }
     if (paintProperty->HasBlockBorderWidth()) {
-        DumpLog::GetInstance().AddDesc("BlockBorderWidth: " + paintProperty->GetBlockBorderWidthValue().ToString());
+        DumpLog::GetInstance().AddDesc("BlockBorderWidth: " + paintProperty->GetBlockBorderWidth().value().ToString());
     }
     if (paintProperty->HasStepColor()) {
-        DumpLog::GetInstance().AddDesc("StepColor: " + paintProperty->GetStepColorValue().ToString());
+        DumpLog::GetInstance().AddDesc("StepColor: " + paintProperty->GetStepColor().value().ToString());
     }
     if (paintProperty->HasTrackBorderRadius()) {
-        DumpLog::GetInstance().AddDesc("TrackBorderRadius: " + paintProperty->GetTrackBorderRadiusValue().ToString());
+        DumpLog::GetInstance().AddDesc(
+            "TrackBorderRadius: " + paintProperty->GetTrackBorderRadius().value().ToString());
     }
     if (paintProperty->HasSelectedBorderRadius()) {
         DumpLog::GetInstance().AddDesc(
-            "SelectedBorderRadius: " + paintProperty->GetSelectedBorderRadiusValue().ToString());
+            "SelectedBorderRadius: " + paintProperty->GetSelectedBorderRadius().value().ToString());
     }
     if (layoutProperty->HasBlockSize()) {
-        DumpLog::GetInstance().AddDesc("BlockSize: " + layoutProperty->GetBlockSizeValue().ToString());
+        SizeT<Dimension> size = layoutProperty->GetBlockSize().value();
+        std::stringstream ss;
+        ss << "[" << size.Width().ToString() << " x " << size.Height().ToString() << "]";
+        DumpLog::GetInstance().AddDesc("BlockSize: " + ss.str());
     }
     if (paintProperty->HasBlockType()) {
-        DumpLog::GetInstance().AddDesc("BlockType: " + ToString(paintProperty->GetBlockTypeValue()));
+        DumpLog::GetInstance().AddDesc("BlockType: " + ToString(paintProperty->GetBlockType().value()));
     }
     if (paintProperty->HasBlockImage()) {
-        DumpLog::GetInstance().AddDesc("BlockImage: " + paintProperty->GetBlockImageValue());
+        DumpLog::GetInstance().AddDesc("BlockImage: " + paintProperty->GetBlockImage().value());
     }
     if (paintProperty->HasBlockShape()) {
         DumpLog::GetInstance().AddDesc(
-            "BlockShape: " + std::to_string(paintProperty->GetBlockShapeValue()->GetBasicShapeType()));
+            "BlockShape: " + ToString(paintProperty->GetBlockShape().value()->GetBasicShapeType()));
     }
     if (paintProperty->HasStepSize()) {
-        DumpLog::GetInstance().AddDesc("StepSize: " + paintProperty->GetStepSizeValue().ToString());
+        DumpLog::GetInstance().AddDesc("StepSize: " + paintProperty->GetStepSize().value().ToString());
     }
     if (paintProperty->HasSliderInteractionMode()) {
         DumpLog::GetInstance().AddDesc(
-            "SliderInteractionMode: " + ToString(paintProperty->GetSliderInteractionModeValue()));
+            "SliderInteractionMode: " + ToString(paintProperty->GetSliderInteractionMode().value()));
     }
     if (paintProperty->HasValidSlideRange()) {
-        DumpLog::GetInstance().AddDesc("SlideRange: " + paintProperty->GetValidSlideRangeValue()->ToString());
+        DumpLog::GetInstance().AddDesc("SlideRange: " + paintProperty->GetValidSlideRange().value()->ToString());
     }
 }
 } // namespace OHOS::Ace::NG
