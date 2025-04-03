@@ -14,11 +14,12 @@
  */
 
 
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+// HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { __context, __id } from "@koalaui/runtime"
+import { DynamicNode } from "./common"
+import { LazyForEachImpl } from "../LazyForEach"
+
 export enum DataOperationType {
     ADD = "add",
     DELETE = "delete",
@@ -69,3 +70,55 @@ export interface DataReloadOperation {
     type: DataOperationType;
 }
 export type DataOperation = DataAddOperation | DataDeleteOperation | DataChangeOperation | DataMoveOperation | DataExchangeOperation | DataReloadOperation;
+
+export interface DataChangeListener {
+    onDataReloaded(): void;
+    onDataAdded(index: number): void;
+    onDataAdd(index: number): void;
+    onDataMoved(from: number, to: number): void;
+    onDataMove(from: number, to: number): void;
+    onDataDeleted(index: number): void;
+    onDataDelete(index: number): void;
+    onDataChanged(index: number): void;
+    onDataChange(index: number): void;
+    onDatasetChange(dataOperations: DataOperation[]): void;
+}
+
+/**
+ * Developers need to implement this interface to provide data to LazyForEach component.
+ * @since 7
+ */
+export interface IDataSource<T> {
+    /**
+     * Total data count.
+     * @since 7
+     */
+    totalCount(): number;
+    /**
+     * Return the data of index.
+     * @since 7
+     */
+    getData(index: number): T;
+    /**
+     * Register data change listener.
+     * @since 7
+     */
+    registerDataChangeListener(listener: DataChangeListener): void;
+    /**
+     * Unregister data change listener.
+     * @since 7
+     */
+    unregisterDataChangeListener(listener: DataChangeListener): void;
+}
+
+/** @memo */
+export function LazyForEach<T>(
+    /** @memo */
+    style: ((attributes: DynamicNode) => void) | undefined,
+    dataSource: IDataSource<T>,
+    /** @memo */
+    itemGenerator: (item: T, index: number) => void,
+    keyGenerator?: (item: T, index: number) => string,
+) {
+    LazyForEachImpl(dataSource, itemGenerator, keyGenerator)
+}

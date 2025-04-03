@@ -18,36 +18,8 @@ import { hashCodeFromString, int32, KoalaCallsiteKey } from "@koalaui/common"
 import { nullptr, pointer } from "@koalaui/interop";
 import { LazyForEachType, PeerNode, PeerNodeType } from "./PeerNode";
 import { LazyForEachOps } from "./generated/ArkLazyForEachOpsMaterialized"
-import { DataChangeListener, InternalListener } from "./DataChangeListener";
-
-export { DataChangeListener } from "./DataChangeListener";
-
-/**
- * Developers need to implement this interface to provide data to LazyForEach component.
- * @since 7
- */
- export interface IDataSource<T> {
-    /**
-     * Total data count.
-     * @since 7
-     */
-    totalCount(): number;
-    /**
-     * Return the data of index.
-     * @since 7
-     */
-    getData(index: number): T;
-    /**
-     * Register data change listener.
-     * @since 7
-     */
-    registerDataChangeListener(listener: DataChangeListener): void;
-    /**
-     * Unregister data change listener.
-     * @since 7
-     */
-    unregisterDataChangeListener(listener: DataChangeListener): void;
-}
+import { InternalListener } from "./DataChangeListener";
+import { IDataSource } from "./component/lazyForEach";
 
 class LazyForEachManager {
     static isDummy: boolean = false
@@ -154,7 +126,7 @@ function getOffset(parent: PeerNode, id: KoalaCallsiteKey): int32 {
 }
 
 /** @memo */
-export function LazyForEach<T>(dataSource: IDataSource<T>,
+export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
     /** @memo */
     itemGenerator: (item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
