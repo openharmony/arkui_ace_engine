@@ -57,6 +57,7 @@ public:
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
     static void AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode);
+    static void AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
 private:
