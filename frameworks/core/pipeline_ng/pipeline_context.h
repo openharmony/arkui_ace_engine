@@ -875,10 +875,7 @@ public:
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
-    void SetVsyncListener(VsyncCallbackFun vsync)
-    {
-        vsyncListener_ = std::move(vsync);
-    }
+    void SetVsyncListener(VsyncCallbackFun vsync);
 
     void SetOnceVsyncListener(VsyncCallbackFun vsync)
     {
