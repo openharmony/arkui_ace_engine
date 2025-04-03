@@ -136,6 +136,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         return;
     }
     auto touchEvent = touchRestrict.touchEvent;
+    RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
     InitPanAction();
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
