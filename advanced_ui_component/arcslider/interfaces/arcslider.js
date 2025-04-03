@@ -168,6 +168,8 @@ let ArcSliderOptions = class ArcSliderOptions {
         });
         this.onChange = options?.onChange ?? ((progress) => {
         });
+        this.onEnlarge = options?.onEnlarge ?? ((isEnlarged) => {
+        });
     }
 };
 __decorate([
@@ -188,6 +190,9 @@ __decorate([
 __decorate([
     Trace
 ], ArcSliderOptions.prototype, "onChange", void 0);
+__decorate([
+    Trace
+], ArcSliderOptions.prototype, "onEnlarge", void 0);
 ArcSliderOptions = __decorate([
     ObservedV2
 ], ArcSliderOptions);
@@ -396,6 +401,7 @@ export class ArcSlider extends ViewV2 {
 
     startTouchAnimator() {
         if (this.touchAnimator) {
+            this.options.onEnlarge?.(true);
             this.touchAnimator.play();
         }
     }
@@ -479,6 +485,7 @@ export class ArcSlider extends ViewV2 {
 
     startRestoreAnimator() {
         if (this.restoreAnimator) {
+            this.options.onEnlarge?.(false);
             this.restoreAnimator.play();
         }
     }
