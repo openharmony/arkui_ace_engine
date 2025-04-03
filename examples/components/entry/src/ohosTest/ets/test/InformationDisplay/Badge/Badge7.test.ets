@@ -33,7 +33,7 @@ export default function Badge7Test() {
 
     })
     // bindMenu.是否显示选中图标
-    it('ArkUI_Column_Comp_0529', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0529', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -61,7 +61,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0530', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0530', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -87,7 +87,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0531', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0531', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -113,7 +113,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0532', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0532', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -138,7 +138,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0533', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0533', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -163,7 +163,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0534', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0534', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -202,7 +202,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.菜单项3是否选中
-    it('ArkUI_Column_Comp_0535', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0535', 0, async (done: Function) => {
 
 
       await titleSearch('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
@@ -219,7 +219,7 @@ export default function Badge7Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0536', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0536', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.菜单项3是否选中', '通用属性4')
 
@@ -235,7 +235,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.是否显示选中图标
-    it('ArkUI_Column_Comp_0537', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0537', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -263,7 +263,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0538', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0538', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -289,7 +289,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0539', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0539', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -315,7 +315,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0540', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0540', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -340,7 +340,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0541', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0541', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -365,7 +365,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0542', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0542', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -403,7 +403,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.菜单项4是否选中
-    it('ArkUI_Column_Comp_0543', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0543', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
 
@@ -418,7 +418,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0544', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0544', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.菜单项4是否选中', '通用属性4')
 
@@ -434,7 +434,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.是否显示选中图标
-    it('ArkUI_Column_Comp_0545', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0545', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -462,7 +462,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0546', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0546', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -488,7 +488,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0547', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0547', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -514,7 +514,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0548', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0548', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -539,7 +539,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0549', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0549', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -564,7 +564,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0550', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0550', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('bindMenu.是否显示选中图标'))
 
@@ -602,7 +602,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.item中是否显示右侧图标
-    it('ArkUI_Column_Comp_0551', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0551', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
 
@@ -617,7 +617,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0552', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0552', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.item中是否显示右侧图标', '通用属性4')
 
@@ -633,7 +633,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.Opacity
-    it('ArkUI_Column_Comp_0553', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0553', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Opacity', '通用属性4')
 
@@ -656,7 +656,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.Visibility
-    it('ArkUI_Column_Comp_0554', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0554', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
 
@@ -671,7 +671,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0555', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0555', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Visibility', '通用属性4')
 
@@ -688,7 +688,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.Padding
-    it('ArkUI_Column_Comp_0556', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0556', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Padding', '通用属性4')
 
@@ -711,7 +711,7 @@ export default function Badge7Test() {
     })
 
     // bindMenu.Margin
-    it('ArkUI_Column_Comp_0557', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0557', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'bindMenu.Margin', '通用属性4')
 
@@ -734,7 +734,7 @@ export default function Badge7Test() {
     })
 
     // hoverEffect
-    it('ArkUI_Column_Comp_0558', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0558', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
@@ -743,7 +743,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -754,13 +754,13 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0559', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0559', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
       await radioClick({
         radioClickObj: 2,
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -771,14 +771,14 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0560', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0560', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
 
       await radioClick({
         radioClickObj: 3,
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -789,7 +789,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0561', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0561', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'hoverEffect', '通用属性4')
 
@@ -798,7 +798,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('hoverEffect', JsonType.value)
@@ -810,7 +810,7 @@ export default function Badge7Test() {
     })
 
     // id
-    it('ArkUI_Column_Comp_0562', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0562', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'id', '通用属性4')
 
@@ -826,7 +826,7 @@ export default function Badge7Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0563', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0563', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'id', '通用属性4')
 
@@ -843,7 +843,7 @@ export default function Badge7Test() {
     })
 
     // key
-    it('ArkUI_Column_Comp_0564', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0564', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'key', '通用属性4')
 
@@ -864,7 +864,7 @@ export default function Badge7Test() {
 
     })
 
-    it('ArkUI_Column_Comp_0565', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0565', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'key', '通用属性4')
 
@@ -885,7 +885,7 @@ export default function Badge7Test() {
     })
 
     // reuseId
-    it('ArkUI_Column_Comp_0566', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0566', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'reuseId', '通用属性4')
 
@@ -900,7 +900,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0567', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0567', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'reuseId', '通用属性4')
 
@@ -916,7 +916,7 @@ export default function Badge7Test() {
     })
 
     // restoreId
-    it('ArkUI_Column_Comp_0568', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0568', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'restoreId', '通用属性4')
 
@@ -932,7 +932,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0569', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0569', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'restoreId', '通用属性4')
 
@@ -949,7 +949,7 @@ export default function Badge7Test() {
     })
 
     // foregroundEffect.radius
-    it('ArkUI_Column_Comp_0570', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0570', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundEffect.radius', '通用属性5')
 
@@ -958,7 +958,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('foregroundEffect', JsonType.obj),
@@ -972,7 +972,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('foregroundEffect', JsonType.obj),
@@ -985,7 +985,7 @@ export default function Badge7Test() {
     })
 
     // foregroundBlurStyle.value
-    it('ArkUI_Column_Comp_0571', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0571', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1000,7 +1000,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0572', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0572', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1012,7 +1012,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0573', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0573', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1024,7 +1024,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0574', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0574', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1036,7 +1036,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0575', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0575', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1048,7 +1048,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0576', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0576', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1060,7 +1060,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0577', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0577', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1072,7 +1072,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0578', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0578', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1084,7 +1084,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0579', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0579', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1096,7 +1096,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0580', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0580', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1109,7 +1109,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0581', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0581', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1122,7 +1122,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0582', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0582', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
 
@@ -1139,7 +1139,7 @@ export default function Badge7Test() {
     })
 
     // foregroundBlurStyle.options.colorMode
-    it('ArkUI_Column_Comp_0583', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0583', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -1154,7 +1154,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0584', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0584', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -1166,7 +1166,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0585', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0585', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
 
@@ -1182,7 +1182,7 @@ export default function Badge7Test() {
     })
 
     // foregroundBlurStyle.options.adaptiveColor
-    it('ArkUI_Column_Comp_0586', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0586', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
 
@@ -1197,7 +1197,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0587', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0587', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.adaptiveColor', '通用属性5')
 
@@ -1213,7 +1213,7 @@ export default function Badge7Test() {
     })
 
     // foregroundBlurStyle.options.blurOptions
-    it('ArkUI_Column_Comp_0588', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0588', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
 
@@ -1236,7 +1236,7 @@ export default function Badge7Test() {
     })
 
     // foregroundBlurStyle.options.scale
-    it('ArkUI_Column_Comp_0589', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0589', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'foregroundBlurStyle.options.blurOptions', '通用属性5')
 
@@ -1259,7 +1259,7 @@ export default function Badge7Test() {
     })
 
     // motionBlur.radius
-    it('ArkUI_Column_Comp_0590', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0590', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.radius', '通用属性5')
 
@@ -1268,7 +1268,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1282,7 +1282,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1295,7 +1295,7 @@ export default function Badge7Test() {
     })
 
     // motionBlur.anchorX
-    it('ArkUI_Column_Comp_0591', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0591', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.anchorX', '通用属性5')
 
@@ -1304,7 +1304,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1319,7 +1319,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1333,7 +1333,7 @@ export default function Badge7Test() {
     })
 
     // motionBlur.anchorY
-    it('ArkUI_Column_Comp_0592', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0592', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'motionBlur.anchorY', '通用属性5')
 
@@ -1342,7 +1342,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1357,7 +1357,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('motionBlur', JsonType.obj),
@@ -1371,7 +1371,7 @@ export default function Badge7Test() {
     })
 
     // clickEffect
-    it('ArkUI_Column_Comp_0593', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0593', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'clickEffect', '通用属性5')
 
@@ -1385,7 +1385,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0594', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0594', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'clickEffect', '通用属性5')
 
@@ -1400,7 +1400,7 @@ export default function Badge7Test() {
     })
 
     //clickEffect.level
-    it('ArkUI_Column_Comp_0595', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0595', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1425,7 +1425,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1437,7 +1437,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0596', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0596', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1458,7 +1458,7 @@ export default function Badge7Test() {
 
       await radioClick({
         radioClickObj: 2,
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1470,7 +1470,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0597', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0597', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.level'))
 
@@ -1494,7 +1494,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1507,7 +1507,7 @@ export default function Badge7Test() {
     })
 
     // clickEffect.scale
-    it('ArkUI_Column_Comp_0598', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0598', 0, async (done: Function) => {
 
       let title = await driver.findComponent(ON.text('clickEffect.scale'))
 
@@ -1531,7 +1531,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1545,7 +1545,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('clickEffect', JsonType.obj),
@@ -1568,7 +1568,7 @@ export default function Badge7Test() {
     })
 
     // accessibilityGroup
-    it('ArkUI_Column_Comp_0599', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0599', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
 
@@ -1577,7 +1577,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityGroup', JsonType.value),
@@ -1588,7 +1588,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0600', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0600', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityGroup', '通用属性5')
 
@@ -1597,7 +1597,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityGroup', JsonType.value),
@@ -1609,7 +1609,7 @@ export default function Badge7Test() {
     })
 
     //accessibilityText
-    it('ArkUI_Column_Comp_0601', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0601', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityText', '通用属性5')
 
@@ -1618,7 +1618,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityText', JsonType.value),
@@ -1629,7 +1629,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0602', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0602', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityText', '通用属性5')
 
@@ -1638,7 +1638,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityText', JsonType.value),
@@ -1650,7 +1650,7 @@ export default function Badge7Test() {
     })
 
     // accessibilityDescription
-    it('ArkUI_Column_Comp_0603', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0603', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityDescription', '通用属性5')
 
@@ -1659,7 +1659,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityDescription', JsonType.value),
@@ -1670,7 +1670,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0604', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0604', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityDescription', '通用属性5')
 
@@ -1679,7 +1679,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityDescription', JsonType.value),
@@ -1691,7 +1691,7 @@ export default function Badge7Test() {
     })
 
     // accessibilityLevel
-    it('ArkUI_Column_Comp_0605', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0605', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1701,7 +1701,7 @@ export default function Badge7Test() {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1712,7 +1712,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0606', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0606', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1721,7 +1721,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1732,7 +1732,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0607', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0607', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1741,7 +1741,7 @@ export default function Badge7Test() {
         toggleClick: {
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1752,7 +1752,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0608', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0608', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'accessibilityLevel', '通用属性5')
 
@@ -1762,7 +1762,7 @@ export default function Badge7Test() {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'accessibilityLevel'
         },
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('accessibilityLevel', JsonType.value),
@@ -1774,7 +1774,7 @@ export default function Badge7Test() {
     })
 
     // attributeModifier
-    it('ArkUI_Column_Comp_0609', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0609', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'attributeModifier', '通用属性5')
 
@@ -1790,7 +1790,7 @@ export default function Badge7Test() {
       done()
     })
 
-    it('ArkUI_Column_Comp_0610', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0610', 0, async (done: Function) => {
 
       await titleSearch('基础属性', 'attributeModifier', '通用属性5')
 
@@ -1810,7 +1810,7 @@ export default function Badge7Test() {
     /*
     * 测试组件gestureModifier支持设置为true且获取属性正确
     */
-    it('ArkUI_Column_Comp_0611', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0611', 0, async (done: Function) => {
       // 无法取到属性值
       await titleSearch('基础属性', 'gestureModifier', '通用属性6')
       await radioClick({
@@ -1821,7 +1821,7 @@ export default function Badge7Test() {
     /*
     *测试组件gestureModifier支持设置包含单个子组件为false且获取属性正确
     */
-    it('ArkUI_Column_Comp_0612', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0612', 0, async (done: Function) => {
       // 无法取到属性值
       await titleSearch('基础属性', 'gestureModifier', '通用属性6')
       await radioClick({
@@ -1833,11 +1833,11 @@ export default function Badge7Test() {
       done();
     })
     //outline.value.width
-    it('ArkUI_Column_Comp_0613', 0, async (done: Function) => {
+    it('ArkUI_Badge_Comp_0613', 0, async (done: Function) => {
       await titleSearch('基础属性', 'outline.value.width', '通用属性6')
       await sliderDrag({
         slideStar: Slide.start,
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineWidth', JsonType.value)
@@ -1847,7 +1847,7 @@ export default function Badge7Test() {
 
       await sliderDrag({
         slideStar: Slide.end,
-        id: 'Column',
+        id: 'Badge',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('outlineWidth', JsonType.value)

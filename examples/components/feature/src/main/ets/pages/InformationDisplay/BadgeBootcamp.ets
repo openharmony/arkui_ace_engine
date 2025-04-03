@@ -1073,7 +1073,8 @@ export struct BadgeBootcamp {
   @Builder
   badgeParamWithNumber() {
     Badge({
-      count: useEnabled(this.enableBadgeParamWithNumberCount, this.badgeParamWithNumberCount) as number,
+      count: this.enableBadgeParamWithNumberCount ?
+      useEnabled(this.enableBadgeParamWithNumberCount, this.badgeParamWithNumberCount) : 1 as number,
       maxCount: useEnabled(this.enableBadgeParamWithNumberMaxCount, this.badgeParamWithNumberMaxCount),
       style: {
         color: useEnabled(this.enableBadgeStyleColor, this.badgeStyleColor),

@@ -35,14 +35,14 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件backdropBlur
      */
-    it('ArkUI_Column_Comp_0086', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0086', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backdropBlur');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backdropBlur', JsonType.value),
@@ -55,7 +55,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backdropBlur', JsonType.value),
@@ -66,7 +66,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0087', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0087', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'backdropBlur.options.grayscale');
       let toggle: Component =
@@ -79,7 +79,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0088', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0088', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backdropBlur.options.grayscale');
       let toggle: Component =
@@ -107,7 +107,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0089', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0089', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backdropBlur.options.grayscale');
       let toggle: Component =
@@ -135,7 +135,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0090', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0090', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backdropBlur.options.grayscale');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -150,7 +150,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件backgroundEffect
      */
-    it('ArkUI_Column_Comp_0091', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0091', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
@@ -163,7 +163,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0092', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0092', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -178,7 +178,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -193,7 +193,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -206,7 +206,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0093', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0093', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -221,7 +221,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -236,7 +236,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -249,7 +249,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0094', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0094', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -264,7 +264,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -279,7 +279,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -291,7 +291,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0095', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0095', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -306,7 +306,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -319,7 +319,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0096', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0096', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -337,7 +337,7 @@ export default function AlphabetIndexer3Test() {
       }
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -350,7 +350,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0097', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0097', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -368,7 +368,7 @@ export default function AlphabetIndexer3Test() {
       }
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -381,7 +381,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0098', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0098', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -399,7 +399,7 @@ export default function AlphabetIndexer3Test() {
       }
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -412,7 +412,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0099', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0099', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -430,7 +430,7 @@ export default function AlphabetIndexer3Test() {
       }
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -443,7 +443,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0100', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0100', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -461,7 +461,7 @@ export default function AlphabetIndexer3Test() {
       }
       await buttonClick({
         buttonClickObj: 5,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
@@ -477,7 +477,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0101', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0101', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -492,7 +492,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -505,7 +505,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0102', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0102', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -526,7 +526,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -539,7 +539,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0103', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0103', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -554,7 +554,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -569,7 +569,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -582,7 +582,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0104', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0104', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -597,7 +597,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -612,7 +612,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundEffect', JsonType.obj),
@@ -625,7 +625,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0105', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0105', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'backgroundEffect');
       let toggle: Component =
@@ -643,7 +643,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件backgroundImageResizable
      */
-    it('ArkUI_Column_Comp_0106', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0106', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
@@ -656,7 +656,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0107', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0107', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -671,7 +671,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -684,7 +684,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -695,7 +695,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0108', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0108', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -710,7 +710,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -723,7 +723,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -734,7 +734,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0109', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0109', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -749,7 +749,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -762,7 +762,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -773,7 +773,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0110', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0110', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -788,7 +788,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -801,7 +801,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageResizable', JsonType.value)
@@ -812,7 +812,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0111', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0111', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'backgroundImageResizable');
       let toggle: Component =
@@ -832,7 +832,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0112', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0112', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -846,7 +846,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0113', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0113', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -857,7 +857,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0114', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0114', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -871,7 +871,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0115', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0115', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -885,7 +885,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0116', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0116', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -896,7 +896,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0117', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0117', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -910,7 +910,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0118', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0118', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -932,7 +932,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0119', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0119', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -954,7 +954,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0120', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0120', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -962,7 +962,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0121', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0121', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -985,7 +985,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0122', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0122', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1008,7 +1008,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0123', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0123', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1031,7 +1031,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0124', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0124', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1054,7 +1054,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0125', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0125', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1062,7 +1062,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0126', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0126', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1076,7 +1076,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0127', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0127', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1087,7 +1087,7 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0128', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0128', 0, async (done: Function) => {
       // 获取不到
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', true)
@@ -1101,14 +1101,14 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0129', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0129', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('backgroundImageResizable', true)
       await searchParentBlock('backgroundImageResizable.lattice', false)
       done();
 
     })
-    it('ArkUI_Column_Comp_0130', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0130', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('backgroundImageResizable', false)
       done();
@@ -1117,14 +1117,14 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件backgroundBrightness
      */
-    it('ArkUI_Column_Comp_0131', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0131', 0, async (done: Function) => {
       await Search('基础属性', 'backgroundBrightness.rate');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('BackgroundBrightness', JsonType.obj),
@@ -1138,7 +1138,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('BackgroundBrightness', JsonType.obj),
@@ -1150,14 +1150,14 @@ export default function AlphabetIndexer3Test() {
       done();
 
     })
-    it('ArkUI_Column_Comp_0132', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0132', 0, async (done: Function) => {
       await Search('基础属性', 'backgroundBrightness.lightUpDegree');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('BackgroundBrightness', JsonType.obj),
@@ -1171,7 +1171,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('BackgroundBrightness', JsonType.obj),
@@ -1186,14 +1186,14 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件opacity
      */
-    it('ArkUI_Column_Comp_0133', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0133', 0, async (done: Function) => {
       await Search('基础属性', 'opacity');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('opacity', JsonType.value),
@@ -1206,7 +1206,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('opacity', JsonType.value),
@@ -1220,14 +1220,14 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件aspectRatio且获取属性正确
      */
-    it('ArkUI_Column_Comp_0134', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0134', 0, async (done: Function) => {
       await Search('基础属性', 'aspectRatio', '通用属性1');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('aspectRatio', JsonType.value)
@@ -1240,7 +1240,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('aspectRatio', JsonType.value)
@@ -1252,14 +1252,14 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试开启pixelRound
      */
-    it('ArkUI_Column_Comp_0135', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0135', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       done();
     })
     /**
      * 测试组件pixelRound.start
      */
-    it('ArkUI_Column_Comp_0136', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0136', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.start', false);
       await radioClick({
@@ -1267,7 +1267,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1276,12 +1276,12 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0137', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0137', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.start', true);
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1290,7 +1290,7 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0138', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0138', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.start', true);
       await radioClick({
@@ -1298,7 +1298,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1310,7 +1310,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件pixelRound.bottom
      */
-    it('ArkUI_Column_Comp_0139', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0139', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.bottom', false);
       await radioClick({
@@ -1318,7 +1318,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1327,12 +1327,12 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0140', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0140', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.bottom', true);
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1341,7 +1341,7 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0141', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0141', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.bottom', true);
       await radioClick({
@@ -1349,7 +1349,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1362,7 +1362,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件pixelRound.top
      */
-    it('ArkUI_Column_Comp_0142', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0142', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.top', false);
       await radioClick({
@@ -1370,7 +1370,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1379,12 +1379,12 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0143', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0143', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.top', true);
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1393,7 +1393,7 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0144', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0144', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.top', true);
       await radioClick({
@@ -1401,7 +1401,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1414,7 +1414,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件pixelRound.end
      */
-    it('ArkUI_Column_Comp_0145', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0145', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.end', false);
       await radioClick({
@@ -1422,7 +1422,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1431,12 +1431,12 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0146', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0146', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.end', true);
       await radioClick({
         radioClickObj: 1,
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1445,7 +1445,7 @@ export default function AlphabetIndexer3Test() {
       })
       done();
     })
-    it('ArkUI_Column_Comp_0147', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0147', 0, async (done: Function) => {
       await searchParentBlock('pixelRound', true, '基础属性', '通用属性1')
       await searchParentBlock('pixelRound.end', true);
       await radioClick({
@@ -1453,7 +1453,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('pixelRound', JsonType.value)
@@ -1465,7 +1465,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试关闭pixelRound
      */
-    it('ArkUI_Column_Comp_0148', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0148', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('pixelRound', false, '基础属性', '通用属性1')
       done();
@@ -1475,7 +1475,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试开启borderImage
      */
-    it('ArkUI_Column_Comp_0149', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0149', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       done();
@@ -1483,13 +1483,13 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试开启关闭borderImage.source
      */
-    it('ArkUI_Column_Comp_0150', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0150', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.source', true, '基础属性', '通用属性1')
       done();
     })
-    it('ArkUI_Column_Comp_0151', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0151', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.source', false, '基础属性', '通用属性1')
@@ -1498,7 +1498,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试开启borderImage.slice
      */
-    it('ArkUI_Column_Comp_0152', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0152', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
@@ -1507,7 +1507,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.slice.top
      */
-    it('ArkUI_Column_Comp_0153', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0153', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice.top', false, '基础属性', '通用属性1')
@@ -1516,7 +1516,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1529,7 +1529,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1543,7 +1543,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.slice.bottom
      */
-    it('ArkUI_Column_Comp_0154', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0154', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice.bottom', false, '基础属性', '通用属性1')
@@ -1552,7 +1552,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1565,7 +1565,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1579,7 +1579,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.slice.left
      */
-    it('ArkUI_Column_Comp_0155', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0155', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice.left', false, '基础属性', '通用属性1')
@@ -1588,7 +1588,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1601,7 +1601,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1615,7 +1615,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.slice.right
      */
-    it('ArkUI_Column_Comp_0156', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0156', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice.right', false, '基础属性', '通用属性1')
@@ -1624,7 +1624,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1637,7 +1637,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1651,7 +1651,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试关闭borderImage.slice
      */
-    it('ArkUI_Column_Comp_0157', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0157', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.slice', false, '基础属性', '通用属性1')
@@ -1660,7 +1660,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试开启borderImage.width
      */
-    it('ArkUI_Column_Comp_0158', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0158', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
@@ -1669,7 +1669,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.width.top
      */
-    it('ArkUI_Column_Comp_0159', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0159', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width.top', false, '基础属性', '通用属性1')
@@ -1678,7 +1678,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1691,7 +1691,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1705,7 +1705,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.width.bottom
      */
-    it('ArkUI_Column_Comp_0160', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0160', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width.bottom', false, '基础属性', '通用属性1')
@@ -1714,7 +1714,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1727,7 +1727,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1741,7 +1741,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.width.left
      */
-    it('ArkUI_Column_Comp_0161', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0161', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width.left', false, '基础属性', '通用属性1')
@@ -1750,7 +1750,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1763,7 +1763,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1777,7 +1777,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试组件borderImage.width.right
      */
-    it('ArkUI_Column_Comp_0162', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0162', 0, async (done: Function) => {
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width.right', false, '基础属性', '通用属性1')
@@ -1786,7 +1786,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderImage', JsonType.value),
@@ -1799,7 +1799,7 @@ export default function AlphabetIndexer3Test() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Column',
+        id: 'AlphabetIndexer',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1813,7 +1813,7 @@ export default function AlphabetIndexer3Test() {
     /**
      * 测试关闭borderImage.width
      */
-    it('ArkUI_Column_Comp_0163', 0, async (done: Function) => {
+    it('ArkUI_AlphabetIndexer_Comp_0163', 0, async (done: Function) => {
       // 无断言
       await searchParentBlock('borderImage', true, '基础属性', '通用属性1')
       await searchParentBlock('borderImage.width', false, '基础属性', '通用属性1')
