@@ -51,6 +51,11 @@
       "buildFunction": "DialogFocusableBuilder"
     },
     {
+      "name": "EmbeddedDialogPageOne",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
+      "buildFunction": "EmbeddedDialogPageOneBuilder"
+    },
+    {
       "name": "MenuIndex",
       "pageSourceFile": "src/main/ets/pages/components/menu/Index.ets",
       "buildFunction": "MenuIndexBuilder"
