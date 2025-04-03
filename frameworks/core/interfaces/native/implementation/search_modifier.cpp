@@ -686,12 +686,12 @@ void InputFilterImpl(Ark_NativePointer node,
     auto valueString = Converter::OptConvert<std::string>(*value);
     std::optional<Callback_String_Void> arkErrorEvent = error ? Converter::GetOpt(*error) : std::nullopt;
     std::function<void(const std::u16string&)> errorEvent = nullptr;
-    if (arkErrorEvent)
-        errorEvent = [callback = CallbackHelper(*arkErrorEvent), frameNode](const std::u16string& val) {
-        Converter::ConvContext ctx;
-        auto errortArkString = Converter::ArkValue<Ark_String>(val, &ctx);
-        callback.Invoke(errortArkString);
-    };
+    if (arkErrorEvent) {
+        errorEvent = [callback = CallbackHelper(*arkErrorEvent)](const std::u16string& val) {
+            auto errortArkString = Converter::ArkValue<Ark_String>(val, Converter::FC);
+            callback.Invoke(errortArkString);
+        };
+    }
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,

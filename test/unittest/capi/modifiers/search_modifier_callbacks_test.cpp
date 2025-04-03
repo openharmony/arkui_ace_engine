@@ -26,7 +26,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
-#include "frameworks/bridge/common/utils/utils.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 

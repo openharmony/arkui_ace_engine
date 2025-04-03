@@ -23,7 +23,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "frameworks/bridge/common/utils/utils.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
