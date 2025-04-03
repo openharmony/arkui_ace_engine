@@ -135,8 +135,7 @@ export struct AdvancedCounterBootcamp {
             }
           }
         })
-      }
-      else if (this.counterType == CounterType.COMPACT) {
+      }else if (this.counterType == CounterType.COMPACT) {
         CounterComponent({
           options: {
             type: useEnabledNumber(this.enableType, this.counterType, CounterType.COMPACT),
