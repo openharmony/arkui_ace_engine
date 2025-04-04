@@ -71,6 +71,8 @@ void ScrollBar::InitTheme()
     SetActiveMaxOffsetAngle(theme->GetActiveMaxOffsetAngle());
     SetNormalScrollBarWidth(theme->GetNormalScrollBarWidth());
     SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
+    SetArcForegroundColor(theme->GetArcForegroundColor());
+    SetArcBackgroundColor(theme->GetArcBackgroundColor());
 #endif // ARKUI_CIRCLE_FEATURE
 }
 
