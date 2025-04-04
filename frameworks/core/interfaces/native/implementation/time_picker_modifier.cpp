@@ -227,7 +227,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = EnumToInt(Converter::GetOpt(*value));
+    auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
     TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,

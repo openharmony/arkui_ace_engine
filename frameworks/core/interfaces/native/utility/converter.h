@@ -730,10 +730,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src);
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
-
-#ifdef SUPPORT_DIGITAL_CROWN
     template<>void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src);
-#endif
     template<> void AssignCast(
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
     template<>
