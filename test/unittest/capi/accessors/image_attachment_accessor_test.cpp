@@ -172,7 +172,7 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestPixelMap, TestSize.Level1)
         .value = arkPixelMap,
     };
     auto peer = accessor_->ctor(&value);
-    EXPECT_EQ(peer->imageSpan->GetImageSpanOptions().imagePixelMap, pixelMap);
+    EXPECT_EQ(peer->span->GetImageSpanOptions().imagePixelMap, pixelMap);
     accessor_->destroyPeer(peer);
     GeneratedModifier::GetPixelMapAccessor()->destroyPeer(arkPixelMap);
 }
@@ -193,16 +193,16 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSize, TestSize.Level1)
             .size = ArkValue<Opt_SizeOptions>(size),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_TRUE(peer->span->GetImageAttribute()->size);
         if (expected.IsNonNegative()) {
-            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->width);
-            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->height);
-            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->width->ToString(), expected.ToString());
-            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->height->ToString(), expected.ToString());
+            ASSERT_TRUE(peer->span->GetImageAttribute()->size->width);
+            ASSERT_TRUE(peer->span->GetImageAttribute()->size->height);
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->width->ToString(), expected.ToString());
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->height->ToString(), expected.ToString());
         } else {
-            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->width);
-            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->height);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->width);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->height);
         }
         accessor_->destroyPeer(peer);
     }
@@ -227,16 +227,16 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestSizeResources, TestSize.Level1)
             .size = ArkValue<Opt_SizeOptions>(size),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_TRUE(peer->span->GetImageAttribute()->size);
         if (expectPointer->IsNonNegative()) {
-            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->width);
-            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->size->height);
-            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->width->ToString(), expectPointer->ToString());
-            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->size->height->ToString(), expectPointer->ToString());
+            ASSERT_TRUE(peer->span->GetImageAttribute()->size->width);
+            ASSERT_TRUE(peer->span->GetImageAttribute()->size->height);
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->width->ToString(), expectPointer->ToString());
+            EXPECT_EQ(peer->span->GetImageAttribute()->size->height->ToString(), expectPointer->ToString());
         } else {
-            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->width);
-            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->size->height);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->width);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->size->height);
         }
         accessor_->destroyPeer(peer);
     }
@@ -254,9 +254,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->verticalAlign);
-        EXPECT_EQ(peer->imageSpan->GetImageAttribute()->verticalAlign, expected);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_TRUE(peer->span->GetImageAttribute()->verticalAlign);
+        EXPECT_EQ(peer->span->GetImageAttribute()->verticalAlign, expected);
         accessor_->destroyPeer(peer);
     }
 }
@@ -273,8 +273,8 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
             .verticalAlign = ArkValue<Opt_ImageSpanAlignment>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->verticalAlign);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_FALSE(peer->span->GetImageAttribute()->verticalAlign);
         accessor_->destroyPeer(peer);
     }
 }
@@ -291,9 +291,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->objectFit);
-        EXPECT_EQ(peer->imageSpan->GetImageAttribute()->objectFit, expected);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_TRUE(peer->span->GetImageAttribute()->objectFit);
+        EXPECT_EQ(peer->span->GetImageAttribute()->objectFit, expected);
         accessor_->destroyPeer(peer);
     }
 }
@@ -310,8 +310,8 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
             .objectFit = ArkValue<Opt_ImageFit>(test),
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-        ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->objectFit);
+        ASSERT_TRUE(peer->span->GetImageAttribute());
+        ASSERT_FALSE(peer->span->GetImageAttribute()->objectFit);
         accessor_->destroyPeer(peer);
     }
 }
@@ -327,10 +327,10 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleOptional, TestSize.Level
         .layoutStyle = getImageLayoutStyleOptional(),
     };
     auto peer = accessor_->ctor(&value);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->marginProp);
-    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->paddingProp);
-    ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->borderRadius);
+    ASSERT_TRUE(peer->span->GetImageAttribute());
+    ASSERT_FALSE(peer->span->GetImageAttribute()->marginProp);
+    ASSERT_FALSE(peer->span->GetImageAttribute()->paddingProp);
+    ASSERT_FALSE(peer->span->GetImageAttribute()->borderRadius);
     accessor_->destroyPeer(peer);
 };
 
@@ -345,13 +345,13 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleLengthMetrics, TestSize.
         .layoutStyle = getImageLayoutStyleLengthMetrics(),
     };
     auto peer = accessor_->ctor(&value);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->marginProp);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->paddingProp);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->borderRadius);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute());
+    ASSERT_TRUE(peer->span->GetImageAttribute()->marginProp);
+    EXPECT_EQ(peer->span->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute()->paddingProp);
+    EXPECT_EQ(peer->span->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute()->borderRadius);
+    EXPECT_EQ(peer->span->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
     accessor_->destroyPeer(peer);
 };
 
@@ -366,13 +366,13 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestImageStyleFilled, TestSize.Level1)
         .layoutStyle = getImageLayoutStyleFilled(),
     };
     auto peer = accessor_->ctor(&value);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->marginProp);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->paddingProp);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
-    ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->borderRadius);
-    EXPECT_EQ(peer->imageSpan->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute());
+    ASSERT_TRUE(peer->span->GetImageAttribute()->marginProp);
+    EXPECT_EQ(peer->span->GetImageAttribute()->marginProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute()->paddingProp);
+    EXPECT_EQ(peer->span->GetImageAttribute()->paddingProp, MARGIN_PADDING_PROPERTY);
+    ASSERT_TRUE(peer->span->GetImageAttribute()->borderRadius);
+    EXPECT_EQ(peer->span->GetImageAttribute()->borderRadius, BORDER_RADIUES_PROPERTY);
     accessor_->destroyPeer(peer);
 };
 
@@ -393,14 +393,14 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestColorFilter, TestSize.Level1)
             .colorFilter = unionValue,
         };
         auto peer = accessor_->ctor(&value);
-        ASSERT_TRUE(peer->imageSpan->GetImageAttribute());
+        ASSERT_TRUE(peer->span->GetImageAttribute());
         if (expected) {
-            ASSERT_TRUE(peer->imageSpan->GetImageAttribute()->colorFilterMatrix);
-            EXPECT_EQ(peer->imageSpan->GetImageAttribute()->colorFilterMatrix, expected);
+            ASSERT_TRUE(peer->span->GetImageAttribute()->colorFilterMatrix);
+            EXPECT_EQ(peer->span->GetImageAttribute()->colorFilterMatrix, expected);
         } else {
-            ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->colorFilterMatrix);
+            ASSERT_FALSE(peer->span->GetImageAttribute()->colorFilterMatrix);
         }
-        ASSERT_FALSE(peer->imageSpan->GetImageAttribute()->drawingColorFilter);
+        ASSERT_FALSE(peer->span->GetImageAttribute()->drawingColorFilter);
         accessor_->destroyPeer(peer);
     }
 };

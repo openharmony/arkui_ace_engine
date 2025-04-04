@@ -109,7 +109,7 @@ using namespace Converter;
 void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
     CHECK_NULL_VOID(peer);
-    peer->imageSpan = nullptr;
+    peer->span = nullptr;
     delete peer;
 }
 Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
@@ -118,7 +118,7 @@ Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
     CHECK_NULL_RETURN(value, peer);
     auto imageSpan = OptConvert<RefPtr<ImageSpan>>(*value);
     CHECK_NULL_RETURN(imageSpan, peer);
-    peer->imageSpan = *imageSpan;
+    peer->span = *imageSpan;
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -129,8 +129,8 @@ Ark_PixelMap GetValueImpl(Ark_ImageAttachment peer)
 {
 #if defined(PIXEL_MAP_SUPPORTED) || defined(PIXEL_MAP_TEST_SUPPORTED)
     auto arkPixelMap = GetPixelMapAccessor()->ctor();
-    CHECK_NULL_RETURN(peer && peer->imageSpan, arkPixelMap);
-    auto pixelMap = peer->imageSpan->GetImageSpanOptions().imagePixelMap;
+    CHECK_NULL_RETURN(peer && peer->span, arkPixelMap);
+    auto pixelMap = peer->span->GetImageSpanOptions().imagePixelMap;
     CHECK_NULL_RETURN(pixelMap, arkPixelMap);
     arkPixelMap->pixelMap = *pixelMap;
     return arkPixelMap;
@@ -143,46 +143,46 @@ Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_SizeOptions>();
     CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->imageSpan, invalid);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), invalid);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->size, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), invalid);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute()->size, invalid);
     Ark_SizeOptions size;
-    size.width = ArkValue<Opt_Length>(peer->imageSpan->GetImageAttribute()->size->width);
-    size.height = ArkValue<Opt_Length>(peer->imageSpan->GetImageAttribute()->size->height);
+    size.width = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->width);
+    size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height);
     return Converter::ArkValue<Opt_SizeOptions>(size);
 }
 Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageSpanAlignment>();
     CHECK_NULL_RETURN(
-        peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), invalid);
-    auto alignment = peer->imageSpan->GetImageAttribute()->verticalAlign;
+        peer && peer->span && peer->span->GetImageAttribute(), invalid);
+    auto alignment = peer->span->GetImageAttribute()->verticalAlign;
     return ArkValue<Opt_ImageSpanAlignment>(alignment);
 }
 Opt_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageFit>();
-    CHECK_NULL_RETURN(peer && peer->imageSpan && peer->imageSpan->GetImageAttribute(), invalid);
-    auto objectFit = peer->imageSpan->GetImageAttribute()->objectFit;
+    CHECK_NULL_RETURN(peer && peer->span && peer->span->GetImageAttribute(), invalid);
+    auto objectFit = peer->span->GetImageAttribute()->objectFit;
     return ArkValue<Opt_ImageFit>(objectFit);
 }
 Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>();
     CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->imageSpan, invalid);
-    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->imageSpan->GetImageAttribute());
+    CHECK_NULL_RETURN(peer->span, invalid);
+    return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute());
 }
 Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
     auto empty = Converter::ArkValue<Opt_ColorFilterType>();
     CHECK_NULL_RETURN(peer, empty);
-    CHECK_NULL_RETURN(peer->imageSpan, empty);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute(), empty);
-    CHECK_NULL_RETURN(peer->imageSpan->GetImageAttribute()->colorFilterMatrix ||
-        peer->imageSpan->GetImageAttribute()->drawingColorFilter, empty);
-    if (peer->imageSpan->GetImageAttribute()->colorFilterMatrix) {
-        auto& colorFilter = peer->imageSpan->GetImageAttribute()->colorFilterMatrix.value();
+    CHECK_NULL_RETURN(peer->span, empty);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), empty);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute()->colorFilterMatrix ||
+        peer->span->GetImageAttribute()->drawingColorFilter, empty);
+    if (peer->span->GetImageAttribute()->colorFilterMatrix) {
+        auto& colorFilter = peer->span->GetImageAttribute()->colorFilterMatrix.value();
         ArkArrayHolder<Array_Number> colorFilterHolder(colorFilter);
         auto arrayNumber = ArkValue<Array_Number>(colorFilterHolder.ArkValue());
         auto colorFilterPeer = GeneratedModifier::GetColorFilterAccessor()->ctor(&arrayNumber);

@@ -20,19 +20,6 @@
 #include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/mutable_styled_string_peer.h"
 
-namespace OHOS::Ace::NG::Converter {
-template<>
-RefPtr<SpanBase> Convert(const Ark_SpanStyle& src)
-{
-    return Convert<RefPtr<SpanBase>>(Ark_StyleOptions {
-        .start = ArkValue<Opt_Number>(src.start),
-        .length = ArkValue<Opt_Number>(src.length),
-        .styledKey = src.styledKey,
-        .styledValue = src.styledValue,
-    });
-}
-} // namespace OHOS::Ace::NG::Converter
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MutableStyledStringAccessor {
 void DestroyPeerImpl(Ark_MutableStyledString peer)
