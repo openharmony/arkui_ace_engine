@@ -1711,7 +1711,9 @@ void ScrollablePattern::InitMouseEvent()
             std::move(actionEndTask), std::move(actionCancelTask));
     }
     PanDirection panDirection = { .type = PanDirection::ALL };
-    gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
     gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,

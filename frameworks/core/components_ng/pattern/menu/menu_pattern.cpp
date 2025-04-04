@@ -1980,7 +1980,9 @@ void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, std::move(actionEndTask), nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
     gestureHub->AddPreviewMenuHandleDragEnd(std::move(actionScrollEndTask));
 }
 

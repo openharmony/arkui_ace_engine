@@ -298,7 +298,9 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
         };
         panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
     }
-    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)

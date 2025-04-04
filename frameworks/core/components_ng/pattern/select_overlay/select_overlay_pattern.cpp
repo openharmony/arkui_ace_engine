@@ -94,7 +94,9 @@ void SelectOverlayPattern::SetGestureEvent()
     };
     panEvent_ =
         MakeRefPtr<PanEvent>(std::move(panStart), std::move(panUpdate), std::move(panEnd), std::move(panCancel));
-    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gesture->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, distanceMap);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();

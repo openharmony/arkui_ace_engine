@@ -1959,7 +1959,9 @@ void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestu
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void NavigationPattern::InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1988,7 +1990,9 @@ void NavigationPattern::InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestu
     dragBarPanEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
-    gestureHub->AddPanEvent(dragBarPanEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(dragBarPanEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void NavigationPattern::OnHover(bool isHover)
