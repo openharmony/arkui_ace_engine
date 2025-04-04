@@ -6608,7 +6608,7 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
 void RichEditorPattern::HandleOnSelectAll()
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnSelectAll");
-    CloseSelectOverlay();
+    selectOverlay_->CloseOverlay(true, CloseReason::CLOSE_REASON_SELECT_ALL);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     textResponseType_.reset();
