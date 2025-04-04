@@ -22,6 +22,9 @@ class SpanToHtml {
 public:
     static std::string ToHtml(const SpanString& spanString);
     static std::string ToHtml(std::vector<uint8_t>& values);
+    static std::string ToHtml(const std::list<RefPtr<NG::SpanItem>>& spanItems);
+    static std::string ToHtmlForNormalType(const NG::FontStyle& fontStyle,
+        const NG::TextLineStyle& textLineStyle, const std::u16string& contentStr);
 
 private:
     static std::string NormalStyleToHtml(
@@ -66,6 +69,8 @@ private:
     }
 
     static bool CreateDirectory(const std::string& path);
+    static void HandleSingleSpanItemHtml(const RefPtr<NG::SpanItem>& item, std::string& out,
+        size_t& paragrapStart, bool& newLine);
 };
 }; // namespace OHOS::Ace
 #endif

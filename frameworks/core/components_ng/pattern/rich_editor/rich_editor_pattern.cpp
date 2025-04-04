@@ -19,6 +19,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <future>
 #include <iterator>
 #include <sstream>
 #include <string>
@@ -62,6 +63,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
+#include "core/text/html_utils.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -7855,6 +7857,36 @@ void RichEditorPattern::CheckEditorTypeChange()
     }
 }
 
+void RichEditorPattern::AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            auto richEditor = weak.Upgrade();
+            CHECK_NULL_VOID(richEditor);
+            RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
+            std::vector<uint8_t> tlvData;
+            subSpanString->EncodeTlv(tlvData);
+            auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+            multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
+            std::string htmlStr = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+            multiTypeRecordImpl->SetHtmlText(htmlStr);
+
+            auto uiTaskExecutor = task.Upgrade();
+            uiTaskExecutor->PostSyncTask([weak, pasteData, tlvData, multiTypeRecordImpl]() {
+                auto richEditor = weak.Upgrade();
+                CHECK_NULL_VOID(richEditor);
+                std::vector<uint8_t> tlvDataCopy = tlvData;
+                richEditor->clipboard_->AddSpanStringRecord(pasteData, tlvDataCopy);
+                richEditor->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
+                richEditor->clipboard_->SetData(pasteData, richEditor->copyOption_);
+            }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopyStyledStringSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopyStyledStringHtml");
+}
+
 void RichEditorPattern::OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData)
 {
     auto subSpanString =
@@ -7867,17 +7899,12 @@ void RichEditorPattern::OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData)
 
 void RichEditorPattern::HandleOnCopyStyledString()
 {
-    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
     auto subSpanString = styledString_->GetSubSpanString(textSelector_.GetTextStart(),
         textSelector_.GetTextEnd() - textSelector_.GetTextStart());
 #ifdef PREVIEW
     clipboard_->SetData(subSpanString->GetString(), CopyOptions::Distributed);
 #else
-    std::vector<uint8_t> tlvData;
-    subSpanString->EncodeTlv(tlvData);
-    clipboard_->AddSpanStringRecord(pasteData, tlvData);
-    clipboard_->AddTextRecord(pasteData, subSpanString->GetString());
-    clipboard_->SetData(pasteData, copyOption_);
+    AsyncHandleOnCopyStyledStringHtml(subSpanString);
 #endif
 }
 
@@ -7887,19 +7914,32 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
         HandleOnCopyStyledString();
         return;
     }
-    RefPtr<PasteDataMix> pasteData = clipboard_->CreatePasteDataMix();
-    auto selectStart = textSelector_.GetTextStart();
-    auto selectEnd = textSelector_.GetTextEnd();
-    auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
-    auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
-    caretUpdateType_ = CaretUpdateType::NONE;
-    if (copyResultObjects.empty()) {
-        return;
-    }
-    for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
-        ProcessResultObject(pasteData, *resultObj);
-    }
-    clipboard_->SetData(pasteData, copyOption_);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            auto richEditor = weak.Upgrade();
+            RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
+            auto selectStart = richEditor->textSelector_.GetTextStart();
+            auto selectEnd = richEditor->textSelector_.GetTextEnd();
+            auto textSelectInfo = richEditor->GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+            auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
+            richEditor->caretUpdateType_ = CaretUpdateType::NONE;
+            if (copyResultObjects.empty()) {
+                return;
+            }
+            for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
+                richEditor->ProcessResultObject(pasteData, *resultObj);
+            }
+            auto uiTaskExecutor = task.Upgrade();
+            uiTaskExecutor->PostSyncTask([weak, pasteData]() {
+                auto richEditor = weak.Upgrade();
+                CHECK_NULL_VOID(richEditor);
+                richEditor->clipboard_->SetData(pasteData, richEditor->copyOption_);
+            }, TaskExecutor::TaskType::UI, "AsyncHandleOnCopyWithoutSpanStringSetClipboardData");
+        }, TaskExecutor::TaskType::BACKGROUND, "AsyncHandleOnCopyWithoutSpanStringHtml");
 }
 
 void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result)
@@ -7913,7 +7953,9 @@ void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, cons
         clipboard_->SetData(data, CopyOptions::Distributed);
 #else
         multiTypeRecordImpl->SetPlainText(data);
-        EncodeTlvDataByResultObject(result, multiTypeRecordImpl->GetSpanStringBuffer());
+        auto subSpanString = EncodeTlvDataByResultObject(result, multiTypeRecordImpl->GetSpanStringBuffer());
+        auto htmlStr = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+        multiTypeRecordImpl->SetHtmlText(htmlStr);
         clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
 #endif
         return;
@@ -7931,18 +7973,21 @@ void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, cons
         } else {
             multiTypeRecordImpl->SetUri(UtfUtils::Str16ToStr8(result.valueString));
         }
-        EncodeTlvDataByResultObject(result, multiTypeRecordImpl->GetSpanStringBuffer());
+        auto subSpanString = EncodeTlvDataByResultObject(result, multiTypeRecordImpl->GetSpanStringBuffer());
+        auto htmlStr = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+        multiTypeRecordImpl->SetHtmlText(htmlStr);
         clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
 #endif
     }
 }
 
-void RichEditorPattern::EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData)
+RefPtr<SpanString> RichEditorPattern::EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData)
 {
     auto selectStart = result.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] + result.offsetInSpan[RichEditorSpanRange::RANGESTART];
     auto selectEnd = result.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] + result.offsetInSpan[RichEditorSpanRange::RANGEEND];
     auto spanString = ToStyledString(selectStart, selectEnd);
     spanString->EncodeTlv(tlvData);
+    return spanString;
 }
 
 void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)

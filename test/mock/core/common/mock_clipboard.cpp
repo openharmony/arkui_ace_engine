@@ -97,6 +97,7 @@ RefPtr<PasteDataMix> MockClipBoard::CreatePasteDataMix()
 
 void MultiTypeRecordImpl::SetPlainText(const std::string plainText) {}
 void MultiTypeRecordImpl::SetUri(const std::string uri) {}
+void MultiTypeRecordImpl::SetHtmlText(const std::string& htmlText) {}
 void MultiTypeRecordImpl::SetPixelMap(RefPtr<PixelMap> pixelMap) {}
 
 const RefPtr<PixelMap> MultiTypeRecordImpl::GetPixelMap()
@@ -108,6 +109,10 @@ const std::string MultiTypeRecordImpl::GetPlainText()
     return "";
 }
 const std::string MultiTypeRecordImpl::GetUri()
+{
+    return "";
+}
+const std::string MultiTypeRecordImpl::GetHtmlText()
 {
     return "";
 }

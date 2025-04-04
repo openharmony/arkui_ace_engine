@@ -1571,7 +1571,7 @@ private:
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
     void ClearOnFocusTextField(FrameNode* node);
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
-    void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
+    RefPtr<SpanString> EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
     bool InitPreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool ReplaceText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
@@ -1580,6 +1580,7 @@ private:
     void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
     void SetIsEnableSubWindowMenu();
+    void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
