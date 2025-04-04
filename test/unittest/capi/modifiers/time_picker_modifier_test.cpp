@@ -174,7 +174,7 @@ const std::vector<PickerTime> CHANGE_EVENT_TEST_PLAN = {
     PickerTime(23, 0, 15)
 };
 
-typedef std::tuple<Opt_CrownSensitivity,std::string> CrouwnSensitivityTestStep;
+typedef std::tuple<Opt_CrownSensitivity, std::string> CrouwnSensitivityTestStep;
 const std::vector<CrouwnSensitivityTestStep> SENSITIVITY_TEST_PLAN = {
     {Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW), "0"},
     {Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM), "1"},

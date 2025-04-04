@@ -206,7 +206,6 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
-
 }
 void EnableHapticFeedback0Impl(Ark_NativePointer node,
                                Ark_Boolean value)
