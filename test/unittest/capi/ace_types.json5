@@ -5847,6 +5847,47 @@
             ]
         },
         {
+            "name": "Row",
+            "remove": [
+                "setRowOptions1TestOptionsRowOptionsV2SpaceValidValues",
+                "setRowOptions1TestOptionsRowOptionsV2SpaceInvalidValues",
+                "setAlignItemsTestDefaultValues",
+                "setAlignItemsTestAlignItemsValidValues",
+                "setAlignItemsTestAlignItemsInvalidValues",
+                "setJustifyContentTestDefaultValues",
+                "setJustifyContentTestJustifyContentValidValues",
+                "setJustifyContentTestJustifyContentInvalidValues",
+                "setPointLightTestDefaultValues",
+                "setPointLightTestPointLightLightSourcePositionXValidValues",
+                "setPointLightTestPointLightLightSourcePositionXInvalidValues",
+                "setPointLightTestPointLightLightSourcePositionYValidValues",
+                "setPointLightTestPointLightLightSourcePositionYInvalidValues",
+                "setPointLightTestPointLightLightSourcePositionZValidValues",
+                "setPointLightTestPointLightLightSourcePositionZInvalidValues",
+                "setPointLightTestDefausetPointLightTestPointLightLightSourceIntensityValidValuesltValues",
+                "setPointLightTestPointLightLightSourceColorValidValues",
+                "setPointLightTestPointLightLightSourceColorInvalidValues",
+                "setPointLightTestPointLightIlluminatedValidValues",
+                "setPointLightTestPointLightIlluminatedInvalidValues",
+                "setPointLightTestPointLightBloomValidValues",
+                "setPointLightTestPointLightBloomInvalidValues",
+                "setPointLightTestPointLightLightSourceIntensityValidValues",
+                "setReverseTestDefaultValues",
+                "setReverseTestReverseValidValues",
+                "setReverseTestReverseInvalidValues",
+            ],
+            "disable": [
+                "setRowOptions1TestDefaultValues",
+            ],
+            "attributes": [
+                {
+                    "name": "space",
+                    "default": "0.00px",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"],
+                },
+            ]
+        },
+        {
             "name": "SymbolSpan",
             "disable": [
                 "setFontColorTestValidValues",
