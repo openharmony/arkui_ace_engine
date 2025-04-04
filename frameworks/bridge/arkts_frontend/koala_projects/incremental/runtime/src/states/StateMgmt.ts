@@ -180,7 +180,7 @@ export interface IDecoratedImmutableVariable<T> {
     get(): T;
 }
 
-export interface IDecoratedMutableVariable<T> {
+export interface DecoratedMutableVariable<T> {
     get(): T;
     set(newValue: T): void;
 }
@@ -260,7 +260,7 @@ export class StateMgmtLoop {
 }
 
 export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
+    implements DecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T> {
     private __backing: BackingValue<T>;
     private __sourceValue: T;
 
@@ -287,7 +287,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.registerWatchForObservedObjectChanges(newValue);
 
             this.__backing.value = deepCopy<T>(newValue);
-            this.__sourceValue = newValue;
             this.meta_.fireChange();
             this._watchFuncs.forEach((watchFunc) => { watchFunc.execute(this.varName_) });
         }
@@ -316,14 +315,14 @@ export interface __MkPropReturnType<T> {
 }
 
 export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
-    private _backing: BackingValue<T>;
+    implements DecoratedMutableVariable<T> {
+    private __backing: BackingValue<T>;
 
     constructor(initValue: T, watchFunc?: WatchFuncType) {
         super('', watchFunc);
     
-        this._backing = new BackingValue<T>(initValue);
-        this.registerWatchForObservedObjectChanges(this._backing.value);
+        this.__backing = new BackingValue<T>(initValue);
+        this.registerWatchForObservedObjectChanges(this.__backing.value);
     }
 
     public getInfo(): string {
@@ -331,17 +330,17 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public get(): T {
-        setObservationDepth(this._backing.value, 1);
+        setObservationDepth(this.__backing.value, 1);
         this.meta_.addRef();
-        return this._backing.value;
+        return this.__backing.value;
     }
 
     public set(newValue: T): void {
-        if (this._backing.value != newValue) {
-            this.unregisterWatchFromObservedObjectChanges(this._backing.value);
+        if (this.__backing.value != newValue) {
+            this.unregisterWatchFromObservedObjectChanges(this.__backing.value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            this._backing.value = newValue;
+            this.__backing.value = newValue;
 
             this.meta_.fireChange();
             this._watchFuncs.forEach((watchFunc) => { watchFunc.execute(this.varName_) });
@@ -371,7 +370,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
 /***************************************************** @Link ********************************************** */
 export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements DecoratedMutableVariable<T> {
 
     private sourceGet_: () => T;
     private sourceSet_?: (newValue: T) => void;
@@ -418,9 +417,9 @@ interface StorageLinkPropRegistration {
   
 export class LocalStorage {
 
-    private storage_: Map<string, StateDecoratedVariable<Object>>;
-    private nextLinkPropId: StorageLinkPropIdType = 1;
-    private linksPropRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
+  private storage_: Map<string, StateDecoratedVariable<Object>>; 
+  private nextLinkPropId: StorageLinkPropIdType = 1;
+  private linksPropRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
 
   constructor() {
     this.storage_ = new Map<string, StateDecoratedVariable<Object>>();
@@ -447,22 +446,22 @@ export class LocalStorage {
     return p ? p!.get() as T: undefined;
   }
 
-  public set(propName: string, newValue: Object): boolean {
+  public set<T>(propName: string, newValue: T): boolean {
     const p: StateDecoratedVariable<Object> | undefined = this.storage_.get(propName);
     if (p === undefined) {
       return false;
     }
-    p.set(newValue);
+    p.set(newValue as Object);
     return true;
   }
 
-  public setOrCreate(propName: string, newValue: Object): boolean {
+  public setOrCreate<T>(propName: string, newValue: T): boolean {
     let p: StateDecoratedVariable<Object> | undefined = this.storage_.get(propName);
     if (p !== undefined) {
-      p.set(newValue);
+      p.set(newValue as Object);
       return true;
     }
-    this.addNewPropertyInternal(propName, newValue);
+    this.addNewPropertyInternal(propName, newValue as Object);
     return true;
   }
 
@@ -612,11 +611,11 @@ export class AppStorage extends LocalStorage {
         return AppStorage.getOrCreate().get<T>(key);
     }
 
-    public static set(key: string, newValue: Object): boolean {
+    public static set<T>(key: string, newValue: T): boolean {
         return AppStorage.getOrCreate().set(key, newValue);
     }
 
-    public static setOrCreate(key: string, newValue: Object): void {
+    public static setOrCreate<T>(key: string, newValue: T): void {
         AppStorage.getOrCreate().setOrCreate(key, newValue);
     }
 
@@ -652,7 +651,7 @@ export class AppStorage extends LocalStorage {
 
 /***************************************************** @StorageLink ********************************************** */
 export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements DecoratedMutableVariable<T> {
 
     private asLink : LinkDecoratedVariable<Object> | undefined;
     constructor(propName: string, varName_: string, localValue: T, watchFunc?: WatchFuncType) {
@@ -685,7 +684,7 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
 /***************************************************** @StorageProp ********************************************** */
 export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IDecoratedMutableVariable<T> {
+    implements DecoratedMutableVariable<T> {
 
     private asProp : PropDecoratedVariable<Object> | undefined;
     constructor(propName: string, varName:string, localVal: T, watchFunc?: WatchFuncType) {
