@@ -428,6 +428,8 @@ void PipelineContext::FlushMessages() {}
 
 void PipelineContext::FlushModifier() {}
 
+void PipelineContext::FlushDirtyNodeUpdate() {}
+
 void PipelineContext::FlushUITasks(bool triggeredByImplicitAnimation)
 {
     if (!MockPipelineContext::GetCurrent()->UseFlushUITasks()) {

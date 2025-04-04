@@ -3340,13 +3340,19 @@ void SwiperPattern::TriggerAddTabBarEvent() const
     }
 }
 
-void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+void SwiperPattern::ReportTraceOnDragEnd() const
 {
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
+}
+
+void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+{
+    ReportTraceOnDragEnd();
+
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity) || !CheckContentWillScroll(dragVelocity, mainDelta)) {
@@ -3360,6 +3366,10 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    if (SupportSwiperCustomAnimation()) {
+        pipeline->FlushDirtyNodeUpdate();
+    }
+
     pipeline->FlushUITasks();
     if (itemPosition_.empty()) {
         EventReport::ReportScrollableErrorEvent(
