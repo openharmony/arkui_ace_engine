@@ -57,7 +57,18 @@ void ValidatePaddingProperty(PaddingProperty& opt)
 auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& style) {
     // content
     std::optional<std::string> content = std::nullopt;
-    LOGE("TabContentAttributeModifier.TabBar1Impl content is not supported yet.");
+    Converter::VisitUnion(style._content,
+        [&content](const Ark_String& arkContent) {
+            content = Converter::OptConvert<std::string>(arkContent);
+        },
+        [&content](const Ark_Resource& arkContent) {
+            content = Converter::OptConvert<std::string>(arkContent);
+        },
+        [](const Ark_ComponentContent& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContent) is not supported yet.");
+        },
+        []() {}
+    );
 
     // indicator
     auto indicator = Converter::OptConvert<Ark_IndicatorStyle>(style._indicator);
@@ -74,18 +85,21 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         LOGE("TabContentAttributeModifier.TabBar1Impl labelStyle is not supported yet.");
     }
     // padding
-    auto paddingProperty = Converter::OptConvert<PaddingProperty>(style._padding).value_or(PaddingProperty());
-    Validator::ValidatePaddingProperty(paddingProperty);
+    std::optional<PaddingProperty> optPadding;
     bool useLocalizedPadding = false;
-    if (paddingProperty.start) {
-        paddingProperty.left = paddingProperty.start;
-        useLocalizedPadding = true;
-    }
-    if (paddingProperty.end) {
-        paddingProperty.right = paddingProperty.end;
-        useLocalizedPadding = true;
-    }
-    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    Converter::VisitUnion(style._padding,
+        [&optPadding](const Ark_Union_Padding_Dimension& arkPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
+        },
+        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
+            useLocalizedPadding = true;
+        },
+        []() {}
+    );
+    PaddingProperty paddingProperty = optPadding.value_or(PaddingProperty());
+    Validator::ValidatePaddingProperty(paddingProperty);
+    TabContentModelNG::SetPadding(frameNode, paddingProperty);
     TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
@@ -112,18 +126,24 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
     // layoutMode
     TabContentModelNG::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
     // padding
-    auto paddingProperty = Converter::OptConvert<PaddingProperty>(style._padding).value_or(PaddingProperty());
-    Validator::ValidatePaddingProperty(paddingProperty);
+    std::optional<PaddingProperty> optPadding;
     bool useLocalizedPadding = false;
-    if (paddingProperty.start) {
-        paddingProperty.left = paddingProperty.start;
-        useLocalizedPadding = true;
-    }
-    if (paddingProperty.end) {
-        paddingProperty.right = paddingProperty.end;
-        useLocalizedPadding = true;
-    }
-    TabContentModelNG::SetPadding(frameNode, paddingProperty, true);
+    Converter::VisitUnion(style._padding,
+        [&optPadding](const Ark_Padding& arkPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
+        },
+        [&optPadding](const Ark_Length& arkLength) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
+        },
+        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
+            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
+            useLocalizedPadding = true;
+        },
+        []() {}
+    );
+    PaddingProperty paddingProperty = optPadding.value_or(PaddingProperty());
+    Validator::ValidatePaddingProperty(paddingProperty);
+    TabContentModelNG::SetPadding(frameNode, paddingProperty);
     TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // verticalAlign
     TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
