@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
 void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_SubmitEvent CtorImpl()
 {
-    return new SubmitEventPeer();
+    return PeerUtils::CreatePeer<SubmitEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

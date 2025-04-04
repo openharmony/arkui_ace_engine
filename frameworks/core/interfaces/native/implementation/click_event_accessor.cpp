@@ -29,11 +29,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ClickEvent CtorImpl()
 {
-    return new ClickEventPeer();
+    return PeerUtils::CreatePeer<ClickEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

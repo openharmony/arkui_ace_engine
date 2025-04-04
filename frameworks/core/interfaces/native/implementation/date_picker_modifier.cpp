@@ -249,7 +249,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto sensitivity = Converter::OptConvert<CrownSensitivity>(*value).value_or(DIGITAL_CROWN_SENSITIVITY_DEFAULT);
-    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, sensitivity);
+    DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<int32_t>(sensitivity));
 #endif
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,

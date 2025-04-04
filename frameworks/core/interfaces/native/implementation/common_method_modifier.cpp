@@ -36,6 +36,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
@@ -2680,10 +2681,31 @@ void OnKeyEvent1Impl(Ark_NativePointer node,
 void OnDigitalCrownImpl(Ark_NativePointer node,
                         const Opt_Callback_CrownEvent_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOnDigitalCrown(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    std::optional<Callback_CrownEvent_Void> optOnDigitalCrown = Converter::GetOpt(*value);
+    if (optOnDigitalCrown) {
+        auto onDigitalCrown = [callback = CallbackHelper(*optOnDigitalCrown), node = weakNode](CrownEventInfo& info) {
+            PipelineContext::SetCallBackNode(node);
+            auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>([&info]() {
+                info.SetStopPropagation(true);
+            });
+            Ark_CrownEvent crownEvent {
+                .timestamp = ArkValue<Ark_Int64>(info.GetTimeStamp().time_since_epoch().count()),
+                .angularVelocity = ArkValue<Ark_Number>(info.GetAngularVelocity()),
+                .degree = ArkValue<Ark_Number>(info.GetDegree()),
+                .action = ArkValue<Ark_CrownAction>(info.GetAction()),
+                .stopPropagation = stopPropagation,
+            };
+            callback.Invoke(crownEvent);
+        };
+        ViewAbstract::SetOnCrownEvent(frameNode, std::move(onDigitalCrown));
+    } else {
+        ViewAbstract::DisableOnCrownEvent(frameNode);
+    }
+#endif
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
@@ -2719,8 +2741,13 @@ void OnFocusAxisEventImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnFocusAxisEvent(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onFocusAxis = [callback = CallbackHelper(*value), node = weakNode](NG::FocusAxisEventInfo& info) {
+        PipelineContext::SetCallBackNode(node);
+        const auto arkInfo = Converter::ArkFocusAxisEventSync(info);
+        callback.InvokeSync(arkInfo.ArkValue());
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, std::move(onFocusAxis));
 }
 void OnAxisEventImpl(Ark_NativePointer node,
                      const Callback_AxisEvent_Void* value)
@@ -4205,8 +4232,10 @@ void OnAccessibilityFocusImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnAccessibilityFocus(frameNode, convValue);
+    auto onFocus = [callback = CallbackHelper(*value)](bool isFocus) -> void {
+        callback.Invoke(ArkValue<Ark_Boolean>(isFocus));
+    };
+    ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Ark_String* value)

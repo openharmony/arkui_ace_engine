@@ -61,6 +61,7 @@
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "core/gestures/drag_event.h"
@@ -176,6 +177,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Buffer& dst, const std::string& src);
     void AssignArkValue(Ark_CaretOffset& dst, const NG::OffsetF& src);
     void AssignArkValue(Ark_CheckboxGroupResult& dst, const CheckboxGroupResult& src);
+    void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
     void AssignArkValue(Ark_Date& dst, const DatePickerChangeEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     void AssignArkValue(Ark_Date& dst, const std::string& src);
@@ -751,7 +753,7 @@ namespace OHOS::Ace::NG::Converter {
         }
 
     private:
-        Peer* const peer_ = new Peer();
+        Peer* const peer_ = PeerUtils::CreatePeer<Peer>();
         const std::shared_ptr<typename Peer::EventInfo> info_ = peer_->eventInfo;
     };
 

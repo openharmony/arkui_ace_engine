@@ -28,11 +28,11 @@ const auto DefaultValueInt32 = Converter::ArkValue<Ark_Number>(0);
 namespace KeyEventAccessor {
 void DestroyPeerImpl(Ark_KeyEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_KeyEvent CtorImpl()
 {
-    return new KeyEventPeer();
+    return PeerUtils::CreatePeer<KeyEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

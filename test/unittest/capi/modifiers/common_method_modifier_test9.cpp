@@ -20,6 +20,7 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/focus_axis_event_accessor.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -28,9 +29,12 @@
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "test/unittest/capi/modifiers/generated/test_fixtures.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::Ace::NG::Converter;
+using namespace OHOS::Ace::NG::GeneratedModifier::FocusAxisEventAccessor;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,7 +52,18 @@ namespace {
     const auto ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST = "";
     const auto ATTRIBUTE_SELECTED_NAME_TEST = "accessibilitySelected";
     const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST = "";
-}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    constexpr int64_t SEC_TO_MICROSEC = 1000000;
+
+    const std::vector<std::tuple<std::string, CrownAction>> testFixtureEnumCrown = {
+        { "ARK_CROWN_ACTION_BEGIN", CrownAction::BEGIN },
+        { "ARK_CROWN_ACTION_UPDATE", CrownAction::UPDATE },
+        { "ARK_CROWN_ACTION_END", CrownAction::END },
+        { "ARK_CROWN_ACTION_UNKNOWN", CrownAction::UNKNOWN },
+    };
+#endif // SUPPORT_DIGITAL_CROWN
+} // namespace
 
 namespace Converter {
     template<>
@@ -58,7 +73,37 @@ namespace Converter {
         dst.bundleName = Converter::ArkValue<Ark_String>(src);
         LOGE("this converter is disabled");
     }
-}
+#ifdef SUPPORT_DIGITAL_CROWN
+    template<>
+    void AssignCast(std::optional<CrownAction>& dst, const Ark_CrownAction& src)
+    {
+        switch (src) {
+            case ARK_CROWN_ACTION_BEGIN: dst = CrownAction::BEGIN; break;
+            case ARK_CROWN_ACTION_UPDATE: dst = CrownAction::UPDATE; break;
+            case ARK_CROWN_ACTION_END: dst = CrownAction::END; break;
+            default:
+                LOGE("Unexpected enum value in Ark_CrownAction: %{public}d", src);
+                break;
+        }
+    }
+
+    template<>
+    CrownEventInfo Convert(const Ark_CrownEvent& crownEvent)
+    {
+        CrownEvent event;
+        auto originalTime = Convert<int64_t>(crownEvent.timestamp) / SEC_TO_MICROSEC;
+        event.SetTimeStamp(originalTime);
+        event.angularVelocity = Convert<float>(crownEvent.angularVelocity);
+        event.degree = Convert<float>(crownEvent.degree);
+        auto action = OptConvert<CrownAction>(crownEvent.action);
+        if (action) {
+            event.SetAction(*action);
+        }
+        CrownEventInfo info(event);
+        return info;
+    }
+#endif // SUPPORT_DIGITAL_CROWN
+} // namespace Converter
 
 namespace GeneratedModifier {
     const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
@@ -451,7 +496,11 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
                           const Ark_AccessibilityHoverEvent event) {
         auto info = event ? event->GetEventInfo() : nullptr;
         ASSERT_NE(info, nullptr);
-        checkEvent = { .nodeId = resourceId, .isHover = isHover, .type = info->GetActionType() };
+        checkEvent = {
+            .nodeId = resourceId,
+            .isHover = isHover,
+            .type = info->GetActionType()
+        };
         GeneratedModifier::GetAccessibilityHoverEventAccessor()->destroyPeer(event);
     };
     auto callBackValue = Converter::ArkValue<AccessibilityCallback>(onAccessibilityHoverFunc, frameNode->GetId());
@@ -694,4 +743,158 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
     test();
 }
 
+
+/*
+ * @tc.name: setOnAccessibilityFocusTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setOnAccessibilityFocusTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setOnAccessibilityFocus);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    struct CheckEvent {
+        int32_t nodeId = -1;
+        bool isFocus = false;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onAccessibilityFocus = [](const Ark_Int32 resourceId, const Ark_Boolean isFocus) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .isFocus = Convert<bool>(isFocus),
+        };
+    };
+
+    auto accessibilityFocusCallback = ArkValue<AccessibilityFocusCallback>(onAccessibilityFocus, frameNode->GetId());
+
+    for (auto& [message, value, expect] : Fixtures::testFixtureBooleanValidValues) {
+        checkEvent = std::nullopt;
+        modifier_->setOnAccessibilityFocus(node_, &accessibilityFocusCallback);
+        EXPECT_FALSE(checkEvent);
+        accessibilityProperty->OnAccessibilityFocusCallback(value);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+        EXPECT_EQ(checkEvent->isFocus, value) << "Passed value is: " << message;
+    }
+}
+
+/*
+ * @tc.name: setOnFocusAxisEventTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setOnFocusAxisEventTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setOnFocusAxisEvent);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    FocusAxisEvent event;
+    event.absXValue = 1.0f;
+    event.absYValue = 2.0f;
+    event.absZValue = 3.0f;
+    event.absRzValue = 4.0f;
+    event.absGasValue = 5.0f;
+    event.absBrakeValue = 6.0f;
+    event.absHat0XValue = 7.0f;
+    event.absHat0YValue = 8.0f;
+    FocusAxisEventInfo eventInfo(event);
+
+    struct CheckEvent {
+        int32_t nodeId = -1;
+        std::map<AxisModel, float> info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onFocusAxisCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_FocusAxisEvent parameter) {
+        checkEvent = {
+            .nodeId = resourceId,
+        };
+        if (parameter && parameter->GetEventInfo()) {
+            checkEvent->info = getAxisMapFromInfo(*parameter->GetEventInfo());
+        }
+        PeerUtils::DestroyPeer(parameter);
+    };
+
+    auto accessibilityFocusCallback = ArkValue<Callback_FocusAxisEvent_Void>(onFocusAxisCallback, frameNode->GetId());
+    modifier_->setOnFocusAxisEvent(node_, &accessibilityFocusCallback);
+    EXPECT_FALSE(checkEvent);
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_TRUE(focusHub);
+    auto onFocusAxisFromFocus = focusHub->GetOnFocusAxisCallback();
+    ASSERT_TRUE(onFocusAxisFromFocus);
+    onFocusAxisFromFocus(eventInfo);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+    EXPECT_EQ(getAxisMapFromInfo(eventInfo), checkEvent->info);
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+MATCHER_P(CompareCrownEventInfo, expected, "Compare CrownEventInfo values")
+{
+    return arg.GetTimeStamp() == expected.GetTimeStamp()
+        && arg.GetAngularVelocity() == expected.GetAngularVelocity()
+        && arg.GetDegree() == expected.GetDegree()
+        && arg.GetAction() == expected.GetAction()
+        && expected.IsStopPropagation();
+}
+#endif // SUPPORT_DIGITAL_CROWN
+/*
+ * @tc.name: setOnDigitalCrownTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setOnDigitalCrownTest, TestSize.Level1)
+{
+    ASSERT_TRUE(modifier_->setOnDigitalCrown);
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    struct CheckEvent {
+        int32_t nodeId;
+        CrownEventInfo eventInfo;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    CrownEvent event;
+    event.SetTimeStamp(12345);
+    event.angularVelocity = 5.0f;
+    event.degree = 10.0f;
+    event.isInjected = true;
+    for (auto& [message, value] : testFixtureEnumCrown) {
+        checkEvent = std::nullopt;
+        event.SetAction(value);
+        CrownEventInfo info(event);
+        auto onCrownEvent = [](const Ark_Int32 resourceId, const Ark_CrownEvent parameter) {
+            auto callback = CallbackHelper(parameter.stopPropagation);
+            callback.Invoke();
+            checkEvent = {
+                .nodeId = resourceId,
+                .eventInfo = Convert<CrownEventInfo>(parameter),
+            };
+        };
+        auto arkCrownCallback = ArkValue<Callback_CrownEvent_Void>(onCrownEvent, frameNode->GetId());
+        auto optCrownCallback = ArkValue<Opt_Callback_CrownEvent_Void>(arkCrownCallback);
+        modifier_->setOnDigitalCrown(node_, &optCrownCallback);
+        ASSERT_FALSE(checkEvent);
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        ASSERT_TRUE(focusHub);
+        auto focusCallback = focusHub->GetOnCrownCallback();
+        focusCallback(info);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId()) << "Passed id is: " << frameNode->GetId();
+        
+        EXPECT_THAT(checkEvent->eventInfo, CompareCrownEventInfo(info));
+    }
+    checkEvent = std::nullopt;
+    auto optCrownCallback = ArkValue<Opt_Callback_CrownEvent_Void>();
+    modifier_->setOnDigitalCrown(node_, &optCrownCallback);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_TRUE(focusHub);
+    focusHub->ProcessOnCrownEventInternal(event);
+    ASSERT_FALSE(checkEvent);
+#endif // SUPPORT_DIGITAL_CROWN
+}
 }

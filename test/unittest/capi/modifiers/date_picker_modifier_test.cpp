@@ -70,7 +70,7 @@ const auto ATTRIBUTE_TEXT_COLOR_DISAPPEAR_DEFAULT_VALUE = "#FF182431";
 const auto ATTRIBUTE_TEXT_COLOR_NORMAL_DEFAULT_VALUE = "#FF182431";
 const auto ATTRIBUTE_TEXT_COLOR_SELECTED_DEFAULT_VALUE = "#FF007DFF";
 #ifdef SUPPORT_DIGITAL_CROWN
-const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "CrownSensitivity.MEDIUM";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1"; // equal "CrownSensitivity.MEDIUM"
 const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
 #endif
 
@@ -266,11 +266,11 @@ const std::vector<PickerDateOptionsStepTest> PICKER_DATE_OPTIONS_TEST_PLAN = {
 #ifdef SUPPORT_DIGITAL_CROWN
 std::vector<std::tuple<std::string, Opt_CrownSensitivity, std::string>> testFixtureEnumCrownSensitivityTestPlan = {
     { "CrownSensitivity.LOW", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW),
-        "CrownSensitivity.LOW" },
+        "0" },
     { "CrownSensitivity.MEDIUM", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM),
-        "CrownSensitivity.MEDIUM" },
+        "1" },
     { "CrownSensitivity.HIGH", Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_HIGH),
-        "CrownSensitivity.HIGH" },
+        "2" },
     { "-1", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(-1)),
         ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE },
     { "INT_MAX", Converter::ArkValue<Opt_CrownSensitivity>(static_cast<Ark_CrownSensitivity>(INT_MAX)),
@@ -1944,9 +1944,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
 HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-    auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    resultStr = GetAttrValue<std::string>(constructor, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE)
         << "Default value for attribute 'digitalCrownSensitivity'";
 }
@@ -1968,8 +1966,7 @@ HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.
         inputValueDigitalCrownSensitivity = value;
         modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
         auto jsonValue = GetJsonValue(node_);
-        auto constructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-        auto resultStr = GetAttrValue<std::string>(constructor, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input
                                           << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
     };
@@ -1977,19 +1974,6 @@ HWTEST_F(DatePickerModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.
         checkValue(input, expected, value);
     }
 }
-#else
-/*
- * @tc.name: setDigitalCrownSensitivityDefaultValuesTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityDefaultValuesTest, TestSize.Level1) {}
-/*
- * @tc.name: setDigitalCrownSensitivityValidValuesTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1) {}
 #endif
 
 /*

@@ -2778,17 +2778,6 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
         jsonConstructor->Put("mode", GetModeString(datePickerMode_).c_str());
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    std::string sensitivity = "CrownSensitivity.MEDIUM";
-    if (crownSensitivity_ == CrownSensitivity::LOW) {
-        sensitivity = "CrownSensitivity.LOW";
-    } else if (crownSensitivity_ == CrownSensitivity::HIGH) {
-        sensitivity = "CrownSensitivity.HIGH";
-    } else {
-        sensitivity = "CrownSensitivity.MEDIUM";
-    }
-    jsonConstructor->Put("digitalCrownSensitivity", sensitivity.c_str());
-#endif
     json->PutExtAttr("constructor", jsonConstructor, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }

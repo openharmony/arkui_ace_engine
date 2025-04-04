@@ -2077,7 +2077,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0999, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(WeakPtr(eventHub));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
     NonPointerEvent nonPointerEvent;
@@ -2108,7 +2108,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg01000, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(WeakPtr(eventHub));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
 
@@ -2138,7 +2138,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg01001, TestSize.Level1)
      * @tc.steps2: initialize parameters.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(WeakPtr(eventHub));
     ASSERT_NE(focusHub, nullptr);
     ASSERT_NE(focusHub->GetRootFocusHub(), nullptr);
 
