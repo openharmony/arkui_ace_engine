@@ -161,6 +161,7 @@ ohos_unittest("ace_kit_test") {
     "box_layout_algorithm_test.cpp",
     "content_modifier_test.cpp",
     "frame_node_test.cpp",
+    "resource_parser_test.cpp",
     "view_stack_processor_test.cpp",
   ]
 
