@@ -7208,8 +7208,9 @@ bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
         if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
             return true;
-        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-                   AceType::InstanceOf<ForEachNode>(child)) {
+        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child)) {
             continue;
         } else {
             if (HasRepeatTotalCountDifference(child)) {
