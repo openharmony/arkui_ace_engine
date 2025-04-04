@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,10 +40,11 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
     RefPtr<FrameNode> frameNode = nullptr;
     if (isCreateArc) {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
-        #ifdef ARKUI_CIRCLE_FEATURE
-        frameNode = FrameNode::GetOrCreateFrameNode(
-            V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
-        #endif
+        auto deviceType = SystemProperties::GetDeviceType();
+        if (deviceType == DeviceType::WATCH || deviceType == DeviceType::WEARABLE) {
+            frameNode = FrameNode::GetOrCreateFrameNode(
+                V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
+        }
     } else {
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
         frameNode = FrameNode::GetOrCreateFrameNode(
