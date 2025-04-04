@@ -524,8 +524,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         UpdateCurrentFocus();
         host->ChildrenUpdatedFrom(-1);
     }
-
     CheckLoopChange();
+    SetLazyLoadIsLoop();
     auto lastCurrentIndex = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
@@ -5249,18 +5249,19 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     CHECK_NULL_VOID(host);
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
+        auto isLoop = IsLoop();
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
         if (lazyForEachNode) {
-            lazyForEachNode->SetIsLoop(IsLoop());
+            lazyForEachNode->SetIsLoop(isLoop);
         }
         auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
         if (repeatVirtualNode) {
-            repeatVirtualNode->SetIsLoop(IsLoop());
+            repeatVirtualNode->SetIsLoop(isLoop);
         }
 
         auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
         if (repeatVirtualNode2) {
-            repeatVirtualNode2->SetIsLoop(IsLoop());
+            repeatVirtualNode2->SetIsLoop(isLoop);
         }
     }
 }
