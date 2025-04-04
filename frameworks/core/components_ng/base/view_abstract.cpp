@@ -4307,11 +4307,8 @@ void ViewAbstract::ResetAspectRatio(FrameNode* frameNode)
 void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop)
 {
     CHECK_NULL_VOID(frameNode);
-    if (allowDrop.has_value()) {
-        frameNode->SetAllowDrop(allowDrop.value());
-    } else {
-        frameNode->SetAllowDrop({});
-    }
+    frameNode->SetDisallowDropForcedly(!allowDrop.has_value());
+    frameNode->SetAllowDrop(allowDrop.value_or(std::set<std::string>{}));
 }
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)

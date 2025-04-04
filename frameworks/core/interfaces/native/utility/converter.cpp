@@ -2179,5 +2179,6 @@ std::set<std::string> Convert(const Array_UniformDataType& src)
             dst.insert(convVal.value());
         }
     }
+    return dst;
 }
 } // namespace OHOS::Ace::NG::Converter
