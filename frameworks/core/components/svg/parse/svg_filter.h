@@ -32,8 +32,15 @@ public:
     void SetAttr(const std::string& name, const std::string& value) override;
     RefPtr<RenderNode> CreateRender(
         const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true) override;
+    bool ProcessIteratively(const LayoutParam& layoutParam, std::stack<SvgCreateRenderInfo>& createRenderTaskSt,
+        SvgCreateRenderInfo& svgCreateRenderInfo) override;
+    bool BeforeChildrenProcessed(SvgCreateRenderInfo& svgCreateRenderInfo) override;
     void AppendChild(const RefPtr<SvgNode>& child) override;
     void Update(RefPtr<RenderNode>& node) override;
+    bool IsCreateRenderRecursive() const override
+    {
+        return true;
+    }
 
     RefPtr<Component> GetComponent() const override
     {

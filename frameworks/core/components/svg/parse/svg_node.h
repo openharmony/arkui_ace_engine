@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_NODE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_PARSE_SVG_NODE_H
 
+#include <utility>
 #include <vector>
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkPath.h"
@@ -38,6 +39,23 @@ enum class SvgLengthType {
 };
 
 class SvgContext;
+class SvgNode;
+
+struct SvgCreateRenderInfo {
+    SvgCreateRenderInfo() = default;
+    SvgCreateRenderInfo(RefPtr<SvgNode> svgNode, RefPtr<SvgBaseDeclaration> svgBaseDeclaration, bool useBox,
+        RefPtr<RenderNode> parentRenderNode = nullptr)
+        : svgNode_(svgNode), svgBaseDeclaration_(svgBaseDeclaration), useBox_(useBox),
+          parentRenderNode_(parentRenderNode)
+    {}
+    RefPtr<SvgNode> svgNode_ = nullptr; // The SVG node currently being processed
+    RefPtr<SvgBaseDeclaration> svgBaseDeclaration_ =
+        nullptr;             // Pointer to the declaration used for inheriting rendering attributes
+    int32_t childIndex_ = 0; // Index of the next child node to traverse for the current node
+    bool useBox_ = true;
+    RefPtr<RenderNode> renderNode_ = nullptr;
+    RefPtr<RenderNode> parentRenderNode_ = nullptr;
+};
 
 class SvgNode : public AceType {
     DECLARE_ACE_TYPE(SvgNode, AceType);
@@ -50,7 +68,22 @@ public:
     virtual void SetAttr(const std::string& name, const std::string& value) {}
     virtual void Update(RefPtr<RenderNode>& node) {}
     virtual void Inherit(const RefPtr<SvgBaseDeclaration>& parent) {}
+    // Return true if CreateRender is implemented recursively; otherwise false.
+    virtual bool IsCreateRenderRecursive() const
+    {
+        return false;
+    }
 
+    virtual bool BeforeChildrenProcessed(SvgCreateRenderInfo& svgCreateRenderInfo)
+    {
+        return true;
+    }
+    virtual void AfterChildrenProcessed(const LayoutParam& layoutParam, SvgCreateRenderInfo& svgCreateRenderInfo) {}
+    virtual bool ProcessIteratively(const LayoutParam& layoutParam, std::stack<SvgCreateRenderInfo>& createRenderTaskSt,
+        SvgCreateRenderInfo& svgCreateRenderInfo)
+    {
+        return false;
+    }
     virtual RefPtr<RenderNode> CreateRender(
         const LayoutParam& layoutParam, const RefPtr<SvgBaseDeclaration>& parent, bool useBox = true)
     {
@@ -88,6 +121,11 @@ public:
     void SetText(const std::string& text)
     {
         text_ = text;
+    }
+
+    const std::vector<RefPtr<SvgNode>>& GetChildren()
+    {
+        return children_;
     }
 
 protected:
