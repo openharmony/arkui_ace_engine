@@ -3761,34 +3761,31 @@ void DragPreview0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!value) {
-        ViewAbstract::SetDragPreview(frameNode, std::nullopt);
-        return;
-    }
-    DragDropInfo dragDropInfo;
+    CHECK_NULL_VOID(value);
     Converter::VisitUnion(*value,
-        [frameNode, &dragDropInfo](const Ark_String& val) {
-            dragDropInfo.inspectorId = Converter::Convert<std::string>(val);
-            ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
+        [frameNode](const Ark_String& val) {
+            ViewAbstract::SetDragPreview(frameNode,
+                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val) });
         },
         [node, frameNode](const CustomNodeBuilder& val) {
             CallbackHelper(val).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo({ .customNode = uiNode }));
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode });
                 }, node);
         },
-        [node, frameNode, &dragDropInfo](const Ark_DragItemInfo& value) {
-            dragDropInfo.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
-            dragDropInfo.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+        [node, frameNode](const Ark_DragItemInfo& value) {
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
             if (builder) {
-                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo](const RefPtr<UINode>& uiNode) {
-                    ViewAbstract::SetDragPreview(frameNode, DragDropInfo({
-                        .customNode = uiNode,
-                        .pixelMap = dragDropInfo.pixelMap,
-                        .extraInfo = dragDropInfo.extraInfo }));
+                CallbackHelper(builder.value()).BuildAsync([frameNode, value](const RefPtr<UINode>& uiNode) {
+                    DragDropInfo info;
+                    info.customNode = uiNode;
+                    info.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+                    info.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+                    ViewAbstract::SetDragPreview(frameNode, info);
                     }, node);
             } else {
-                ViewAbstract::SetDragPreview(frameNode, dragDropInfo);
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
+                    .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
+                    .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
             }
         },
         [frameNode]() {
