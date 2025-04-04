@@ -26,6 +26,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -35,14 +36,10 @@ using namespace Converter;
 
 namespace {
 // attrs
-#ifdef WRONG_CALLBACK
 const auto INPUT_FILTER_ATTR("inputFilter");
-#endif
 // check text
 const std::u16string CHECK_TEXT(u"test_text");
-#ifdef WRONG_CALLBACK
-const auto ERROR_TEXT("test_error_text");
-#endif
+const std::u16string ERROR_TEXT(u"test_error_text");
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
 const auto EMPTY_TEXT(u"");
 
@@ -148,28 +145,42 @@ HWTEST_F(SearchModifierCallbackTest, setSearchOptionsTestSearchController, TestS
  * @tc.desc: Check the functionality of setInputFilter
  * @tc.type: FUNC
  */
-#ifdef WRONG_CALLBACK
 HWTEST_F(SearchModifierCallbackTest, setInputFilterTest, TestSize.Level1)
 {
-    g_EventTestString = u"";
-    g_EventErrorTestString = "";
-    ASSERT_NE(modifier_->setInputFilter, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback_String_Void func{};
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    ASSERT_NE(textFieldChild, nullptr);
+    ASSERT_TRUE(textFieldChild);
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-
-    auto sendString = ArkValue<Ark_String>(ERROR_TEXT);
-    auto sendResource = ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
-    modifier_->setInputFilter(node_, &sendResource, &func);
+    ASSERT_TRUE(textFieldEventHub);
+    struct CheckEvent {
+        int32_t nodeId;
+        std::string textBreakpoints;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto callback = [] (const Ark_Int32 resourceId, const Ark_String breakpoints) {
+        checkEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+            .textBreakpoints = Convert<std::string>(breakpoints),
+        };
+    };
+    auto arkCallback = ArkValue<Callback_String_Void>(callback, textFieldChild->GetId());
+    auto optCallback = ArkValue<Opt_Callback_String_Void>(arkCallback);
+    auto sendResource = ArkUnion<Ark_ResourceStr, Ark_String>(ArkValue<Ark_String>(ERROR_TEXT, Converter::FC));
+    modifier_->setInputFilter(node_, &sendResource, &optCallback);
     textFieldEventHub->FireOnInputFilterError(ERROR_TEXT);
-    auto filterValue = GetStringAttribute(node_, INPUT_FILTER_ATTR);
-    EXPECT_EQ(filterValue, ERROR_TEXT);
-    EXPECT_EQ(g_EventTestString, ERROR_TEXT);
-    EXPECT_EQ(g_EventErrorTestString, ERROR_TEXT);
+    ASSERT_TRUE(checkEvent);
+    auto jsonValue = GetJsonValue(node_);
+    auto filterValue = GetAttrValue<std::string>(jsonValue, INPUT_FILTER_ATTR);
+    EXPECT_EQ(checkEvent->nodeId, textFieldChild->GetId());
+    EXPECT_EQ(checkEvent->textBreakpoints, UtfUtils::Str16ToStr8(ERROR_TEXT));
+    EXPECT_EQ(filterValue, UtfUtils::Str16ToStr8(ERROR_TEXT));
+    // reset callback
+    optCallback = ArkValue<Opt_Callback_String_Void>();
+    checkEvent.reset();
+    modifier_->setInputFilter(node_, &sendResource, &optCallback);
+    textFieldEventHub->FireOnInputFilterError(ERROR_TEXT);
+    ASSERT_FALSE(checkEvent);
 }
-#endif
 
 /**
  * @tc.name: setOnTextSelectionChangeTest

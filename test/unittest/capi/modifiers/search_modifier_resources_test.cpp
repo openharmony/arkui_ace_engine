@@ -23,6 +23,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -45,6 +46,7 @@ const auto CARET_STYLE_WIDTH_ATTR("width");
 const auto DECORATION_ATTRS("decoration");
 const auto DECORATION_COLOR_ATTR("color");
 const auto FONT_COLOR_ATTR("fontColor");
+const auto INPUT_FILTER_ATTR("inputFilter");
 const auto LETTER_SPACING_ATTR("letterSpacing");
 const auto LINE_HEIGHT_ATTR("lineHeight");
 const auto MAX_FONT_SIZE_ATTR("maxFontSize");
@@ -399,38 +401,40 @@ HWTEST_F(SearchModifierResourcesTest, setCaretStyleTestResources, TestSize.Level
  * @tc.desc: Check the functionality of setInputFilter
  * @tc.type: FUNC
  */
-#ifdef WRONG_CALLBACK
 HWTEST_F(SearchModifierResourcesTest, setInputFilterTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setInputFilter, nullptr);
-
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_TRUE(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    ASSERT_TRUE(textFieldEventHub);
     struct CheckEvent {
         int32_t nodeId;
-        std::string data;
+        std::string textBreakpoints;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback_String_Void func{};
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
-
+    auto callback = [] (const Ark_Int32 resourceId, const Ark_String breakpoints) {
+        checkEvent = {
+            .nodeId = Convert<int32_t>(resourceId),
+            .textBreakpoints = Convert<std::string>(breakpoints),
+        };
+    };
+    auto arkCallback = ArkValue<Callback_String_Void>(callback, textFieldChild->GetId());
+    auto optCallback = ArkValue<Opt_Callback_String_Void>(arkCallback);
     std::unique_ptr<JsonValue> jsonValue;
-    Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions attrs;
-    attrs.selector = 0;
     for (const auto &[src, expected] : ARK_RESOURCES_TEST_PLAN) {
         auto sendResource = src;
-        modifier_->setInputFilter(node_, &sendResource, &func);
-        textFieldEventHub->FireOnInputFilterError(expected);
-        EXPECT_TRUE(checkEvent.has_value());
+        modifier_->setInputFilter(node_, &sendResource, &optCallback);
+        textFieldEventHub->FireOnInputFilterError(UtfUtils::Str8ToStr16(expected));
+        ASSERT_TRUE(checkEvent);
         auto jsonValue = GetJsonValue(node_);
         auto filterValue = GetAttrValue<std::string>(jsonValue, INPUT_FILTER_ATTR);
-        EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-        EXPECT_EQ(checkEvent->data, expected);
+        EXPECT_EQ(checkEvent->nodeId, textFieldChild->GetId());
+        EXPECT_EQ(checkEvent->textBreakpoints, expected);
         EXPECT_EQ(filterValue, expected);
     }
 }
-#endif
 
 /**
  * @tc.name: selectedBackgroundColorTest
