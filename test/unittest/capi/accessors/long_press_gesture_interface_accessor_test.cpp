@@ -27,6 +27,7 @@ using namespace testing::ext;
 namespace {
     int32_t ID = 123;
     constexpr bool DEFAULT_REPEAT = false;
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
     constexpr int32_t DEFAULT_FINGERS = 1;
     constexpr int32_t DEFAULT_DURATION = 500;
     struct CheckEvent {
@@ -84,6 +85,197 @@ public:
             AceType::MakeRefPtr<MockLongPressGesture>(DEFAULT_FINGERS, DEFAULT_REPEAT, DEFAULT_DURATION);
     }
 };
+
+/**
+ * @tc.name: CtorTestFingers
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+{
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
+        { -10, DEFAULT_FINGERS },
+        { 0, DEFAULT_FINGERS },
+        { 1, 1 },
+        { 10, 10 },
+        { 11, 11 },
+    };
+    bool someRepeat = true;
+    int32_t someDuration = 100;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.repeat = Converter::ArkValue<Opt_Boolean>(someRepeat);
+        params.duration = Converter::ArkValue<Opt_Number>(someDuration);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, someRepeat);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, someDuration);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.repeat = Converter::ArkValue<Opt_Boolean>();
+        params.duration = Converter::ArkValue<Opt_Number>();
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, DEFAULT_REPEAT);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, DEFAULT_DURATION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestRepeat
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestRepeat, TestSize.Level1)
+{
+    const std::vector<std::pair<Ark_Boolean, bool>> TEST_PLAN = {
+        { Converter::ArkValue<Ark_Boolean>(true), true },
+        { Converter::ArkValue<Ark_Boolean>(false), false },
+    };
+    int32_t someFingers = 5;
+    int32_t someDuration = 100;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
+        params.repeat = Converter::ArkValue<Opt_Boolean>(value.first);
+        params.duration = Converter::ArkValue<Opt_Number>(someDuration);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, someFingers);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, value.second);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, someDuration);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.repeat = Converter::ArkValue<Opt_Boolean>(value.first);
+        params.duration = Converter::ArkValue<Opt_Number>();
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, value.second);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, DEFAULT_DURATION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestDuration
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestDuration, TestSize.Level1)
+{
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
+        { -10, DEFAULT_DURATION },
+        { 0, DEFAULT_DURATION },
+        { 1, 1 },
+        { 1000, 1000 },
+    };
+    bool someRepeat = true;
+    int32_t someFingers= 5;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
+        params.repeat = Converter::ArkValue<Opt_Boolean>(someRepeat);
+        params.duration = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, someFingers);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, someRepeat);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, value.second);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_duration_fingers_Boolean_repeat params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.repeat = Converter::ArkValue<Opt_Boolean>();
+        params.duration = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_duration_fingers_Boolean_repeat>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto repeat = peer->gesture->GetRepeat();
+        EXPECT_EQ(repeat, DEFAULT_REPEAT);
+        auto duration = peer->gesture->GetDuration();
+        EXPECT_EQ(duration, value.second);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+{
+    auto peer = accessor_->ctor(nullptr);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto fingers = peer->gesture->GetFingers();
+    EXPECT_EQ(fingers, DEFAULT_FINGERS);
+    auto repeat = peer->gesture->GetRepeat();
+    EXPECT_EQ(repeat, DEFAULT_REPEAT);
+    auto duration = peer->gesture->GetDuration();
+    EXPECT_EQ(duration, DEFAULT_DURATION);
+    auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+    EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+    finalyzer_(peer);
+}
 
 /**
  * @tc.name: OnActionTest

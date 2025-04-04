@@ -1887,4 +1887,53 @@ void AssignCast(std::optional<OHOS::Ace::FillStyle>& dst, const Ark_EffectFillSt
         }
     }
 }
+template<>
+void AssignCast(std::optional<PanDirection>& dst, const Ark_PanDirection& src)
+{
+    dst = PanDirection();
+    switch (src) {
+        case ARK_PAN_DIRECTION_NONE: dst->type = PanDirection::NONE; break;
+        case ARK_PAN_DIRECTION_HORIZONTAL: dst->type = PanDirection::HORIZONTAL; break;
+        case ARK_PAN_DIRECTION_LEFT: dst->type = PanDirection::LEFT; break;
+        case ARK_PAN_DIRECTION_RIGHT: dst->type = PanDirection::RIGHT; break;
+        case ARK_PAN_DIRECTION_VERTICAL: dst->type = PanDirection::VERTICAL; break;
+        case ARK_PAN_DIRECTION_UP: dst->type = PanDirection::UP; break;
+        case ARK_PAN_DIRECTION_DOWN: dst->type = PanDirection::DOWN; break;
+        case ARK_PAN_DIRECTION_ALL: dst->type = PanDirection::ALL; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& src)
+{
+    dst = SwipeDirection();
+    switch (src) {
+        case ARK_SWIPE_DIRECTION_NONE: dst->type = SwipeDirection::NONE; break;
+        case ARK_SWIPE_DIRECTION_HORIZONTAL: dst->type = SwipeDirection::HORIZONTAL; break;
+        case ARK_SWIPE_DIRECTION_VERTICAL: dst->type = SwipeDirection::VERTICAL; break;
+        case ARK_SWIPE_DIRECTION_ALL: dst->type = SwipeDirection::ALL; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src)
+{
+    switch (src) {
+        case ARK_GESTURE_MODE_SEQUENCE: dst = GestureMode::Sequence; break;
+        case ARK_GESTURE_MODE_PARALLEL: dst = GestureMode::Parallel; break;
+        case ARK_GESTURE_MODE_EXCLUSIVE: dst = GestureMode::Exclusive; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_GestureMode: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

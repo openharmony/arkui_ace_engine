@@ -44,6 +44,12 @@ public:
     RotationGesture(int32_t fingers, double angle, bool isLimitFingerCount = false);
     ~RotationGesture() override = default;
 
+#ifdef ARKUI_CAPI_UNITTEST
+    double GetAngle()
+    {
+        return angle_;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

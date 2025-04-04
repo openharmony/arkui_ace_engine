@@ -23,11 +23,38 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-constexpr int32_t EXPECTED_ID = 100;
+namespace {
+    constexpr int32_t EXPECTED_ID = 100;
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    constexpr int32_t DEFAULT_FINGERS = 1;
+    constexpr int32_t DEFAULT_COUNT = 1;
+    constexpr double DEFAULT_DISTANCE = std::numeric_limits<double>::infinity();
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+    constexpr double FLT_PRECISION = 0.00001;
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN_FINGERS = {
+        { -10, DEFAULT_FINGERS },
+        { 0, DEFAULT_FINGERS },
+        { 1, 1 },
+        { 10, 10 },
+        { 11, 11 },
+    };
 
-struct CheckEvent {
-    int32_t resourceId;
-};
+    const std::vector<std::pair<Ark_Number, double>> TEST_PLAN_DISTANCE = {
+        { Converter::ArkValue<Ark_Number>(0.0), 0.0 },
+        { Converter::ArkValue<Ark_Number>(0.05), 0.05 },
+        { Converter::ArkValue<Ark_Number>(1.0), 1.0 },
+        { Converter::ArkValue<Ark_Number>(100.0), 100.0 },
+    };
+
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN_COUNT = {
+        { -10, DEFAULT_COUNT },
+        { 0, DEFAULT_COUNT },
+        { 1, 1 },
+        { 100, 100 },
+    };
+}
 
 class MockTapGesture : public TapGesture {
 public:
@@ -61,6 +88,305 @@ public:
     }
     RefPtr<MockTapGesture> gesture_;
 };
+
+/**
+ * @tc.name: CtorTestFingers
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+{
+    const double distance = 10.0;
+    bool isFingerCountLimited = true;
+    int32_t count = 5;
+
+    for (auto& value : TEST_PLAN_FINGERS) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.count = Converter::ArkValue<Opt_Number>(count);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, count);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_NEAR(distanceThreshold, (Dimension(distance, DimensionUnit::VP)).ConvertToPx(), FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, isFingerCountLimited);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN_FINGERS) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.count = Converter::ArkValue<Opt_Number>();
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>();
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, DEFAULT_COUNT);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_EQ(distanceThreshold, DEFAULT_DISTANCE);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestCount
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestCount, TestSize.Level1)
+{
+    const int32_t fingerCount = 3;
+    const double distance = 10.0;
+    bool isFingerCountLimited = true;
+
+    for (auto& value : TEST_PLAN_COUNT) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(fingerCount);
+        params.count = Converter::ArkValue<Opt_Number>(value.first);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, fingerCount);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, value.second);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_NEAR(distanceThreshold, (Dimension(distance, DimensionUnit::VP)).ConvertToPx(), FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, isFingerCountLimited);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN_COUNT) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.count = Converter::ArkValue<Opt_Number>(value.first);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>();
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, value.second);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_EQ(distanceThreshold, DEFAULT_DISTANCE);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestDistance
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistance, TestSize.Level1)
+{
+    const int32_t fingerCount = 3;
+    const int32_t count = 5;
+    bool isFingerCountLimited = true;
+
+    for (auto& value : TEST_PLAN_DISTANCE) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(fingerCount);
+        params.count = Converter::ArkValue<Opt_Number>(count);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, fingerCount);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, count);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_NEAR(distanceThreshold, (Dimension(value.second, DimensionUnit::VP)).ConvertToPx(), FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, isFingerCountLimited);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN_DISTANCE) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.count = Converter::ArkValue<Opt_Number>();
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, DEFAULT_COUNT);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_NEAR(distanceThreshold, value.second, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestDistanceInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestDistanceInvalid, TestSize.Level1)
+{
+    const std::vector<std::pair<Ark_Number, double>> TEST_PLAN = {
+        { Converter::ArkValue<Ark_Number>(-1.0), DEFAULT_DISTANCE },
+        { Converter::ArkValue<Ark_Number>(-0.05), DEFAULT_DISTANCE },
+    };
+    const int32_t fingerCount = 3;
+    const int32_t count = 5;
+    bool isFingerCountLimited = true;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(fingerCount);
+        params.count = Converter::ArkValue<Opt_Number>(count);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(value.first);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(isFingerCountLimited);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, fingerCount);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, count);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_EQ(distanceThreshold, value.second);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, isFingerCountLimited);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.count = Converter::ArkValue<Opt_Number>(value.first);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>();
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>();
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, DEFAULT_COUNT);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_EQ(distanceThreshold, value.second);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestFingerCountLimited
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestFingerCountLimited, TestSize.Level1)
+{
+    const std::vector<std::pair<Ark_Boolean, bool>> TEST_PLAN = {
+        { Converter::ArkValue<Ark_Boolean>(true), true },
+        { Converter::ArkValue<Ark_Boolean>(false), false },
+    };
+    const int32_t fingerCount = 3;
+    const int32_t count = 5;
+    const double distance = 10.0;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>(fingerCount);
+        params.count = Converter::ArkValue<Opt_Number>(count);
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>(distance);
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(value.first);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, fingerCount);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, count);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_NEAR(distanceThreshold, (Dimension(distance, DimensionUnit::VP)).ConvertToPx(), FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, value.second);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_TapGestureParameters params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.count = Converter::ArkValue<Opt_Number>();
+        params.distanceThreshold = Converter::ArkValue<Opt_Number>();
+        params.isFingerCountLimited = Converter::ArkValue<Opt_Boolean>(value.first);
+        auto optParam = Converter::ArkValue<Opt_TapGestureParameters>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto tapCount = peer->gesture->GetTapCount();
+        EXPECT_EQ(tapCount, DEFAULT_COUNT);
+        auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+        EXPECT_EQ(distanceThreshold, DEFAULT_DISTANCE);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, value.second);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TapGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+{
+    auto peer = accessor_->ctor(nullptr);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto fingers = peer->gesture->GetFingers();
+    EXPECT_EQ(fingers, DEFAULT_FINGERS);
+    auto tapCount = peer->gesture->GetTapCount();
+    EXPECT_EQ(tapCount, DEFAULT_COUNT);
+    auto distanceThreshold = peer->gesture->GetDistanceThreshold();
+    EXPECT_EQ(distanceThreshold, DEFAULT_DISTANCE);
+    auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+    EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+    finalyzer_(peer);
+}
 
 /**
  * @tc.name: onActionTest

@@ -49,12 +49,18 @@ class MockRotationGesture : public RotationGesture {
         }
     };
 
+namespace {
 struct RotationEvent {
     int32_t resourceId;
 };
 
 static const int RES_ID = 123;
 
+constexpr int32_t DEFAULT_FINGERS = 2;
+constexpr double DEFAULT_ANGLE = 1.0;
+constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+constexpr double FLT_PRECISION = 0.001;
+}
 class RotationGestureInterfaceAccessorTest :
     public AccessorTestCtorBase<GENERATED_ArkUIRotationGestureInterfaceAccessor,
     &GENERATED_ArkUIAccessors::getRotationGestureInterfaceAccessor, RotationGestureInterfacePeer> {
@@ -73,6 +79,128 @@ public:
         peer_->gesture = AceType::MakeRefPtr<MockRotationGesture>(fingersNum, angleNum);
     }
 };
+
+/**
+ * @tc.name: CtorTestFingers
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+{
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
+        { -10, DEFAULT_FINGERS },
+        { 0, DEFAULT_FINGERS },
+        { 1, DEFAULT_FINGERS },
+        { 2, 2 },
+        { 10, 10 },
+        { 11, 11 },
+    };
+    double someAngle = 50.5;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_angle_fingers params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.angle = Converter::ArkValue<Opt_Number>(someAngle);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_angle_fingers>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto angle = peer->gesture->GetAngle();
+        EXPECT_NEAR(angle, someAngle, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_angle_fingers params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.angle = Converter::ArkValue<Opt_Number>();
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_angle_fingers>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto angle = peer->gesture->GetAngle();
+        EXPECT_NEAR(angle, DEFAULT_ANGLE, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestAngle
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestAngle, TestSize.Level1)
+{
+    const std::vector<std::pair<double, double>> TEST_PLAN = {
+        { -10.0, DEFAULT_ANGLE },
+        { 0.0, DEFAULT_ANGLE },
+        { 1.0, 1.0 },
+        { 20.0, 20.0 },
+    };
+    double someFingers = 3;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_angle_fingers params;
+        params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
+        params.angle = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_angle_fingers>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, someFingers);
+        auto angle = peer->gesture->GetAngle();
+        EXPECT_NEAR(angle, value.second, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_angle_fingers params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.angle = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_angle_fingers>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto angle = peer->gesture->GetAngle();
+        EXPECT_NEAR(angle, value.second, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RotationGestureInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+{
+    auto peer = accessor_->ctor(nullptr);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto fingers = peer->gesture->GetFingers();
+    EXPECT_EQ(fingers, DEFAULT_FINGERS);
+    auto angle = peer->gesture->GetAngle();
+    EXPECT_NEAR(angle, DEFAULT_ANGLE, FLT_PRECISION);
+    auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+    EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+    finalyzer_(peer);
+}
+
 
 /**
  * @tc.name: onActionStartTest
