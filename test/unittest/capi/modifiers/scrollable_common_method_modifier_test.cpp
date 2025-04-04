@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

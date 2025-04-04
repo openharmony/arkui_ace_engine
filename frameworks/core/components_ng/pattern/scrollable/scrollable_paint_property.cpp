@@ -61,6 +61,7 @@ void ScrollablePaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
             : Dimension(32.0, DimensionUnit::VP).ToString().c_str()); // 32.0: default fading edge length
     json->PutExtAttr("fadingEdgeOption", fadingEdgeOption, filter);
     json->PutExtAttr("clipContent", ContentClipToStr().c_str(), filter);
+    json->PutExtAttr("clipContentRect", GetClipContentRectString(), filter);
 }
 
 Color ScrollablePaintProperty::GetBarColor() const
@@ -104,6 +105,38 @@ std::string ScrollablePaintProperty::GetBarStateString() const
             break;
     }
     return "BarState.Off";
+}
+
+std::unique_ptr<JsonValue> ScrollablePaintProperty::GetClipContentRectString() const
+{
+    auto resultJSON = JsonUtil::Create(true);
+    auto clip = propContentClip_->second;
+    if (clip) {
+        resultJSON->Put("width", clip->GetWidth().ToString().c_str());
+        resultJSON->Put("height", clip->GetHeight().ToString().c_str());
+        resultJSON->Put("topLeftRadius", clip->GetTopLeftRadius().ToString().c_str());
+        resultJSON->Put("topRightRadius", clip->GetTopRightRadius().ToString().c_str());
+        resultJSON->Put("bottomRightRadius", clip->GetBottomRightRadius().ToString().c_str());
+        resultJSON->Put("bottomLeftRadius", clip->GetBottomLeftRadius().ToString().c_str());
+        resultJSON->Put("offset", GetDimensionOffsetJSON(clip->GetOffset()));
+        resultJSON->Put("position", GetDimensionOffsetJSON(clip->GetPosition()));
+        resultJSON->Put("color", clip->GetColor().ColorToString().c_str());
+        resultJSON->Put("strokeColor", static_cast<int32_t>(clip->GetStrokeColor()));
+        resultJSON->Put("strokeWidth", clip->GetStrokeWidth());
+    }
+    return resultJSON;
+}
+
+std::unique_ptr<JsonValue> ScrollablePaintProperty::GetDimensionOffsetJSON(const DimensionOffset& offset) const
+{
+    auto offsetJSON = JsonUtil::Create(true);
+    offsetJSON->Put("x", offset.GetX().ToString().c_str());
+    offsetJSON->Put("y", offset.GetY().ToString().c_str());
+    auto offsetZ = offset.GetZ();
+    if (offsetZ) {
+        offsetJSON->Put("z", offsetZ->ToString().c_str());
+    }
+    return offsetJSON;
 }
 
 void ScrollablePaintProperty::CloneProps(const ScrollablePaintProperty* src)

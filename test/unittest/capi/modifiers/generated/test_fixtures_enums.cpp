@@ -695,6 +695,20 @@ std::vector<std::tuple<std::string, Ark_FinishCallbackType>> testFixtureEnumFini
     { "INT_MAX", static_cast<Ark_FinishCallbackType>(INT_MAX) },
 };
 
+std::vector<std::tuple<std::string, Ark_FlexAlign, std::string>> testFixtureEnumFlexAlignValidValues = {
+    { "ARK_FLEX_ALIGN_START", ARK_FLEX_ALIGN_START, "FlexAlign.Start" },
+    { "ARK_FLEX_ALIGN_CENTER", ARK_FLEX_ALIGN_CENTER, "FlexAlign.Center" },
+    { "ARK_FLEX_ALIGN_END", ARK_FLEX_ALIGN_END, "FlexAlign.End" },
+    { "ARK_FLEX_ALIGN_SPACE_BETWEEN", ARK_FLEX_ALIGN_SPACE_BETWEEN, "FlexAlign.SpaceBetween" },
+    { "ARK_FLEX_ALIGN_SPACE_AROUND", ARK_FLEX_ALIGN_SPACE_AROUND, "FlexAlign.SpaceAround" },
+    { "ARK_FLEX_ALIGN_SPACE_EVENLY", ARK_FLEX_ALIGN_SPACE_EVENLY, "FlexAlign.SpaceEvenly" },
+};
+
+std::vector<std::tuple<std::string, Ark_FlexAlign>> testFixtureEnumFlexAlignInvalidValues = {
+    { "-1", static_cast<Ark_FlexAlign>(-1) },
+    { "INT_MAX", static_cast<Ark_FlexAlign>(INT_MAX) },
+};
+
 std::vector<std::tuple<std::string, Ark_FlexDirection, std::string>> testFixtureEnumFlexDirectionValidValues = {
     { "ARK_FLEX_DIRECTION_ROW", ARK_FLEX_DIRECTION_ROW, "FlexDirection.Row" },
     { "ARK_FLEX_DIRECTION_COLUMN", ARK_FLEX_DIRECTION_COLUMN, "FlexDirection.Column" },

@@ -4640,6 +4640,10 @@
                     "name": "enableScrollInteraction",
                     "default": "true"
                 },
+                {
+                    "name": "clipContent",
+                    "default": "ContentClipMode.DEFAULT"
+                },
             ],
             "disable": [
                 // Unusual structure of json file
@@ -4655,11 +4659,6 @@
                 // Specific setup is required to initialize friction value
                 "setFrictionTestDefaultValues",
 
-                // New attr in API 105?
-                "setClipContentTestDefaultValues",
-                "setClipContentTestClipContentValidValues",
-                "setClipContentTestClipContentInvalidValues",
-
                 // New API 111
                 "setDigitalCrownSensitivityTestDefaultValues",
                 "setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues",
@@ -4672,7 +4671,12 @@
                 // New API 122
                 "setBackToTopTestDefaultValues",
                 "setBackToTopTestBackToTopValidValues",
-            ]
+            ],
+            "remove": [
+                "setClipContentTestDefaultValues",
+                "setClipContentTestClipContentValidValues",
+                "setClipContentTestClipContentInvalidValues",
+            ],
         },
         {
             "name": "Slider",
