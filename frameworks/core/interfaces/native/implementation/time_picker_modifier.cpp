@@ -197,8 +197,16 @@ void OnEnterSelectedAreaImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TimePickerModelNG::SetOnEnterSelectedArea(frameNode, convValue);
+    auto onEnterSelectedArea = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+        auto resultStr = eventInfo->GetSelectedStr();
+        auto result = Converter::ArkValue<Ark_TimePickerResult>(resultStr);
+        arkCallback.Invoke(result);
+    };
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+
 }
 void EnableHapticFeedback0Impl(Ark_NativePointer node,
                                Ark_Boolean value)
@@ -220,8 +228,8 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    auto convValue = EnumToInt(Converter::GetOpt(*value));
+    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,
                        Ark_Boolean value)
@@ -229,7 +237,7 @@ void EnableCascadeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //TimePickerModelNG::SetEnableCascade(frameNode, convValue);
+    TimePickerModelNG::SetEnableCascade(frameNode, convValue);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
                                  const Callback_Date_Void* callback)

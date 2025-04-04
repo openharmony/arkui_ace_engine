@@ -81,6 +81,7 @@ public:
     static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& crownSensitivity);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

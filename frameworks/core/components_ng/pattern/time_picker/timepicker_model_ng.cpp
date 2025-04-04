@@ -921,4 +921,20 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, crownSensitivity, frameNode);
 }
 
+void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, std::optional<int32_t>& valueOpt)
+{
+    if (valueOpt) {
+        if (valueOpt.value() < CROWN_SENSITIVITY_MIN || valueOpt.value() > CROWN_SENSITIVITY_MAX) {
+            return;
+        }
+        CHECK_NULL_VOID(frameNode);
+        auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
+        CHECK_NULL_VOID(timePickerPattern);
+        timePickerPattern->SetDigitalCrownSensitivity(valueOpt.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, valueOpt.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, frameNode);
+    }
+}
+
 } // namespace OHOS::Ace::NG

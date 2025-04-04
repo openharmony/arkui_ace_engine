@@ -41,6 +41,8 @@ const auto PROP_NAME_FONT_SIZE = "size";
 const auto PROP_NAME_FONT_WEIGHT = "weight";
 const auto PROP_NAME_FONT_STYLE = "style";
 const auto PROP_NAME_FONT_FAMILY = "family";
+const auto PROP_NAME_ENABLE_CASCADE = "enableCascade";
+const auto PROP_NAME_DIGITAL_CROWN_SENSITIVITY = "digitalCrownSensitivity";
 
 // Expected values
 static const std::string EXPECTED_TRUE("true");
@@ -54,6 +56,8 @@ const auto ATTRIBUTE_LOOP_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE = "14.00px";
 const auto ATTRIBUTE_FONT_COLOR_DEFAULT_VALUE = COLOR_BLACK;
 const auto ATTRIBUTE_HAPTIC_FEEDBACK_DEFAULT_VALUE = true;
+const auto ATTRIBUTE_ENABLE_CASCADE_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "1";
 
 // Test plans
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -168,6 +172,13 @@ const std::vector<PickerTime> CHANGE_EVENT_TEST_PLAN = {
     PickerTime(10, 20, 30),
     PickerTime(15, 59, 0),
     PickerTime(23, 0, 15)
+};
+
+typedef std::tuple<Opt_CrownSensitivity,std::string> CrouwnSensitivityTestStep;
+const std::vector<CrouwnSensitivityTestStep> SENSITIVITY_TEST_PLAN = {
+    {Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_LOW), "0"},
+    {Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_MEDIUM), "1"},
+    {Converter::ArkValue<Opt_CrownSensitivity>(ARK_CROWN_SENSITIVITY_HIGH), "2"},
 };
 } // namespace
 
@@ -948,6 +959,96 @@ HWTEST_F(TimePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
         EXPECT_EQ(selectedTime->GetHour(), time.GetHour());
         EXPECT_EQ(selectedTime->GetMinute(), time.GetMinute());
         EXPECT_EQ(selectedTime->GetSecond(), 0);
+    };
+}
+
+/**
+ * @tc.name: enableCascadeTest
+ * @tc.desc: Check the functionality of TimePickerModifierTest.LoopImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerModifierTest, enableCascadeTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEnableCascade, nullptr);
+
+    auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
+    EXPECT_EQ(checkValue, ATTRIBUTE_ENABLE_CASCADE_DEFAULT_VALUE);
+    auto value = Converter::ArkValue<Ark_Boolean>(true);
+    modifier_->setEnableCascade(node_, value);
+    checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
+    EXPECT_EQ(checkValue, EXPECTED_TRUE);
+    value = Converter::ArkValue<Ark_Boolean>(false);
+    modifier_->setEnableCascade(node_, value);
+    checkValue = GetAttrValue<std::string>(node_, PROP_NAME_ENABLE_CASCADE);
+    EXPECT_EQ(checkValue, EXPECTED_FALSE);
+}
+/**
+ * @tc.name: digitalCrownSensitivity
+ * @tc.desc: Check the functionality of TimePickerModifierTest.digitalCrownSensitivity
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerModifierTest, digitalCrownSensitivity, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
+    auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_DIGITAL_CROWN_SENSITIVITY);
+    EXPECT_EQ(checkValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE);
+        for (const auto& [value, expectVal] : SENSITIVITY_TEST_PLAN) {
+        modifier_->setDigitalCrownSensitivity(node_, &value);
+        auto checkValue = GetAttrValue<std::string>(node_, PROP_NAME_DIGITAL_CROWN_SENSITIVITY);
+        EXPECT_EQ(checkValue, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setOnEnterSelectedArea
+ * @tc.desc: onEnterSelectedArea event test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerModifierTest, setOnEnterSelectedArea, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnEnterSelectedArea, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        PickerTime selectedTime;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onChange = [](const Ark_Int32 resourceId, const Ark_TimePickerResult value) {
+        PickerTime selectedTime;
+        selectedTime.SetHour(Converter::Convert<int32_t>(value.hour));
+        selectedTime.SetMinute(Converter::Convert<int32_t>(value.minute));
+        selectedTime.SetSecond(Converter::Convert<int32_t>(value.second));
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .selectedTime = selectedTime
+        };
+    };
+    auto arkCallback = Converter::ArkValue<Callback_TimePickerResult_Void>(onChange, frameNode->GetId());
+    modifier_->setOnEnterSelectedArea(node_, &arkCallback);
+
+    for (const auto time : CHANGE_EVENT_TEST_PLAN) {
+        checkEvent = std::nullopt;
+        EXPECT_FALSE(checkEvent);
+        DatePickerChangeEvent event(time.ToString(true, true));
+        eventHub->FireEnterSelectedAreaEvent(&event);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->selectedTime.GetHour(), time.GetHour());
+        EXPECT_EQ(checkEvent->selectedTime.GetMinute(), time.GetMinute());
+        EXPECT_EQ(checkEvent->selectedTime.GetSecond(), time.GetSecond());
+
+        checkEvent = std::nullopt;
+        EXPECT_FALSE(checkEvent);
+        DatePickerChangeEvent eventWithoutSeconds(time.ToString(true, false));
+        eventHub->FireEnterSelectedAreaEvent(&eventWithoutSeconds);
+        ASSERT_TRUE(checkEvent);
+        EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+        EXPECT_EQ(checkEvent->selectedTime.GetHour(), time.GetHour());
+        EXPECT_EQ(checkEvent->selectedTime.GetMinute(), time.GetMinute());
+        EXPECT_EQ(checkEvent->selectedTime.GetSecond(), 0);
     };
 }
 } // namespace OHOS::Ace::NG
