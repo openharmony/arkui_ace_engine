@@ -32,25 +32,19 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     auto layoutProps = menuItem->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateAlignment(Alignment::CENTER_LEFT);
-    // set border radius
-    auto renderContext = menuItem->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    BorderRadiusProperty border;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        border.SetRadius(theme->GetMenuDefaultInnerRadius());
-    } else {
-        border.SetRadius(theme->GetInnerBorderRadius());
-    }
-    renderContext->UpdateBorderRadius(border);
+    UpdateRadius(menuItem);
 
     CHECK_NULL_VOID(customNode);
     if (menuItem->GetChildren().empty()) {
         menuItem->AddChild(customNode);
     }
+}
+
+void MenuItemModelNG::AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(customNode);
+    frameNode->AddChild(customNode);
 }
 
 /*
@@ -72,10 +66,58 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     CHECK_NULL_VOID(menuItem);
     stack->Push(menuItem);
 
+    UpdateRadius(menuItem);
+
+    if (menuItem->GetChildren().empty()) {
+        DoMountRow(menuItem);
+    }
+    auto buildFunc = menuItemProps.buildFunc;
+    auto pattern = menuItem->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (buildFunc.has_value()) {
+        pattern->SetSubBuilder(buildFunc.value_or(nullptr));
+    }
+
+    UpdateMenuProperty(menuItem, menuItemProps);
+}
+
+void MenuItemModelNG::DoMountRow(const RefPtr<NG::FrameNode>& menuItem)
+{
+    CHECK_NULL_VOID(menuItem);
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(leftRow);
+    auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(leftRowLayoutProps);
+    leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+
+    leftRow->MountToParent(menuItem);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_VOID(rightRow);
+    auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(rightRowLayoutProps);
+    rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+
+    rightRow->MountToParent(menuItem);
+}
+
+void MenuItemModelNG::UpdateRadius(const RefPtr<NG::FrameNode>& menuItem)
+{
+    CHECK_NULL_VOID(menuItem);
     // set border radius
     auto renderContext = menuItem->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -86,37 +128,43 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
         border.SetRadius(theme->GetInnerBorderRadius());
     }
     renderContext->UpdateBorderRadius(border);
+}
 
-    if (menuItem->GetChildren().empty()) {
-        auto leftRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        CHECK_NULL_VOID(leftRow);
-        auto leftRowLayoutProps = leftRow->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_VOID(leftRowLayoutProps);
-        leftRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-        leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-        leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+ void MenuItemModelNG::UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
+ {
+     CHECK_NULL_VOID(frameNode);
+    auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
 
-        leftRow->MountToParent(menuItem);
-        auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        CHECK_NULL_VOID(rightRow);
-        auto rightRowLayoutProps = rightRow->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_VOID(rightRowLayoutProps);
-        rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::CENTER);
-        rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
-        rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
+    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
+    menuProperty->UpdateContent(menuItemProps.content);
+    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
+    menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
+    menuProperty->SetStartSymbol(menuItemProps.startApply);
+    menuProperty->SetEndSymbol(menuItemProps.endApply);
+}
 
-        rightRow->MountToParent(menuItem);
-    }
+void MenuItemModelNG::AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto menuItem = AceType::Claim<FrameNode>(frameNode);
+    CHECK_NULL_VOID(menuItem);
+    
+    UpdateRadius(menuItem);
+    DoMountRow(menuItem);
     auto buildFunc = menuItemProps.buildFunc;
     auto pattern = menuItem->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
     if (buildFunc.has_value()) {
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+}
 
-    UpdateMenuProperty(menuItem, menuItemProps);
+RefPtr<FrameNode> MenuItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
+    return frameNode;
 }
 
 void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps)
