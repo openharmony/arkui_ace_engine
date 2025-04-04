@@ -136,6 +136,7 @@ HWTEST_F(GridArkoalaTest, Basic002, TestSize.Level1)
     EXPECT_FALSE(lazy_.NeedRecompose());
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
     EXPECT_EQ(pattern_->info_.currentOffset_, -12.0f);
+    EXPECT_FALSE(GetChildFrameNode(frameNode_, 0)->IsActive());
 
     UpdateCurrentOffset(15.0f);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);

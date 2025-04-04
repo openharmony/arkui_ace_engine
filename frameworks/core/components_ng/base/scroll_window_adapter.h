@@ -60,6 +60,7 @@ public:
     FrameNode* InitPivotItem(FillDirection direction);
 
     RefPtr<FrameNode> GetChildByIndex(uint32_t index);
+    uint32_t GetIndexOfChild(const RefPtr<FrameNode>& child) const;
 
     // return the mark item which new item will insert after or before.
     FrameNode* NeedMoreElements(FrameNode* markItem, FillDirection direction);

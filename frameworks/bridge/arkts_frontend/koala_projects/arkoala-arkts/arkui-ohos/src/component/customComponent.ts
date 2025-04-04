@@ -48,6 +48,17 @@ class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
         return this.instance.onBackPress();
     }
 
+    aboutToRecycle(): void {
+        return this.instance.aboutToRecycle()
+    }
+
+    aboutToReuse(params: Record<string, Object>): void {
+        this.instance.aboutToReuse(params)
+    }
+    __toRecord(param: Object): Record<string, Object> {
+        return this.instance.__toRecord(param)
+    }
+
     /** @memo */
     __build(
         /** @memo */
@@ -107,6 +118,10 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
     onPageHide(): void {}
     onBackPress(): boolean { return false; }
     getUIContext(): UIContext { return new UIContext(100000); }
+
+    aboutToReuse(param: Record<string, Object>): void {}
+    aboutToRecycle(): void {}
+    __toRecord(param: Object): Record<string, Object> { return {} }
 
     build(): void {};
 

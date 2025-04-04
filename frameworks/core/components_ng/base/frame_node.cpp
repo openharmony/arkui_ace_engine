@@ -4451,14 +4451,17 @@ void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheSta
 {
     auto* adapter = GetScrollWindowAdapter();
     if (adapter) {
-        MarkNeedSyncRenderTree(true);
-    } else {
-        if (showCached) {
-            frameProxy_->SetActiveChildRange(
-                std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
-        } else {
-            frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+        for (const auto& child : GetChildren()) {
+            const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+            child->SetActive(index >= start && index <= end);
         }
+        return;
+    }
+    if (showCached) {
+        frameProxy_->SetActiveChildRange(
+            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
+    } else {
+        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
     }
 }
 

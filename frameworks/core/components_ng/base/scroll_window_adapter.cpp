@@ -237,6 +237,15 @@ RefPtr<FrameNode> ScrollWindowAdapter::GetChildByIndex(uint32_t index)
     return Claim(GetChildPtrByIndex(index));
 }
 
+uint32_t ScrollWindowAdapter::GetIndexOfChild(const RefPtr<FrameNode>& child) const
+{
+    auto iter = nodeToIndex_.find(child.GetRawPtr());
+    if (iter != nodeToIndex_.end()) {
+        return iter->second;
+    }
+    return INT_MAX;
+}
+
 bool ScrollWindowAdapter::FillToTarget(FillDirection direction, int32_t curIdx) const
 {
     if (!target_) {

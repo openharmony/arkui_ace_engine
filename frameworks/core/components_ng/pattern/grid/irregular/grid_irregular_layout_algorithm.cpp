@@ -434,7 +434,6 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();
             }
-            child->SetActive(true);
         }
         // add mainGap below the item
         mainOffset += lineHeightIt->second + mainGap_;
