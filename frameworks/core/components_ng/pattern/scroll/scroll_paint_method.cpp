@@ -61,20 +61,22 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         CHECK_NULL_VOID(arcScrollBarOverlayModifier);
         auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
         CHECK_NULL_VOID(arcScrollBar);
-        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        scrollBarOverlayModifier->SetBarColor(arcScrollBar->GetArcForegroundColor());
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
         arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
             arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
             arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
     } else {
+        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     }
 #else
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
 #endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

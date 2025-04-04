@@ -401,6 +401,25 @@ public:
     {
         activeScrollBarWidth_ = activeScrollBarWidth;
     }
+
+    void SetArcBackgroundColor(const Color& backgroundColor)
+    {
+        arcBackgroundColor_ = backgroundColor;
+    }
+    const Color& GetArcBackgroundColor() const
+    {
+        return arcBackgroundColor_;
+    }
+
+    void SetArcForegroundColor(const Color& foregroundColor)
+    {
+        arcForegroundColor_ = foregroundColor;
+    }
+
+    Color GetArcForegroundColor() const
+    {
+        return IsPressed() ? arcForegroundColor_.BlendColor(PRESSED_BLEND_COLOR) : arcForegroundColor_;
+    }
 #endif
 
 protected:
@@ -695,6 +714,8 @@ private:
     double activeMaxOffsetAngle_ = 0.0;
     Dimension normalScrollBarWidth_;
     Dimension activeScrollBarWidth_;
+    Color arcBackgroundColor_;
+    Color arcForegroundColor_;
 #endif // ARKUI_CIRCLE_FEATURE
 };
 

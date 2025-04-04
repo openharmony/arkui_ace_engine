@@ -78,15 +78,10 @@ public:
             theme->activeScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width", 22.0_vp);
             auto blendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
                 ARC_SCROLL_BAR_FOREGROUND_OPACITY);
-            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+            theme->arcForegroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(blendOpacity);
-            theme->backgroundColor_ = pattern->GetAttr<Color>("arc_scroll_bar_background_color",
+            theme->arcBackgroundColor_ = pattern->GetAttr<Color>("arc_scroll_bar_background_color",
                 Color(ARC_SCROLL_BAR_BACKGROUND_COLOR));
-#else
-            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
-            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(blendOpacity);
-            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
 #endif // ARKUI_CIRCLE_FEATURE
         }
 
@@ -104,6 +99,10 @@ public:
             theme->scrollBarMargin_ = padding;
             theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
             theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
+            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
 
             theme->foregroundHoverBlendColor_ =
                 pattern->GetAttr<Color>("scroll_bar_foreground_hover_blend_color", Color::TRANSPARENT);
@@ -222,6 +221,14 @@ public:
     {
         return activeScrollBarWidth_;
     }
+    const Color& GetArcBackgroundColor() const
+    {
+        return arcBackgroundColor_;
+    }
+    const Color& GetArcForegroundColor() const
+    {
+        return arcForegroundColor_;
+    }
 #endif // ARKUI_CIRCLE_FEATURE
 
 protected:
@@ -252,6 +259,8 @@ private:
     double activeMaxOffsetAngle_ = 0.0;
     Dimension normalScrollBarWidth_;
     Dimension activeScrollBarWidth_;
+    Color arcForegroundColor_;
+    Color arcBackgroundColor_;
 #endif // ARKUI_CIRCLE_FEATURE
 };
 
