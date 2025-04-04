@@ -1152,16 +1152,11 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
-    static RefPtr<AccessibilityManager> testAccessibilityManager_;
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    if (!testAccessibilityManager_) {
-        testAccessibilityManager_ = AceType::MakeRefPtr<MockAccessibilityManager>();
-    } else {
-        testAccessibilityManager_->IncRefCount();
-    }
-    return testAccessibilityManager_;
+    static RefPtr<AccessibilityManager> testAccessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    return testAccessibilityManager;
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED

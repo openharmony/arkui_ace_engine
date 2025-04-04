@@ -256,11 +256,11 @@ HWTEST_F(CommonMethodModifierTest19, AccessibilityNextFocusIdTestValidValues, Te
     }
 }
 
-// /*
-// * @tc.name: AccessibilityDefaultFocusTestDefaultValues
-// * @tc.desc:
-// * @tc.type: FUNC
-// */
+/*
+* @tc.name: AccessibilityDefaultFocusTestDefaultValues
+* @tc.desc:
+* @tc.type: FUNC
+*/
 HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestDefaultValues, TestSize.Level1)
 {
     LOGE("AccessibilityManager::SendFrameNodeToAccessibility(...) is empty body");
@@ -287,10 +287,6 @@ HWTEST_F(CommonMethodModifierTest19, DISABLED_AccessibilityDefaultFocusTestValid
 
     bool isFocus = true;
     modifier_->setAccessibilityDefaultFocus(node_, isFocus);
-    // auto defaultFocusList = accessibilityManager->GetDefaultFocusList();
-    // std::cout << "test defaultFocusList: "  << std::hex << defaultFocusList.size() << std::endl;
-    // EXPECT_EQ(defaultFocusList.empty(), false);
-    // EXPECT_EQ(defaultFocusList[0], node_);
 }
 
 /*
