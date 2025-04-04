@@ -85,8 +85,8 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends ModifierWithKey<string> {
-  constructor(value: string) {
+class FontWeightModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textFontWeight');
@@ -384,15 +384,15 @@ class TextMaxLinesModifier extends ModifierWithKey<number> {
   }
 }
 
-class TextLetterSpacingModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextLetterSpacingModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetLetterSpacing(node);
-    } else if (!isNumber(this.value) && !isString(this.value)) {
+    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetLetterSpacing(node);
     } else {
       getUINativeModule().text.setLetterSpacing(node, this.value!);
@@ -440,15 +440,15 @@ class TextTextOverflowModifier extends ModifierWithKey<{ overflow: TextOverflow 
   }
 }
 
-class TextBaselineOffsetModifier extends ModifierWithKey<number | string> {
-  constructor(value: number | string) {
+class TextBaselineOffsetModifier extends ModifierWithKey<number | string | Resource> {
+  constructor(value: number | string | Resource) {
     super(value);
   }
   static identity: symbol = Symbol('textBaselineOffset');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().text.resetBaselineOffset(node);
-    } else if (!isNumber(this.value) && !isString(this.value)) {
+    } else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
       getUINativeModule().text.resetBaselineOffset(node);
     } else {
       getUINativeModule().text.setBaselineOffset(node, this.value!);
@@ -914,12 +914,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string): TextAttribute {
+  fontWeight(value: number | FontWeight | string | Resource): TextAttribute {
     let fontWeightStr: string = '400';
     if (isNumber(value)) {
       fontWeightStr = value.toString();
     } else if (isString(value)) {
       fontWeightStr = String(value);
+    } else if (isResource(value)) {
+        modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, value);
+        return this;
     }
     modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, fontWeightStr);
     return this;
@@ -948,7 +951,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }
-  letterSpacing(value: number | string): TextAttribute {
+  letterSpacing(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
@@ -960,7 +963,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextCaseModifier.identity, TextTextCaseModifier, value);
     return this;
   }
-  baselineOffset(value: number | string): TextAttribute {
+  baselineOffset(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextBaselineOffsetModifier.identity, TextBaselineOffsetModifier, value);
     return this;
   }

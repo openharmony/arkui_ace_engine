@@ -306,6 +306,8 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
     std::string buttonValue = "";
     if (info[0]->IsString()) {
         buttonValue = info[0]->ToString();
+    } else {
+        ParseJsString(info[0], buttonValue);
     }
     SearchModel::GetInstance()->SetSearchButton(buttonValue);
     // set font color

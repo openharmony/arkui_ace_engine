@@ -712,8 +712,7 @@ ArkUINativeModuleValue TextInputBridge::SetTextInputFontWeight(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string weight;
-    if (secondArg->IsString(vm)) {
-        weight = secondArg->ToString(vm)->ToString(vm);
+    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) && ArkTSUtils::ParseJsString(vm, secondArg, weight)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontWeightStr(nativeNode, weight.c_str());
     } else if (secondArg->IsNumber()) {
         weight = std::to_string(secondArg->Int32Value(vm));

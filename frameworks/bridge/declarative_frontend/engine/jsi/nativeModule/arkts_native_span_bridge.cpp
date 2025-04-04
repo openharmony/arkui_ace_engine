@@ -166,8 +166,9 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     if (!secondArg->IsNull()) {
         if (secondArg->IsNumber()) {
             weight = std::to_string(secondArg->Int32Value(vm));
-        } else if (secondArg->IsString(vm)) {
-            weight = secondArg->ToString(vm)->ToString(vm);
+        } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
+            (!(ArkTSUtils::ParseJsString(vm, secondArg, weight)))) {
+            return panda::JSValueRef::Undefined(vm);
         }
     }
 
@@ -393,11 +394,12 @@ ArkUINativeModuleValue SpanBridge::SetLetterSpacing(ArkUIRuntimeCallInfo *runtim
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     struct ArkUIStringAndFloat letterSpacingValue = { 0.0, nullptr };
+    std::string tempValueStr = "";
     if (secondArg->IsNumber()) {
         letterSpacingValue.value = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
-    } else if (secondArg->IsString(vm)) {
-        std::string tempValueStr = secondArg->ToString(vm)->ToString(vm);
+    } else if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) &&
+        ArkTSUtils::ParseJsString(vm, secondArg, tempValueStr)) {
         letterSpacingValue.valueStr = tempValueStr.c_str();
         GetArkUINodeModifiers()->getSpanModifier()->setSpanLetterSpacing(nativeNode, &letterSpacingValue);
     } else {

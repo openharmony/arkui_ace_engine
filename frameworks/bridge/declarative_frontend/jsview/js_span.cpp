@@ -103,9 +103,19 @@ void JSSpan::SetFontSize(const JSCallbackInfo& info)
     SpanModel::GetInstance()->SetFontSize(fontSize);
 }
 
-void JSSpan::SetFontWeight(const std::string& value)
+void JSSpan::SetFontWeight(const JSCallbackInfo& info)
 {
-    SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> args = info[0];
+    std::string fontWeight;
+    if (args->IsNumber()) {
+        fontWeight = args->ToString();
+    } else {
+        ParseJsString(args, fontWeight);
+    }
+    SpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void JSSpan::SetTextColor(const JSCallbackInfo& info)
