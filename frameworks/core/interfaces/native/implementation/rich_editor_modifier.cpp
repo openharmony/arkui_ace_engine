@@ -17,6 +17,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
@@ -26,17 +27,116 @@
 #include "rich_editor_styled_string_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src)
+namespace {
+using Union_Span_Result = Ark_Union_RichEditorTextSpanResult_RichEditorImageSpanResult;
+
+void SetImageSpanResult(Union_Span_Result& dst, const ResultObject& src, Converter::ConvContext *ctx)
+{
+    Ark_RichEditorImageSpanResult imageSpanResult;
+    imageSpanResult.spanPosition.spanIndex = Converter::ArkValue<Ark_Number>(src.spanPosition.spanIndex);
+    imageSpanResult.spanPosition.spanRange.value0 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[0]);
+    imageSpanResult.spanPosition.spanRange.value1 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[1]);
+
+    Ark_PixelMap arkPixelMap = new PixelMapPeer();
+    arkPixelMap->pixelMap = src.valuePixelMap;
+    imageSpanResult.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+
+    if (src.valueResource) {
+        imageSpanResult.valueResourceStr =
+            Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(*src.valueResource, ctx);
+    }
+    imageSpanResult.imageStyle = Converter::ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
+    imageSpanResult.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[0]);
+    imageSpanResult.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[1]);
+
+    dst = Converter::ArkUnion<Union_Span_Result, Ark_RichEditorImageSpanResult>(imageSpanResult);
+}
+
+void SetTextSpanResult(Union_Span_Result& dst, const ResultObject& src, Converter::ConvContext *ctx)
+{
+    Ark_RichEditorTextSpanResult textSpanResult;
+
+    // Set span position
+    textSpanResult.spanPosition.spanIndex = Converter::ArkValue<Ark_Number>(src.spanPosition.spanIndex);
+    textSpanResult.spanPosition.spanRange.value0 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[0]);
+    textSpanResult.spanPosition.spanRange.value1 = Converter::ArkValue<Ark_Number>(src.spanPosition.spanRange[1]);
+
+    // Set text value
+    textSpanResult.value = Converter::ArkValue<Ark_String>(src.valueString, ctx);
+
+    // Set text style
+    textSpanResult.textStyle.fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(
+        src.textStyle.fontColor, ctx);
+    textSpanResult.textStyle.fontSize = Converter::ArkValue<Ark_Number>(src.textStyle.fontSize);
+    textSpanResult.textStyle.fontStyle = Converter::ArkValue<Ark_FontStyle>(
+        static_cast<OHOS::Ace::FontStyle>(src.textStyle.fontStyle));
+    textSpanResult.textStyle.fontWeight = Converter::ArkValue<Ark_Number>(src.textStyle.fontWeight);
+    textSpanResult.textStyle.fontFamily = Converter::ArkValue<Ark_String>(src.textStyle.fontFamily, ctx);
+
+    // Set decoration
+    textSpanResult.textStyle.decoration.type = Converter::ArkValue<Ark_TextDecorationType>(
+        static_cast<OHOS::Ace::TextDecoration>(src.textStyle.decorationType));
+    textSpanResult.textStyle.decoration.color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(
+        src.textStyle.decorationColor, ctx);
+    textSpanResult.textStyle.decoration.style.value = Converter::ArkValue<Ark_TextDecorationStyle>(
+        static_cast<OHOS::Ace::TextDecorationStyle>(src.textStyle.decorationStyle));
+
+    // Set other text properties
+    textSpanResult.textStyle.letterSpacing = Converter::ArkValue<Opt_Number>(src.textStyle.letterSpacing);
+    textSpanResult.textStyle.lineHeight = Converter::ArkValue<Opt_Number>(src.textStyle.lineHeight);
+    textSpanResult.textStyle.fontFeature.value = Converter::ArkValue<Ark_String>(src.textStyle.fontFeature, ctx);
+
+    // Set preview text if available
+    textSpanResult.previewText = Converter::ArkValue<Opt_String>(src.previewText, ctx);
+
+    // Set offset in span
+    textSpanResult.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[0]);
+    textSpanResult.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[1]);
+
+    // Set symbol span style
+    textSpanResult.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(
+        src.symbolSpanStyle, ctx);
+
+    // Set resource if available
+    if (src.valueResource) {
+        textSpanResult.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.valueResource, ctx);
+    }
+
+    dst = Converter::ArkUnion<Union_Span_Result, Ark_RichEditorTextSpanResult>(textSpanResult);
+}
+} // namespace
+
+void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, Converter::ConvContext *ctx)
 {
     if (src.GetType() == "SelectionInfo") {
         auto selectionInfo = static_cast<const SelectionInfo*>(&src);
-        if (selectionInfo) {
-            auto selection = selectionInfo->GetSelection();
-            dst.selection.value0 = Converter::ArkValue<Ark_Number>(selection.selection[0]);
-            dst.selection.value1 = Converter::ArkValue<Ark_Number>(selection.selection[1]);
+        if (!selectionInfo) {
+            return;
+        }
+        auto selection = selectionInfo->GetSelection();
+        // Setting selection
+        dst.selection.value0 = Converter::ArkValue<Ark_Number>(selection.selection[0]);
+        dst.selection.value1 = Converter::ArkValue<Ark_Number>(selection.selection[1]);
+        // Setting span results
+        std::list<ResultObject>& resultObjects = selection.resultObjects;
+        if (resultObjects.empty()) {
+            dst.spans.length = 0;
+            dst.spans.array = nullptr;
+            return;
+        }
+        dst.spans.length = resultObjects.size();
+        dst.spans.array = new Union_Span_Result[resultObjects.size()];
+        size_t idx = 0;
+        for (auto& resultObject : resultObjects) {
+            Union_Span_Result* to = dst.spans.array + idx;
+            if (resultObject.type == SelectSpanType::TYPEIMAGE) {
+                SetImageSpanResult(*to, resultObject, ctx);
+            } else if (resultObject.type == SelectSpanType::TYPESPAN) {
+                SetTextSpanResult(*to, resultObject, ctx);
+            }
+            idx++;
         }
     }
-    LOGE("Arkkoala converter to Ark_RichEditorSelection not fully implemented");
 }
 
 void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
@@ -117,6 +217,16 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
     dst.bundleName = Converter::ArkValue<Ark_String>(src.GetBundleName(), ctx);
     dst.moduleName = Converter::ArkValue<Ark_String>(src.GetModuleName(), ctx);
     dst.id = Converter::ArkValue<Ark_Number>(src.GetId());
+
+    std::vector<std::string> paramsArray;
+    auto params = src.GetParams();
+    for (ResourceObjectParams& param : params) {
+        if (param.value) {
+            paramsArray.push_back(*param.value);
+        }
+    }
+    auto arkArray = Converter::ArkValue<Array_String>(paramsArray, ctx);
+    dst.params = Converter::ArkValue<Opt_Array_String>(arkArray, ctx);
     dst.type = Converter::ArkValue<Opt_Number>(src.GetType());
 }
 
@@ -152,6 +262,20 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
     auto rangeBefore = src.GetRangeBefore();
     dst.rangeBefore.start = Converter::ArkValue<Opt_Number>(rangeBefore.start);
     dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
+}
+
+void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
+{
+    dst.size.value0 = Converter::ArkValue<Ark_Number>(src.size[0]);
+    dst.size.value1 = Converter::ArkValue<Ark_Number>(src.size[1]);
+    VerticalAlign align = static_cast<VerticalAlign>(src.verticalAlign);
+    dst.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(align);
+    ImageFit fit = static_cast<ImageFit>(src.objectFit);
+    dst.objectFit = Converter::ArkValue<Ark_ImageFit>(fit);
+    dst.layoutStyle.value.borderRadius.value =
+        Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(src.borderRadius);
+    dst.layoutStyle.value.margin.value =
+        Converter::ArkUnion<Ark_Union_Dimension_Margin, Ark_Length>(src.margin);
 }
 
 template<>
@@ -228,8 +352,8 @@ void OnSelectImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value)](const BaseEventInfo* event) {
         CHECK_NULL_VOID(event);
-        auto selection = Converter::ArkValue<Ark_RichEditorSelection>(*event);
-        LOGW("OnSelectImpl :: Ark_RichEditorSelection don't fully filled from BaseEventInfo");
+        Converter::ConvContext ctx;
+        auto selection = Converter::ArkValue<Ark_RichEditorSelection>(*event, &ctx);
         arkCallback.Invoke(selection);
     };
     RichEditorModelNG::SetOnSelect(frameNode, std::move(onCallback));

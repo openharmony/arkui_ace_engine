@@ -18,10 +18,13 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "test/mock/base/mock_pixel_map.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor();
@@ -59,6 +62,7 @@ constexpr int32_t TEST_INSERT_OFFSET = 3;
 constexpr auto TEST_INSERT_VALUE = u"insert text";
 constexpr auto TEST_PREVIEW_TEXT = u"preview text";
 constexpr auto TEST_TEXT = u"just text";
+constexpr auto TEST_TEXT_2 = "just text";
 constexpr int32_t TEST_SPAN_IDX = 4;
 constexpr int32_t TEST_SPAN_START = 5;
 constexpr int32_t TEST_SPAN_END = 6;
@@ -152,6 +156,138 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackTest, TestSize.Level1)
     eventHub->FireOnSelect(&value);
     ASSERT_TRUE(checkEvent);
     EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+}
+
+/**
+ * @tc.name: OnSelectCallbackWithTextSpanTest
+ * @tc.desc: Test setOnSelect with text span data
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithTextSpanTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t resourceId;
+        bool hasTextSpan = false;
+        bool hasImageSpan = false;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onChange = [](Ark_Int32 nodeId, Ark_RichEditorSelection data) {
+        bool hasText = false;
+        bool hasImage = false;
+        Converter::VisitUnion(data.spans.array[0],
+            [&hasText](const Ark_RichEditorTextSpanResult& value) {
+                hasText = true;
+                EXPECT_EQ(Converter::Convert<std::string>(value.value), TEST_TEXT_2);
+            },
+            [&hasImage](const Ark_RichEditorImageSpanResult& value) {
+                hasImage = true;
+            },
+            []() {}
+        );
+
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId), .hasTextSpan = hasText, .hasImageSpan = hasImage
+        };
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
+    modifier_->setOnSelect(node_, &arkCallback);
+
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
+
+    SelectionInfo value;
+    value.SetSelectionStart(TEST_SELECTION_START);
+    value.SetSelectionEnd(TEST_SELECTION_END);
+
+    ResultObject textResult;
+    textResult.type = SelectSpanType::TYPESPAN;
+    textResult.valueString = TEST_TEXT;
+    textResult.textStyle.fontColor = TEST_FONT_COLOR;
+    textResult.textStyle.fontSize = 16.0;
+    textResult.spanPosition.spanIndex = 1;
+    textResult.spanPosition.spanRange[0] = TEST_RANGE_START;
+    textResult.spanPosition.spanRange[1] = TEST_RANGE_END;
+
+    value.SetResultObjectList({ textResult });
+
+    eventHub->FireOnSelect(&value);
+
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_TRUE(checkEvent->hasTextSpan);
+    EXPECT_FALSE(checkEvent->hasImageSpan);
+}
+
+/**
+ * @tc.name: OnSelectCallbackWithImageSpanTest
+ * @tc.desc: Test setOnSelect with image span data
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierCallbacksTest, OnSelectCallbackWithImageSpanTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t resourceId;
+        bool hasTextSpan = false;
+        bool hasPixelMap = false;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onChange = [](Ark_Int32 nodeId, Ark_RichEditorSelection data) {
+        bool hasText = false;
+        bool hasPixelMap = false;
+
+        Converter::VisitUnion(data.spans.array[0],
+            [&hasText](const Ark_RichEditorTextSpanResult& value) {
+                hasText = true;
+            },
+            [&hasPixelMap](const Ark_RichEditorImageSpanResult& value) {
+                PixelMapPeer* pixelMapPeer = value.valuePixelMap.value;
+                hasPixelMap = pixelMapPeer && pixelMapPeer->pixelMap;
+            },
+            []() {}
+        );
+
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(nodeId),
+            .hasTextSpan = hasText, .hasPixelMap = hasPixelMap
+        };
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_RichEditorSelection_Void>(onChange, frameNode->GetId());
+    modifier_->setOnSelect(node_, &arkCallback);
+
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
+    EXPECT_FALSE(checkEvent);
+
+    SelectionInfo value;
+    value.SetSelectionStart(TEST_SELECTION_START);
+    value.SetSelectionEnd(TEST_SELECTION_END);
+
+    RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+
+    ResultObject imageResult;
+    imageResult.type = SelectSpanType::TYPEIMAGE;
+    imageResult.valuePixelMap = pixelMap;
+    imageResult.spanPosition.spanIndex = 1;
+    imageResult.spanPosition.spanRange[0] = TEST_RANGE_START;
+    imageResult.spanPosition.spanRange[1] = TEST_RANGE_END;
+    imageResult.imageStyle.verticalAlign = static_cast<int32_t>(VerticalAlign::BOTTOM);
+    imageResult.imageStyle.objectFit = static_cast<int32_t>(ImageFit::COVER);
+
+    value.SetResultObjectList({ imageResult });
+
+    eventHub->FireOnSelect(&value);
+
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_FALSE(checkEvent->hasTextSpan);
+    EXPECT_TRUE(checkEvent->hasPixelMap);
 }
 
 /**
