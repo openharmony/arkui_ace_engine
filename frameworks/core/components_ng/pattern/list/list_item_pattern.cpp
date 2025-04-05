@@ -1031,6 +1031,17 @@ void ListItemPattern::InitListItemCardStyleForList()
     }
 }
 
+void ListItemPattern::SetListItemStyle(V2::ListItemStyle style)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
+        listItemStyle_ = style;
+        SetListItemDefaultAttributes(host);
+        InitListItemCardStyleForList();
+    }
+}
+
 void ListItemPattern::UpdateListItemAlignToCenter()
 {
     auto frameNode = GetListFrameNode();

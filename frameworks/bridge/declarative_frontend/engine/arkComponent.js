@@ -30685,11 +30685,31 @@ class ListItemOnSelectModifier extends ModifierWithKey {
   }
 }
 ListItemOnSelectModifier.identity = Symbol('listItemOnSelect');
+class ListItemInitializeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().listItem.resetListItemInitialize(node);
+    } else {
+      getUINativeModule().listItem.setListItemInitialize(node, this.value?.style);
+    }
+  }
+}
+ListItemInitializeModifier.identity = Symbol('listItemInitialize');
 class ArkListItemComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
   initialize(value) {
+    if (value[0] !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ListItemInitializeModifier.identity,
+        ListItemInitializeModifier, undefined);
+    }
     return this;
   }
   sticky(value) {
