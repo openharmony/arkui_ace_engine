@@ -5882,8 +5882,10 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
         return HandleOutBoundary(offset, source, velocity);
     }
-    if (IsDisableSwipe() || (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) ||
-        !CheckSwiperPanEvent(offset) || !CheckContentWillScroll(offset, offset)) {
+    if (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) {
+        return { 0.0f, true };
+    }
+    if (IsDisableSwipe() || !CheckSwiperPanEvent(offset) || !CheckContentWillScroll(offset, offset)) {
         // deny conflicting animation from child
         return { offset, true };
     }
