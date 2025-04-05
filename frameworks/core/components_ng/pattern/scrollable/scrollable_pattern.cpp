@@ -782,9 +782,9 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-    if (isClickAnimationStop_) {
+    if (isBackToTopRunning_) {
         StopAnimate();
-        isClickAnimationStop_ = false;
+        isBackToTopRunning_ = false;
     }
 }
 
@@ -1456,7 +1456,7 @@ void ScrollablePattern::OnAnimateFinish()
                 .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
-    isClickAnimationStop_ = false;
+    isBackToTopRunning_ = false;
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
@@ -1569,6 +1569,9 @@ void ScrollablePattern::InitSpringOffsetProperty()
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
         if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
+        }
+        if (pattern->isBackToTopRunning_) {
+            source = SCROLL_FROM_STATUSBAR;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
@@ -2152,6 +2155,7 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         { SCROLL_FROM_ANIMATION_CONTROLLER, ScrollSource::SCROLLER_ANIMATION },
         { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
         { SCROLL_FROM_CROWN, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_STATUSBAR, ScrollSource::OTHER_USER_INPUT },
     };
     ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
     int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);
@@ -2696,7 +2700,7 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    isClickAnimationStop_ = true; // set stop animation flag when click status bar.
+    isBackToTopRunning_ = true; // set stop animation flag when click status bar.
     AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
 }
 
