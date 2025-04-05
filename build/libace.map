@@ -222,6 +222,7 @@
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
+      "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::StageManager::*;
@@ -531,6 +532,7 @@
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;
