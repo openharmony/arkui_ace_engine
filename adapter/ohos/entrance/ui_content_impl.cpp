@@ -73,6 +73,7 @@
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
+#include "adapter/ohos/entrance/global_pipeline_context_manager.h"
 #include "adapter/ohos/entrance/aps_monitor_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
@@ -112,8 +113,10 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/image/image_file_cache.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
@@ -141,6 +144,7 @@ const std::string START_PARAMS_KEY = "__startParams";
 const std::string PARAM_QUERY_KEY = "query";
 const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
+const std::string USE_GLOBAL_UICONTENT = "ohos.uec.params.useGlobalUIContent";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
 static std::atomic<bool> g_isDynamicVsync = false;
@@ -253,6 +257,82 @@ std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS:
     });
     ss << "]";
     return ss.str();
+}
+
+bool CloseGlobalModalUIExtension(int32_t instanceId, int32_t sessionId, const std::string& name)
+{
+    auto globalPipelineManager = GlobalPipelineContextManager::GetInstance();
+    auto uecName = name.empty() ? globalPipelineManager->GetUecNameBySessionId(sessionId) : name;
+    if (uecName.empty()) {
+        return false;
+    }
+
+    auto globalPipeline = globalPipelineManager->RemoveGlobalPipelineContext(uecName);
+    auto modalPageNode = globalPipelineManager->RemoveModalPageNode(uecName);
+    globalPipelineManager->RemoveSessionId(uecName);
+    CHECK_NULL_RETURN(globalPipeline, false);
+    CHECK_NULL_RETURN(modalPageNode, false);
+    auto parentNode = modalPageNode->GetParent();
+    if (parentNode) {
+        parentNode->RemoveChild(modalPageNode);
+    }
+    modalPageNode->MountToParent(globalPipeline->GetRootElement());
+    auto globalOverlay = globalPipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(globalOverlay, false);
+    globalOverlay->CloseModalUIExtension(sessionId);
+    globalPipeline->Destroy();
+    globalPipeline.Reset();
+    return true;
+}
+
+bool UpdateModalUIExtensionCallback(std::string uecName, const ModalUIExtensionCallbacks& callbacks)
+{
+    auto modalPageNode = GlobalPipelineContextManager::GetInstance()->GetModalPageNode(uecName);
+    CHECK_NULL_RETURN(modalPageNode, false);
+    auto uiExtNode = AceType::DynamicCast<NG::FrameNode>(modalPageNode->GetFirstChild());
+    if (!uiExtNode || uiExtNode->GetTag() != V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "GlobalPipelineContext record error ModalUIExtension");
+        return false;
+    }
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
+    pattern->SetOnErrorCallback(std::move(callbacks.onError));
+    pattern->SetModalOnDestroy(std::move(callbacks.onDestroy));
+    return true;
+}
+
+bool CreateGlobalModalUIExtension(const AAFwk::Want& want, int32_t &sessionId,
+    const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config,
+    int32_t instanceId, OHOS::Rosen::Window* window)
+{
+    const std::string uecName = want.GetElement().GetBundleName() + "." + want.GetElement().GetModuleName() +
+        "." + want.GetElement().GetAbilityName();
+    auto globalPipelineManager = GlobalPipelineContextManager::GetInstance();
+    auto globalPipelineContext =
+        globalPipelineManager->GetGlobalPipelineContext(uecName);
+    if (!globalPipelineContext) {
+        globalPipelineContext = globalPipelineManager->CreateGlobalPipelineContext(
+            uecName, window, FrontendType::DECLARATIVE_JS, instanceId);
+        globalPipelineContext->SetupRootElement();
+
+        auto overlay = globalPipelineContext->GetOverlayManager();
+        CHECK_NULL_RETURN(overlay, false);
+        sessionId =
+            overlay->CreateModalUIExtension(want, callbacks, config); // ModalPage -> UIExtensionComponent
+        globalPipelineManager->RegisterSessionId(uecName, sessionId);
+        globalPipelineManager->ProcessModalPageNode(uecName, instanceId);
+    } else {
+        if (!UpdateModalUIExtensionCallback(uecName, callbacks)) {
+            CloseGlobalModalUIExtension(instanceId, 0, uecName);
+            TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "GlobalPipelineContext with the name %{public}s reuse error", uecName.c_str());
+            return false;
+        }
+        sessionId = globalPipelineManager->GetSessionId(uecName);
+        globalPipelineManager->ProcessModalPageNode(uecName, instanceId);
+    }
+    return true;
 }
 } // namespace
 
@@ -4056,7 +4136,13 @@ int32_t UIContentImpl::CreateModalUIExtension(
     CHECK_NULL_RETURN(taskExecutor, 0);
     int32_t sessionId = 0;
     taskExecutor->PostSyncTask(
-        [container, &sessionId, want, callbacks = callbacks, config = config]() {
+        [container, &sessionId, want, callbacks = callbacks, config = config, window = window_,
+            instanceId = instanceId_]() {
+            auto flag = want.GetBoolParam(USE_GLOBAL_UICONTENT, false);
+            if (flag && CreateGlobalModalUIExtension(want, sessionId, callbacks, config, instanceId, window)) {
+                return;
+            }
+
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
@@ -4092,6 +4178,10 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, sessionId]() {
+            if (CloseGlobalModalUIExtension(container->GetInstanceId(), sessionId, "")) {
+                return;
+            }
+
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();

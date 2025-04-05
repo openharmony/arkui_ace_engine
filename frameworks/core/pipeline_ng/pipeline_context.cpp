@@ -1282,7 +1282,7 @@ void PipelineContext::SetupRootElement()
     RefPtr<AppBarView> appBar = AceType::MakeRefPtr<AppBarView>();
     auto atomicService = installationFree_ ? appBar->Create(stageNode) : nullptr;
     auto container = Container::Current();
-    if (container) {
+    if (container && installationFree_) {
         container->SetAppBar(appBar);
     }
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
