@@ -397,6 +397,7 @@ void ComponentSnapshot::Create(
         node = stackNode;
     }
     FrameNode::ProcessOffscreenNode(node);
+    node->SetActive();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Process off screen Node finished, root size = %{public}s Id=%{public}d Tag=%{public}s InspectorId=%{public}s "
         "enableInspector=%{public}d",
