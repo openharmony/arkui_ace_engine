@@ -1243,6 +1243,7 @@ private:
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     void ReportComponentChangeEvent(
         const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+    void ReportTraceOnDragEnd() const;
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
