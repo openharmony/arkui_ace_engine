@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import {addPartialUpdate} from '../Application'
+import {addPartialUpdate} from '../ArkUIEntry'
 import {AnimationExtender, AnimateParam} from '../generated'
 
 export function _animateTo(param: AnimateParam, event: (() => void)): void {

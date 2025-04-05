@@ -49,8 +49,6 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
-    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopeDelegate);
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
@@ -63,7 +61,6 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
         return;
     }
     AnimationOption option = Converter::Convert<AnimationOption>(*param);
-    // Validator::ValidateAnimationOption(option, pipelineContextBase->IsFormRender());
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
             option.GetDuration() > (DEFAULT_DURATION - timeInterval)) {
         option.SetDuration(DEFAULT_DURATION - timeInterval);
@@ -73,22 +70,19 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
     auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
     std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
         ContainerScope scope(currentId);
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
-    // need check
-    // ViewContextModelNG::openAnimationInternal(option);
+    ViewContextModel::GetInstance()->openAnimation(option);
 }
 
 void CloseImplicitAnimationImpl()
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
     ContainerScope cope(currentId);
-    auto scopeDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopeDelegate);
     auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipelineContextBase = container->GetPipelineContext();
@@ -101,8 +95,7 @@ void CloseImplicitAnimationImpl()
         return;
     }
     AnimationOption option;
-    // need check
-    // ViewContextModelNG::closeAnimationInternal(option, true);
+    ViewContextModel::GetInstance()->closeAnimation(option, true);
 }
 
 void StartDoubleAnimationImpl(Ark_NativePointer node,
