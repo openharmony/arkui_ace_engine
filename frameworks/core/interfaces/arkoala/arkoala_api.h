@@ -3428,6 +3428,8 @@ struct ArkUIListItemModifier {
     void (*resetSelectable)(ArkUINodeHandle node);
     void (*setListItemSwipeAction)(ArkUINodeHandle node, ArkUIListItemSwipeActionOptionHandle option);
     void (*resetListItemSwipeAction)(ArkUINodeHandle node);
+    void (*setListItemStyle)(ArkUINodeHandle node, ArkUI_Uint32 style);
+    void (*resetListItemStyle)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollBarModifier {
