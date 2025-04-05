@@ -735,6 +735,7 @@ void PipelineContext::FlushMouseEventVoluntarily()
     }
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
+    ACE_SCOPED_TRACE("FlushMouseEventVoluntarily x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
 
     MouseEvent event;
     if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
@@ -3752,6 +3753,7 @@ void PipelineContext::FlushMouseEvent()
 
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(rootNode_);
+    ACE_SCOPED_TRACE("FlushMouseEvent x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
     touchRestrict.sourceType = event.sourceType;
@@ -5928,6 +5930,7 @@ void PipelineContext::FlushMouseEventForHover()
     CHECK_RUN_ON(UI);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+    ACE_SCOPED_TRACE("FlushMouseEventForHover x:%f y:%f", lastMouseEvent_->x, lastMouseEvent_->y);
     MouseEvent event;
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
