@@ -3536,3 +3536,9 @@ let KeyProcessingMode;
   KeyProcessingMode[KeyProcessingMode.FOCUS_NAVIGATION = 0] = 'FOCUS_NAVIGATION';
   KeyProcessingMode[KeyProcessingMode.ANCESTOR_EVENT = 1] = 'ANCESTOR_EVENT';
 })(KeyProcessingMode || (KeyProcessingMode = {}));
+
+let RichEditorDeleteDirection;
+(function (RichEditorDeleteDirection) {
+  RichEditorDeleteDirection[RichEditorDeleteDirection.BACKWARD = 0] = 'BACKWARD';
+  RichEditorDeleteDirection[RichEditorDeleteDirection.FORWARD = 1] = 'FORWARD';
+})(RichEditorDeleteDirection || (RichEditorDeleteDirection = {}));
