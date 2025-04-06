@@ -27,7 +27,6 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -69,6 +68,7 @@ enum class SelectOverlayMenuId {
     CUT,
     PASTE,
     SELECT_ALL,
+    TRANSLATE,
     SEARCH,
     SHARE,
     CAMERA_INPUT,

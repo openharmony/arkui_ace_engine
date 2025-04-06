@@ -173,7 +173,7 @@ HWTEST_F(ScrollLayoutTestNg, Measure002, TestSize.Level1)
     CreateScrollDone();
     RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
     pattern_->SetIsSelectScroll(true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     layoutWrapper->MountToHostOnMainThread();
 
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
@@ -207,7 +207,7 @@ HWTEST_F(ScrollLayoutTestNg, Measure003, TestSize.Level1)
      */
     ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
     expectSize = SizeF(300.f, 500.f);
     EXPECT_TRUE(IsEqual(scrollSize, expectSize));
@@ -378,7 +378,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
 
     ScrollTo(0.f);
     pattern_->SetAxis(Axis::HORIZONTAL);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_LEFT);
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
@@ -386,7 +386,7 @@ HWTEST_F(ScrollLayoutTestNg, Model001, TestSize.Level1)
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_RIGHT);
 
     pattern_->SetAxis(Axis::NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(model.GetOnScrollEdge(AceType::RawPtr(frameNode_)), ScrollEdgeType::SCROLL_NONE);
 }
 
@@ -408,36 +408,36 @@ HWTEST_F(ScrollLayoutTestNg, Alignment001, TestSize.Level1)
     float contentWidth = WIDTH / 2;
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     float centerPosition = (HEIGHT - ITEM_MAIN_SIZE) / 2;
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(60, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF()));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, HEIGHT - ITEM_MAIN_SIZE)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, HEIGHT - ITEM_MAIN_SIZE)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth / 2, centerPosition)));
 }
 
@@ -459,35 +459,35 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
     float contentWidth = WIDTH * 2;
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-240, 0)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_LEFT);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 }
 
@@ -543,7 +543,7 @@ HWTEST_F(ScrollLayoutTestNg, RTL001, TestSize.Level1)
     /**
      * @tc.steps: step1. Set content width less than scroll width
      */
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(WIDTH / 4, 0.f)));
 }
 
@@ -565,7 +565,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge001, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
     EXPECT_NE(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     MockAnimationManager::GetInstance().CancelAnimations();
@@ -576,7 +576,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge001, TestSize.Level1)
      */
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->AnimateRunning());
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(pattern_->IsAtBottom());
@@ -603,14 +603,14 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_TRUE(pattern_->IsAtBottom());
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_FALSE(pattern_->AnimateRunning());
 
@@ -620,11 +620,11 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge002, TestSize.Level1)
      */
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_FALSE(pattern_->AnimateRunning());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
 }
 
@@ -646,10 +646,10 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     EXPECT_TRUE(pattern_->IsAtBottom());
     pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
@@ -662,12 +662,12 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
      */
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->AnimateRunning());
     MockAnimationManager::GetInstance().Tick();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
 }
 
@@ -685,34 +685,61 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
 
     auto padding = 2 * 5.f;
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH - padding, 100.f));
 
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH - padding, 2000.f));
 
     pattern_->SetAxis(Axis::HORIZONTAL);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(HEIGHT));
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(100.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, HEIGHT - padding));
 
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(2000.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2000.f, HEIGHT - padding));
 
     ViewAbstract::SetMargin(AceType::RawPtr(contentNode), CalcLength(5.f));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, HEIGHT - padding));
 
     pattern_->SetAxis(Axis::NONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
 
     pattern_->SetAxis(Axis::FREE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+}
+
+/**
+ * @tc.name: ScrollAdjustOffset001
+ * @tc.desc: Test Scroll AdjustOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollAdjustOffset001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(1000.f);
+    CreateScrollDone();
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(-100.f, SCROLL_FROM_FOCUS_JUMP);
+    EXPECT_EQ(pattern_->currentOffset_, 900.f);
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->currentOffset_, 900.f);
+    EXPECT_LT(pattern_->currentOffset_, 1000.f);
+
+    pattern_->currentOffset_ = 1000.f;
+    pattern_->OnScrollCallback(100.f, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->currentOffset_, 1000.f);
+    EXPECT_LT(pattern_->currentOffset_, 1100.f);
 }
 } // namespace OHOS::Ace::NG

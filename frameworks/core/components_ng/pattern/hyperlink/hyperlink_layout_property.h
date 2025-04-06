@@ -60,19 +60,23 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
-        if (propColor_.has_value()) {
-            json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (propColor_.has_value()) {
+                json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
+            } else {
+                auto pipeline = host->GetContext();
+                CHECK_NULL_VOID(pipeline);
+                auto themeManager = pipeline->GetThemeManager();
+                CHECK_NULL_VOID(themeManager);
+                auto theme = themeManager->GetTheme<HyperlinkTheme>();
+                json->PutExtAttr("color", theme->GetTextColor().ColorToString().c_str(), filter);
+            }
         } else {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto pipeline = host->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            auto themeManager = pipeline->GetThemeManager();
-            CHECK_NULL_VOID(themeManager);
-            auto theme = themeManager->GetTheme<HyperlinkTheme>();
-            json->PutExtAttr("color", theme->GetTextColor().ColorToString().c_str(), filter);
+            json->PutExtAttr("color", propColor_.value_or(Color::BLUE).ColorToString().c_str(), filter);
         }
+        json->PutExtAttr("address", propAddress_.value_or("").c_str(), filter);
     }
 
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override

@@ -93,7 +93,7 @@ std::unique_ptr<JsonValue> ParticlePattern::ParseEmitterParticleJson(const Parti
             "ImageFit.TOP_END", "ImageFit.START", "ImageFit.CENTER", "ImageFit.END", "ImageFit.BOTTOM_START",
             "ImageFit.BOTTOM", "ImageFit.BOTTOM_END" };
         if (objectFit.has_value()) {
-            auto objectFitValue = static_cast<int32_t>(objectFit.value());
+            auto objectFitValue = static_cast<uint32_t>(objectFit.value());
             if (objectFitValue < sizeof(OBJECTFITVALUE) / sizeof(char*)) {
                 objectConfigJson->Put("objectFit", OBJECTFITVALUE[objectFitValue]);
             }

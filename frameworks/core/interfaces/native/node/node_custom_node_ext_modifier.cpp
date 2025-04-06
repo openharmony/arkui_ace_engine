@@ -198,20 +198,23 @@ void SetIsAtomic(ArkUINodeHandle node, const ArkUI_Bool isAtomic)
 namespace NodeModifier {
 const struct ArkUICustomNodeExtModifier* GetCustomNodeExtModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const struct ArkUICustomNodeExtModifier modifiers = {
-        ParseColorString,
-        ParseLengthString,
-        GetDpi,
-        GetLayoutDirection,
-        SetCustomMeasureCallback,
-        SetCustomLayoutCallback,
-        SetCustomContentDrawCallback,
-        SetCustomForegroundDrawCallback,
-        SetCustomOverlayDrawCallback,
-        SetOnConfigUpdateCallback,
-        SetOnModifyDoneCallback,
-        SetOnDirtyLayoutWrapperSwap,
-        SetIsAtomic };
+        .parseColorString = ParseColorString,
+        .parseLengthString = ParseLengthString,
+        .getDpi = GetDpi,
+        .getLayoutDirection = GetLayoutDirection,
+        .setCustomMeasure = SetCustomMeasureCallback,
+        .setCustomLayout = SetCustomLayoutCallback,
+        .setCustomContentDraw = SetCustomContentDrawCallback,
+        .setCustomForegroundDraw = SetCustomForegroundDrawCallback,
+        .setCustomOverlayDraw = SetCustomOverlayDrawCallback,
+        .setOnConfigUpdate = SetOnConfigUpdateCallback,
+        .setOnModifyDone = SetOnModifyDoneCallback,
+        .setOnDirtyLayoutWrapperSwap = SetOnDirtyLayoutWrapperSwap,
+        .setIsAtomic = SetIsAtomic
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifiers, 0, 0, 0); // don't move this line
     return &modifiers;
 }
 } // NodeModifier

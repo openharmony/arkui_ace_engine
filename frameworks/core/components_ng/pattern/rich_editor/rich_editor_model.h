@@ -23,12 +23,14 @@
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/device_config.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/text_model.h"
@@ -80,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextShadows.reset();
         updateFontFeature.reset();
         updateTextBackgroundStyle.reset();
+        updateUrlAddress.reset();
 
         updateLineHeight.reset();
         updateHalfLeading.reset();
@@ -111,6 +114,7 @@ struct UpdateSpanStyle {
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
+    std::optional<std::u16string> updateUrlAddress = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
     std::optional<bool> updateHalfLeading = std::nullopt;
@@ -184,11 +188,13 @@ struct UpdateParagraphStyle {
         leadingMargin.reset();
         wordBreak.reset();
         lineBreakStrategy.reset();
+        paragraphSpacing.reset();
     }
     std::optional<TextAlign> textAlign;
     std::optional<NG::LeadingMargin> leadingMargin;
     std::optional<WordBreak> wordBreak;
     std::optional<LineBreakStrategy> lineBreakStrategy;
+    std::optional<Dimension> paragraphSpacing;
 
     std::string ToString() const
     {
@@ -197,6 +203,7 @@ struct UpdateParagraphStyle {
         JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, leadingMargin);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, wordBreak);
         JSON_STRING_PUT_OPTIONAL_INT(jsonValue, lineBreakStrategy);
+        JSON_STRING_PUT_OPTIONAL_STRINGABLE(jsonValue, paragraphSpacing);
         return jsonValue->ToString();
     }
 };
@@ -220,6 +227,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
+    std::optional<std::u16string> urlAddress;
     UserGestureOptions userGestureOption;
     bool useThemeFontColor = true;
     bool useThemeDecorationColor = true;
@@ -303,6 +311,8 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
+    virtual ColorMode GetColorMode() = 0;
+    virtual RefPtr<NG::RichEditorTheme> GetTheme() = 0;
 };
 
 class ACE_EXPORT RichEditorControllerBase : virtual public RichEditorBaseControllerBase {
@@ -368,6 +378,7 @@ public:
     virtual void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) = 0;
     virtual void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
+    virtual void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
@@ -379,6 +390,7 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

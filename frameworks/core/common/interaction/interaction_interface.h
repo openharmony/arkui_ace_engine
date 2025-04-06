@@ -63,6 +63,10 @@ public:
     virtual int32_t UnRegisterCoordinationListener() = 0;
 
     virtual int32_t SetDraggableState(bool state) = 0;
+
+    virtual int32_t GetAppDragSwitchState(bool& state) = 0;
+
+    virtual void SetDraggableStateAsync(bool state, int64_t downTime) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

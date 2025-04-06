@@ -15,6 +15,8 @@
 
 #include "image_base.h"
 
+#include "base/image/image_defines.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -557,10 +559,21 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0001, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_TRUE(imagePattern->images_.size() == 2);
     EXPECT_EQ(imagePattern->GetIsAnimation(), true);
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
     EXPECT_EQ(imagePattern->durationTotal_, 0);
     EXPECT_EQ(imagePattern->animator_->GetDuration(), DURATION_DEFAULT);
     EXPECT_EQ(imagePattern->animator_->GetIteration(), ITERATION_DEFAULT);
+
+    /**
+    * @tc.steps: step4. set SrcUndefined and call OnAnimatedModifyDone.
+    * @tc.expected: isSrcUndefined_ is true.
+    */
+    imagePattern->imageType_ = ImageType::BASE;
+    imagePattern->status_ = AnimatorStatus::PAUSED;
+    imagePattern->SetSrcUndefined(true);
+    imagePattern->OnModifyDone();
+    imagePattern->OnAnimatedModifyDone();
+    EXPECT_TRUE(imagePattern->isSrcUndefined_);
 }
 
 /**
@@ -674,7 +687,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level1)
      * @tc.steps: step8. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 
     /**
      * @tc.steps: step9. Test durationTotal
@@ -698,7 +711,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0002, TestSize.Level1)
      * @tc.steps: step12. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
 }
 
 /**
@@ -720,7 +733,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0003, TestSize.Level1)
     ASSERT_NE(imagePattern->animator_, nullptr);
     EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
     imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::STOPPED);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
     EXPECT_TRUE(imagePattern->images_.size() == 2);
 
     /**
@@ -770,7 +783,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0004, TestSize.Level1)
     ASSERT_NE(imagePattern->animator_, nullptr);
     EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
     imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::STOPPED);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
     EXPECT_TRUE(imagePattern->images_.size() == 2);
 
     /**
@@ -833,21 +846,21 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0005, TestSize.Level1)
      * @tc.steps: step3. Test isAnimation
      * @tc.expected: false
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::BASE);
+    imagePattern->SetImageType(ImageType::BASE);
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
     /**
      * @tc.steps: step4. Test isAnimation
      * @tc.expected: false
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::UNDEFINED);
+    imagePattern->SetImageType(ImageType::BASE);
     EXPECT_EQ(imagePattern->GetIsAnimation(), false);
 
     /**
      * @tc.steps: step5. Test isAnimation
      * @tc.expected: true
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     EXPECT_EQ(imagePattern->GetIsAnimation(), true);
 }
 
@@ -875,28 +888,28 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0006, TestSize.Level1)
      * @tc.steps: step2. Test GetImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATED_DRAWABLE);
 
     /**
      * @tc.steps: step3. Test GetImageType
      * @tc.expected: BASE
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::BASE);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::BASE);
+    imagePattern->SetImageType(ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 
     /**
      * @tc.steps: step4. Test GetImageType
      * @tc.expected: UNDEFINED
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::UNDEFINED);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::UNDEFINED);
+    imagePattern->SetImageType(ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 
     /**
      * @tc.steps: step5. Test GetImageType
      * @tc.expected: ANIMATION
      */
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::ANIMATED_DRAWABLE);
 }
 
 /**
@@ -923,21 +936,21 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0007, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 
     /**
      * @tc.steps: step3. Test status
      * @tc.expected: STOPPED
      */
     imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::STOPPED);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
 
     /**
      * @tc.steps: step4. Test status
      * @tc.expected: RUNNING
      */
     imagePattern->StartAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::RUNNING);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::RUNNING);
 }
 
 /**
@@ -959,7 +972,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0008, TestSize.Level1)
     ASSERT_NE(imagePattern->animator_, nullptr);
     EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
     imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::STOPPED);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
     EXPECT_TRUE(imagePattern->images_.size() == 2);
 
     /**
@@ -1022,7 +1035,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0009, TestSize.Level1)
     ASSERT_NE(imagePattern->animator_, nullptr);
     EXPECT_EQ(imagePattern->animator_->GetFillMode(), FillMode::BACKWARDS);
     imagePattern->StopAnimation();
-    EXPECT_EQ(imagePattern->status_, Animator::Status::STOPPED);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::STOPPED);
     EXPECT_TRUE(imagePattern->images_.size() == 10);
 
     /**
@@ -1366,7 +1379,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
      * @tc.steps: step1. Test status
      * @tc.expected: STATE_START
      */
-    EXPECT_EQ(imagePattern->status_, static_cast<Animator::Status>(STATE_START));
+    EXPECT_EQ(imagePattern->status_, static_cast<AnimatorStatus>(STATE_START));
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1386,7 +1399,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0016, TestSize.Level1)
      * @tc.steps: step2. Test status
      * @tc.expected: IDLE
      */
-    EXPECT_EQ(imagePattern->status_, Animator::Status::IDLE);
+    EXPECT_EQ(imagePattern->status_, AnimatorStatus::IDLE);
 }
 
 /**
@@ -1574,7 +1587,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
      * @tc.steps: step1. Test ImageType
      * @tc.expected: ANIMATION
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::ANIMATION);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::ANIMATED_DRAWABLE);
 
     //切换Image数据源
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1594,7 +1607,7 @@ HWTEST_F(ImageTestTwoNg, ImagePixelMapListTest0020, TestSize.Level1)
      * @tc.steps: step2. Test ImageType
      * @tc.expected: BASE
      */
-    EXPECT_EQ(imagePattern->imageType_, ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->imageType_, ImageType::BASE);
 }
 
 /**
@@ -1768,7 +1781,7 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     EXPECT_EQ(imagePattern->GetSyncLoad(), SYNCMODE_DEFAULT);
     image.EnableAnalyzer(false);
     image.EnableAnalyzer(frameNode, true);
-    imagePattern->SetImageType(ImagePattern::ImageType::ANIMATION);
+    imagePattern->SetImageType(ImageType::ANIMATED_DRAWABLE);
     image.ResetImageSrc(frameNode);
     RefPtr<PixelMap> pixMap = nullptr;
     ImageInfoConfig imageInfoConfig;
@@ -1776,6 +1789,6 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
     imageInfoConfig.bundleName = BUNDLE_NAME;
     imageInfoConfig.moduleName = MODULE_NAME;
     image.Create(imageInfoConfig, pixMap);
-    EXPECT_EQ(imagePattern->GetImageType(), ImagePattern::ImageType::BASE);
+    EXPECT_EQ(imagePattern->GetImageType(), ImageType::BASE);
 }
 } // namespace OHOS::Ace::NG

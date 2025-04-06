@@ -20,21 +20,9 @@
 #include "base/geometry/rect.h"
 #include "base/geometry/rrect.h"
 #include "base/utils/utils.h"
-#include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/placement.h"
-#include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/search/search_event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
-#include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/image_painter.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,

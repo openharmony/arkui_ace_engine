@@ -40,6 +40,9 @@ constexpr Dimension STROKE_WIDTH = 10.0_vp;
 constexpr Dimension START_MARGIN = 5.0_vp;
 constexpr Dimension END_MARGIN = 5.0_vp;
 constexpr Dimension NONE_WIDTH = 0.0_vp;
+constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 100.0_vp;
+constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 50.0_vp;
+constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 200.0_vp;
 const SizeF FIRST_ITEM_SIZE(5.0f, 5.0f);
 const SizeF SELF_SIZE(50.0f, 50.0f);
 const float REAL_WIDTH = 10.0f;
@@ -587,5 +590,213 @@ HWTEST_F(SideBarViewTestNg, SideBarViewTestNg014, TestSize.Level1)
     SideBarContainerModelInstance.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: SideBarViewTestNg015
+ * @tc.desc: Test SideBar unavailable widthType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get layoutProperty.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    SideBarContainerModelInstance.Create();
+    SideBarContainerModelInstance.SetSideBarWidth(DEFAULT_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinSideBarWidth(DEFAULT_MIN_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMaxSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call ParseAndSetWidth function with widthType unavailable.
+     * @tc.expected: step2. sideBarWidth doesn't set.
+     */
+    Dimension sideBarWidth = DEFAULT_SIDE_BAR_WIDTH;
+    SideBarContainerModelInstance.ParseAndSetWidth(static_cast<WidthType>(-1), sideBarWidth);
+    EXPECT_EQ(layoutProperty->GetSideBarWidth(), DEFAULT_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetMinSideBarWidth(), DEFAULT_MIN_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetMaxSideBarWidth(), DEFAULT_MAX_SIDE_BAR_WIDTH);
+}
+
+/**
+ * @tc.name: SideBarViewTestNg016
+ * @tc.desc: Test SideBar set sideBarWith in double bind mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get layoutProperty.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    SideBarContainerModelInstance.Create();
+    SideBarContainerModelInstance.SetSideBarWidth(DEFAULT_SIDE_BAR_WIDTH, true);
+    SideBarContainerModelInstance.SetMinSideBarWidth(DEFAULT_MIN_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMaxSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = AceType::DynamicCast<SideBarContainerPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetSideBarWidth function in doubleBind mode.
+     * @tc.expected: step2. sideBarWidth doesn't set.
+     */
+    pattern->isInDividerDrag_ = true;
+    SideBarContainerModelInstance.SetSideBarWidth(DEFAULT_MIN_SIDE_BAR_WIDTH, true);
+    SideBarContainerModelInstance.SetMinSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMaxSideBarWidth(DEFAULT_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetSideBarWidth(AceType::RawPtr(frameNode), DEFAULT_MIN_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinSideBarWidth(AceType::RawPtr(frameNode), DEFAULT_MAX_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMaxSideBarWidth(AceType::RawPtr(frameNode), DEFAULT_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetSideBarWidth(), DEFAULT_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetMinSideBarWidth(), DEFAULT_MIN_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetMaxSideBarWidth(), DEFAULT_MAX_SIDE_BAR_WIDTH);
+}
+
+/**
+ * @tc.name: SideBarViewTestNg017
+ * @tc.desc: Test SideBar setMinContentWidth with negative value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get layoutProperty.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    SideBarContainerModelInstance.Create();
+    SideBarContainerModelInstance.SetMinContentWidth(DEFAULT_SIDE_BAR_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetMinContentWidth function with negative value.
+     * @tc.expected: step2. sideBar minContentWidth doesn't set.
+     */
+    SideBarContainerModelInstance.SetMinContentWidth(-DEFAULT_SIDE_BAR_WIDTH);
+    SideBarContainerModelInstance.SetMinContentWidth(AceType::RawPtr(frameNode), -DEFAULT_SIDE_BAR_WIDTH);
+    EXPECT_EQ(layoutProperty->GetMinContentWidth(), DEFAULT_MIN_CONTENT_WIDTH);
+}
+
+/**
+ * @tc.name: SideBarViewTestNg018
+ * @tc.desc: Test SideBar OnUpdateShowSideBar function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get layoutProperty.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    SideBarContainerModelInstance.Create();
+    SideBarContainerModelInstance.SetMinContentWidth(DEFAULT_SIDE_BAR_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<SideBarContainerPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool localShow = false;
+    ChangeEvent eventOnChange = [&localShow](const bool isShow) { localShow = isShow; };
+    eventHub->SetOnChangeEvent(std::move(eventOnChange));
+
+    pattern->realSideBarWidth_ = -DEFAULT_SIDE_BAR_WIDTH;
+    layoutProperty->UpdateSideBarWidth(DEFAULT_SIDE_BAR_WIDTH);
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_EQ(pattern->realSideBarWidth_, DEFAULT_SIDE_BAR_WIDTH);
+
+    pattern->hasInit_ = false;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    layoutProperty->UpdateShowSideBar(true);
+    pattern->userSetShowSideBar_ = false;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    layoutProperty->UpdateShowSideBar(false);
+    pattern->userSetShowSideBar_ = true;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    layoutProperty->UpdateShowSideBar(false);
+    pattern->userSetShowSideBar_ = true;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    layoutProperty->UpdateShowSideBar(true);
+    pattern->userSetShowSideBar_ = false;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+}
+
+/**
+ * @tc.name: SideBarViewTestNg019
+ * @tc.desc: Test SideBar OnUpdateShowSideBar function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarViewTestNg, SideBarViewTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sideBar, get layoutProperty.
+     */
+    SideBarContainerModelNG SideBarContainerModelInstance;
+    SideBarContainerModelInstance.Create();
+    SideBarContainerModelInstance.SetMinContentWidth(DEFAULT_SIDE_BAR_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = AceType::DynamicCast<SideBarContainerPattern>(frameNode->GetPattern());
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::SideBarContainerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    bool localShow = false;
+    ChangeEvent eventOnChange = [&localShow](const bool isShow) { localShow = isShow; };
+    eventHub->SetOnChangeEvent(std::move(eventOnChange));
+
+    pattern->realSideBarWidth_ = -DEFAULT_SIDE_BAR_WIDTH;
+    layoutProperty->UpdateSideBarWidth(DEFAULT_SIDE_BAR_WIDTH);
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_EQ(pattern->realSideBarWidth_, DEFAULT_SIDE_BAR_WIDTH);
+
+    pattern->hasInit_ = true;
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    layoutProperty->UpdateShowSideBar(true);
+    pattern->userSetShowSideBar_ = false;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    layoutProperty->UpdateShowSideBar(false);
+    pattern->userSetShowSideBar_ = true;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::HIDDEN;
+    layoutProperty->UpdateShowSideBar(true);
+    pattern->userSetShowSideBar_ = false;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_TRUE(localShow);
+
+    pattern->sideBarStatus_ = SideBarStatus::SHOW;
+    layoutProperty->UpdateShowSideBar(false);
+    pattern->userSetShowSideBar_ = true;
+    pattern->OnUpdateShowSideBar(layoutProperty);
+    EXPECT_FALSE(localShow);
 }
 } // namespace OHOS::Ace::NG

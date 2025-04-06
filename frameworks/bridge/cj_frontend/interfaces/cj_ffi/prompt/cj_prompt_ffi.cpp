@@ -17,11 +17,11 @@
 
 #include "cj_lambda.h"
 
-#include "base/i18n/localization.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -134,7 +134,11 @@ void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int3
 void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback)
 {
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(theme);
+    ButtonInfo buttonInfo = { .text = theme->GetCancelText(), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = NG::PipelineContext::GetCurrentContext();
     auto curExecutor = context->GetTaskExecutor();
@@ -286,15 +290,15 @@ DialogProperties GetDialogProperties(const NativeCustomDialogOptions& options)
     };
     DialogProperties dialogProperties = {
         .autoCancel = options.autoCancel,
+        .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
+        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
-        .isSysBlurStyle = false,
-        .maskColor = Color(ColorAlphaAdapt(options.maskColor)),
-        .transitionEffect = chainedEffect,
-        .backgroundColor = Color(ColorAlphaAdapt(options.backgroundColor)),
         .enableHoverMode = options.enableHoverMode,
+        .isSysBlurStyle = false,
         .shadow = shadow,
         .hoverModeArea = HoverModeAreaType(options.hoverModeArea),
+        .transitionEffect = chainedEffect
     };
     SetBorder(dialogProperties, options);
     SetShape(dialogProperties, options);
@@ -540,17 +544,17 @@ void FfiPromptShowToastWithOption(NativeShowToastOptions options)
         };
 
         auto toastInfo = NG::ToastInfo { .message = toastMessage,
-            .isRightToLeft = isRightToLeft,
             .duration = durationTime,
             .bottom = toastBottom,
+            .isRightToLeft = isRightToLeft,
             .showMode = NG::ToastShowMode(options.showMode),
             .alignment = options.alignment,
             .offset = offset,
             .backgroundColor = Color(options.backgroundColor),
             .textColor = Color(ColorAlphaAdapt(options.textColor)),
+            .backgroundBlurStyle = options.backgroundBlurStyle,
             .shadow = shadow,
             .enableHoverMode = options.enableHoverMode,
-            .backgroundBlurStyle = options.backgroundBlurStyle,
             .hoverModeArea = HoverModeAreaType(options.hoverModeArea) };
         overlayManager->ShowToast(toastInfo, nullptr);
     };
@@ -572,8 +576,8 @@ void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCa
         .title = options.title,
         .content = options.message,
         .buttons = buttons,
-        .isShowInSubWindow = options.showInSubWindow,
         .backgroundColor = Color(options.backgroundColor),
+        .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,
         .enableHoverMode = options.enableHoverMode,
         .backgroundBlurStyle = options.backgroundBlurStyle,
@@ -597,9 +601,9 @@ void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActi
     auto callback = [ffiOnClick = CJLambda::Create(callbackRef)](
                         int32_t callbackType, int32_t successType) { ffiOnClick(callbackType, successType); };
     DialogProperties dialogProperties = {
+        .title = options.title,
         .autoCancel = true,
         .isMenu = true,
-        .title = options.title,
         .buttons = buttons,
         .isShowInSubWindow = options.showInSubWindow,
         .isModal = options.isModal,

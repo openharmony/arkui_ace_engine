@@ -75,6 +75,8 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
     animateOption.iterations = option->iterations;
     animateOption.onFinish = option->onFinish;
     animateOption.userData = option->userData;
+    animateOption.expectedFrameRateRange =
+            reinterpret_cast<ArkUIExpectedFrameRateRange*>(option->expectedFrameRateRange);
     ArkUIKeyframeState keyframes[option->keyframes.size()];
     for (size_t i = 0; i < option->keyframes.size(); i++) {
         keyframes[i].duration = option->keyframes[i].duration;

@@ -1,3 +1,5 @@
+import { image } from '@kit.ImageKit'
+
 const VIEW_WIDTH: string = '80vp'
 const BUTTON_WIDTH: string = '40vp'
 const VIEW_HEIGHT: string = '36vp'
@@ -6,21 +8,24 @@ const MENU_RADIUS: string = '20vp'
 const DIVIDER_HEIGHT: string = '16vp'
 const BORDER_WIDTH: string = '1px'
 const VIEW_MARGIN_TOP: string = '10vp'
-const VIEW_MARGIN_RIGHT: string = '16vp'
+const VIEW_MARGIN_RIGHT: string = '8vp'
 
 const ICON_FILL_COLOR_DEFAULT: string = '#182431'
 const BORDER_COLOR_DEFAULT: string = '#33000000'
 const MENU_BACK_COLOR: string = '#99FFFFFF'
 
-const ARKUI_APP_BAR_COLOR_CONFIGURATION: string = "arkui_app_bar_color_configuration";
-const ARKUI_APP_BAR_MENU_SAFE_AREA: string = "arkui_app_bar_menu_safe_area";
-const ARKUI_APP_BAR_CONTENT_SAFE_AREA: string = "arkui_app_bar_content_safe_area";
-const ARKUI_APP_BAR_BAR_INFO: string = "arkui_app_bar_info";
-const ARKUI_APP_BAR_SCREEN: string = "arkui_app_bar_screen";
+const ARKUI_APP_BAR_COLOR_CONFIGURATION: string = 'arkui_app_bar_color_configuration';
+const ARKUI_APP_BAR_MENU_SAFE_AREA: string = 'arkui_app_bar_menu_safe_area';
+const ARKUI_APP_BAR_CONTENT_SAFE_AREA: string = 'arkui_app_bar_content_safe_area';
+const ARKUI_APP_BAR_BAR_INFO: string = 'arkui_app_bar_info';
+const ARKUI_APP_BAR_SCREEN: string = 'arkui_app_bar_screen';
+const ARKUI_APP_BG_COLOR: string = 'arkui_app_bg_color';
+const ARKUI_APP_BAR_SERVICE_PANEL: string = 'arkui_app_bar_service_panel'
+const ARKUI_APP_BAR_CLOSE: string = 'arkui_app_bar_close'
 
-const EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = "arkui_custom_app_bar_menu_click";
-const EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = "arkui_custom_app_bar_close_click";
-const EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_did_build";
+const EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = 'arkui_custom_app_bar_menu_click';
+const EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = 'arkui_custom_app_bar_close_click';
+const EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = 'arkui_custom_app_bar_did_build';
 
 const MENU_MARGIN_TOP: number = 10
 
@@ -36,7 +41,7 @@ class ColorGroup {
 
 const colorMap: Map<string, ColorGroup> = new Map<string, ColorGroup>([
   [ICON_FILL_COLOR_DEFAULT, new ColorGroup('#182431', '#e5ffffff')],
-  [BORDER_COLOR_DEFAULT, new ColorGroup('#33182432', '#4Dffffff')],
+  [BORDER_COLOR_DEFAULT, new ColorGroup('#33182431', '#4Dffffff')],
   [MENU_BACK_COLOR, new ColorGroup('#99FFFFFF', '#33000000')],
 ]);
 
@@ -62,11 +67,14 @@ struct Index {
   @State menubarBorderColor: string = this.getResourceColor(BORDER_COLOR_DEFAULT)
   @State menubarBackColor: string = this.getResourceColor(MENU_BACK_COLOR)
   @State dividerBackgroundColor: string = this.getResourceColor(BORDER_COLOR_DEFAULT)
+  @State contentBgColor: string = '#FFFFFFFF'
   @State contentMarginTop: string = '0vp'
   @State contentMarginLeft: string = '0vp'
   @State contentMarginRight: string = '0vp'
   @State contentMarginBottom: string = '0vp'
   @State menuMarginTop: string = '10vp'
+  @State serviceMenuRead: string = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL)
+  @State closeRead: string = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE)
   isDark: boolean = true;
 
   parseBoolean(value: string): boolean {
@@ -106,6 +114,9 @@ struct Index {
       //buildName,appname
       let splitArray: string[] = param.split('|');
     } else if (eventName === ARKUI_APP_BAR_SCREEN) {
+
+    } else if (eventName === ARKUI_APP_BG_COLOR) {
+      this.contentBgColor = param;
     }
   }
 
@@ -118,6 +129,10 @@ struct Index {
     this.menubarBackColor = this.getResourceColor(MENU_BACK_COLOR);
   }
 
+  setAppIcon(pixelMap: image.PixelMap) {
+
+  }
+
   onMenuButtonClick() {
   }
 
@@ -126,7 +141,7 @@ struct Index {
 
   onDidBuild(): void {
   }
-  
+
   build() {
     Column() {
       Stack({ alignContent: Alignment.TopEnd }) {
@@ -162,6 +177,10 @@ struct Index {
             .gesture(TapGesture().onAction(() => {
               this.onMenuButtonClick()
             }))
+            .accessibilityText(this.serviceMenuRead)
+            .onAccessibilityHover(() => {
+              this.serviceMenuRead = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL);
+            })
 
             Divider()
               .id('AtomicServiceDividerId')
@@ -189,6 +208,10 @@ struct Index {
             .gesture(TapGesture().onAction(() => {
               this.onCloseButtonClick()
             }))
+            .accessibilityText(this.closeRead)
+            .onAccessibilityHover(() => {
+              this.closeRead = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE);
+            })
           }
           .borderRadius(MENU_RADIUS)
           .borderWidth(BORDER_WIDTH)
@@ -198,15 +221,16 @@ struct Index {
           .width(VIEW_WIDTH)
           .align(Alignment.Top)
           .draggable(false)
-          .hitTestBehavior(HitTestMode.Transparent)
           .id('AtomicServiceMenubarId')
         }
         .id('AtomicServiceMenubarRowId')
         .justifyContent(FlexAlign.End)
         .margin({ top: this.menuMarginTop, left: VIEW_MARGIN_RIGHT, right: VIEW_MARGIN_RIGHT })
         .height(VIEW_HEIGHT)
+        .hitTestBehavior(HitTestMode.Transparent)
         .width('100%')
       }
+      .id('AtomicServiceContainerId')
       .height('100%')
       .width('100%')
       .backgroundColor(Color.Transparent)
@@ -215,7 +239,18 @@ struct Index {
     .height('100%')
     .width('100%')
     .justifyContent(FlexAlign.End)
-    .backgroundColor(Color.Transparent)
+    .backgroundColor(this.contentBgColor)
     .hitTestBehavior(HitTestMode.Transparent)
+  }
+
+  getStringByResourceToken(value?: string, ...args: Array<string | number>): string {
+    if (value) {
+      try {
+        return getContext(this).resourceManager.getStringByNameSync(value, ...args);
+      } catch (error) {
+        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+      }
+    }
+    return '';
   }
 }

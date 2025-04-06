@@ -23,9 +23,13 @@
 
 namespace OHOS {
 namespace Ace {
+#ifdef ARKUI_WEARABLE
+constexpr int32_t PROCESS_WAIT_TIME = 50;
+#else
 constexpr int32_t PROCESS_WAIT_TIME = 20;
+#endif
 constexpr float DOUBLE = 2.0;
-constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 600;
+constexpr int32_t DEFAULT_FORM_ROTATION_ANIM_DURATION = 100;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -143,7 +147,6 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
 void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width,
     float height, uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
 {
-    int32_t duration = DEFAULT_FORM_ROTATION_ANIM_DURATION;
     bool needSync = false;
     if (rsTransaction && rsTransaction->GetSyncId() > 0) {
         // extract high 32 bits of SyncId as pid
@@ -154,15 +157,13 @@ void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<
     }
 
     if (needSync) {
-        duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
         globalLock_.lock();
         Rosen::RSTransaction::FlushImplicitTransaction();
         rsTransaction->Begin();
     }
     Rosen::RSAnimationTimingProtocol protocol;
-    protocol.SetDuration(duration);
-    // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-    auto curve = Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+    protocol.SetDuration(DEFAULT_FORM_ROTATION_ANIM_DURATION);
+    auto curve = Rosen::RSAnimationTimingCurve::LINEAR;
     Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
     
     float uiWidth = width - borderWidth * DOUBLE;

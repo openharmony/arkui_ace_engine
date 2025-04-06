@@ -75,17 +75,18 @@ const char LOCALE_DIR_LTR[] = "ltr";
 const char LOCALE_DIR_RTL[] = "rtl";
 const char LOCALE_KEY[] = "locale";
 
-void SaveResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+void SaveResourceAdapter(const std::string& bundleName, const std::string& moduleName, int32_t instanceId,
+    RefPtr<ResourceAdapter>& resourceAdapter)
 {
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter(
+        defaultBundleName, defaultModuleName, instanceId, resourceAdapter);
     LOGI("Save default adapter");
 
     if (!bundleName.empty() && !moduleName.empty()) {
         LOGI("Save resource adapter bundle: %{public}s, module: %{public}s", bundleName.c_str(), moduleName.c_str());
-        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+        ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, instanceId, resourceAdapter);
     }
 }
 } // namespace
@@ -559,7 +560,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
     }
     resourceInfo_.SetResourceConfiguration(resConfig);
     if (ResourceConfiguration::TestFlag(updateFlags, ResourceConfiguration::COLOR_MODE_UPDATED_FLAG)) {
-        SystemProperties::SetColorMode(resConfig.GetColorMode());
+        SetColorMode(resConfig.GetColorMode());
         if (frontend_) {
             frontend_->SetColorMode(resConfig.GetColorMode());
         }
@@ -610,7 +611,7 @@ void AceContainer::NativeOnConfigurationUpdated(int32_t instanceId)
 
     std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
     value->Put("fontScale", container->GetResourceConfiguration().GetFontRatio());
-    value->Put("colorMode", SystemProperties::GetColorMode() == ColorMode::LIGHT ? "light" : "dark");
+    value->Put("colorMode", container->GetColorMode() == ColorMode::LIGHT ? "light" : "dark");
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(front);
     if (declarativeFrontend) {
         container->UpdateResourceConfiguration(value->ToString());
@@ -770,7 +771,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     SystemProperties::InitDeviceType(deviceConfig.deviceType);
     SystemProperties::SetDeviceOrientation(deviceConfig.orientation == DeviceOrientation::PORTRAIT ? 0 : 1);
     SystemProperties::SetResolution(deviceConfig.density);
-    SystemProperties::SetColorMode(deviceConfig.colorMode);
+    SetColorMode(deviceConfig.colorMode);
     auto resConfig = resourceInfo_.GetResourceConfiguration();
     if (resConfig.GetDeviceType() == deviceConfig.deviceType &&
         resConfig.GetOrientation() == deviceConfig.orientation && resConfig.GetDensity() == deviceConfig.density &&
@@ -844,6 +845,7 @@ void AceContainer::SetView(AceViewPreview* view, sptr<Rosen::Window> rsWindow, d
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    window->Init();
     auto rsUIDirector = window->GetRSUIDirector();
     CHECK_NULL_VOID(rsUIDirector);
     rsUIDirector->SetFlushEmptyCallback(AcePreviewHelper::GetInstance()->GetCallbackFlushEmpty());
@@ -895,7 +897,7 @@ void AceContainer::AttachView(
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo);
-        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
     if (themeManager) {
@@ -1020,7 +1022,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     if (SystemProperties::GetResourceDecoupling()) {
         auto resourceAdapter = ResourceAdapter::Create();
         resourceAdapter->Init(resourceInfo_);
-        SaveResourceAdapter(bundleName_, moduleName_, resourceAdapter);
+        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
         themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
 

@@ -46,7 +46,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(info->startIndex_, 0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->Offset(), 0.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5200.0f, 100.0f);
 
@@ -112,16 +112,16 @@ HWTEST_F(WaterFlowTestNg, LargeOffset001, TestSize.Level1)
 
     auto info = pattern_->layoutInfo_;
     UpdateCurrentOffset(-2000.0f);
-    EXPECT_EQ(info->startIndex_, 18);
-    EXPECT_EQ(info->endIndex_, 23);
+    EXPECT_EQ(info->startIndex_, 20);
+    EXPECT_EQ(info->endIndex_, 25);
 
     UpdateCurrentOffset(1000.0f); // no jump
-    EXPECT_EQ(info->startIndex_, 8);
-    EXPECT_EQ(info->endIndex_, 14);
+    EXPECT_EQ(info->startIndex_, 10);
+    EXPECT_EQ(info->endIndex_, 16);
 
     UpdateCurrentOffset(-3000.0f);
-    EXPECT_EQ(info->startIndex_, 28);
-    EXPECT_EQ(info->endIndex_, 33);
+    EXPECT_EQ(info->startIndex_, 31);
+    EXPECT_EQ(info->endIndex_, 36);
 
     UpdateCurrentOffset(-5000.0f);
     EXPECT_EQ(info->startIndex_, 31);
@@ -148,29 +148,33 @@ HWTEST_F(WaterFlowTestNg, LargeOffset002, TestSize.Level1)
 
     auto info = pattern_->layoutInfo_;
     UpdateCurrentOffset(-2000.0f);
-    EXPECT_EQ(info->startIndex_, 11);
-    EXPECT_EQ(info->endIndex_, 15);
+    EXPECT_EQ(info->startIndex_, 13);
+    EXPECT_EQ(info->endIndex_, 17);
 
     UpdateCurrentOffset(-10000.0f);
-    EXPECT_EQ(info->startIndex_, 57);
-    EXPECT_EQ(info->endIndex_, 61);
+    EXPECT_EQ(info->startIndex_, 72);
+    EXPECT_EQ(info->endIndex_, 77);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(info->startIndex_, 57);
-    EXPECT_EQ(info->endIndex_, 72);
+    FlushUITasks();
+    EXPECT_EQ(info->startIndex_, 72);
+    EXPECT_EQ(info->endIndex_, 88);
 
     UpdateCurrentOffset(-Infinity<float>());
-    EXPECT_EQ(info->startIndex_, 86);
+    EXPECT_EQ(info->startIndex_, 85);
     EXPECT_EQ(info->endIndex_, 99);
+
+    UpdateCurrentOffset(2000.0f);
+    EXPECT_EQ(info->startIndex_, 50);
+    EXPECT_EQ(info->endIndex_, 66);
 
     UpdateCurrentOffset(10000.0f);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 16);
 
     UpdateCurrentOffset(-2000.0f);
-    EXPECT_EQ(info->startIndex_, 36);
-    EXPECT_EQ(info->endIndex_, 52);
+    EXPECT_EQ(info->startIndex_, 38);
+    EXPECT_EQ(info->endIndex_, 54);
 }
 
 /**
@@ -188,12 +192,12 @@ HWTEST_F(WaterFlowTestNg, LargeOffset003, TestSize.Level1)
 
     auto info = pattern_->layoutInfo_;
     UpdateCurrentOffset(-2000.0f);
-    EXPECT_EQ(info->startIndex_, 28);
+    EXPECT_EQ(info->startIndex_, 30);
     EXPECT_EQ(info->endIndex_, 44);
 
     UpdateCurrentOffset(1500.0f); // no jump
-    EXPECT_EQ(info->startIndex_, 5);
-    EXPECT_EQ(info->endIndex_, 15);
+    EXPECT_EQ(info->startIndex_, 8);
+    EXPECT_EQ(info->endIndex_, 17);
 
     UpdateCurrentOffset(-3000.0f);
     EXPECT_EQ(info->startIndex_, 29);

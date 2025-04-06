@@ -33,6 +33,7 @@ public:
     static void OnAppear(std::function<void()> callback);
     static void OnDisAppear(std::function<void()> callback);
     static void OnHover(std::function<void(bool)> callback);
+    static void OnHoverMove(std::function<void()> callback);
     static void OnKey(std::function<bool(KeyEventInfo& keyInfo)> callback);
     static void OnDelete(std::function<void()> callback);
     static EventMarker GetClickEventMarker(std::function<void(const ClickInfo& clickInfo)> callback);

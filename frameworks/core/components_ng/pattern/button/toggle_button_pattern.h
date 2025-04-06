@@ -83,6 +83,8 @@ public:
     void OnColorConfigurationUpdate() override;
     void MarkIsSelected(bool isSelected);
     void SetButtonPress(bool value);
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -119,6 +121,7 @@ private:
     void InitHoverEvent();
     void HandleHoverEvent(bool isHover);
     void InitEvent();
+    void SetToggleScale(RefPtr<RenderContext>& renderContext);
 
     RefPtr<FrameNode> BuildContentModifierNode();
     std::function<void(bool)> isFocusActiveUpdateEvent_;
@@ -134,10 +137,7 @@ private:
     Color checkedColor_;
     Color unCheckedColor_;
     Color backgroundColor_;
-    float disabledAlpha_ { 1.0f };
     Dimension textMargin_;
-    Dimension buttonMargin_;
-    Dimension buttonHeight_;
     Dimension buttonRadius_;
     Dimension textFontSize_;
     Color textColor_;
@@ -150,7 +150,6 @@ private:
     bool isPress_ = false;
     bool isSetClickedColor_ = false;
     bool IsNeedToHandleHoverOpacity();
-    bool isTouchPreventDefault_ = false;
     bool isTextFadeOut_ = false;
     bool isHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);

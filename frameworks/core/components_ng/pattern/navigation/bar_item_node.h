@@ -79,6 +79,16 @@ public:
     {
         return isMoreItemNode_;
     }
+    
+    bool IsHideText() const
+    {
+        return isHideText_;
+    }
+
+    void SetIsHideItemText(bool isHideText)
+    {
+        isHideText_ = isHideText;
+    }
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(IconSrc, std::string);
     void OnIconSrcUpdate(const std::string& value) {}
@@ -90,6 +100,7 @@ private:
     RefPtr<UINode> icon_;
     bool isInToolbar_ = false;
     bool isMoreItemNode_ = false;
+    bool isHideText_ = false;
 };
 
 } // namespace OHOS::Ace::NG

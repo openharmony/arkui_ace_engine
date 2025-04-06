@@ -38,6 +38,7 @@ build_component_ng("web_pattern_ng") {
       "web_model_ng.cpp",
       "web_paint_method.cpp",
       "web_pattern.cpp",
+      "web_select_overlay.cpp",
     ]
 
     external_deps = [

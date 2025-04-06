@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/form_render_window.h"
 
+#include "base/log/frame_report.h"
 #include "core/common/container.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -97,8 +98,10 @@ void FormRenderWindow::Destroy()
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
-    rsUIDirector_->Destroy();
-    rsUIDirector_.reset();
+    if (rsUIDirector_) {
+        rsUIDirector_->Destroy();
+        rsUIDirector_.reset();
+    }
     callbacks_.clear();
 #endif
 }
@@ -127,6 +130,7 @@ void FormRenderWindow::OnShow()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 #endif
 }
@@ -141,6 +145,7 @@ void FormRenderWindow::OnHide()
 void FormRenderWindow::FlushTasks()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }
@@ -181,12 +186,25 @@ void FormRenderWindow::InitOnVsyncCallback()
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
             CHECK_NULL_VOID(container);
+            bool isReportFrameEvent = false;
+            auto containerHandler = container->GetContainerHandler();
+            if (containerHandler) {
+                isReportFrameEvent = containerHandler->GetHostConfig().isReportFrameEvent;
+            }
+            if (isReportFrameEvent) {
+                FrameReport::GetInstance().ReportSchedEvent(
+                    FrameSchedEvent::UI_SCB_WORKER_BEGIN, {});
+            }
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
             auto pipeline = container->GetPipelineContext();
             if (pipeline) {
                 pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            }
+            if (isReportFrameEvent) {
+                FrameReport::GetInstance().ReportSchedEvent(
+                    FrameSchedEvent::UI_SCB_WORKER_END, {});
             }
         };
 

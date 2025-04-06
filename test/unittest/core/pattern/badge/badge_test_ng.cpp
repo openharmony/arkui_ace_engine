@@ -55,7 +55,6 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
-constexpr float AGE_FONT_SIZE_SCALE = 1.75f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 
@@ -773,147 +772,6 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: BadgeLayoutAlgorithmTestNg001
- * @tc.desc: Test badge layout in the upper right corner.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg001, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create(u"text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
-     * @tc.expected: step2. related function is called.
-     */
-    layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT_TOP);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT_TOP);
-    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
-}
-
-/**
- * @tc.name: BadgeLayoutAlgorithmTestNg002
- * @tc.desc: Test the layout on the right side of the badge.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg002, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create(u"text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
-     * @tc.expected: step2. related function is called.
-     */
-    layoutProperty_->UpdateBadgePosition(BadgePosition::RIGHT);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::RIGHT);
-    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
-}
-
-/**
- * @tc.name: BadgeLayoutAlgorithmTestNg003
- * @tc.desc: Test the layout on the left side of the badge.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg003, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create(u"text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-
-    /**
-     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
-     * @tc.expected: step2. related function is called.
-     */
-    layoutProperty_->UpdateBadgePosition(BadgePosition::LEFT);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty_->UpdateIsPositionXy(false);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
-    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
-}
-
-/**
- * @tc.name: BadgeLayoutAlgorithmTestNg004
- * @tc.desc: Test the layout on the left side of the badge.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeTestNg, BadgeLayoutAlgorithmTestNg004, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
-    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
-    badge.SetIsDefault(false, false);
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create(u"text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushLayoutTask(frameNode_);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode_->GetLastChild());
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_FALSE(layoutProperty_->GetFontSizeIsDefault());
-    EXPECT_FALSE(layoutProperty_->GetBadgeSizeIsDefault());
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-
-    float fontScale = MockPipelineContext::GetCurrentContext()->GetFontScale();
-    MockPipelineContext::GetCurrentContext()->SetFontScale(AGE_FONT_SIZE_SCALE);
-
-    layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 10);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-
-    layoutProperty_->SetIsDefault(true, true);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Value(), 16);
-    EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(1)).Unit(), DimensionUnit::VP);
-    MockPipelineContext::GetCurrentContext()->SetFontScale(fontScale);
-}
-
-/**
  * @tc.name: BadgeModelNG001
  * @tc.desc: Test badge property.
  * @tc.type: FUNC
@@ -957,6 +815,24 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetBadgeCountValue(), COUNT);
     EXPECT_EQ(layoutProperty->GetBadgePositionXValue(), Dimension(1));
     EXPECT_EQ(layoutProperty->GetBadgePositionYValue(), Dimension(1));
+    /**
+     * @tc.steps: step4. Test updateBadgeStyle method.
+     */
+    BadgeParameters badgeParameters2;
+    badgeParameters2.badgeColor = Color::RED;
+    badgeParameters2.badgeTextColor = Color::RED;
+    badgeParameters2.badgeBorderColor = Color::RED;
+    badgeParameters2.badgeValue = VALUE;
+    badgeParameters2.badgeFontWeight = FontWeight::W100;
+    badgeParameters2.badgeBorderWidth = BADGE_BORDER_WIDTH;
+
+    BadgeModelNG::UpdateBadgeStyle(badgeParameters2, frameNode);
+    EXPECT_EQ(layoutProperty->GetBadgeColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetBadgeBorderColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetBadgeTextColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetBadgeValueValue(), VALUE);
+    EXPECT_EQ(layoutProperty->GetBadgeFontWeightValue(), FontWeight::W100);
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidthValue(), BADGE_BORDER_WIDTH);
 }
 
 /**

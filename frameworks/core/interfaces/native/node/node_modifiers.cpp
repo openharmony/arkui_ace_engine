@@ -34,6 +34,7 @@
 #include "core/interfaces/native/node/grid_row_modifier.h"
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
+#include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
@@ -124,7 +125,14 @@
 #include "core/interfaces/native/node/form_component_modifier.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/interfaces/native/node/web_modifier.h"
+#endif
+
 using namespace OHOS::Ace::NG;
+
+#define MODIFIER_COUNTS 13
+#define BLANK_LINES 6
 
 extern "C" {
 const ArkUINodeModifiers* GetArkUINodeModifiers()
@@ -192,11 +200,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetPolylineModifier,
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
-    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
-    #else
-        .getSideBarContainerModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
     #else
@@ -267,7 +271,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
         .getBadgeModifier = NodeModifier::GetBadgeModifier, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -279,11 +287,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
         .getParticleModifier = NodeModifier::GetParticleModifier,
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
     #ifdef MODEL_COMPONENT_SUPPORTED
@@ -296,8 +300,9 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
+        .getLazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(impl, 14, 0, 0); // don't move this line.  14: ifdef count.
+    CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;
 }
 
@@ -366,11 +371,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetCJUIPolylineModifier,
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
-    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
-    #else
-        .getSideBarContainerModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
     #else
@@ -444,7 +445,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
         .getBadgeModifier = nullptr, // BadgeModifier
+    #ifdef WEB_SUPPORTED
+        .getWebModifier = NodeModifier::GetCJUIWebModifier, // WebModifier
+    #else
         .getWebModifier = nullptr, // WebModifier
+    #endif
         .getRefreshModifier = NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
         .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
@@ -455,11 +460,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
-    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
-    #else
-        .getNodeContentModifier = nullptr,
-    #endif
         .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
         .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
@@ -472,7 +473,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, 14, 6, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, MODIFIER_COUNTS, BLANK_LINES, 0); // don't move this line
     return &modifiers;
 }
 }

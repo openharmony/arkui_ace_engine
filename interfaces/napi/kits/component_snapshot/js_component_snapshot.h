@@ -46,6 +46,10 @@ public:
 
     void ParseOptions(int32_t idx, NG::SnapshotOptions& options);
 
+    bool ParseLocalizedRegion(napi_value* regionObject, NG::SnapshotOptions& options);
+
+    bool ParseRegion(napi_value* regionObject, NG::SnapshotOptions& options);
+
     static constexpr int32_t ARGC_MAX = 5;
 
 private:

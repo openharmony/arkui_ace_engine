@@ -1,16 +1,16 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CJ_FRONTEND_CJ_PAGE_ROUTER_H
@@ -19,14 +19,14 @@
 #include <mutex>
 
 #include "base/utils/base_id.h"
-#include "bridge/js_frontend/js_ace_page.h"
 #include "bridge/cj_frontend/frontend/cj_page_router_abstract.h"
+#include "bridge/js_frontend/js_ace_page.h"
 
 namespace OHOS::Ace::Framework {
 class CJPageRouter final : public CJPageRouterAbstract {
     DECLARE_ACE_TYPE(CJPageRouter, CJPageRouterAbstract)
 public:
-    explicit CJPageRouter(WeakPtr<CJFrontendAbstract> frontend): CJPageRouterAbstract(std::move(frontend)) {}
+    explicit CJPageRouter(WeakPtr<CJFrontendAbstract> frontend) : CJPageRouterAbstract(std::move(frontend)) {}
 
     void OnShowCurrent() override;
     void OnHideCurrent() override;
@@ -34,7 +34,13 @@ public:
 
     void EnableAlertBeforeBackPage(const std::string& message, std::function<void(int32_t)> callback) override;
     int32_t GetStackSize() const override;
-    void GetState(int32_t& index, std::string& name, std::string& path) override;
+    void GetState(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    void GetStateByIndex(int32_t& index, std::string& name, std::string& path, std::string& params) override;
+    std::vector<CJPageRouterAbstract::RouterState> GetStateByUrl(const std::string& url) override;
+    void StartPushPageWithCallback(const RouterPageInfo& target, const std::string& params) override;
+    void StartReplacePageWithCallback(const RouterPageInfo& target, const std::string& params) override;
+    void BackCheckAlertIndex(int32_t index, const std::string& params) override;
+    void DisableAlertBeforeBackPage() override;
     std::string GetParams() const override;
     std::string GetCurrentPageUrl() override;
     RefPtr<JsAcePage> GetLoadingPage()
@@ -86,6 +92,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(CJPageRouter);
 };
-}
+} // namespace OHOS::Ace::Framework
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CJ_FRONTEND_CJ_PAGE_ROUTER_H

@@ -31,6 +31,13 @@
 
 namespace OHOS::Ace::NG {
 
+struct CalendarPaintParams {
+    PickerDate startDate;
+    PickerDate endDate;
+    bool markToday;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+};
+
 class CalendarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CalendarPaintMethod, NodePaintMethod)
 
@@ -38,6 +45,11 @@ public:
     CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay, PickerDate& startDate,
         PickerDate& endDate, bool isCalendarDialog = false)
         : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay), startDate_(startDate), endDate_(endDate),
+          isCalendarDialog_(isCalendarDialog) {};
+    CalendarPaintMethod(ObtainedMonth& obtainedMonth, CalendarDay& calendarDay, const CalendarPaintParams& params,
+        bool isCalendarDialog = false)
+        : obtainedMonth_(obtainedMonth), calendarDay_(calendarDay), startDate_(params.startDate),
+          endDate_(params.endDate), markToday_(params.markToday), disabledDateRange_(params.disabledDateRange),
           isCalendarDialog_(isCalendarDialog) {};
     ~CalendarPaintMethod() override = default;
 
@@ -58,7 +70,7 @@ private:
     void SetDayTextStyle(RSTextStyle& dateTextStyle, RSTextStyle& lunarTextStyle, const CalendarDay& day);
     void SetCalendarPickerDayTextStyle(RSTextStyle& dateTextStyle, const CalendarDay& day);
     void SetOffWorkTextStyle(RSTextStyle& offWorkTextStyle, const CalendarDay& day) const;
-    bool IsDateInRange(const CalendarDay& day);
+    bool IsDateInRange(const CalendarDay& day) const;
     void PaintDay(RSCanvas& canvas, const Offset& offset, const CalendarDay& day, RSTextStyle& textStyle) const;
     void PaintLunarDay(
         RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const RSTextStyle& textStyle) const;
@@ -72,6 +84,8 @@ private:
     CalendarDay calendarDay_;
     PickerDate startDate_;
     PickerDate endDate_;
+    bool markToday_ = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange_;
     std::vector<std::string> weekNumbers_;
     std::vector<CalendarDay> calendarDays_;
     CalendarMonth currentMonth_;
@@ -145,12 +159,14 @@ private:
     RSColor focusedAreaBackgroundColor_;
     RSColor markLunarColor_;
     RSColor textNonCurrentMonthColor_;
+    RSColor textNonCurrentMonthTodayColor_;
     RSColor textSelectedDayColor_;
     RSColor textCurrentDayColor_;
     RSColor textCurrentMonthColor_;
     RSColor backgroundKeyFocusedColor_;
     RSColor backgroundSelectedTodayColor_;
     RSColor backgroundSelectedNotTodayColor_;
+    RSColor backgroundDisabledMarkTodayColor_;
     RSColor backgroundHoverColor_;
     RSColor backgroundPressColor_;
     FontWeight dayFontWeight_ = FontWeight::W500;

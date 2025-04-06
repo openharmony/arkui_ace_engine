@@ -759,7 +759,7 @@ void WebModelNG::SetOnDragMove(
 void WebModelNG::SetOnDragLeave(
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragLeave)
 {
-    ViewAbstract::SetOnDrop(std::move(onDragLeave));
+    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
 }
 
 void WebModelNG::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDropId)
@@ -1046,6 +1046,13 @@ void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
     webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
+void WebModelNG::SetIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateIntrinsicSizeEnabled(isIntrinsicSizeEnabled);
+}
+
 void WebModelNG::RegisterNativeEmbedRule(const std::string& tag, const std::string& type)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1238,13 +1245,6 @@ void WebModelNG::SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay)
     webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 
-void WebModelNG::SetSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
-}
-
 void WebModelNG::SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
@@ -1349,4 +1349,84 @@ void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
 }
+
+void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateJsEnabled(isJsEnabled);
+}
+
+void WebModelNG::SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateFileAccessEnabled(isFileAccessEnabled);
+}
+
+void WebModelNG::SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDomStorageAccessEnabled(isDomStorageAccessEnabled);
+}
+
+void WebModelNG::SetMixedMode(FrameNode* frameNode, MixedModeContent mixedContentMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMixedMode(mixedContentMode);
+}
+
+void WebModelNG::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void WebModelNG::SetCacheMode(FrameNode* frameNode, WebCacheMode cacheMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateCacheMode(cacheMode);
+}
+
+void WebModelNG::SetDarkMode(FrameNode* frameNode, WebDarkMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateDarkMode(mode);
+}
+
+void WebModelNG::SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+}
+
+void WebModelNG::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+}
+
 } // namespace OHOS::Ace::NG

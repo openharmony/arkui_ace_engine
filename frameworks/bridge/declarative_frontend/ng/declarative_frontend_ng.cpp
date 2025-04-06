@@ -57,8 +57,7 @@ bool DeclarativeFrontendNG::Initialize(FrontendType type, const RefPtr<TaskExecu
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {
-        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
     } else {
         initJSEngineTask();
     }
@@ -265,6 +264,35 @@ void DeclarativeFrontendNG::InitializeDelegate(const RefPtr<TaskExecutor>& taskE
     if (jsEngine_) {
         delegate_->SetGroupJsBridge(jsEngine_->GetGroupJsBridge());
     }
+    auto moduleNamecallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](const std::string& pageName)->
+    std::string {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return "";
+        }
+        return jsEngine->SearchRouterRegisterMap(pageName);
+    };
+    auto navigationLoadCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string bundleName, const std::string& moduleName, const std::string& pageSourceFile,
+        bool isSingleton) -> int32_t {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return -1;
+        }
+        return jsEngine->LoadNavDestinationSource(bundleName, moduleName, pageSourceFile, isSingleton);
+    };
+    auto container = Container::Current();
+    if (container) {
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        // ArkTSCard container no SetPageUrlChecker
+        if (pageUrlChecker != nullptr) {
+            pageUrlChecker->SetModuleNameCallback(std::move(moduleNamecallback));
+        }
+        auto navigationRoute = container->GetNavigationRoute();
+        if (navigationRoute) {
+            navigationRoute->SetLoadPageCallback(std::move(navigationLoadCallback));
+        }
+    }
 }
 
 RefPtr<NG::PageRouterManager> DeclarativeFrontendNG::GetPageRouterManager() const
@@ -375,8 +403,7 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(const std::string& url, const 
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource");
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {

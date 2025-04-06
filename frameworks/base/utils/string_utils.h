@@ -208,13 +208,13 @@ inline std::string RestoreBackslash(const std::string& src)
     return res;
 }
 
-inline int32_t StringToInt(const std::string& value)
+inline int32_t StringToInt(const std::string& value, int64_t defaultErr = 0)
 {
     errno = 0;
     char* pEnd = nullptr;
     int64_t result = std::strtol(value.c_str(), &pEnd, 10);
     if (pEnd == value.c_str() || (result < INT_MIN || result > INT_MAX) || errno == ERANGE) {
-        return 0;
+        return defaultErr;
     } else {
         return result;
     }
@@ -685,6 +685,17 @@ inline void SplitStr(const std::string& str, const std::string& sep, std::vector
             out.emplace_back(StringToDimension(std::move(strPart)));
         }
     }
+}
+
+inline bool CStringEqual(const char* first, const char* second)
+{
+    if (first == nullptr && second == nullptr) {
+        return true;
+    }
+    if (first && second) {
+        return std::strcmp(first, second) == 0;
+    }
+    return false;
 }
 
 const std::string ACE_FORCE_EXPORT FormatString(const char* fmt, ...);

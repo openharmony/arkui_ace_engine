@@ -18,6 +18,7 @@
 #include "core/components/box/render_box.h"
 #include "core/components/select/render_select.h"
 #include "core/components/text/render_text.h"
+#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
 

@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_RENDER_SURFACE_H
 
+#include <queue>
+
 #ifdef OHOS_PLATFORM
 #include "ibuffer_consumer_listener.h"
 #include "iconsumer_surface.h"
@@ -92,6 +94,16 @@ public:
     std::string GetPatternType() const
     {
         return patternType_;
+    }
+
+    void SetBufferUsage(const std::string& usage) override
+    {
+        bufferUsage_ = usage;
+    }
+
+    std::string GetBufferUsage() const
+    {
+        return bufferUsage_;
     }
 
     void SetWebSlideAxis(Axis axis) override
@@ -179,6 +191,7 @@ private:
     RectF keyBoardAvoidRect_;
     OffsetF orgin_ { 0, 0 };
     std::string patternType_;
+    std::string bufferUsage_;
     int32_t queueSize_ = SURFACE_QUEUE_SIZE;
     Axis axis_ = Axis::NONE;
     float webOffset_ = 0.0;

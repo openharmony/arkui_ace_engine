@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -95,9 +95,7 @@ public:
         IDLE,
     };
 
-    static void SetVelocityScale(double sVelocityScale);
     static double GetVelocityScale();
-    static void SetFriction(double sFriction);
 
     void Initialize(const RefPtr<FrameNode>& host);
 
@@ -189,16 +187,16 @@ public:
         springVelocityScale_ = scale;
     }
 
-    void HandleTouchDown();
+    void HandleTouchDown(bool fromcrown = false);
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
-    void HandleDragEnd(const GestureEvent& info);
+    void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
-    void ProcessAxisUpdateEvent(float mainDelta);
+    void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
     void ProcessAxisEndEvent();
     void LayoutDirectionEst(double correctVelocity, double velocityScale, bool isScrollFromTouchPad);
     void ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus);
@@ -375,6 +373,8 @@ public:
         getSnapTypeCallback_ = getSnapTypeCallback;
     }
 
+    std::optional<float> GetPredictSnapOffset() const;
+
     void SetHandleScrollCallback(NestableScrollCallback&& func)
     {
         handleScrollCallback_ = std::move(func);
@@ -492,11 +492,7 @@ public:
         return endPos_;
     }
 
-    void SetMaxFlingVelocity(double max)
-    {
-        double density = PipelineBase::GetCurrentDensity();
-        maxFlingVelocity_ = max * density;
-    }
+    void SetMaxFlingVelocity(double max);
 
     double GetMaxFlingVelocity() const
     {
@@ -540,9 +536,9 @@ public:
         return isCrownEventDragging_;
     }
 
-    void SetReachBoundary(bool flag)
+    void SetCrownEventDragging(bool draging)
     {
-        reachBoundary_ = flag;
+        isCrownEventDragging_ = draging;
     }
 #endif
 
@@ -573,6 +569,8 @@ private:
     void SetOnActionUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
+    void SetPanEndCallback();
+    void ProcessPanActionEndEvents(const GestureEvent& info);
     bool UpdateScrollPosition(double offset, int32_t source) const;
     void ProcessSpringMotion(double position);
     void ProcessScrollMotion(double position, int32_t source = SCROLL_FROM_ANIMATION);
@@ -588,6 +586,7 @@ private:
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
     void CalcOverScrollVelocity();
+    double CalcNextStep(double position, double mainDelta);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownEvent(const CrownEvent& event, const OffsetF& center);
@@ -639,13 +638,12 @@ private:
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
+    bool isCrownDragging_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
     // The tag of UINode
     std::string nodeTag_ = "Scrollable";
     double slipFactor_ = 0.0;
-    static std::optional<double> sFriction_;
-    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -689,6 +687,7 @@ private:
     float lastPosition_ = 0.0f;
     float initVelocity_ = 0.0f;
     float frictionVelocity_ = 0.0f;
+    double lastMainDelta_ = 0.0;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     bool skipRestartSpring_ = false; // set to true when need to skip repeated spring animation
@@ -709,6 +708,8 @@ private:
     bool nestedScrolling_ = false;
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
+    bool isSlow_ = false;
+    std::optional<float> nextStep_;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -719,6 +720,7 @@ private:
 
     int crownEventNum_ = 0;
     bool reachBoundary_ = false;
+    CancelableCallback<void()> crownTask_;
 #endif
 };
 

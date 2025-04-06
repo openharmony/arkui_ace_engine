@@ -33,12 +33,12 @@ void IfElseModelNG::Pop()
     ViewStackProcessor::GetInstance()->PopContainer();
 }
 
-void IfElseModelNG::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId)
+void IfElseModelNG::SetBranchId(int32_t value, std::list<int32_t>& removedElmtId, std::list<int32_t>& reservedElmtId)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
     CHECK_NULL_VOID(node);
-    node->SetBranchId(value, removedElmtId);
+    node->SetBranchId(value, removedElmtId, reservedElmtId);
 }
 
 int32_t IfElseModelNG::GetBranchId()
@@ -55,6 +55,14 @@ bool IfElseModelNG::CanRetake(const std::string& id)
     auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
     CHECK_NULL_RETURN(node, false);
     return node->TryRetake(id);
+}
+
+bool IfElseModelNG::GetRetakenElmtIds(std::list<int32_t>& retakenElmtIds)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto node = AceType::DynamicCast<IfElseNode>(stack->GetMainElementNode());
+    CHECK_NULL_RETURN(node, false);
+    return node->GetRetakenElmtIds(retakenElmtIds);
 }
 
 } // namespace OHOS::Ace::NG

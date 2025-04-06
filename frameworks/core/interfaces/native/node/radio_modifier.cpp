@@ -17,6 +17,7 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -308,6 +309,26 @@ void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr gr
     }
     RadioModelNG::SetRadioOptions(frameNode, std::string(value), std::string(group), indicatorType);
 }
+
+void SetRadioOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        RadioModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        RadioModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetRadioOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetOnChange(frameNode, nullptr);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -340,6 +361,8 @@ const ArkUIRadioModifier* GetRadioModifier()
         .resetRadioGroup = ResetRadioGroup,
         .getRadioGroup = GetRadioGroup,
         .setRadioOptions = SetRadioOptions,
+        .setRadioOnChange = SetRadioOnChange,
+        .resetRadioOnChange = ResetRadioOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

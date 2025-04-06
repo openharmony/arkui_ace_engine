@@ -2179,29 +2179,29 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     auto frameId = tmpHost->GetId();
     Offset offset1(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
-    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->ChangeMouseState(offset1, frameId);
     Offset offset2(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->ChangeMouseState(offset2, frameId);
     Offset offset3(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->ChangeMouseState(offset3, frameId);
     Offset offset4(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
-    pattern->ChangeMouseState(offset4, frameId, true);
+    pattern->ChangeMouseState(offset4, frameId);
 
     // test rtl
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
-    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->ChangeMouseState(offset1, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->ChangeMouseState(offset2, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->ChangeMouseState(offset3, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
-    pattern->ChangeMouseState(offset4, frameId, true);
+    pattern->ChangeMouseState(offset4, frameId);
 }
 
 /**
@@ -2559,6 +2559,42 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
     layoutWrapper->skipMeasureContent_ = true;
     layoutWrapper->layoutAlgorithm_->skipMeasure_ = true;
     EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config), false);
+}
+
+/**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test testInput text IsShowTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowTranslate();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnTranslate001
+ * @tc.desc: test testInput text HandleOnTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnTranslate();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
 }
 
 /**

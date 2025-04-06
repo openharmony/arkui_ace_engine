@@ -19,7 +19,6 @@
 #include <unistd.h>
 
 #include "base/image/image_packer.h"
-#include "base/utils/utf_helper.h"
 #include "core/text/html_utils.h"
 
 namespace OHOS::Ace {
@@ -135,7 +134,7 @@ std::string SpanToHtml::TextDecorationStyleToHtml(TextDecorationStyle decoration
 
 std::string SpanToHtml::DimensionToString(const Dimension& dimension)
 {
-    return StringUtils::DoubleToString(dimension.ConvertToPx()).append("px");
+    return StringUtils::DoubleToString(dimension.ConvertToVp()).append("px");
 }
 
 std::string SpanToHtml::DimensionToStringWithoutUnit(const Dimension& dimension)
@@ -212,6 +211,11 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<CalcD
     }
 
     return ToHtmlStyleFormat(key, DimensionToString(*dimesion));
+}
+
+std::string SpanToHtml::ToHtml(const std::string& key, bool syncLoad)
+{
+    return ToHtmlStyleFormat(key, V2::ConvertBoolToString(syncLoad));
 }
 
 std::string SpanToHtml::ToHtmlImgSizeAttribute(const std::string& key, const std::optional<CalcDimension>& dimesion)
@@ -400,19 +404,19 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
     }
 
     auto options = image->options;
-    if (!options.image || !options.imagePixelMap) {
-        return "";
-    }
-
-    auto pixelMap = options.imagePixelMap.value();
-    if (pixelMap == nullptr) {
+    if (!options.image && !options.imagePixelMap) {
         return "";
     }
 
     std::string urlName;
-    int ret = WriteLocalFile(pixelMap, *options.image, urlName);
-    LOGI("img write ret: %{public}d height: %{public}d, width: %{public}d, size:%{public}d", ret, pixelMap->GetHeight(),
-        pixelMap->GetWidth(), pixelMap->GetByteCount());
+    auto pixelMap = options.imagePixelMap.value_or(nullptr);
+    if (pixelMap) {
+        int ret = WriteLocalFile(pixelMap, *options.image, urlName);
+        LOGI("img write ret: %{public}d height: %{public}d, width: %{public}d, size:%{public}d", ret,
+            pixelMap->GetHeight(), pixelMap->GetWidth(), pixelMap->GetByteCount());
+    } else if (options.image.has_value()) {
+        urlName = options.image.value();
+    }
     std::string imgHtml = "<img src=\"" + urlName + "\" ";
     imgHtml += ToHtml(options.imageAttribute->size);
     if (options.imageAttribute) {
@@ -422,6 +426,9 @@ std::string SpanToHtml::ImageToHtml(RefPtr<NG::SpanItem> item)
         imgHtml += ToHtml("margin", options.imageAttribute->marginProp);
         imgHtml += ToHtml(options.imageAttribute->borderRadius);
         imgHtml += ToHtml("padding", options.imageAttribute->paddingProp);
+        if (!pixelMap) {
+            imgHtml += ToHtml("sync-load", options.imageAttribute->syncLoad);
+        }
         imgHtml += "\"";
     }
 

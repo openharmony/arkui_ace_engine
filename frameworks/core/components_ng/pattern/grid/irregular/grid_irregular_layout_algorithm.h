@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
@@ -47,6 +48,11 @@ public:
     void SetEnableSkip(bool value)
     {
         enableSkip_ = value;
+    }
+
+    void SetScrollSource(bool source)
+    {
+        scrollSource_ = source;
     }
 
 private:
@@ -91,8 +97,9 @@ private:
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      * @param cacheLine number of lines of cache items to layout
+     * @return number of cached items laid out in front and back
      */
-    void LayoutChildren(float mainOffset, int32_t cacheLine);
+    std::pair<int32_t, int32_t> LayoutChildren(float mainOffset, int32_t cacheLine);
 
     /**
      * @brief Update variables in GridLayoutInfo at the end of Layout.
@@ -169,6 +176,7 @@ private:
     bool enableSkip_ = true;
     bool canOverScrollStart_ = false;
     bool canOverScrollEnd_ = false;
+    int32_t scrollSource_ = SCROLL_FROM_NONE;
 
     SizeF frameSize_;
 

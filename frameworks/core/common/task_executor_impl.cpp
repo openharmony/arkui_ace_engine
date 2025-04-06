@@ -195,7 +195,7 @@ bool TaskExecutorImpl::OnPostTask(
         (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
         TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
             std::move(task), currentId, delayTime, std::move(traceIdFunc));
-        taskWrapper_->Call(std::move(wrappedTask));
+        taskWrapper_->Call(std::move(wrappedTask), delayTime);
         return true;
     }
 
@@ -204,19 +204,15 @@ bool TaskExecutorImpl::OnPostTask(
 
     switch (type) {
         case TaskType::PLATFORM:
-            return PostTaskToTaskRunner(
-                platformRunner_, std::move(wrappedTask), delayTime, name, GetPriorityTypeWithCheck(priorityType));
+            return PostTaskToTaskRunner(platformRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::UI:
             return PostTaskToTaskRunner(uiRunner_, std::move(wrappedTask), delayTime, name, priorityType);
         case TaskType::IO:
-            return PostTaskToTaskRunner(
-                ioRunner_, std::move(wrappedTask), delayTime, name, GetPriorityTypeWithCheck(priorityType));
+            return PostTaskToTaskRunner(ioRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::GPU:
-            return PostTaskToTaskRunner(
-                gpuRunner_, std::move(wrappedTask), delayTime, name, GetPriorityTypeWithCheck(priorityType));
+            return PostTaskToTaskRunner(gpuRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::JS:
-            return PostTaskToTaskRunner(
-                jsRunner_, std::move(wrappedTask), delayTime, name, GetPriorityTypeWithCheck(priorityType));
+            return PostTaskToTaskRunner(jsRunner_, std::move(wrappedTask), delayTime, name);
         case TaskType::BACKGROUND:
             // Ignore delay time
             return BackgroundTaskExecutor::GetInstance().PostTask(std::move(wrappedTask));

@@ -23,7 +23,6 @@
 #include "base/memory/referenced.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_object.h"

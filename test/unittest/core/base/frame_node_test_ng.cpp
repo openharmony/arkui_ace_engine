@@ -398,7 +398,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
     DimensionRect dimensionRect;
     FRAME_NODE2->AddHotZoneRect(dimensionRect);
     FRAME_NODE2->RemoveLastHotZoneRect();
-    EXPECT_NE(FRAME_NODE2->eventHub_, nullptr);
+    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>(), nullptr);
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
@@ -482,7 +482,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
      */
     FRAME_NODE->FromJson(jsonValue);
     FRAME_NODE->renderContext_ = nullptr;
-    FRAME_NODE->eventHub_->focusHub_ = nullptr;
+    FRAME_NODE->focusHub_ = nullptr;
     auto jsonValue2 = JsonUtil::Create(true);
     FRAME_NODE->ToJsonValue(jsonValue2, filter);
     FRAME_NODE->FromJson(jsonValue2);
@@ -648,7 +648,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback0013, TestSize.Lev
      * @tc.steps: step3.set callback and release lastParentOffsetToWindow_
      * @tc.expected: expect flag is still false
      */
-    FRAME_NODE2->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
+    FRAME_NODE2->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
     FRAME_NODE2->lastParentOffsetToWindow_ = nullptr;
     FRAME_NODE2->TriggerOnAreaChangeCallback(TIMESTAMP_2);
     EXPECT_FALSE(flag);
@@ -945,7 +945,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
      * @tc.expected: expect The function return value is OUT_OF_REGION.
      */
     FRAME_NODE2->isActive_ = false;
-    FRAME_NODE2->eventHub_->SetEnabled(false);
+    FRAME_NODE2->GetEventHub<EventHub>()->SetEnabled(false);
     auto test = FRAME_NODE2->TouchTest(
         globalPoint, parentLocalPoint, parentLocalPoint, touchRestrict, result, 1, responseLinkResult);
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
@@ -967,9 +967,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
     const PointF parentRevertPoint;
     TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
-    FRAME_NODE2->eventHub_->GetOrCreateInputEventHub();
+    FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_NE(FRAME_NODE2->eventHub_->inputEventHub_, nullptr);
+    EXPECT_NE(FRAME_NODE2->GetEventHub<EventHub>()->inputEventHub_, nullptr);
 }
 
 /**
@@ -1035,6 +1035,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeMarkRemoving0029, TestSize.Level1)
      * @tc.steps: step1. callback MarkRemoving.
      * @tc.expected: expect The function return value is true.
      */
+    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     FRAME_NODE2->AddChild(FRAME_NODE3);
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto mark = FRAME_NODE2->MarkRemoving();
@@ -1158,11 +1159,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAnimateHoverEffect0034, TestSize.Level1)
      * @tc.expected: AnimateHoverEffectScale has been called
      */
     auto one = FrameNode::GetOrCreateFrameNode("one", 12, []() { return AceType::MakeRefPtr<Pattern>(); });
-    one->eventHub_->inputEventHub_ = nullptr;
+    one->GetEventHub<EventHub>()->inputEventHub_ = nullptr;
     auto renderContext = AceType::DynamicCast<MockRenderContext>(one->renderContext_);
     EXPECT_CALL(*renderContext, AnimateHoverEffectScale(_));
     one->AnimateHoverEffect(false);
-    auto inputEventHub = one->eventHub_->GetOrCreateInputEventHub();
+    auto inputEventHub = one->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
     inputEventHub->hoverEffectType_ = HoverEffectType::UNKNOWN;
     one->AnimateHoverEffect(false);
     inputEventHub->hoverEffectType_ = HoverEffectType::AUTO;
@@ -1403,7 +1404,7 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
     frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
     layoutProperty->UpdateLayoutConstraint(layoutConstraintF_);
 
-    frameNode->eventHub_->GetOrCreateFocusHub();
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub();
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
     EXPECT_NE(frameNode->eventHub_, nullptr);
 
@@ -1411,9 +1412,9 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
      * @tc.steps: step5. set currentFocus_ is true and call SwapDirtyLayoutWrapperOnMainThread.
      * @tc.expected: expect cover branch IsCurrentFocus() is true and function is run ok .
      */
-    frameNode->eventHub_->GetOrCreateFocusHub()->currentFocus_ = true;
+    frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->currentFocus_ = true;
     frameNode->SwapDirtyLayoutWrapperOnMainThread(layoutWrapper);
-    EXPECT_TRUE(frameNode->eventHub_->GetOrCreateFocusHub()->IsCurrentFocus());
+    EXPECT_TRUE(frameNode->GetEventHub<EventHub>()->GetOrCreateFocusHub()->IsCurrentFocus());
 }
 
 /**
@@ -1482,7 +1483,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback048, TestSize
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     FRAME_NODE2->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
-    FRAME_NODE2->ProcessThrottledVisibleCallback();
+    FRAME_NODE2->ProcessThrottledVisibleCallback(false);
     EXPECT_EQ(FRAME_NODE2->throttledCallbackOnTheWay_, false);
 }
 
@@ -2450,4 +2451,106 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
     EXPECT_TRUE(json->Contains(label));
 }
 
+/**
+ * @tc.name: FrameNodeTestNg091
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg091, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(1 << 5);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 1 << 5);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg092
+ * @tc.desc: Test AddFrameNodeChangeInfoFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg092, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->AddFrameNodeChangeInfoFlag(0);
+    EXPECT_EQ(frameNode->GetChangeInfoFlag(), 0);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg093
+ * @tc.desc: Test SetPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg093, TestSize.Level1)
+{
+    auto paintNode = FrameNode::CreateFrameNode("paintNodeTag", 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetPaintNode(paintNode);
+    EXPECT_EQ(frameNode->GetPaintNode(), paintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg094
+ * @tc.desc: Test GetPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg094, TestSize.Level1)
+{
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
+    FrameNode frameNode("testTag", 1, pattern);
+    RefPtr<FrameNode> paintNode = AceType::MakeRefPtr<FrameNode>("paintNodeTag", 2, pattern);
+    frameNode.SetPaintNode(paintNode);
+    const RefPtr<FrameNode>& result = frameNode.GetPaintNode();
+    ASSERT_EQ(result, paintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg095
+ * @tc.desc: Test SetFocusPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg095, TestSize.Level1)
+{
+    auto focusPaintNode = FrameNode::CreateFrameNode("focusTag", 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetFocusPaintNode(focusPaintNode);
+    EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg096
+ * @tc.desc: Test GetFocusPaintNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg096, TestSize.Level1)
+{
+    auto focusPaintNode = FrameNode::CreateFrameNode("focusPaintNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->SetFocusPaintNode(focusPaintNode);
+    EXPECT_EQ(frameNode->GetFocusPaintNode(), focusPaintNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg097
+ * @tc.desc: Test IsDrawFocusOnTop
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg097, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_FALSE(frameNode->IsDrawFocusOnTop());
+}
+
+/**
+ * @tc.name: FrameNodeTestNg098
+ * @tc.desc: Test IsDrawFocusOnTop true value
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg098, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    EXPECT_TRUE(frameNode->IsDrawFocusOnTop());
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,8 @@ ace_unittest("grid_row_test_ng") {
   type = "new"
   sources = [
     "grid_row_base_test_ng.cpp",
+    "grid_row_layout_test_ng.cpp",
+    "grid_row_measure_test_ng.cpp",
     "grid_row_new_test_ng.cpp",
     "old_cases/grid_row_test_ng.cpp",
   ]

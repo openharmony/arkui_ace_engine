@@ -68,6 +68,17 @@ struct UIComponents {
     RefPtr<GeometryNode> titleGeometryNode = nullptr;
     RefPtr<GeometryNode> subtitleGeometryNode = nullptr;
 };
+
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == NavigationBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<NavigationBarTheme>();
+    } else if (type == AgingAdapationDialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
+    } else {
+        return AceType::MakeRefPtr<DialogTheme>();
+    }
+}
 } // namespace
 
 class NavdestinationTestNg : public testing::Test {
@@ -103,14 +114,10 @@ void NavdestinationTestNg::MockPipelineContextGetTheme()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == NavigationBarTheme::TypeId()) {
-            return AceType::MakeRefPtr<NavigationBarTheme>();
-        } else if (type == AgingAdapationDialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<AgingAdapationDialogTheme>();
-        } else {
-            return AceType::MakeRefPtr<DialogTheme>();
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
 }
 
 RefPtr<LayoutWrapperNode> NavdestinationTestNg::CreateNavDestinationWrapper()
@@ -1092,7 +1099,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 1.0f;
     float subtitleHeight = 0.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_ = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1112,7 +1119,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 100.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 2.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 2.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1133,7 +1140,7 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     InitChildrenComponent(ui);
     float titleHeight = 99.0f;
     float subtitleHeight = 1.0f;
-    ui.titleBarLayoutAlgorithm->menuHeight_ = 0.0f;
+    ui.titleBarLayoutAlgorithm->menuOccupiedHeight_  = 0.0f;
     auto titleBarGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(titleBarGeometryNode, nullptr);
     titleBarGeometryNode->SetFrameSize(SizeF(100, 100));
@@ -1141,6 +1148,48 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     float offsetY = 0.0f;
     EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
         titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
+}
+
+/**
+ * @tc.name: SetHideBackButton001
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(true);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, true);
+}
+
+/**
+ * @tc.name: SetHideBackButton002
+ * @tc.desc: Test SetHideBackButton function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetHideBackButton002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG NavDestinationModelNG;
+    NavDestinationModelNG.Create();
+    NavDestinationModelNG.SetHideBackButton(false);
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto navDestinationLayoutProperty = navDestinationGroupNode->GetLayoutPropertyPtr<NavDestinationLayoutProperty>();
+    ASSERT_NE(navDestinationLayoutProperty, nullptr);
+    auto hideBackButtonValue = navDestinationLayoutProperty->GetHideBackButtonValue(false);
+    ASSERT_EQ(hideBackButtonValue, false);
 }
 
 /**
@@ -1163,7 +1212,9 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
 
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1177,8 +1228,8 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
@@ -1210,7 +1261,9 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
 
     NavigationTitlebarOptions opt;
     opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
-    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::REGULAR;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
     opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
     opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
     opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
@@ -1224,8 +1277,8 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
     EXPECT_TRUE(options.bgOptions.color.has_value());
     EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
 
-    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
-    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+    EXPECT_TRUE(options.bgOptions.blurStyleOption.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyleOption->blurStyle, BlurStyle::REGULAR);
 
     EXPECT_TRUE(options.brOptions.barStyle.has_value());
     EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);

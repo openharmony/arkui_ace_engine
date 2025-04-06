@@ -23,8 +23,8 @@
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 
 namespace OHOS::AAFwk {
 class Want;

@@ -423,17 +423,49 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
 
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
 {
-    static const ArkUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
-        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
-        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINodeAdapterAPI impl {
+        .create = Create,
+        .dispose = Dispose,
+        .setTotalNodeCount = SetTotalNodeCount,
+        .getTotalNodeCount = GetTotalNodeCount,
+        .registerEventReceiver = RegisterEventReceiver,
+        .unregisterEventReceiver = UnregisterEventReceiver,
+        .notifyItemReloaded = NotifyItemReloaded,
+        .notifyItemChanged = NotifyItemChanged,
+        .notifyItemRemoved = NotifyItemRemoved,
+        .notifyItemInserted = NotifyItemInserted,
+        .notifyItemMoved = NotifyItemMoved,
+        .getAllItem = GetAllItem,
+        .attachHostNode = AttachHostNode,
+        .detachHostNode = DetachHostNode,
+        .getNodeAdapter = GetNodeAdapter
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 
 const CJUINodeAdapterAPI* GetCJUINodeAdapterAPI()
 {
-    static const CJUINodeAdapterAPI impl { Create, Dispose, SetTotalNodeCount, GetTotalNodeCount,
-        RegisterEventReceiver, UnregisterEventReceiver, NotifyItemReloaded, NotifyItemChanged, NotifyItemRemoved,
-        NotifyItemInserted, NotifyItemMoved, GetAllItem, AttachHostNode, DetachHostNode, GetNodeAdapter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINodeAdapterAPI impl {
+        .create = Create,
+        .dispose = Dispose,
+        .setTotalNodeCount = SetTotalNodeCount,
+        .getTotalNodeCount = GetTotalNodeCount,
+        .registerEventReceiver = RegisterEventReceiver,
+        .unregisterEventReceiver = UnregisterEventReceiver,
+        .notifyItemReloaded = NotifyItemReloaded,
+        .notifyItemChanged = NotifyItemChanged,
+        .notifyItemRemoved = NotifyItemRemoved,
+        .notifyItemInserted = NotifyItemInserted,
+        .notifyItemMoved = NotifyItemMoved,
+        .getAllItem = GetAllItem,
+        .attachHostNode = AttachHostNode,
+        .detachHostNode = DetachHostNode,
+        .getNodeAdapter = GetNodeAdapter
+    };
+    CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
 }
 

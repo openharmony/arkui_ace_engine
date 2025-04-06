@@ -33,6 +33,14 @@ inline RefPtr<NavigationBarTheme> NavigationGetTheme()
     return pipeline->GetTheme<NavigationBarTheme>();
 }
 
+
+inline RefPtr<NavigationBarTheme> NavigationGetTheme(int32_t themeScopeId)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    return pipeline->GetTheme<NavigationBarTheme>(themeScopeId);
+}
+
 // TODO：move some items to theme
 // title bar back button
 constexpr const char* BACK_BUTTON = "Back";
@@ -122,6 +130,13 @@ constexpr const char* DES_FIELD = "__NavdestinationField__";
 
 // font scale
 constexpr float STANDARD_FONT_SCALE = 1.0f;
+
+constexpr int32_t ROTATION_0 = 0;
+constexpr int32_t ROTATION_90 = 90;
+constexpr int32_t ROTATION_180 = 180;
+constexpr int32_t ROTATION_270 = 270;
+
+constexpr uint32_t BAR_ITEM_MARGIN_NUM = 2;
 
 enum class NavToolbarItemStatus {
     NORMAL = 0,
@@ -245,7 +260,12 @@ enum class NavigationSystemTransitionType {
     TITLE = 1,
     CONTENT = 1 << 1,
     DEFAULT = 1 | (1 << 1),
+    FADE = 1 << 2,
+    EXPLODE = 1 << 3,
+    SLIDE_RIGHT = 1 << 4,
+    SLIDE_BOTTOM = 1 << 5,
 };
+
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
 {
     return static_cast<NavigationSystemTransitionType>(static_cast<uint32_t>(lv) & static_cast<uint32_t>(rv));
@@ -254,6 +274,18 @@ struct NavSafeArea {
     float top = 0.0f;
     float bottom = 0.0f;
 };
+
+struct NavDestinationTransition {
+    int32_t delay;
+    int32_t duration;
+    RefPtr<Curve> curve;
+    std::function<void()> event;
+    std::function<void()> onTransitionEnd;
+};
+
+using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
+    NavigationOperation operation, bool isEnter)>;
+using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;
 
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

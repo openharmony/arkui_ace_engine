@@ -77,7 +77,8 @@ void MultiFingersRecognizer::SetFingerList(const std::map<int32_t, TouchEvent> t
 {
     for (auto& point : touchPoints) {
         Offset localLocation = point.second.GetOffset() - coordinateOffset;
-        FingerInfo fingerInfo = { point.first, point.second.GetOffset(), localLocation, {} };
+        FingerInfo fingerInfo = { point.first, point.second.operatingHand, point.second.GetOffset(),
+            localLocation, {} };
         fingerList.emplace_back(fingerInfo);
     }
 }

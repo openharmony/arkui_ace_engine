@@ -199,14 +199,19 @@ public:
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
-    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) override;
-    void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
+    void UpdateBackBlurStyle(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackgroundEffect(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
-    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateBackBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
-    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateFrontBlur(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
-    void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
+    void UpdateFrontBlurStyle(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
     void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
     void OnSphericalEffectUpdate(double radio) override;
@@ -252,6 +257,7 @@ public:
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
     void UpdateWindowFocusState(bool isFocused) override;
+    void UpdateWindowActiveState(bool isActive) override;
     void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
@@ -279,7 +285,10 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
     void SetHDRBrightness(float hdrBrightness) override;
+    void SetImageHDRBrightness(float hdrBrightness) override;
+    void SetImageHDRPresent(bool hdrPresent) override;
     void SetTransparentLayer(bool isTransparentLayer) override;
+    void SetScreenId(uint64_t screenId) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -293,6 +302,8 @@ public:
     std::pair<RectF, bool> GetPaintRectWithTranslate() override;
 
     RectF GetPaintRectWithoutTransform() override;
+
+    RectF GetPaintRectWithTransformWithoutDegree() override;
 
     // get position property
     RectF GetPropertyOfPosition() override;
@@ -312,6 +323,8 @@ public:
     void GetPointTransform(PointF& point) override;
 
     void GetPointTransformRotate(PointF& point) override;
+
+    Matrix4 GetMatrixWithTransformRotate() override;
 
     void GetPointWithTransform(PointF& point) override;
 
@@ -367,6 +380,7 @@ public:
     void OnBackgroundColorUpdate(const Color& value) override;
     void OnOpacityUpdate(double opacity) override;
     void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) override;
+    void SetIsWideColorGamut(bool isWideColorGamut) override;
     void SetAlphaOffscreen(bool isOffScreen) override;
     void MarkContentChanged(bool isChanged) override;
     void MarkDrivenRender(bool flag) override;
@@ -383,7 +397,7 @@ public:
     void AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property) override;
     void DetachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
 
-    void RegisterSharedTransition(const RefPtr<RenderContext>& other) override;
+    void RegisterSharedTransition(const RefPtr<RenderContext>& other, const bool isInSameWindow) override;
     void UnregisterSharedTransition(const RefPtr<RenderContext>& other) override;
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
@@ -410,6 +424,11 @@ public:
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
 
+    OffsetF GetBaseTransalteInXY() const override;
+    void SetBaseTranslateInXY(const OffsetF& offset) override;
+    float GetBaseRotateInZ() const override;
+    void SetBaseRotateInZ(float degree) override;
+
     void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) override;
     void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) override;
     void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) override;
@@ -417,6 +436,7 @@ public:
     void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) override;
     void ResetSurface(int width, int height) override;
     void SetMarkNodeGroup(bool isNodeGroup) override;
+    int32_t GetRotateDegree() override;
     void PaintDebugBoundary(bool flag) override;
     void UpdateRenderGroup(bool isRenderGroup, bool isForced, bool includeProperty) override;
     void SavePaintRect(bool isRound = true, uint16_t flag = 0) override;
@@ -431,6 +451,52 @@ public:
     }
     void UpdateWindowBlur() override;
     void MarkUiFirstNode(bool isUiFirstNode) override;
+
+    void SetDrawNode() override;
+    bool AddNodeToRsTree() override;
+    static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
+    RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
+    void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void AddRsNodeForCapture();
+    static bool initDrawNodeChangeCallback_;
+
+    void FreezeCanvasNode(bool freezeFlag = false);
+    void RemoveCanvasNode();
+    void CheckAnimationParametersValid(int32_t& animationParam);
+    bool SetCanvasNodeOpacityAnimation(int32_t duration, int32_t delay, bool isDragEnd = false);
+    void LinkCanvasNodeToRootNode(const RefPtr<FrameNode>& rootNode);
+    void CreateCanvasNode();
+    std::shared_ptr<Rosen::RSCanvasNode> GetCanvasNode() const;
+
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
+    {
+        callbackAnimateEnd_ =  callback;
+    }
+
+    void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
+    {
+        callbackCachedAnimateAction_ = callback;
+    }
+
+    bool GetIsDraggingFlag() const
+    {
+        return isDraggingFlag_;
+    }
+
+    void SetIsDraggingFlag(bool isDraggingFlag)
+    {
+        isDraggingFlag_ = isDraggingFlag;
+    }
+
+    bool GetReDraggingFlag() const
+    {
+        return reDraggingFlag_;
+    }
+
+    void SetReDraggingFlag(bool reDraggingFlag)
+    {
+        reDraggingFlag_ = reDraggingFlag;
+    }
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -632,7 +698,6 @@ protected:
     void OnePixelRounding();
     void OnePixelRounding(uint16_t flag = 0);
     Matrix4 GetMatrix();
-    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
@@ -658,6 +723,7 @@ protected:
     PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
+    bool isWideColorGamut_ = false;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool firstTransitionIn_ = false;
@@ -703,6 +769,10 @@ protected:
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
+    std::shared_ptr<Rosen::RSRotationXModifier> rotationXUserModifier_;
+    std::shared_ptr<Rosen::RSRotationYModifier> rotationYUserModifier_;
+    std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
+    std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
@@ -712,6 +782,10 @@ protected:
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
     std::optional<OffsetF> frameOffset_;
+
+    // for page orientation feature.
+    std::shared_ptr<Rosen::RSTranslateModifier> baseTranslateInXY_;
+    std::shared_ptr<Rosen::RSRotationModifier> baseRotateInZ_;
 
     // graphics modifiers
     struct GraphicModifiers {
@@ -742,6 +816,12 @@ protected:
     std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
+
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_;
+    std::function<void()> callbackAnimateEnd_ = nullptr;
+    std::function<void()> callbackCachedAnimateAction_ = nullptr;
+    bool isDraggingFlag_ = false;
+    bool reDraggingFlag_ = false;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

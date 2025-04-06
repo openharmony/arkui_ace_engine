@@ -22,10 +22,11 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/common_decoration.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -586,6 +587,16 @@ public:
         return normalButtonFontSize_;
     }
 
+    const std::string& GetCancelText() const
+    {
+        return cancelText_;
+    }
+
+    const std::string& GetConfirmText() const
+    {
+        return confirmText_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -694,6 +705,8 @@ private:
     Color colorBgWithBlur_;
     Color backgroundBorderColor_;
     int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string cancelText_;
+    std::string confirmText_;
 };
 
 } // namespace OHOS::Ace

@@ -33,8 +33,8 @@ public:
             auto context = AceType::RawPtr(pipelineContext_);
             context->IncRefCount();
             pipelineContext_.Reset();
-            taskExecutor->PostTask([context] { context->DecRefCount(); }, TaskExecutor::TaskType::PLATFORM,
-                "ArkUIDecRefCount", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            taskExecutor->PostTask(
+                [context] { context->DecRefCount(); }, TaskExecutor::TaskType::PLATFORM, "ArkUIDecRefCount");
         }
     }
 

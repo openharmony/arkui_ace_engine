@@ -164,11 +164,13 @@ void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGe
         switch (type) {
             case GestureTypeName::LONG_PRESS_GESTURE: {
                 auto* longPressGestureEvent = TypeInfoHelper::DynamicCast<LongPressGestureEvent>(info.get());
+                CHECK_NULL_VOID(longPressGestureEvent);
                 cjEvent.repeat = longPressGestureEvent->GetRepeat();
                 break;
             }
             case GestureTypeName::PAN_GESTURE: {
                 auto* panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
+                CHECK_NULL_VOID(panGestureEvent);
                 cjEvent.offsetX = panGestureEvent->GetOffsetX() / density;
                 cjEvent.offsetY = panGestureEvent->GetOffsetY() / density;
                 cjEvent.velocityX = panGestureEvent->GetVelocity().GetVelocityX() / density;
@@ -178,6 +180,7 @@ void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGe
             }
             case GestureTypeName::PINCH_GESTURE: {
                 auto* pinchGestureEvent = TypeInfoHelper::DynamicCast<PinchGestureEvent>(info.get());
+                CHECK_NULL_VOID(pinchGestureEvent);
                 cjEvent.scale = pinchGestureEvent->GetScale();
                 cjEvent.pinchCenterX = pinchGestureEvent->GetPinchCenter().GetX() / density;
                 cjEvent.pinchCenterY = pinchGestureEvent->GetPinchCenter().GetY() / density;
@@ -185,12 +188,14 @@ void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGe
             }
             case GestureTypeName::SWIPE_GESTURE: {
                 auto* swipeGestureEvent = TypeInfoHelper::DynamicCast<SwipeGestureEvent>(info.get());
+                CHECK_NULL_VOID(swipeGestureEvent);
                 cjEvent.angle = swipeGestureEvent->GetAngle();
                 cjEvent.speed = swipeGestureEvent->GetSpeed();
                 break;
             }
             case GestureTypeName::ROTATION_GESTURE: {
                 auto* rotationGestureEvent = TypeInfoHelper::DynamicCast<RotationGestureEvent>(info.get());
+                CHECK_NULL_VOID(rotationGestureEvent);
                 cjEvent.angle = rotationGestureEvent->GetAngle();
                 break;
             }
@@ -200,11 +205,11 @@ void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGe
     }
 }
 
-std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEvent info))
+std::function<void(const GestureEvent& event)> FormatGestureEvenFunctionV2(void (*callback)(CJGestureEventV2 info))
 {
     std::function<void(const GestureEvent& event)> result = [ffiOnAction = CJLambda::Create(callback)](
                                                                 const GestureEvent& event) -> void {
-        CJGestureEvent ffiGestureEvent {};
+        CJGestureEventV2 ffiGestureEvent {};
         CJEventTarget ffiEventTarget {};
         CJArea ffiArea {};
         CJPosition ffiPosition {};
@@ -252,6 +257,49 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiGestureEvent.axisVertical = event.GetVerticalAxis();
         ffiGestureEvent.deviceId = event.GetDeviceId();
         ffiGestureEvent.baseEventInfoPtr = dynamic_cast<const BaseEventInfo*>(&event);
+        ffiOnAction(ffiGestureEvent);
+    };
+    return result;
+}
+
+std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*callback)(CJGestureEvent info))
+{
+    std::function<void(const GestureEvent& event)> result = [ffiOnAction = CJLambda::Create(callback)](
+                                                                const GestureEvent& event) -> void {
+        CJGestureEvent ffiGestureEvent {};
+        CJEventTarget ffiEventTarget {};
+        CJArea ffiArea {};
+        CJPosition ffiPosition {};
+        CJPosition ffiGlobalPosition {};
+
+        const auto& eventTarget = event.GetTarget();
+        ffiArea.width = eventTarget.area.GetWidth().ConvertToVp();
+        ffiArea.height = eventTarget.area.GetHeight().ConvertToVp();
+        const auto& localOffset = eventTarget.area.GetOffset();
+        const auto& origin = eventTarget.origin;
+        ffiPosition.x = localOffset.GetX().ConvertToVp();
+        ffiPosition.y = localOffset.GetY().ConvertToVp();
+        ffiGlobalPosition.x = origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp();
+        ffiGlobalPosition.y = origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp();
+        ffiArea.globalPosition = &ffiGlobalPosition;
+        ffiArea.position = &ffiPosition;
+        ffiEventTarget.area = &ffiArea;
+
+        auto& fingerList = event.GetFingerList();
+        ffiGestureEvent.fingerListSize = static_cast<int32_t>(fingerList.size());
+        ffiGestureEvent.fingerList = new CJFingerInfo[fingerList.size()];
+        TransformNativeCJFingerInfo(ffiGestureEvent.fingerList, fingerList);
+        ffiGestureEvent.target = &ffiEventTarget;
+        ffiGestureEvent.timestamp = event.GetTimeStamp().time_since_epoch().count();
+        ffiGestureEvent.repeat = event.GetRepeat();
+        ffiGestureEvent.source = static_cast<int32_t>(event.GetSourceDevice());
+        ffiGestureEvent.offsetX = event.GetOffsetX();
+        ffiGestureEvent.offsetY = event.GetOffsetY();
+        ffiGestureEvent.scale = event.GetScale();
+        ffiGestureEvent.pinchCenterX = event.GetPinchCenter().GetX();
+        ffiGestureEvent.pinchCenterY = event.GetPinchCenter().GetY();
+        ffiGestureEvent.angle = event.GetAngle();
+        ffiGestureEvent.speed = event.GetSpeed();
         ffiOnAction(ffiGestureEvent);
     };
     return result;
@@ -325,6 +373,11 @@ void FfiOHOSAceFrameworkGestureOnAction(void (*callback)(CJGestureEvent info))
     HandlerOnGestureEvent(GestureEventType::ACTION, FormatGestureEvenFunction(callback));
 }
 
+void FfiOHOSAceFrameworkGestureOnActionV2(void (*callback)(CJGestureEventV2 info))
+{
+    HandlerOnGestureEvent(GestureEventType::ACTION, FormatGestureEvenFunctionV2(callback));
+}
+
 void FfiOHOSAceFrameworkGestureSetTag(const char* tag)
 {
     RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
@@ -341,14 +394,29 @@ void FfiOHOSAceFrameworkGestureOnActionStart(void (*callback)(CJGestureEvent inf
     HandlerOnGestureEvent(GestureEventType::START, FormatGestureEvenFunction(callback));
 }
 
+void FfiOHOSAceFrameworkGestureOnActionStartV2(void (*callback)(CJGestureEventV2 info))
+{
+    HandlerOnGestureEvent(GestureEventType::START, FormatGestureEvenFunctionV2(callback));
+}
+
 void FfiOHOSAceFrameworkGestureOnActionUpdate(void (*callback)(CJGestureEvent info))
 {
     HandlerOnGestureEvent(GestureEventType::UPDATE, FormatGestureEvenFunction(callback));
 }
 
+void FfiOHOSAceFrameworkGestureOnActionUpdateV2(void (*callback)(CJGestureEventV2 info))
+{
+    HandlerOnGestureEvent(GestureEventType::UPDATE, FormatGestureEvenFunctionV2(callback));
+}
+
 void FfiOHOSAceFrameworkGestureOnActionEnd(void (*callback)(CJGestureEvent info))
 {
     HandlerOnGestureEvent(GestureEventType::END, FormatGestureEvenFunction(callback));
+}
+
+void FfiOHOSAceFrameworkGestureOnActionEndV2(void (*callback)(CJGestureEventV2 info))
+{
+    HandlerOnGestureEvent(GestureEventType::END, FormatGestureEvenFunctionV2(callback));
 }
 
 void FfiOHOSAceFrameworkGestureOnActionCancel(void (*callback)())
@@ -542,8 +610,13 @@ int64_t FfiOHOSAceFrameworkTapGestureHandlerCtor(int32_t count, int32_t fingers)
         LOGE("FfiOHOSAceFrameworkTapGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
     auto tapGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createTapGestureWithDistanceThreshold(
-        count, fingers, DEFAULT_TAP_DISTANCE, nullptr);
+        count, fingers, DEFAULT_TAP_DISTANCE, false, nullptr);
     nativeGesture->setArkUIGesture(tapGesture);
     return nativeGesture->GetID();
 }
@@ -555,8 +628,13 @@ int64_t FfiOHOSAceFrameworkLongPressGestureHandlerCtor(int32_t fingers, bool rep
         LOGE("FfiOHOSAceFrameworkLongPressGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto longPressGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(
-        fingers, repeat, duration, nullptr);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
+    auto longPressGesture = apiimpl->getNodeModifiers()->getGestureModifier()->createLongPressGesture(
+        fingers, repeat, duration, false, nullptr);
     nativeGesture->setArkUIGesture(longPressGesture);
     return nativeGesture->GetID();
 }
@@ -568,8 +646,13 @@ int64_t FfiOHOSAceFrameworkPinchGestureHandlerCtor(int32_t fingers, double dista
         LOGE("FfiOHOSAceFrameworkPinchGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
     auto pinchGesture =
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
+        apiimpl->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, false, nullptr);
     nativeGesture->setArkUIGesture(pinchGesture);
     return nativeGesture->GetID();
 }
@@ -581,8 +664,13 @@ int64_t FfiOHOSAceFrameworkSwipeGestureHandlerCtor(int32_t fingers, uint32_t dir
         LOGE("FfiOHOSAceFrameworkSwipeGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto swipeGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(
-        fingers, direction, speed);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
+    auto swipeGesture = apiimpl->getNodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(
+        fingers, direction, speed, false);
     nativeGesture->setArkUIGesture(swipeGesture);
     return nativeGesture->GetID();
 }
@@ -594,8 +682,13 @@ int64_t FfiOHOSAceFrameworkRotationGestureHandlerCtor(int32_t fingers, double an
         LOGE("FfiOHOSAceFrameworkRotationGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
     auto rotationGesture =
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
+        apiimpl->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, false, nullptr);
     nativeGesture->setArkUIGesture(rotationGesture);
     return nativeGesture->GetID();
 }
@@ -607,8 +700,13 @@ int64_t FfiOHOSAceFrameworkPanGestureHandlerCtor(int32_t fingers, uint32_t direc
         LOGE("FfiOHOSAceFrameworkPanGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto panGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, nullptr);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
+    auto panGesture = apiimpl->getNodeModifiers()->getGestureModifier()->createPanGesture(
+        fingers, direction, distance, false, nullptr);
     nativeGesture->setArkUIGesture(panGesture);
     return nativeGesture->GetID();
 }
@@ -620,7 +718,12 @@ int64_t FfiOHOSAceFrameworkGestureGroupHandlerCtor(int32_t mode, VectorInt64Hand
         LOGE("FfiOHOSAceFrameworkGestureGroupHandlerCtor: nativeGestureGroup create failed");
         return FFI_ERROR_CODE;
     }
-    auto gestureGroup = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createGestureGroup(mode);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return FFI_ERROR_CODE;
+    }
+    auto gestureGroup = apiimpl->getNodeModifiers()->getGestureModifier()->createGestureGroup(mode);
     nativeGestureGroup->setArkUIGesture(gestureGroup);
     const auto& gestureList = *reinterpret_cast<std::vector<int64_t>*>(vectorHandle);
     for (auto id : gestureList) {
@@ -629,7 +732,7 @@ int64_t FfiOHOSAceFrameworkGestureGroupHandlerCtor(int32_t mode, VectorInt64Hand
             LOGE("FfiOHOSAceFrameworkGestureGroupHandlerCtor: invalid id");
             return FFI_ERROR_CODE;
         }
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(
+        apiimpl->getNodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(
             nativeGestureGroup->getArkUIGesture(), nativeGesture->getArkUIGesture());
     }
     return nativeGestureGroup->GetID();
@@ -659,53 +762,53 @@ void FfiOHOSAceFrameworkGestureHandlerSetTag(int64_t id, const char* tag)
     gesturePtr->SetTag(tag);
 }
 
-void FfiOHOSAceFrameworkGestureHandlerSetOnAction(int64_t id, void (*onActionCallback)(CJGestureEvent))
+void FfiOHOSAceFrameworkGestureHandlerSetOnAction(int64_t id, void (*onActionCallback)(CJGestureEventV2))
 {
     auto nativeGesture = FFIData::GetData<NativeGesture>(id);
     if (nativeGesture == nullptr) {
         LOGE("FfiOHOSAceFrameworkLongPressGestureHandlerCtor: invalid id");
         return;
     }
-    auto event = FormatGestureEvenFunction(onActionCallback);
+    auto event = FormatGestureEvenFunctionV2(onActionCallback);
 
     auto gesturePtr = Referenced::Claim(reinterpret_cast<OHOS::Ace::NG::Gesture*>(nativeGesture->getArkUIGesture()));
     gesturePtr->SetOnActionId(event);
 }
 
-void FfiOHOSAceFrameworkGestureHandlerSetOnActionStart(int64_t id, void (*onActionCallback)(CJGestureEvent))
+void FfiOHOSAceFrameworkGestureHandlerSetOnActionStart(int64_t id, void (*onActionCallback)(CJGestureEventV2))
 {
     auto nativeGesture = FFIData::GetData<NativeGesture>(id);
     if (nativeGesture == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureHandlerSetOnActionStart: invalid id");
         return;
     }
-    auto event = FormatGestureEvenFunction(onActionCallback);
+    auto event = FormatGestureEvenFunctionV2(onActionCallback);
 
     auto gesturePtr = Referenced::Claim(reinterpret_cast<OHOS::Ace::NG::Gesture*>(nativeGesture->getArkUIGesture()));
     gesturePtr->SetOnActionStartId(event);
 }
 
-void FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate(int64_t id, void (*onActionCallback)(CJGestureEvent))
+void FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate(int64_t id, void (*onActionCallback)(CJGestureEventV2))
 {
     auto nativeGesture = FFIData::GetData<NativeGesture>(id);
     if (nativeGesture == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate: invalid id");
         return;
     }
-    auto event = FormatGestureEvenFunction(onActionCallback);
+    auto event = FormatGestureEvenFunctionV2(onActionCallback);
 
     auto gesturePtr = Referenced::Claim(reinterpret_cast<OHOS::Ace::NG::Gesture*>(nativeGesture->getArkUIGesture()));
     gesturePtr->SetOnActionUpdateId(event);
 }
 
-void FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd(int64_t id, void (*onActionCallback)(CJGestureEvent))
+void FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd(int64_t id, void (*onActionCallback)(CJGestureEventV2))
 {
     auto nativeGesture = FFIData::GetData<NativeGesture>(id);
     if (nativeGesture == nullptr) {
         LOGE("FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd: invalid id");
         return;
     }
-    auto event = FormatGestureEvenFunction(onActionCallback);
+    auto event = FormatGestureEvenFunctionV2(onActionCallback);
 
     auto gesturePtr = Referenced::Claim(reinterpret_cast<OHOS::Ace::NG::Gesture*>(nativeGesture->getArkUIGesture()));
     gesturePtr->SetOnActionEndId(event);
@@ -759,8 +862,13 @@ void FfiOHOSAceFrameworkViewAbstractSetGestureHandler(int64_t elemId, int64_t ge
         LOGE("FfiOHOSAceFrameworkViewAbstractSetGestureHandler: invalid id");
         return;
     }
-    auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return;
+    }
+    auto nativeNode = apiimpl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
+    apiimpl->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
 }
 
@@ -772,29 +880,44 @@ void FfiOHOSAceFrameworkViewAbstractSetGestureGroupHandler(
         LOGE("FfiOHOSAceFrameworkViewAbstractSetGestureGroupHandler: invalid id");
         return;
     }
-    auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return;
+    }
+    auto nativeNode = apiimpl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
+    apiimpl->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
 }
 
 void FfiOHOSAceFrameworkViewAbstractClearGestureHandlers(int64_t elemId)
 {
-    auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return;
+    }
+    auto nativeNode = apiimpl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
     if (!nativeNode) {
         LOGE("FfiOHOSAceFrameworkViewAbstractClearGestureHandlers: invalid id");
         return;
     }
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->clearGestures(nativeNode);
+    apiimpl->getNodeModifiers()->getGestureModifier()->clearGestures(nativeNode);
 }
 
 void FfiOHOSAceFrameworkViewAbstractRemoveGestureHandlerByTag(int64_t elemId, const char* tag)
 {
-    auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
+    auto apiimpl = GetNodeAPIImpl();
+    if (apiimpl == nullptr) {
+        LOGE("GetNodeAPIImpl: impl is null");
+        return;
+    }
+    auto nativeNode = apiimpl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
     if (!nativeNode) {
         LOGE("FfiOHOSAceFrameworkViewAbstractRemoveGestureHandlerByTag: invalid id");
         return;
     }
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->removeGestureFromNodeByTag(nativeNode, tag);
+    apiimpl->getNodeModifiers()->getGestureModifier()->removeGestureFromNodeByTag(nativeNode, tag);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(CJGestureInfo, CJBaseGestureEvent))

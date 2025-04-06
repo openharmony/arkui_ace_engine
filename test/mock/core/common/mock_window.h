@@ -36,6 +36,7 @@ public:
     MOCK_CONST_METHOD0(GetRefreshRate, float());
     MOCK_CONST_METHOD0(GetCurrentWindowRect, Rect());
     MOCK_CONST_METHOD0(GetRSUIDirector, std::shared_ptr<Rosen::RSUIDirector>());
+    MOCK_CONST_METHOD0(GetStatusBarHeight, uint32_t());
     MOCK_METHOD1(SetDrawTextAsBitmap, void(bool useBitmap));
     MOCK_METHOD1(SetRootFrameNode, void(const RefPtr<NG::FrameNode>& root));
     MOCK_METHOD1(SetInstanceId, void(int32_t instanceId));

@@ -56,8 +56,7 @@ void JSIndicator::Create(const JSCallbackInfo& info)
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
         if (jsController) {
             jsController->SetInstanceId(Container::CurrentId());
-            WeakPtr<NG::UINode> indicatorNode =
-                AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto indicatorNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             jsController->SetController(indicatorController, indicatorNode);
         }
     }
@@ -110,8 +109,14 @@ void JSIndicator::SetVertical(const JSCallbackInfo& info)
 
 void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters)
 {
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
-    JSRef<JSVal> size = obj->GetProperty("size");
+    JSRef<JSVal> size;
+    JSRef<JSVal> weight;
+    if (font->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+        size = obj->GetProperty("size");
+        weight = obj->GetProperty("weight");
+    }
+
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -131,7 +136,7 @@ void JSIndicator::GetFontContent(const JSRef<JSVal>& font, bool isSelected, Swip
     } else {
         digitalParameters.fontSize = fontSize;
     }
-    JSRef<JSVal> weight = obj->GetProperty("weight");
+    
     if (!weight->IsNull()) {
         std::string weightValue;
         if (weight->IsNumber()) {
@@ -219,6 +224,7 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
     JSRef<JSVal> colorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR_VALUE));
     JSRef<JSVal> selectedColorValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SELECTED_COLOR_VALUE));
     JSRef<JSVal> maxDisplayCountVal = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::MAX_DISPLAY_COUNT_VALUE));
+    JSRef<JSVal> spaceValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SPACE_VALUE));
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -228,6 +234,11 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
     swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal);
     swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    auto defalutSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    CalcDimension dimSpace;
+    auto parseSpaceOk = ParseLengthMetricsToDimension(spaceValue, dimSpace) &&
+        (dimSpace.Unit() != DimensionUnit::PERCENT);
+    swiperParameters.dimSpace =  (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defalutSpace;
     if (maxDisplayCountVal->IsUndefined()) {
         return;
     }
@@ -313,7 +324,6 @@ void JSIndicator::SetOnChange(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
         if (!swiperInfo) {
-            TAG_LOGW(AceLogTag::ACE_INDICATOR, "IndicatorComponent onChange callback execute failed.");
             return;
         }
         PipelineContext::SetCallBackNode(node);
@@ -361,9 +371,9 @@ void JSIndicatorController::Destructor(JSIndicatorController* scroller)
 
 void JSIndicatorController::ChangeIndex(const JSCallbackInfo& args)
 {
-    if (!controller_) {
-        return;
-    }
+    auto controller = controller_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    ContainerScope scope(instanceId_);
     if (!args[0]->IsNumber()) {
         return;
     }
@@ -372,7 +382,7 @@ void JSIndicatorController::ChangeIndex(const JSCallbackInfo& args)
         useAnimation = args[1]->ToBoolean();
     }
     auto index = args[0]->ToNumber<int32_t>();
-    controller_->ChangeIndex(index, useAnimation);
+    controller->ChangeIndex(index, useAnimation);
 }
 
 } // namespace OHOS::Ace::Framework

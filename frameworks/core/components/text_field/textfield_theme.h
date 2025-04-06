@@ -224,6 +224,8 @@ public:
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
+            auto supportTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(supportTranslate);
             auto supportSearch = pattern->GetAttr<std::string>("textfield_menu_search_is_support", "0");
             theme->supportSearch_ = StringUtils::StringToInt(supportSearch);
         }
@@ -244,6 +246,10 @@ public:
                 static_cast<bool>(pattern->GetAttr<double>("independent_control_keyboard", 0.0));
             theme->directionKeysMoveFocusOut_ =
                 static_cast<bool>(pattern->GetAttr<double>("direction_keys_move_focus_out", 0.0));
+            theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_icon_size", 0.0_vp);
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+                theme->cancelIconSize_ = pattern->GetAttr<Dimension>("textfield_cancel_icon_size", 16.0_vp);
+            }
         }
     };
 
@@ -397,6 +403,26 @@ public:
     const Dimension& GetIconSize() const
     {
         return iconSize_;
+    }
+
+    const Dimension& GetCancelIconSize() const
+    {
+        return cancelIconSize_;
+    }
+
+    const Dimension& GetPasswordIconSize() const
+    {
+        return passwordIconSize_;
+    }
+
+    const Dimension& GetCancelIconPadding() const
+    {
+        return cancelIconPadding_;
+    }
+
+    const Dimension& GetPasswordIconPadding() const
+    {
+        return passwordIconPadding_;
     }
 
     const Dimension& GetIconHotZoneSize() const
@@ -704,6 +730,11 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     bool GetIsSupportSearch() const
     {
         return supportSearch_;
@@ -814,6 +845,11 @@ public:
         return errorTextAlign_;
     }
 
+    const Dimension& GetContentHoverPadding() const
+    {
+        return contentHoverPadding_;
+    }
+
 protected:
     TextFieldTheme() = default;
     TextStyle textStyle_;
@@ -821,6 +857,7 @@ protected:
     Color placeholderColor_;
     Color bgColor_;
     Color focusBgColor_;
+    Color inlineBgColor_;
     Color cursorColor_;
     Color symbolColor_;
     Color textColorDisable_;
@@ -866,7 +903,6 @@ private:
     TextStyle overCountTextStyle_;
     Color inlineTextColor_;
     Radius inlineRadiusSize_;
-    Color inlineBgColor_;
     Color inlineBorderColor_;
     Color defaultCounterColor_;
     Color overCounterColor_;
@@ -890,6 +926,11 @@ private:
     Dimension iconSize_;
     Dimension iconHotZoneSize_;
     Dimension inlineBorderWidth_ = 2.0_vp;
+    Dimension cancelIconSize_;
+    Dimension passwordIconSize_ = 20.0_vp;
+    Dimension cancelIconPadding_ = 14.0_vp;
+    Dimension passwordIconPadding_ = 10.0_vp;
+    Dimension contentHoverPadding_ = 8.0_vp;
 
     // Replace image(icon) with symbol
     Dimension symbolSize_;
@@ -906,6 +947,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool translateIsSupport_ = false;
     bool supportSearch_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 

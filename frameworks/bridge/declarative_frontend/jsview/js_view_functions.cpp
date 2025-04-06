@@ -36,6 +36,7 @@
 
 namespace OHOS::Ace::Framework {
 const std::string EMPTY_STATUS_DATA = "empty_status_data";
+const std::string JS_STRINGIFIED_UNDEFINED = "undefined";
 
 #ifdef USE_ARK_ENGINE
 
@@ -109,7 +110,7 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
         measureWidth = { -1.0f };
     }
     if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("height"), measureHeight)) {
-        measureWidth = { -1.0f };
+        measureHeight = { -1.0f };
     }
     NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -184,6 +185,46 @@ void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
     } else {
         LOGE("the set active func is null");
     }
+}
+
+void ViewFunctions::ExecutePrebuildComponent()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    auto func = jsPrebuildComponent_.Lock();
+    if (!func->IsEmpty()) {
+        func->Call(jsObject_.Lock());
+    } else {
+        LOGE("the prebuild component func is null");
+    }
+}
+
+bool ViewFunctions::ExecuteSetPrebuildPhase(PrebuildPhase prebuildPhase)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsSetPrebuildPhase_.Lock();
+    if (!func->IsEmpty()) {
+        auto jsPrebuildPhase = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(prebuildPhase)));
+        func->Call(jsObject_.Lock(), 1, &jsPrebuildPhase);
+        return true;
+    } else {
+        LOGE("the set prebuild phase func is null");
+    }
+    return false;
+}
+
+bool ViewFunctions::ExecuteIsEnablePrebuildInMultiFrame()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false)
+    auto func = jsIsEnablePrebuildInMultiFrame_.Lock();
+    if (!func->IsEmpty()) {
+        auto result = func->Call(jsObject_.Lock());
+        if (result->IsBoolean()) {
+            return result->ToBoolean();
+        }
+    } else {
+        LOGE("the is enable prebuild in multi frame func is null");
+    }
+    return false;
 }
 
 void ViewFunctions::ExecuteOnDumpInfo(const std::vector<std::string>& params)
@@ -306,6 +347,21 @@ void ViewFunctions::InitViewFunctions(
         if (jsOnDumpInspector->IsFunction()) {
             jsOnDumpInspector_ = JSRef<JSFunc>::Cast(jsOnDumpInspector);
         }
+
+        JSRef<JSVal> jsPrebuildComponent = jsObject->GetProperty("prebuildComponent");
+        if (jsPrebuildComponent->IsFunction()) {
+            jsPrebuildComponent_ = JSRef<JSFunc>::Cast(jsPrebuildComponent);
+        }
+
+        JSRef<JSVal> jsIsEnablePrebuildInMultiFrame = jsObject->GetProperty("isEnablePrebuildInMultiFrame");
+        if (jsIsEnablePrebuildInMultiFrame->IsFunction()) {
+            jsIsEnablePrebuildInMultiFrame_ = JSRef<JSFunc>::Cast(jsIsEnablePrebuildInMultiFrame);
+        }
+
+        JSRef<JSVal> jsSetPrebuildPhase = jsObject->GetProperty("setPrebuildPhase");
+        if (jsSetPrebuildPhase->IsFunction()) {
+            jsSetPrebuildPhase_ = JSRef<JSFunc>::Cast(jsSetPrebuildPhase);
+        }
     }
 
     JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
@@ -414,6 +470,11 @@ void ViewFunctions::InitViewFunctions(
     JSRef<JSVal> jsOnFormRecoverFunc = jsObject->GetProperty("onFormRecover");
     if (jsOnFormRecoverFunc->IsFunction()) {
         jsOnFormRecoverFunc_ = JSRef<JSFunc>::Cast(jsOnFormRecoverFunc);
+    }
+
+    JSRef<JSVal> jsOnNewParam = jsObject->GetProperty("onNewParam");
+    if (jsOnNewParam->IsFunction()) {
+        jsOnNewParam_ = JSRef<JSFunc>::Cast(jsOnNewParam);
     }
 }
 
@@ -655,7 +716,7 @@ void ViewFunctions::Destroy(JSView* parentCustomView)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             view->Destroy(parentCustomView);
         }
@@ -680,7 +741,7 @@ void ViewFunctions::Destroy()
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(renderRes);
     if (!obj.IsEmpty()) {
         // jsRenderResult_ maybe an js exception, not a JSView
-        JSView* view = obj->Unwrap<JSView>();
+        JSView* view = JSView::GetNativeView(obj);
         if (view != nullptr) {
             LOGE("NOTE NOTE NOTE render returned a JSView object that's dangling!");
         }
@@ -692,7 +753,11 @@ void ViewFunctions::Destroy()
 // Partial update method
 void ViewFunctions::ExecuteRerender()
 {
-    COMPONENT_UPDATE_DURATION();
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    COMPONENT_UPDATE_DURATION(id);
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsRerenderFunc_.IsEmpty()) {
         LOGE("no rerender function in View!");
@@ -740,5 +805,19 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
     auto jsData = JSRef<JSVal>::Make(ToJSValue(data));
     auto func = jsOnFormRecoverFunc_.Lock();
     func->Call(jsObject_.Lock(), 1, &jsData);
+}
+
+void ViewFunctions::ExecuteOnNewParam(const std::string& newParam)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsOnNewParam_.IsEmpty()) {
+        return;
+    }
+    auto argv = JSRef<JSVal>::Make();
+    if (!newParam.empty() && newParam != JS_STRINGIFIED_UNDEFINED) {
+        argv = JSRef<JSObject>::New()->ToJsonObject(newParam.c_str());
+    }
+    auto func = jsOnNewParam_.Lock();
+    func->Call(jsObject_.Lock(), 1, &argv);
 }
 } // namespace OHOS::Ace::Framework

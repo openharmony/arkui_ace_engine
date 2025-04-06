@@ -23,8 +23,8 @@ import {
 } from '@kit.ArkUI';
 import { common, EnvironmentCallback } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
 import accessibility from '@ohos.accessibility';
+import hilog from '@ohos.hilog';
 
 //  declaring Constants
 const COL_IMAGE_TEXT = 3;
@@ -54,6 +54,7 @@ const DEFAULT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 8;
 const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN = 16;
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION = 200;
+const SEND_EVENT_DURATION = 100;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38); // Drag to move and fill curves
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24); // Delete Add Curve
@@ -65,8 +66,6 @@ const ACCESSIBILITY_SELECTED_ITEM_DRAG_START: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_start';
 const ACCESSIBILITY_DOUBLE_CLICK: string =
   'gridobjectsortcomponent_accessibility_single_finger_double_click';
-const ACCESSIBILITY_COMPLETE_BUTTON: string =
-  'gridobjectsortcomponent_accessibility_complete_button';
 const ACCESSIBILITY_RESIDENT_AREA: string =
   'gridobjectsortcomponent_accessibility_resident_area_edit_state';
 const ACCESSIBILITY_SELECTED_ITEM_DESC: string = 'gridobjectsortcomponent_accessibility_selected_item_desc';
@@ -79,7 +78,6 @@ const ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC: string =
   'gridobjectsortcomponent_accessibility_unselected_text_item_desc';
 const ACCESSIBILITY_UNSELECTED_ITEM: string = 'gridobjectsortcomponent_accessibility_unselected_item';
 const ACCESSIBILITY_SELECTED_ITEM_DELETE: string = 'gridobjectsortcomponent_accessibility_selected_item_delete';
-const ACCESSIBILITY_HEADER_EDIT_BUTTON: string = 'gridobjectsortcomponent_accessibility_header_edit_button';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_moving';
 const ACCESSIBILITY_DELETED: string = 'gridobjectsortcomponent_accessibility_deleted';
@@ -121,25 +119,6 @@ export enum GridObjectSortComponentType {
 interface PositionXY {
   x: number;
   y: number;
-}
-
-class MenuItem {
-  public value: Resource;
-  public symbolStyle: SymbolGlyphModifier;
-  public isEnabled: boolean;
-  public action: () => void;
-  public label: ResourceStr; // 适老化弹窗描述文字
-  accessibilityText?: ResourceStr;
-
-  constructor(value: Resource, symbolStyle: SymbolGlyphModifier,
-    enabled: boolean, accessibilityText: ResourceStr, action: () => void, label: ResourceStr) {
-    this.value = value;
-    this.symbolStyle = symbolStyle;
-    this.isEnabled = enabled;
-    this.action = action;
-    this.accessibilityText = accessibilityText;
-    this.label = label;
-  }
 }
 
 @Component
@@ -224,19 +203,8 @@ export struct GridObjectSortComponent {
   private touchDown: Resource = $r('sys.color.ohos_id_color_click_effect');
   private touchBorderRadius: Resource = $r('sys.float.ohos_id_corner_radius_clicked');
   private hoverBackgroundColor: Resource = $r('sys.color.ohos_id_color_hover');
-  private focusBorder: Resource = $r('sys.color.ohos_id_color_focused_outline');
   private imageText: boolean = false;
-  private menuItems: Array<MenuItem> = [
-    new MenuItem(
-      $r('sys.media.ohos_ic_public_edit'), 
-      (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))), 
-      true, 
-      this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON),
-      () => {
-        this.goEdit();
-      },
-      this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON))
-  ];
+
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
   isFollowingSystemFontScale: boolean = false;
@@ -266,7 +234,7 @@ export struct GridObjectSortComponent {
       this.maxAppFontScale = uiContent.getMaxFontScale();
       this.fontSizeScale = this.decideFontScale(uiContent);
       this.fontWeightScale =
-        (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
+        (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontWeightScale ?? DEFAULT_FONT_WEIGHT_SCALE;
     } catch (exception) {
       let code = (exception as BusinessError).code;
       let message = (exception as BusinessError).message;
@@ -342,7 +310,7 @@ export struct GridObjectSortComponent {
       return 1;
     }
     let systemFontScale: number | undefined =
-      (uiContent.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
+      (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? DEFAULT_FONT_SIZE_SCALE;
     return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
   }
 
@@ -447,16 +415,18 @@ export struct GridObjectSortComponent {
       let editableTittleBarUniqueId =
         this.getUIContext().getFrameNodeById(EDIT_TITLE_BAR_ID)?.getFirstChild()?.getUniqueId();
       let eventInfo: accessibility.EventInfo = ({
-        type: 'requestFocusForAccessibility',
+        type: 'requestFocusForAccessibilityNotInterrupt',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: `ImageMenuItem_${editableTittleBarUniqueId}_0`
       });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        setTimeout(()=>{
-          this.isPointToEditTitleBarSaveButton = false;
-        }, ENTER_EXIT_ICON_DURATION);
-      });
+      setTimeout(() => {
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          setTimeout(() => {
+            this.isPointToEditTitleBarSaveButton = false;
+          }, ENTER_EXIT_ICON_DURATION);
+        });
+      }, SEND_EVENT_DURATION);
     }
   }
 
@@ -504,7 +474,7 @@ export struct GridObjectSortComponent {
         customId: `ComposeTitleBar_ImageMenuItem_${composeTittleBarUniqueId}_0`
       });
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        setTimeout(()=>{
+        setTimeout(() => {
           this.isPointToAddTitleBarEditButton = false;
         }, ENTER_EXIT_ICON_DURATION);
       });
@@ -520,10 +490,10 @@ export struct GridObjectSortComponent {
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     } else {
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_MOVING,
         Math.floor(insertIndex / this.colNum) + 1,
-        insertIndex%this.colNum + 1
+        insertIndex % this.colNum + 1
       );
     }
     if (this.dragContent.visibility !== Visibility.Hidden) {
@@ -573,9 +543,9 @@ export struct GridObjectSortComponent {
       this.readFlag = false;
       // 播报区域为添加域的第1个，index为0
       this.readIndex4AddArea = 0;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_DELETED,
-        `${this.content?.text  ?? ' '}`
+        this.getAccessibilityText(this.content?.text ?? ' ')
       );
     } }, () => {
       let addItemGridPosition = this.getAddItemGridPosition();
@@ -592,11 +562,11 @@ export struct GridObjectSortComponent {
       customId: ADD_GRID_FIRST_ITEM_ID
     });
     accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-     setTimeout(() => {
-       this.readFlag = true;
-       this.readIndex4AddArea = -1;
-       }, ENTER_EXIT_ICON_DURATION
-     );
+      setTimeout(() => {
+        this.readFlag = true;
+        this.readIndex4AddArea = -1;
+      }, ENTER_EXIT_ICON_DURATION
+      );
     });
   }
 
@@ -888,14 +858,15 @@ export struct GridObjectSortComponent {
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
           } else if (url instanceof SymbolGlyphModifier) {
             SymbolGlyph()
               .draggable(false)
               .height(this.options.imageSize || SYMBOL_DEFAULT)
               .width(this.options.imageSize || SYMBOL_DEFAULT)
               .attributeModifier(url)
-              .fontSize(this.options.imageSize || SYMBOL_DEFAULT)
+              .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+              .symbolEffect(new SymbolEffect(), false)
           } else {
             Image(url)
               .draggable(false)
@@ -976,7 +947,16 @@ export struct GridObjectSortComponent {
   HeaderTitleBuilder() {
     ComposeTitleBar({
       title: this.options.normalTitle || $r('sys.string.ohos_grid_edit_title_chanel'),
-      menuItems: this.menuItems,
+      menuItems: [{
+        value: $r('sys.media.ohos_ic_public_edit'),
+        symbolStyle: (new SymbolGlyphModifier($r('sys.symbol.square_and_pencil'))),
+        isEnabled: true,
+        label: $r('sys.string.gridobjectsortcomponent_accessibility_header_edit_button'),
+        accessibilityText: $r('sys.string.gridobjectsortcomponent_accessibility_header_edit_button'),
+        action: () => {
+          this.goEdit();
+        }
+      }]
     })
       .id(ADD_TITLE_BAR_ID)
       .visibility(!this.menuSwitch ? Visibility.Visible : Visibility.None)
@@ -1001,8 +981,8 @@ export struct GridObjectSortComponent {
       isSaveIconRequired: false,
       menuItems: [{
         value: $r('sys.symbol.checkmark'),
-        label: this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON),
-        accessibilityText: this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON),
+        label: $r('sys.string.gridobjectsortcomponent_accessibility_complete_button'),
+        accessibilityText: $r('sys.string.gridobjectsortcomponent_accessibility_complete_button'),
         action: () => {
           this.saveClick = true;
           this.onSaveEdit();
@@ -1031,6 +1011,7 @@ export struct GridObjectSortComponent {
             .draggable(false)
             .attributeModifier(select.symbolStyle)
             .fontSize(this.getSymbolFontSizeFrom(this.options.imageSize))
+            .symbolEffect(new SymbolEffect(), false)
         } else {
           if (select.url === undefined) {
             SymbolGlyph()
@@ -1071,8 +1052,8 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleAddIconClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(
-              ACCESSIBILITY_UNSELECTED_BUTTON, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(
+              ACCESSIBILITY_UNSELECTED_BUTTON, this.getAccessibilityText(select.text))
           )
 
         SymbolGlyph(this.imageTextRemoveIcon(select))
@@ -1091,7 +1072,7 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleDeleteClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
           )
       }
       .alignItems(HorizontalAlign.Center)
@@ -1147,9 +1128,9 @@ export struct GridObjectSortComponent {
     })
     this.readFlag = false;
     this.readIndex4EditArea = this.editGridDataLength - 1;
-    this.textAnnouncedForAccessibility = this.getStringByResource(
+    this.textAnnouncedForAccessibility = this.getStringByResourceToken(
       ACCESSIBILITY_UNSELECTED_ITEM_ADD,
-      `${this.content?.text  ?? ''}`,
+      this.getAccessibilityText(this.content?.text ?? ''),
       Math.floor(this.readIndex4EditArea / this.colNum) + 1,
       this.readIndex4EditArea % this.colNum + 1
     );
@@ -1215,7 +1196,7 @@ export struct GridObjectSortComponent {
           .onClick(() => this.handleDeleteClick(select))
           .accessibilityLevel(YES)
           .accessibilityText(
-            this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DELETE, `${select.text  ?? ''}`)
+            this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DELETE, this.getAccessibilityText(select.text))
           )
       }
       .borderRadius(50)
@@ -1400,8 +1381,8 @@ export struct GridObjectSortComponent {
           .accessibilityLevel(YES)
           .accessibilityText(
             this.readFlag ?
-            this.getStringByResource(
-              ACCESSIBILITY_UNSELECTED_ITEM, `${item.text  ?? ''}`
+            this.getStringByResourceToken(
+              ACCESSIBILITY_UNSELECTED_ITEM, this.getAccessibilityText(item.text ?? '')
             ) : this.textAnnouncedForAccessibility
           )
           .accessibilityDescription(
@@ -1432,9 +1413,9 @@ export struct GridObjectSortComponent {
 
   getAddTagGridItemAccessibilityDesc(): string { // 图文在编辑态不播报描述 纯文字在编辑态不播报双击长按事件
     return this.options?.type === GridObjectSortComponentType.IMAGE_TEXT ?
-      this.menuSwitch ? ' ' : this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
-      this.menuSwitch ? this.getStringByResource(ACCESSIBILITY_DOUBLE_CLICK) :
-      this.getStringByResource(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC)
+      this.menuSwitch ? ' ' : this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
+      this.menuSwitch ? this.getStringByResourceToken(ACCESSIBILITY_DOUBLE_CLICK) :
+      this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC)
   }
 
   handleAddItemTouch(event: TouchEvent, item: GridObjectSortComponentItem): void {
@@ -1499,9 +1480,9 @@ export struct GridObjectSortComponent {
 
       this.readFlag = false;
       this.readIndex4EditArea = this.editGridDataLength - 1;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_UNSELECTED_ITEM_ADD,
-        `${this.content?.text  ?? ''}`,
+        this.getAccessibilityText(this.content?.text ?? ''),
         Math.floor(this.readIndex4EditArea / this.colNum) + 1,
         this.readIndex4EditArea % this.colNum + 1
       );
@@ -1566,9 +1547,9 @@ export struct GridObjectSortComponent {
 
     this.readFlag = false;
     this.readIndex4EditArea = this.editGridDataLength - 1;
-    this.textAnnouncedForAccessibility = this.getStringByResource(
+    this.textAnnouncedForAccessibility = this.getStringByResourceToken(
       ACCESSIBILITY_UNSELECTED_ITEM_ADD,
-      `${this.content?.text ?? ''}`,
+      this.getAccessibilityText(this.content?.text ?? ''),
       Math.floor(this.readIndex4EditArea / this.colNum) + 1,
       this.readIndex4EditArea % this.colNum + 1
     );
@@ -1631,12 +1612,12 @@ export struct GridObjectSortComponent {
             .accessibilityLevel(YES)
             .accessibilityText(
               this.readFlag ?
-              this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM, `${select.text  ?? ''}`) :
+              this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM, this.getAccessibilityText(select.text)) :
               this.textAnnouncedForAccessibility
             )
             .accessibilityDescription(
               this.readFlag ?
-              this.getStringByResource(ACCESSIBILITY_SELECTED_ITEM_DESC) : ''
+              this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DESC) : ''
             )
           }
           .clip(false)
@@ -1716,8 +1697,8 @@ export struct GridObjectSortComponent {
         this.insertIndex = itemIndex;
         this.dragContent = this.selected[itemIndex];
         this.dragContentIndex = itemIndex;
-        this.textAnnouncedForAccessibility = getContext().resourceManager
-          .getStringByNameSync(ACCESSIBILITY_SELECTED_ITEM_DRAG_START, `${this.dragContent?.text}`);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_SELECTED_ITEM_DRAG_START,
+          this.getAccessibilityText(this.dragContent?.text ?? ''));
         this.sendAccessibility();
         return this.PixelMapBuilder(this.dragContent?.symbolStyle || this.dragContent?.url, this.dragContent?.text);
       })
@@ -1729,7 +1710,7 @@ export struct GridObjectSortComponent {
         this.onDragMoveEvent(event, itemIndex, insertIndex)
       )
       .onItemDragLeave((event: ItemDragInfo, itemIndex: number) => {
-        this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_ILLEGAL_AREA);
+        this.textAnnouncedForAccessibility = this.getStringByResourceToken(ACCESSIBILITY_ILLEGAL_AREA);
         this.sendAccessibility();
       })
     }
@@ -1749,9 +1730,9 @@ export struct GridObjectSortComponent {
           });
           accessibility.sendAccessibilityEvent(eventInfo);
         }))
-    .accessibilityText(this.getStringByResource(ACCESSIBILITY_RESIDENT_AREA))
+    .accessibilityText(this.getStringByResourceToken(ACCESSIBILITY_RESIDENT_AREA))
     .accessibilityDescription(this.menuSwitch ? ' ' :
-    this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC))
+    this.getStringByResourceToken(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC))
   }
 
   pointToRepeat(type: string): void {
@@ -1803,13 +1784,13 @@ export struct GridObjectSortComponent {
     if (insertIndex !== -1) {
       this.selected.splice(itemIndex, 1);
       this.selected.splice(insertIndex, 0, this.dragContent);
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(insertIndex / this.colNum) + 1,
         insertIndex % this.colNum + 1);
     } else {
       this.insertIndex = itemIndex;
-      this.textAnnouncedForAccessibility = this.getStringByResource(
+      this.textAnnouncedForAccessibility = this.getStringByResourceToken(
         ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP,
         Math.floor(itemIndex / this.colNum) + 1,
         itemIndex % this.colNum + 1
@@ -1898,14 +1879,42 @@ export struct GridObjectSortComponent {
     .height('90%')
   }
 
-  getStringByResource(value?: string, ...args: Array<string | number>): string {
+  getStringByResourceToken(value?: string, ...args: Array<string | number>): string {
     if (value) {
       try {
         return getContext(this).resourceManager.getStringByNameSync(value, ...args);
       } catch (error) {
-        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
+        hilog.error(0x3900, 'Ace', `GridObjectSortComponent getStringByResourceToken, error: ${error.toString()}`);
       }
     }
     return '';
+  }
+
+  /**
+   * 获取无障碍文本
+   *
+   * @param resource 资源
+   * @param selected select state
+   * @returns string
+   */
+  getAccessibilityText(resource: ResourceStr): string {
+    try {
+      let resourceString: string = '';
+      if (typeof resource === 'string') {
+        resourceString = resource;
+      } else {
+        if (resource.id === -1 ) {
+          resourceString = getContext()?.resourceManager?.getStringByNameSync(resource.params?.[0].split('.').pop());
+        } else {
+          resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        }
+      }
+      return resourceString;
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `GridObjectSortComponent getAccessibilityText error, code: ${code}, message: ${message}`);
+      return '';
+    }
   }
 }

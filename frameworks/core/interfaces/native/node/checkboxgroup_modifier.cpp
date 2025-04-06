@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
 #include "core/components_ng/base/view_abstract.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 static uint32_t ERROR_UINT_CODE = -1;
@@ -167,6 +168,25 @@ void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
     CheckBoxGroupModelNG::SetCheckboxGroupName(frameNode, std::string(group));
 }
 
+void SetCheckboxGroupOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void (const BaseEventInfo*)>*>(callback);
+        CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetCheckboxGroupOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelNG::SetOnChange(frameNode, nullptr);
+}
+
 ArkUI_CharPtr GetCheckboxGroupName(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -244,6 +264,8 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
         .setCheckboxGroupStyle = SetCheckboxGroupStyle,
         .resetCheckboxGroupStyle = ResetCheckboxGroupStyle,
         .setCheckboxGroupName = SetCheckboxGroupName,
+        .setCheckboxGroupOnChange=SetCheckboxGroupOnChange,
+        .resetCheckboxGroupOnChange=ResetCheckboxGroupOnChange,
         .getCheckboxGroupName = GetCheckboxGroupName,
         .getCheckboxGroupSelectAll = GetCheckboxGroupSelectAll,
         .getCheckboxGroupSelectedColor = GetCheckboxGroupSelectedColor,
@@ -293,12 +315,31 @@ void SetCheckboxGroupChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const bool value) {
+    auto onEvent = [node, extraParam](const BaseEventInfo* info) {
+        const auto* groupInfo = TypeInfoHelper::DynamicCast<CheckboxGroupResult>(info);
+        if (!groupInfo) {
+            return;
+        }
         ArkUINodeEvent event;
-        event.kind = COMPONENT_ASYNC_EVENT;
+        event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
-        event.componentAsyncEvent.subKind = ON_CHECKBOX_GROUP_CHANGE;
-        event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
+        event.textInputEvent.subKind = ON_CHECKBOX_GROUP_CHANGE;
+        std::vector<std::string> nameList = groupInfo->GetNameList();
+        std::string status = std::to_string(groupInfo->GetStatus());
+
+        std::string nodeEventStr;
+        if (!nameList.empty()) {
+            nodeEventStr.append("Name:");
+            for (auto nameStr : nameList) {
+                nodeEventStr.append(nameStr);
+                nodeEventStr.append(",");
+            }
+            nodeEventStr.pop_back();
+            nodeEventStr.append(";");
+        }
+
+        nodeEventStr.append("Status:" + status);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(nodeEventStr.c_str());
         SendArkUISyncEvent(&event);
     };
     CheckBoxGroupModelNG::SetOnChange(frameNode, std::move(onEvent));

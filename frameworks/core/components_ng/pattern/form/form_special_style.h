@@ -17,7 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SPECIAL_STYLE_H
 
 #include <cstdint>
-#include "form_info.h"
+
+namespace OHOS::AppExecFwk {
+struct FormInfo;
+}
+
 namespace OHOS::Ace::NG {
 enum class FormOperation : int32_t {
     KEEP,

@@ -264,6 +264,100 @@ int32_t GetImagesSize(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, 0);
     return ImageAnimatorModelNG::GetImagesSize(frameNode);
 }
+
+void SetImageAnimatorOnStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStart = reinterpret_cast<std::function<void()>*>(callback);
+        ImageAnimatorModelNG::SetOnStart(frameNode, std::move(*onStart));
+    } else {
+        ImageAnimatorModelNG::SetOnStart(frameNode, nullptr);
+    }
+}
+
+void ResetImageAnimatorOnStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnStart(frameNode, nullptr);
+}
+void SetImageAnimatorOnPause(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onPause = reinterpret_cast<std::function<void()>*>(callback);
+        ImageAnimatorModelNG::SetOnPause(frameNode, std::move(*onPause));
+    } else {
+        ImageAnimatorModelNG::SetOnPause(frameNode, nullptr);
+    }
+}
+
+void ResetImageAnimatorOnPause(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnPause(frameNode, nullptr);
+}
+
+void SetImageAnimatorOnRepeat(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onRepeat = reinterpret_cast<std::function<void()>*>(callback);
+        ImageAnimatorModelNG::SetOnRepeat(frameNode, std::move(*onRepeat));
+    } else {
+        ImageAnimatorModelNG::SetOnRepeat(frameNode, nullptr);
+    }
+}
+
+void ResetImageAnimatorOnRepeat(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnRepeat(frameNode, nullptr);
+}
+
+void SetImageAnimatorOnCancel(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onCancel = reinterpret_cast<std::function<void()>*>(callback);
+        ImageAnimatorModelNG::SetOnCancel(frameNode, std::move(*onCancel));
+    } else {
+        ImageAnimatorModelNG::SetOnCancel(frameNode, nullptr);
+    }
+}
+
+void ResetImageAnimatorOnCancel(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnCancel(frameNode, nullptr);
+}
+
+void SetImageAnimatorOnFinish(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onFinish = reinterpret_cast<std::function<void()>*>(callback);
+        ImageAnimatorModelNG::SetOnFinish(frameNode, std::move(*onFinish));
+    } else {
+        ImageAnimatorModelNG::SetOnFinish(frameNode, nullptr);
+    }
+}
+
+void ResetImageAnimatorOnFinish(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetOnFinish(frameNode, nullptr);
+}
 } // namespace ImageAnimatorModifier
 
 namespace NodeModifier {
@@ -294,6 +388,16 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         .getFillMode = ImageAnimatorModifier::GetFillMode,
         .getIteration = ImageAnimatorModifier::GetIteration,
         .getImagesSize = ImageAnimatorModifier::GetImagesSize,
+        .setImageAnimatorOnStart = ImageAnimatorModifier::SetImageAnimatorOnStart,
+        .resetImageAnimatorOnStart = ImageAnimatorModifier::ResetImageAnimatorOnStart,
+        .setImageAnimatorOnPause = ImageAnimatorModifier::SetImageAnimatorOnPause,
+        .resetImageAnimatorOnPause = ImageAnimatorModifier::ResetImageAnimatorOnPause,
+        .setImageAnimatorOnRepeat = ImageAnimatorModifier::SetImageAnimatorOnRepeat,
+        .resetImageAnimatorOnRepeat = ImageAnimatorModifier::ResetImageAnimatorOnRepeat,
+        .setImageAnimatorOnCancel = ImageAnimatorModifier::SetImageAnimatorOnCancel,
+        .resetImageAnimatorOnCancel = ImageAnimatorModifier::ResetImageAnimatorOnCancel,
+        .setImageAnimatorOnFinish = ImageAnimatorModifier::SetImageAnimatorOnFinish,
+        .resetImageAnimatorOnFinish = ImageAnimatorModifier::ResetImageAnimatorOnFinish,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

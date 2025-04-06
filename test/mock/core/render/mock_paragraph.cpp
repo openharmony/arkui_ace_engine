@@ -26,6 +26,12 @@ RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPt
     return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
 }
 
+RefPtr<Paragraph> Paragraph::CreateRichEditorParagraph(
+    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
+{
+    return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;
+}
+
 RefPtr<Paragraph> Paragraph::Create(void* paragraph)
 {
     return MockParagraph::enabled_ ? MockParagraph::paragraph_ : nullptr;

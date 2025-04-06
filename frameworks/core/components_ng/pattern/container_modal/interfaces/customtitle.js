@@ -150,8 +150,8 @@ export class Index extends ViewPU {
       Text.fontWeight(TITLE_TEXT_FONT_WEIGHT);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
-      Text.layoutWeight(1.0);
       Text.opacity(this.iconOpacity);
+      Text.flexShrink(1);
       Text.minFontScale(0.85);
       Text.maxFontScale(1.45);
       if (!isInitialRender) {
@@ -932,10 +932,10 @@ class c3 extends ViewPU {
         }
     }
     onShowMenuWithTimer() {
+        this.onCancelMenuTimer();
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;
-                this.menuDisappearTimer(i1);
             }, h1);
         }
     }
@@ -1087,6 +1087,11 @@ class c3 extends ViewPU {
             PanGesture.create();
             PanGesture.pop();
             Gesture.pop();
+            Row.onTouch((u) => {
+                if (u) {
+                    u.stopPropagation();
+                }
+            })
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
@@ -1116,6 +1121,7 @@ class c3 extends ViewPU {
             LongPressGesture.onAction(() => {
                 this.onMenuWidthChange();
                 this.isShowMenu = !this.hideSplit;
+                this.menuDisappearTimer(i1);
             });
             LongPressGesture.pop();
             TapGesture.create();
@@ -1130,9 +1136,11 @@ class c3 extends ViewPU {
                 if (isHover) {
                     this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
+                    this.cancelMenuDisappearTimer();
                 }
                 else {
                     this.onCancelMenuTimer();
+                    this.menuDisappearTimer(j1);
                 }
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {

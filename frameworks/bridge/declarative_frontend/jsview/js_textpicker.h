@@ -32,7 +32,7 @@ enum class PickerStyle {
 
 struct ParseTextArrayParam {
     std::vector<NG::RangeContent> result;
-    uint32_t kind = 0;
+    uint32_t kind = NG::TEXT;
     uint32_t selected = 0;
     std::vector<Dimension> columnWidths;
     std::string value;
@@ -87,6 +87,7 @@ public:
 
     static void SetDefaultPickerItemHeight(const JSCallbackInfo& info);
     static void SetCanLoop(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
     static void OnAccept(const JSCallbackInfo& info);
     static void OnCancel(const JSCallbackInfo& info);

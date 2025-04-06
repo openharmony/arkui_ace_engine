@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/resource/ace_res_config.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -71,9 +70,26 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, name, PriorityType::VIP);
+        TaskExecutor::TaskType::UI, name);
 }
 
+struct DialogStrings {
+    std::string confirm;
+    std::string cancel;
+};
+
+DialogStrings GetDialogStrings()
+{
+    DialogStrings strs = {"", ""};
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, strs);
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, strs);
+
+    strs.confirm = dialogTheme->GetConfirmText();
+    strs.cancel = dialogTheme->GetCancelText();
+    return strs;
+}
 } // namespace
 
 int32_t FrontendDelegateDeclarative::GenerateNextPageId()
@@ -164,8 +180,7 @@ UIContentErrorCode FrontendDelegateDeclarative::RunPage(
                 delegate->manifestParser_->GetAppInfo()->ParseI18nJsonInfo();
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIParseI18nJsonInfo",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIParseI18nJsonInfo");
 
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_RETURN(pageRouterManager_, UIContentErrorCode::NULL_PAGE_ROUTER);
@@ -180,7 +195,7 @@ UIContentErrorCode FrontendDelegateDeclarative::RunPage(
                     pageRouterManager->RunPage(url, params);
                 }
             },
-            TaskExecutor::TaskType::JS, "ArkUIRunPageUrl", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
         return UIContentErrorCode::NO_ERRORS;
     }
     if (!url.empty()) {
@@ -207,15 +222,14 @@ void FrontendDelegateDeclarative::RunPage(
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageContent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
 }
 
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIAppInfoChangeLocale",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAppInfoChangeLocale");
 }
 
 void FrontendDelegateDeclarative::GetI18nData(std::unique_ptr<JsonValue>& json)
@@ -341,14 +355,13 @@ void FrontendDelegateDeclarative::OnJSCallback(const std::string& callbackId, co
                 delegate->jsCallback_(callbackId, args);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIHandleJsCallback", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIHandleJsCallback");
 }
 
 void FrontendDelegateDeclarative::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const
 {
     taskExecutor_->PostTask([dispatcherCallback = dispatcherCallback_, dispatcher] { dispatcherCallback(dispatcher); },
-        TaskExecutor::TaskType::JS, "ArkUISetJsMessageDispatcher",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUISetJsMessageDispatcher");
 }
 
 void FrontendDelegateDeclarative::TransferComponentResponseData(
@@ -367,8 +380,7 @@ void FrontendDelegateDeclarative::TransferComponentResponseData(
                 context->GetMessageBridge()->HandleCallback(callbackId, std::move(data));
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITransferComponentResponseData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::UI, "ArkUITransferComponentResponseData");
 }
 
 void FrontendDelegateDeclarative::TransferJsResponseData(
@@ -385,8 +397,7 @@ void FrontendDelegateDeclarative::TransferJsResponseData(
                 groupJsBridge->TriggerModuleJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseData");
 }
 
 #if defined(PREVIEW)
@@ -400,8 +411,7 @@ void FrontendDelegateDeclarative::TransferJsResponseDataPreview(
                 groupJsBridge->TriggerModuleJsCallbackPreview(callbackId, code, responseData);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseDataPreview",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsResponseDataPreview");
 }
 #endif
 
@@ -414,8 +424,7 @@ void FrontendDelegateDeclarative::TransferJsPluginGetError(
                 groupJsBridge->TriggerModulePluginGetErrorCallback(callbackId, errorCode, std::move(errorMessage));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsPluginGetError");
 }
 
 void FrontendDelegateDeclarative::TransferJsEventData(
@@ -427,8 +436,7 @@ void FrontendDelegateDeclarative::TransferJsEventData(
                 groupJsBridge->TriggerEventJsCallback(callbackId, code, std::move(data));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUITransferJsEventData",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUITransferJsEventData");
 }
 
 void FrontendDelegateDeclarative::LoadPluginJsCode(std::string&& jsCode) const
@@ -439,7 +447,7 @@ void FrontendDelegateDeclarative::LoadPluginJsCode(std::string&& jsCode) const
                 groupJsBridge->LoadPluginJsCode(std::move(jsCode));
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsCode");
 }
 
 void FrontendDelegateDeclarative::LoadPluginJsByteCode(
@@ -453,8 +461,7 @@ void FrontendDelegateDeclarative::LoadPluginJsByteCode(
         [jsCode = std::move(jsCode), jsCodeLen = std::move(jsCodeLen), groupJsBridge = groupJsBridge_]() mutable {
             groupJsBridge->LoadPluginJsByteCode(std::move(jsCode), std::move(jsCodeLen));
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadPluginJsByteCode");
 }
 
 bool FrontendDelegateDeclarative::OnPageBackPress()
@@ -500,19 +507,19 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
             }
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage");
 }
 
 void FrontendDelegateDeclarative::OnBackGround()
 {
-    OnPageHide();
+    OnPageHide(true);
 }
 
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
     if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
-        OnPageShow();
+        OnPageShow(true);
     }
     isFirstNotifyShow_ = false;
 }
@@ -600,7 +607,7 @@ void FrontendDelegateDeclarative::OnMemoryLevel(const int32_t level)
                 onMemoryLevel(level);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIMemoryLevel", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIMemoryLevel");
 }
 
 void FrontendDelegateDeclarative::GetPluginsUsed(std::string& data)
@@ -644,16 +651,14 @@ void FrontendDelegateDeclarative::UpdateApplicationState(const std::string& pack
 {
     taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
                                 state] { updateApplicationState(packageName, state); },
-        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState");
 }
 
 void FrontendDelegateDeclarative::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
     taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
                                 data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
-        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged");
 }
 
 void FrontendDelegateDeclarative::OnSaveAbilityState(std::string& data)
@@ -666,14 +671,13 @@ void FrontendDelegateDeclarative::OnSaveAbilityState(std::string& data)
 void FrontendDelegateDeclarative::OnRestoreAbilityState(const std::string& data)
 {
     taskExecutor_->PostTask([onRestoreAbilityState = onRestoreAbilityState_, data] { onRestoreAbilityState(data); },
-        TaskExecutor::TaskType::JS, "ArkUIRestoreAbilityState",
-        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIRestoreAbilityState");
 }
 
 void FrontendDelegateDeclarative::OnNewWant(const std::string& data)
 {
-    taskExecutor_->PostTask([onNewWant = onNewWant_, data] { onNewWant(data); }, TaskExecutor::TaskType::JS,
-        "ArkUINewWant", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor_->PostTask([onNewWant = onNewWant_, data] { onNewWant(data); },
+        TaskExecutor::TaskType::JS, "ArkUINewWant");
 }
 
 void FrontendDelegateDeclarative::FireAsyncEvent(
@@ -691,7 +695,7 @@ void FrontendDelegateDeclarative::FireAsyncEvent(
                 delegate->asyncEvent_(eventId, args);
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIFireAsyncEvent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUIFireAsyncEvent");
 }
 
 bool FrontendDelegateDeclarative::FireSyncEvent(
@@ -1569,10 +1573,9 @@ void FrontendDelegateDeclarative::TriggerPageUpdate(int32_t pageId, bool directE
         TaskExecutor::TaskType::UI, "ArkUIAddPageUpdate");
 }
 
-void FrontendDelegateDeclarative::PostJsTask(
-    std::function<void()>&& task, const std::string& name, PriorityType priority)
+void FrontendDelegateDeclarative::PostJsTask(std::function<void()>&& task, const std::string& name)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priority);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
 }
 
 const std::string& FrontendDelegateDeclarative::GetAppID() const
@@ -1636,7 +1639,7 @@ void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std:
             ToastComponent::GetInstance().Show(context, updatedToastInfo.message, updatedToastInfo.duration,
                 updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowToast", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIShowToast");
 }
 
 void FrontendDelegateDeclarative::CloseToast(const int32_t toastId, std::function<void(int32_t)>&& callback)
@@ -1669,7 +1672,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         dialogProperties.onSuccess = std::move(callback);
         dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-                TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
         };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             LOGI("Begin to show dialog ");
@@ -1713,7 +1716,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
                 taskExecutor->PostTask([callback, successType]() { callback(CALLBACK_ERRORCODE_SUCCESS, successType); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback", PriorityType::VIP);
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback");
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
     }
@@ -1723,7 +1726,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCancelCallback", PriorityType::VIP);
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCancelCallback");
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -1733,7 +1736,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_COMPLETE, CALLBACK_DATACODE_ZERO); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback", PriorityType::VIP);
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback");
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -1789,9 +1792,12 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1836,6 +1842,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
+        .levelOrder = dialogAttr.levelOrder,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1860,26 +1867,9 @@ void FrontendDelegateDeclarative::RemoveCustomDialog(int32_t instanceId)
     NG::ViewAbstract::DismissDialog();
 }
 
-DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+void FrontendDelegateDeclarative::ParsePartialPropertiesFromAttr(
+    DialogProperties& dialogProperties, const PromptDialogAttr& dialogAttr)
 {
-    DialogProperties dialogProperties = {
-        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
-        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
-        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
-        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
-        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
-        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
-        .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
-        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
-        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
-        .dialogLevelMode = dialogAttr.dialogLevelMode,
-        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
-    };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -1903,6 +1893,37 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
             dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
         }
     }
+}
+
+DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
+{
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
+        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
+        .customBuilderWithId = dialogAttr.customBuilderWithId,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption,
+        .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width, .height = dialogAttr.height,
+        .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
+        .maskRect = dialogAttr.maskRect,
+        .transitionEffect = dialogAttr.transitionEffect, .dialogTransitionEffect = dialogAttr.dialogTransitionEffect,
+        .maskTransitionEffect = dialogAttr.maskTransitionEffect, .contentNode = dialogAttr.contentNode,
+        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .levelOrder = dialogAttr.levelOrder,
+        .focusable = dialogAttr.focusable,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+    };
+    ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
 }
 
@@ -1945,7 +1966,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
@@ -1973,7 +1994,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
             overlayManager->CloseCustomDialog(node, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 
 void FrontendDelegateDeclarative::UpdateCustomDialog(
@@ -2003,7 +2024,29 @@ void FrontendDelegateDeclarative::UpdateCustomDialog(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+}
+
+std::optional<double> FrontendDelegateDeclarative::GetTopOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetTopOrder();
+}
+
+std::optional<double> FrontendDelegateDeclarative::GetBottomOrder()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetBottomOrder();
 }
 
 void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogProperties,
@@ -2028,7 +2071,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
                         callback(CALLBACK_ERRORCODE_SUCCESS, successType);
                     }
                 },
-                TaskExecutor::TaskType::JS, "ArkUIDialogShowActionMenuSuccess", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIDialogShowActionMenuSuccess");
         });
     callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
 
@@ -2036,7 +2079,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-                TaskExecutor::TaskType::JS, "ArkUIDialogShowActionMenuCancel", PriorityType::VIP);
+                TaskExecutor::TaskType::JS, "ArkUIDialogShowActionMenuCancel");
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     dialogProperties.callbacks = std::move(callbackMarkers);
@@ -2053,7 +2096,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel");
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -2092,7 +2135,7 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
                 CHECK_NULL_VOID(dialog);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenuInner", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenuInner");
 }
 
 void FrontendDelegateDeclarative::ShowActionMenu(
@@ -2191,14 +2234,15 @@ void FrontendDelegateDeclarative::EnableAlertBeforeBackPage(
         return;
     }
 
+    auto strs = GetDialogStrings();
     auto& currentPage = pageRouteStack_.back();
     ClearAlertCallback(currentPage);
     currentPage.alertCallback = callback;
     currentPage.dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = strs.cancel, .textColor = "" },
+            { .text = strs.confirm, .textColor = "" } },
         .callbacks = std::move(callbackMarkers),
     };
 }
@@ -2385,10 +2429,9 @@ UIContentErrorCode FrontendDelegateDeclarative::LoadPage(
                         page->GetDomDocument()->HandlePageLoadFinish();
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish",
-                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+                TaskExecutor::TaskType::UI, "ArkUIPageLoadFinish");
         },
-        TaskExecutor::TaskType::JS, "ArkUILoadJsPage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        TaskExecutor::TaskType::JS, "ArkUILoadJsPage");
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -2440,7 +2483,7 @@ void FrontendDelegateDeclarative::OnMediaQueryUpdate(bool isSynchronous)
         callback();
         return;
     }
-    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
+    taskExecutor_->PostTask(callback, TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
 }
 
 void FrontendDelegateDeclarative::OnLayoutCompleted(const std::string& componentId)
@@ -3107,9 +3150,9 @@ void FrontendDelegateDeclarative::RebuildAllPages()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageShow()
+void FrontendDelegateDeclarative::OnPageShow(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3119,7 +3162,7 @@ void FrontendDelegateDeclarative::OnPageShow()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnShow();
+            pagePattern->OnShow(isFromWindow);
             return;
         }
 
@@ -3140,9 +3183,9 @@ void FrontendDelegateDeclarative::OnPageShow()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageHide()
+void FrontendDelegateDeclarative::OnPageHide(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3152,7 +3195,7 @@ void FrontendDelegateDeclarative::OnPageHide()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnHide();
+            pagePattern->OnHide(isFromWindow);
             return;
         }
 
@@ -3556,6 +3599,17 @@ void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNo
     MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
 }
 
+void FrontendDelegateDeclarative::AddFrameNodeWithOrder(const RefPtr<NG::FrameNode>& node,
+    std::optional<double> levelOrder)
+{
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->AddFrameNodeWithOrder(node, levelOrder);
+}
+
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
     auto task = [node, containerId = Container::CurrentId()](const RefPtr<NG::OverlayManager>& overlayManager) {
@@ -3638,8 +3692,6 @@ std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
 }
 bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto overlayManager = context->GetOverlayManager();
@@ -3648,8 +3700,6 @@ bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayMana
 };
 std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayManagerOptions()
 {
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, std::nullopt);
     auto overlayManager = context->GetOverlayManager();

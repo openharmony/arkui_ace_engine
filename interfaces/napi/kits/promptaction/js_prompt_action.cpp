@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "interfaces/napi/kits/promptaction/js_level_order.h"
 #include "interfaces/napi/kits/promptaction/js_prompt_controller.h"
 #include "interfaces/napi/kits/promptaction/prompt_action.h"
 #include "interfaces/napi/kits/utils/napi_utils.h"
@@ -58,6 +59,7 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(promptDesc) / sizeof(promptDesc[0]), promptDesc));
     NAPI_CALL(env, JSPromptController::Define(env, exports));
+    NAPI_CALL(env, JSLevelOrder::Define(env, exports));
     return exports;
 }
 

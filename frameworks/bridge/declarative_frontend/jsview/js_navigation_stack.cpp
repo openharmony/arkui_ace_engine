@@ -321,6 +321,12 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
     RefPtr<NG::NavDestinationGroupNode> desNode;
     NG::ScopedViewStackProcessor scopedViewStackProcessor;
     int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
+    if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (navDestinationPattern) {
+            SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
+        }
+    }
     // isRemove true, set destination info, false, current destination create failed
     bool isRemove = RemoveDestinationIfNeeded(pathInfo, errorCode, index);
     if (!isRemove) {
@@ -329,6 +335,11 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
     if (errorCode != ERROR_CODE_NO_ERROR) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
         node = AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+        GetNavDestinationNodeInUINode(node, desNode);
+        CHECK_NULL_RETURN(desNode, true);
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        CHECK_NULL_RETURN(navDestinationPattern, true);
+        SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
         return true;
     }
     node = targetNode;
@@ -477,10 +488,6 @@ bool JSNavigationStack::GetNavDestinationNodeInUINode(
             return true;
         }
         auto children = node->GetChildren();
-        if (children.size() != 1) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
-                "router map is invalid, child size is not one: %{public}zu", children.size());
-        }
         node = children.front();
     }
     return false;
@@ -1313,5 +1320,98 @@ bool JSNavigationStack::ExecutePopCallback(const RefPtr<NG::UINode>& uiNode,
     params[0] = param;
     callback->Call(JSRef<JSObject>(), 1, params);
     return true;
+}
+
+bool JSNavigationStack::HasSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    auto hasSingletonMoved = dataSourceObj_->GetProperty("hasSingletonMoved");
+    if (!hasSingletonMoved->IsBoolean()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "hasSingletonMoved invalid!");
+        return false;
+    }
+    return hasSingletonMoved->ToBoolean();
+}
+
+bool JSNavigationStack::IsTopFromSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto len = GetSize();
+    if (len == 0) {
+        return false;
+    }
+    auto top = GetJsPathInfo(len - 1);
+    if (top->IsEmpty()) {
+        return false;
+    }
+    auto isFromSingletonMoved = top->GetProperty("singletonMoved");
+    if (!isFromSingletonMoved->IsBoolean()) {
+        return false;
+    }
+    return isFromSingletonMoved->ToBoolean();
+}
+
+uint64_t JSNavigationStack::GetNavDestinationIdInt(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, -1);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return -1;
+    }
+    auto id = pathInfo->GetProperty("navDestinationId");
+    if (!id->IsString()) {
+        return -1;
+    }
+    auto navDestinationIdStr = id->ToString();
+    auto navDestinationId = std::atol(navDestinationIdStr.c_str());
+    return navDestinationId;
+}
+
+bool JSNavigationStack::GetIsForceSet(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto isForceSet = pathInfo->GetProperty("isForceSet");
+    if (!isForceSet->IsBoolean()) {
+        return false;
+    }
+    return isForceSet->ToBoolean();
+}
+
+void JSNavigationStack::ResetIsForceSetFlag(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetPropertyObject("isForceSet", JsiValue::Undefined());
+}
+
+void JSNavigationStack::ResetSingletonMoved()
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto hasSingletonMoved = dataSourceObj_->GetProperty("hasSingletonMoved");
+    if (!hasSingletonMoved->IsBoolean() || !hasSingletonMoved->ToBoolean()) {
+        return;
+    }
+    auto len = GetSize();
+    for (auto index = 0; index < len; index++) {
+        auto info = GetJsPathInfo(index);
+        if (info->IsEmpty()) {
+            continue;
+        }
+        info->SetProperty<bool>("singletonMoved", false);
+    }
+    dataSourceObj_->SetProperty<bool>("hasSingletonMoved", false);
 }
 } // namespace OHOS::Ace::Framework

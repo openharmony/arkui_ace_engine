@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDICATOR_TYPE_INDEX = 0;
-constexpr int32_t DEFAULT_DISPLAY_COUNT = 1;
 constexpr int32_t DIGIT_INDICATOR_LEFT = 7;
 constexpr int32_t DIGIT_INDICATOR_TOP = 8;
 constexpr int32_t DIGIT_INDICATOR_RIGHT = 9;
@@ -47,6 +46,8 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 10;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 11;
 constexpr int32_t DOT_INDICATOR_INFO_SIZE = 11;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 12;
+constexpr int32_t DOT_INDICATOR_SPACE = 13;
+constexpr int32_t DEFAULT_INDICATOR_COUNT = 2;
 namespace {
 
 std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
@@ -183,6 +184,7 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     auto maskValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MASK);
     auto colorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_COLOR);
     auto selectedColorValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SELECTED_COLOR);
+    auto spaceValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_SPACE);
     CHECK_NULL_RETURN(frameNode, SwiperParameters());
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
@@ -211,6 +213,10 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     if (!maxDisplayCount.empty()) {
         indicatorParameters.maxDisplayCountVal = StringUtils::StringToInt(maxDisplayCount);
     }
+    auto space = StringUtils::StringToCalcDimension(spaceValue, false, DimensionUnit::VP);
+    bool parseSpaceOk = !spaceValue.empty() && space.Unit() != DimensionUnit::PERCENT;
+    auto defaultSpaceSize = swiperIndicatorTheme->GetIndicatorDotItemSpace();
+    indicatorParameters.dimSpace = (parseSpaceOk && !(space < 0.0_vp)) ? space : defaultSpaceSize;
     return indicatorParameters;
 }
 
@@ -233,7 +239,7 @@ void SetCount(ArkUINodeHandle node, ArkUI_Int32 count)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (count < 0) {
-        count = DEFAULT_CACHED_COUNT;
+        count = DEFAULT_INDICATOR_COUNT;
     }
     IndicatorModelNG::SetCount(frameNode, count);
 }
@@ -242,7 +248,7 @@ void ResetCount(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndicatorModelNG::SetCount(frameNode, DEFAULT_DISPLAY_COUNT);
+    IndicatorModelNG::SetCount(frameNode, DEFAULT_INDICATOR_COUNT);
 }
 
 void SetOnChange(ArkUINodeHandle node, void* callback)
@@ -321,8 +327,22 @@ void ResetVertical(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()
 {
-    static const ArkUIIndicatorComponentModifier modifier = { SetInitialIndex, ResetInitialIndex, SetCount, ResetCount,
-        SetOnChange, ResetOnChange, SetStyle, ResetStyle, SetLoop, ResetLoop, SetVertical, ResetVertical };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIIndicatorComponentModifier modifier = {
+        .setInitialIndex = SetInitialIndex,
+        .resetInitialIndex = ResetInitialIndex,
+        .setCount = SetCount,
+        .resetCount = ResetCount,
+        .setOnChange = SetOnChange,
+        .resetOnChange = ResetOnChange,
+        .setStyle = SetStyle,
+        .resetStyle = ResetStyle,
+        .setLoop = SetLoop,
+        .resetLoop = ResetLoop,
+        .setVertical = SetVertical,
+        .resetVertical = ResetVertical
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 };
 

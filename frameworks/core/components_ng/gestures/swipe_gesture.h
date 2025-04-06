@@ -27,11 +27,12 @@ class ACE_FORCE_EXPORT SwipeGesture : public Gesture {
     DECLARE_ACE_TYPE(SwipeGesture, Gesture);
 
 public:
-    SwipeGesture(int32_t fingers, const SwipeDirection& direction, double speed)
+    SwipeGesture(int32_t fingers, const SwipeDirection& direction, double speed, bool limitFingerCount = false)
     {
         fingers_ = fingers;
         direction_ = direction;
         speed_ = speed;
+        isLimitFingerCount_ = limitFingerCount;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::SWIPE_GESTURE);
             gestureInfo_->SetRecognizerType(GestureTypeName::SWIPE_GESTURE);

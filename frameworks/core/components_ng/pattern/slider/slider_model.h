@@ -127,6 +127,9 @@ public:
     virtual void ResetSliderInteractionMode() = 0;
     virtual void ResetMinResponsiveDistance() = 0;
     virtual void ResetValidSlideRange() = 0;
+    virtual void ResetBlockColor() {};
+    virtual void ResetTrackColor() {};
+    virtual void ResetSelectColor() {};
     virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void ResetDigitalCrownSensitivity() = 0;

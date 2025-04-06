@@ -74,6 +74,15 @@ public:
         return true;
     }
 
+    bool PostDelayedTask(Task&& task, TaskType type, uint32_t delayTime, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
+    {
+        if (delayTime > 0 && type == TaskType::BACKGROUND) {
+            return false;
+        }
+        return OnPostTask(std::move(task), type, delayTime, name, priorityType);
+    }
+
 private:
     bool delayRun_ = false;
 };

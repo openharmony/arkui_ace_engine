@@ -112,6 +112,7 @@ enum class AccessibilityEventType : size_t {
     ANNOUNCE_FOR_ACCESSIBILITY = 0x10000000,
     PAGE_OPEN = 0x20000000,
     ELEMENT_INFO_CHANGE = 0x40000000,
+    SCROLLING_EVENT = 0x40000003,
     UNKNOWN,
 };
 
@@ -218,6 +219,17 @@ struct SubComponentInfo {
     std::string accessibilityText = "";
     std::string accessibilityDescription = "";
     std::string accessibilityLevel = "";
+};
+
+enum class NotifyChildActionType : uint32_t {
+    ACTION_CLICK = 1,
+};
+
+enum class AccessibilityActionResult : int32_t {
+    ACTION_OK = 0,
+    ACTION_ERROR = -1,
+    ///< need to  bubble up the action
+    ACTION_RISE = 2,
 };
 
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);

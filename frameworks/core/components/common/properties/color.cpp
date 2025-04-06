@@ -19,6 +19,7 @@
 #include <regex>
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace {
@@ -626,7 +627,7 @@ void Color::UpdateColorByResourceId()
 {
 #ifndef ACE_UNITTEST
     CHECK_NULL_VOID(resourceId_ != 0);
-    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+    auto resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
     CHECK_NULL_VOID(resourceAdapter);
     auto newColor = resourceAdapter->GetColor(resourceId_);
     SetValue(newColor.GetValue());

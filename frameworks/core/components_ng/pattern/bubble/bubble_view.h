@@ -26,6 +26,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -33,8 +34,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT BubbleView {
 public:
-    static RefPtr<FrameNode> CreateBubbleNode(
-        const std::string& tag, int32_t targetId, const RefPtr<PopupParam>& param);
+    static RefPtr<FrameNode> CreateBubbleNode(const std::string& tag, int32_t targetId, const RefPtr<PopupParam>& param,
+        const RefPtr<SpanString>& spanString = nullptr);
     static RefPtr<FrameNode> CreateCustomBubbleNode(const std::string& targetTag, int32_t targetId,
         const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param);
     static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom);
@@ -42,7 +43,8 @@ public:
         const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bobbleNode);
     static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
     static RefPtr<FrameNode> CreateButton(
-        ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param);
+        ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param,
+         const std::string& buttonName = "primaryButton");
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
     static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom = true);
@@ -51,6 +53,9 @@ public:
         const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight, int32_t popupId);
     static void UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& param);
     static void UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const RefPtr<PopupParam>& param);
+    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
 private:
     static bool IsSupportBlurStyle(RefPtr<RenderContext>& renderContext, bool isShowInSubWindow);

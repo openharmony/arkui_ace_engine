@@ -157,6 +157,8 @@ public:
         return isInDividerDrag_;
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -206,6 +208,19 @@ private:
     void SetAccessibilityEvent();
     void InitImageErrorCallback(const RefPtr<SideBarTheme>& sideBarTheme, const RefPtr<FrameNode>& imgNode);
     void SetMouseStyle(MouseFormat format);
+    void UpdateSideBarToolBarManager(bool isShowDivider, float width);
+    void UpdateSideBarColorToolBarManager(const Color& backgroudColor);
+    void UpdateSideBarDividerToolBarManager(float dividerWidth);
+    void UpdateSideBarStatus();
+
+    void InitToolBarManager()
+    {
+        if (!toolbarManager_) {
+            auto pipeline = GetHost()->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            toolbarManager_ = pipeline->GetToolbarManager();
+        }
+    }
 
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
@@ -216,6 +231,7 @@ private:
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
     RefPtr<CurveAnimation<float>> leftToRightAnimation_;
     RefPtr<PanEvent> dragEvent_;
+    RefPtr<ToolbarManager> toolbarManager_;
 
     float currentOffset_ = 0.0f;
     float realDividerWidth_ = 0.0f;

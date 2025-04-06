@@ -23,6 +23,8 @@
 #include "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h"
 
 namespace OHOS::Ace {
+constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 std::unique_ptr<SymbolModel> SymbolModel::instance_ = nullptr;
 std::mutex SymbolModel::mutex_;
@@ -80,6 +82,16 @@ void JSSymbol::Create(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resourceObject;
     ParseJsSymbolId(info[0], symbolId, resourceObject);
     SymbolModel::GetInstance()->Create(symbolId);
+    std::vector<std::string> familyNames;
+    if (symbolId > SYSTEM_SYMBOL_BOUNDARY) {
+        ParseJsSymbolCustomFamilyNames(familyNames, info[0]);
+        SymbolModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolModel::GetInstance()->SetSymbolType(SymbolType::CUSTOM);
+    } else {
+        familyNames.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        SymbolModel::GetInstance()->SetFontFamilies(familyNames);
+        SymbolModel::GetInstance()->SetSymbolType(SymbolType::SYSTEM);
+    }
 }
 
 void JSSymbol::SetFontSize(const JSCallbackInfo& info)

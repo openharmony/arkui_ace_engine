@@ -26,24 +26,22 @@ using namespace OHOS::FFI;
 namespace OHOS::DisplaySync {
 void DisplaySync::RegisterOnFrameCallback(void (*callback)(CIntervalInfo))
 {
-    callbackRef_ = callback;
-    auto callbackCJ = CJLambda::Create(callback);
-    uiDisplaySync_->RegisterOnFrameWithData([&callbackCJ] (Ace::RefPtr<Ace::DisplaySyncData> displaySyncData) {
+    uiDisplaySync_->RegisterOnFrameWithData(
+        [callbackCJ = CJLambda::Create(callback)] (Ace::RefPtr<Ace::DisplaySyncData> displaySyncData) {
         CIntervalInfo intervalInfo;
         intervalInfo.timestamp = displaySyncData->timestamp_;
         intervalInfo.targetTimestamp = displaySyncData->targetTimestamp_;
-        callbackCJ(intervalInfo);
+        if (callbackCJ != nullptr) {
+            callbackCJ(intervalInfo);
+        }
     });
 }
 
 void DisplaySync::UnregisterOnFrameCallback(void (*callback)(CIntervalInfo))
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (callbackRef_ == nullptr) {
-        return;
-    }
-    callbackRef_ = nullptr;
     uiDisplaySync_->UnregisterOnFrame();
+    FFIDataManager::GetInstance()->RemoveRemoteData(reinterpret_cast<int64_t>(callback));
 }
 
 DisplaySyncImpl::DisplaySyncImpl()

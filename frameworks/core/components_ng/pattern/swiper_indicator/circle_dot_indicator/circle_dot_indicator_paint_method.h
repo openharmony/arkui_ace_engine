@@ -122,6 +122,11 @@ public:
 
     void UpdateBackground(const PaintWrapper* paintWrapper);
 
+    void SetHorizontalAndRightToLeft(TextDirection textDirection)
+    {
+        isHorizontalAndRightToLeft_ = axis_ == Axis::HORIZONTAL && textDirection == TextDirection::RTL;
+    }
+
 private:
     void CalculateLongPointCenterAngle(float longPointLeftCenterMoveRate, float longPointRightCenterMoveRate);
     std::tuple<std::pair<float, float>, LinearVector<float>> CalculateLongPointCenterAngle(
@@ -147,6 +152,7 @@ private:
         const LinearVector<float>& itemSizes, int32_t symbol);
     std::tuple<float, float, float> GetMoveRate();
     void CalculatePointCenterAngle();
+    std::pair<int32_t, int32_t> GetIndexOnRTL(int32_t index);
 
     RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
@@ -163,6 +169,7 @@ private:
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     bool isLongPressed_ = false;
+    bool isHorizontalAndRightToLeft_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointAngle_ = {};
     LinearVector<float> vectorBlackPointRadius_ = {};

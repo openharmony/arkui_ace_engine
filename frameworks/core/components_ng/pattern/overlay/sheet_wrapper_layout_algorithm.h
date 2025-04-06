@@ -63,6 +63,9 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void MeasureSheetMask(LayoutWrapper* layoutWrapper);
+    void LayoutMaskNode(LayoutWrapper* layoutWrapper);
+
 private:
     void InitParameter(LayoutWrapper* layoutWrapper);
     void GetSheetPageSize(LayoutWrapper* layoutWrapper);

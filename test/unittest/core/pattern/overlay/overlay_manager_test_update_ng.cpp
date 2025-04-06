@@ -2064,7 +2064,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(ShadowTheme::TypeId())).WillRepeatedly(Return(shadowTheme));
     overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
     EXPECT_EQ(renderContext->GetBackShadow().has_value(), true);
-    Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, SystemProperties::GetColorMode());
+    Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, MockContainer::GetMockColorMode());
     EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 

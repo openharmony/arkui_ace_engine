@@ -13,9 +13,12 @@
  * limitations under the License.
  */
 
+#include "base/resource/internal_resource.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 bool ExecuteCustomTitleAbc()
@@ -28,5 +31,19 @@ bool ExecuteCustomTitleAbc()
 bool ExecuteCustomWindowMaskAbc()
 {
     return true;
+}
+
+RefPtr<FrameNode> BuildTitleNodeForCj()
+{
+    return FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+}
+
+RefPtr<FrameNode> BuildControlButtonForCj(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback,
+    bool isCloseButton = false, bool canDrag = false)
+{
+    return FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
 }
 } // namespace OHOS::Ace::NG

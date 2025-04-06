@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components/theme/app_theme.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -60,7 +61,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
             return FocusIntension::SPACE;
         default:;
     }
-    switch (keyEvent.keyIntention) {
+    return GetFocusIntensionFromKey(keyEvent.keyIntention);
+}
+
+FocusIntension FocusEvent::GetFocusIntensionFromKey(KeyIntention keyIntention)
+{
+    switch (keyIntention) {
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
@@ -150,7 +156,23 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
         return HandleCrownEvent(crownEvent);
     }
+
+    auto keyProcessingMode = static_cast<KeyProcessingMode>(GetKeyProcessingMode());
+    if (keyProcessingMode == KeyProcessingMode::ANCESTOR_EVENT) {
+        return ret;
+    }
     return ret ? true : HandleFocusTravel(focusEvent);
+}
+
+int32_t FocusEventHandler::GetKeyProcessingMode()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(context, static_cast<int32_t>(KeyProcessingMode::FOCUS_NAVIGATION));
+    return static_cast<int32_t>(focusManager->GetKeyProcessingMode());
 }
 
 bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension intension)
@@ -178,8 +200,10 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
         return true;
     }
     // Handle on click
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
-        !pipeline->GetIsFocusActive()) {
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(appTheme, false);
+    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) ||
+                                             !appTheme->NeedFocusHandleClick())) {
         return false;
     }
     if (intension == FocusIntension::SELECT && !IsTabStop()) {
@@ -189,8 +213,9 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     if (intension == FocusIntension::SPACE) {
         ret = OnClick(event);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
+            "OnClick: Node %{public}s/%{public}d handle KeyEvent("
+            SEC_PLD(%{private}d) ", %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(event.code), event.action, ret);
     }
     return ret;
 }
@@ -204,7 +229,7 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     auto onFocusAxisCallback = GetOnFocusAxisCallback();
     CHECK_NULL_RETURN(onFocusAxisCallback, false);
     auto info = FocusAxisEventInfo(event);
-    auto eventHub = eventHub_.Upgrade();
+    auto eventHub = node->GetEventHub<EventHub>();
     if (eventHub) {
         auto targetImpl = eventHub->CreateGetEventTargetImpl();
         info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -295,7 +320,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             info.SetScreenLocation(windowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
-        auto eventHub = eventHub_.Upgrade();
+        auto eventHub = node->GetEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));
@@ -317,17 +342,19 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     if (isNodeNeedKey_) {
         retInternal =  ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
+            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
         return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "OnKeyEventInteral: Node %{public}s/%{public}d"
+            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
     }
     return retInternal;
 }
@@ -359,8 +386,9 @@ bool FocusEventHandler::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& k
 void FocusEventHandler::PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback)
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-        GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
+        "OnKeyEventUser: Node %{public}s/%{public}d"
+        "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) return: %{public}d",
+        GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retCallback);
 }
 
 bool FocusEventHandler::ProcessOnKeyEventInternal(const KeyEvent& event)

@@ -33,6 +33,7 @@
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components/text_field/on_text_changed_listener_impl.h"
 #endif
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -90,6 +91,7 @@ void RemoveErrorTextFromValue(const std::string& value, const std::string& error
         valuePtr++;
         errorTextPtr++;
     }
+    valuePtr = std::clamp(valuePtr, 0, static_cast<int32_t>(value.length()));
     result += value.substr(valuePtr);
 }
 #endif
@@ -1706,6 +1708,7 @@ void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate
         }
         std::string strInSelection;
         if (start < end) {
+            start = std::clamp(start, 0, static_cast<int32_t>(valueToUpdate.text.length()));
             strInSelection = valueToUpdate.text.substr(start, end - start);
             textChanged |= FilterWithRegex(strInSelection, keyboardFilterValue);
         }
@@ -2670,6 +2673,21 @@ void RenderTextField::InsertValueDone(const std::string& appendElement)
         std::max(GetEditingValue().selection.GetEnd(), 0) + StringUtils::Str8ToStr16(appendElement).length());
     UpdateEditingValue(editingValue);
     MarkNeedLayout();
+}
+
+void RenderTextField::SyncGeometryProperties()
+{
+    if (!IsTailRenderNode()) {
+        return;
+    }
+    auto rsNode = GetRSNode();
+    if (!rsNode) {
+        return;
+    }
+    Offset paintOffset = GetPaintOffset();
+    Size paintSize = GetLayoutSize();
+    rsNode->SetBounds(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
+    rsNode->SetFrame(paintOffset.GetX(), paintOffset.GetY(), paintSize.Width(), paintSize.Height());
 }
 
 void RenderTextField::UpdateAccessibilityAttr()

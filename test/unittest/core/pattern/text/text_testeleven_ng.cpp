@@ -48,6 +48,11 @@ public:
     explicit MyImageSpan(const ImageSpanOptions& options) : ImageSpan(options) {}
 };
 
+void UrlCallback()
+{
+    std::cout << "urlOnRelease" << std::endl;
+}
+
 /**
  * @tc.name: SpanStringContainSpecialNode001
  * @tc.desc: test ContainSpecialNode
@@ -517,5 +522,385 @@ HWTEST_F(TextTestNg, TLVUtilWriteImageSpanSize001, TestSize.Level1)
     TLVUtil::WriteImageSpanSize(buffer, imageSpanSize);
     std::vector<uint8_t> expectedBuffer = { TLV_IMAGESPANSIZE_TAG, TLV_IMAGESPANSIZE_END_TAG };
     EXPECT_EQ(buffer, expectedBuffer);
+}
+
+/**
+ * @tc.name: TLVUtilReadImageSpanSize001
+ * @tc.desc: test ReadImageSpanSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TLVUtilReadImageSpanSize001, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    int32_t cursor = 0;
+    TLVUtil::WriteUint8(buffer, TLV_IMAGESPANSIZE_TAG);
+    TLVUtil::WriteUint8(buffer, TLV_ELLIPSISMODE_TAG);
+    TLVUtil::WriteUint8(buffer, TLV_IMAGESPANSIZE_END_TAG);
+    auto result = TLVUtil::ReadImageSpanSize(buffer, cursor);
+    EXPECT_FALSE(result.width.has_value());
+    EXPECT_FALSE(result.height.has_value());
+}
+
+/**
+ * @tc.name: TLVUtilReadPaddingProperty001
+ * @tc.desc: test ReadPaddingProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TLVUtilReadPaddingProperty001, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    int32_t cursor = 0;
+    TLVUtil::WriteUint8(buffer, TLV_PADDINGPROPERTY_TAG);
+    TLVUtil::WriteUint8(buffer, TLV_ELLIPSISMODE_TAG);
+    TLVUtil::WriteUint8(buffer, TLV_PADDINGPROPERTY_END_TAG);
+    auto result = TLVUtil::ReadPaddingProperty(buffer, cursor);
+    EXPECT_FALSE(result.left.has_value());
+    EXPECT_FALSE(result.top.has_value());
+    EXPECT_FALSE(result.bottom.has_value());
+    EXPECT_FALSE(result.right.has_value());
+}
+
+/**
+ * @tc.name: ContentControllerRemoveErrorTextFromValue001
+ * @tc.desc: test RemoveErrorTextFromValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ContentControllerRemoveErrorTextFromValue001, TestSize.Level1)
+{
+    auto result = ContentController::RemoveErrorTextFromValue(u"b", u"a");
+    EXPECT_EQ(result, u"b");
+}
+
+/**
+ * @tc.name: ContentControllerFilterWithAscii001
+ * @tc.desc: test FilterWithAscii
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ContentControllerFilterWithAscii001, TestSize.Level1)
+{
+    std::u16string str = u"";
+    auto result = ContentController::FilterWithAscii(str);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SpanStringGetDefaultSpan001
+ * @tc.desc: test GetDefaultSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetDefaultSpan001, TestSize.Level1)
+{
+    auto span = SpanString::GetDefaultSpan(SpanType::Decoration);
+    EXPECT_NE(span, nullptr);
+    auto decorationSpan = AceType::DynamicCast<DecorationSpan>(span);
+    EXPECT_NE(decorationSpan, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetDefaultSpan002
+ * @tc.desc: test GetDefaultSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetDefaultSpan002, TestSize.Level1)
+{
+    auto span = SpanString::GetDefaultSpan(SpanType::ExtSpan);
+    EXPECT_NE(span, nullptr);
+    auto extSpan = AceType::DynamicCast<ExtSpan>(span);
+    EXPECT_NE(extSpan, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetDefaultSpan003
+ * @tc.desc: test GetDefaultSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetDefaultSpan003, TestSize.Level1)
+{
+    auto span = SpanString::GetDefaultSpan(SpanType::BackgroundColor);
+    EXPECT_NE(span, nullptr);
+    auto backgroundColorSpan = AceType::DynamicCast<BackgroundColorSpan>(span);
+    EXPECT_NE(backgroundColorSpan, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetDefaultSpan004
+ * @tc.desc: test GetDefaultSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetDefaultSpan004, TestSize.Level1)
+{
+    auto span = SpanString::GetDefaultSpan(SpanType::Url);
+    EXPECT_NE(span, nullptr);
+    auto urlSpan = AceType::DynamicCast<UrlSpan>(span);
+    EXPECT_NE(urlSpan, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringGetDefaultSpan005
+ * @tc.desc: test GetDefaultSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetDefaultSpan005, TestSize.Level1)
+{
+    auto span = SpanString::GetDefaultSpan(SpanType::CustomSpan);
+    EXPECT_EQ(span, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringCheckRange001
+ * @tc.desc: test CheckRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringCheckRange001, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    RefPtr<SpanBase> span = AceType::MakeRefPtr<ExtSpan>(5, 3);
+    auto result = spanString.CheckRange(span);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SpanStringCheckRange002
+ * @tc.desc: test CheckRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringCheckRange002, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    RefPtr<SpanBase> span = AceType::MakeRefPtr<ExtSpan>(1, 2);
+    auto result = spanString.CheckRange(span);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SpanString_CheckRange001
+ * @tc.desc: test CheckRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanString_CheckRange001, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    auto result = spanString.CheckRange(1, 1, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SpanString_CheckRange002
+ * @tc.desc: test CheckRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanString_CheckRange002, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    auto result = spanString.CheckRange(0, 2, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SpanStringGetSubSpanList001
+ * @tc.desc: test GetSubSpanList
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetSubSpanList001, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(6, 1);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    auto result = spanString.GetSubSpanList(2, 3, spans);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: SpanStringGetSubSpanList002
+ * @tc.desc: test GetSubSpanList
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetSubSpanList002, TestSize.Level1)
+{
+    SpanString spanString(u"text");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    auto result = spanString.GetSubSpanList(0, 5, spans);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: SpanStringGetSpan001
+ * @tc.desc: test GetSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetSpan001, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::ExtSpan, spans);
+    auto result = spanString.GetSpan(0, 5, SpanType::ExtSpan);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: SpanStringOperator001
+ * @tc.desc: test operator==
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringOperator001, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    SpanString spanStringOne(u"string");
+    GestureStyle gestureInfo;
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<GestureSpan>(gestureInfo, 2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::Gesture, spans);
+    GestureStyle gesture;
+    RefPtr<SpanBase> spanBaseOne = AceType::MakeRefPtr<GestureSpan>(gesture, 1, 2);
+    std::list<RefPtr<SpanBase>> spanList;
+    spanList.emplace_back(spanBaseOne);
+    spanStringOne.spansMap_.emplace(SpanType::Gesture, spanList);
+    auto result = spanString.operator==(spanStringOne);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SpanStringOperator002
+ * @tc.desc: test operator==
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringOperator002, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    SpanString spanStringOne(u"string");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::ExtSpan, spans);
+    Font font;
+    RefPtr<SpanBase> spanBaseOne = AceType::MakeRefPtr<FontSpan>(font, 1, 2);
+    std::list<RefPtr<SpanBase>> spanList;
+    spanList.emplace_back(spanBaseOne);
+    spanStringOne.spansMap_.emplace(SpanType::Font, spanList);
+    auto result = spanString.operator==(spanStringOne);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SpanStringOperator003
+ * @tc.desc: test operator==
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringOperator003, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    SpanString spanStringOne(u"string");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::ExtSpan, spans);
+    RefPtr<SpanBase> spanBaseOne = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    Font font;
+    RefPtr<SpanBase> spanBaseTwo = AceType::MakeRefPtr<FontSpan>(font, 1, 2);
+    std::list<RefPtr<SpanBase>> spanList;
+    spanList.emplace_back(spanBaseOne);
+    spanList.emplace_back(spanBaseTwo);
+    spanStringOne.spansMap_.emplace(SpanType::ExtSpan, spanList);
+    auto result = spanString.operator==(spanStringOne);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: SpanStringOperator004
+ * @tc.desc: test operator==
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringOperator004, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    SpanString spanStringOne(u"string");
+    Dimension dimension(20.0);
+    Color color(20, 10);
+    Font font;
+    font.fontWeight.emplace(FontWeight::BOLDER);
+    font.fontSize.emplace(dimension);
+    font.fontStyle = std::nullopt;
+    font.fontColor.emplace(color);
+    font.enableVariableFontWeight.emplace(true);
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<FontSpan>(font, 1, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::Font, spans);
+    Font fontOne;
+    fontOne.fontWeight.emplace(FontWeight::BOLDER);
+    fontOne.fontSize.emplace(dimension);
+    fontOne.fontStyle = std::nullopt;
+    fontOne.fontColor.emplace(color);
+    fontOne.enableVariableFontWeight.emplace(true);
+    RefPtr<SpanBase> spanBaseOne = AceType::MakeRefPtr<FontSpan>(fontOne, 1, 2);
+    std::list<RefPtr<SpanBase>> spanList;
+    spanList.emplace_back(spanBaseOne);
+    spanStringOne.spansMap_.emplace(SpanType::Font, spanList);
+    auto result = spanString.operator==(spanStringOne);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SpanStringGetSpecialTypesVector001
+ * @tc.desc: test GetSpecialTypesVector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetSpecialTypesVector001, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(6, 1);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::Image, spans);
+    spanString.spansMap_.emplace(SpanType::CustomSpan, spans);
+    std::list<int32_t> indexList;
+    indexList.emplace_back(1);
+    indexList.emplace_back(2);
+    spanString.GetSpecialTypesVector(indexList, 2, 3);
+    auto iter = std::find(indexList.begin(), indexList.end(), 6);
+    auto iters = indexList.end();
+    EXPECT_EQ(iter, iters);
+}
+
+/**
+ * @tc.name: SpanStringGetSpecialTypesVector002
+ * @tc.desc: test GetSpecialTypesVector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SpanStringGetSpecialTypesVector002, TestSize.Level1)
+{
+    SpanString spanString(u"string");
+    RefPtr<SpanBase> spanBase = AceType::MakeRefPtr<ExtSpan>(2, 2);
+    std::list<RefPtr<SpanBase>> spans;
+    spans.emplace_back(spanBase);
+    spanString.spansMap_.emplace(SpanType::Image, spans);
+    spanString.spansMap_.emplace(SpanType::CustomSpan, spans);
+    std::list<int32_t> indexList;
+    indexList.emplace_back(1);
+    indexList.emplace_back(2);
+    spanString.GetSpecialTypesVector(indexList, 0, 5);
+    auto iter = std::find(indexList.begin(), indexList.end(), 6);
+    auto iters = indexList.end();
+    EXPECT_EQ(iter, iters);
+}
+
+/**
+ * @tc.name: UrlSpanApplyToSpanItem001
+ * @tc.desc: test ApplyToSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UrlSpanApplyToSpanItem001, TestSize.Level1)
+{
+    UrlSpan urlSpan("test");
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    spanItem->urlOnRelease = UrlCallback;
+    urlSpan.ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    EXPECT_EQ(spanItem->urlOnRelease, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -70,8 +70,8 @@ struct Index {
         .maxLines(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .textAlign(TextAlign.Start)
-        .layoutWeight(1.0)
         .opacity(this.iconOpacity)
+        .flexShrink(1)
     }
     .width('100%')
     .height(TITLE_ROW_HEIGHT)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,7 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class SwiperAccessibilityTestNg : public SwiperTestNg {
-public:
-};
+class SwiperAccessibilityTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: GetInfo001
@@ -29,7 +27,9 @@ public:
  */
 HWTEST_F(SwiperAccessibilityTestNg, GetInfo001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
     EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 4);
     EXPECT_EQ(accessibilityProperty_->GetCurrentIndex(), 0);
@@ -69,9 +69,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      * @tc.expected: ACTION_SCROLL_FORWARD
      */
     accessibilityProperty_->ResetSupportAction();
-    uint64_t expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    std::unordered_set<AceAction> expectedActions = { AceAction::ACTION_SCROLL_FORWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step2. Show next page, Current is second(middle) page
@@ -79,10 +78,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     ShowNext();
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.steps: step3. Show last page, Current is last page
@@ -90,9 +87,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     ChangeIndex(3);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 
     /**
      * @tc.cases: Swiper is loop
@@ -100,10 +96,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
      */
     model.SetLoop(AceType::RawPtr(frameNode_), true);
     accessibilityProperty_->ResetSupportAction();
-    expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), expectActions);
+    expectedActions = { AceAction::ACTION_SCROLL_FORWARD, AceAction::ACTION_SCROLL_BACKWARD };
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -122,7 +116,8 @@ HWTEST_F(SwiperAccessibilityTestNg, AccessibilityProperty002, TestSize.Level1)
     CreateSwiperDone();
     EXPECT_FALSE(accessibilityProperty_->IsScrollable());
     accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
+    std::unordered_set<AceAction> expectedActions = {};
+    EXPECT_EQ(accessibilityProperty_->GetSupportAction(), expectedActions);
 }
 
 /**
@@ -135,7 +130,9 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. Scrollable swiper
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_TRUE(accessibilityProperty_->IsScrollable());
 
     /**
@@ -144,7 +141,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. Call ActActionScrollBackward
@@ -152,7 +149,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**
@@ -177,7 +174,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollForward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 
     /**
      * @tc.steps: step3. Call ActActionScrollBackward
@@ -185,7 +182,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      */
     accessibilityProperty_->ActActionScrollBackward();
     FlushUITasks();
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(CurrentIndex(0));
 }
 
 /**

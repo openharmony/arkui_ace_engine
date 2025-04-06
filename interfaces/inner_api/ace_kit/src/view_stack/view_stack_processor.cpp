@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-#include "interfaces/inner_api/ace_kit/include/ui/view_stack/view_stack_processor.h"
+#include "ui/view_stack/view_stack_processor.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 
@@ -32,4 +33,16 @@ void ViewStackProcessor::Push(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(nodeImpl);
     NG::ViewStackProcessor::GetInstance()->Push(nodeImpl->PopAceNode());
 }
+
+RefPtr<FrameNode> ViewStackProcessor::GetTopNode()
+{
+    auto* mainNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(mainNode, nullptr);
+    auto kitNode = mainNode->GetKitNode();
+    if (!kitNode) {
+        kitNode = Referenced::MakeRefPtr<FrameNodeImpl>(AceType::Claim(mainNode));
+    }
+    return kitNode;
+}
+
 } // namespace OHOS::Ace::Kit

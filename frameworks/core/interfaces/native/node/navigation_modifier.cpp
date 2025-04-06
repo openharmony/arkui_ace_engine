@@ -288,7 +288,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         finalOptions.bgOptions.color = Color(options.colorValue.value);
     }
     if (options.blurStyle.isSet) {
-        finalOptions.bgOptions.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        BlurStyleOption blurStyleOption;
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(options.blurStyle.value);
+        finalOptions.bgOptions.blurStyleOption = blurStyleOption;
     }
     if (options.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle.value);
@@ -401,6 +403,105 @@ void ResetEnableDragBar(ArkUINodeHandle node)
     NavigationModelNG::SetEnableDragBar(frameNode, false);
 }
 
+void SetCustomTitle(ArkUINodeHandle node, ArkUINodeHandle titleNode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* customTitleFrameNode = reinterpret_cast<FrameNode*>(titleNode);
+    CHECK_NULL_VOID(customTitleFrameNode);
+    NavigationModelNG::SetCustomTitle(frameNode, AceType::Claim(customTitleFrameNode));
+}
+
+ArkUINodeHandle GetCustomTitle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto titleNode = NavigationModelNG::GetCustomTitle(frameNode);
+    CHECK_NULL_RETURN(titleNode, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(titleNode));
+}
+
+void SetTitleHeight(ArkUINodeHandle node, const struct ArkUIDimensionType height)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension titleHeight = Dimension(height.value, static_cast<OHOS::Ace::DimensionUnit>(height.units));
+    NavigationModelNG::SetTitleHeight(frameNode, titleHeight, true);
+}
+
+void SetTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::NavigationTitlebarOptions finalOptions;
+    if (opts.colorValue.isSet) {
+        finalOptions.bgOptions.color = Color(opts.colorValue.value);
+    }
+    if (opts.barStyle.isSet) {
+        finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
+    }
+    NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
+}
+
+void SetOnCoordScrollStartAction(ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollStartActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollStartAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollStartAction(nodeHandle);
+    };
+    NavigationModelNG::SetOnCoordScrollStartAction(frameNode, std::move(onCoordScrollStartActionCallBack));
+}
+
+void SetOnCoordScrollUpdateAction(ArkUINodeHandle node,
+    void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollUpdateActionCallBack =
+        [node = AceType::WeakClaim(frameNode), onCoordScrollUpdateAction](float currentOffset)->void {
+            auto frameNode = node.Upgrade();
+            auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+            onCoordScrollUpdateAction(nodeHandle, currentOffset);
+        };
+    NavigationModelNG::SetOnCoordScrollUpdateAction(frameNode, std::move(onCoordScrollUpdateActionCallBack));
+}
+
+void SetOnCoordScrollEndAction(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onCoordScrollEndActionCallBack = [node = AceType::WeakClaim(frameNode), onCoordScrollEndAction]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        onCoordScrollEndAction(nodeHandle);
+    };
+    NavigationModelNG::SetOnCoordScrollEndAction(frameNode, std::move(onCoordScrollEndActionCallBack));
+}
+
+void SetSystemBarStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentColor = Color(value);
+    NavigationModelNG::SetSystemBarStyle(frameNode, contentColor);
+}
+
+void SetEnableToolBarAdaptation(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, enable);
+}
+
+void ResetEnableToolBarAdaptation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetEnableToolBarAdaptation(frameNode, false);
+}
 
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
@@ -445,6 +546,16 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .resetRecoverable = ResetNavigationRecoverable,
         .setEnableDragBar = SetEnableDragBar,
         .resetEnableDragBar = ResetEnableDragBar,
+        .setCustomTitle = SetCustomTitle,
+        .getCustomTitle = GetCustomTitle,
+        .setTitleHeight = SetTitleHeight,
+        .setTitlebarOptions = SetTitlebarOptions,
+        .setOnCoordScrollStartAction = SetOnCoordScrollStartAction,
+        .setOnCoordScrollUpdateAction = SetOnCoordScrollUpdateAction,
+        .setOnCoordScrollEndAction = SetOnCoordScrollEndAction,
+        .setSystemBarStyle = SetSystemBarStyle,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -483,6 +594,8 @@ const CJUINavigationModifier* GetCJUINavigationModifier()
         .resetNavBarWidth = ResetNavBarWidth,
         .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
         .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setEnableToolBarAdaptation = SetEnableToolBarAdaptation,
+        .resetEnableToolBarAdaptation = ResetEnableToolBarAdaptation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

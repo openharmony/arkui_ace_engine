@@ -21,6 +21,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 using VectorFloat64Handle = void*;
 using VectorTouchTestInfoHandle = void*;
@@ -55,6 +56,27 @@ CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDragMove(void (*callback)(CJ
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDragLeave(
     void (*callback)(CJDragInfo info), uint32_t componentName);
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDrop(void (*callback)(CJDragInfo info), uint32_t componentName);
+CJ_EXPORT void FfiInteractableViewOnDragStart(CJDragItemInfo (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiDragEventSetResult(void* ptr, int32_t result);
+CJ_EXPORT int32_t FfiDragEventGetResult(void* ptr);
+CJ_EXPORT NativeRectangle FfiDragEventGetPreviewRect(void* ptr);
+CJ_EXPORT double FfiDragEventGetVelocityX(void* ptr);
+CJ_EXPORT double FfiDragEventGetVelocityY(void* ptr);
+CJ_EXPORT double FfiDragEventGetVelocity(void* ptr);
+CJ_EXPORT double FfiDragEventGetWindowX(void* ptr);
+CJ_EXPORT double FfiDragEventGetWindowY(void* ptr);
+CJ_EXPORT double FfiDragEventGetDisplayX(void* ptr);
+CJ_EXPORT double FfiDragEventGetDisplayY(void* ptr);
+CJ_EXPORT void FfiDragEventFree(void* ptr);
+CJ_EXPORT bool FfiDragEventGetModifierKeyState(void* ptr, VectorStringHandle keys);
+CJ_EXPORT void FfiInteractableViewOnDragEnter(void (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiInteractableViewOnDragMove(void (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiInteractableViewOnDragLeave(void (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiInteractableViewOnDrop(void (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiInteractableViewOnDragEnd(void (*callback)(CJDragEvent event, const char* extraParams));
+CJ_EXPORT void FfiInteractableViewOnPreDrag(void (*callback)(int32_t status));
+CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDetach(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnSizeChange(void (*callback)(CJSizeOptions, CJSizeOptions));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_FFI_H

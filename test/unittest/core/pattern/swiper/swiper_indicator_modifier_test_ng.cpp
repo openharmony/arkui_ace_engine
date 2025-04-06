@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,6 +146,39 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorUpdateContentModifier003,
     paintMethod->UpdateContentModifier(&paintWrapper);
     ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
     EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsHover());
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier004
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorUpdateContentModifier004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isHover_ = true;
+    paintMethod->touchBottomType_ = TouchBottomType::START;
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+
+    /**
+    * @tc.steps: step3. call GetContentModifier.
+    * @tc.expected: dotIndicatorModifier_->isPressed_ is true.
+    */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
 }
 
 /**
@@ -811,6 +844,42 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorPaintHoverIndicator003, T
 }
 
 /**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator004
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorPaintHoverIndicator004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->hoverIndex_ = 10;
+    paintMethod->currentIndex_ = 10;
+    paintMethod->mouseClickIndex_ = 5;
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetNormalToHoverIndex(5);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(false);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+
+    /**
+    * @tc.steps: step3. call PaintHoverIndicator.
+    * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
+    */
+    paintMethod->PaintHoverIndicator(&paintWrapper);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
  * @tc.name: SwiperIndicatorCalculatePointCenterX002
  * @tc.desc: Test DotIndicatorPaintMethod CalculatePointCenterX
  * @tc.type: FUNC
@@ -874,7 +943,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperIndicatorCalculatePointCenterX002,
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodClipPadding001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -907,7 +978,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodClipPadding001, TestSiz
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -948,7 +1021,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade001, TestSize.
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -977,7 +1052,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 4);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
@@ -1017,7 +1094,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
@@ -1026,7 +1103,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
@@ -1055,7 +1132,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
@@ -1064,7 +1141,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     ASSERT_NE(indicatorPattern, nullptr);
@@ -1085,7 +1162,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
@@ -1144,7 +1223,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, AdjustPointCenterXForTouchBottom001, Tes
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, GetLongPointAnimationStateSecondCenter001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1240,7 +1321,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetMoveRate001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
@@ -1275,7 +1358,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade002, TestSize.
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodGetOverlayDrawFunction001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
@@ -1299,7 +1384,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodGetOverlayDrawFunction0
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade003, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
@@ -1333,7 +1420,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade003, TestSize.
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, SwiperPaintMethodPaintFade004, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintProperty = AceType::MakeRefPtr<PaintProperty>();
@@ -1393,7 +1482,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetContentDrawFunction001, TestSize.Leve
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     SwiperPaintMethod swiperPaintMethod1(Axis::VERTICAL, 0.0f);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
@@ -1422,7 +1513,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, PlayIndicatorAnimation001, TestSize.Leve
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1452,7 +1545,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, PaintUnselectedIndicator001, TestSize.Le
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1493,7 +1588,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, PaintUnselectedIndicator001, TestSize.Le
  */
 HWTEST_F(SwiperIndicatorModifierTestNg, PlayLongPointAnimation001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
@@ -1523,7 +1620,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, PlayLongPointAnimation002, TestSize.Leve
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
@@ -1562,7 +1661,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, StopAnimation001, TestSize.Level1)
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1585,7 +1686,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateLongPointDilateRatio001, TestSize.
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1609,7 +1712,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateDilatePaintProperty001, TestSize.L
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 
@@ -1659,7 +1764,9 @@ HWTEST_F(SwiperIndicatorModifierTestNg, UpdateShrinkPaintProperty002, TestSize.L
     /**
      * @tc.steps: step1. Default value
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto totalCount = pattern_->TotalCount();
     EXPECT_EQ(totalCount, 4);
 

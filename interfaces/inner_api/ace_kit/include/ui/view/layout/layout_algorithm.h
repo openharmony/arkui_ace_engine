@@ -21,8 +21,8 @@
 
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/ng/size_t.h"
-#include "ui/base/referenced.h"
 #include "ui/view/frame_node.h"
+#include "ui/view/layout/layout_info.h"
 
 namespace OHOS::Ace::NG {
 template<class T>
@@ -38,7 +38,7 @@ public:
     explicit LayoutAlgorithm(const WeakPtr<FrameNode>& host) : host_(host) {}
     virtual ~LayoutAlgorithm() = default;
 
-    virtual void Measure() {}
+    virtual void Measure(const Kit::LayoutConstraintInfo& contentConstraint) {}
 
     virtual void Layout() {}
 
@@ -47,8 +47,19 @@ public:
         return std::nullopt;
     }
 
+    virtual void SetLayoutConstraint(const Kit::LayoutConstraintInfo& contentConstraint)
+    {
+        layoutConstraintInfo_ = contentConstraint;
+    }
+
+    virtual const LayoutConstraintInfo& GetLayoutConstraint() const
+    {
+        return layoutConstraintInfo_;
+    }
+
 protected:
     WeakPtr<FrameNode> host_;
+    LayoutConstraintInfo layoutConstraintInfo_;
 };
 
 } // namespace OHOS::Ace::Kit

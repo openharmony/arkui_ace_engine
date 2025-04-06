@@ -572,7 +572,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const ChangeValueInfo&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -699,6 +699,25 @@ void ResetSearchIcon(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetIcon(frameNode, "");
+}
+
+void SetSearchOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillChange = reinterpret_cast<std::function<bool(const ChangeValueInfo&)>*>(callback);
+        SearchModelNG::SetOnWillChangeEvent(frameNode, std::move(*onWillChange));
+    } else {
+        SearchModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillChangeEvent(frameNode, nullptr);
 }
 
 void SetSearchOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
@@ -878,6 +897,20 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
 
+void SetSearchAutoCapitalizationMode(ArkUINodeHandle node, ArkUI_Int32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, static_cast<AutoCapitalizationMode>(value));
+}
+
+void ResetSearchAutoCapitalizationMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::NONE);
+}
+
 void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -975,6 +1008,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchShowCounter = SetSearchShowCounterOptions,
         .resetSearchShowCounter = ResetSearchShowCounterOptions,
         .getSearchController = GetSearchController,
+        .setSearchOnWillChange = SetSearchOnWillChange,
+        .resetSearchOnWillChange = ResetSearchOnWillChange,
         .setSearchOnWillInsert = SetSearchOnWillInsert,
         .resetSearchOnWillInsert = ResetSearchOnWillInsert,
         .setSearchOnDidInsert = SetSearchOnDidInsert,
@@ -989,12 +1024,16 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchSelectionMenuOptions = ResetSearchSelectionMenuOptions,
         .setSearchEnableHapticFeedback = SetSearchEnableHapticFeedback,
         .resetSearchEnableHapticFeedback = ResetSearchEnableHapticFeedback,
+        .setSearchAutoCapitalizationMode = SetSearchAutoCapitalizationMode,
+        .resetSearchAutoCapitalizationMode = ResetSearchAutoCapitalizationMode,
         .setSearchMinFontScale = SetSearchMinFontScale,
         .resetSearchMinFontScale = ResetSearchMinFontScale,
         .setSearchMaxFontScale = SetSearchMaxFontScale,
         .resetSearchMaxFontScale = ResetSearchMaxFontScale,
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
+        .setSearchKeyboardAppearance = SetSearchKeyboardAppearance,
+        .resetSearchKeyboardAppearance = ResetSearchKeyboardAppearance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1114,9 +1153,9 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
+    auto onEvent = [extraParam](const ChangeValueInfo& info) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(info.value);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
@@ -1172,6 +1211,22 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));
+}
+
+void SetSearchKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetSearchKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
 }
 }
 } // namespace OHOS::Ace::NG

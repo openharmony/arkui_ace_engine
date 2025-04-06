@@ -35,7 +35,17 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ACE_EXPORT NavigationGroupNode : public GroupNode {
+struct TransitionUnitInfo {
+    const RefPtr<FrameNode>& transitionNode;
+    bool isUseCustomTransition = false;
+    int32_t animationId = -1;
+
+    TransitionUnitInfo(const RefPtr<FrameNode>& node, bool isUseCustomTransition, int32_t animationId)
+        : transitionNode(node), isUseCustomTransition(isUseCustomTransition), animationId(animationId)
+    {}
+};
+
+class ACE_FORCE_EXPORT NavigationGroupNode : public GroupNode {
     DECLARE_ACE_TYPE(NavigationGroupNode, GroupNode)
 public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
@@ -144,6 +154,8 @@ public:
     }
 
     bool CheckCanHandleBack(bool& isEntry);
+    
+    void CheckIsNeedForceExitWindow(bool result);
 
     void OnInspectorIdUpdate(const std::string& id) override;
 
@@ -158,10 +170,11 @@ public:
     RefPtr<NavigationManager> FetchNavigationManager();
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
-    virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+    virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    virtual void ResetSystemAnimationProperties(const RefPtr<FrameNode>& navDestinationNode);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -203,14 +216,15 @@ public:
         AnimationOption option);
     void DialogTransitionPushAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
         AnimationOption option);
-    void InitDialogTransition(const RefPtr<NavDestinationGroupNode>& node, bool isZeroY);
 
     int32_t GetLastStandardIndex() const
     {
         return lastStandardIndex_;
     }
+
     AnimationOption CreateAnimationOption(const RefPtr<Curve>& curve, FillMode mode,
-        int32_t duration, const AnimationFinishCallback& callback);
+        int32_t duration, const NavigationGroupNode::AnimationFinishCallback& callback);
+
     NavigationMode GetNavigationMode();
 
     void SetIsOnAnimation(bool isOnAnimation)
@@ -240,7 +254,7 @@ public:
 
     float CheckLanguageDirection();
 
-    void RemoveDialogDestination(bool isReplace = false);
+    void RemoveDialogDestination(bool isReplace = false, bool isTriggerByInteractiveCancel = false);
     void AddDestinationNode(const RefPtr<UINode>& parent);
     WeakPtr<NavDestinationGroupNode> GetParentDestinationNode() const
     {
@@ -287,9 +301,9 @@ public:
         return dragBarNode_;
     }
 
-    void GenerateAnimationId()
+    int32_t MakeUniqueAnimationId()
     {
-        animationId_++;
+        return ++animationId_;
     }
 
     int32_t GetAnimationId() const
@@ -297,11 +311,10 @@ public:
         return animationId_;
     }
 
-    void UpdateTransitionAnimationId(const RefPtr<FrameNode>& curNode);
-
     bool CheckAnimationIdValid(const RefPtr<FrameNode>& curNode, const int32_t animationId);
 
     std::string ToDumpString();
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
@@ -319,8 +332,11 @@ private:
         RefPtr<UINode>& remainDestination, RefPtr<UINode>& curTopDestination);
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
-    RefPtr<FrameNode> TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar);
+    RefPtr<FrameNode> TransitionAnimationIsValid(
+        const RefPtr<FrameNode>& node, bool isNavBar, bool isUseNavDestCustomTransition);
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
+    void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
+        int32_t preAnimationId);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

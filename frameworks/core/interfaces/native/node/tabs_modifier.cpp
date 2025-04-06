@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -90,6 +91,17 @@ void SetFadingEdge(ArkUINodeHandle node, ArkUI_Bool fadingEdge)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, fadingEdge);
+}
+void SetTabOnUnselected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnUnselected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnUnselected(frameNode, nullptr);
+    }
 }
 void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -242,12 +254,17 @@ void ResetDivider(ArkUINodeHandle node)
 
     TabsModelNG::SetDivider(frameNode, divider);
 }
-
 void ResetFadingEdge(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetFadingEdge(frameNode, true);
+}
+void ResetTabOnUnselected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnUnselected(frameNode, nullptr);
 }
 void ResetBarBackgroundColor(ArkUINodeHandle node)
 {
@@ -455,6 +472,172 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
     TabsModelNG::SetBarBackgroundEffect(frameNode, effectOption);
 }
 
+void SetTabsOnSelected(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnSelected(frameNode, std::move(*onEvent));
+    } else {
+        TabsModelNG::SetOnSelected(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnSelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnSelected(frameNode, nullptr);
+}
+
+void SetCachedMaxCount(ArkUINodeHandle node, ArkUI_Int32 count, ArkUI_Int32 mode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+        mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+        cacheMode = static_cast<TabsCacheMode>(mode);
+    }
+    TabsModelNG::SetCachedMaxCount(frameNode, count, cacheMode);
+}
+
+void ResetCachedMaxCount(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetCachedMaxCount(frameNode, std::nullopt, TabsCacheMode::CACHE_BOTH_SIDE);
+}
+void SetTabsOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        TabsModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnChange(frameNode, nullptr);
+}
+
+void SetTabsOnTabBarClick(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onTabBarClick = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
+        TabsModelNG::SetOnTabBarClick(frameNode, std::move(*onTabBarClick));
+    } else {
+        TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnTabBarClick(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnTabBarClick(frameNode, nullptr);
+}
+
+void SetTabsOnAnimationStart(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onAnimationStart =
+            reinterpret_cast<std::function<void(int32_t, int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnAnimationStart(frameNode, std::move(*onAnimationStart));
+    } else {
+        TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnAnimationStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnAnimationStart(frameNode, nullptr);
+}
+
+void SetTabsOnAnimationEnd(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onAnimationEnd = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnAnimationEnd(frameNode, std::move(*onAnimationEnd));
+    } else {
+        TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnAnimationEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnAnimationEnd(frameNode, nullptr);
+}
+
+void SetTabsOnGestureSwipe(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onGestureSwipe = reinterpret_cast<std::function<void(int32_t, const AnimationCallbackInfo&)>*>(callback);
+        TabsModelNG::SetOnGestureSwipe(frameNode, std::move(*onGestureSwipe));
+    } else {
+        TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnGestureSwipe(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnGestureSwipe(frameNode, nullptr);
+}
+
+void SetTabsOnContentWillChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onContentWillChange = reinterpret_cast<std::function<bool(int32_t, int32_t)>*>(callback);
+        TabsModelNG::SetOnContentWillChange(frameNode, std::move(*onContentWillChange));
+    } else {
+        TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
+    }
+}
+
+void ResetTabsOnContentWillChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetOnContentWillChange(frameNode, nullptr);
+}
+
+void SetTabsIsCustomAnimation(ArkUINodeHandle node, ArkUI_Bool isCustom)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIsCustomAnimation(frameNode, isCustom);
+}
+
+void ResetTabsIsCustomAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetIsCustomAnimation(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
@@ -465,6 +648,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
         .setFadingEdge = SetFadingEdge,
+        .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
         .setBarOverlap = SetBarOverlap,
@@ -482,6 +666,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetBarGridAlign = ResetBarGridAlign,
         .resetDivider = ResetDivider,
         .resetFadingEdge = ResetFadingEdge,
+        .resetTabOnUnselected = ResetTabOnUnselected,
         .resetBarBackgroundColor = ResetBarBackgroundColor,
         .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
         .resetBarOverlap = ResetBarOverlap,
@@ -507,6 +692,24 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
+        .setCachedMaxCount = SetCachedMaxCount,
+        .resetCachedMaxCount = ResetCachedMaxCount,
+        .setTabsOnChange = SetTabsOnChange,
+        .resetTabsOnChange = ResetTabsOnChange,
+        .setTabsOnTabBarClick = SetTabsOnTabBarClick,
+        .resetTabsOnTabBarClick = ResetTabsOnTabBarClick,
+        .setTabsOnAnimationStart = SetTabsOnAnimationStart,
+        .resetTabsOnAnimationStart = ResetTabsOnAnimationStart,
+        .setTabsOnAnimationEnd = SetTabsOnAnimationEnd,
+        .resetTabsOnAnimationEnd = ResetTabsOnAnimationEnd,
+        .setTabsOnGestureSwipe = SetTabsOnGestureSwipe,
+        .resetTabsOnGestureSwipe = ResetTabsOnGestureSwipe,
+        .setTabsOnContentWillChange = SetTabsOnContentWillChange,
+        .resetTabsOnContentWillChange = ResetTabsOnContentWillChange,
+        .setTabsIsCustomAnimation = SetTabsIsCustomAnimation,
+        .resetTabsIsCustomAnimation = ResetTabsIsCustomAnimation,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -562,6 +765,8 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetAnimateMode = ResetAnimateMode,
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
+        .setTabsOnSelected = SetTabsOnSelected,
+        .resetTabsOnSelected = ResetTabsOnSelected,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

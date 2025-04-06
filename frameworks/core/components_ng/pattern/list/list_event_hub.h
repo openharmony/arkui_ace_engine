@@ -193,12 +193,48 @@ public:
     void HandleOnItemDragEnd(const GestureEvent& info);
     void HandleOnItemDragCancel();
     int32_t GetListItemIndexByPosition(float x, float y, bool strict = false);
+
+    void SetJSFrameNodeOnListScrollIndex(OnScrollIndexEvent&& onScroll)
+    {
+        onJSFrameNodeScrollIndexEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnListScrollIndex()
+    {
+        if (onJSFrameNodeScrollIndexEvent_) {
+            onJSFrameNodeScrollIndexEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollIndexEvent& GetJSFrameNodeOnListScrollIndex() const
+    {
+        return onJSFrameNodeScrollIndexEvent_;
+    }
+
+    void SetJSFrameNodeOnScrollVisibleContentChange(OnScrollVisibleContentChangeEvent&& onScroll)
+    {
+        OnJSFrameNodeScrollVisibleContentChangeEvent_ = std::move(onScroll);
+    }
+
+    void ClearJSFrameNodeOnScrollVisibleContentChange()
+    {
+        if (OnJSFrameNodeScrollVisibleContentChangeEvent_) {
+            OnJSFrameNodeScrollVisibleContentChangeEvent_ = nullptr;
+        }
+    }
+
+    const OnScrollVisibleContentChangeEvent& GetJSFrameNodeOnScrollVisibleContentChange() const
+    {
+        return OnJSFrameNodeScrollVisibleContentChangeEvent_;
+    }
 private:
     Axis GetDirection() const;
 
     OnScrollBeginEvent onScrollBeginEvent_;
     OnScrollIndexEvent onScrollIndexEvent_;
+    OnScrollIndexEvent onJSFrameNodeScrollIndexEvent_;
     OnScrollVisibleContentChangeEvent OnScrollVisibleContentChangeEvent_;
+    OnScrollVisibleContentChangeEvent OnJSFrameNodeScrollVisibleContentChangeEvent_;
     OnItemMoveEvent onItemMoveEvent_;
     OnItemDragStartFunc onItemDragStartEvent_;
     OnItemDragEnterFunc onItemDragEnterEvent_;

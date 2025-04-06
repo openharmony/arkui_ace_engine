@@ -84,6 +84,11 @@ private:
     float CalculateTextFieldWidth(
         LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
 
+    // cached data
+    float maxFontScale_;
+    float minFontScale_;
+    double searchHeight_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

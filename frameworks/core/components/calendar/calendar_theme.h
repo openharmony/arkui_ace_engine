@@ -49,6 +49,7 @@ constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_DAY_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_NONCURRENT_MONTH_LUNAR_COLOR = Color(0xff555e6b);
 constexpr Color DEFAULT_CALENDAR_FOCUS_AREA_BACKGROUND_COLOR = Color(0xff5ea1ff);
 constexpr Color DEFAULT_CALENDAR_BLUR_AREA_BACKGROUND_COLOR = Color(0xffffffff);
+constexpr float DEFAULT_CALENDAR_DISABLED_OPACITY = 0.4f;
 } // namespace
 
 struct CalendarThemeStructure {
@@ -66,6 +67,7 @@ struct CalendarThemeStructure {
     std::string nextMonth;
     std::string preYear;
     std::string preMonth;
+    std::string today;
     Color weekColor;
     Color dayColor;
     Color lunarColor;
@@ -238,6 +240,7 @@ public:
             theme->calendarTheme_.nextMonth = pattern->GetAttr<std::string>("general_next_month", "");
             theme->calendarTheme_.preYear = pattern->GetAttr<std::string>("general_pre_year", "");
             theme->calendarTheme_.preMonth = pattern->GetAttr<std::string>("general_pre_month", "");
+            theme->calendarTheme_.today = pattern->GetAttr<std::string>("general_today", "");
         }
 
         void ParseCalenderPickerFirstPart(const RefPtr<ThemeConstants>& themeConstants,
@@ -260,8 +263,10 @@ public:
                 pattern->GetAttr<double>("calendar_picker_attribute_alpha_content_primary", 0.0));
             theme->textNonCurrentMonthColor_ = currentMonthColor.BlendOpacity(
                 pattern->GetAttr<double>("calendar_picker_attribute_alpha_content_tertiary", 0.0));
-            theme->textSelectedDayColor_ = pattern->GetAttr<Color>(
-                "calendar_picker_text_selected_day_color", Color());
+            Color textSelectedDayColor = pattern->GetAttr<Color>("calendar_picker_text_selected_day_color", Color());
+            theme->textSelectedDayColor_ = textSelectedDayColor;
+            theme->textNonCurrentMonthTodayColor_ = textSelectedDayColor.BlendOpacity(
+                pattern->GetAttr<double>("interactive_disable", DEFAULT_CALENDAR_DISABLED_OPACITY));
             theme->textCurrentDayColor_ = pattern->GetAttr<Color>("calendar_picker_text_current_day_color", Color());
             theme->backgroundKeyFocusedColor_ = pattern->GetAttr<Color>(
                 "calendar_picker_background_key_focused_color", Color());
@@ -270,6 +275,8 @@ public:
             theme->dialogButtonBackgroundColor_ = pattern->GetAttr<Color>(
                 "calendar_picker_dialog_button_bg_color", Color());
             theme->backgroundSelectedTodayColor_ = backgroundSelectedTodayColor;
+            theme->backgroundDisabledMarkTodayColor_ = backgroundSelectedTodayColor.BlendOpacity(
+                pattern->GetAttr<double>("interactive_disable", DEFAULT_CALENDAR_DISABLED_OPACITY));
             theme->backgroundSelectedNotTodayColor_ = backgroundSelectedTodayColor.BlendOpacity(
                 pattern->GetAttr<double>("calendar_picker_attribute_alpha_highlight_bg", 0.0));
             theme->backgroundHoverColor_ = pattern->GetAttr<Color>("calendar_picker_background_hover_color", Color());
@@ -733,6 +740,11 @@ public:
         return textNonCurrentMonthColor_;
     }
 
+    const Color& GetTextNonCurrentMonthTodayColor() const
+    {
+        return textNonCurrentMonthTodayColor_;
+    }
+
     const Color& GetTextSelectedDayColor() const
     {
         return textSelectedDayColor_;
@@ -751,6 +763,11 @@ public:
     const Color& GetBackgroundSelectedTodayColor() const
     {
         return backgroundSelectedTodayColor_;
+    }
+
+    const Color& GetBackgroundDisabledMarkTodayColor() const
+    {
+        return backgroundDisabledMarkTodayColor_;
     }
 
     const Color& GetBackgroundSelectedNotTodayColor() const
@@ -821,10 +838,12 @@ private:
     Color calendarTitleFontColor_;
     Color textCurrentMonthColor_;
     Color textNonCurrentMonthColor_;
+    Color textNonCurrentMonthTodayColor_;
     Color textSelectedDayColor_;
     Color textCurrentDayColor_;
     Color backgroundKeyFocusedColor_;
     Color backgroundSelectedTodayColor_;
+    Color backgroundDisabledMarkTodayColor_;
     Color backgroundSelectedNotTodayColor_;
     Color backgroundHoverColor_;
     Color backgroundPressColor_;

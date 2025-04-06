@@ -59,7 +59,7 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderingContext);
 
 private:
-    void DeleteCallbackFromList(int argc, napi_env env, napi_value cb, CanvasCallbackType type);
+    void DeleteCallbackFromList(uint32_t argc, napi_env env, napi_value cb, CanvasCallbackType type);
     void AddCallbackToList(napi_env env, napi_value cb, CanvasCallbackType type, const std::function<void()>&& onFunc);
     CanvasCallbackFuncPairList::const_iterator FindCbList(
         napi_env env, napi_value cb, CanvasCallbackFuncPairList& callbackFuncPairList);

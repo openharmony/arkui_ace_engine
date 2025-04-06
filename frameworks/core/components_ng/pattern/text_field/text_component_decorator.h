@@ -18,10 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,6 +50,7 @@ public:
     float MeasureDecorator(float contentWidth, const std::u16string& textContent, bool showPlaceHolder) override;
     void LayoutDecorator() override;
     float GetBoundHeight() const override;
+    bool HasContent() const;
 private:
     void UpdateCounterContentAndStyle(uint32_t textLength, uint32_t maxLength, bool isVisible = true);
     float MeasureTextNodeHeight();

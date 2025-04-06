@@ -43,7 +43,8 @@ public:
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
-        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList) override;
+        const ImageOption& imageOption, RefPtr<PixelMap>& pixMap, const std::vector<std::string>& nameList,
+        bool userDefinedAccessibilityText = false, const std::string& backButtonAccessibilityText = "") override;
     void SetHideBackButton(bool hideBackButton) override;
     void SetHideToolBar(bool hideToolBar, bool animated = false) override;
     void SetCustomToolBar(const RefPtr<AceType>& customNode) override;
@@ -52,7 +53,11 @@ public:
     void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) override;
     void SetToolbarOptions(NavigationToolbarOptions&& opt) override;
+    void SetHideItemText(bool isHideItemText) override;
+    void SetEnableToolBarAdaptation(bool enable) override;
+    void SetToolbarMorebuttonOptions(MoreButtonOptions&& opt) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
+    void SetMenuOptions(NG::NavigationMenuOptions&& opt) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetOnTitleModeChange(std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;
@@ -93,6 +98,7 @@ public:
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
@@ -104,6 +110,13 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
+    static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
+    static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
+    static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
+    static void SetOnCoordScrollStartAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollStart);
+    static void SetOnCoordScrollUpdateAction(FrameNode* frameNode, std::function<void(float)>&& onCoordScrollUpdate);
+    static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
+    static void SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
 
 private:

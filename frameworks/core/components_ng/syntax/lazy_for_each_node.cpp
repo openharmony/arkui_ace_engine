@@ -472,6 +472,11 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     }
 }
 
+const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector() const
+{
+    return children_;
+}
+
 void LazyForEachNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
 {
     if (configurationChange.IsNeedUpdate() && builder_) {
@@ -493,6 +498,18 @@ void LazyForEachNode::SetOnMove(std::function<void(int32_t, int32_t)>&& onMove)
         InitAllChilrenDragManager(false);
     }
     onMoveEvent_ = onMove;
+}
+
+void LazyForEachNode::SetItemDragHandler(std::function<void(int32_t)>&& onLongPress,
+    std::function<void(int32_t)>&& onDragStart, std::function<void(int32_t, int32_t)>&& onMoveThrough,
+    std::function<void(int32_t)>&& onDrop)
+{
+    if (onMoveEvent_) {
+        onLongPressEvent_ = onLongPress;
+        onDragStartEvent_ = onDragStart;
+        onMoveThroughEvent_ = onMoveThrough;
+        onDropEvent_ = onDrop;
+    }
 }
 
 void LazyForEachNode::MoveData(int32_t from, int32_t to)

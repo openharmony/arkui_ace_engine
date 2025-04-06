@@ -25,6 +25,26 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
+enum class ReferenceEdge {
+    START,
+    END,
+};
+struct ViewPosReference {
+    float viewPosStart;
+    float viewPosEnd;
+    float referencePos;
+    ReferenceEdge referenceEdge;
+    Axis axis;
+
+    bool operator==(const ViewPosReference &other) const
+    {
+        return NearEqual(viewPosStart, other.viewPosStart) &&
+               NearEqual(viewPosEnd, other.viewPosEnd) &&
+               NearEqual(referencePos, other.referencePos) &&
+               referenceEdge == other.referenceEdge &&
+               axis == other.axis;
+    }
+};
 template<typename T>
 struct LayoutConstraintT {
     ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty();
@@ -33,6 +53,7 @@ struct LayoutConstraintT {
     SizeT<T> percentReference { 0, 0 };
     OptionalSize<T> parentIdealSize;
     OptionalSize<T> selfIdealSize;
+    std::optional<ViewPosReference> viewPosRef;
 
     static bool CompareWithInfinityCheck(const OptionalSize<float>& first, const OptionalSize<float>& second)
     {
@@ -97,7 +118,7 @@ struct LayoutConstraintT {
         return (scaleProperty == layoutConstraint.scaleProperty) && (minSize == layoutConstraint.minSize) &&
                (maxSize == layoutConstraint.maxSize) && (percentReference == layoutConstraint.percentReference) &&
                (parentIdealSize == layoutConstraint.parentIdealSize) &&
-               (selfIdealSize == layoutConstraint.selfIdealSize);
+               (selfIdealSize == layoutConstraint.selfIdealSize) && (viewPosRef == layoutConstraint.viewPosRef);
     }
 
     bool operator!=(const LayoutConstraintT& layoutConstraint) const
@@ -112,7 +133,8 @@ struct LayoutConstraintT {
                CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
                CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
                CompareWithInfinityCheck(percentReference.Height(), layoutConstraint.percentReference.Height()) &&
-               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize);
+               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize) &&
+               (viewPosRef == layoutConstraint.viewPosRef);
     }
 
     bool EqualWithoutPercentHeight(const LayoutConstraintT& layoutConstraint) const
@@ -122,7 +144,8 @@ struct LayoutConstraintT {
                CompareWithInfinityCheck(maxSize, layoutConstraint.maxSize) &&
                CompareWithInfinityCheck(parentIdealSize, layoutConstraint.parentIdealSize) &&
                CompareWithInfinityCheck(percentReference.Width(), layoutConstraint.percentReference.Width()) &&
-               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize);
+               CompareWithInfinityCheck(selfIdealSize, layoutConstraint.selfIdealSize) &&
+               (viewPosRef == layoutConstraint.viewPosRef);
     }
 
     bool UpdateSelfMarginSizeWithCheck(const OptionalSize<T>& size)

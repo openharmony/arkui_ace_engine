@@ -293,6 +293,7 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
+    void UpdateHostWindowRect();
     void UpdateFontScale();
 
     bool GetIsSuitOldMeasure()
@@ -311,7 +312,9 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+    bool IsWaterfallWindowMode();
     bool IsShowInFloatingWindow();
+    void AddExtraMaskNode(const DialogProperties& props);
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
@@ -328,6 +331,7 @@ private:
     void RegisterHoverModeChangeCallback();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    RectF GetContentRect(const RefPtr<FrameNode>& contentNode);
     void HandleClick(const GestureEvent& info);
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -336,6 +340,7 @@ private:
     void HandleFocusEvent();
 
     void PopDialog(int32_t buttonIdx);
+    bool NeedUpdateHostWindowRect();
 
     // set render context properties of content frame
     void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const DialogProperties& props);

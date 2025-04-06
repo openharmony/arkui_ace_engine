@@ -18,12 +18,8 @@
 
 #include "modules/svg/include/SkSVGDOM.h"
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/paragraph.h"
-#else
 #include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
-#endif
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
 #include "include/core/SkPath.h"
@@ -139,22 +135,12 @@ private:
     void UpdatePaintShader(const Pattern& pattern, RSPen* pen, RSBrush* brush);
 #endif
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph);
-    std::unique_ptr<txt::Paragraph> paragraph_;
-#else
     double GetBaselineOffset(TextBaseline baseline, std::unique_ptr<Rosen::Typography>& paragraph);
     std::unique_ptr<Rosen::Typography> paragraph_;
-#endif
     bool HasShadow() const;
     bool HasImageShadow() const;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    void UpdateTextStyleForeground(bool isStroke, txt::TextStyle& style, bool hasShadow);
-    double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph);
-#else
     void UpdateTextStyleForeground(bool isStroke, Rosen::TextStyle& style, bool hasShadow);
     double GetAlignOffset(const std::string& text, TextAlign align, std::unique_ptr<Rosen::Typography>& paragraph);
-#endif
     TextDirection GetTextDirection(const std::string& text);
     bool UpdateOffParagraph(const std::string& text, bool isStroke, const PaintState& state, bool hasShadow = false);
 #ifndef USE_ROSEN_DRAWING

@@ -19,10 +19,7 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/gesture_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,7 +45,8 @@ public:
     void FireCompleteEvent()
     {
         if (onComplete_) {
-            onComplete_();
+            auto onComplete = onComplete_;
+            onComplete();
         }
     }
 

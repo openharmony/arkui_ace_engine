@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "frameworks/core/components/grid_layout/grid_layout_component.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
@@ -58,6 +59,8 @@ struct CJItemDragInfo {
     double y;
 };
 CJ_EXPORT void FfiOHOSAceFrameworkGridOnItemDragStart(void (*callback)(CJItemDragInfo dragInfo, int32_t itemIndex));
+CJ_EXPORT void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
+    CJDragItemInfo (*callback)(CJItemDragInfo dragInfo, int32_t itemIndex));
 CJ_EXPORT void FfiOHOSAceFrameworkGridOnItemDragEnter(void (*callback)(CJItemDragInfo dragInfo));
 CJ_EXPORT void FfiOHOSAceFrameworkGridOnItemDragMove(
     void (*callback)(CJItemDragInfo dragInfo, int32_t itemIndex, int32_t insertIndex));

@@ -83,6 +83,10 @@ float CalcToolbarItemWidth(const float& toolbarWidth, size_t toolbarItemNum)
 
     float totalItemsInterval = (toolbarItemNum - 1) * (toolbarItemInterval);
     float containerWidth = GetToolbarContainerMaxWidth(toolbarWidth, toolbarItemNum);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return (containerWidth - totalItemsInterval) / toolbarItemNum -
+            theme->GetToolbarItemLeftOrRightPadding().ConvertToPx() * BAR_ITEM_MARGIN_NUM;
+    }
     return (containerWidth - totalItemsInterval) / toolbarItemNum;
 }
 
@@ -106,7 +110,7 @@ float UpdateToolBarItemsContainer(LayoutWrapper* layoutWrapper, size_t toolbarIt
     float toolbarItemWidth = CalcToolbarItemWidth(toolbarWidth, toolbarItemNum);
 
     for (const auto& toolbarItemWrapper : containerWrapper->GetAllChildrenWithBuild()) {
-        auto layoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
+        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(toolbarItemWrapper->GetLayoutProperty());
         layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(toolbarItemWidth), std::nullopt));
     }
 

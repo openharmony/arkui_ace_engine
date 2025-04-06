@@ -22,6 +22,12 @@
 
 using namespace testing;
 using namespace testing::ext;
+namespace {
+    const std::u16string TEST_INPUT_U16_STRING = u"THIS IS A STRING";
+    const std::u16string TEST_INPUT_U16_EMOJI = u"😁👻🔕🈯👩‍👩‍👧‍👦👨‍👩‍👧‍👧🙄😬🤥😌😔👩‍👦👨‍👩‍👦";
+    const std::u32string TEST_INPUT_U32_STRING = U"THIS IS A STRING";
+    const std::u32string TEST_INPUT_U32_EMOJI = U"😁👻🔕🈯👩‍👩‍👧‍👦👨‍👩‍👧‍👧🙄😬🤥😌😔👩‍👦👨‍👩‍👦";
+}
 namespace OHOS::Ace::UtfUtils {
 class UtfHelperTestOneNg : public Test {
     void SetUp() override
@@ -90,6 +96,59 @@ HWTEST_F(UtfHelperTestOneNg, DebuggerConvertRegionUtf16ToUtf8_004, TestSize.Leve
     size_t utf16Len = 5;
     size_t res = DebuggerConvertRegionUtf16ToUtf8(utf16String, utf8Buffer, utf16Len, utf8Len, 0);
     EXPECT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: DebuggerConvertRegionUtf16ToUtf8_005
+ * @tc.desc: null string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, DebuggerConvertRegionUtf16ToUtf8_005, TestSize.Level1)
+{
+    const uint16_t* emptyInput = nullptr;
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(emptyInput, output, 0, 10, 0);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: DebuggerConvertRegionUtf16ToUtf8_006
+ * @tc.desc: singlebyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, DebuggerConvertRegionUtf16ToUtf8_006, TestSize.Level1)
+{
+    const uint16_t input[] = { 0x0061 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 1, 10, 0);
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(output[0], 0x61);
+}
+
+/**
+ * @tc.name: DebuggerConvertRegionUtf16ToUtf8_007
+ * @tc.desc: twobyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, DebuggerConvertRegionUtf16ToUtf8_007, TestSize.Level1)
+{
+    const uint16_t input[] = { 0xD800, 0xDC00 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
+    EXPECT_EQ(result, 4);
+}
+
+/**
+ * @tc.name: DebuggerConvertRegionUtf16ToUtf8_008
+ * @tc.desc: twobyte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, DebuggerConvertRegionUtf16ToUtf8_008, TestSize.Level1)
+{
+    const uint16_t input[] = { 0xD800, 0xD800 };
+    uint8_t output[10] = { 0 };
+    size_t result = DebuggerConvertRegionUtf16ToUtf8(input, output, 2, 10, 0);
+    EXPECT_EQ(result, 6);
 }
 
 /**
@@ -405,6 +464,59 @@ HWTEST_F(UtfHelperTestOneNg, FixUtf8Len_006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FixUtf8Len_007
+ * @tc.desc: empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, FixUtf8Len_007, TestSize.Level1)
+{
+    const uint8_t* emptyInput = nullptr;
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(emptyInput, output, 0, 10);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: FixUtf8Len_008
+ * @tc.desc: singleByte string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, FixUtf8Len_008, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"a");
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, 1, 10);
+    EXPECT_EQ(result, 1);
+    EXPECT_EQ(output[0], 'a');
+}
+
+/**
+ * @tc.name: FixUtf8Len_009
+ * @tc.desc: mixed string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, FixUtf8Len_009, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"Hello, 世界!");
+    uint16_t output[50] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, strlen(reinterpret_cast<const char*>(input)), 50);
+    EXPECT_EQ(result, 10);
+}
+
+/**
+ * @tc.name: FixUtf8Len_010
+ * @tc.desc: invalid string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, FixUtf8Len_010, TestSize.Level1)
+{
+    const uint8_t* input = reinterpret_cast<const uint8_t*>(u8"XXXX");
+    uint16_t output[10] = { 0 };
+    size_t result = ConvertRegionUtf8ToUtf16(input, output, 4, 10);
+    EXPECT_EQ(result, 4);
+}
+
+/**
  * @tc.name: ConvertRegionUtf16ToUtf8_001
  * @tc.desc: test ConvertRegionUtf16ToUtf8
  * @tc.type: FUNC
@@ -502,4 +614,138 @@ HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_007, TestSize.Level1)
     size_t len = sizeof(utf16) / sizeof(utf16[0]);
     EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 7);
 }
+
+/**
+ * @tc.name: IsIndexInPairedSurrogates_001
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, IsIndexInPairedSurrogates_001, TestSize.Level1)
+{
+    std::u16string emojiStr = u"";
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
+}
+
+/**
+ * @tc.name: IsIndexInPairedSurrogates_002
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, IsIndexInPairedSurrogates_002, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    int32_t len = static_cast<int32_t>(emojiStr.length());
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, emojiStr), true);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, emojiStr), false);
+}
+
+/**
+ * @tc.name: IsIndexInPairedSurrogates_003
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates when a emoji is truncated
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, IsIndexInPairedSurrogates_003, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁😁";
+    int32_t len = static_cast<int32_t>(emojiStr.length());
+    std::u16string subEmojiStr = emojiStr.substr(0, len - 1);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(3, subEmojiStr), true);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, subEmojiStr), false);
+}
+
+/**
+ * @tc.name: Str16ToStr32_001
+ * @tc.desc: test utf_helper.cpp: Convert u16string and u32string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str16ToStr32_001, TestSize.Level1)
+{
+    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_STRING), TEST_INPUT_U32_STRING);
+    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_EMOJI), TEST_INPUT_U32_EMOJI);
+    ASSERT_EQ(UtfUtils::Str16ToStr32(u""), U"");
+    ASSERT_EQ(UtfUtils::Str16ToStr32(UtfUtils::DEFAULT_U16STR), UtfUtils::DEFAULT_U32STR);
+}
+
+/**
+ * @tc.name: Str16ToStr32_002
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str16ToStr32_002, TestSize.Level1)
+{
+    std::u16string emojiStr = u"😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 1);
+    std::u32string excpectSubEmojiStr = U"哈";
+    excpectSubEmojiStr[0] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
+}
+
+/**
+ * @tc.name: Str16ToStr32_003
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str16ToStr32_003, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 3);
+    std::u32string excpectSubEmojiStr = U"哈哈哈";
+    excpectSubEmojiStr[2] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
+}
+
+/**
+ * @tc.name: Str32ToStr16_001
+ * @tc.desc: test utf_helper.cpp: Convert u16string and u32string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str32ToStr16_001, TestSize.Level1)
+{
+    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_STRING), TEST_INPUT_U16_STRING);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_EMOJI), TEST_INPUT_U16_EMOJI);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(U""), u"");
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::DEFAULT_U32STR), UtfUtils::DEFAULT_U16STR);
+}
+
+/**
+ * @tc.name: Str32ToStr16_002
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str32ToStr16_002, TestSize.Level1)
+{
+    std::u16string emojiStr = u"😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 1);
+    std::u32string excpectSubEmojiStr = U"哈";
+    excpectSubEmojiStr[0] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
+}
+
+/**
+ * @tc.name: Str32ToStr16_003
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Str32ToStr16_003, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 3);
+    std::u32string excpectSubEmojiStr = U"哈哈哈";
+    excpectSubEmojiStr[2] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
+}
+
 } // namespace OHOS::Ace::UtfUtils

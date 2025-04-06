@@ -66,6 +66,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextArea>::StaticMethod("maxLines", &JSTextArea::SetMaxLines);
     JSClass<JSTextArea>::StaticMethod("style", &JSTextField::SetInputStyle);
+    JSClass<JSTextArea>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextArea>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextArea>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextArea>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
@@ -114,8 +115,10 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextArea>::StaticMethod("autoCapitalizationMode", &JSTextField::SetCapitalizationMode);
     JSClass<JSTextArea>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     JSClass<JSTextArea>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

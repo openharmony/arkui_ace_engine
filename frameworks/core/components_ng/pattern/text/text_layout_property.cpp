@@ -114,7 +114,8 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         return;
     }
     auto host = GetHost();
-    auto themeScopeId = host ? host->GetThemeScopeId() : 0;
+    CHECK_NULL_VOID(host);
+    auto themeScopeId = host->GetThemeScopeId();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>(themeScopeId);
@@ -181,18 +182,6 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("privacySensitive", host ? host->IsPrivacySensitive() : false, filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
-}
-
-void TextLayoutProperty::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
-{
-    LayoutProperty::ToTreeJson(json, config);
-    if (json->Contains(TreeKey::CONTENT)) {
-        return;
-    }
-    auto content = UtfUtils::Str16DebugToStr8(GetContent().value_or(u""));
-    if (!content.empty()) {
-        json->Put(TreeKey::CONTENT, content.c_str());
-    }
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

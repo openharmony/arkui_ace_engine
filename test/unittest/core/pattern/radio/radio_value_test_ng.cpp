@@ -538,7 +538,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest011, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), false);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), false);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -605,7 +605,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest012, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), true);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), true);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -672,7 +672,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest013, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), BIG_INT);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), BIG_INT);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -739,7 +739,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest014, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), NEGATIVE_BIG_INT);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), NEGATIVE_BIG_INT);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -806,7 +806,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest015, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), 0);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), 0);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -873,7 +873,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest016, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), 1);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), 1);
     /**
      * @tc.steps: step7. Get isChecked
      */
@@ -940,7 +940,7 @@ HWTEST_F(RadioValueTestNg, RadioValueTest017, TestSize.Level1)
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    radioModelNG.SetChangeValue(frameNode.GetRawPtr(), -1);
+    radioModelNG.SetChangeValue(Referenced::RawPtr(frameNode), -1);
     /**
      * @tc.steps: step7. Get isChecked
      */

@@ -16,6 +16,7 @@ import(
 
 build_component_ng("svg_ng") {
   sources = [
+    "effect/svg_colorfilter_effect.cpp",
     "parse/svg_animation.cpp",
     "parse/svg_attributes_parser.cpp",
     "parse/svg_circle.cpp",
@@ -46,6 +47,7 @@ build_component_ng("svg_ng") {
     "parse/svg_stop.cpp",
     "parse/svg_style.cpp",
     "parse/svg_svg.cpp",
+    "parse/svg_transform.cpp",
     "parse/svg_use.cpp",
     "svg_context.cpp",
     "svg_dom.cpp",

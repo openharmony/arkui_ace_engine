@@ -16,8 +16,17 @@
 #include "core/event/touch_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
+void TouchPoint::CovertId()
+{
+    if (sourceTool == SourceTool::PEN) {
+        originalId = TOUCH_TOOL_BASE_ID + static_cast<int32_t>(sourceTool);
+        id = id + originalId;
+    }
+}
+
 TouchEvent& TouchEvent::SetId(int32_t id)
 {
     this->id = id;
@@ -92,6 +101,12 @@ TouchEvent& TouchEvent::SetTiltX(std::optional<float> tiltX)
 TouchEvent& TouchEvent::SetTiltY(std::optional<float> tiltY)
 {
     this->tiltY = tiltY;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetRollAngle(std::optional<float> rollAngle)
+{
+    this->rollAngle = rollAngle;
     return *this;
 }
 
@@ -184,6 +199,30 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
+{
+    this->operatingHand = operatingHand;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetPressedTime(TimeStamp pressedTime)
+{
+    this->pressedTime = pressedTime;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetWidth(int32_t width)
+{
+    this->width = width;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetHeight(int32_t height)
+{
+    this->height = height;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -204,6 +243,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.force = force;
     event.tiltX = tiltX;
     event.tiltY = tiltY;
+    event.rollAngle = rollAngle;
     event.deviceId = deviceId;
     event.targetDisplayId = targetDisplayId;
     event.sourceType = sourceType;
@@ -220,6 +260,10 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
     event.isPassThroughMode = isPassThroughMode;
+    event.operatingHand = operatingHand;
+    event.width = width;
+    event.height = height;
+    event.pressedTime = pressedTime;
     return event;
 }
 
@@ -245,6 +289,11 @@ void TouchEvent::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (tiltY.has_value()) {
         json->Put("ty", tiltY.value());
     }
+    int32_t hasRollAngle = rollAngle.has_value() ? 1 : 0;
+    json->Put("ha", hasRollAngle);
+    if (rollAngle.has_value()) {
+        json->Put("ta", rollAngle.value());
+    }
     json->Put("d", deviceId);
     json->Put("sty", static_cast<int32_t>(sourceType));
     json->Put("sto", static_cast<int32_t>(sourceTool));
@@ -252,6 +301,7 @@ void TouchEvent::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void TouchEvent::FromJson(const std::unique_ptr<JsonValue>& json)
 {
+    CHECK_NULL_VOID(json);
     id = json->GetInt("id");
     x = json->GetDouble("x");
     y = json->GetDouble("y");
@@ -269,6 +319,10 @@ void TouchEvent::FromJson(const std::unique_ptr<JsonValue>& json)
     }
     if (hasTiltY) {
         tiltY = json->GetDouble("ty");
+    }
+    int32_t hasRollAngle = json->GetInt("ha");
+    if (hasRollAngle) {
+        rollAngle = json->GetDouble("ta");
     }
     deviceId = json->GetInt64("d");
     sourceType = static_cast<SourceType>(json->GetInt("sty"));
@@ -340,7 +394,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .downTime = time,
         .size = size,
         .force = force,
-        .isPressed = (type == TouchType::DOWN) };
+        .isPressed = (type == TouchType::DOWN),
+        .operatingHand = operatingHand };
     TouchEvent event;
     event.SetId(id)
         .SetX(x)
@@ -357,7 +412,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
         .SetOriginalId(originalId)
-        .SetIsPassThroughMode(isPassThroughMode);
+        .SetIsPassThroughMode(isPassThroughMode)
+        .SetOperatingHand(operatingHand);
     event.pointers.emplace_back(std::move(point));
     return event;
 }
@@ -790,6 +846,23 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.type = changedTouches_.front().GetTouchType();
         touchEvent.tiltX = changedTouches_.front().GetTiltX();
         touchEvent.tiltY = changedTouches_.front().GetTiltY();
+        touchEvent.rollAngle = changedTouches_.front().GetRollAngle();
+        touchEvent.width = changedTouches_.front().GetWidth();
+        touchEvent.height = changedTouches_.front().GetHeight();
+        touchEvent.pressedTime = changedTouches_.front().GetPressedTime();
+        const auto& targetLocalOffset = changedTouches_.front().GetTarget().area.GetOffset();
+        const auto& targetOrigin = changedTouches_.front().GetTarget().origin;
+        // width height x y globalx globaly
+        touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        touchEvent.widthArea = changedTouches_.front().GetTarget().area.GetWidth().ConvertToPx();
+        touchEvent.heightArea = changedTouches_.front().GetTarget().area.GetHeight().ConvertToPx();
+        // deviceid
+        touchEvent.deviceId = changedTouches_.front().GetDeviceId();
+        // modifierkeystates
+        touchEvent.modifierKeyState = CalculateModifierKeyState(changedTouches_.front().GetPressedKeyCodes());
     }
     touchEvent.time = timeStamp_;
     return touchEvent;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,9 +30,12 @@ public:
     static void TearDownTestSuite();
 
     RefPtr<Scrollable> GetScrollable(RefPtr<FrameNode> node);
+    void AxisDragStart(RefPtr<Scrollable> scrollable);
+    void AxisDragUpdate(RefPtr<Scrollable> scrollable, float offset);
+    void AxisDragEnd(RefPtr<Scrollable> scrollable, float velocity);
     void DragStart(RefPtr<Scrollable> scrollable);
     void DragUpdate(RefPtr<Scrollable> scrollable, float offset);
-    void DragEnd(RefPtr<Scrollable> scrollable, float velocity);
+    void DragEnd(RefPtr<Scrollable> scrollable, float velocity, double mainDelta = 0.0);
 };
 } // namespace OHOS::Ace::NG
 #endif

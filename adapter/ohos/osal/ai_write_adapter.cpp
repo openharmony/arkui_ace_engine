@@ -19,13 +19,7 @@
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
 #include "want.h"
-#include "want_params.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
-#include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 
 namespace OHOS::Ace {
 const std::pair<std::string, std::string> UI_ENTENSION_TYPE = {"ability.want.params.uiExtensionType", "sys/commonUI"};

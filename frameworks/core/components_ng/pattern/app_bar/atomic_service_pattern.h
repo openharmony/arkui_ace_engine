@@ -33,7 +33,6 @@ public:
 
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
-    void OnLanguageConfigurationUpdate() override;
     void OnColorConfigurationUpdate() override;
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
@@ -61,6 +60,7 @@ public:
     void ColorConfigurationCallBack();
     void AppInfoCallBack();
     void AppScreenCallBack();
+    void AppBgColorCallBack();
     std::optional<bool> settedColorMode = std::nullopt;
 
 private:

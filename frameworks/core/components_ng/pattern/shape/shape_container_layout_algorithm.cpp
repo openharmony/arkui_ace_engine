@@ -17,7 +17,7 @@
 
 #include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)

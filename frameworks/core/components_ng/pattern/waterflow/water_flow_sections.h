@@ -21,6 +21,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/memory/ace_type.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {

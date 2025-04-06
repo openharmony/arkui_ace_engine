@@ -58,6 +58,8 @@ void ScrollBar::InitTheme()
     SetMinDynamicHeight(theme->GetMinDynamicHeight());
     SetBackgroundColor(theme->GetBackgroundColor());
     SetForegroundColor(theme->GetForegroundColor());
+    SetForegroundHoverColor(theme->GetForegroundHoverBlendColor());
+    SetForegroundPressedColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
 #ifdef ARKUI_CIRCLE_FEATURE
@@ -69,6 +71,8 @@ void ScrollBar::InitTheme()
     SetActiveMaxOffsetAngle(theme->GetActiveMaxOffsetAngle());
     SetNormalScrollBarWidth(theme->GetNormalScrollBarWidth());
     SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
+    SetArcForegroundColor(theme->GetArcForegroundColor());
+    SetArcBackgroundColor(theme->GetArcBackgroundColor());
 #endif // ARKUI_CIRCLE_FEATURE
 }
 
@@ -132,6 +136,22 @@ void ScrollBar::UpdateScrollBarRegion(
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
         lastOffset_ == lastOffset && NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) && !isReverseUpdate_) {
         return;
+    }
+    // When the scroll jumps without animation and is at the top or bottom before and after the jump,
+    // the scrollbar is not displayed.
+    auto checkAtEdge = (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) &&
+        displayMode_ == DisplayMode::AUTO && isScrollable_;
+    if (checkAtEdge) {
+        if (NearZero(GetMainOffset(lastOffset_)) && NearZero(GetMainOffset(lastOffset))) {
+            return;
+        }
+        auto lastIsAtBottom = NearEqual(GetMainOffset(lastOffset_), estimatedHeight_ - GetMainSize(viewPortSize_));
+        auto isAtBottom = NearEqual(GetMainOffset(lastOffset), estimatedHeight - GetMainSize(size));
+        if (lastIsAtBottom && isAtBottom) {
+            return;
+        }
+        opacityAnimationType_  = OpacityAnimationType::APPEAR_WITHOUT_ANIMATION;
+        ScheduleDisappearDelayTask();
     }
     if (!NearEqual(estimatedHeight_, estimatedHeight, 0.000001f) || viewPortSize_ != size) {
         needAddLayoutInfo = true;
@@ -237,7 +257,7 @@ void ScrollBar::SetRectTrickRegion(
     double activeMainOffset =
         std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) + NormalizeToPx(startReservedHeight_);
     activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
-    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
+    bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
     scrollableOffset_ = activeMainOffset;
@@ -577,7 +597,7 @@ void ScrollBar::HandleDragStart(const GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_SCROLL_BAR, "inner scrollBar drag start");
     ACE_SCOPED_TRACE("inner scrollBar HandleDragStart");
     if (scrollPositionCallback_) {
-        scrollPositionCallback_(0, SCROLL_FROM_START);
+        scrollPositionCallback_(0, SCROLL_FROM_START, false);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(0, NG::SceneStatus::START);
         }
@@ -606,7 +626,9 @@ void ScrollBar::HandleDragUpdate(const GestureEvent& info)
             offset = -offset;
         }
         ACE_SCOPED_TRACE("inner scrollBar HandleDragUpdate offset:%f", offset);
-        scrollPositionCallback_(offset, SCROLL_FROM_BAR);
+        auto isMouseWheelScroll =
+            info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+        scrollPositionCallback_(offset, SCROLL_FROM_BAR, isMouseWheelScroll);
         if (dragFRCSceneCallback_) {
             dragFRCSceneCallback_(NearZero(info.GetMainDelta()) ? info.GetMainVelocity()
                                                                 : info.GetMainVelocity() / info.GetMainDelta() * offset,
@@ -670,7 +692,7 @@ void ScrollBar::ProcessFrictionMotion(double value)
 {
     if (scrollPositionCallback_) {
         auto offset = CalcPatternOffset(value - frictionPosition_);
-        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING)) {
+        if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
             if (frictionController_ && frictionController_->IsRunning()) {
                 frictionController_->Stop();
             }
@@ -689,7 +711,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 
 void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
     TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-    ResponseLinkResult& responseLinkResult)
+    ResponseLinkResult& responseLinkResult, bool inBarRect)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
@@ -699,6 +721,16 @@ void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetE
         panRecognizer_->SetTargetComponent(targetComponent);
         panRecognizer_->SetIsSystemGesture(true);
         panRecognizer_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        GestureJudgeFunc sysJudge = nullptr;
+        if (inBarRect) {
+            sysJudge = [](const RefPtr<GestureInfo>& gestureInfo,
+                          const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
+                auto inputEventType = gestureInfo->GetInputEventType();
+                return inputEventType == InputEventType::AXIS ? GestureJudgeResult::CONTINUE
+                                                              : GestureJudgeResult::REJECT;
+            };
+        }
+        panRecognizer_->SetSysGestureJudge(sysJudge);
         result.emplace_front(panRecognizer_);
         responseLinkResult.emplace_back(panRecognizer_);
     }
@@ -943,7 +975,13 @@ void ScrollBar::DumpAdvanceInfo()
 
 Color ScrollBar::GetForegroundColor() const
 {
-    return IsPressed() ? foregroundColor_.BlendColor(PRESSED_BLEND_COLOR) : foregroundColor_;
+    if (IsPressed()) {
+        return foregroundPressedColor_;
+    }
+    if (IsHover()) {
+        return foregroundHoverColor_;
+    }
+    return foregroundColor_;
 }
 
 void ScrollBar::SetHoverWidth(const RefPtr<ScrollBarTheme>& theme)
@@ -1043,6 +1081,11 @@ void ScrollBar::MarkNeedRender()
 float ScrollBar::GetMainOffset(const Offset& offset) const
 {
     return positionMode_ == PositionMode::BOTTOM ? offset.GetX() : offset.GetY();
+}
+
+float ScrollBar::GetMainSize(const Size& size) const
+{
+    return positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height();
 }
 
 void ScrollBar::SetReverse(bool reverse)

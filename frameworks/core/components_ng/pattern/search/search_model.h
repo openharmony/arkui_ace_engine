@@ -73,7 +73,7 @@ public:
     virtual void SetBackBorder() {};
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
-    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func);
@@ -84,6 +84,7 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func);
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func);
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
@@ -96,6 +97,7 @@ public:
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
     virtual void SetCustomKeyboard(const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     virtual void SetSearchEnterKeyType(TextInputAction value);
+    virtual void SetSearchCapitalizationMode(AutoCapitalizationMode value);
     virtual void SetMaxLength(uint32_t value);
     virtual void ResetMaxLength();
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
@@ -114,6 +116,7 @@ public:
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;

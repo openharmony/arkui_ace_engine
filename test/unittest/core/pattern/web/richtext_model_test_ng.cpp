@@ -16,7 +16,9 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/pattern/button/button_pattern.h"
+#define private public
 #include "core/components_ng/pattern/web/richtext_model_ng.h"
+#undef private
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "test/mock/base/mock_task_executor.h"
 #define private public
@@ -53,6 +55,7 @@ HWTEST_F(RichTextModelNGTest, Create_001, TestSize.Level1)
     RichTextModelNG richTextModelNG;
     const std::string data = "<h1>h1 text for test</h1>";
     richTextModelNG.Create(data);
+    EXPECT_FALSE(richTextModelNG.isDataEmpty_);
 }
 
 /**
@@ -69,6 +72,7 @@ HWTEST_F(RichTextModelNGTest, Create_002, TestSize.Level1)
     RichTextModelNG richTextModelNG;
     const std::string data = "<h1>h1 text for test</h1>";
     richTextModelNG.Create(data);
+    EXPECT_FALSE(richTextModelNG.isDataEmpty_);
 
     MockPipelineContext::TearDown();
     MockContainer::TearDown();

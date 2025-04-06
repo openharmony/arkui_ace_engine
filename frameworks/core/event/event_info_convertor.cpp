@@ -26,4 +26,8 @@ bool EventInfoConvertor::IsTouchEventNeedAbandoned(const TouchEventInfo& touchEv
     return false;
 }
 
+bool EventInfoConvertor::MatchCompatibleCondition()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG

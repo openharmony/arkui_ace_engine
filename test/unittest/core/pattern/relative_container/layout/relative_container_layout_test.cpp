@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,9 +91,9 @@ HWTEST_F(RelativeContainerLayoutTest, LayoutTest, TestSize.Level1)
     RelativeContainerLayoutAlgorithm layoutAlgorithm;
 
     // dependence: recordOffsetMap_
-    PrepareLayout(relativeContainer.GetRawPtr(), layoutAlgorithm);
+    PrepareLayout(Referenced::RawPtr(relativeContainer), layoutAlgorithm);
     // test Layout
-    layoutAlgorithm.Layout(relativeContainer.GetRawPtr());
+    layoutAlgorithm.Layout(Referenced::RawPtr(relativeContainer));
     // expect: row1.offset = (center, padding+border) = (100/2, 3+1) = (50, 4)
     EXPECT_EQ(row1->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(50, 4))
         << row1->GetGeometryNode()->GetMarginFrameOffset().ToString();

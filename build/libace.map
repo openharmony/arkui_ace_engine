@@ -47,6 +47,7 @@
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
       OHOS::Ace::CubicCurve::*;
@@ -64,6 +65,8 @@
       OHOS::Ace::Platform::AceApplicationInfoImpl::*;
       OHOS::Ace::Platform::AceContainer::*;
       OHOS::Ace::Platform::FlutterAceView::*;
+      "OHOS::Ace::Platform::WindowFreeContainer::CreateWindowFreeContainer(void*, void*)";
+      "OHOS::Ace::Platform::WindowFreeContainer::DestroyWindowFreeContainer()";
       OHOS::Ace::PluginComponentManager::*;
       OHOS::Ace::Scheduler::*;
       OHOS::Ace::ScopedDelegate::*;
@@ -89,8 +92,14 @@
       OHOS::Ace::Dimension::*;
       OHOS::Ace::Matrix4::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
+      OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
+      OHOS::Ace::NG::ParallelPagePattern::*;
+      OHOS::Ace::NG::ViewAdvancedRegister::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor()";
+      "OHOS::Ace::AnimatableColor::~AnimatableColor()";
+      "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -101,6 +110,9 @@
       OHOS::Ace::Alignment::*;
       OHOS::Ace::LinearColor::*;
       OHOS::Ace::NG::Gradient::*;
+      OHOS::Ace::NG::ContainerModalView::*;
+      OHOS::Ace::NG::BuildTitleNodeForCj*;
+      OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -147,6 +159,7 @@
       OHOS::Ace::NavigationModel::*;
       OHOS::Ace::NavigatorModel::*;
       OHOS::Ace::SlidingPanelModel::*;
+      OHOS::Ace::ParticleModel::*;
       OHOS::Ace::PathModel::*;
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
@@ -192,6 +205,9 @@
       OHOS::Ace::VideoModel::*;
       OHOS::Ace::WebModel::*;
       OHOS::Ace::ImageInfoConfig::*;
+      OHOS::Ace::RecycleViewModel::*;
+      OHOS::Ace::NG::RecycleDummyNode::*;
+      OHOS::Ace::XComponentModel::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -225,6 +241,8 @@
       OHOS::Ace::NG::Matrix2D::*;
       OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
+      OHOS::Ace::DatePickerDialogModel::*;
+      OHOS::Ace::TimePickerModel::*;
       OHOS::Ace::DOM_ROOT_NODE_ID_BASE;
       OHOS::Ace::ComponentGroupElement::*;
       OHOS::Ace::ComposedComponent::*;
@@ -263,11 +281,14 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::TabController::*;
       OHOS::Ace::ParseFontFeatureSettings*;
+      OHOS::Ace::UnParseFontFeatureSetting*;
+      OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
       "OHOS::Ace::NG::CustomNode::FlushReload()";
       "OHOS::Ace::CanvasModel::GetInstance()";
+      "OHOS::Ace::NG::ViewAdvancedRegister::GetInstance()";
       OHOS::Ace::ImageAnalyzerAdapterImpl::*;
       OHOS::Ace::ImageAnalyzerLoader::*;
       OHOS::Ace::ImageAnalyzerManager::ImageAnalyzerManager*;
@@ -288,6 +309,7 @@
       OHOS::Ace::ImageAnalyzerMgr::UpdateConfig*;
       OHOS::Ace::ImageAnalyzerMgr::Release*;
       OHOS::Ace::ImageAnalyzerMgr::UpdateOverlayStatus*;
+      "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
 
       OHOS::Ace::NG::InspectorFilter::*;
       OHOS::Ace::NG::ServiceCollaborationMenuAceHelper::*;
@@ -331,11 +353,11 @@
       vtable?for?OHOS::Ace::NG::GestureGroup;
       vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
-      vtable?for?OHOS::Ace::NG::XComponentModelNG;
-      vtable?for?OHOS::Ace::Framework::XComponentModelImpl;
       vtable?for?OHOS::Ace::NG::XComponentControllerNG;
       vtable?for?OHOS::Ace::NG::ViewAbstractModelNG;
       vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
+      vtable?for?OHOS::Ace::NG::TimePickerModelNG;
 
       VTT?for?OHOS::Ace::Animator;
       VTT?for?OHOS::Ace::Container;
@@ -361,15 +383,20 @@
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      VTT?for?OHOS::Ace::NG::ParallelPagePattern;
+      VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      VTT?for?OHOS::Ace::NG::ContainerModalView;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
+      OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
       OHOS::Ace::ImageSourceInfo::*;
       OHOS::Ace::JsonUtil::*;
       OHOS::Ace::Recorder::*;
       OHOS::Ace::Referenced::*;
+      OHOS::Ace::SystemBarStyle::*;
       OHOS::Ace::Recorder::IsCacheAvaliable*;
       OHOS::Ace::Recorder::EventRecorder::*;
       OHOS::Ace::Recorder::EventParamsBuilder::*;
@@ -399,21 +426,42 @@
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
-      OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::Ace::LifeCycleCheckable::*;
       OHOS::Ace::Kit::ViewStackProcessor::*;
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
       OHOS::Ace::Kit::ResourceParser::*;
       OHOS::Ace::Kit::ThemeFactory::*;
       OHOS::Ace::Kit::ThemeStyle::*;
+      OHOS::Ace::Kit::AgingAdapationDialogUtil::*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::MeasureUtils::*;
+      OHOS::Ace::Kit::MenuView::*;
+      OHOS::Ace::Kit::OverlayManager::*;
+      OHOS::Ace::Kit::UIContext::*;
       OHOS::Ace::Theme::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;
+      OHOS::Ace::NG::ScrollableModelNG::*;
+      OHOS::Ace::Kit::ContentModifier::*;
+      OHOS::Ace::Kit::Property::*;
+      OHOS::Ace::Kit::ParseColor*;
+      OHOS::Ace::Kit::ParseDimension*;
+      OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::View::*;
+      OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::Text::*;
+      OHOS::Ace::NG::NavigationStack::*;
+      OHOS::Ace::NG::CustomNode::*;
+      OHOS::Ace::NG::NavigationGroupNode::*;
+      OHOS::Ace::NavDestinationModel::*;
+      OHOS::Ace::NavDestinationModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       OHOS::Ace::NG::ComponentSnapshot::*;
+      virtual?thunk?to?OHOS::Ace::Kit::ContentModifier::*;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -436,6 +484,7 @@
 
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
+      virtual?thunk?to?OHOS::Ace::NG::LayoutProperty::*;
 
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -450,10 +499,20 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
+      vtable?for?OHOS::Ace::NG::ParallelPagePattern;
+      vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
       vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollableModelNG;
+      vtable?for?OHOS::Ace::NG::NavigationStack;
+      vtable?for?OHOS::Ace::NG::CustomNode;
+      vtable?for?OHOS::Ace::NG::NavigationGroupNode;
+      vtable?for?OHOS::Ace::NavDestinationModel;
+      vtable?for?OHOS::Ace::SystemBarStyle;
+      vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -462,6 +521,7 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+      VTT?for?OHOS::Ace::NG::NavigationStack;
 
       OHOS::Ace::LinearColor::TRANSPARENT;
 
@@ -469,6 +529,9 @@
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
       "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
+      OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
+      OHOS::Ace::TouchEventTarget::GetAttachedNode*;
+      "OHOS::Ace::CheckThread(OHOS::Ace::TaskExecutor::TaskType)";
     };
   local:
     *;

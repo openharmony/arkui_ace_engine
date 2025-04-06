@@ -19,13 +19,16 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr float ARC_SWIPER_PROPORTION = 5.0f / 2.0f;    //The critical point of arc_swiper is 2/5 screen
+constexpr float TO_LEFT_ARC_SWIPER_PROPORTION = 5.0f / 2.0f;    //The critical point of arc_swiper is 2/5 screen
+constexpr float TO_RIGHT_ARC_SWIPER_PROPORTION = 5.0f / 3.0f;
+constexpr int32_t MIN_PAGE_VELOCITY = 520;
 class ArcSwiperPattern : public SwiperPattern {
     DECLARE_ACE_TYPE(ArcSwiperPattern, SwiperPattern);
 public:
     ArcSwiperPattern()
     {
-        swiperProportion_ = ARC_SWIPER_PROPORTION;
+        swiperProportion_ = TO_LEFT_ARC_SWIPER_PROPORTION;
+        newMinTurnPageVelocity_ = MIN_PAGE_VELOCITY;
     }
 
     ~ArcSwiperPattern() {}
@@ -81,11 +84,10 @@ private:
 
     void ResetAnimationParam() override;
     void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
-    void CancelFrameNodePropertyAnimation(const RefPtr<RenderContext>& context);
     void UsePropertyAnimation(const OffsetF& offset);
-    void PlayPropertyTranslateAnimation(
-        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
-    void PlayScrollAnimation(float offset) override;
+    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f,
+        bool stopAutoPlay = false, std::optional<float> pixelRoundTargetPos = std::nullopt) override;
+    void PlayScrollAnimation(float currentDelta, float currentIndexOffset) override;
     void ResetCurrentFrameNodeAnimation() override;
     void ResetParentNodeColor() override;
     RefPtr<Curve> GetCurve() const override;
@@ -94,12 +96,12 @@ private:
     int32_t CalcTime(int32_t time);
     void ResetFrameNodeAnimation(const RefPtr<FrameNode>& frameNode, bool resetBackgroundcolor);
     void ClearAnimationFinishList();
-    void HorizontalScrollAnimation();
+    void HorizontalScrollAnimation(float offset);
     void PlayHorizontalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     void PlayHorizontalScrollEntryAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<Color> GetEntryNodeBackgroundColor(const RefPtr<FrameNode>& frameNode);
 
-    void VerticalScrollAnimation();
+    void VerticalScrollAnimation(float offset);
     void PlayVerticalScrollExitAnimation(float swiperWidth, float startPos, const RefPtr<FrameNode>& frameNode);
     void PlayVerticalScrollEntryAnimation(float swiperWidth, float startPosj, const RefPtr<FrameNode>& frameNode);
 
@@ -141,7 +143,8 @@ private:
     void PlayVerticalExitOffsetAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, bool rollBack);
     void PlayVerticalEntryOffsetAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode, bool rollBack);
     void PlayVerticalScrollEntryBackgroundAnimation(float percent, const RefPtr<FrameNode>& frameNode);
-
+    void PlayVerticalEntryBlurAnimation(const RefPtr<FrameNode>& frameNode, bool rollBack);
+    void ResetBackgroundColor(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<Color> preNodeBackgroundColor_;
     std::shared_ptr<Color> entryNodeBackgroundColor_;
     std::shared_ptr<Color> parentNodeBackgroundColor_;
@@ -171,6 +174,7 @@ private:
     void HandleCrownActionCancel();
     double GetCrownRotatePx(const CrownEvent& event) const;
     void UpdateCrownVelocity(double degree, double mainDelta, bool isEnd = false);
+    void StartVibrator(bool isLeft);
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -181,6 +185,9 @@ private:
     double crownTurnVelocity_ = 0.0;
     bool isHandleCrownActionEnd_ = false;
 #endif
+    bool canChangeDirectionFlag_ = false;
+    bool scrollToLeft_ = false;
+    bool scrollToTop_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_ARC_SWIPER_PATTERN_H

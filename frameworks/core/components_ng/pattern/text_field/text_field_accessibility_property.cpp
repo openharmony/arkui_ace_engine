@@ -132,6 +132,11 @@ std::string TextFieldAccessibilityProperty::GetText() const
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
+
+    if ((IsShowCount() || IsShowError()) && IsHint()) {
+        return GetHintText();
+    }
+
     return text;
 }
 
@@ -185,5 +190,28 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     AddSupportAction(AceAction::ACTION_SET_TEXT);
     AddSupportAction(AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
     AddSupportAction(AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
+}
+
+bool TextFieldAccessibilityProperty::IsShowCount() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    CHECK_NULL_RETURN(textFieldPattern->IsShowCount(), false);
+    auto textCmpDecorator = textFieldPattern->GetCounterDecorator();
+    CHECK_NULL_RETURN(textCmpDecorator, false);
+    auto counterDecorator = DynamicCast<CounterDecorator>(textCmpDecorator);
+    CHECK_NULL_RETURN(counterDecorator, false);
+    return counterDecorator->HasContent();
+}
+
+bool TextFieldAccessibilityProperty::IsShowError() const
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+    return textFieldPattern->IsShowError();
 }
 } // namespace OHOS::Ace::NG

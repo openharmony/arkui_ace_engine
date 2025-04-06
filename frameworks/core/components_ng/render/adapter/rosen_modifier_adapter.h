@@ -34,6 +34,10 @@
 #include "ui/view/draw/content_modifier.h"
 #include "ui/view/draw/modifier.h"
 
+namespace OHOS::Ace::Kit {
+class Modifier;
+}
+
 namespace OHOS::Ace::NG {
 
 using RSModifier = Rosen::RSModifier;
@@ -59,9 +63,6 @@ public:
     explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
         : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
     {}
-    explicit ContentModifierAdapter(const RefPtr<Kit::Modifier>& modifier)
-        : kitModifier_(AceType::DynamicCast<Kit::ContentModifier>(modifier))
-    {}
     ~ContentModifierAdapter() override = default;
 
     void Draw(RSDrawingContext& context) const override;
@@ -70,7 +71,6 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
-    RefPtr<Kit::ContentModifier> kitModifier_ = nullptr;
     bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);

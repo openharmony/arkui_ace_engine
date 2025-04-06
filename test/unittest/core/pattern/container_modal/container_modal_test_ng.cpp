@@ -74,6 +74,7 @@ void ContainerModelTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_CONTAINER_MODAL);
@@ -130,7 +131,7 @@ void ContainerModelTestNg::CreateContainerModal()
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void ContainerModelTestNg::Touch(TouchLocationInfo locationInfo)
@@ -439,41 +440,6 @@ HWTEST_F(ContainerModelTestNg, Test004, TestSize.Level1)
     Mouse(Offset(0, titlePopupDistance));
     floatingLayoutProperty->UpdateVisibility(VisibleType::GONE);
 }
-
-/**
- * @tc.name: Test005
- * @tc.desc: WindowFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test005, TestSize.Level1)
-{
-    CreateContainerModal();
-
-    /**
-     * @tc.steps: step1. set foused true.
-     * @tc.expected: isFocus_ is true.
-     */
-    pattern_->OnWindowFocused();
-    EXPECT_TRUE(pattern_->isFocus_);
-
-    /**
-     * @tc.steps: step2. set foused false.
-     * @tc.expected: isFocus_ is false.
-     */
-    pattern_->OnWindowUnfocused();
-    EXPECT_FALSE(pattern_->isFocus_);
-
-    // coverage OnWindowForceUnfocused
-    pattern_->OnWindowForceUnfocused();
-
-    /**
-     * @tc.steps: step3. Alter maxId.
-     */
-    auto pipeline = MockPipelineContext::GetCurrent();
-    pipeline->windowManager_->SetCurrentWindowMaximizeMode(MaximizeMode::MODE_AVOID_SYSTEM_BAR);
-    pattern_->OnWindowFocused();
-    EXPECT_TRUE(pattern_->isFocus_);
-}
 /**
  * @tc.name: Test006
  * @tc.desc: CanShowFloatingTitle windowMode_.
@@ -598,7 +564,7 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty002, TestSize.Level1)
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     pattern_->appLabel_ = "abc";
     EXPECT_EQ(accessibilityProperty_->GetText(), "abc");
 }

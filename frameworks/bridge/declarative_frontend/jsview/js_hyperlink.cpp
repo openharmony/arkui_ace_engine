@@ -102,6 +102,9 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
 
 void JSHyperlink::Pop()
 {
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSHyperlink][pop]", &JSHyperlink::Pop);
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         ViewStackModel::GetInstance()->PopContainer();
         return;

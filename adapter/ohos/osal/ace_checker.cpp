@@ -14,6 +14,8 @@
  */
 
 #include "base/log/ace_checker.h"
+#include "base/log/ace_performance_check.h"
+#include "base/websocket/websocket_manager.h"
 
 #ifdef HICHECKER_EXISTS
 #include "caution.h"
@@ -42,11 +44,14 @@ int32_t AceChecker::vsyncTimeout_ = VSYNC_TIMEOUT;
 int32_t AceChecker::nodeTimeout_ = NODE_TIMEOUT;
 int32_t AceChecker::foreachItems_ = FOREACH_ITEMS;
 int32_t AceChecker::flexLayouts_ = FLEX_LAYOUTS;
+std::string AceChecker::checkMessage_ = "";
+bool AceChecker::isPerformanceCheckEnabled_ = false;
+bool AceChecker::isWebSocketCheckEnabled_ = false;
 
 #ifdef HICHECKER_EXISTS
 bool AceChecker::IsPerformanceCheckEnabled()
 {
-    return HiviewDFX::HiChecker::Contains(HiviewDFX::Rule::RULE_CHECK_ARKUI_PERFORMANCE);
+    return HiviewDFX::HiChecker::Contains(HiviewDFX::Rule::RULE_CHECK_ARKUI_PERFORMANCE) || isPerformanceCheckEnabled_;
 }
 
 void AceChecker::NotifyCaution(const std::string& tag)
@@ -71,14 +76,42 @@ void AceChecker::InitPerformanceParameters()
     AceChecker::foreachItems_ = system::GetIntParameter<int>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
     AceChecker::flexLayouts_ = system::GetIntParameter<int>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
 }
+
+void AceChecker::SetPerformanceCheckStatus(bool status, const std::string& message)
+{
+    AceChecker::checkMessage_ = message;
+    AceChecker::isPerformanceCheckEnabled_ = status;
+    AceChecker::isWebSocketCheckEnabled_ = true;
+    if (status) {
+        AceChecker::InitPerformanceParameters();
+        AcePerformanceCheck::Start();
+    } else {
+        AcePerformanceCheck::Stop();
+    }
+}
+
 #else
 bool AceChecker::IsPerformanceCheckEnabled()
 {
-    return false;
+    return isPerformanceCheckEnabled_;
 }
 
 void AceChecker::NotifyCaution(const std::string& tag) {}
 void AceChecker::InitPerformanceParameters() {}
+
+void AceChecker::SetPerformanceCheckStatus(bool status, const std::string& message)
+{
+    AceChecker::checkMessage_ = message;
+    AceChecker::isPerformanceCheckEnabled_ = status;
+    AceChecker::isWebSocketCheckEnabled_ = true;
+    if (status) {
+        AceChecker::InitPerformanceParameters();
+        AcePerformanceCheck::Start();
+    } else {
+        AcePerformanceCheck::Stop();
+    }
+}
+
 #endif
 
 } // namespace OHOS::Ace

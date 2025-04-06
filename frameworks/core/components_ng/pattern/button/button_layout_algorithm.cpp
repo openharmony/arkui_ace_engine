@@ -17,6 +17,7 @@
 
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -159,10 +160,10 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
     CHECK_NULL_VOID(buttonTheme);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(childWrapper);
-    auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
-    childWrapper->Measure(childConstraint);
-    auto textSize = childWrapper->GetGeometryNode()->GetContentSize();
     if (buttonLayoutProperty->HasFontSize() || buttonLayoutProperty->HasControlSize()) {
+        auto childConstraint = layoutWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
+        childWrapper->Measure(childConstraint);
+        auto textSize = childWrapper->GetGeometryNode()->GetContentSize();
         // Fonsize is set. When the font height is larger than the button height, make the button fit the font
         // height.
         if (GreatOrEqual(textSize.Height(), layoutConstraint.maxSize.Height())) {
@@ -173,10 +174,16 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
         // size to no less than 9sp.
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateAdaptMaxFontSize(
-            buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
-        textLayoutProperty->UpdateAdaptMinFontSize(
-            buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+        if (buttonTheme->GetIsApplyTextFontSize() && !buttonLayoutProperty->GetMaxFontSize().has_value() &&
+            !buttonLayoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(
+                buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+            textLayoutProperty->UpdateAdaptMinFontSize(
+                buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+        }
     }
     childWrapper->Measure(layoutConstraint);
     childSize_ = childWrapper->GetGeometryNode()->GetContentSize();

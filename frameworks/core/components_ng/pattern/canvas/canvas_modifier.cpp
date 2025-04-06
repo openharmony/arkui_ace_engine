@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 
+#include "base/utils/time_util.h"
 #include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
 
@@ -94,5 +95,10 @@ void CanvasModifier::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& array)
         info->Put("CommandSize", std::to_string(dumpInfo.opItemSize).c_str());
         array->PutRef(std::move(info));
     }
+}
+
+void CanvasModifier::SetRenderContext(const WeakPtr<RenderContext>& renderContext)
+{
+    renderContext_ = renderContext;
 }
 } // namespace OHOS::Ace::NG

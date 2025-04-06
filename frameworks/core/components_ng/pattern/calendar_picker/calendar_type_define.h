@@ -47,6 +47,8 @@ struct CalendarSettingData {
     PickerDate endDate;
     std::optional<Dimension> dayRadius;
     WeakPtr<FrameNode> entryNode = nullptr;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    bool markToday = false;
 };
 
 struct CalendarPickerOption {

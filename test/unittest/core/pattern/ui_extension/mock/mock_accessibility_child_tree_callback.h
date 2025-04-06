@@ -14,7 +14,7 @@
  */
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_UI_EXTENSION_MOCK_ACCESSIBILITY_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_UI_EXTENSION_MOCK_ACCESSIBILITY_H
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS::Ace::NG {

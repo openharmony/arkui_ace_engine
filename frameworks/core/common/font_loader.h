@@ -26,17 +26,19 @@ class FontLoader : public virtual AceType {
 
 public:
     FontLoader(const std::string& familyName, const std::string& familySrc);
+    FontLoader(const std::string& familyName, const std::vector<std::string>& familySrc);
     ~FontLoader() override = default;
 
     virtual void AddFont(const RefPtr<PipelineBase>& context, const std::string& bundleName = "",
         const std::string& moduleName = "") = 0;
 
-    virtual void SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
+    virtual void SetDefaultFontFamily(const char* fontFamily, const std::vector<std::string>& familySrc)
     {
         return;
     }
 
     static RefPtr<FontLoader> Create(const std::string& familyName, const std::string& familySrc);
+    static RefPtr<FontLoader> CreateFontLoader(const char* familyName, const std::vector<std::string>& familySrc);
 
     const std::string& GetFamilyName() const;
     void SetOnLoaded(const WeakPtr<RenderNode>& node, const std::function<void()>& callback);
@@ -45,10 +47,15 @@ public:
 
     void SetOnLoadedNG(const WeakPtr<NG::UINode>& node, const std::function<void()>& callback);
     void RemoveCallbackNG(const WeakPtr<NG::UINode>& node);
+    bool GetIsLoader() const
+    {
+        return isLoaded_;
+    }
 
 protected:
     std::string familyName_;
     std::string familySrc_;
+    std::vector<std::string> familySrcArray_;
     std::map<WeakPtr<RenderNode>, std::function<void()>> callbacks_;
     std::map<WeakPtr<NG::UINode>, std::function<void()>> callbacksNG_;
     bool isLoaded_ = false;

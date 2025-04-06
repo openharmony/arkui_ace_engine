@@ -45,10 +45,17 @@ int32_t OH_ArkUI_GetNodeHandleFromNapiValue(napi_env env, napi_value value, ArkU
         }
         auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
         uiNodePtr->IncRefCount();
+        // check whether it is bind to native XComponent.
+        bool isBindNativeXComponent = impl && impl->getNodeModifiers()->getXComponentModifier()
+            ->getXComponentIsBindNative(reinterpret_cast<ArkUINodeHandle>(nativePtr));
         *handle = new ArkUI_Node({ .type = -1,
             .uiNodeHandle = reinterpret_cast<ArkUINodeHandle>(nativePtr),
             .cNode = false,
             .buildNode = true });
+        if (isBindNativeXComponent) {
+            OHOS::Ace::NodeModel::RegisterBindNativeNode(*handle);
+            (*handle)->isBindNative = true;
+        }
         if (impl) {
             impl->getExtendedAPI()->setAttachNodePtr((*handle)->uiNodeHandle, reinterpret_cast<void*>(*handle));
         }
@@ -419,8 +426,7 @@ int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData
     auto id = context->id;
     auto ret = basicAPI->postFrameCallback(id, userData, callback);
     if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
-        LOGF("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
-        abort();
+        LOGF_ABORT("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
     }
     return static_cast<ArkUI_ErrorCode>(ret);
 }

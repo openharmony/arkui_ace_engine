@@ -23,4 +23,10 @@ RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* val
     LOGI("Not supported in previewer");
     return nullptr;
 }
+
+RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
+{
+    LOGI("Not supported in previewer");
+    return nullptr;
+}
 } // namespace OHOS::Ace

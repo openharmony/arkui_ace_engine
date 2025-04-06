@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -42,11 +43,14 @@ enum class BindSheetDismissReason {
     CLOSE_BUTTON,
     SLIDE_DOWN,
 };
-class ACE_EXPORT SheetPresentationPattern :
-    public LinearLayoutPattern, public PopupBasePattern, public FocusView,
-        public NestableScrollContainer, public AutoFillTriggerStateHolder{
-    DECLARE_ACE_TYPE(SheetPresentationPattern,
-        LinearLayoutPattern, PopupBasePattern, FocusView, NestableScrollContainer, AutoFillTriggerStateHolder);
+class ACE_EXPORT SheetPresentationPattern : public LinearLayoutPattern,
+                                            public PopupBasePattern,
+                                            public FocusView,
+                                            public NestableScrollContainer,
+                                            public AutoFillTriggerStateHolder,
+                                            public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(SheetPresentationPattern, LinearLayoutPattern, PopupBasePattern, FocusView,
+        NestableScrollContainer, AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     SheetPresentationPattern(
@@ -170,7 +174,7 @@ public:
         }
     }
 
-    void FireOnHeightDidChange(float height);
+    void FireOnHeightDidChange();
 
     bool HasOnHeightDidChange()
     {
@@ -328,7 +332,6 @@ public:
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
-        ProcessColumnRect(height_);
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -442,6 +445,7 @@ public:
     void InitSheetMode();
     void GetSheetTypeWithAuto(SheetType& sheetType);
     void GetSheetTypeWithPopup(SheetType& sheetType);
+    void GetSheetTypeWithCenter(SheetType& sheetType);
 
     void SetUIFirstSwitch(bool isFirstTransition, bool isNone);
 
@@ -525,14 +529,20 @@ public:
         return sheetOffsetY_;
     }
 
+    bool IsShowInSubWindowTwoInOne();
+    bool IsShowInSubWindow();
+    SheetType ComputeSheetTypeInSubWindow();
+    void SheetTransitionAction(float offset, bool isStart, bool isTransitionIn);
+    float ComputeTransitionOffset(float sheetHeight);
+    void InitSheetTransitionAction(float offset);
+    int32_t GetSubWindowId();
+
     OffsetF GetSheetArrowOffset() const
     {
         return arrowOffset_;
     }
 
     float GetFitContentHeight();
-
-    void ProcessColumnRect(float height = 0.0f);
 
     bool WillSpringBack() const
     {
@@ -562,6 +572,8 @@ public:
     void UpdateMaskBackgroundColor();
 
     void UpdateMaskBackgroundColorRender();
+
+    void UpdateTitleTextColor();
 
     Color GetMaskBackgroundColor() const
     {
@@ -640,7 +652,6 @@ public:
         return detentsFinalIndex_;
     }
     bool IsScrollOutOfBoundary();
-    RefPtr<FrameNode> GetScrollNode();
 
     void UpdateSheetType()
     {
@@ -690,6 +701,7 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         sheetPopupInfo_ = sheetPopupInfo;
@@ -706,6 +718,39 @@ public:
     {
         return isPlayTransition_;
     }
+    void OnFontScaleConfigurationUpdate() override;
+
+    void FireCommonCallback();
+
+    void SetCloseButtonNode(const WeakPtr<FrameNode>& node) {
+        closeButtonNode_ = node;
+    }
+
+    void SetScrollNode(const WeakPtr<FrameNode>& node) {
+        scrolNode_ = node;
+    }
+
+    void SetTitleBuilderNode(const WeakPtr<FrameNode>& node) {
+        titleBuilderNode_ = node;
+    }
+    
+    RefPtr<FrameNode> GetSheetCloseIcon() const
+    {
+        auto closeButtonNode = closeButtonNode_.Upgrade();
+        return closeButtonNode;
+    }
+
+    RefPtr<FrameNode> GetTitleBuilderNode() const
+    {
+        auto titleBuilderNode = titleBuilderNode_.Upgrade();
+        return titleBuilderNode;
+    }
+
+    RefPtr<FrameNode> GetSheetScrollNode() const
+    {
+        auto scrollNode = scrolNode_.Upgrade();
+        return scrollNode;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -715,6 +760,9 @@ private:
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
 
     void RegisterHoverModeChangeCallback();
     void InitScrollProps();
@@ -758,6 +806,7 @@ private:
     float GetTopAreaInWindow() const;
     void MarkSheetPageNeedRender();
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
+    PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     bool AvoidKeyboardBeforeTranslate();
@@ -787,7 +836,7 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-
+    
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
@@ -888,6 +937,9 @@ private:
     bool showArrow_ = true;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
+    WeakPtr<FrameNode> closeButtonNode_;
+    WeakPtr<FrameNode> scrolNode_;
+    WeakPtr<FrameNode> titleBuilderNode_;
 };
 } // namespace OHOS::Ace::NG
 

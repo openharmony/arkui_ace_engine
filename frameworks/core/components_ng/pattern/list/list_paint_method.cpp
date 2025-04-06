@@ -108,7 +108,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool cli
     listContentModifier_->SetDividerPainter(
         dividerInfo.constrainStrokeWidth, dividerInfo.isVertical, dividerInfo.color);
     int32_t lanes = dividerInfo.lanes;
-    int32_t laneIdx = 0;
+    int32_t laneIdx = initLaneIdx_;
     bool lastIsItemGroup = false;
     bool isFirstItem = (itemPosition_.begin()->first == 0) || !clip;
     std::map<int32_t, int32_t> lastLineIndex;
@@ -129,15 +129,15 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool cli
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
     }
     if (clip && !lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
-        int32_t laneIdx = 0;
+        int32_t lastLineLaneIdx = 0;
         for (auto index : lastLineIndex) {
             if (index.first + lanes >= dividerInfo.totalItemCount) {
                 break;
             }
             if (!itemPosition_.at(index.first).isPressed) {
-                dividerMap[-index.second] = HandleLastLineIndex(index.first, laneIdx, dividerInfo);
+                dividerMap[-index.second] = HandleLastLineIndex(index.first, lastLineLaneIdx, dividerInfo);
             }
-            laneIdx++;
+            lastLineLaneIdx++;
         }
     }
     listContentModifier_->SetDividerMap(std::move(dividerMap));
@@ -214,20 +214,22 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         CHECK_NULL_VOID(arcScrollBarOverlayModifier);
         auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
         CHECK_NULL_VOID(arcScrollBar);
-        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        scrollBarOverlayModifier->SetBarColor(arcScrollBar->GetArcForegroundColor());
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
         arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
             arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
             arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
     } else {
+        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     }
 #else
+    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
 #endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 } // namespace OHOS::Ace::NG

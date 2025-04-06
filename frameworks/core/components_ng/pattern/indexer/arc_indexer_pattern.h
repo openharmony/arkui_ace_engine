@@ -62,7 +62,15 @@ public:
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
-        return MakeRefPtr<IndexerAccessibilityProperty>();
+        auto property = MakeRefPtr<IndexerAccessibilityProperty>();
+        CHECK_NULL_RETURN(property, nullptr);
+        property->SetAccessibilityHoverConsume([weak = WeakClaim(this)](const NG::PointF& point) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            Offset offset = Offset(point.GetX(), point.GetY());
+            return pattern->AtArcHotArea(offset);
+        });
+        return property;
     }
 
     void SetIsTouch(bool isTouch)
@@ -96,10 +104,12 @@ private:
     void DumpInfo() override;
 
     void InitArrayValue(bool& autoCollapseModeChanged);
+    RefPtr<FrameNode> BuildIcon();
     void BuildArrayValueItems();
     void BuildFullArrayValue();
     void CollapseArrayValue();
     void ApplyFourPlusOneMode();
+    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
 
     void OnTouchDown(const TouchEventInfo& info);
     void OnTouchUp(const TouchEventInfo& info);
@@ -112,6 +122,7 @@ private:
     void InitTouchEvent ();
     void ResetArrayValue (bool isModeChanged);
     void UpdateChildNodeStyle(int32_t index);
+    void SetChildNodeAccessibility(const RefPtr<FrameNode>& childNode, const std::string &nodeStr);
     void SetChildNodeStyle(int32_t index, const std::string &nodeStr, bool fromTouchUp);
     void SetFocusIndexStyle(int32_t index, const std::string &nodeStr, bool isTextNodeInTree);
     std::string GetChildNodeContent(int32_t index);

@@ -195,7 +195,7 @@ public:
     {
         return dotResourceId_;
     }
-    
+
     const Color& GetFocusLineColor() const
     {
         return focusLineColor_;
@@ -224,6 +224,16 @@ public:
     const Color& GetFocusedBgUnchecked() const
     {
         return focusedBgUnchecked_;
+    }
+
+    const Dimension& GetHotZoneHorizontalSize() const
+    {
+        return hotZoneHorizontalSize_;
+    }
+
+    const Dimension& GetHotZoneVerticalSize() const
+    {
+        return hotZoneVerticalSize_;
     }
 
 protected:
@@ -271,6 +281,8 @@ protected:
     const float ratio_ = 1.8f;
     InternalResource::ResourceId tickResourceId_ = InternalResource::ResourceId::RADIO_TICK_SVG;
     InternalResource::ResourceId dotResourceId_ = InternalResource::ResourceId::RADIO_DOT_SVG;
+    Dimension hotZoneHorizontalSize_;
+    Dimension hotZoneVerticalSize_;
 };
 
 class CheckboxTheme : public CheckableTheme {
@@ -293,11 +305,11 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
 
         void SetCheckboxSize(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
-        
+
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };
 
@@ -361,7 +373,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParseSubStylePattern(const RefPtr<ThemeConstants>& themeConstants,
             const RefPtr<SwitchTheme>& theme) const;
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SwitchTheme>& theme) const;
@@ -427,6 +439,16 @@ public:
         return focusPadding_;
     }
 
+    const std::string& GetSwitchOnText() const
+    {
+        return switchOnText_;
+    }
+
+    const std::string& GetSwitchOffText() const
+    {
+        return switchOffText_;
+    }
+
 private:
     double colorAnimationDuration_ = 0.0;
     double pointAnimationDuration_ = 0.0;
@@ -439,6 +461,8 @@ private:
     Dimension focusBoardHeight_;
     Dimension focusBoardRadius_;
     Dimension focusPadding_;
+    std::string switchOnText_;
+    std::string switchOffText_;
 };
 
 class RadioTheme : public CheckableTheme {
@@ -461,7 +485,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RadioTheme>& theme) const
         {
             RefPtr<ThemeStyle> radioPattern = themeConstants->GetPatternByName(THEME_PATTERN_RADIO);

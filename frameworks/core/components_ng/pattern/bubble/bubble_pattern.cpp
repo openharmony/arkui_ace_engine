@@ -81,8 +81,10 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
-    if (SystemProperties::GetColorMode() != colorMode_ && !isCustomPopup_) {
-        colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    if (context->GetColorMode() != colorMode_ && !isCustomPopup_) {
+        colorMode_ = context->GetColorMode();
         UpdateBubbleText();
     }
     UpdateAgingTextSize();
@@ -113,12 +115,16 @@ void BubblePattern::OnAttachToFrameNode()
     hasOnAreaChange_ = pipelineContext->HasOnAreaChangeNode(targetNode->GetId());
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
-                                              const OffsetF& /* origin */) {
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host), weak = WeakClaim(this)](
+                                              const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
+                                              const RectF& /* rect */, const OffsetF& /* origin */) {
         auto popupNode = popupNodeWk.Upgrade();
         CHECK_NULL_VOID(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->PopTipsBubble();
+        }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 
@@ -396,6 +402,30 @@ void BubblePattern::PopBubble()
     }
 }
 
+void BubblePattern::PopTipsBubble()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineNg = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineNg);
+    auto overlayManager = pipelineNg->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
+    if (!popupInfo.isCurrentOnShow || !popupInfo.isTips) {
+        return;
+    }
+    popupInfo.markNeedUpdate = true;
+    CHECK_NULL_VOID(host);
+    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+    if (showInSubWindow) {
+        SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
+    } else {
+        overlayManager->HidePopup(targetNodeId_, popupInfo);
+    }
+}
+
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
     auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -414,6 +444,15 @@ void BubblePattern::Animation(
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(
         option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
+}
+
+bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void BubblePattern::StartEnteringTransitionEffects(
@@ -450,7 +489,7 @@ void BubblePattern::StartEnteringTransitionEffects(
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -564,7 +603,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
                     rects.emplace_back(rect);
                 }
                 auto subWindowMgr = SubwindowManager::GetInstance();
-                subWindowMgr->SetHotAreas(rects, popupId, pattern->GetContainerId());
+                subWindowMgr->SetHotAreas(rects, SubwindowType::TYPE_POPUP, popupId, pattern->GetContainerId());
             }
             if (finish) {
                 finish();
@@ -687,6 +726,7 @@ void BubblePattern::ResetToInvisible()
 
 void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowSizeChanged, reason: %d", type);
     switch (type) {
         case WindowSizeChangeReason::UNDEFINED:
         case WindowSizeChangeReason::MOVE:
@@ -708,7 +748,8 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
             CHECK_NULL_VOID(layoutProp);
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+                auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+                    pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
                 CHECK_NULL_VOID(subwindow);
                 subwindow->HidePopupNG(targetNodeId_);
             }
@@ -718,6 +759,7 @@ void BubblePattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 
 void BubblePattern::OnWindowHide()
 {
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "Popup OnWindowHide start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineNg = host->GetContextRefPtr();
@@ -730,7 +772,8 @@ void BubblePattern::OnWindowHide()
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     if (showInSubWindow) {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
+            pipelineNg->GetInstanceId(), SubwindowType::TYPE_POPUP);
         CHECK_NULL_VOID(subwindow);
         subwindow->HidePopupNG(targetNodeId_);
     }
@@ -747,7 +790,9 @@ void BubblePattern::UpdateText(const RefPtr<UINode>& node, const RefPtr<PopupThe
         auto parentNode = node->GetParent();
         if (parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG &&
             !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            if (popupTheme->GetPopupDoubleButtonIsSameStyle()) {
+                textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+            }
         } else if (!isSetMessageColor_) {
             if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
                 textLayoutProperty->UpdateTextColor(popupTheme->GetFontColor());
@@ -799,7 +844,9 @@ void BubblePattern::OnColorConfigurationUpdate()
     if (isCustomPopup_) {
         return;
     }
-    colorMode_ = SystemProperties::GetColorMode();
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    colorMode_ = context->GetColorMode();
     UpdateBubbleText();
 }
 

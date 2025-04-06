@@ -80,6 +80,7 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     }
     event.dragEvent.dataTypes = strList.data();
     event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
+    event.dragEvent.key = info->GetUdKey().c_str();
 }
 
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
@@ -110,6 +111,8 @@ void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)
         info->UseCustomAnimation(event.dragEvent.useCustomDropAnimation);
         info->SetResult(static_cast<DragRet>(event.dragEvent.dragResult));
         info->SetDragBehavior(static_cast<DragBehavior>(event.dragEvent.dragBehavior));
+        info->SetIsDragEndPending(event.dragEvent.isDragEndPending);
+        info->SetRequestIdentify(event.dragEvent.requestId);
         info->SetCapi(true);
     };
     ViewAbstract::SetOnDrop(frameNode, onDragDrop);

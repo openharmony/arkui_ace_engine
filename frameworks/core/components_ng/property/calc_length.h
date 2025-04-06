@@ -80,7 +80,8 @@ public:
         calcValue_ = value;
     }
 
-    bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result) const;
+    bool NormalizeToPx(double vpScale, double fpScale, double lpxScale, double parentLength, double& result,
+        const std::vector<std::string>& rpnexp = std::vector<std::string>()) const;
 
     bool IsValid() const
     {

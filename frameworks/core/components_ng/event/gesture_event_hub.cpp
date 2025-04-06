@@ -450,7 +450,7 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetFocusHub();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnClickCallback(std::move(clickEvent));
 }
@@ -560,6 +560,10 @@ void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent)
     clickEventActuator_->AddClickEvent(clickEvent);
 
     SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+
+    auto uiNode = AceType::DynamicCast<UINode>(GetFrameNode());
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetBuiltInEventRegistrationState(true);
 }
 
 void GestureEventHub::AddClickAfterEvent(const RefPtr<ClickEvent>& clickEvent)
@@ -578,6 +582,15 @@ void GestureEventHub::BindMenu(GestureEventFunc&& showMenu)
     }
     showMenu_ = MakeRefPtr<ClickEvent>(std::move(showMenu));
     AddClickEvent(showMenu_);
+}
+
+void GestureEventHub::RegisterMenuOnTouch(TouchEventFunc&& callback)
+{
+    if (bindMenuTouch_) {
+        RemoveTouchEvent(bindMenuTouch_);
+    }
+    bindMenuTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
+    AddTouchEvent(bindMenuTouch_);
 }
 
 OnAccessibilityEventFunc GestureEventHub::GetOnAccessibilityEventFunc()
@@ -912,8 +925,8 @@ void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
     for (auto iter = modifierGestures_.begin(); iter != modifierGestures_.end();) {
         auto tag = (*iter)->GetTag();
         if (tag.has_value() && tag.value() == gestureTag) {
-            iter = modifierGestures_.erase(iter);
             backupModifierGestures_.remove(*iter);
+            iter = modifierGestures_.erase(iter);
             needRecollect = true;
         } else {
             auto group = AceType::DynamicCast<GestureGroup>(*iter);
@@ -1038,6 +1051,11 @@ bool GestureEventHub::IsClickable() const
     return clickEventActuator_ != nullptr;
 }
 
+bool GestureEventHub::IsComponentClickable() const
+{
+    return clickEventActuator_ && clickEventActuator_->IsComponentClickable();
+}
+
 bool GestureEventHub::IsUserClickable() const
 {
     return clickEventActuator_ != nullptr && clickEventActuator_->IsUserClickable();
@@ -1108,11 +1126,30 @@ void GestureEventHub::SetPanEvent(
     panEventActuator_->ReplacePanEvent(panEvent);
 }
 
+// Set by user define, which will replace old one.
+void GestureEventHub::SetPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+{
+    if (!panEventActuator_) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
+    }
+    panEventActuator_->ReplacePanEvent(panEvent);
+}
+
 void GestureEventHub::AddPanEvent(
     const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
     if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
+    }
+    panEventActuator_->AddPanEvent(panEvent);
+}
+
+void GestureEventHub::AddPanEvent(
+    const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap)
+{
+    if (!panEventActuator_ || direction.type != panEventActuator_->GetDirection().type) {
+        panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distanceMap);
     }
     panEventActuator_->AddPanEvent(panEvent);
 }
@@ -1252,4 +1289,9 @@ void GestureEventHub::SetExcludedAxisForPanEvent(bool isExcludedAxis)
     panEventActuator_->SetExcludedAxis(isExcludedAxis);
 }
 
+void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->DumpVelocityInfo(fingerId);
+}
 } // namespace OHOS::Ace::NG

@@ -21,10 +21,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/gestures/drag_event.h"
-#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -144,11 +144,7 @@ public:
     static void UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
     static void UpdateGatherAnimatePosition(
         std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo, const OffsetF& GatherNodeOffset);
-    static void CreatePreviewNode(
-        const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale);
     static void SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode);
-    static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
-        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
     void SetEventColumn(const RefPtr<DragEventActuator>& actuator);
@@ -253,6 +249,11 @@ public:
         return isRestartDrag_;
     }
 
+    void SetIsForDragDrop(bool isForDragDrop)
+    {
+        isForDragDrop_ = isForDragDrop;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
@@ -300,6 +301,7 @@ public:
     virtual RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
     virtual void ResetPreScaledPixelMapForDragThroughTouch();
     virtual void NotifyDragStart() {};
+    virtual void NotifyDragEnd() {};
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
     {
@@ -364,6 +366,7 @@ private:
     int32_t lastTouchFingerId_ = 0;
     bool isNewFwk_ = false;
     bool isRestartDrag_ = false;
+    bool isForDragDrop_ = false;
 };
 
 } // namespace OHOS::Ace::NG

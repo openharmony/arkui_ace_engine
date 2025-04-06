@@ -51,6 +51,16 @@ void FunctionDeleter(void *env, void *nativePointer, void *data)
 
 thread_local EcmaVM* ArkJSRuntime::threadVm_ = nullptr;
 
+void ArkJSRuntime::SetUniqueId(const std::string& uniqueId)
+{
+    uniqueId_ = uniqueId;
+}
+
+const std::string& ArkJSRuntime::GetUniqueId() const
+{
+    return uniqueId_;
+}
+
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
@@ -158,8 +168,7 @@ bool ArkJSRuntime::StartDebugger()
     if (!libPath_.empty()) {
         bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        auto callback = [instanceId = instanceId_,
-                            weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
+        auto callback = [weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
                 if (isDebugApp) {
@@ -407,7 +416,7 @@ void ArkJSRuntime::HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& t
     if (!exception.IsEmpty() && !exception->IsHole()) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
-        uncaughtErrorHandler_(errorPtr, shared_from_this());
+        uncaughtErrorHandler_(errorPtr, shared_from_this(), uniqueId_);
     }
 }
 

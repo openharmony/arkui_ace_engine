@@ -48,6 +48,22 @@ void CJRuntimeDelegate::RegisterCJFuncs(AtCPackage funcs)
     }
 }
 
+void CJRuntimeDelegate::RegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs))
+{
+    if (!atCPackageLoadedV2_) {
+        callback(&atCPackageV2_);
+        atCPackageLoadedV2_ = true;
+    }
+}
+
+void CJRuntimeDelegate::RegisterCJXCompCtrFuncs(AtCXComponentCallback funcs)
+{
+    if (!atCXcompCtrLoaded_) {
+        atCXcompCtr_ = funcs;
+        atCXcompCtrLoaded_ = true;
+    }
+}
+
 bool CJRuntimeDelegate::LoadAtCPackage()
 {
     if (!atCPackageLoaded_) {

@@ -56,6 +56,7 @@ public:
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};
     void SetMaintainVisibleContentPosition(bool enabled) override {};
+    void SetStackFromEnd(bool enabled) override {};
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;

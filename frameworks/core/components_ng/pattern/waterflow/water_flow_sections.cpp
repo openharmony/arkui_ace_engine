@@ -71,8 +71,9 @@ void WaterFlowSections::NotifySectionChange(
         return;
     }
     int32_t addItemCount = 0;
-    int32_t n = static_cast<int32_t>(sections_.size());
-    const int32_t oldSegLen = start + deleteCount - 1, newSegLen = newSections.size() - 1;
+    const int32_t n = static_cast<int32_t>(sections_.size());
+    const int32_t oldSegLen = start + deleteCount - 1;
+    const int32_t newSegLen = static_cast<int32_t>(newSections.size()) - 1;
     for (int32_t i = 0; i < newSegLen; i++) {
         addItemCount += newSections[i].itemsCount;
     }

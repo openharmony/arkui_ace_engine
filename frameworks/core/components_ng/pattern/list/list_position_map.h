@@ -30,6 +30,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -42,6 +43,7 @@ namespace {
 struct PositionInfo {
     float mainPos;
     float mainSize;
+    bool isGroup;
 };
 
 enum class ListPosMapUpdate {
@@ -59,7 +61,7 @@ public:
 
     void UpdatePos(int32_t index, PositionInfo posInfo)
     {
-        posMap_[index] = { posInfo.mainPos, posInfo.mainSize };
+        posMap_[index] = posInfo;
     }
 
     void UpdatePosWithCheck(int32_t index, PositionInfo posInfo)
@@ -69,6 +71,7 @@ public:
             posMap_[index] = posInfo;
             return;
         }
+        iter->second.isGroup = posInfo.isGroup;
         if (LessNotEqual(iter->second.mainSize, posInfo.mainSize)) {
             iter->second.mainSize = posInfo.mainSize;
         }
@@ -171,9 +174,12 @@ public:
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
-            } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
-                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
+            } else if (AceType::InstanceOf<LazyForEachNode>(child)) {
                 // Rules: only one type node(ListItem or ListItemGroup) can exist in LazyForEach.
+                CalculateLazyForEachNode(child);
+            } else if (AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
+                CalculateLazyForEachNode(child);
+            } else if (AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
                 CalculateLazyForEachNode(child);
             } else {
                 CalculateUINode(child);
@@ -312,14 +318,6 @@ public:
             curRowHeight_ = 0.0f;
         }
         totalHeight_ = totalHeight_ - space_ + footerSize_;
-    }
-
-    void PosMapUpdateAllSize()
-    {
-        float curPos = 0.0f;
-        for (int32_t index = 0; index < totalItemCount_; index++) {
-            posMap_[index] = { curPos, curRowHeight_ };
-        }
     }
 
     virtual void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
@@ -505,6 +503,26 @@ public:
             rowHeight = posMap_[endIndex + 1].mainPos  - posMap_[endIndex].mainPos - space_;
         }
         return { endIndex, rowHeight };
+    }
+
+    void ReversePosMap()
+    {
+        totalHeight_ = 0.0f;
+        float curRowHeight = posMap_.begin()->second.mainSize;
+        std::map<int32_t, PositionInfo> posMap;
+        for (int32_t index = totalItemCount_ - 1; index >= 0; --index) {
+            auto posIndex = totalItemCount_ - index - 1;
+            posMap[posIndex] = {totalHeight_, posMap_[posIndex].mainSize};
+            if (index > 0 && !NearEqual(posMap_[index].mainPos, posMap_[index - 1].mainPos)) {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+                totalHeight_ += (curRowHeight + space_);
+                curRowHeight = 0.0f;
+            } else {
+                curRowHeight = std::max(posMap_[posIndex].mainSize, curRowHeight);
+            }
+        }
+        posMap_ = std::move(posMap);
+        totalHeight_ += curRowHeight;
     }
 protected:
     RefPtr<ListChildrenMainSize> childrenSize_;

@@ -31,6 +31,7 @@
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
 #include "core/event/crown_event.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -93,7 +94,7 @@ void CalculateWindowCoordinate(const NG::OffsetF& offsetF, const std::shared_ptr
     const NG::VectorF& scale, const int32_t udegree = 0);
 
 void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    MouseEvent& events, bool isScenceBoardWindow);
+    MouseEvent& events, bool isSceneBoardWindow);
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event);
 
@@ -110,6 +111,10 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
 bool GetPointerEventToolType(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t& toolType);
 
 SourceTool GetSourceTool(int32_t orgToolType);
+
+void SetClonedPointerEvent(const MMI::PointerEvent* pointerEvent, ArkUITouchEvent* arkUITouchEventCloned);
+
+void SetPostPointerEvent(const MMI::PointerEvent* pointerEvent, TouchEvent& touchEvent);
 } // namespace OHOS::Ace::Platform
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_MMI_EVENT_CONVERTOR_H

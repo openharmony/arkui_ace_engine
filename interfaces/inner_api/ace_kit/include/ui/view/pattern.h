@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_PATTERN_H
 
 #include "ui/base/ace_type.h"
-#include "ui/base/dirty_flag.h"
+#include "ui/base/referenced.h"
+#include "ui/properties/dirty_flag.h"
+#include "ui/properties/property.h"
 #include "ui/view/draw/node_paint_method.h"
 #include "ui/view/layout/layout_algorithm.h"
 
@@ -31,6 +33,12 @@ public:
     virtual bool OnDirtyLayoutrSwap(const NG::DirtySwapConfig& config)
     {
         return false;
+    }
+    virtual void OnModifyDone() {}
+
+    virtual RefPtr<Property> CreateProperty()
+    {
+        return AceType::MakeRefPtr<Property>();
     }
 
     void SetHost(const WeakPtr<FrameNode>& host)

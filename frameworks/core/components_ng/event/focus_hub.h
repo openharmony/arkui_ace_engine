@@ -324,8 +324,22 @@ public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : FocusState(eventHub, type), FocusEventHandler(), focusable_(focusable)
     {}
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE, bool focusable = false)
+        : FocusState(frameNode, type), FocusEventHandler(), focusable_(focusable)
+    {}
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
         : FocusState(eventHub), FocusEventHandler()
+    {
+        focusable_ = focusPattern.GetFocusable();
+        focusType_ = focusPattern.GetFocusType();
+        focusStyleType_ = focusPattern.GetStyleType();
+        if (focusPattern.GetFocusPaintParams()) {
+            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+        }
+        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+    }
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern)
+        : FocusState(frameNode), FocusEventHandler()
     {
         focusable_ = focusPattern.GetFocusable();
         focusType_ = focusPattern.GetFocusType();
@@ -475,6 +489,7 @@ public:
 
     bool HandleEvent(const NonPointerEvent& event);
     bool HandleFocusTravel(const FocusEvent& event) override;
+    bool HandleFocusNavigation(const FocusEvent& event);
     bool RequestFocusImmediately(FocusReason reason = FocusReason::DEFAULT);
     void RequestFocus() const;
     void SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusReason = FocusReason::DEFAULT);
@@ -544,7 +559,7 @@ public:
 
     bool HasFocusedChild();
 
-    void SetOnFocusInternal(OnFocusFunc&& onFocusInternal)
+    void SetOnFocusInternal(std::function<void(FocusReason reason)>&& onFocusInternal)
     {
         onFocusInternal_ = std::move(onFocusInternal);
     }
@@ -589,6 +604,8 @@ public:
     /* Manipulation on node-tree is forbidden in operation. */
     bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
     bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
+    bool AllChildFocusHubInMainTree(const std::function<void(const RefPtr<FocusHub>&)>& operation,
+        RefPtr<FocusHub>& lastFocusNode, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -861,6 +878,11 @@ public:
     {
         return onGetNextFocusNodeFunc_;
     }
+
+    void SetNextFocus(FocusIntension key, const std::variant<WeakPtr<AceType>, std::string>& nextFocus)
+    {
+        FocusState::SetNextFocus(static_cast<int32_t>(key), nextFocus);
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -931,6 +953,7 @@ private:
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
     bool RequestFocusImmediatelyInner(FocusReason reason = FocusReason::DEFAULT);
+    bool RequestUserNextFocus(const FocusEvent& event);
     bool RequestNextFocusByKey(const FocusEvent& event);
 
     bool IsComponentDirectionRtl();
@@ -944,7 +967,7 @@ private:
 
     bool IsLastWeakNodeFocused() const;
 
-    OnFocusFunc onFocusInternal_;
+    std::function<void(FocusReason reason)> onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;
     OnPreFocusFunc onPreFocusCallback_;

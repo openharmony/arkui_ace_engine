@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-"use strict";
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
@@ -25,18 +24,21 @@ const t = '20vp';
 const u = '16vp';
 const a1 = '1px';
 const b1 = '10vp';
-const c1 = '16vp';
+const c1 = '8vp';
 const g1 = '#182431';
 const h1 = '#33000000';
 const t1 = '#99FFFFFF';
-const i1 = "arkui_app_bar_color_configuration";
-const j1 = "arkui_app_bar_menu_safe_area";
-const l1 = "arkui_app_bar_content_safe_area";
-const m1 = "arkui_app_bar_info";
-const n1 = "arkui_app_bar_screen";
-const e2 = "arkui_custom_app_bar_menu_click";
-const f2 = "arkui_custom_app_bar_close_click";
-const g2 = "arkui_custom_app_bar_did_build";
+const i1 = 'arkui_app_bar_color_configuration';
+const j1 = 'arkui_app_bar_menu_safe_area';
+const l1 = 'arkui_app_bar_content_safe_area';
+const m1 = 'arkui_app_bar_info';
+const n1 = 'arkui_app_bar_screen';
+const i2 = 'arkui_app_bg_color';
+const e2 = 'arkui_custom_app_bar_menu_click';
+const f2 = 'arkui_custom_app_bar_close_click';
+const g2 = 'arkui_custom_app_bar_did_build';
+const ARKUI_APP_BAR_SERVICE_PANEL = 'arkui_app_bar_service_panel';
+const ARKUI_APP_BAR_CLOSE = 'arkui_app_bar_close';
 const h2 = 10;
 class o1 {
     constructor(a2, b2) {
@@ -76,11 +78,14 @@ class e1 extends ViewPU {
         this.__menubarBorderColor = new ObservedPropertySimplePU(this.getResourceColor(h1), this, "menubarBorderColor");
         this.__menubarBackColor = new ObservedPropertySimplePU(this.getResourceColor(t1), this, "menubarBackColor");
         this.__dividerBackgroundColor = new ObservedPropertySimplePU(this.getResourceColor(h1), this, "dividerBackgroundColor");
+        this.__contentBgColor = new ObservedPropertySimplePU('#FFFFFFFF', this, "contentBgColor");
         this.__contentMarginTop = new ObservedPropertySimplePU('0vp', this, "contentMarginTop");
         this.__contentMarginLeft = new ObservedPropertySimplePU('0vp', this, "contentMarginLeft");
         this.__contentMarginRight = new ObservedPropertySimplePU('0vp', this, "contentMarginRight");
         this.__contentMarginBottom = new ObservedPropertySimplePU('0vp', this, "contentMarginBottom");
         this.__menuMarginTop = new ObservedPropertySimplePU('10vp', this, "menuMarginTop");
+        this.__serviceMenuRead = new ObservedPropertySimplePU(this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL), this, "serviceMenuRead");
+        this.__closeRead = new ObservedPropertySimplePU(this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE), this, "closeRead");
         this.isDark = true;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -107,6 +112,9 @@ class e1 extends ViewPU {
         if (params.dividerBackgroundColor !== undefined) {
             this.dividerBackgroundColor = params.dividerBackgroundColor;
         }
+        if (params.contentBgColor !== undefined) {
+            this.contentBgColor = params.contentBgColor;
+        }
         if (params.contentMarginTop !== undefined) {
             this.contentMarginTop = params.contentMarginTop;
         }
@@ -122,6 +130,12 @@ class e1 extends ViewPU {
         if (params.menuMarginTop !== undefined) {
             this.menuMarginTop = params.menuMarginTop;
         }
+        if (params.serviceMenuRead !== undefined) {
+            this.serviceMenuRead = params.serviceMenuRead;
+        }
+        if (params.closeRead !== undefined) {
+            this.closeRead = params.closeRead;
+        }
         if (params.isDark !== undefined) {
             this.isDark = params.isDark;
         }
@@ -136,11 +150,14 @@ class e1 extends ViewPU {
         this.__menubarBorderColor.purgeDependencyOnElmtId(rmElmtId);
         this.__menubarBackColor.purgeDependencyOnElmtId(rmElmtId);
         this.__dividerBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__contentBgColor.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginTop.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginLeft.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginRight.purgeDependencyOnElmtId(rmElmtId);
         this.__contentMarginBottom.purgeDependencyOnElmtId(rmElmtId);
         this.__menuMarginTop.purgeDependencyOnElmtId(rmElmtId);
+        this.__serviceMenuRead.purgeDependencyOnElmtId(rmElmtId);
+        this.__closeRead.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__menuResource.aboutToBeDeleted();
@@ -150,11 +167,14 @@ class e1 extends ViewPU {
         this.__menubarBorderColor.aboutToBeDeleted();
         this.__menubarBackColor.aboutToBeDeleted();
         this.__dividerBackgroundColor.aboutToBeDeleted();
+        this.__contentBgColor.aboutToBeDeleted();
         this.__contentMarginTop.aboutToBeDeleted();
         this.__contentMarginLeft.aboutToBeDeleted();
         this.__contentMarginRight.aboutToBeDeleted();
         this.__contentMarginBottom.aboutToBeDeleted();
         this.__menuMarginTop.aboutToBeDeleted();
+        this.__serviceMenuRead.aboutToBeDeleted();
+        this.__closeRead.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -200,6 +220,12 @@ class e1 extends ViewPU {
     set dividerBackgroundColor(newValue) {
         this.__dividerBackgroundColor.set(newValue);
     }
+    get contentBgColor() {
+        return this.__contentBgColor.get();
+    }
+    set contentBgColor(newValue) {
+        this.__contentBgColor.set(newValue);
+    }
     get contentMarginTop() {
         return this.__contentMarginTop.get();
     }
@@ -229,6 +255,18 @@ class e1 extends ViewPU {
     }
     set menuMarginTop(newValue) {
         this.__menuMarginTop.set(newValue);
+    }
+    get serviceMenuRead() {
+        return this.__serviceMenuRead.get();
+    }
+    set serviceMenuRead(newValue) {
+        this.__serviceMenuRead.set(newValue);
+    }
+    get closeRead() {
+        return this.__closeRead.get();
+    }
+    set closeRead(newValue) {
+        this.__closeRead.set(newValue);
     }
     parseBoolean(value) {
         if (value === 'true') {
@@ -268,6 +306,9 @@ class e1 extends ViewPU {
         }
         else if (eventName === n1) {
         }
+        else if (eventName === i2) {
+            this.contentBgColor = param;
+        }
     }
     onColorConfigurationUpdate(s1) {
         this.isDark = s1;
@@ -276,6 +317,8 @@ class e1 extends ViewPU {
         this.menubarBorderColor = this.getResourceColor(h1);
         this.dividerBackgroundColor = this.getResourceColor(h1);
         this.menubarBackColor = this.getResourceColor(t1);
+    }
+    setAppIcon(pixelMap) {
     }
     onMenuButtonClick() {
         ContainerAppBar.callNative(e2);
@@ -292,7 +335,7 @@ class e1 extends ViewPU {
             Column.height('100%');
             Column.width('100%');
             Column.justifyContent(FlexAlign.End);
-            Column.backgroundColor(Color.Transparent);
+            Column.backgroundColor(this.contentBgColor);
             Column.hitTestBehavior(HitTestMode.Transparent);
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -322,6 +365,7 @@ class e1 extends ViewPU {
             Row.justifyContent(FlexAlign.End);
             Row.margin({ top: this.menuMarginTop, left: c1, right: c1 });
             Row.height(m);
+            Row.hitTestBehavior(HitTestMode.Transparent);
             Row.width('100%');
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -334,7 +378,6 @@ class e1 extends ViewPU {
             Row.width(i);
             Row.align(Alignment.Top);
             Row.draggable(false);
-            Row.hitTestBehavior(HitTestMode.Transparent);
             Row.id('AtomicServiceMenubarId');
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -352,6 +395,10 @@ class e1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
+            Button.accessibilityText(this.serviceMenuRead);
+            Button.onAccessibilityHover(() => {
+                this.serviceMenuRead = this.getStringByResourceToken(ARKUI_APP_BAR_SERVICE_PANEL);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.menuResource);
@@ -387,6 +434,10 @@ class e1 extends ViewPU {
             });
             TapGesture.pop();
             Gesture.pop();
+            Button.accessibilityText(this.closeRead);
+            Button.onAccessibilityHover(() => {
+                this.closeRead = this.getStringByResourceToken(ARKUI_APP_BAR_CLOSE);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.closeResource);
@@ -408,6 +459,16 @@ class e1 extends ViewPU {
     }
     static getEntryName() {
         return "Index";
+    }
+    getStringByResourceToken(f, ...g) {
+        if (f) {
+            try {
+                return getContext(this).resourceManager.getStringByNameSync(f, ...g);
+            } catch (h) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${h.toString()}`);
+            }
+        }
+        return '';
     }
 }
 

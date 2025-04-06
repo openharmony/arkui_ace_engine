@@ -31,13 +31,13 @@ void TextController::CloseSelectionMenu()
     }
 }
 
-void TextController::SetStyledString(const RefPtr<SpanStringBase>& value)
+void TextController::SetStyledString(const RefPtr<SpanStringBase>& value, bool closeSelectOverlay)
 {
     auto textPattern = pattern_.Upgrade();
     if (textPattern) {
         auto spanString = AceType::DynamicCast<SpanString>(value);
         if (spanString) {
-            textPattern->SetStyledString(spanString);
+            textPattern->SetStyledString(spanString, closeSelectOverlay);
         }
     }
 }

@@ -63,6 +63,12 @@ struct TestParameters {
     NG::BarItem menuItem;
     std::vector<NG::BarItem> menuItems;
 };
+
+void ThemeManagerSetTime(RefPtr<MockThemeManager>& themeManager)
+{
+    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).Times(0);
+}
 } // namespace
 
 class NavBarTestNg : public testing::Test {
@@ -125,6 +131,7 @@ void NavBarTestNg::InitializationParameters(TestParameters& testParameters)
     testParameters.theme = AceType::MakeRefPtr<NavigationBarTheme>();
     ASSERT_NE(testParameters.theme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(testParameters.theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(testParameters.theme));
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(SelectTheme::TypeId())).WillRepeatedly(Return(selectTheme));
@@ -540,7 +547,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
     auto navGeometryNode = navBarNode_->GetGeometryNode();
     ASSERT_NE(navGeometryNode, nullptr);
     navGeometryNode->SetFrameSize(size);
-    EXPECT_CALL(*themeManager, GetTheme(_)).Times(0);
+    ThemeManagerSetTime(themeManager);
     navBarpattern_->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::UNDEFINED);
 
     /**
@@ -870,6 +877,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern013, TestSize.Level1)
 HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
 {
     float offset = 0.001;
+    float currentOffset = 0.0;
     auto frameNode =
         FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     EXPECT_NE(frameNode, nullptr);
@@ -877,7 +885,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
     EXPECT_NE(navBarPattern, nullptr);
     navBarPattern->isHideTitlebar_ = true;
     navBarPattern->titleMode_ = NavigationTitleMode::MINI;
-    navBarPattern->OnCoordScrollUpdate(offset);
+    navBarPattern->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 /**
@@ -888,6 +896,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern014, TestSize.Level1)
 HWTEST_F(NavBarTestNg, NavBarPattern015, TestSize.Level1)
 {
     float offset = 0.001;
+    float currentOffset = 0.0;
     auto frameNode =
         FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<NavBarPattern>());
     EXPECT_NE(frameNode, nullptr);
@@ -895,7 +904,7 @@ HWTEST_F(NavBarTestNg, NavBarPattern015, TestSize.Level1)
     EXPECT_NE(navBarPattern, nullptr);
     navBarPattern->isHideTitlebar_ = false;
     navBarPattern->titleMode_ = NavigationTitleMode::FREE;
-    navBarPattern->OnCoordScrollUpdate(offset);
+    navBarPattern->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,7 +92,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern002, TestSize.Level1)
         (*callback)(info);
     }
     EXPECT_TRUE(indicatorPattern->isClicked_);
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, std::nullopt);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
 }
 
 /**
@@ -200,7 +200,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern005, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern006, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     auto firstTextNode = FrameNode::CreateFrameNode(
@@ -258,7 +260,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern007, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -304,7 +308,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern008, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     indicatorPattern->dragStartPoint_.SetX(0.0f);
     indicatorPattern->dragStartPoint_.SetY(0.0f);
@@ -340,7 +346,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern009, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -379,7 +387,9 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern010, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern011, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     auto childrenSize = pattern_->RealTotalCount();
     auto displayCount = pattern_->GetDisplayCount();
@@ -793,7 +803,7 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     ASSERT_NE(indicatorPattern, nullptr);
     ASSERT_NE(pattern_, nullptr);
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 

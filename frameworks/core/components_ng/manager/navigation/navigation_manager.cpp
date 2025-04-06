@@ -137,6 +137,7 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
 bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
+
     auto context = node->GetRenderContext();
     if ((context && context->GetAnimationsCount() != 0) || node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
         return false;
@@ -158,6 +159,15 @@ bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
                 return false;
             }
             nodeStack.push(child);
+        }
+        auto overlayNode = curNode->GetOverlayNode();
+        if (overlayNode) {
+            auto overlayNodeContext = overlayNode->GetRenderContext();
+            if ((overlayNodeContext && overlayNodeContext->GetAnimationsCount() != 0) ||
+                overlayNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+                return false;
+            }
+            nodeStack.push(overlayNode);
         }
     }
     return true;
@@ -182,9 +192,10 @@ void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
     UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
     preNodeAnimationCached_ = state;
     preNodeNeverSet_ = false;
-    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-        "Cache PreNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
-        preNavDestContentNode->GetId(), preNavDestContentNode->GetTag().c_str(), state);
+    auto preNavPattern = preNavNode_->GetPattern<NavDestinationPattern>();
+    auto name = preNavPattern == nullptr ? "NavBar" : preNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache PreNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
 }
 
 void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
@@ -196,9 +207,10 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
     UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
     curNodeAnimationCached_ = state;
     currentNodeNeverSet_ = false;
-    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
-        "Cache CurNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
-        curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str(), state);
+    auto curNavPattern = curNavNode_->GetPattern<NavDestinationPattern>();
+    auto name = curNavPattern == nullptr ? "NavBar" : curNavPattern->GetName();
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cache CurNavNode, name=%{public}s, will cache? %{public}s", name.c_str(),
+        state ? "yes" : "no");
 }
 
 void NavigationManager::ResetCurNavNodeRenderGroupProperty()
@@ -235,7 +247,7 @@ void NavigationManager::CacheNavigationNodeAnimation()
         UpdateCurNavNodeRenderGroupProperty();
     }
     // If the cached entry page changes again, cancel the previously marked entry page.
-    if (!currentNodeNeverSet_ && pipeline->GetIsRequestVsync()) {
+    if (!currentNodeNeverSet_) {
         ResetCurNavNodeRenderGroupProperty();
     }
 }
@@ -247,7 +259,7 @@ void NavigationManager::UpdateAnimationCachedRenderGroup(const RefPtr<FrameNode>
     TAG_LOGD(AceLogTag::ACE_NAVIGATION,
         "UpdateAnimationCachedRenderGroup node(id=%{public}d name=%{public}s), isSet=%{public}d", node->GetId(),
         node->GetTag().c_str(), isSet);
-    context->OnRenderGroupUpdate(isSet);
+    context->UpdateRenderGroup(isSet, false, false);
 }
 
 bool NavigationManager::AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode)
@@ -323,41 +335,6 @@ const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRe
     return ret;
 }
 
-void NavigationManager::OnContainerModalButtonsRectChange()
-{
-    for (auto& pair : buttonsRectChangeListeners_) {
-        if (pair.second) {
-            pair.second();
-        }
-    }
-}
-
-void NavigationManager::AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener)
-{
-    if (!hasRegisterListener_) {
-        auto pipeline = pipeline_.Upgrade();
-        CHECK_NULL_VOID(pipeline);
-        auto containerModalListener =
-            [weakMgr = WeakClaim(this)](const RectF&, const RectF&) {
-                auto mgr = weakMgr.Upgrade();
-                CHECK_NULL_VOID(mgr);
-                mgr->OnContainerModalButtonsRectChange();
-            };
-        ContainerModalViewEnhance::AddButtonsRectChangeListener(
-            AceType::RawPtr(pipeline), std::move(containerModalListener));
-        hasRegisterListener_ = true;
-    }
-    buttonsRectChangeListeners_[id] = listener;
-}
-
-void NavigationManager::RemoveButtonsRectChangeListener(int32_t id)
-{
-    auto it = buttonsRectChangeListeners_.find(id);
-    if (it != buttonsRectChangeListeners_.end()) {
-        buttonsRectChangeListeners_.erase(it);
-    }
-}
-
 void NavigationManager::AddNavigation(int32_t parentId, int32_t navigationId)
 {
     auto iter = navigationMaps_.find(parentId);
@@ -401,23 +378,16 @@ std::vector<int32_t> NavigationManager::FindNavigationInTargetParent(int32_t tar
     return it->second;
 }
 
-void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle)
+void NavigationManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
 {
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto currentState = container->WindowIsShow();
-    NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION;
-    if (currentState != lastWindowShow_) {
-        reason = NavDestinationActiveReason::APP_STATE_CHANGE;
-    }
-    lastWindowShow_ = currentState;
-    if (reason == NavDestinationActiveReason::TRANSITION) {
+    NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
+    if (activeReason == NavDestinationActiveReason::TRANSITION) {
         NavigationPattern::FireNavigationLifecycle(node, static_cast<NavDestinationLifecycle>(lifecycle),
-            static_cast<NavDestinationActiveReason>(reason));
+            activeReason);
         return;
     }
     // fire navdestination lifecycle in outer layer
-    FireLowerLayerLifecycle(nullptr, lifecycle, static_cast<int32_t>(reason));
+    FireLowerLayerLifecycle(nullptr, lifecycle, reason);
 }
 
 void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
@@ -426,7 +396,7 @@ void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t
     NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
     auto currentLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
     NavigationPattern::FireNavigationLifecycle(node, currentLifecycle, activeReason);
-    NavDestinationLifecycle lowerLifecycle;
+    NavDestinationLifecycle lowerLifecycle = NavDestinationLifecycle::ON_ACTIVE;
     if (lifecycle == NavDestinationLifecycle::ON_ACTIVE) {
         lowerLifecycle = NavDestinationLifecycle::ON_INACTIVE;
     }
@@ -438,10 +408,6 @@ void NavigationManager::FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t
 
 void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
 {
-    // showActionSheet is not support
-    if (node && node->GetTag() == V2::ACTION_SHEET_DIALOG_ETS_TAG) {
-        return;
-    }
     NavDestinationLifecycle lowerLifecycle = static_cast<NavDestinationLifecycle>(lifecycle);
     NavDestinationActiveReason activeReason = static_cast<NavDestinationActiveReason>(reason);
     auto pipelineContext = pipeline_.Upgrade();
@@ -457,7 +423,7 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
         : static_cast<int32_t>(rootNode->GetChildren().size());
     // find lower layer node below node
     for (auto index = curNodeIndex - 1; index >= 0; index--) {
-        auto child = rootNode->GetChildAtIndex(index);
+        auto child = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(index));
         if (!child) {
             continue;
         }
@@ -470,8 +436,12 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
             NavigationPattern::FireNavigationLifecycle(child, lowerLifecycle, activeReason);
             return;
         }
-        // if lower layer is dialog or overlay, don't need to trigger lifecycle
-        if (tag == V2::DIALOG_ETS_TAG || tag == V2::ALERT_DIALOG_ETS_TAG || tag == V2::OVERLAY_ETS_TAG) {
+        if (IsOverlayValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "overlay has onShow");
+            return;
+        }
+        if (IsCustomDialogValid(child)) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom dialog onShow");
             return;
         }
     }
@@ -481,5 +451,111 @@ void NavigationManager::FireLowerLayerLifecycle(const RefPtr<UINode>& node, int3
     auto lastPage = stageManager->GetLastPage();
     CHECK_NULL_VOID(lastPage);
     NavigationPattern::FireNavigationLifecycle(lastPage, lowerLifecycle, activeReason);
+}
+
+void NavigationManager::FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason)
+{
+    auto context = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetMainPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+}
+
+bool NavigationManager::IsOverlayValid(const RefPtr<UINode>& node)
+{
+    if (node->GetTag() != V2::OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto overlays = node->GetChildren();
+    // check overlay is visible, if overlay is visible, don't need fire active lifecycle
+    for (auto index = 0; index < static_cast<int32_t>(overlays.size()); index++) {
+        auto overlay = AceType::DynamicCast<FrameNode>(node->GetChildAtIndex(index));
+        if (!overlay) {
+            continue;
+        }
+        auto layoutProperty = overlay->GetLayoutProperty();
+        if (layoutProperty && layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool NavigationManager::IsCustomDialogValid(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    // if lower layer is dialog, don't need to trigger lifecycle
+    auto pattern = frameNode->GetPattern();
+    if (!InstanceOf<DialogPattern>(pattern)) {
+        return false;
+    }
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    if (!dialogPattern) {
+        return false;
+    }
+    auto dialogProperty = dialogPattern->GetDialogProperties();
+    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
+    return dialogProperty.isUserCreatedDialog;
+}
+
+void NavigationManager::AddBeforeOrientationChangeTask(const std::function<void()>&& task)
+{
+    beforeOrientationChangeTasks_.emplace_back(std::move(task));
+}
+
+void NavigationManager::ClearBeforeOrientationChangeTask()
+{
+    beforeOrientationChangeTasks_.clear();
+}
+
+void NavigationManager::OnOrientationChanged()
+{
+    auto tasks = std::move(beforeOrientationChangeTasks_);
+    for (auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
+}
+
+void NavigationManager::SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    bool animated = false;
+    if (config.has_value()) {
+        // developer set statusBar config to NavDestination
+        enable = config.value().first;
+        animated = config.value().second;
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = statusBarConfigByWindowApi_.first;
+        animated = statusBarConfigByWindowApi_.second;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::STATUS, enable, animated);
+}
+
+void NavigationManager::SetNavigationIndicatorConfig(std::optional<bool> config)
+{
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    bool enable = false;
+    if (config.has_value()) {
+        // developer set navigationIndicator config to NavDestination
+        enable = config.value();
+    } else {
+        // developer didn't use interface of NavDestination, fallback to setting in window.d.ts
+        enable = navigationIndicatorConfigByWindowApi_;
+    }
+
+    container->SetSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, false);
 }
 } // namespace OHOS::Ace::NG

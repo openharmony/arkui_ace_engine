@@ -31,12 +31,21 @@ template<class T>
 class WeakPtr;
 
 // Inherit this class to use 'RefPtr' and 'WeakPtr' to manage pointer of instance.
-class Referenced : public LifeCycleCheckable {
+class ACE_FORCE_EXPORT Referenced : public LifeCycleCheckable {
 public:
     // Use raw pointer to construct 'RefPtr' and 'WeakPtr'.
-    template<class T>
+    template<class T, bool isNewOrRecycle = false>
     static RefPtr<T> Claim(T* rawPtr)
     {
+        if constexpr (isNewOrRecycle) {
+            if (rawPtr && rawPtr->RefCount()) {
+                rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
+            }
+        } else {
+            if (rawPtr && !rawPtr->RefCount()) {
+                rawPtr->OnDetectedClaimDeathObj(isNewOrRecycle);
+            }
+        }
         if (MemoryMonitor::IsEnable()) {
             MemoryMonitor::GetInstance().Update(rawPtr, static_cast<Referenced*>(rawPtr));
         }
@@ -53,7 +62,7 @@ public:
     template<class T, class... Args>
     static RefPtr<T> MakeRefPtr(Args&&... args)
     {
-        return Claim(new T(std::forward<Args>(args)...));
+        return Claim<T, true>(new T(std::forward<Args>(args)...));
     }
 
     // Get raw pointer from 'RefPtr'.
@@ -62,12 +71,9 @@ public:
     {
         return ptr.rawPtr_;
     }
-
+    // Forbid getting raw pointer from rvalue 'RefPtr'.
     template<class T>
-    static T* UnsafeRawPtr(const WeakPtr<T>& ptr)
-    {
-        return ptr.unsafeRawPtr_;
-    }
+    static T* RawPtr(const RefPtr<T>&& ptr) = delete;
 
     void IncRefCount()
     {
@@ -116,10 +122,8 @@ private:
     friend class RefPtr;
     template<class T>
     friend class WeakPtr;
-    // Forbid getting raw pointer from rvalue 'RefPtr'.
-    template<class T>
-    static T* RawPtr(const RefPtr<T>&& ptr) = delete;
 
+    void OnDetectedClaimDeathObj(bool isNewOrRecycle);
     RefCounter* refCounter_ { nullptr };
 
     ACE_DISALLOW_COPY_AND_MOVE(Referenced);
@@ -182,11 +186,6 @@ public:
     operator bool() const
     {
         return rawPtr_ != nullptr;
-    }
-
-    T* GetRawPtr() const
-    {
-        return rawPtr_;
     }
 
     // Use 'Swap' to implement overloaded operator '='.
@@ -451,14 +450,6 @@ public:
     bool operator<(const WeakPtr<O>& other) const
     {
         return refCounter_ < other.refCounter_;
-    }
-
-    inline T* GetRawPtr() const
-    {
-        if (Invalid()) {
-            return nullptr;
-        }
-        return unsafeRawPtr_;
     }
 
 private:

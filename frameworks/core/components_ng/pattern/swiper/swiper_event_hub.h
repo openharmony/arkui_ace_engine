@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,6 +34,7 @@ enum class Direction {
     NEXT,
 };
 using ChangeIndicatorEvent = std::function<void()>;
+using IndicatorIndexChangeEvent = std::function<void(int32_t index)>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeEventWithPreIndex = std::function<void(int32_t preIndex, int32_t currentIndex)>;
@@ -62,6 +64,11 @@ public:
         changeIndicatorEvent_ = std::move(changeEvent);
     }
 
+    void SetIndicatorIndexChangeEvent(IndicatorIndexChangeEvent&& indicatorIndexChangeEvent)
+    {
+        indicatorIndexChangeEvent_ = std::move(indicatorIndexChangeEvent);
+    }
+
     void SetChangeDoneEvent(ChangeDoneEvent&& changeDoneEvent)
     {
         changeDoneEvent_ = std::move(changeDoneEvent);
@@ -82,6 +89,11 @@ public:
         gestureSwipeEvent_ = std::move(gestureSwipeEvent);
     }
 
+    void AddOnSlectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        selectedEvents_.emplace_back(changeEvent);
+    }
+
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
@@ -91,6 +103,29 @@ public:
                 direction_ = Direction::PRE;
             }
             changeDoneEvent_();
+        }
+    }
+
+    void AddOnUnselectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        unselectedEvents_.emplace_back(changeEvent);
+    }
+
+    void FireUnselectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper FireUnselectedEvent id:%{public}d, index:%{public}d",
+            frameNode ? frameNode->GetId() : -1, index);
+        ACE_SCOPED_TRACE("Swiper FireUnselectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!unselectedEvents_.empty()) {
+            std::for_each(unselectedEvents_.begin(), unselectedEvents_.end(),
+                [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
         }
     }
 
@@ -146,6 +181,13 @@ public:
         }
     }
 
+    void FireIndicatorIndexChangeEvent(int32_t index) const
+    {
+        if (indicatorIndexChangeEvent_) {
+            indicatorIndexChangeEvent_(index);
+        }
+    }
+
     Direction GetDirection()
     {
         return direction_;
@@ -153,6 +195,11 @@ public:
 
     void FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)
     {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationStartEvent, index: %{public}d, targetIndex: %{public}d, id:%{public}d", index, targetIndex,
+            swiperId_);
+        ACE_SCOPED_TRACE(
+            "Swiper FireAnimationStartEvent, index: %d, targetIndex %d, id: %d", index, targetIndex, swiperId_);
         if (!animationStartEvents_.empty()) {
             std::for_each(animationStartEvents_.begin(), animationStartEvents_.end(),
                 [index, targetIndex, info](const AnimationStartEventPtr& animationStartEvent) {
@@ -184,6 +231,12 @@ public:
             };
             return;
         }
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationEndEvent index: %{public}d, currentOffset: has_value %{public}d, value %{public}fvp, "
+            "isForce: %{public}d, aniStartCalledCount %{public}d, id:%{public}d",
+            index, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop,
+            aniStartCalledCount_, swiperId_);
+        ACE_SCOPED_TRACE("Swiper FireAnimationEndEvent, index: %d, id: %d", index, swiperId_);
         if (!animationEndEvents_.empty()) {
             std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
                 [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -199,6 +252,9 @@ public:
 
     void FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
     {
+        TAG_LOGI(AceLogTag::ACE_SWIPER,
+            "FireAnimationEndOnForceEvent index: %{public}d, aniStartCalledCount %{public}d, id:%{public}d", index,
+            aniStartCalledCount_, swiperId_);
         if (aniStartCalledCount_ <= 0) {
             delayCallback_ = [weak = WeakClaim(this), index, info]() {
                 auto hub = weak.Upgrade();
@@ -235,6 +291,26 @@ public:
         }
     }
 
+    void FireSelectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        ACE_SCOPED_TRACE("Swiper FireSelectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!selectedEvents_.empty()) {
+            std::for_each(selectedEvents_.begin(), selectedEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
+        }
+    }
+
+    void SetSwiperId(int32_t swiperId)
+    {
+        swiperId_ = swiperId;
+    }
+
 private:
     void FireJSChangeEvent(int32_t preIndex, int32_t index)
     {
@@ -254,15 +330,19 @@ private:
     }
 
     Direction direction_;
+    std::list<ChangeEventPtr> unselectedEvents_;
     std::list<ChangeEventPtr> changeEvents_;
+    std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
+    IndicatorIndexChangeEvent indicatorIndexChangeEvent_;
     std::list<AnimationStartEventPtr> animationStartEvents_;
     std::list<AnimationEndEventPtr> animationEndEvents_;
     GestureSwipeEvent gestureSwipeEvent_;
     int32_t aniStartCalledCount_ = 0;
     std::function<void()> delayCallback_;
+    int32_t swiperId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

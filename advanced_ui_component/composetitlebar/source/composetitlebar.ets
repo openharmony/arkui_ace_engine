@@ -17,7 +17,7 @@ import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { hilog } from '@kit.PerformanceAnalysisKit';
+import hilog from '@ohos.hilog';
 
 export interface ComposeTitleBarMenuItem {
   value: ResourceStr;
@@ -163,6 +163,7 @@ struct ComposeTitleBar {
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
         .accessibilityGroup(true)
+        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
@@ -473,7 +474,11 @@ struct ImageMenuItem {
     } else {
       let resourceString: string = '';
       try {
-        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        if (resource.id === -1 ) {
+          resourceString = getContext()?.resourceManager?.getStringByNameSync(resource.params?.[0].split('.').pop());
+        } else {
+          resourceString = getContext()?.resourceManager?.getStringSync(resource);
+        }
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
@@ -650,7 +655,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false;
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close();
           }
         }
@@ -756,7 +761,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false;
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close();
           }
         }
@@ -847,7 +852,7 @@ struct ComposeTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
@@ -874,7 +879,7 @@ struct ComposeTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)

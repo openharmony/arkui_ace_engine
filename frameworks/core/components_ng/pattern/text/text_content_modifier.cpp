@@ -42,28 +42,6 @@ constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
 constexpr float OBSCURED_ALPHA = 0.2f;
-const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
-    FontWeight::W100,
-    FontWeight::W200,
-    FontWeight::W300,
-    FontWeight::W400,
-    FontWeight::W500,
-    FontWeight::W600,
-    FontWeight::W700,
-    FontWeight::W800,
-    FontWeight::W900,
-    FontWeight::W700,       // FontWeight::BOLD
-    FontWeight::W400,       // FontWeight::NORMAL
-    FontWeight::W900,       // FontWeight::BOLDER,
-    FontWeight::W100,       // FontWeight::LIGHTER
-    FontWeight::W500,       // FontWeight::MEDIUM
-    FontWeight::W400,       // FontWeight::REGULAR
-};
-
-inline FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
-}
 } // namespace
 
 TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textStyle, const WeakPtr<Pattern>& pattern)
@@ -89,7 +67,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     dragStatus_ = MakeRefPtr<PropertyBool>(false);
     AttachProperty(dragStatus_);
     if (textStyle.has_value()) {
-        SetDefaultAnimatablePropertyValue(textStyle.value());
+        SetDefaultAnimatablePropertyValue(textStyle.value(), host);
     }
 
     textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
@@ -101,7 +79,7 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
 
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
     } else {
         clip_ = MakeRefPtr<PropertyBool>(false);
@@ -120,13 +98,17 @@ void TextContentModifier::ChangeDragStatus()
     dragStatus_->Set(!dragStatus_->Get());
 }
 
-void TextContentModifier::SetDefaultAnimatablePropertyValue(const TextStyle& textStyle)
+void TextContentModifier::SetDefaultAnimatablePropertyValue(
+    const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode)
 {
     SetDefaultFontSize(textStyle);
     SetDefaultAdaptMinFontSize(textStyle);
     SetDefaultAdaptMaxFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        SetDefaultSymbolColor(textStyle);
+    }
     SetDefaultTextShadow(textStyle);
     SetDefaultTextDecoration(textStyle);
     SetDefaultBaselineOffset(textStyle);
@@ -170,7 +152,7 @@ void TextContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 void TextContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
 {
     fontWeightFloat_ =
-        MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
+        MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(V2::ConvertFontWeight(textStyle.GetFontWeight())));
     AttachProperty(fontWeightFloat_);
 }
 
@@ -180,13 +162,25 @@ void TextContentModifier::SetDefaultTextColor(const TextStyle& textStyle)
     AttachProperty(animatableTextColor_);
 }
 
+void TextContentModifier::SetDefaultSymbolColor(const TextStyle& textStyle)
+{
+    animatableSymbolColor_ =
+        MakeRefPtr<AnimatablePropertyVectorLinearVector>(Convert2VectorLinearColor(textStyle.GetSymbolColorList()));
+    AttachProperty(animatableSymbolColor_);
+}
+
+LinearVector<LinearColor> TextContentModifier::Convert2VectorLinearColor(const std::vector<Color>& colorList)
+{
+    LinearVector<LinearColor> colors;
+    for (auto color : colorList) {
+        colors.emplace_back(LinearColor(color));
+    }
+    return colors;
+}
+
 void TextContentModifier::SetDefaultTextShadow(const TextStyle& textStyle)
 {
     auto&& textShadows = textStyle.GetTextShadows();
-    if (textShadows.empty()) {
-        AddDefaultShadow();
-        return;
-    }
     shadows_.clear();
     shadows_.reserve(textShadows.size());
     for (auto&& textShadow : textShadows) {
@@ -205,6 +199,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     textShadow.SetOffset(shadow.GetOffset());
     textShadow.SetColor(shadow.GetColor());
     shadows_.emplace_back(ShadowProp { .shadow = textShadow,
+        .lastShadow = textShadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
@@ -219,8 +214,9 @@ void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 {
     textDecoration_ = textStyle.GetTextDecoration();
     textDecorationColor_ = textStyle.GetTextDecorationColor();
-    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(
-        textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha());
+    auto alpha = textDecoration_ == TextDecoration::NONE ? 0.0f : textDecorationColor_->GetAlpha();
+    textDecorationColorAlpha_ = MakeRefPtr<AnimatablePropertyFloat>(alpha);
+    lastTextDecorationColorAlpha_ = alpha;
     AttachProperty(textDecorationColorAlpha_);
 }
 void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
@@ -407,7 +403,11 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         textPattern->DumpRecord("onDraw GetParagraphs empty:" + std::to_string(host->GetId()));
         return;
     }
-    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f]", host->GetId(), paintOffset_.GetX(), paintOffset_.GetY());
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentRect = geometryNode->GetContentRect();
+    ACE_SCOPED_TRACE("[Text][id:%d] paint[offset:%f,%f][contentRect:%s]", host->GetId(), paintOffset_.GetX(),
+        paintOffset_.GetY(), contentRect.ToString().c_str());
 
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
@@ -416,7 +416,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->OnPropertyChangeMeasure();
     }
-
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
         CHECK_NULL_VOID(contentSize_);
@@ -432,8 +431,15 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
         if (!marqueeSet_) {
-            textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
-            DrawText(canvas, pManager);
+            auto paintOffsetY = paintOffset_.GetY();
+            auto paragraphs = pManager->GetParagraphs();
+            for (auto&& info : paragraphs) {
+                auto paragraph = info.paragraph;
+                CHECK_NULL_VOID(paragraph);
+                ChangeParagraphColor(paragraph);
+                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+                paintOffsetY += paragraph->GetHeight();
+            }
         } else {
             // Racing
             DrawTextRacing(drawingContext, fadeoutInfo, pManager);
@@ -583,6 +589,23 @@ void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
     }
 }
 
+void TextContentModifier::ModifySymbolColorInTextStyle(TextStyle& textStyle)
+{
+    if (symbolColors_.has_value() && animatableSymbolColor_) {
+        lastSymbolColors_= animatableSymbolColor_->Get();
+        textStyle.SetSymbolColorList(Convert2VectorColor(animatableSymbolColor_->Get()));
+    }
+}
+
+std::vector<Color> TextContentModifier::Convert2VectorColor(const LinearVector<LinearColor>& colorList)
+{
+    std::vector<Color> colors;
+    for (auto color : colorList) {
+        colors.emplace_back(Color(color.GetValue()));
+    }
+    return colors;
+}
+
 void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
 {
     std::vector<Shadow> shadows;
@@ -642,6 +665,7 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
     ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
     ModifyTextColorInTextStyle(textStyle);
+    ModifySymbolColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
     ModifyBaselineOffsetInTextStyle(textStyle);
@@ -700,6 +724,29 @@ void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
     }
 }
 
+void TextContentModifier::UpdateSymbolColorMeasureFlag(PropertyChangeFlag& flag)
+{
+    if (!symbolColors_.has_value()) {
+        return;
+    }
+    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto symbolColors = layoutProperty->GetSymbolColorList();
+    CHECK_NULL_VOID(symbolColors);
+    if (!symbolColors.has_value()) {
+        return;
+    }
+    symbolColors_ = Convert2VectorLinearColor(symbolColors.value());
+    if (symbolColors_.has_value() && animatableSymbolColor_ &&
+        (symbolColors_ != animatableSymbolColor_->Get() || lastSymbolColors_ != animatableSymbolColor_->Get())) {
+        flag |= PROPERTY_UPDATE_MEASURE_SELF;
+        lastSymbolColors_ = animatableSymbolColor_->Get();
+    }
+}
+
 void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
 {
     for (auto&& shadow : shadows_) {
@@ -750,6 +797,14 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
     }
 }
 
+void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
+{
+    PropertyChangeFlag flag = 0;
+    if (NeedMeasureUpdate(flag)) {
+        host->MarkDirtyNode(flag);
+    }
+}
+
 bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
 {
     flag = 0;
@@ -769,6 +824,7 @@ bool TextContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
         UpdateTextColorMeasureFlag(flag);
         flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
+    UpdateSymbolColorMeasureFlag(flag);
     return flag;
 }
 
@@ -814,12 +870,12 @@ void TextContentModifier::SetAdaptMaxFontSize(const Dimension& value, const Text
 void TextContentModifier::SetFontWeight(const FontWeight& value, bool isReset)
 {
     if (!isReset) {
-        fontWeight_ = ConvertFontWeight(value);
+        fontWeight_ = V2::ConvertFontWeight(value);
     } else {
         fontWeight_ = std::nullopt;
     }
     CHECK_NULL_VOID(fontWeightFloat_);
-    fontWeightFloat_->Set(static_cast<int>(ConvertFontWeight(value)));
+    fontWeightFloat_->Set(static_cast<int>(V2::ConvertFontWeight(value)));
 }
 
 void TextContentModifier::SetTextColor(const Color& value, bool isReset)
@@ -838,6 +894,17 @@ void TextContentModifier::TextColorModifier(const Color& value)
 {
     SetTextColor(value);
     onlyTextColorAnimation_ = true;
+}
+
+void TextContentModifier::SetSymbolColor(const std::vector<Color>& value, bool isReset)
+{
+    if (!isReset) {
+        symbolColors_ = Convert2VectorLinearColor(value);
+    } else {
+        symbolColors_ = std::nullopt;
+    }
+    CHECK_NULL_VOID(animatableSymbolColor_);
+    animatableSymbolColor_->Set(Convert2VectorLinearColor(value));
 }
 
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
@@ -951,6 +1018,10 @@ void TextContentModifier::StartTextRace(const MarqueeOption& option)
 
     marqueeSet_ = true;
     ResumeTextRace(false);
+
+    if (!IsMarqueeVisible()) {
+        PauseAnimation();
+    }
 }
 
 void TextContentModifier::StopTextRace()
@@ -968,7 +1039,7 @@ void TextContentModifier::StopTextRace()
 void TextContentModifier::ResumeAnimation()
 {
     CHECK_NULL_VOID(raceAnimation_);
-    if (!CheckMarqueeState(MarqueeState::PAUSED)) {
+    if (!CheckMarqueeState(MarqueeState::PAUSED) || !IsMarqueeVisible()) {
         return;
     }
     AnimationUtils::ResumeAnimation(raceAnimation_);
@@ -1379,5 +1450,18 @@ void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const Fade
     canvas.DrawRect(clipInnerRect);
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+bool TextContentModifier::IsMarqueeVisible() const
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, true);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, true);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    return Positive(visibleInnerRect.Width()) && Positive(visibleInnerRect.Height());
 }
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace::NG {
 class NavigationStack;
@@ -155,21 +156,52 @@ public:
     void StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> allNavigationInfo);
     const std::vector<NavdestinationRecoveryInfo> GetNavigationRecoveryInfo(std::string navigationId);
 
-    void OnContainerModalButtonsRectChange();
-    void AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener);
-    void RemoveButtonsRectChangeListener(int32_t id);
-
     void AddNavigation(int32_t pageId, int32_t navigationId);
 
     void RemoveNavigation(int32_t pageId);
 
     std::vector<int32_t> FindNavigationInTargetParent(int32_t targetId);
 
-    void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle);
+    void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+
+    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+
+    // set by developer in window.d.ts
+    void SetOrientationByWindowApi(Orientation ori)
+    {
+        orientationByWindowApi_ = ori;
+    }
+    Orientation GetOrientationByWindowApi() const
+    {
+        return orientationByWindowApi_;
+    }
+    void SetStatusBarConfigByWindowApi(std::pair<bool, bool> config)
+    {
+        statusBarConfigByWindowApi_ = config;
+    }
+    const std::pair<bool, bool>& GetStatusBarConfigByWindowApi() const
+    {
+        return statusBarConfigByWindowApi_;
+    }
+    void SetNavigationIndicatorConfigByWindowApi(bool config)
+    {
+        navigationIndicatorConfigByWindowApi_ = config;
+    }
+    bool GetNavigationIndicatorConfigByWindowApi() const
+    {
+        return navigationIndicatorConfigByWindowApi_;
+    }
+    void SetStatusBarConfig(const std::optional<std::pair<bool, bool>>& config);
+    void SetNavigationIndicatorConfig(std::optional<bool> config);
+
+    // for non-animation
+    void AddBeforeOrientationChangeTask(const std::function<void()>&& task);
+    void ClearBeforeOrientationChangeTask();
+    void OnOrientationChanged();
 
 private:
     struct DumpMapKey {
@@ -186,6 +218,10 @@ private:
         }
     };
 
+    bool IsOverlayValid(const RefPtr<UINode>& frameNode);
+
+    bool IsCustomDialogValid(const RefPtr<UINode>& node);
+
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
     std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;
@@ -201,13 +237,17 @@ private:
     bool preNodeAnimationCached_ = false;
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
-    bool hasCacheNavigationNodeEnable_ = false;
-    bool lastWindowShow_ = true;
+    bool hasCacheNavigationNodeEnable_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;
-    bool hasRegisterListener_ = false;
-    std::unordered_map<int32_t, std::function<void()>> buttonsRectChangeListeners_;
+
+    // set by developer in window.d.ts setPreferredOrientation
+    Orientation orientationByWindowApi_ = Orientation::UNSPECIFIED;
+    std::vector<std::function<void()>> beforeOrientationChangeTasks_;
+    // set by developer in window.d.ts setSpecificSystemBarEnabled
+    std::pair<bool, bool> statusBarConfigByWindowApi_;
+    bool navigationIndicatorConfigByWindowApi_ = true;
 };
 } // namespace OHOS::Ace::NG
 

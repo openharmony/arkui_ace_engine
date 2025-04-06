@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/view_abstract.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -214,9 +215,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg004, TestSize.Level1)
      * @tc.expected: result is parent and nullptr
      */
     for (int i = 0; i < 3; ++i) {
-        auto eventHub = AceType::MakeRefPtr<EventHub>();
-        auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub, focusTypes[i]);
-        eventHub->focusHub_ = focusHub;
+        RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+        auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)), focusTypes[i]);
+        parent->focusHub_ = focusHub;
         parent->eventHub_ = eventHub;
         ONE->parent_ = parent;
         auto result = ONE->GetFocusParent();
@@ -250,13 +251,14 @@ HWTEST_F(UINodeTestNg, UINodeTestNg005, TestSize.Level1)
      * @tc.expected: THREE's children size is 2
      */
     std::list<RefPtr<FrameNode>> children;
-    auto eventHubTwo = AceType::MakeRefPtr<EventHub>();
-    auto focusHubTwo = AceType::MakeRefPtr<FocusHub>(eventHubTwo, FocusType::NODE);
-    auto eventHubFour = AceType::MakeRefPtr<EventHub>();
-    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(eventHubFour, FocusType::DISABLE);
-    eventHubTwo->focusHub_ = focusHubTwo;
+    RefPtr<EventHub> eventHubTwo = AceType::MakeRefPtr<EventHub>();
+    auto focusHubTwo = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubTwo)), FocusType::NODE);
+    RefPtr<EventHub> eventHubFour = AceType::MakeRefPtr<EventHub>();
+    auto focusHubFour = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubFour)), FocusType::DISABLE);
+    TWO->focusHub_ = focusHubTwo;
     TWO->eventHub_ = eventHubTwo;
-    eventHubFour->focusHub_ = focusHubFour;
+    FOUR->focusHub_ = focusHubFour;
     FOUR->eventHub_ = eventHubFour;
     THREE->AddChild(TWO, 1, false);
     THREE->AddChild(FOUR, 1, false);
@@ -420,6 +422,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg011, TestSize.Level1)
     ONE->MountToParent(ZERO, 1, false);
     retPageId = ONE->GetPageId();
     EXPECT_EQ(retPageId, 1);
+    ZERO->SetDestroying(false);
     ONE->Clean();
     ZERO->Clean();
 }
@@ -441,10 +444,11 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step2. call the GetFirstFocusHubChild functionand and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild, nullptr);
@@ -452,9 +456,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step3. call the GetFirstFocusHubChild functionand set focus type is NODE
      * @tc.expected: the return focusHub type is NODE
      */
-    focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::NODE);
+    focusHubZero = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::NODE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild->GetFocusType(), FocusType::NODE);
@@ -463,9 +467,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg012, TestSize.Level1)
      * @tc.steps: step4. call the GetFirstFocusHubChild functionand set focus type is SCOPE
      * @tc.expected: the return focusHub type is SCOPE
      */
-    focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::SCOPE);
+    focusHubZero = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::SCOPE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
     EXPECT_EQ(retFirstFocusHubChild->GetFocusType(), FocusType::SCOPE);
@@ -483,14 +487,15 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
      * @tc.steps: step1. add one child to ZERO and set focus type is NODE
      * @tc.expected: the return focusHub type is NODE
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
-    auto eventHubOne = AceType::MakeRefPtr<EventHub>();
-    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::NODE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
+    RefPtr<EventHub> eventHubOne = AceType::MakeRefPtr<EventHub>();
+    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::NODE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
 
     ZERO->AddChild(ONE, 1, false);
@@ -501,9 +506,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg013, TestSize.Level1)
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
+    focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::DISABLE);
 
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
     ZERO->AddChild(ONE, 1, false);
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
@@ -522,14 +527,16 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
      * @tc.steps: step1. add one child to ZERO and set focus type is SCOPE
      * @tc.expected: the return focusHub type is SCOPE
      */
-    auto eventHubZero = AceType::MakeRefPtr<EventHub>();
-    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(eventHubZero, FocusType::DISABLE);
-    auto eventHubOne = AceType::MakeRefPtr<EventHub>();
-    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::SCOPE);
+    RefPtr<EventHub> eventHubZero = AceType::MakeRefPtr<EventHub>();
+    auto focusHubZero = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubZero)), FocusType::DISABLE);
+    RefPtr<EventHub> eventHubOne = AceType::MakeRefPtr<EventHub>();
+    auto focusHubOne = AceType::MakeRefPtr<FocusHub>(
+        AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::SCOPE);
 
-    eventHubZero->focusHub_ = focusHubZero;
+    ZERO->focusHub_ = focusHubZero;
     ZERO->eventHub_ = eventHubZero;
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
 
     ZERO->AddChild(ONE, 1, false);
@@ -540,9 +547,9 @@ HWTEST_F(UINodeTestNg, UINodeTestNg014, TestSize.Level1)
      * @tc.steps: step2. add one child to ZERO and set focus type is DISABLE
      * @tc.expected: the return value is null
      */
-    focusHubOne = AceType::MakeRefPtr<FocusHub>(eventHubOne, FocusType::DISABLE);
+    focusHubOne = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHubOne)), FocusType::DISABLE);
 
-    eventHubOne->focusHub_ = focusHubOne;
+    ONE->focusHub_ = focusHubOne;
     ONE->eventHub_ = eventHubOne;
     ZERO->AddChild(ONE, 1, false);
     retFirstFocusHubChild = ZERO->GetFirstFocusHubChild();
@@ -982,6 +989,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg033, TestSize.Level1)
     ZERO->children_.emplace_back(nullptr);
     ZERO->SetChildrenInDestroying();
     EXPECT_EQ(ZERO->children_.size(), 3);
+    ONE->SetDestroying(false);
+    TWO->SetDestroying(false);
     ZERO->children_.clear();
     ZERO->Clean();
 }
@@ -1561,8 +1570,8 @@ HWTEST_F(UINodeTestNg, UINodeTestNg045, TestSize.Level1)
     int32_t depth = 0;
 
     parent->GetPageNodeCountAndDepth(&count, &depth);
-    EXPECT_EQ(parent->depth_, 1);
-    EXPECT_EQ(parent->depth_, 1);
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
+    EXPECT_EQ(parent->depth_, Infinity<int32_t>());
 
     auto child1 = FrameNode::CreateFrameNode(
         "child1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
@@ -2416,14 +2425,20 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CollectRemovedChildren001
- * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.name: CollectCleanedChildren
+ * @tc.desc: Test ui node method CollectCleanedChildren
  * @tc.type: FUNC
  */
-HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
+HWTEST_F(UINodeTestNg, CollectCleanedChildren, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create FrameNode with child
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -2437,7 +2452,7 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. add child
+     * @tc.steps: step3. add child
      */
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(testNode3, 1, false);
@@ -2445,10 +2460,56 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
     testNode2->AddChild(testNode5, 1, false);
 
     /**
-     * @tc.steps: step3. set API12.
+     * @tc.steps: step4. test CollectCleanedChildren.
+     */
+    testNode2->isDisappearing_ = true;
+    std::list<int32_t> removedElmtId2;
+    std::list<int32_t> reservedElmtIds;
+    testNode1->CollectCleanedChildren(testNode1->GetChildren(), removedElmtId2, reservedElmtIds, true);
+    EXPECT_EQ(removedElmtId2.size(), 4);
+    testNode2->CollectCleanedChildren(testNode2->GetChildren(), removedElmtId2, reservedElmtIds, false);
+    EXPECT_EQ(removedElmtId2.size(), 5);
+
+    /**
+     * @tc.steps: step5. revert to the origin API.
+     */
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: CollectRemovedChildren001
+ * @tc.desc: Test ui node method CollectRemovedChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set API12.
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
+     */
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 3, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step3. add child
+     */
+    testNode1->AddChild(testNode2, 1, false);
+    testNode1->AddChild(testNode3, 1, false);
+    testNode1->AddChild(testNode4, 1, false);
+    testNode2->AddChild(testNode5, 1, false);
 
     /**
      * @tc.steps: step4. test CollectRemovedChildren.
@@ -2474,7 +2535,13 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren001, TestSize.Level1)
 HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create FrameNode with child
+     * @tc.steps: step1. set API13.
+     */
+    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+
+    /**
+     * @tc.steps: step2. create FrameNode with child
      */
     const RefPtr<FrameNode> testNode1 =
         FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
@@ -2488,18 +2555,12 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
 
     /**
-     * @tc.steps: step2. add child
+     * @tc.steps: step3. add child
      */
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(testNode3, 1, false);
     testNode1->AddChild(testNode4, 1, false);
     testNode2->AddChild(testNode5, 1, false);
-
-    /**
-     * @tc.steps: step3. set API13.
-     */
-    int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step4. test CollectRemovedChildren.
@@ -2510,10 +2571,835 @@ HWTEST_F(UINodeTestNg, CollectRemovedChildren002, TestSize.Level1)
     EXPECT_EQ(removedElmtId2.size(), 4);
     testNode2->CollectRemovedChildren(testNode2->GetChildren(), removedElmtId2, false);
     EXPECT_EQ(removedElmtId2.size(), 5);
-    
+
     /**
      * @tc.steps: step5. revert to the origin API.
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: IsAutoFillContainerNode001
+ * @tc.desc: Test ui node method IsAutoFillContainerNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, IsAutoFillContainerNode001, TestSize.Level1)
+{
+    const RefPtr<FrameNode> testNode1 =
+        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode1->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode2->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode3->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, 4, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode4->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, 5, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode5->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode6 =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 6, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_TRUE(testNode6->IsAutoFillContainerNode());
+    const RefPtr<FrameNode> testNode7 =
+        FrameNode::CreateFrameNode("OTHER_TAG", 7, AceType::MakeRefPtr<Pattern>(), false);
+    EXPECT_FALSE(testNode7->IsAutoFillContainerNode());
+}
+
+/**
+ * @tc.name: AddFunc_API01
+ * @tc.desc: CanAddChildWhenTopNodeIsModalUec
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(TWO, 1, false);
+    testNode->AddChild(THREE, 1, false);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.end();
+    testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+
+    /**
+     * @tc.steps: step2. change function parameters.
+     */
+    itr = testNode->children_.begin();
+    testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+    itr = testNode->children_.begin();
+    itr++;
+    TWO->isAllowAddChildBelowModalUec_ = false;
+    TWO->tag_ = V2::MODAL_PAGE_TAG;
+    THREE->isAllowAddChildBelowModalUec_ = false;
+    THREE->tag_ = V2::MODAL_PAGE_TAG;
+
+    /**
+     * @tc.steps: step3. test CanAddChildWhenTopNodeIsModalUec.
+     */
+    bool res = testNode->CanAddChildWhenTopNodeIsModalUec(itr);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddFunc_API02
+ * @tc.desc: AddChildAfter
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_EQ(testNode->children_.size(), 0);
+    auto node = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto node2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode->AddChild(node, 1, false);
+
+    /**
+     * @tc.steps: step2. test CanAddChildWhenTopNodeIsModalUec.
+     */
+    testNode->AddChildAfter(node, node);
+    EXPECT_EQ(testNode->children_.size(), 1);
+    testNode->AddChildAfter(node2, node);
+    EXPECT_EQ(testNode->children_.size(), 2);
+    testNode->Clean(false);
+}
+
+/**
+ * @tc.name: AddFunc_API03
+ * @tc.desc: RemoveChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ONE->AddChild(TWO, 1, false);
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->isDestroyingState_ = true;
+
+    /**
+     * @tc.steps: step2. observe the changes in the number of children after removal.
+     */
+    auto iter = ONE->RemoveChild(TWO);
+    EXPECT_EQ(iter, ONE->children_.end());
+    ONE->isDestroyingState_ = false;
+    iter = ONE->RemoveChild(testNode);
+    EXPECT_EQ(iter, ONE->children_.end());
+}
+
+/**
+ * @tc.name: AddFunc_API04
+ * @tc.desc: Clean
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API04, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ONE->AddChild(TWO, 1, false);
+    auto iter = ONE->RemoveChild(TWO);
+    EXPECT_NE(iter, ONE->children_.end());
+    ONE->RemoveChildAtIndex(0);
+    EXPECT_EQ(ONE->children_.size(), 0);
+
+    /**
+     * @tc.steps: step2. add child nodes, to compare the number of child nodes after cleaning.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(testNode2, 1, false);
+
+    /**
+     * @tc.steps: step3. test Clean.
+     */
+    testNode2->isDestroyingState_ = true;
+    testNode->Clean(true, false);
+    EXPECT_EQ(testNode->children_.size(), 0);
+}
+
+/**
+ * @tc.name: AddFunc_API05
+ * @tc.desc: MountToParentAfter
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API05, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ONE->isInDestroying_ = true;
+    ONE->hostPageId_ = 3;
+
+    /**
+     * @tc.steps: step2. test MountToParentAfter.
+     */
+    ONE->MountToParentAfter(ONE, testNode);
+    EXPECT_EQ(testNode->hostPageId_, 0);
+    EXPECT_EQ(testNode->isInDestroying_, false);
+}
+
+/**
+ * @tc.name: AddFunc_API06
+ * @tc.desc: MountToParentBefore
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API06, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    ONE->isInDestroying_ = true;
+    ONE->hostPageId_ = 5;
+
+    /**
+     * @tc.steps: step2. test MountToParentBefore.
+     */
+    ONE->MountToParentBefore(ONE, testNode);
+    EXPECT_EQ(testNode->hostPageId_, 0);
+    EXPECT_EQ(testNode->isInDestroying_, false);
+}
+
+/**
+ * @tc.name: AddFunc_API07
+ * @tc.desc: OnRemoveFromParent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API07, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test the function.
+     */
+    testNode->isDestroyingState_ = true;
+    bool res = testNode->OnRemoveFromParent(true);
+    EXPECT_EQ(res, false);
+    testNode->isDestroyingState_ = false;
+    res = testNode->OnRemoveFromParent(true);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddFunc_API08
+ * @tc.desc: GetParentCustomNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API08, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto child = CustomNode::CreateCustomNode(childId, "child");
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test the function.
+     */
+    child->AddChild(testNode, 1, false);
+    auto res = testNode->GetParentCustomNode();
+    EXPECT_NE(res, nullptr);
+}
+
+/**
+ * @tc.name: AddFunc_API09
+ * @tc.desc: GetFocusParentWithBoundary、GetCurrentChildrenFocusHub
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API09, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+    testNode->DoAddChild(itr, ONE, true);
+
+    /**
+     * @tc.steps: step2. test GetFocusParentWithBoundary.
+     */
+    testNode->tag_ = V2::SCREEN_ETS_TAG;
+    ONE->parent_ = testNode;
+    auto res = ONE->GetFocusParentWithBoundary();
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test the function.
+     */
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode2->AddChild(testNode3, 1, false);
+    std::list<RefPtr<FocusHub>> focusNodes;
+    testNode2->GetCurrentChildrenFocusHub(focusNodes);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: AddFunc_API10
+ * @tc.desc: DoAddChild、AttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API10, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    std::list<RefPtr<UINode>>::iterator itr = testNode->children_.begin();
+
+    /**
+     * @tc.steps: step2. test DoAddChild.
+     */
+    testNode->isAccessibilityVirtualNode_ = true;
+    testNode->themeScopeId_ = 2;
+    testNode->isAllowUseParentTheme_ = true;
+    testNode->DoAddChild(itr, ONE, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test AttachToMainTree.
+     */
+    TWO->AddChild(THREE, 1, false);
+    bool recursive = true;
+    PipelineContext* ret = TWO->GetContextWithCheck();
+    ret->isOpenInvisibleFreeze_ = true;
+    TWO->onMainTree_ = false;
+    TWO->AttachToMainTree(recursive, ret);
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API11
+ * @tc.desc: AttachToMainTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API11, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    TWO->AddChild(THREE, 1, false);
+    TWO->onMainTree_ = false;
+    TWO->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    /**
+     * @tc.steps: step2. test AttachToMainTree.
+     */
+    TWO->AttachToMainTree();
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API12
+ * @tc.desc: DetachFromMainTree、SetFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API12, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test SetFreeze.
+     */
+    ONE->SetUserFreeze(true);
+    ONE->SetFreeze(true, true, true);
+    ONE->SetFreeze(true, true, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values.
+     */
+    TWO->AddChild(THREE, 1, false);
+    TWO->onMainTree_ = false;
+    TWO->nodeStatus_ = NodeStatus::BUILDER_NODE_OFF_MAINTREE;
+
+    /**
+     * @tc.steps: step3. test DetachFromMainTree.
+     */
+    TWO->AttachToMainTree();
+    EXPECT_TRUE(TWO->onMainTree_);
+    TWO->isDestroyingState_ = true;
+    TWO->DetachFromMainTree();
+    TWO->Clean();
+}
+
+/**
+ * @tc.name: AddFunc_API13
+ * @tc.desc: DumpTree、DumpTreeJsonForDiff
+	 * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API13, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->isDisappearing_ =true;
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+
+    /**
+     * @tc.steps: step2. test DumpTreeJsonForDiff and DumpTree.
+     */
+    testNode->DumpTreeJsonForDiff(json);
+    testNode->DumpTree(0, true);
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("_"));
+}
+
+/**
+ * @tc.name: AddFunc_API14
+ * @tc.desc: DumpSimplifyTree、DumpTreeById
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API14, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(ONE, 1, false);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    auto child = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 3, AceType::MakeRefPtr<Pattern>());
+    auto child2 = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 4, AceType::MakeRefPtr<Pattern>());
+    testNode->AddDisappearingChild(child);
+    testNode->AddDisappearingChild(child2);
+
+    /**
+     * @tc.steps: step2. test DumpSimplifyTree and DumpTreeById.
+     */
+    testNode->DumpSimplifyTree(0, json);
+    std::string str = "11";
+    testNode->nodeId_ = 11;
+    auto res = testNode->DumpTreeById(1, str, true);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: AddFunc_API15
+ * @tc.desc: MouseTest、AddDisappearingChild、NotifyChange、UpdateThemeScopeUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API15, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    MouseTestResult onMouseResult;
+    MouseTestResult onHoverResult;
+    RefPtr<FrameNode> hoverNode;
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode2->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    testNode->AddChild(testNode2, 1, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test NotifyChange.
+     */
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t changeIdx = 0;
+    int32_t count = 0;
+    int64_t id = 0;
+    testNode4->AddChild(ONE, 1, false);
+    ONE->UINode::NotifyChange(changeIdx, count, id, SelectOverlayNode::NotificationType::START_CHANGE_POSITION);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values and test UpdateThemeScopeUpdate.
+     */
+    const RefPtr<FrameNode> testNode5 =
+        FrameNode::CreateFrameNode("testNode5", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t themeScopeId = 3;
+    testNode5->themeScopeId_ = 5;
+    testNode5->UpdateThemeScopeUpdate(themeScopeId);
+    themeScopeId = 5;
+    testNode5->needCallChildrenUpdate_ = true;
+    testNode5->UpdateThemeScopeUpdate(themeScopeId);
+
+    /**
+     * @tc.steps: step4. test AddDisappearingChild and MouseTest.
+     */
+    auto parent = FrameNode::CreateFrameNode(V2::COMMON_VIEW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>(), true);
+    parent->AddDisappearingChild(parent);
+    HitTestResult ret =
+        testNode->UINode::MouseTest(globalPoint, parentLocalPoint, onMouseResult, onHoverResult, hoverNode);
+    EXPECT_EQ(ret == HitTestResult::STOP_BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API16
+ * @tc.desc: AxisTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API16, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_ONE);
+    testNode2->hitTestResult_ = HitTestResult::BUBBLING;
+    testNode->AddChild(testNode2, 1, false);
+    auto testNode3 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode3->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+    testNode4->AddChild(testNode3, 1, false);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test AxisTest.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    PointT<float> parentRevertPoint;
+    HitTestResult ret =
+        testNode->UINode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(ret == HitTestResult::BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API17
+ * @tc.desc: CollectReservedChildren、GetContainerComponentText
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API17, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function and test CollectReservedChildren.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    std::list<int32_t> reservedElmtId;
+    testNode->CollectReservedChildren(reservedElmtId);
+    testNode->tag_ = V2::JS_VIEW_ETS_TAG;
+    testNode->CollectReservedChildren(reservedElmtId);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test GetContainerComponentText.
+     */
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode2->AddChild(ONE, 1, false);
+    ONE->tag_ = V2::TEXT_ETS_TAG;
+    std::u16string text;
+    testNode2->GetContainerComponentText(text);
+    ONE->tag_ = V2::TEXT_COMPONENT_TAG;
+    testNode2->GetContainerComponentText(text);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult onAxisResult;
+    PointT<float> globalPoint;
+    PointT<float> parentLocalPoint;
+    PointT<float> parentRevertPoint;
+    auto testNode3 = TestNode::CreateTestNode(TEST_ID_TWO);
+    testNode3->hitTestResult_ = HitTestResult::STOP_BUBBLING;
+
+    /**
+     * @tc.steps: step4. test AxisTest.
+     */
+    testNode->AddChild(testNode3, 1, false);
+    HitTestResult ret =
+        testNode->UINode::AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    EXPECT_EQ(ret == HitTestResult::STOP_BUBBLING, true);
+}
+
+/**
+ * @tc.name: AddFunc_API18
+ * @tc.desc: SetDestroying、HasSkipNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API18, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_ONE);
+    testNode->AddChild(testNode2, 1, false);
+    bool isDestroying = false;
+    bool cleanStatus = false;
+    testNode->isInDestroying_ = false;
+
+    /**
+     * @tc.steps: step2. test SetDestroying.
+     */
+    testNode->SetDestroying(isDestroying, cleanStatus);
+    testNode->isInDestroying_ = true;
+    testNode2->isCNode_ = true;
+    testNode->SetDestroying(isDestroying, cleanStatus);
+
+    /**
+     * @tc.steps: step3. set the variables to meet the conditional values.
+     */
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 1, AceType::MakeRefPtr<Pattern>(), true);
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 1, AceType::MakeRefPtr<Pattern>(), true);
+    testNode->AddChild(testNode3, 1, false);
+    testNode3->AddChild(testNode4, 1, false);
+
+    /**
+     * @tc.steps: step4. test HasSkipNode.
+     */
+    bool res = testNode->HasSkipNode();
+    EXPECT_FALSE(res);
+    testNode4->tag_ = V2::WEB_ETS_TAG;
+    res = testNode->HasSkipNode();
+    EXPECT_TRUE(res);
+    testNode3->tag_ = V2::WEB_ETS_TAG;
+    res = testNode->HasSkipNode();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: AddFunc_API19
+ * @tc.desc: TraversingCheck、LessThanAPITargetVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddFunc_API19, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function and test LessThanAPITargetVersion.
+     */
+    const RefPtr<FrameNode> testNode =
+        FrameNode::CreateFrameNode("testNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool res = testNode->LessThanAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
+    EXPECT_TRUE(res);
+    const RefPtr<FrameNode> testNode2 =
+        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
+    int32_t apiTargetVersion  = 1;
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiTargetVersion);
+    auto context = MockPipelineContext::GetCurrent();
+    testNode2->context_ = AceType::RawPtr(context);
+    res = testNode2->LessThanAPITargetVersion(PlatformVersion::VERSION_SIX);
+
+    /**
+     * @tc.steps: step2. set the variables to meet the conditional values and test TraversingCheck.
+     */
+    const RefPtr<FrameNode> testNode3 =
+        FrameNode::CreateFrameNode("testNode3", 0, AceType::MakeRefPtr<Pattern>());
+    const RefPtr<FrameNode> testNode4 =
+        FrameNode::CreateFrameNode("testNode4", 0, AceType::MakeRefPtr<Pattern>());
+    bool withAbort = false;
+    testNode3->isTraversing_ = true;
+    testNode3->TraversingCheck(testNode4, withAbort);
+    testNode3->TraversingCheck(nullptr, withAbort);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo001
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with JS.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with JS.
+     * @tc.expected: InteractionEventBindingInfo.baseEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(std::move(tapEventFunc));
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo002
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with attributeModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with attributeModifier.
+     * @tc.expected: InteractionEventBindingInfo.baseEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo003
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with capi.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with capi.
+     * @tc.expected: InteractionEventBindingInfo.nativeEventRegistered = true.
+     */
+    uiNode->setIsCNode(true);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+    ViewAbstract::DisableOnClick(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo004
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with frameNode commomEvens.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with frameNode commomEvens.
+     * @tc.expected: InteractionEventBindingInfo.nodeEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc tapEventFunc;
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(tapEventFunc));
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
+}
+
+/**
+ * @tc.name: GetInteractionEventBindingInfo005
+ * @tc.desc: Test ui node method GetInteractionEventBindingInfo when register onClick with buitIn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetInteractionEventBindingInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create uiNode.
+     * @tc.expected: uiNode is not null.
+     */
+    char tagRoot[] = "root";
+    auto patternRoot = AceType::MakeRefPtr<Pattern>();
+    auto frameNodeRoot = FrameNode::CreateFrameNode(tagRoot, 1, patternRoot, true);
+    ViewStackProcessor::GetInstance()->Push(frameNodeRoot);
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(uiNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Bind onClick with buitIn.
+     * @tc.expected: InteractionEventBindingInfo.builtInEventRegistered = true.
+     */
+    uiNode->setIsCNode(false);
+    ViewStackProcessor::GetInstance()->Push(uiNode);
+    auto topUINode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ASSERT_NE(topUINode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(topUINode);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+    auto clickCallback = [](GestureEvent& info) {};
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureEventHub->AddClickEvent(clickEvent);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().baseEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nodeEventRegistered);
+    EXPECT_FALSE(uiNode->GetInteractionEventBindingInfo().nativeEventRegistered);
+    EXPECT_TRUE(uiNode->GetInteractionEventBindingInfo().builtInEventRegistered);
 }
 } // namespace OHOS::Ace::NG

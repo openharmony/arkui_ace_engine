@@ -21,6 +21,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -28,33 +29,36 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/event/focus_hub.h"
+#include "core/components/common/layout/grid_layout_info.h"
+#include "core/components/common/layout/position_param.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/property/border_property.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/flex_property.h"
-#include "core/components_ng/property/geometry_property.h"
-#include "core/components_ng/property/grid_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/property/safe_area_insets.h"
-#include "core/pipeline/base/element_register.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+class UINode;
 class InspectorFilter;
+class GridProperty;
+class FlexItemProperty;
+struct PositionProperty;
+struct SafeAreaExpandOpts;
+class GeometryTransition;
+struct SafeAreaInsets;
+using BiasPair = std::pair<float, float>;
+using ChainWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
 
 class ACE_FORCE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-    LayoutProperty() = default;
+    LayoutProperty();
 
-    ~LayoutProperty() override = default;
+    ~LayoutProperty() override;
 
     virtual RefPtr<LayoutProperty> Clone() const;
 
@@ -133,10 +137,7 @@ public:
 
     TextDirection GetNonAutoLayoutDirection() const;
 
-    RefPtr<GeometryTransition> GetGeometryTransition() const
-    {
-        return geometryTransition_.Upgrade();
-    }
+    RefPtr<GeometryTransition> GetGeometryTransition() const;
 
     MeasureType GetMeasureType(MeasureType defaultType = MeasureType::MATCH_CONTENT) const
     {
@@ -158,7 +159,7 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdateChainWeight(const LayoutWeightPair& value);
+    void UpdateChainWeight(const ChainWeightPair& value);
 
     void UpdatePixelRound(uint16_t value)
     {
@@ -204,6 +205,8 @@ public:
     virtual void UpdateCalcMinSize(const CalcSize& value);
 
     virtual void UpdateCalcMaxSize(const CalcSize& value);
+
+    std::pair<std::vector<std::string>, std::vector<std::string>> CalcToString(const CalcSize& calcSize);
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
@@ -294,8 +297,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
 
 public:
-    void UpdateVisibility(const VisibleType& value, bool allowTransition = false);
-    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false);
+    void UpdateVisibility(const VisibleType& value, bool allowTransition = false, bool isUserSet = false);
+    void OnVisibilityUpdate(VisibleType visible, bool allowTransition = false, bool isUserSet = false);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty);
 
@@ -379,6 +382,18 @@ public:
         markAnchorStart_ = markAnchorStart;
     }
 
+    void SetNeedLazyLayout(bool value)
+    {
+        needLazyLayout_ = true;
+    }
+
+    bool GetNeedLazyLayout() const
+    {
+        return needLazyLayout_;
+    }
+
+    void ConstraintViewPosRef(ViewPosReference& viewPosRef);
+
     void CheckPositionLocalizedEdges(TextDirection layoutDirection);
     void CheckMarkAnchorPosition(TextDirection layoutDirection);
     void CheckOffsetLocalizedEdges(TextDirection layoutDirection);
@@ -395,6 +410,8 @@ public:
 
     virtual void OnPropertyChangeMeasure() {}
 
+    std::string LayoutInfoToString();
+
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -402,7 +419,8 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
+    void CheckSelfIdealSize(const SizeF& originMax);
+    void CheckCalcLayoutConstraint(const LayoutConstraintF& parentConstraint);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
@@ -416,6 +434,7 @@ private:
 
     void PaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void MarginToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
     std::optional<LayoutConstraintF> layoutConstraint_;
@@ -425,6 +444,9 @@ private:
     std::optional<LayoutConstraintF> parentLayoutConstraint_;
 
     std::unique_ptr<MeasureProperty> calcLayoutConstraint_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcSelfIdealSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMinSizeRpn_;
+    std::pair<std::vector<std::string>, std::vector<std::string>> calcMaxSizeRpn_;
     std::unique_ptr<PaddingProperty> safeAreaPadding_;
     std::unique_ptr<PaddingProperty> padding_;
     std::unique_ptr<MarginProperty> margin_;
@@ -450,7 +472,7 @@ private:
 
     bool usingPosition_ = true;
 
-    uint16_t pixelRoundFlag_  = 0;
+    uint16_t pixelRoundFlag_ = 0;
 
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;
@@ -460,6 +482,7 @@ private:
     bool widthPercentSensitive_ = false;
     bool needPositionLocalizedEdges_ = false;
     bool needOffsetLocalizedEdges_ = false;
+    bool needLazyLayout_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };

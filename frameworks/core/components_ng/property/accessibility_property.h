@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_set>
 
+#include "accessibility_property_function.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -62,10 +63,12 @@ using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 
 using GetWindowScenePositionImpl = std::function<void((WindowSceneInfo& windowSceneInfo))>;
 
+using OnAccessibilityHoverConsumeCheckImpl = std::function<bool(const NG::PointF& point)>;
+
 class FrameNode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
-class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType {
+class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType, public AccessibilityPropertyInnerFunction {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:
@@ -449,6 +452,8 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    void OnAccessibilityDetachFromMainTree();
+
     bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
 
     bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
@@ -463,15 +468,15 @@ public:
 
     void NotifyComponentChangeEvent(AccessibilityEventType eventType);
 
+    void UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey);
+
     int32_t GetChildTreeId() const;
 
     int32_t GetChildWindowId() const;
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node);
 
-    RefPtr<UINode> GetAccessibilityVirtualNode();
-
-    NG::UINode* GetAccessibilityVirtualNodePtr();
+    const RefPtr<UINode>& GetAccessibilityVirtualNode() const;
 
     bool HasAccessibilityVirtualNode() const;
 
@@ -488,6 +493,22 @@ public:
     std::string GetAccessibilityDescription() const;
 
     std::string GetTextType() const;
+
+    // true means self and descendants will consume hover, do not search brothers
+    // false means self and descendants no need to be hovered, should search brothers
+    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl)
+    {
+        accessibilityHoverConsumeCheckImpl_ = accessibilityHoverConsumeCheckImpl;
+    }
+
+    bool IsAccessibilityHoverConsume(const NG::PointF& point) const
+    {
+        if (!accessibilityHoverConsumeCheckImpl_) {
+            return true;
+        }
+
+        return accessibilityHoverConsumeCheckImpl_(point);
+    }
 
     class Level {
     public:
@@ -625,6 +646,17 @@ public:
     virtual bool IsAccessibilityHoverPriority() const;
     void SetAccessibilityHoverPriority(bool hoverPriority);
 
+    void SetUserScrollTriggerable(const bool& triggerable);
+    bool HasUserScrollTriggerable();
+    bool IsUserScrollTriggerable();
+    void ResetUserScrollTriggerable();
+    void SetFocusDrawLevel(int32_t drawLevel);
+    int32_t GetFocusDrawLevel();
+
+
+    void SetAccessibilityZIndex(const int32_t& accessibilityZIndex);
+    int32_t GetAccessibilityZIndex() const;
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -661,6 +693,10 @@ private:
 
     bool HasAction() const;
 
+    static bool CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node);
+
+    static bool CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point);
+
 protected:
     virtual void SetSpecificSupportAction() {}
     std::optional<std::string> propText_;
@@ -688,6 +724,7 @@ protected:
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetWindowScenePositionImpl getWindowScenePositionImpl_;
     OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
+    OnAccessibilityHoverConsumeCheckImpl accessibilityHoverConsumeCheckImpl_;
 
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
@@ -711,6 +748,7 @@ protected:
     std::optional<bool> isSelected_;
     std::optional<int32_t> checkedType_;
     std::optional<bool> isUserCheckable_;
+    std::optional<bool> isUserScrollTriggerable_ = true;
 
     std::optional<int32_t> minValue_;
     std::optional<int32_t> maxValue_;
@@ -719,6 +757,10 @@ protected:
     std::optional<int32_t> rangeMaxValue_;
     std::optional<int32_t> rangeCurrentValue_;
     std::optional<std::string> textValue_;
+    FocusDrawLevel focusDrawLevel_ = FocusDrawLevel::SELF;
+    // used to modify the hierarchical relation ship between sibling nodes the same level in barrierfree tree
+    // only affects the barrierfree tree presentation, does not affect the zindex in barrierfree hover
+    int32_t accessibilityZIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

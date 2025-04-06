@@ -61,6 +61,16 @@ constexpr Dimension TOOL_BAR_HEIGHT = 56.0_vp;
 constexpr Dimension TOOL_BAR_ITEM_SAFE_INTERVAL = 8.0_vp;
 constexpr Dimension TOOL_BAR_ITEM_VERTICAL_PADDING = 12.0_vp;
 constexpr Dimension ICON_SIZE = 24.0_vp;
+
+RefPtr<NavigationBarTheme> CreateAndBindNavigationBarTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(navigationTheme));
+    return navigationTheme;
+}
 } // namespace
 
 class NavigationPatternTestNg : public testing::Test {
@@ -99,9 +109,7 @@ void NavigationPatternTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapperNode>& lay
 
 void NavigationPatternTestNg::MockPipelineContextGetTheme()
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<NavigationBarTheme>()));
+    CreateAndBindNavigationBarTheme();
 }
 
 /**
@@ -1216,10 +1224,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create navigation theme to set toolbar specifications.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    auto navigationTheme = CreateAndBindNavigationBarTheme();
     navigationTheme->toolbarIconSize_ = ICON_SIZE;
     navigationTheme->menuIconSize_ = ICON_SIZE;
 
@@ -1537,10 +1542,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationToolbarConfigurationTest005, TestSiz
     /**
      * @tc.steps: step1. create navigation theme to set toolbar specifications.
      */
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto navigationTheme = AceType::MakeRefPtr<NavigationBarTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(navigationTheme));
+    auto navigationTheme = CreateAndBindNavigationBarTheme();
     navigationTheme->height_ = TOOL_BAR_HEIGHT;
     navigationTheme->toolbarItemSafeInterval_ = TOOL_BAR_ITEM_SAFE_INTERVAL;
     navigationTheme->toolbarItemHorizontalPadding_ = TOOL_BAR_ITEM_SAFE_INTERVAL;

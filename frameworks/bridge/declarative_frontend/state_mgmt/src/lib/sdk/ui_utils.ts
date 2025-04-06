@@ -35,7 +35,18 @@ class UIUtilsImpl {
     public makeObserved<T extends object>(target: T): T {
       // mark makeObserved using V2 feature
       ConfigureStateMgmt.instance.usingV2ObservedTrack('makeObserved', 'use');
-      return RefInfo.get(target).proxy as T;
+      return RefInfo.get(target)[RefInfo.MAKE_OBSERVED_PROXY] as T;
+    }
+
+    public makeV1Observed<T extends object>(target: T): T {
+      // Make non-observed data into observed V1 data
+      return ObservedObject.makeV1Observed(target);
+    }
+
+    public enableV2Compatibility<T extends object>(target: T): T {
+      // Enables V2 compatibility for the given object and all its nested objects
+      ObservedObject.enableV2Compatible(target);
+      return target;
     }
 
     public static instance(): UIUtilsImpl {

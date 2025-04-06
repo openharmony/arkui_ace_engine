@@ -31,15 +31,44 @@ struct MockReplace {
 };
 constexpr char UNDEFINED_ID[] = "undefined";
 
-struct MockNavPathInfo {
+class MockNavPathInfo : public NavPathInfo {
+    DECLARE_ACE_TYPE(MockNavPathInfo, NavPathInfo)
+public:
+    MockNavPathInfo() = default;
+    explicit MockNavPathInfo(const std::string& name) : NG::NavPathInfo(name) {}
+    MockNavPathInfo(const std::string& name, bool isEntry) : NG::NavPathInfo(name, isEntry) {}
+    ~MockNavPathInfo() = default;
+
+    void SetOnPop(std::function<void()> onPop)
+    {
+        onPop_ = onPop;
+    }
+
+    std::function<void()> GetOnPop() const
+    {
+        return onPop_;
+    }
+
+    void SetNavDestinationId(const std::string& navDestinationId)
+    {
+        navDestinationId_ = navDestinationId;
+    }
+
+    std::string GetNavDestinationId() const
+    {
+        return navDestinationId_;
+    }
+
     int32_t index = -1;
-    std::string name = "";
-    std::string navDestinationId = UNDEFINED_ID;
     bool needBuildNewInstance = false;
     bool fromRecovery = false;
     int32_t mode = 0; // 0 for standard and 1 for dialog
+    bool isForceSet = false;
+    bool isReplaced = false;
 
-    explicit MockNavPathInfo(std::string name) : name(std::move(name)) {}
+private:
+    std::function<void()> onPop_;
+    std::string navDestinationId_ = UNDEFINED_ID;
 };
 
 enum LaunchMode {
@@ -118,7 +147,7 @@ public:
 
     std::string GetNavDestinationId(int32_t index)
     {
-        return mockPathArray_[index].navDestinationId;
+        return mockPathArray_[index]->GetNavDestinationId();
     }
 
     MOCK_METHOD1(OnAttachToParent, void(RefPtr<NavigationStack>));
@@ -156,7 +185,8 @@ public:
 
     // pushPath(info: NavPathInfo, animated?: boolean): void
     // pushPath(info: NavPathInof, options?: NavigationOptions): void
-    void MockPushPath(MockNavPathInfo info, bool animated = true, LaunchMode launchmode = LaunchMode::STANDARD);
+    void MockPushPath(const RefPtr<MockNavPathInfo>& info, bool animated = true,
+        LaunchMode launchmode = LaunchMode::STANDARD);
 
     bool MockRemoveByNavDestinationId(const std::string& navDestinationId);
 
@@ -187,6 +217,24 @@ public:
 
     std::vector<int32_t> GetAllPathIndex() override;
 
+    std::vector<RefPtr<MockNavPathInfo>> MockGetPathStack();
+
+    void MockSetPathStack(std::vector<RefPtr<MockNavPathInfo>>& setPathArray, bool animated = true);
+
+    void SetIsEntryByIndex(int32_t index, bool isEntry) override;
+
+    int32_t GetSize() const
+    {
+        return size_;
+    }
+
+    int32_t GetRecoveredDestinationMode(int32_t index);
+    uint64_t GetNavDestinationIdInt(int32_t index);
+    bool GetIsForceSet(int32_t index);
+    void ResetIsForceSetFlag(int32_t index);
+    bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
+    void SetRecoveryFromReplaceDestination(int32_t index, bool value);
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
@@ -195,8 +243,10 @@ private:
     NavigationInterceptionEvent afterCallback_;
     std::function<void(NavigationMode)> modeCallback_;
     MockReplace *mockReplace_ = new MockReplace();
-    std::vector<MockNavPathInfo> mockPathArray_;
-    std::vector<MockNavPathInfo> mockPopArray_;
+    std::vector<RefPtr<MockNavPathInfo>> mockPathArray_;
+    std::vector<RefPtr<MockNavPathInfo>> mockPopArray_;
+    std::map<int32_t, bool> mockIsEntryMap_;
+    int32_t size_ = 0;
 };
 } // namespace NG
 #endif

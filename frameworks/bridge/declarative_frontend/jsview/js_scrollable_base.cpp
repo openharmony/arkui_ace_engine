@@ -111,9 +111,8 @@ void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
         NG::ScrollableModelNG::SetDigitalCrownSensitivity(
             static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
         return;
-    } else {
-        NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
     }
+    NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
 #endif
 }
 
@@ -127,6 +126,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -151,5 +151,17 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     }
     // default
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::JSBackToTop(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        NG::ScrollableModelNG::SetBackToTop(info[0]->ToBoolean());
+    } else {
+        NG::ScrollableModelNG::ResetBackToTop();
+    }
 }
 } // namespace OHOS::Ace::Framework

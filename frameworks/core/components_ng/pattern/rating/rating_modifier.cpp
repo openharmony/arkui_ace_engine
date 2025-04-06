@@ -108,7 +108,7 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum);
     const float singleStarHeight = contentSize_->Get().Height();
     float pressBorderRadius = 0.0f;
-    if (!ratingTheme->GetIsCircleRadius()) {
+    if (!ratingTheme->GetIsCircleRadius() || !isImageInfoFromTheme_) {
         pressBorderRadius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
     } else {
         auto isSquare = singleStarWidth == singleStarHeight;
@@ -121,7 +121,8 @@ void RatingModifier::PaintBoard(DrawingContext& context)
         bool isCircleBoard = static_cast<bool>(ratingTheme->GetFocusAndBlurCancleAnimation());
         RSBrush rsBrush(ToRSColor(bgColor));
         rsBrush.SetAntiAlias(true);
-        if (!isCircleBoard || (isCircleBoard && singleStarWidth != singleStarHeight)) {
+        if (!isImageInfoFromTheme_ || !isCircleBoard || (isCircleBoard &&
+            singleStarWidth != singleStarHeight)) {
             const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar),
                 offset.GetY(), offset.GetX() + singleStarWidth * static_cast<float>(
                 (touchStar + 1)), offset.GetY() + singleStarHeight);

@@ -54,6 +54,7 @@ template("ace_core_interfaces_native_node") {
       "node/grid_row_modifier.cpp",
       "node/hyperlink_modifier.cpp",
       "node/image_animator_modifier.cpp",
+      "node/lazy_grid_layout_modifier.cpp",
       "node/line_modifier.cpp",
       "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
@@ -71,6 +72,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
       "node/node_container_span_modifier.cpp",
+      "node/node_content_modifier.cpp",
       "node/node_custom_node_ext_modifier.cpp",
       "node/node_date_picker_modifier.cpp",
       "node/node_drag_modifier.cpp",
@@ -116,6 +118,7 @@ template("ace_core_interfaces_native_node") {
       "node/scroller_modifier.cpp",
       "node/search_modifier.cpp",
       "node/shape_modifier.cpp",
+      "node/side_bar_container_modifier.cpp",
       "node/swiper_controller_modifier.cpp",
       "node/tab_content_modifier.cpp",
       "node/tabs_modifier.cpp",
@@ -128,6 +131,10 @@ template("ace_core_interfaces_native_node") {
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    if (defined(config.web_components_support) &&
+        config.web_components_support) {
+      sources += [ "node/web_modifier.cpp" ]
+    }
     if (is_arkui_x) {
       deps += [
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static",
@@ -168,11 +175,9 @@ template("ace_core_interfaces_native_node") {
       sources += [
         "node/calendar_picker_modifier.cpp",
         "node/column_split_modifier.cpp",
-        "node/node_content_modifier.cpp",
         "node/node_folder_stack_modifier.cpp",
         "node/row_split_modifier.cpp",
         "node/select_modifier.cpp",
-        "node/side_bar_container_modifier.cpp",
         "node/stepper_item_modifier.cpp",
         "node/water_flow_modifier.cpp",
       ]

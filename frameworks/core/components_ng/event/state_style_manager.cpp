@@ -129,11 +129,25 @@ void StateStyleManager::HandleTouchUp()
     }
 }
 
-void StateStyleManager::FireStateFunc(bool isReset)
+static bool IsCanUpdate(UIState subscribers, UIState handlingState, UIState currentState)
 {
-    auto node = GetFrameNode();
-    CHECK_NULL_VOID(node);
-    auto nodeId = node->GetId();
+    return ((subscribers & handlingState) == handlingState || currentState == UI_STATE_NORMAL);
+}
+
+void StateStyleManager::HandleStateChangeInternal(UIState handlingState, UIState currentState, bool isReset)
+{
+    std::function<void(UIState)> onStateStyleChange;
+    if (IsCanUpdate(innerStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = innerStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
+            onStateStyleChange(currentState);
+        }
+    }
+    if (IsCanUpdate(frontendSubscribers_, handlingState, currentState)) {
+        auto node = GetFrameNode();
+        CHECK_NULL_VOID(node);
+        auto nodeId = node->GetId();
 #ifdef IS_RELEASE_VERSION
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE,"Start execution, node is %{public}s, "
         "reset is %{public}d", node->GetTag().c_str(), isReset);
@@ -141,16 +155,30 @@ void StateStyleManager::FireStateFunc(bool isReset)
     TAG_LOGI(AceLogTag::ACE_STATE_STYLE, "Start execution, node is %{public}s/%{public}d, "
         "reset is %{public}d", node->GetTag().c_str(), nodeId, isReset);
 #endif
-    auto uiNode = DynamicCast<UINode>(node);
-    CHECK_NULL_VOID(uiNode);
-    RefPtr<CustomNodeBase> customNode;
-    GetCustomNode(customNode, uiNode);
-    if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
-        TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+        auto uiNode = DynamicCast<UINode>(node);
+        CHECK_NULL_VOID(uiNode);
+        RefPtr<CustomNodeBase> customNode;
+        GetCustomNode(customNode, uiNode);
+        if (!customNode || (!customNode->FireHasNodeUpdateFunc(nodeId))) {
+            TAG_LOGW(AceLogTag::ACE_STATE_STYLE, "Can not find customNode!");
+            return;
+        }
+        ScopedViewStackProcessor processor;
+        customNode->FireNodeUpdateFunc(nodeId);
         return;
     }
-    ScopedViewStackProcessor processor;
-    customNode->FireNodeUpdateFunc(nodeId);
+    if (IsCanUpdate(userStateStyleSubscribers_.first, handlingState, currentState)) {
+        onStateStyleChange = userStateStyleSubscribers_.second;
+        if (onStateStyleChange) {
+            ScopedViewStackProcessor processor;
+            onStateStyleChange(currentState);
+        }
+    }
+}
+
+void StateStyleManager::FireStateFunc(UIState handlingState, UIState currentState, bool isReset)
+{
+    HandleStateChangeInternal(handlingState, currentState, isReset);
 }
 
 void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node)
@@ -173,6 +201,7 @@ void StateStyleManager::GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr
         if (GetCustomNodeFromSelf(node, customNode, nodeId)) {
             return;
         }
+        CHECK_NULL_VOID(node);
         node = node->GetParent();
     }
 }
@@ -345,7 +374,7 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
         CHECK_NULL_VOID(context);
         auto localMat = context->GetLocalTransformMatrix();
         vTrans.emplace_back(localMat);
-        host = host->GetAncestorNodeOfFrame(false);
+        host = host->GetAncestorNodeOfFrame(true);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());
@@ -363,11 +392,11 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
     if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
         return true;
     }
-    auto parent = node->GetAncestorNodeOfFrame(false);
+    auto parent = node->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         if (!renderContext) {
-            parent = parent->GetAncestorNodeOfFrame(false);
+            parent = parent->GetAncestorNodeOfFrame(true);
             continue;
         }
         // If the parent node has a "clip" attribute, the press region should be re-evaluated.
@@ -375,7 +404,7 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
         if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
             return true;
         }
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return false;
 }

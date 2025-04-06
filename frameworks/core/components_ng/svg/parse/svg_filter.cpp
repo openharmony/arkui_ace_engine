@@ -91,16 +91,17 @@ void SvgFilter::OnAsPaint()
     filterBrush_.SetFilter(filter);
 }
 
-void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext,
+    float useOffsetX, float useOffsetY)
 {
     auto filterRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.filterUnits);
-    auto measuredX = GetMeasuredPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
-    auto measuredY = GetMeasuredPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
-    auto measuredWidth = GetMeasuredLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
-    auto measuredHeight = GetMeasuredLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
+    auto measuredX = GetRegionPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetRegionPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetRegionLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetRegionLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
     Rect effectFilterArea = {
-        measuredX,
-        measuredY,
+        measuredX + useOffsetX,
+        measuredY + useOffsetY,
         measuredWidth,
         measuredHeight
     };
@@ -134,24 +135,24 @@ bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::s
             } },
         { SVG_HEIGHT,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.height = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.height);
             } },
         { SVG_PRIMITIVE_UNITS,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.primitiveUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
-                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+                attr.primitiveUnits = (val == "objectBoundingBox") ? SvgLengthScaleUnit::OBJECT_BOUNDING_BOX :
+                    SvgLengthScaleUnit::USER_SPACE_ON_USE;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.width = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.width);
             } },
         { SVG_X,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.x = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.x);
             } },
         { SVG_Y,
             [](const std::string& val, SvgFilterAttribute& attr) {
-                attr.y = SvgAttributesParser::ParseDimension(val);
+                SvgAttributesParser::ParseDimension(val, attr.y);
             } },
     };
     std::string key = name;

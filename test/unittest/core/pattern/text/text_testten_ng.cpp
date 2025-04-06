@@ -41,7 +41,7 @@ public:
  */
 HWTEST_F(TextFieldTenPatternNg, SpanItemUpdateParagraph007, TestSize.Level1)
 {
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
+    RefPtr<ImageSpanItem> spanItem = AceType::MakeRefPtr<ImageSpanItem>();
     ASSERT_NE(spanItem, nullptr);
     TextStyle textStyle;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -53,7 +53,8 @@ HWTEST_F(TextFieldTenPatternNg, SpanItemUpdateParagraph007, TestSize.Level1)
     placeholderStyle.height = 10.0;
     placeholderStyle.verticalAlign = VerticalAlign::BASELINE;
     placeholderStyle.baselineOffset = 1.0;
-    auto index = spanItem->UpdateParagraph(nullptr, paragraph, false, placeholderStyle);
+    spanItem->UpdatePlaceholderRun(placeholderStyle);
+    auto index = spanItem->UpdateParagraph(nullptr, paragraph, TextStyle());
     EXPECT_EQ(index, 50);
     MockParagraph::TearDown();
 }
@@ -265,6 +266,9 @@ HWTEST_F(TextFieldTenPatternNg, TextDragOverlayModifierTestNG001, TestSize.Level
     auto textNode = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
     ASSERT_NE(V2::TEXTDRAG_ETS_TAG, nullptr);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_->AddParagraph(ParagraphManager::ParagraphInfo());
     auto dragNode = TextDragPattern::CreateDragNode(textNode);
     ASSERT_NE(dragNode, nullptr);
     auto test = dragNode->GetPattern<TextDragPattern>();

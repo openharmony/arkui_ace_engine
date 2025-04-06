@@ -42,7 +42,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
-#include "ui/rs_ext_node_operation.h"
+#include "feature/anco_manager/rs_ext_node_operation.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -59,23 +59,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::string XComponentTypeToString(XComponentType type)
-{
-    switch (type) {
-        case XComponentType::UNKNOWN:
-            return "unknown";
-        case XComponentType::SURFACE:
-            return "surface";
-        case XComponentType::COMPONENT:
-            return "component";
-        case XComponentType::TEXTURE:
-            return "texture";
-        case XComponentType::NODE:
-            return "node";
-        default:
-            return "unknown";
-    }
-}
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 
 std::string XComponentRenderFitToString(RenderFit renderFit)
 {
@@ -165,6 +149,22 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
     nativeKeyEvent.timestamp = event.timeStamp.time_since_epoch().count();
     return nativeKeyEvent;
 }
+
+ArkUI_XComponent_ImageAnalyzerState ConvertNativeXComponentAnalyzerStatus(const ImageAnalyzerState state)
+{
+    switch (state) {
+        case ImageAnalyzerState::UNSUPPORTED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED;
+        case ImageAnalyzerState::ONGOING:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING;
+        case ImageAnalyzerState::STOPPED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_STOPPED;
+        case ImageAnalyzerState::FINISHED:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_FINISHED;
+        default:
+            return ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED;
+    }
+}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -179,6 +179,52 @@ XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComp
         InitNativeXComponent();
     }
     RegisterSurfaceCallbackModeEvent();
+}
+
+std::string XComponentPattern::XComponentTypeToString(XComponentType type)
+{
+    switch (type) {
+        case XComponentType::UNKNOWN:
+            return "unknown";
+        case XComponentType::SURFACE:
+            return "surface";
+        case XComponentType::COMPONENT:
+            return "component";
+        case XComponentType::TEXTURE:
+            return "texture";
+        case XComponentType::NODE:
+            return "node";
+        default:
+            return "unknown";
+    }
+}
+
+std::string XComponentPattern::XComponentNodeTypeToString(XComponentNodeType type)
+{
+    switch (type) {
+        case XComponentNodeType::UNKNOWN:
+            return "unknown";
+        case XComponentNodeType::TYPE_NODE:
+            return "type_node";
+        case XComponentNodeType::DECLARATIVE_NODE:
+            return "declarative_node";
+        case XComponentNodeType::CNODE:
+            return "cnode";
+        default:
+            return "unknown";
+    }
+}
+
+void XComponentPattern::AdjustNativeWindowSize(float width, float height)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto viewScale = context->GetViewScale();
+    CHECK_NULL_VOID(renderSurface_);
+    renderSurface_->AdjustNativeWindowSize(
+        static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
 }
 
 void XComponentPattern::InitNativeXComponent()
@@ -221,6 +267,7 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -239,13 +286,14 @@ void XComponentPattern::InitSurface()
     } else if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);
+        renderContext->OnNodeNameUpdate(GetId());
     }
     renderSurface_->InitSurface();
     renderSurface_->UpdateSurfaceConfig();
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->RegisterBufferCallback();
     }
-    if (isTypedNode_) {
+    if (isTypedNode_ || isCNode_) {
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
@@ -259,10 +307,17 @@ void XComponentPattern::UpdateTransformHint()
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
+    initialContext_ = pipelineContext;
     pipelineContext->AddWindowStateChangedCallback(host->GetId());
-    SetRotation(pipelineContext->GetTransformHint());
+    RegisterTransformHintCallback(AceType::RawPtr(pipelineContext));
+}
+
+void XComponentPattern::RegisterTransformHintCallback(PipelineContext* context)
+{
+    CHECK_NULL_VOID(context);
+    SetRotation(context->GetTransformHint());
     auto callbackId =
-        pipelineContext->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
+        context->RegisterTransformHintChangeCallback([weak = WeakClaim(this)](uint32_t transform) {
             auto pattern = weak.Upgrade();
             if (pattern) {
                 pattern->SetRotation(transform);
@@ -294,14 +349,19 @@ void XComponentPattern::OnAttachToMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
+    isOnTree_ = true;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
-    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->AddToPipelineOnContainer();
-        needRecoverDisplaySync_ = false;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->AddToPipelineOnContainer();
+            needRecoverDisplaySync_ = false;
+        }
     }
 }
 
@@ -309,14 +369,19 @@ void XComponentPattern::OnDetachFromMainTree()
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] DetachFromMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
+    isOnTree_ = false;
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
     }
-    if (displaySync_ && displaySync_->IsOnPipeline()) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: %{public}s(%{public}" PRIu64 ")",
-            GetId().c_str(), displaySync_->GetId());
-        displaySync_->DelFromPipelineOnContainer();
-        needRecoverDisplaySync_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (displaySync_ && displaySync_->IsOnPipeline()) {
+            TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: "
+                "%{public}s(%{public}" PRIu64 ")", GetId().c_str(), displaySync_->GetId());
+            displaySync_->DelFromPipelineOnContainer();
+            needRecoverDisplaySync_ = true;
+        }
     }
 }
 
@@ -484,10 +549,10 @@ void XComponentPattern::OnRebuildFrame()
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    UninitializeAccessibility();
+    UninitializeAccessibility(frameNode);
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
-            HandleSurfaceDestroyed();
+            HandleSurfaceDestroyed(frameNode);
         }
         if (isNativeXComponent_) {
             OnNativeUnload(frameNode);
@@ -571,6 +636,15 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
     context->AddWindowStateChangedCallback(host->GetId());
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->SetInstanceId(context->GetInstanceId());
+    auto initialContext = initialContext_.Upgrade();
+    if (initialContext && initialContext != context) {
+        initialContext->RemoveWindowStateChangedCallback(host->GetId());
+        if (HasTransformHintChangedCallbackId()) {
+            initialContext->UnregisterTransformHintChangedCallback(transformHintChangedCallbackId_.value());
+            RegisterTransformHintCallback(context);
+        }
+        initialContext_ = nullptr;
+    }
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
@@ -591,6 +665,7 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
     json->PutExtAttr("hdrBrightness", std::to_string(hdrBrightness_).c_str(), filter);
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
+    json->PutExtAttr("screenId", screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : "", filter);
     if (type_ == XComponentType::SURFACE) {
         json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
     }
@@ -668,6 +743,8 @@ void XComponentPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc(std::string("hdrBrightness: ").append(std::to_string(hdrBrightness_).c_str()));
     DumpLog::GetInstance().AddDesc(
         std::string("enableTransparentLayer: ").append(isTransparentLayer_ ? "true" : "false"));
+    DumpLog::GetInstance().AddDesc(
+        std::string("screenId: ").append(screenId_.has_value() ? std::to_string(screenId_.value()).c_str() : ""));
     if (renderSurface_) {
         renderSurface_->DumpInfo();
     }
@@ -708,6 +785,10 @@ void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight
     CHECK_NULL_VOID(host);
     auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(renderSurface_);
+    if (renderSurface_->GetNativeWindow()) {
+        return;
+    }
     if (renderSurface_->IsSurfaceValid() && (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE)) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
@@ -722,7 +803,12 @@ void XComponentPattern::XComponentSizeInit()
     CHECK_RUN_ON(UI);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    InitNativeWindow(initSize_.Width(), initSize_.Height());
+    if (!isCNode_) {
+        InitNativeWindow(initSize_.Width(), initSize_.Height());
+    } else {
+        AdjustNativeWindowSize(initSize_.Width(), initSize_.Height());
+    }
+    
 #ifdef RENDER_EXTRACT_SUPPORTED
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
@@ -793,13 +879,12 @@ void XComponentPattern::InitializeAccessibility()
     }
 }
 
-void XComponentPattern::UninitializeAccessibility()
+void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
 {
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "UninitializeAccessibility");
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int64_t accessibilityId = host->GetAccessibilityId();
-    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
@@ -882,10 +967,9 @@ void XComponentPattern::OnSetAccessibilityChildTree(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty != nullptr) {
-        accessibilityProperty->SetChildWindowId(childWindowId);
-        accessibilityProperty->SetChildTreeId(childTreeId);
-    }
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
 }
 
 void XComponentPattern::InitializeAccessibilityCallback()
@@ -984,7 +1068,7 @@ void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetFocusable(true);
 #endif
 
-    auto onFocusEvent = [weak = WeakClaim(this)]() {
+    auto onFocusEvent = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         return pattern->HandleFocusEvent();
@@ -1390,9 +1474,7 @@ void XComponentPattern::RestoreHandlingRenderContextForSurface()
 
 XComponentControllerErrorCode XComponentPattern::SetExtController(const RefPtr<XComponentPattern>& extPattern)
 {
-    if (!extPattern) {
-        return XCOMPONENT_CONTROLLER_BAD_PARAMETER;
-    }
+    CHECK_NULL_RETURN(extPattern, XCOMPONENT_CONTROLLER_BAD_PARAMETER);
     if (extPattern_.Upgrade()) {
         return XCOMPONENT_CONTROLLER_REPEAT_SET;
     }
@@ -1721,12 +1803,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     auto width = surfaceRect.Width();
     auto height = surfaceRect.Height();
     if (needResizeNativeWindow) {
-        CHECK_NULL_VOID(renderSurface_);
-        auto context = host->GetContextRefPtr();
-        CHECK_NULL_VOID(context);
-        auto viewScale = context->GetViewScale();
-        renderSurface_->AdjustNativeWindowSize(
-            static_cast<uint32_t>(width * viewScale), static_cast<uint32_t>(height * viewScale));
+        AdjustNativeWindowSize(width, height);
     }
     if (isNativeXComponent_) {
         CHECK_NULL_VOID(nativeXComponent_);
@@ -1751,7 +1828,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     }
 }
 
-void XComponentPattern::OnSurfaceDestroyed()
+void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
 {
     if (isNativeXComponent_) {
         CHECK_RUN_ON(UI);
@@ -1765,10 +1842,14 @@ void XComponentPattern::OnSurfaceDestroyed()
         ACE_SCOPED_TRACE("XComponent[%s] native OnSurfaceDestroyed", GetId().c_str());
         callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
         nativeXComponentImpl_->SetSurface(nullptr);
-    } else {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto eventHub = host->GetEventHub<XComponentEventHub>();
+    } else if (isTypedNode_) {
+        RefPtr<FrameNode> host;
+        if (!frameNode) {
+            host = GetHost();
+            CHECK_NULL_VOID(host);
+            frameNode = Referenced::RawPtr(host);
+        }
+        auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         {
             ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
@@ -1807,19 +1888,19 @@ void XComponentPattern::HandleSurfaceCreated()
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->RegisterSurface();
-    surfaceId_ = renderSurface_->GetUniqueId();
+    surfaceId_ = screenId_.has_value() ? "" : renderSurface_->GetUniqueId();
     CHECK_NULL_VOID(xcomponentController_);
     xcomponentController_->SetSurfaceId(surfaceId_);
     OnSurfaceCreated();
 }
 
-void XComponentPattern::HandleSurfaceDestroyed()
+void XComponentPattern::HandleSurfaceDestroyed(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(renderSurface_);
     renderSurface_->ReleaseSurfaceBuffers();
     renderSurface_->UnregisterSurface();
     CHECK_NULL_VOID(xcomponentController_);
-    OnSurfaceDestroyed();
+    OnSurfaceDestroyed(frameNode);
     xcomponentController_->SetSurfaceId("");
 }
 
@@ -1919,7 +2000,7 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
             CHECK_NULL_VOID(pattern);
             pattern->CreateAnalyzerOverlay();
         },
-        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 
 void XComponentPattern::StopImageAnalyzer()
@@ -2089,7 +2170,16 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 void XComponentPattern::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    renderFit_ = renderFit;
     handlingSurfaceRenderContext_->SetRenderFit(renderFit);
+}
+
+void XComponentPattern::SetScreenId(uint64_t screenId)
+{
+    screenId_ = screenId;
+    renderContextForSurface_->SetScreenId(screenId);
+    surfaceId_ = "";
+    xcomponentController_->SetSurfaceId(surfaceId_);
 }
 
 void XComponentPattern::EnableSecure(bool isSecure)
@@ -2126,5 +2216,51 @@ RenderFit XComponentPattern::GetSurfaceRenderFit() const
 {
     CHECK_NULL_RETURN(handlingSurfaceRenderContext_, RenderFit::RESIZE_FILL);
     return handlingSurfaceRenderContext_->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
+}
+
+bool XComponentPattern::GetEnableAnalyzer()
+{
+    return isEnableAnalyzer_;
+}
+
+void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& callback)
+{
+    CHECK_NULL_VOID(callback);
+    if (!isOnTree_ || !isEnableAnalyzer_) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
+    }
+    if (!IsSupportImageAnalyzerFeature()) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED);
+    }
+    if (isNativeImageAnalyzing_) {
+        return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING);
+    }
+    isNativeImageAnalyzing_ = true;
+
+    OnAnalyzedCallback nativeOnAnalyzed = [weak = WeakClaim(this),
+        callback](ImageAnalyzerState state) {
+        CHECK_NULL_VOID(callback);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto statusCode = ConvertNativeXComponentAnalyzerStatus(state);
+        callback(statusCode);
+        pattern->isNativeImageAnalyzing_ = false;
+    };
+
+    CHECK_NULL_VOID(imageAnalyzerManager_);
+    imageAnalyzerManager_->SetImageAnalyzerCallback(nativeOnAnalyzed);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
 }
 } // namespace OHOS::Ace::NG

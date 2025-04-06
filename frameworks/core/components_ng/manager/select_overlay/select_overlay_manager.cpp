@@ -16,6 +16,8 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/event/event_info_convertor.h"
+
 namespace OHOS::Ace::NG {
 RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     const SelectOverlayInfo& info, const WeakPtr<SelectionHost>& host, bool animation)
@@ -69,7 +71,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             }
             auto rootNode = weakRoot.Upgrade();
             auto container = Container::Current();
-            if (container && container->IsScenceBoardWindow()) {
+            if (container && container->IsSceneBoardWindow()) {
                 auto root = selectOverlayManager->FindWindowScene(weakCaller.Upgrade());
                 rootNode = DynamicCast<FrameNode>(root);
             }
@@ -108,7 +110,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
 RefPtr<UINode> SelectOverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
 {
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow()) {
+    if (!container || !container->IsSceneBoardWindow()) {
         return rootNodeWeak_.Upgrade();
     }
     CHECK_NULL_RETURN(targetNode, nullptr);
@@ -280,6 +282,11 @@ void SelectOverlayManager::HandleGlobalEvent(
     if ((touchPoint.type != TouchType::DOWN || touchPoint.sourceType != SourceType::MOUSE) && !acceptTouchUp) {
         return;
     }
+    if (EventInfoConvertor::MatchCompatibleCondition() &&
+        (touchPoint.type == TouchType::DOWN && touchPoint.sourceType == SourceType::MOUSE) && !acceptTouchUp) {
+        return;
+    }
+
     if (!IsInSelectedOrSelectOverlayArea(point)) {
         NotifyOverlayClosed(true);
         DestroySelectOverlay();

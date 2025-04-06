@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
+#include "core/common/recorder/node_data_cache.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -23,6 +24,7 @@ namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
+constexpr int32_t  HOTZONE_SPACE = 2;
 } // namespace
 
 void SwitchPattern::OnAttachToFrameNode()
@@ -76,7 +78,7 @@ void SwitchPattern::OnModifyDone()
     CHECK_NULL_VOID(gestureHub);
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    switchTheme_ = pipeline->GetTheme<SwitchTheme>();
+    switchTheme_ = pipeline->GetTheme<SwitchTheme>(host->GetThemeScopeId());
     InitPanEvent(gestureHub);
     InitTouchEvent();
     InitMouseEvent();
@@ -95,7 +97,7 @@ void SwitchPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle focus event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -278,6 +280,8 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
+    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
@@ -424,11 +428,11 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     Color onBgColor = switchTheme_->GetActiveColor();
     Color offBgColor = switchTheme_->GetInactiveColor();
     if (isOn) {
-        if (!switchPaintProperty->HasSelectedColor() || switchPaintProperty->GetSelectedColor() == onBgColor) {
+        if (switchPaintProperty->HasSelectedColor() && switchPaintProperty->GetSelectedColor() == onBgColor) {
             switchPaintProperty->UpdateSelectedColor(onBgColor);
         }
     } else {
-        if (!switchPaintProperty->HasUnselectedColor() || switchPaintProperty->GetUnselectedColor() == offBgColor) {
+        if (switchPaintProperty->HasUnselectedColor() && switchPaintProperty->GetUnselectedColor() == offBgColor) {
             Color bgColor = isFocus_ ? switchTheme_->GetFocusedBGColorUnselected() : switchTheme_->GetInactiveColor();
             switchPaintProperty->UpdateUnselectedColor(bgColor);
         }
@@ -532,17 +536,11 @@ void SwitchPattern::InitClickEvent()
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH &&
-            (info.IsPreventDefault() || switchPattern->isTouchPreventDefault_)) {
-            TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "swich preventDefault successfully");
-            switchPattern->isTouchPreventDefault_ = false;
-            return;
-        }
         switchPattern->OnClick();
     };
 
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    gesture->AddClickAfterEvent(clickListener_);
+    gesture->AddClickEvent(clickListener_);
 }
 
 void SwitchPattern::InitTouchEvent()
@@ -557,9 +555,6 @@ void SwitchPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto switchPattern = weak.Upgrade();
         CHECK_NULL_VOID(switchPattern);
-        if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
-            switchPattern->isTouchPreventDefault_ = info.IsPreventDefault();
-        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             switchPattern->OnTouchDown();
         }
@@ -569,7 +564,7 @@ void SwitchPattern::InitTouchEvent()
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchAfterEvent(touchListener_);
+    gesture->AddTouchEvent(touchListener_);
 }
 
 void SwitchPattern::InitMouseEvent()
@@ -723,10 +718,10 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 // Set the default hot zone for the component.
 void SwitchPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalSize_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalSize_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + HOTZONE_SPACE * hotZoneHorizontalSize_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + HOTZONE_SPACE * hotZoneVerticalSize_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
@@ -770,18 +765,27 @@ void SwitchPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-    CHECK_NULL_VOID(switchTheme);
-    auto switchPaintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-    CHECK_NULL_VOID(switchPaintProperty);
-    switchPaintProperty->UpdateSwitchPointColor(switchTheme->GetPointColor());
     CHECK_NULL_VOID(paintMethod_);
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
-    switchModifier->InitializeParam();
+    switchModifier->InitializeParam(host->GetThemeScopeId());
     host->MarkDirtyNode();
+    host->SetNeedCallChildrenUpdate(false);
+}
+
+bool SwitchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+
+    if (!paintProperty->HasSelectedColor() || !paintProperty->HasSwitchPointColor()) {
+        result = true;
+    }
+
+    return result;
 }
 
 void SwitchPattern::SetSwitchIsOn(bool ison)

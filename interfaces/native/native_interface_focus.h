@@ -19,7 +19,7 @@
  *
  * @brief Provides focus capabilities of ArkUI on the native side, such as focus transfer operaions.
  *
- * @since 16
+ * @since 15
  */
 
 /**
@@ -29,7 +29,8 @@
  *
  * @library libace_ndk.z.so
  * @syscap SystemCapability.ArkUI.ArkUI.Full
- * @since 16
+ * @kit ArkUI
+ * @since 15
  */
 
 #ifndef ARKUI_NATIVE_INTERFACE_FOCUS_H
@@ -43,6 +44,18 @@ extern "C" {
 #endif
 
 /**
+ * @brief Determines the priority of key event processing when component cannot handle the key event.
+ *
+ * @since 15
+ */
+typedef enum {
+    /** Key events are used to move focus. */
+    ARKUI_KEY_PROCESSING_MODE_FOCUS_NAVIGATION = 0,
+    /** Key events bubble up to ancestors. */
+    ARKUI_KEY_PROCESSING_MODE_FOCUS_ANCESTOR_EVENT,
+} ArkUI_KeyProcessingMode;
+
+/**
  * @brief Apply focus for a specific node.
  *
  * @param node The node.
@@ -51,7 +64,7 @@ extern "C" {
  *         {@link ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE} if the node is not focusable.
  *         {@link ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE_ANCESTOR} if the node has unfocusable ancestor.
  *         {@link ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT} if the node is not exists.
- * @since 16
+ * @since 15
  */
 ArkUI_ErrorCode OH_ArkUI_FocusRequest(ArkUI_NodeHandle node);
 
@@ -59,7 +72,7 @@ ArkUI_ErrorCode OH_ArkUI_FocusRequest(ArkUI_NodeHandle node);
  * @brief Clear current focus to root scope.
  *
  * @param uiContext Indicates the pointer to a UI instance.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_FocusClear(ArkUI_ContextHandle uiContext);
 
@@ -71,7 +84,7 @@ void OH_ArkUI_FocusClear(ArkUI_ContextHandle uiContext);
  * @param isAutoInactive When touch event or mouse-pressed event triggerd,
  *                    "true" indicates to set state to inactive,
  *                    "false" indicates to maintain the state until relative API is called.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_FocusActivate(ArkUI_ContextHandle uiContext, bool isActive, bool isAutoInactive);
 
@@ -80,12 +93,22 @@ void OH_ArkUI_FocusActivate(ArkUI_ContextHandle uiContext, bool isActive, bool i
  *
  * @param uiContext Indicates the pointer to a UI instance.
  * @param autoTransfer Indicates whether to transfer focus when focus view show.
- * @since 16
+ * @since 15
  */
 void OH_ArkUI_FocusSetAutoTransfer(ArkUI_ContextHandle uiContext, bool autoTransfer);
+
+/**
+ * @brief Set the priority of key event processing when component cannot handle the key event.
+ *
+ * @param uiContext Indicates the pointer to a UI instance.
+ * @param mode Indicates the key processing mode.
+ * @since 15
+ */
+void OH_ArkUI_FocusSetKeyProcessingMode(ArkUI_ContextHandle uiContext, ArkUI_KeyProcessingMode mode);
 
 #ifdef __cplusplus
 };
 #endif
 
 #endif // ARKUI_NATIVE_INTERFACE_FOCUS_H
+/** @} */

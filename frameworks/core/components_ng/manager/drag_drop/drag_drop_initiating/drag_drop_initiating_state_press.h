@@ -40,7 +40,8 @@ public:
     void HandleSequenceOnActionCancel(const GestureEvent& info) override;
     void HandlePanOnActionStart(const GestureEvent& info) override;
     void HandlePanOnReject() override;
-
+    void HandleTouchEvent(const TouchEvent& touchEvent) override;
+    void HandlePanOnActionEnd(const GestureEvent& info) override;
     void Init(int32_t currentState) override;
 
 private:

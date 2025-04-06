@@ -629,7 +629,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest014, TestSize.Level1)
      * @tc.expected: the return value is equal to HOST_DEPTH.
      */
     int32_t hostDepth = layoutWrapper->GetHostDepth();
-    EXPECT_EQ(hostDepth, 1);
+    EXPECT_EQ(hostDepth, Infinity<int32_t>());
 
     /**
      * @tc.steps: step3. call GetHostDepth and set hostNode_ is null.
@@ -1572,9 +1572,9 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest043, TestSize.Level1)
      */
     auto node = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, NODE_ID_0, AceType::MakeRefPtr<Pattern>());
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<FocusHub> focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = false;
-    eventHub->focusHub_ = focusHub;
+    node->focusHub_ = focusHub;
     node->eventHub_ = eventHub;
 
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();

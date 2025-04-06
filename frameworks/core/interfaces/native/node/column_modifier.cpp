@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr FlexAlign DEFAULT_JUSTIFY_CONTENT = FlexAlign::FLEX_START;

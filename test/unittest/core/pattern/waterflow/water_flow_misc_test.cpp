@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -90,20 +91,20 @@ HWTEST_F(WaterFlowTestNg, Clip002, TestSize.Level1)
     rect->SetHeight(Dimension(200.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(470.0f, 790.0f));
     auto rect1 = frameNode_->GetGeometryNode()->GetPaddingRect();
     rect1.SetOffset(OffsetF(5.0f, 5.0f)); // padding offset
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect1))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto rect2 = frameNode_->GetGeometryNode()->GetFrameRect();
     rect2.SetOffset(OffsetF(0.0f, 0.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect2))).Times(1);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -132,12 +133,12 @@ HWTEST_F(WaterFlowTestNg, Clip003, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameRect().ToString(), "RectT (2.00, 2.00) - [480.00 x 800.00]");
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(5, 5, 470.0f, 790.0f)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(-2, -2, 484, 804)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -169,7 +170,7 @@ HWTEST_F(WaterFlowTestNg, Clip004, TestSize.Level1)
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(1, 1, 478, 798)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -201,7 +202,7 @@ HWTEST_F(WaterFlowTestNg, Clip005, TestSize.Level1)
     ASSERT_TRUE(frameNode_->GetGeometryNode()->GetResolvedSingleSafeAreaPadding());
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(0, 0, 480, 800)))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -224,11 +225,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPaintMethod001, TestSize.Level1)
      */
     auto scrollBar = pattern_->GetScrollBar();
     scrollBar->SetScrollable(true);
-
-    auto paintMethod = pattern_->CreateNodePaintMethod();
-    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
-        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
-    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    UpdateOverlayModifier();
     EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::RIGHT);
 
     /**
@@ -237,11 +234,85 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPaintMethod001, TestSize.Level1)
      */
     pattern_->SetEdgeEffect(EdgeEffect::FADE);
     scrollBar->SetPositionMode(PositionMode::BOTTOM);
-
-    paintMethod = pattern_->CreateNodePaintMethod();
-    paintWrapper = AceType::MakeRefPtr<PaintWrapper>(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(),
-        frameNode_->GetPaintProperty<ScrollablePaintProperty>());
-    paintMethod->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+    UpdateOverlayModifier();
     EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->positionMode_, PositionMode::BOTTOM);
+}
+
+/**
+ * @tc.name: FadingEdge001
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FadingEdge001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to waterFlow
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    WaterFlowModelNG model = CreateWaterFlow();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_TRUE(paintProperty_->GetFadingEdge().value_or(false));
+    EXPECT_EQ(paintProperty_->GetFadingEdgeLength().value(), fadingEdgeLength);
+
+    /**
+     * @tc.steps: step2. Change FadingEdge to false
+     * @tc.expected: There is no fading edge
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false, fadingEdgeLength);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    EXPECT_FALSE(paintProperty_->GetFadingEdge().value_or(false));
+}
+
+/**
+ * @tc.name: FadingEdge002
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FadingEdge002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to waterFlow
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    WaterFlowModelNG model = CreateWaterFlow();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems();
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The waterFlow at top
+     * @tc.expected: Fading bottom
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step3. The waterFlow at middle
+     * @tc.expected: Fading both
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+
+    /**
+     * @tc.steps: step4. The waterFlow at bottom
+     * @tc.expected: Fading top
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
 }
 } // namespace OHOS::Ace::NG

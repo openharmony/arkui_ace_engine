@@ -64,7 +64,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the incoming safe area is identical to the current one, false otherwise.
      */
-    bool CheckNavArea(const SafeAreaInsets& safeArea);
+    bool CheckNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Updates the navigation indictor safe area.
@@ -72,7 +72,7 @@ public:
      * @param safeArea The new navigation indictor safe area.
      * @return True if the system safe area was modified, false otherwise.
      */
-    bool UpdateNavArea(const SafeAreaInsets& safeArea);
+    bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Retrieves the system safe area insets.
@@ -83,6 +83,11 @@ public:
      * @return The system safe area insets.
      */
     SafeAreaInsets GetSystemSafeArea() const;
+
+    SafeAreaInsets GetNavSafeArea() const
+    {
+        return navSafeArea_;
+    }
 
     /**
      * @brief Cut the incoming area with root size, then check if the result is identical to the cutout safe area.
@@ -110,6 +115,13 @@ public:
      * @return The safe area insets that account for any cutout areas on the screen.
      */
     SafeAreaInsets GetCutoutSafeArea() const;
+
+    /**
+     * @brief Retrieves the safe area insets that account for any cutout areas on the screen.
+     *
+     * @return The safe area insets that account for cutout areas on the screen without any judgement.
+     */
+    SafeAreaInsets GetCutoutSafeAreaWithoutProcess() const;
 
     bool UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea);
 
@@ -163,9 +175,11 @@ public:
 
     float GetKeyboardOffset(bool withoutProcess = false) const;
 
-    float GetKeyboardOffsetDirectly() const
+    void SetKeyboardInfo(float height);
+
+    int32_t GetKeyboardOrientation() const
     {
-        return keyboardOffset_;
+        return keyboardOrientation_;
     }
 
     float GetRawKeyboardHeight() const
@@ -224,25 +238,28 @@ public:
 
     SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
-    SafeAreaInsets GetScbSafeArea() const;
-
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(KeyBoardAvoidMode value);
+
     KeyBoardAvoidMode GetKeyBoardAvoidMode();
+
     bool IsIgnoreSafeArea()
     {
         return ignoreSafeArea_;
     }
+
     bool IsNeedAvoidWindow()
     {
         return isNeedAvoidWindow_;
     }
+
     bool IsFullScreen()
     {
         return isFullScreen_;
     }
+
     bool SetIsAtomicService(bool value);
     bool IsAtomicService() const;
 
@@ -283,6 +300,7 @@ public:
     {
         return keyboardHeightConsideringUIExtension_;
     }
+
     void SetkeyboardHeightConsideringUIExtension(uint32_t height)
     {
         if (keyboardHeightConsideringUIExtension_ != height) {
@@ -294,13 +312,25 @@ public:
             keyboardHeightConsideringUIExtension_ = height;
         }
     }
+
     void AddKeyboardChangeCallbackConsideringUIExt(int32_t nodeId, const std::function<void()>& callback)
     {
         keyboardChangeCbsConsideringUIExt_[nodeId] = callback;
     }
+
     void RemoveKeyboardChangeCallbackConsideringUIExt(int32_t nodeId)
     {
         keyboardChangeCbsConsideringUIExt_.erase(nodeId);
+    }
+
+    void SetUseCutout(bool useCutout)
+    {
+        useCutout_ = useCutout;
+    }
+
+    bool GetUseCutout()
+    {
+        return useCutout_;
     }
 
 private:
@@ -327,6 +357,8 @@ private:
      * [keyboardAvoidMode_] is NONE.
      */
     bool keyboardSafeAreaEnabled_ = false;
+
+    bool useCutout_ = false;
 
     KeyBoardAvoidMode keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
 
@@ -368,9 +400,9 @@ private:
     std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
-
     float lastKeyboardY_ = 0.0f;
     float rawKeyboardHeight_ = 0.0f;
+    int32_t keyboardOrientation_ = -1;
 
     static constexpr float SAFE_AREA_VELOCITY = 0.0f;
     static constexpr float SAFE_AREA_MASS = 1.0f;

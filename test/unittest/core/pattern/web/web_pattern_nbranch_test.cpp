@@ -280,137 +280,6 @@ HWTEST_F(WebPatternBranchTestUT, OnDefaultTextEncodingFormatUpdate, TestSize.Lev
 }
 
 /**
- * @tc.name: OnDetachContext
- * @tc.desc: Test OnDetachContext.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, OnDetachContext, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->selectOverlayProxy_ = nullptr;
-    auto pipelineContext = MockPipelineContext::GetCurrent();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
-    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
-#endif
-}
-
-/**
- * @tc.name: OnDetachContext001
- * @tc.desc: Test OnDetachContext.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, OnDetachContext001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    pipelineContext->SetupRootElement();
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
-    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
-#endif
-}
-
-/**
- * @tc.name: OnDetachContext002
- * @tc.desc: Test OnDetachContext.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, OnDetachContext002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(1);
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    pipelineContext->selectOverlayManager_ = nullptr;
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
-    ASSERT_EQ(webPattern->selectOverlayProxy_, nullptr);
-#endif
-}
-
-/**
- * @tc.name: RegisterSelectOverLayOnClose002
- * @tc.desc: Test RegisterSelectOverLayOnClose.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose002, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = true;
-    selectInfo.secondHandle.isShow = true;
-    webPattern->RegisterSelectOverLayOnClose(selectInfo);
-    selectInfo.onClose(false);
-    ASSERT_FALSE(webPattern->isReceivedArkDrag_);
-#endif
-}
-
-/**
- * @tc.name: RegisterSelectOverLayOnClose003
- * @tc.desc: Test RegisterSelectOverLayOnClose.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternBranchTestUT, RegisterSelectOverLayOnClose003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern, nullptr);
-    SelectOverlayInfo selectInfo;
-    selectInfo.firstHandle.isShow = true;
-    selectInfo.secondHandle.isShow = true;
-    webPattern->RegisterSelectOverLayOnClose(selectInfo);
-    selectInfo.onClose(true);
-    ASSERT_FALSE(webPattern->isReceivedArkDrag_);
-#endif
-}
-
-/**
  * @tc.name: DumpViewDataPageNode007
  * @tc.desc: DumpViewDataPageNode.
  * @tc.type: FUNC
@@ -1014,7 +883,7 @@ HWTEST_F(WebPatternBranchTestUT, OnAttachContextDrag, TestSize.Level1)
     auto dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
     auto pipelineContext = MockPipelineContext::GetCurrent();
     pipelineContext->SetupRootElement();
-    webPattern->OnAttachContext(pipelineContext.GetRawPtr());
+    webPattern->OnAttachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }
@@ -1041,7 +910,7 @@ HWTEST_F(WebPatternBranchTestUT, OnDetachContextDrag, TestSize.Level1)
     auto pipelineContext = MockPipelineContext::GetCurrent();
     pipelineContext->SetupRootElement();
     webPattern->tooltipId_ = 1;
-    webPattern->OnDetachContext(pipelineContext.GetRawPtr());
+    webPattern->OnDetachContext(Referenced::RawPtr(pipelineContext));
     ASSERT_NE(pipelineContext->GetDragDropManager(), nullptr);
 #endif
 }

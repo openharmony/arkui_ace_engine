@@ -105,6 +105,21 @@ public:
         if (space.has_value()) {
             DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
         }
+        auto widthLayoutPolicy = layoutProperty->GetWidthLayoutPolicy();
+        auto heightLayoutPolicy = layoutProperty->GetHeightLayoutPolicy();
+        std::string layoutPolicy = "";
+        if (widthLayoutPolicy.has_value() &&
+            widthLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append("WidthLayoutPolicy: ").append(std::to_string(widthLayoutPolicy.value()));
+        }
+        if (heightLayoutPolicy.has_value() &&
+            heightLayoutPolicy.value() != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append(layoutPolicy.length() == 0 ? "HeightLayoutPolicy: " : " HeightLayoutPolicy: ")
+                .append(std::to_string(heightLayoutPolicy.value()));
+        }
+        if (layoutPolicy.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicy);
+        }
     }
 
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override

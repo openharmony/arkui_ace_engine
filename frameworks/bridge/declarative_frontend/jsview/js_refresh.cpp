@@ -16,9 +16,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 
 #include <cstdint>
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
@@ -256,9 +255,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "Refresh.OnStateChange");
-#endif
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
     };
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
 }
@@ -289,7 +286,7 @@ void JSRefresh::OnOffsetChange(const JSCallbackInfo& args)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto offsetChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                                const float& value) {
+                            const float& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Refresh.OnOffsetChange");
         PipelineContext::SetCallBackNode(node);

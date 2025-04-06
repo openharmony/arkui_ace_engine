@@ -41,6 +41,7 @@ using DynamicPageSizeCallback = std::function<void(const SizeF& size)>;
  * and the input parameter is 'true' for onHide and false for onShow.
  */
 using PageVisibilityChangeCallback = std::function<void(bool)>;
+using OnNewParamCallback = std::function<void(const std::string&)>;
 
 enum class RouterPageState {
     ABOUT_TO_APPEAR = 0,
@@ -78,9 +79,9 @@ public:
         return pageInfo_ ? pageInfo_->GetPageUrl() : "";
     }
 
-    virtual void OnShow();
+    virtual void OnShow(bool isFromWindow = false);
 
-    virtual void OnHide();
+    virtual void OnHide(bool isFromWindow = false);
 
     bool OnBackPressed();
 
@@ -102,6 +103,11 @@ public:
     void SetOnBackPressed(std::function<bool()>&& OnBackPressed)
     {
         onBackPressed_ = std::move(OnBackPressed);
+    }
+
+    void SetOnNewParam(OnNewParamCallback&& onNewParam)
+    {
+        onNewParam_ = std::move(onNewParam);
     }
 
     void SetPageTransitionFunc(std::function<void()>&& pageTransitionFunc)
@@ -296,6 +302,17 @@ public:
     {
         isNeedRemove_ = isNeedRemove;
     }
+    void CheckIsNeedForceExitWindow(bool result);
+    void RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType);
+
+    bool IsNeedCallbackBackPressed();
+
+    void FireOnNewParam(const std::string& param)
+    {
+        if (onNewParam_) {
+            onNewParam_(param);
+        }
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -341,9 +358,14 @@ protected:
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
+    void NotifyNavigationLifecycle(bool isShow, bool isFromWindow);
+
+    void RecordPageEvent(bool isShow);
+
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
 
+    OnNewParamCallback onNewParam_;
     std::function<void()> onPageShow_;
     std::function<void()> onPageHide_;
     std::function<bool()> onBackPressed_;

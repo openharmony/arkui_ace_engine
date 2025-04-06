@@ -41,6 +41,26 @@ RSRecordingPath SvgG::AsPath(const SvgLengthScaleRule& lengthRule)
         auto childPath = child->AsPath(lengthRule);
         path.Op(path, childPath, RSPathOp::UNION);
     }
+    ApplyTransform(path, lengthRule);
     return path;
 }
+
+void SvgG::ApplyOpacity(RSCanvas& canvas)
+{
+    if (!attributes_.hasOpacity) {
+        return;
+    }
+    RSBrush brush;
+    brush.SetAlphaF(attributes_.opacity);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
+void SvgG::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    ApplyOpacity(canvas);
+    SvgNode::OnDraw(canvas, lengthRule);
+    return;
+}
+
 } // namespace OHOS::Ace::NG

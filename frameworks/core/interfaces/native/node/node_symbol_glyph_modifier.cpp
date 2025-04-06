@@ -149,11 +149,67 @@ void SetSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
     SymbolModelNG::SetSymbolGlyphInitialize(frameNode, symbolId);
 }
 
+void SetCustomSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId, ArkUI_CharPtr fontFamily)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string fontFamilyStr(fontFamily);
+    SymbolModelNG::SetCustomSymbolGlyphInitialize(frameNode, symbolId, fontFamilyStr.c_str());
+}
+
 void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SymbolModelNG::SetSymbolGlyphInitialize(frameNode, 0);
+}
+
+void UpdateSymbolEffect(ArkUINodeHandle node, ArkUI_Uint32 symbolEffectType, ArkUI_Bool isActive,
+    ArkUI_Int16 isTxtActiveSource)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::UpdateSymbolEffect(frameNode, symbolEffectType, isActive, isTxtActiveSource);
+}
+
+void SetMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SymbolModelNG::SetMinFontScale(frameNode, 0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SymbolModelNG::SetMinFontScale(frameNode, 1.0f);
+        return;
+    }
+    SymbolModelNG::SetMinFontScale(frameNode, minFontScale);
+}
+
+void ResetMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetMinFontScale(frameNode, 1.0f);
+}
+
+void SetMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SymbolModelNG::SetMaxFontScale(frameNode, 1.0f);
+        return;
+    }
+    SymbolModelNG::SetMaxFontScale(frameNode, maxFontScale);
+}
+
+void ResetMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetMaxFontScale(frameNode, 1.0f);
 }
 }
 
@@ -174,7 +230,13 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
+        .updateSymbolEffect = UpdateSymbolEffect,
+        .setMinFontScale = SetMinFontScale,
+        .resetMinFontScale = ResetMinFontScale,
+        .setMaxFontScale = SetMaxFontScale,
+        .resetMaxFontScale = ResetMaxFontScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -197,7 +259,12 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         .setEffectStrategy = SetEffectStrategy,
         .resetEffectStrategy = ResetEffectStrategy,
         .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .setCustomSymbolGlyphInitialize = SetCustomSymbolGlyphInitialize,
         .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
+        .setMinFontScale = SetMinFontScale,
+        .resetMinFontScale = ResetMinFontScale,
+        .setMaxFontScale = SetMaxFontScale,
+        .resetMaxFontScale = ResetMaxFontScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

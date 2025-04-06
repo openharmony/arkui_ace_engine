@@ -32,7 +32,7 @@ using SurfaceCreatedEvent = std::function<void(const std::string&, const std::st
 using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
 using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
-class XComponentModel {
+class ACE_FORCE_EXPORT XComponentModel {
 public:
     static XComponentModel* GetInstance();
     static bool IsBackGroundColorAvailable(const XComponentType& type)
@@ -47,6 +47,7 @@ public:
     }
     virtual ~XComponentModel() = default;
 
+    virtual void Create(XComponentType type) {}
     virtual void Create(const std::optional<std::string>& id, XComponentType type,
         const std::optional<std::string>& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;
@@ -83,6 +84,7 @@ public:
     virtual void EnableSecure(bool isSecure) {}
     virtual void HdrBrightness(float hdrBrightness) {}
     virtual void EnableTransparentLayer(bool isTransparentLayer) {}
+    virtual void SetScreenId(uint64_t screenId) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H

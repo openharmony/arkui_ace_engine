@@ -751,6 +751,27 @@ ArkUI_Bool GetListMaintainVisibleContentPosition(ArkUINodeHandle node)
     return ListModelNG::GetListMaintainVisibleContentPosition(frameNode);
 }
 
+void SetListStackFromEnd(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListStackFromEnd(frameNode, enabled);
+}
+
+void ResetListStackFromEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListStackFromEnd(frameNode, false);
+}
+
+ArkUI_Bool GetListStackFromEnd(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ListModelNG::GetListStackFromEnd(frameNode);
+}
+
 void SetListFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -878,6 +899,9 @@ const ArkUIListModifier* GetListModifier()
         .setListMaintainVisibleContentPosition = SetListMaintainVisibleContentPosition,
         .resetListMaintainVisibleContentPosition = ResetListMaintainVisibleContentPosition,
         .getListMaintainVisibleContentPosition = GetListMaintainVisibleContentPosition,
+        .setListStackFromEnd = SetListStackFromEnd,
+        .resetListStackFromEnd = ResetListStackFromEnd,
+        .getListStackFromEnd = GetListStackFromEnd,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,

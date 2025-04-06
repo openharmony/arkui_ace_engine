@@ -41,7 +41,8 @@ RSRecordingPath SvgLine::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgLine::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         return path_.value();
     }
     RSRecordingPath path;
@@ -52,6 +53,10 @@ RSRecordingPath SvgLine::AsPath(const SvgLengthScaleRule& lengthRule)
 
     path.MoveTo(x1, y1);
     path.LineTo(x2, y2);
+    /* Apply path transform for clip-path only */
+    if (lengthRule.GetPathTransform()) {
+        ApplyTransform(path);
+    }
     return path;
 }
 

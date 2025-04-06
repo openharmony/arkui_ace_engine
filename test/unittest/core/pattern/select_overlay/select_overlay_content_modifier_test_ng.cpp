@@ -432,4 +432,223 @@ HWTEST_F(SelectOverlayContentModifierTestNg, DrawbBackArrow003, TestSize.Level1)
     EXPECT_CALL(canvas, Restore()).Times(1).WillRepeatedly(Return());
     selectOverlayModifier.DrawbBackArrow(drawingContext);
 }
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, onDraw001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    Testing::MockCanvas canvas;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetHasExtensionMenu(true);
+    DrawingContext drawingContext { canvas, 100, 100 };
+    EXPECT_CALL(canvas, Save()).Times(0);
+    selectOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw002
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, onDraw002, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    Testing::MockCanvas canvas;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetHasExtensionMenu(true);
+    DrawingContext drawingContext { canvas, 100, 100 };
+    selectOverlayModifier.SetIsNewAvoid(true);
+    EXPECT_CALL(canvas, Restore()).Times(0);
+    selectOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw003
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, onDraw003, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    Testing::MockCanvas canvas;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetHasExtensionMenu(true);
+    DrawingContext drawingContext { canvas, 100, 100 };
+    selectOverlayModifier.SetFirstHandleIsShow(true);
+    EXPECT_CALL(canvas, Restore()).Times(0);
+    selectOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw004
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, onDraw004, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    Testing::MockCanvas canvas;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetHasExtensionMenu(true);
+    DrawingContext drawingContext { canvas, 100, 100 };
+    selectOverlayModifier.SetSecondHandleIsShow(true);
+    EXPECT_CALL(canvas, Restore()).Times(0);
+    selectOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: BackArrowTransitionAnimation001
+ * @tc.desc: test BackArrowTransitionAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionAnimation001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.BackArrowTransitionAnimation(true);
+    EXPECT_EQ(selectOverlayModifier.circleOffset_[1]->Get().GetX(), 0);
+    EXPECT_EQ(selectOverlayModifier.circleOffset_[1]->Get().GetY(), 0);
+}
+
+/**
+ * @tc.name: BackArrowTransitionChange001
+ * @tc.desc: test BackArrowTransitionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset(5, 5);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 2);
+    EXPECT_EQ(selectOverlayModifier.circleOffset_[2]->Get().GetX(), 5);
+    EXPECT_EQ(selectOverlayModifier.circleOffset_[2]->Get().GetY(), 5);
+}
+
+/**
+ * @tc.name: BackArrowTransitionChange002
+ * @tc.desc: test BackArrowTransitionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange002, TestSize.Level1)
+{
+    OffsetF menuOptionOffset(5, 5);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.circleOffset_.resize(1);
+    selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 2);
+    EXPECT_EQ(selectOverlayModifier.lineEndOffset_[0]->Get().GetX(), 0);
+    EXPECT_EQ(selectOverlayModifier.lineEndOffset_[0]->Get().GetY(), 0);
+}
+
+/**
+ * @tc.name: BackArrowTransitionChange003
+ * @tc.desc: test BackArrowTransitionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, BackArrowTransitionChange003, TestSize.Level1)
+{
+    OffsetF menuOptionOffset(5, 5);
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.lineEndOffset_.resize(4);
+    selectOverlayModifier.BackArrowTransitionChange(menuOptionOffset, 6);
+    EXPECT_EQ(selectOverlayModifier.lineEndOffset_[0]->Get().GetX(), 0);
+    EXPECT_EQ(selectOverlayModifier.lineEndOffset_[0]->Get().GetY(), 0);
+}
+
+/**
+ * @tc.name: LineEndOffsetWithAnimation001
+ * @tc.desc: test LineEndOffsetWithAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, LineEndOffsetWithAnimation001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.LineEndOffsetWithAnimation(true, true);
+    EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 0);
+}
+
+/**
+ * @tc.name: ChangeCircle001
+ * @tc.desc: test ChangeCircle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.circleOffset_.resize(3);
+    selectOverlayModifier.rotationAngle_->Set(1);
+    selectOverlayModifier.ChangeCircle();
+    EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 1);
+}
+
+/**
+ * @tc.name: ChangeCircle002
+ * @tc.desc: test ChangeCircle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle002, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.lineEndOffset_.resize(2);
+    selectOverlayModifier.rotationAngle_->Set(1);
+    selectOverlayModifier.ChangeCircle();
+    EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 1);
+}
+
+/**
+ * @tc.name: ChangeCircle003
+ * @tc.desc: test ChangeCircle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, ChangeCircle003, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.rotationAngle_->Set(1);
+    selectOverlayModifier.ChangeCircle();
+    EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 0);
+}
+
+/**
+ * @tc.name: SetLineEndOffset001
+ * @tc.desc: test SetLineEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, SetLineEndOffset001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.lineEndOffset_.resize(2);
+    selectOverlayModifier.rotationAngle_->Set(1);
+    selectOverlayModifier.SetLineEndOffset(true, true);
+    EXPECT_EQ(selectOverlayModifier.rotationAngle_->Get(), 1);
+}
+
+/**
+ * @tc.name: SetDefaultCircleAndLineEndOffset001
+ * @tc.desc: test SetDefaultCircleAndLineEndOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayContentModifierTestNg, SetDefaultCircleAndLineEndOffset001, TestSize.Level1)
+{
+    OffsetF menuOptionOffset;
+    SelectOverlayModifier selectOverlayModifier(menuOptionOffset, true);
+    selectOverlayModifier.SetIsReverse(true);
+    selectOverlayModifier.circleOffset_.clear();
+    selectOverlayModifier.lineEndOffset_.clear();
+    selectOverlayModifier.rotationAngle_->Set(1);
+    selectOverlayModifier.SetDefaultCircleAndLineEndOffset();
+    EXPECT_FALSE(selectOverlayModifier.circleOffset_.empty());
+}
 } // namespace OHOS::Ace::NG

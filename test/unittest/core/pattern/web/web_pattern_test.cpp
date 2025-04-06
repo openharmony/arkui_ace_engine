@@ -41,10 +41,6 @@ float g_height = 0;
 
 int32_t g_editStateFlags = 0;
 
-int32_t EF_CAN_CUT = 2;
-int32_t EF_CAN_COPY = 4;
-int32_t EF_CAN_PASTE = 8;
-int32_t EF_CAN_SELECT_ALL = 16;
 int32_t CONTRNT_WIDTH_SIZE = 1024;
 int32_t CONTRNT_HEIGHT_SIZE = 99999;
 
@@ -280,156 +276,6 @@ HWTEST_F(WebPatternTest, HandleTouchDownTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsTouchHandleValid003
- * @tc.desc: Test IsTouchHandleValid.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, IsTouchHandleValid003, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle = nullptr;
-    bool result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_FALSE(result);
-    EXPECT_FALSE(result);
-    handle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_FALSE(result);
-    g_isEnable = true;
-    result = g_webPattern->IsTouchHandleValid(handle);
-    EXPECT_TRUE(result);
-#endif
-}
-
-/**
- * @tc.name: GetTouchHandleOverlayTypeTest004
- * @tc.desc: Test GetTouchHandleOverlayType.
- * @tc.type: FUNC
- */
-
-HWTEST_F(WebPatternTest, GetTouchHandleOverlayTypeTest004, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
-    std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
-    bool result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-    g_webPattern->selectOverlayProxy_->Close();
-    g_webPattern->selectOverlayProxy_ = nullptr;
-
-    g_insertHandle.reset();
-    g_insertHandle = nullptr;
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-
-    g_endSelectionHandle.reset();
-    g_endSelectionHandle = nullptr;
-    result = g_webPattern->RunQuickMenu(params, callback);
-    EXPECT_FALSE(result);
-#endif
-}
-
-/**
- * @tc.name: RegisterSelectOverlayCallbackTest005
- * @tc.desc: Test RegisterSelectOverlayCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, RegisterSelectOverlayCallbackTest005, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->GetCoordinatePoint();
-    std::shared_ptr<NWebTouchHandleState> touchHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->ComputeTouchHandleRect(touchHandle);
-    g_Y = -1;
-    g_webPattern->ComputeTouchHandleRect(touchHandle);
-
-    std::shared_ptr<NWebQuickMenuParams> params = std::make_shared<NWebQuickMenuParamsMock>();
-    std::shared_ptr<NWebQuickMenuCallback> callback = std::make_shared<NWebQuickMenuCallbackMock>();
-    SelectOverlayInfo selectInfo;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_CUT;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_COPY;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_PASTE;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-    g_editStateFlags = EF_CAN_SELECT_ALL;
-    g_webPattern->RegisterSelectOverlayCallback(selectInfo, params, callback);
-#endif
-}
-
-/**
- * @tc.name: OnTouchSelectionChangedTest006
- * @tc.desc: Test OnTouchSelectionChanged.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, OnTouchSelectionChangedTest006, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-
-    g_insertHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_startSelectionHandle.reset();
-    g_startSelectionHandle = nullptr;
-    g_endSelectionHandle.reset();
-    g_endSelectionHandle = nullptr;
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-    g_insertHandle.reset();
-    g_insertHandle = nullptr;
-    g_endSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_startSelectionHandle = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->OnTouchSelectionChanged(g_insertHandle, g_startSelectionHandle, g_endSelectionHandle);
-#endif
-}
-
-/**
- * @tc.name: UpdateTouchHandleForOverlayTest007
- * @tc.desc: Test UpdateTouchHandleForOverlay.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTest, UpdateTouchHandleForOverlayTest007, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    g_webPattern->insertHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->startSelectionHandle_.reset();
-    g_webPattern->endSelectionHandle_.reset();
-    g_webPattern->UpdateTouchHandleForOverlay();
-
-    int32_t selectOverlayId = 1;
-    g_webPattern->selectOverlayProxy_ = AceType::MakeRefPtr<SelectOverlayProxy>(selectOverlayId);
-    g_webPattern->UpdateTouchHandleForOverlay();
-    g_webPattern->insertHandle_.reset();
-    g_webPattern->startSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->endSelectionHandle_ = std::make_shared<NWebTouchHandleStateMock>();
-    g_webPattern->UpdateTouchHandleForOverlay();
-
-    g_webPattern->startSelectionHandle_.reset();
-    g_webPattern->endSelectionHandle_.reset();
-    g_webPattern->UpdateTouchHandleForOverlay();
-    g_webPattern->UpdateLocale();
-#endif
-}
-
-/**
  * @tc.name: OnOverviewUpdateTest008
  * @tc.desc: Test OnOverviewModeAccessEnabledUpdate.
  * @tc.type: FUNC
@@ -492,7 +338,7 @@ HWTEST_F(WebPatternTest, HandleDoubleClickEventTest009, TestSize.Level1)
     std::queue<MouseClickInfo> empty;
     swap(empty, g_webPattern->mouseClickQueue_);
     g_webPattern->HandleDoubleClickEvent(info);
-    g_webPattern->HandleDoubleClickEvent(info);
+    EXPECT_FALSE(g_webPattern->HandleDoubleClickEvent(info));
 #endif
 }
 
@@ -545,6 +391,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isWindowShow_ = false;
     g_webPattern->OnWindowHide();
     g_webPattern->OnWindowShow();
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->isActive_ = true;
     g_webPattern->OnActive();
@@ -552,6 +399,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest011, TestSize.Level1)
     g_webPattern->isActive_ = false;
     g_webPattern->OnInActive();
     g_webPattern->OnActive();
+    EXPECT_TRUE(g_webPattern->isActive_);
 
     g_webPattern->OnVisibleChange(false);
     g_webPattern->OnVisibleChange(true);

@@ -287,6 +287,11 @@ void ListModelNG::SetMaintainVisibleContentPosition(bool enabled)
     pattern->SetMaintainVisibleContentPosition(enabled);
 }
 
+void ListModelNG::SetStackFromEnd(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled);
+}
+
 void ListModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -745,6 +750,18 @@ int32_t ListModelNG::GetEdgeEffect(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return ScrollableModelNG::GetEdgeEffect(frameNode);
+}
+
+void ListModelNG::SetListStackFromEnd(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled, frameNode);
+}
+
+bool ListModelNG::GetListStackFromEnd(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto value = frameNode->GetLayoutProperty<ListLayoutProperty>()->GetStackFromEnd().value_or(false);
+    return value;
 }
 
 int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)

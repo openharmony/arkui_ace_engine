@@ -16,6 +16,7 @@
 #include "frameworks/bridge/common/manifest/manifest_appinfo.h"
 
 #include "core/common/container.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 

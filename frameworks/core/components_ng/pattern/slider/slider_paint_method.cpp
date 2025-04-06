@@ -27,7 +27,11 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(sliderTheme);
     sliderContentModifier_->UpdateData(parameters_);
     auto reverse = paintProperty->GetReverseValue(false);
@@ -38,14 +42,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     }
 
     sliderContentModifier_->JudgeNeedAnimate(reverse);
-    sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
-    sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
-    sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
-    sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
-    sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
-    sliderContentModifier_->SetBlockColor(parameters_.blockColor);
-    sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
-    sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
+    SetAttrParameters();
     sliderContentModifier_->SetBoardColor();
     sliderContentModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
     UpdateBorderRadius(paintProperty);
@@ -71,6 +68,18 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->UpdateContentDirtyRect(paintWrapper->GetGeometryNode()->GetFrameSize());
 }
 
+void SliderPaintMethod::SetAttrParameters()
+{
+    sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
+    sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
+    sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
+    sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
+    sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
+    sliderContentModifier_->SetBlockColor(parameters_.blockColor);
+    sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
+    sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
+}
+
 void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintProperty)
 {
     auto trackBorderRadius = paintProperty->GetTrackBorderRadiusValue(Dimension(parameters_.trackThickness * HALF));
@@ -89,44 +98,5 @@ void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintPro
         selectedBorderRadius = Dimension(parameters_.trackThickness * HALF);
     }
     sliderContentModifier_->SetSelectedBorderRadius(selectedBorderRadius.ConvertToPx());
-}
-
-void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(sliderTipModifier_);
-    auto renderContext = paintWrapper->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_VOID(theme);
-
-    auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    sliderTipModifier_->UpdateThemeParams(theme);
-    sliderTipModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
-    sliderTipModifier_->SetTipColor(paintProperty->GetTipColorValue(theme->GetTipColor()));
-    sliderTipModifier_->SetTextFont(paintProperty->GetFontSizeValue(theme->GetTipFontSize()));
-    sliderTipModifier_->SetTextColor(paintProperty->GetTextColorValue(theme->GetTipTextColor()));
-    sliderTipModifier_->SetContent(paintProperty->GetCustomContent().value_or(paintProperty->GetContentValue("")));
-    sliderTipModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
-    auto blockSize = parameters_.blockSize;
-    if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
-        blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),
-            std::min(blockSize.Height(), parameters_.trackThickness));
-    }
-    sliderTipModifier_->SetBlockSize(blockSize);
-    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
-    sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
-    sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
-    sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);
-    sliderTipModifier_->SetSliderGlobalOffset(tipParameters_.sliderGlobalOffset_);
-    sliderTipModifier_->BuildParagraph();
-    sliderTipModifier_->UpdateBubbleSize();
-    if (sliderTipModifier_->UpdateOverlayRect(paintWrapper->GetGeometryNode()->GetFrameSize())) {
-        paintWrapper->FlushOverlayModifier();
-    }
 }
 } // namespace OHOS::Ace::NG

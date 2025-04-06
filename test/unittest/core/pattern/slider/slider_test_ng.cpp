@@ -103,6 +103,7 @@ const PointF POINTF_CENTER { 15.0f, 15.0f };
 const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 const SizeF BLOCK_SIZE_F(10.0f, 10.0f);
 const SizeF BLOCK_SIZE_F_ZREO(0.0f, 0.0f);
+constexpr float SLIDER_PERCENTAGE = 100.0f;
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -378,6 +379,7 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
     sliderTheme->tipFontSize_ = Dimension(16.0);
     sliderTheme->tipTextColor_ = Color::BLACK;
     EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     /**
      * @tc.steps: step3. get sliderPattern and test init parameter.
      */
@@ -401,6 +403,12 @@ HWTEST_F(SliderTestNg, SliderTestNg004, TestSize.Level1)
      */
     sliderPaintProperty->UpdateShowTips(true);
     sliderPattern->OnModifyDone();
+    sliderPaintProperty->UpdatePadding(sliderTheme->GetTipTextPadding());
+    sliderPaintProperty->UpdateTipColor(sliderTheme->GetTipColor());
+    sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
+    sliderPaintProperty->UpdateFontSize(sliderTheme->GetTipFontSize());
+    auto content = std::to_string(static_cast<int>(std::round(sliderPattern->valueRatio_ * SLIDER_PERCENTAGE))) + '%';
+    sliderPaintProperty->UpdateContent(content);
     EXPECT_EQ(sliderPattern->showTips_, true);
     EXPECT_EQ(sliderPaintProperty->GetPaddingValue(Dimension()), Dimension(10.0));
     EXPECT_EQ(sliderPaintProperty->GetTipColorValue(Color::BLACK), Color::BLUE);

@@ -128,6 +128,16 @@ public:
         return canReused_;
     }
 
+    void SetInCurrentStack(bool inStack)
+    {
+        inCurrentStack_ = inStack;
+    }
+
+    bool GetInCurrentStack() const
+    {
+        return inCurrentStack_;
+    }
+
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)
     {
         navDestinationPathInfo_ = pagePath;
@@ -154,6 +164,11 @@ public:
     void SetSystemTransitionType(NavigationSystemTransitionType type)
     {
         systemTransitionType_ = type;
+        if (navDestinationTransitionDelegate_) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+                "reset customTransition delegate of navDestination cause by setting systemTransition");
+            navDestinationTransitionDelegate_ = nullptr;
+        }
     }
 
     NavigationSystemTransitionType GetSystemTransitionType() const
@@ -169,7 +184,8 @@ public:
     void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
     void InitSystemTransitionPop(bool isTransitionIn);
     void StartSystemTransitionPop(bool transitionIn);
-    bool SystemTransitionPopCallback(const int32_t animationId);
+    bool CheckTransitionPop(const int32_t animationId);
+    bool SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent = true);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
 
@@ -202,7 +218,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
-    void CleanContent();
+    void CleanContent(bool cleanDirectly = false, bool allowTransition = false);
     bool IsNeedContentTransition();
     bool TransitionContentInValid();
     bool IsNeedTitleTransition();
@@ -218,7 +234,40 @@ public:
         return needForceMeasure_;
     }
 
+    void SetNavDestinationTransitionDelegate(NavDestinationTransitionDelegate&& delegate)
+    {
+        navDestinationTransitionDelegate_ = std::move(delegate);
+    }
+
+    int32_t DoTransition(NavigationOperation operation, bool isEnter);
+    bool HasStandardBefore() const;
+
+    void UpdateUserSetOpacity(float opacity)
+    {
+        userSetOpacity_ = opacity;
+    }
+
+    RefPtr<UINode> GetNavigationNode() override;
+
 private:
+    int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemFadeTransition(bool isEnter);
+    int32_t DoSystemSlideTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemExplodeTransition(NavigationOperation operation, bool isEnter);
+    int32_t DoSystemEnterExplodeTransition(NavigationOperation operation);
+    int32_t DoSystemExitExplodeTransition(NavigationOperation operation);
+    void DoMaskAnimation(const AnimationOption& option, Color begin, Color end);
+    void StartCustomTransitionAnimation(NavDestinationTransition& transition,
+        bool isEnter, bool& hasResetProperties, int32_t longestAnimationDuration);
+    int32_t MakeUniqueAnimationId();
+    void ResetCustomTransitionAnimationProperties();
+
+    std::optional<AnimationOption> GetTransitionAnimationOption(NavigationOperation operation, bool isEnter) const;
+    std::function<void()> BuildTransitionFinishCallback(
+        bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
+    std::function<void()> BuildEmptyFinishCallback();
+
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
@@ -227,6 +276,7 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = true;
     bool canReused_ = true;
+    bool inCurrentStack_ = true;
     bool recoverable_ = true;
     bool fromNavrouterAndNoRouteInfo_ = false;
     bool needAppearFromRecovery_ = false;
@@ -236,6 +286,9 @@ private:
     std::list<WeakPtr<UINode>> textNodeList_;
     NavigationSystemTransitionType systemTransitionType_ = NavigationSystemTransitionType::DEFAULT;
     bool needForceMeasure_ = false;
+    float userSetOpacity_ = 1.0f;
+
+    NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
 };
 
 } // namespace OHOS::Ace::NG

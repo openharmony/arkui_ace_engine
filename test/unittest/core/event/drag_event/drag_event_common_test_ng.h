@@ -55,6 +55,34 @@ const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 const TouchRestrict DRAG_TOUCH_RESTRICT = { TouchRestrict::CLICK };
 } // namespace
 
+struct DragInfo {
+    bool isDragForbidden = false;
+    bool isDraggable = false;
+    bool isCustomerSet = false;
+    bool textIsSelected = false;
+    DragInfo(bool isDragForbidden, bool isDraggable, bool isCustomerSet, bool textIsSelected)
+        : isDragForbidden(isDragForbidden), isDraggable(isDraggable), isCustomerSet(isCustomerSet),
+          textIsSelected(textIsSelected)
+    {}
+};
+
+struct GlobalDraggingInfo {
+    bool isDragging = false;
+    bool isMSDPDragging = false;
+    GlobalDraggingInfo(bool isDragging, bool isMSDPDragging) : isDragging(isDragging), isMSDPDragging(isMSDPDragging) {}
+};
+
+struct MultiDragInfo {
+    bool isMultiSelectionEnabled = false;
+    bool isAllowDrag = false;
+    bool isFrameNodeAcceptedMultiDrag = false;
+    MultiDragInfo(bool isMultiSelectionEnabled, bool isAllowDrag, bool isFrameNodeAcceptedMultiDrag)
+        : isMultiSelectionEnabled(isMultiSelectionEnabled), isAllowDrag(isAllowDrag),
+          isFrameNodeAcceptedMultiDrag(isFrameNodeAcceptedMultiDrag)
+    {}
+};
+
+
 class DragEventCommonTestNg : public testing::Test {
 };
 } // namespace OHOS::Ace::NG

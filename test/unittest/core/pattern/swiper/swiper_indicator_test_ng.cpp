@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,9 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -176,7 +178,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
@@ -209,11 +211,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick003, TestSize.Level1)
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     indicatorPattern->OnModifyDone();
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     indicatorPattern->isRepeatClicked_ = false;
     layoutProperty_->UpdateSwipeByGroup(true);
 
@@ -250,7 +250,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick003, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Click item(index:1)
@@ -281,7 +283,9 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchClick001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, HandleLongPress001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step1. Touch and move right
@@ -337,7 +341,9 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     /**
      * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
@@ -356,7 +362,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002,
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperInitIndicator006, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     layoutProperty_->UpdateShowIndicator(true);
     layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
     pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
@@ -397,7 +405,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     TouchLocationInfo touchLocationInfo("down", 0);
@@ -422,7 +432,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom001, Tes
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto displayCount = pattern_->GetLayoutProperty<SwiperLayoutProperty>()->GetDisplayCount().value_or(1);
     auto childrenSize = pattern_->RealTotalCount();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
@@ -500,24 +512,22 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom002, TestSize.L
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
 
     GestureEvent info;
     info.mainDelta_ = 1.0f;
     TouchLocationInfo touchLocationInfo("down", 0);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
-    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_FALSE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(touchLocationInfo));
 
     pattern_->currentIndex_ = 0;
     layoutProperty_->UpdateLoop(false);
     pattern_->leftButtonId_ = 1;
     pattern_->rightButtonId_ = 1;
     pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(info));
-    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->SwiperIndicatorPattern::CheckIsTouchBottom(touchLocationInfo));
 }
 
 /**
@@ -577,7 +587,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 3);
@@ -643,11 +655,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
     indicatorPattern->OnModifyDone();
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step1. call no mirror func.
@@ -656,7 +666,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
 
     MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
     indicatorPattern->ChangeIndex(0, false);
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
@@ -666,11 +676,83 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
     MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     indicatorPattern->ChangeIndex(3, false);
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 3);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
 }
+
+/**
+ * @tc.name: GetIndicatorDragAngleThreshold001
+ * @tc.desc: GetIndicatorDragAngleThreshold
+ * @tc.type: FUNC
+ */
+ HWTEST_F(SwiperIndicatorTestNg, GetIndicatorDragAngleThreshold001, TestSize.Level1)
+ {
+     SwiperModelNG model = CreateSwiper();
+     model.SetDirection(Axis::VERTICAL);
+     CreateSwiperItems();
+     CreateSwiperDone();
+     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+     EXPECT_TRUE(indicatorPattern->GetIndicatorDragAngleThreshold(true));
+ }
+ 
+ /**
+  * @tc.name: GetIndicatorDragAngleThreshold002
+  * @tc.desc: GetIndicatorDragAngleThreshold
+  * @tc.type: FUNC
+  */
+ HWTEST_F(SwiperIndicatorTestNg, GetIndicatorDragAngleThreshold002, TestSize.Level1)
+ {
+     SwiperModelNG model = CreateSwiper();
+     model.SetDirection(Axis::VERTICAL);
+     CreateSwiperItems();
+     CreateSwiperDone();
+     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+     EXPECT_TRUE(indicatorPattern->GetIndicatorDragAngleThreshold(false));
+ }
+ 
+ /**
+  * @tc.name: DumpAdvanceInfo001
+  * @tc.desc: DumpAdvanceInfo
+  * @tc.type: FUNC
+  */
+ HWTEST_F(SwiperIndicatorTestNg, DumpAdvanceInfo001, TestSize.Level1)
+ {
+     SwiperModelNG model = CreateSwiper();
+     model.SetDirection(Axis::VERTICAL);
+     model.SetIndicatorType(SwiperIndicatorType::DOT);
+     CreateSwiperItems();
+     CreateSwiperDone();
+     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+     auto json = JsonUtil::Create(true);
+     EXPECT_EQ(indicatorPattern->GetIndicatorType(), SwiperIndicatorType::DOT);
+     indicatorPattern->DumpAdvanceInfo(json);
+     EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DOT");
+ }
+ 
+ /**
+  * @tc.name: DumpAdvanceInfo002
+  * @tc.desc: DumpAdvanceInfo
+  * @tc.type: FUNC
+  */
+ HWTEST_F(SwiperIndicatorTestNg, DumpAdvanceInfo002, TestSize.Level1)
+ {
+     SwiperModelNG model = CreateSwiper();
+     model.SetDirection(Axis::VERTICAL);
+     model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+     CreateSwiperItems();
+     CreateSwiperDone();
+     auto indicatorNode = GetChildFrameNode(frameNode_, 4);
+     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+     auto json = JsonUtil::Create(true);
+     EXPECT_EQ(indicatorPattern->GetIndicatorType(), SwiperIndicatorType::DIGIT);
+     indicatorPattern->DumpAdvanceInfo(json);
+     EXPECT_EQ(json->GetString("SwiperIndicatorType"), "DIGIT");
+ }
 
 /**
  * @tc.name: SwiperIndicatorPatternTestNg0020
@@ -679,7 +761,9 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex004, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0020, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     GestureEvent info;
     info.mainDelta_ = 1.0f;
@@ -720,9 +804,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0021, TestSize.Level
     EXPECT_NE(indicatorNode_, nullptr);
     auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
     auto controller = indicatorPattern->GetIndicatorController();
-    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
-    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
-    controller->SetSwiperNode(targetNode, indicatorNode);
+    controller->SetSwiperNode(frameNode_);
 
     GestureEvent info;
     info.mainDelta_ = 1.0f;
@@ -759,7 +841,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount001, Test
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 4);
@@ -780,7 +862,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternDisplayIndicatorTotalCount002, Test
     CreateSwiperItems(6);
     CreateSwiperDone();
     EXPECT_EQ(pattern_->TotalCount(), 8);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
@@ -808,7 +890,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
     pattern_->contentMainSize_ = SWIPER_WIDTH;
 
     pattern_->UpdateCurrentOffset(-120.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
     EXPECT_EQ(groupTurnPageRate, -0.25f);
@@ -895,5 +977,160 @@ HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcD
         179.0f);
     EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, 1.0f),
         -89.0f);
+}
+
+/**
+ * @tc.name: DynamicChangeIndicatorType001
+ * @tc.desc: Dynamic change indicator type
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, DynamicChangeIndicatorType001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+
+    auto indicatorId = pattern_->GetIndicatorId();
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    pattern_->InitIndicator();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DIGIT);
+    auto newIndicatorId = pattern_->GetIndicatorId();
+    EXPECT_NE(indicatorId, newIndicatorId);
+
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DOT);
+    pattern_->InitIndicator();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+    auto lastIndicatorId = pattern_->GetIndicatorId();
+    EXPECT_NE(lastIndicatorId, newIndicatorId);
+}
+
+/**
+ * @tc.name: CheckPointLocation001
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation002
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation003
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(2.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation004
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(2.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::LEFT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointLocation005
+ * @tc.desc: CheckPointLocation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CheckPointLocation005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call CheckPointLocation.
+     */
+    const PointT<float> center = PointT(float(1.0), float(0.0));
+    const PointT<float> point = PointT(float(0.0), float(1.0));
+    indicatorPattern->direction_ = SwiperDirection::RIGHT;
+    auto result = indicatorPattern->CheckPointLocation(center, point);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

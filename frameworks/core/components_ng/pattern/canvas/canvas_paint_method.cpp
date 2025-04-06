@@ -38,15 +38,12 @@ CanvasPaintMethod::CanvasPaintMethod(RefPtr<CanvasModifier> contentModifier, con
     contentModifier_ = contentModifier;
     // The default value of the font size in canvas is 14px.
     SetFontSize(DEFAULT_FONT_SIZE);
-    // The default value of TextAlign is TextAlign::START.
-    SetDefaultTextAlign();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }
 }
 
-#ifndef USE_FAST_TASKPOOL
 void CanvasPaintMethod::PushTask(const TaskFunc& task)
 {
     static constexpr uint32_t suggestSize = 100000;
@@ -61,36 +58,25 @@ void CanvasPaintMethod::PushTask(const TaskFunc& task)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-#endif
 
 bool CanvasPaintMethod::HasTask() const
 {
-#ifndef USE_FAST_TASKPOOL
     return !tasks_.empty();
-#else
-    return fastTaskPool_ && !fastTaskPool_->Empty();
-#endif
 }
 
 void CanvasPaintMethod::FlushTask()
 {
-#ifndef USE_FAST_TASKPOOL
     ACE_SCOPED_TRACE("Canvas tasks count: %zu.", tasks_.size());
     for (auto& task : tasks_) {
         task(*this);
     }
     tasks_.clear();
-#else
-    CHECK_NULL_VOID(fastTaskPool_);
-    fastTaskPool_->Draw(this);
-    fastTaskPool_->Reset();
-#endif
     needMarkDirty_ = true;
 }
 
 void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
-    ACE_SCOPED_TRACE("CanvasPaintMethod::UpdateContentModifier");
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateContentModifier", GetId());
     auto host = frameNode_.Upgrade();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
@@ -113,12 +99,17 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     FireOnModifierUpdateFunc();
     recordingCanvas->Scale(1.0, 1.0);
     FlushTask();
-    CHECK_NULL_VOID(contentModifier_);
+    if (!contentModifier_) {
+        ACE_SCOPED_TRACE("Canvas[%d] contentModifier is NULL", GetId());
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "Canvas[%{public}d] contentModifier is NULL", GetId());
+        return;
+    }
     contentModifier_->MarkModifierDirty();
 }
 
 void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
 {
+    ACE_SCOPED_TRACE("Canvas[%d] CanvasPaintMethod::UpdateRecordingCanvas[%f, %f]", GetId(), width, height);
     rsCanvas_ = std::make_shared<RSRecordingCanvas>(width, height);
     contentModifier_->UpdateCanvas(std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_));
     CHECK_NULL_VOID(rsCanvas_);
@@ -148,7 +139,7 @@ void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::Canva
         CHECK_NULL_VOID(tempPixelMap);
         RSRect rec;
         if (canvasImage.flag == DrawImageType::THREE_PARAMS &&
-            apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+            apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_TWENTY)) {
             rec = RSRect(canvasImage.dx, canvasImage.dy,
                 canvasImage.dx + tempPixelMap->GetWidth(), canvasImage.dy + tempPixelMap->GetHeight());
         } else {
@@ -234,7 +225,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
         return nullptr;
     }
 
-    RSBitmapFormat format { RSColorType::COLORTYPE_BGRA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
+    RSBitmapFormat format = GetBitmapFormat();
     RSBitmap tempCache;
     tempCache.Build(dirtyWidth, dirtyHeight, format);
     int32_t size = dirtyWidth * dirtyHeight;
@@ -417,6 +408,27 @@ void CanvasPaintMethod::Reset()
     rsCanvas_->Clear(RSColor::COLOR_TRANSPARENT);
     rsCanvas_->Save();
 }
+
+int32_t CanvasPaintMethod::GetId() const
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
+TextDirection CanvasPaintMethod::GetSystemDirection()
+{
+    auto host = frameNode_.Upgrade();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto layoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(host, TextDirection::AUTO);
+    auto direction = layoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::AUTO) {
+        direction = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
+    return direction;
+}
+
 #ifndef ACE_UNITTEST
 void CanvasPaintMethod::ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {

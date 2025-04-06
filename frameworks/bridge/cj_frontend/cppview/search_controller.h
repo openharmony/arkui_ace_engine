@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/components/text_field/text_field_controller.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -35,6 +36,9 @@ public:
     ~SearchController() override = default;
     void CaretPosition(int32_t caretPosition);
     void StopEditing();
+    CJRectResult GetTextContentRect();
+    int32_t GetTextContentLinesNum();
+    CJCaretOffset GetCaretOffset();
     void SetTextSelection(
         int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options = std::nullopt);
     void SetController(const RefPtr<OHOS::Ace::TextFieldControllerBase>& controller)

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 
+#include <cstdio>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
@@ -208,24 +209,25 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     if (!RealPath(hapPath, realPath)) {
         return false;
     }
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 
 bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const std::string& bundleName,
     const std::string& moduleName)
 {
-    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
@@ -239,13 +241,12 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
         CHECK_NULL_RETURN(themeConstants, false);
     }
 
-    static std::mutex rawFdMutex_;
-    std::lock_guard lock(rawFdMutex_);
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     std::string rawFile;
     RawfileDescription rawfileDescription;
+    rawfileDescription.fd = -1;
     if (GetResourceId(src, rawFile)) {
-        if (!resourceWrapper->GetRawFileDescription(rawFile, rawfileDescription)) {
+        if (!resourceWrapper->GetRawFD(rawFile, rawfileDescription)) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "get video data by name failed");
             return false;
         }
@@ -254,10 +255,14 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
     if (!mediaPlayer_ ||
         mediaPlayer_->SetSource(rawfileDescription.fd, rawfileDescription.offset, rawfileDescription.length) != 0) {
         LOGE("Player SetSource failed");
-        resourceWrapper->CloseRawFileDescription(rawFile);
+        if (rawfileDescription.fd >= 0) {
+            close(rawfileDescription.fd);
+        }
         return false;
     }
-    resourceWrapper->CloseRawFileDescription(rawFile);
+    if (rawfileDescription.fd >= 0) {
+        close(rawfileDescription.fd);
+    }
     return true;
 }
 
@@ -285,17 +290,18 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
 
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (!mediaPlayer_ || mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 
@@ -319,17 +325,18 @@ bool RosenMediaPlayer::RelativePathPlay(const std::string& filePath)
     if (!RealPath(hapPath, realPath)) {
         return false;
     }
-    auto hapFd = open(realPath, O_RDONLY);
-    if (hapFd < 0) {
+    std::FILE* hapFp = std::fopen(realPath, "r");
+    if (hapFp == nullptr) {
         LOGE("Open hap file failed");
         return false;
     }
+    auto hapFd = fileno(hapFp);
     if (mediaPlayer_ && mediaPlayer_->SetSource(hapFd, fileInfo.offset, fileInfo.length) != 0) {
         LOGE("Player SetSource failed");
-        close(hapFd);
+        std::fclose(hapFp);
         return false;
     }
-    close(hapFd);
+    std::fclose(hapFp);
     return true;
 }
 

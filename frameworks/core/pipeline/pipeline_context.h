@@ -47,6 +47,7 @@
 #include "core/components/page/page_component.h"
 #include "core/components/text_overlay/text_overlay_manager.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/event/visible_ratio_callback.h"
 #include "core/event/event_trigger.h"
 #include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
@@ -92,13 +93,6 @@ struct WindowBlurInfo {
     std::vector<RRect> coords_;
 };
 
-struct VisibleCallbackInfo {
-    VisibleRatioCallback callback;
-    double visibleRatio = 1.0;
-    bool isCurrentVisible = false;
-    uint32_t period = 0;
-};
-
 using OnRouterChangeCallback = bool (*)(const std::string currentRouterPath);
 using SubscribeCtrlACallback = std::function<void()>;
 
@@ -123,7 +117,7 @@ public:
     void SetupRootElement() override;
 
     // This is used for subwindow, when the subwindow is created,a new subRootElement will be built
-    void SetupSubRootElement() override;
+    RefPtr<Element> SetupSubRootElement();
     RefPtr<DialogComponent> ShowDialog(
         const DialogProperties& dialogProperties, bool isRightToLeft, const std::string& inspectorTag = "");
     void CloseContextMenu();
@@ -212,7 +206,7 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target
@@ -855,6 +849,7 @@ private:
     void CreateTouchEventOnZoom(const AxisEvent& event);
     void HandleVisibleAreaChangeEvent();
     void FlushTouchEvents();
+    bool OnKeyEvent(const NonPointerEvent& nonPointerEvent);
 
     template<typename T>
     struct NodeCompare {

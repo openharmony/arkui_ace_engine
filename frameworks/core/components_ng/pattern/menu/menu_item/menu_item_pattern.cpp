@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -52,6 +53,7 @@ constexpr double MASS = 1.0f;
 constexpr double STIFFNESS = 328.0f;
 constexpr double DAMPING = 33.0f;
 constexpr double SEMI_CIRCLE_ANGEL = 180.0f;
+constexpr double MENU_FOCUS_TYPE = 1.0;
 constexpr float OPACITY_EFFECT = 0.99;
 const std::string SYSTEM_RESOURCE_PREFIX = std::string("resource:///");
 // id of system resource start from 0x07000000
@@ -152,13 +154,38 @@ void MenuItemPattern::OnMountToParentDone()
     UpdateTextNodes();
 }
 
+void MenuItemPattern::AttachBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    CHECK_NULL_VOID(parent);
+    RemoveBottomDivider();
+    auto index = parent->GetChildIndex(host);
+    if (index >= 0) {
+        bottomDivider_->MountToParent(parent, ++index);
+    }
+}
+
+void MenuItemPattern::RemoveBottomDivider()
+{
+    CHECK_NULL_VOID(bottomDivider_);
+    auto dividerParent = bottomDivider_->GetParent();
+    if (dividerParent) {
+        dividerParent->RemoveChild(bottomDivider_);
+    }
+}
+
 void MenuItemPattern::OnAttachToFrameNode()
 {
     InitFocusPadding();
     RegisterOnKeyEvent();
     RegisterOnClick();
     RegisterOnTouch();
+    RegisterOnPress();
     RegisterOnHover();
+    CreateBottomDivider();
 }
 
 void CustomMenuItemPattern::OnAttachToFrameNode()
@@ -166,6 +193,17 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     InitFocusPadding();
     RegisterOnKeyEvent();
     RegisterOnTouch();
+    CreateBottomDivider();
+}
+
+void MenuItemPattern::CreateBottomDivider()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
+    auto dividerPattern = bottomDivider_->GetPattern<MenuDividerPattern>();
+    dividerPattern->BindMenuItem(host);
 }
 
 void MenuItemPattern::InitFocusPadding()
@@ -177,6 +215,9 @@ void MenuItemPattern::InitFocusPadding()
     auto selectTheme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     focusPadding_ = selectTheme->GetOptionFocusedBoxPadding();
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    menuFocusType_ = menuTheme->GetFocusStyleType();
 }
 
 void MenuItemPattern::OnModifyDone()
@@ -211,9 +252,7 @@ void MenuItemPattern::OnModifyDone()
         UpdateIcon(rightRow, false);
         AddExpandIcon(rightRow);
         AddClickableArea();
-        if (IsDisabled()) {
-            UpdateDisabledStyle();
-        }
+        UpdateDisabledStyle();
         SetAccessibilityAction();
 
         auto renderContext = host->GetRenderContext();
@@ -226,6 +265,7 @@ void MenuItemPattern::OnModifyDone()
         if (expandingModeSet_) {
             RegisterOnKeyEvent();
             RegisterOnTouch();
+            RegisterOnPress();
             RegisterOnHover();
             RegisterOnClick();
         }
@@ -281,7 +321,7 @@ void MenuItemPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->IsOptionPattern()) {
@@ -314,7 +354,7 @@ bool MenuItemPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow
     CHECK_NULL_RETURN(context, false);
     auto shadowTheme = context->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, false);
-    auto colorMode = SystemProperties::GetColorMode();
+    auto colorMode = context->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
     return true;
 }
@@ -587,6 +627,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     UpdateSubmenuExpandingMode(customNode);
     if (expandingMode_ == SubMenuExpandingMode::EMBEDDED) {
         auto frameNode = GetSubMenu(customNode);
+        if (!frameNode) {
+            frameNode = AceType::DynamicCast<FrameNode>(customNode);
+        }
         CHECK_NULL_VOID(frameNode);
         OnExpandChanged(frameNode);
         return;
@@ -601,11 +644,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
     auto focusMenuRenderContext = menuNode->GetRenderContext();
-    CHECK_NULL_VOID(focusMenuRenderContext);
-    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
-        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
-        CHECK_NULL_VOID(focusMenuBlurStyle);
-        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+    if (!ParseMenuBlurStyleEffect(param, focusMenuRenderContext)) {
+        return;
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     ParseMenuRadius(param);
@@ -632,6 +672,23 @@ void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu,
     accessibilityProperty->SetAccessibilityIsShow(true);
     subMenu->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN);
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "show sub menu, open type %{public}d", type);
+}
+
+bool MenuItemPattern::ParseMenuBlurStyleEffect(MenuParam& param, const RefPtr<RenderContext>& focusMenuRenderContext)
+{
+    CHECK_NULL_RETURN(focusMenuRenderContext, false);
+    if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
+        auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_RETURN(focusMenuBlurStyle, false);
+        param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
+        param.blurStyleOption = focusMenuBlurStyle;
+    }
+    if (focusMenuRenderContext->GetBackgroundEffect().has_value()) {
+        auto focusMenuEffect = focusMenuRenderContext->GetBackgroundEffect();
+        CHECK_NULL_RETURN(focusMenuEffect, false);
+        param.effectOption = focusMenuEffect;
+    }
+    return true;
 }
 
 RefPtr<UINode> MenuItemPattern::BuildSubMenuCustomNode()
@@ -767,6 +824,8 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -776,11 +835,26 @@ void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
         embeddedMenu_ = expandableNode;
         ShowEmbeddedExpandMenu(embeddedMenu_);
         menuPattern->SetShowedSubMenu(embeddedMenu_);
+        menuPattern->AddEmbeddedMenuItem(host);
     } else {
-        HideEmbeddedExpandMenu(embeddedMenu_);
-        embeddedMenu_ = nullptr;
-        menuPattern->SetShowedSubMenu(nullptr);
+        HideEmbedded();
     }
+}
+
+void MenuItemPattern::HideEmbedded(bool isNeedAnimation)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    isExpanded_ = false;
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    CHECK_NULL_VOID(embeddedMenu_);
+    HideEmbeddedExpandMenu(embeddedMenu_, isNeedAnimation);
+    embeddedMenu_ = nullptr;
+    menuPattern->SetShowedSubMenu(nullptr);
+    menuPattern->RemoveEmbeddedMenuItem(host);
 }
 
 Offset GetTransformCenter(SizeF size, Placement placement)
@@ -922,7 +996,7 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
 }
 
-void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
+void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode, bool isNeedAnimation)
 {
     CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
@@ -936,15 +1010,18 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     CHECK_NULL_VOID(expandableAreaContext);
 
     AnimationOption option = AnimationOption();
-    auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    option.SetCurve(rotateOption);
-    RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
-    expandableAreaContext->UpdateChainedTransition(opacity);
+    if (isNeedAnimation) {
+        auto rotateOption = AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
+        option.SetCurve(rotateOption);
+        RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
+        expandableAreaContext->UpdateChainedTransition(opacity);
+    }
+    MenuRemoveChild(expandableNode, menuFocusType_ == MENU_FOCUS_TYPE);
 
     AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
-        host->RemoveChild(expandableNode, true);
-        host->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->MenuRemoveChild(expandableNode, menuItemPattern->menuFocusType_ != MENU_FOCUS_TYPE);
         auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
         CHECK_NULL_VOID(rightRow);
         auto imageNode = AceType::DynamicCast<FrameNode>(rightRow->GetChildren().back());
@@ -964,10 +1041,21 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
 
-        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
         menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
     });
+}
+
+void MenuItemPattern::MenuRemoveChild(const RefPtr<FrameNode>& expandableNode, bool isOutFocus)
+{
+    if (!isOutFocus) {
+        return;
+    }
+    CHECK_NULL_VOID(expandableNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChild(expandableNode, true);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void MenuItemPattern::CloseMenu()
@@ -1016,7 +1104,9 @@ void MenuItemPattern::RegisterOnTouch()
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->IsOptionPattern() ? pattern->OnPress(info) : pattern->OnTouch(info);
+            if (!pattern->IsOptionPattern()) {
+                pattern->OnTouch(info);
+            }
         };
         onTouchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     }
@@ -1032,6 +1122,28 @@ void MenuItemPattern::RegisterOnTouch()
     } else if (!onTouchEventSet_) {
         gestureHub->AddTouchEvent(onTouchEvent_);
         onTouchEventSet_ = true;
+    }
+}
+
+void MenuItemPattern::RegisterOnPress()
+{
+    if (!onPressEvent_) {
+        auto touchCallback = [weak = WeakClaim(this)](const UIState& state) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->IsOptionPattern()) {
+                pattern->OnPress(state);
+            }
+        };
+        onPressEvent_ = std::move(touchCallback);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!onPressEventSet_) {
+        eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, onPressEvent_, true);
+        onPressEventSet_ = true;
     }
 }
 
@@ -1109,9 +1221,7 @@ bool MenuItemPattern::OnClick()
     auto menuWrapper = GetMenuWrapper();
     auto menuWrapperPattern = menuWrapper ? menuWrapper->GetPattern<MenuWrapperPattern>() : nullptr;
     auto hasSubMenu = menuWrapperPattern ? menuWrapperPattern->HasStackSubMenu() : false;
-    if (expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu) {
-        return true;
-    }
+    CHECK_EQUAL_RETURN(expandingMode_ == SubMenuExpandingMode::STACK && !IsSubMenu() && hasSubMenu, true, true);
     if (expandingMode_ == SubMenuExpandingMode::STACK && IsStackSubmenuHeader()) {
         menuWrapperPattern->HideSubMenu();
         return true;
@@ -1145,8 +1255,10 @@ bool MenuItemPattern::OnClick()
         ShowSubMenu(ShowSubMenuType::CLICK);
         return true;
     }
-    // hide menu when menu item is clicked
-    CloseMenu();
+    // hide menu when menu item is clicked, unless the click is intercepted
+    if (!blockClick_) {
+        CloseMenu();
+    }
     return true;
 }
 
@@ -1201,10 +1313,12 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
             menuWrapperPattern->SetLastTouchItem(host);
         }
         props->UpdatePress(true);
+        UpdateDividerPressStatus(true);
         menuPattern->OnItemPressed(parent, index_, true);
     } else {
         SetBgBlendColor(isHovered_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdatePress(false);
+        UpdateDividerPressStatus(false);
         menuPattern->OnItemPressed(parent, index_, false);
     }
     PlayBgColorAnimation(false);
@@ -1268,6 +1382,7 @@ void MenuItemPattern::OnHover(bool isHover)
         auto props = GetPaintProperty<MenuItemPaintProperty>();
         CHECK_NULL_VOID(props);
         props->UpdateHover(isHover);
+        UpdateDividerHoverStatus(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         if (isHover || !IsSelected()) {
             UpdateNextNodeDivider(!isHover);
@@ -1283,13 +1398,231 @@ void MenuItemPattern::OnHover(bool isHover)
         auto parent = AceType::DynamicCast<UINode>(host->GetParent());
         SetBgBlendColor(isHover || isSubMenuShowed_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdateHover(isHover || isSubMenuShowed_);
-        if (isHover || isSubMenuShowed_) {
-            ShowSubMenu(ShowSubMenuType::HOVER);
-        }
+        UpdateDividerHoverStatus(isHover || isSubMenuShowed_);
+        PostHoverSubMenuTask();
         menuPattern->OnItemPressed(parent, index_, isHover || isSubMenuShowed_, true);
         PlayBgColorAnimation();
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void MenuItemPattern::PostHoverSubMenuTask()
+{
+    if (GetSubBuilder() == nullptr) {
+        return;
+    }
+    if (showTask_) {
+        TAG_LOGD(AceLogTag::ACE_MENU, "Submenu show task cancel");
+        showTask_.Cancel();
+    }
+    if (!isHover_ && !isSubMenuShowed_) {
+        return;
+    }
+    if (expandingMode_ != SubMenuExpandingMode::SIDE) {
+        ShowSubMenu(ShowSubMenuType::HOVER);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto delayTime = menuTheme->GetSubMenuShowDelayDuration();
+    if (delayTime > 0) {
+        showTask_.Reset([weak = WeakClaim(this)] {
+            TAG_LOGD(AceLogTag::ACE_MENU, "Execute show submenu task");
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->IsHover() || pattern->IsSubMenuShowed()) {
+                pattern->ShowSubMenu(ShowSubMenuType::HOVER);
+            }
+        });
+        auto executor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(executor);
+        TAG_LOGD(AceLogTag::ACE_MENU, "Post show submenu task");
+        executor->PostDelayedTask(showTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIShowSubMenuTask");
+    } else {
+        ShowSubMenu(ShowSubMenuType::HOVER);
+    }
+}
+
+void MenuItemPattern::CheckHideSubMenu(std::function<void()> callback, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (expandingMode_ != SubMenuExpandingMode::SIDE) {
+        PerformHideSubMenu(callback);
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto menuTheme = context->GetTheme<MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    if (!lastInnerPosition_.has_value()) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "Last inner position not has value");
+        PerformHideSubMenu(callback);
+        return;
+    }
+    if (hideTask_) {
+        if (NeedPerformHideSubMenuImmediately(mousePoint, menuZone)) {
+            PerformHideSubMenu(callback);
+            return;
+        }
+    } else {
+        if (!NeedStartHideMenuTask(mousePoint, menuZone)) {
+            PerformHideSubMenu(callback);
+            return;
+        }
+        auto delayTime = menuTheme->GetSubMenuHideDelayDuration();
+        if (delayTime > 0) {
+            hideTask_.Reset([weak = WeakClaim(this), callback = std::move(callback)] {
+                TAG_LOGD(AceLogTag::ACE_MENU, "Execute hide submenu task");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->PerformHideSubMenu(callback);
+            });
+            auto executor = context->GetTaskExecutor();
+            CHECK_NULL_VOID(executor);
+            TAG_LOGD(AceLogTag::ACE_MENU, "Post hide submenu task");
+            executor->PostDelayedTask(hideTask_, TaskExecutor::TaskType::UI, delayTime, "ArkUIHideSubMenuTask");
+        } else {
+            PerformHideSubMenu(callback);
+            return;
+        }
+    }
+    lastOutterPosition_ = mousePoint;
+}
+
+bool MenuItemPattern::NeedPerformHideSubMenuImmediately(const PointF& mousePoint, const RectF& menuZone)
+{
+    if (!lastInnerPosition_.has_value()) {
+        return false;
+    }
+    if (!lastOutterPosition_.has_value()) {
+        return false;
+    }
+    auto lastInnerPoint = lastInnerPosition_.value();
+    auto lastOutterPoint = lastOutterPosition_.value();
+    if (LessNotEqual(lastInnerPoint.GetX(), menuZone.Left())) {
+        if (leaveFromBottom_) {
+            if (GreatNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                LessNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        } else {
+            if (GreatNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                GreatNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        }
+    } else if (GreatNotEqual(lastInnerPoint.GetX(), menuZone.Right())) {
+        if (leaveFromBottom_) {
+            if (LessNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                GreatNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        } else {
+            if (LessNotEqual(lastOutterPoint.GetX(), mousePoint.GetX()) &&
+                LessNotEqual(lastOutterPoint.GetY(), mousePoint.GetY())) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool MenuItemPattern::NeedStartHideMenuTask(const PointF& mousePoint, const RectF& menuZone)
+{
+    if (!lastInnerPosition_.has_value()) {
+        return false;
+    }
+    auto lastInnerPoint = lastInnerPosition_.value();
+    leaveFromBottom_ = GreatNotEqual(mousePoint.GetY(), lastInnerPoint.GetY());
+    if (LessNotEqual(lastInnerPoint.GetX(), menuZone.Left())) {
+        return NeedStartHideRightSubMenuTask(lastInnerPoint, mousePoint, menuZone);
+    } else if (GreatNotEqual(lastInnerPoint.GetX(), menuZone.Right())) {
+        return NeedStartHideLeftSubMenuTask(lastInnerPoint, mousePoint, menuZone);
+    } else {
+        return false;
+    }
+}
+
+bool MenuItemPattern::NeedStartHideRightSubMenuTask(
+    const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (leaveFromBottom_) {
+        if (NearEqual(menuZone.Bottom(), lastInnerPoint.GetY()) ||
+            NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (menuZone.Left() - lastInnerPoint.GetX()) / (menuZone.Bottom() - lastInnerPoint.GetY());
+        auto currentRadio = (mousePoint.GetX() - lastInnerPoint.GetX()) / (mousePoint.GetY() - lastInnerPoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    } else {
+        if (NearEqual(menuZone.Top(), lastInnerPoint.GetY()) || NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (menuZone.Left() - lastInnerPoint.GetX()) / (lastInnerPoint.GetY() - menuZone.Top());
+        auto currentRadio = (mousePoint.GetX() - lastInnerPoint.GetX()) / (lastInnerPoint.GetY() - mousePoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool MenuItemPattern::NeedStartHideLeftSubMenuTask(
+    const PointF& lastInnerPoint, const PointF& mousePoint, const RectF& menuZone)
+{
+    if (leaveFromBottom_) {
+        if (NearEqual(menuZone.Bottom(), lastInnerPoint.GetY()) ||
+            NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (lastInnerPoint.GetX() - menuZone.Right()) / (menuZone.Bottom() - lastInnerPoint.GetY());
+        auto currentRadio = (lastInnerPoint.GetX() - mousePoint.GetX()) / (mousePoint.GetY() - lastInnerPoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    } else {
+        if (NearEqual(menuZone.Top(), lastInnerPoint.GetY()) || NearEqual(mousePoint.GetY(), lastInnerPoint.GetY())) {
+            return false;
+        }
+        auto compareRatio = (lastInnerPoint.GetX() - menuZone.Right()) / (lastInnerPoint.GetY() - menuZone.Top());
+        auto currentRadio = (lastInnerPoint.GetX() - mousePoint.GetX()) / (lastInnerPoint.GetY() - mousePoint.GetY());
+        if (GreatNotEqual(compareRatio, currentRadio)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void MenuItemPattern::PerformHideSubMenu(std::function<void()> callback)
+{
+    if (callback) {
+        callback();
+    }
+    OnHover(false);
+    SetIsSubMenuShowed(false);
+    ClearHoverRegions();
+    ResetWrapperMouseEvent();
+    if (hideTask_) {
+        hideTask_.Cancel();
+    }
+    lastOutterPosition_.reset();
+    lastInnerPosition_.reset();
+    leaveFromBottom_ = false;
+}
+
+void MenuItemPattern::CancelHideSubMenuTask(const PointF& mousePoint)
+{
+    if (hideTask_) {
+        hideTask_.Cancel();
+    }
+    lastInnerPosition_ = mousePoint;
 }
 
 void MenuItemPattern::OnVisibleChange(bool isVisible)
@@ -1659,16 +1992,30 @@ void MenuItemPattern::AddClickableArea()
         accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
-        if (content_) {
-            auto nodeAccessibilityProps = content_->GetAccessibilityProperty<AccessibilityProperty>();
-            CHECK_NULL_VOID(nodeAccessibilityProps);
-            nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        }
-        if (label_) {
-            auto nodeAccessibilityProps = label_->GetAccessibilityProperty<AccessibilityProperty>();
-            CHECK_NULL_VOID(nodeAccessibilityProps);
-            nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        }
+
+        SetRowAccessibilityLevel();
+    }
+}
+
+void MenuItemPattern::SetRowAccessibilityLevel()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    if (leftRow) {
+        auto nodeAccessibilityProps = leftRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
+    }
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    if (rightRow) {
+        auto nodeAccessibilityProps = rightRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
     }
 }
 
@@ -1986,9 +2333,7 @@ void MenuItemPattern::UpdateTextNodes()
         host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
-    if (IsDisabled()) {
-        UpdateDisabledStyle();
-    }
+    UpdateDisabledStyle();
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -2002,24 +2347,42 @@ bool MenuItemPattern::IsDisabled()
 
 void MenuItemPattern::UpdateDisabledStyle()
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
+    auto enabled = eventHub->IsEnabled();
+    auto alpha = theme->GetDisabledFontColorAlpha();
     if (content_) {
-        content_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = content_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         content_->MarkModifyDone();
     }
     if (label_) {
-        label_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = label_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         label_->MarkModifyDone();
     }
     if (startIcon_) {
-        startIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = startIcon_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         startIcon_->MarkModifyDone();
     }
     if (endIcon_) {
-        endIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        auto renderContext = endIcon_->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto originalOpacity = renderContext->GetOpacityValue(1.0);
+        renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
         endIcon_->MarkModifyDone();
     }
 }
@@ -2185,7 +2548,7 @@ float MenuItemPattern::GetDividerStroke()
     return props->GetStrokeWidth().value_or(Dimension(0.0f, DimensionUnit::PX)).ConvertToPx();
 }
 
-RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& position)
+RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const PointF& position)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -2198,7 +2561,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
     auto clickableAreaSize = clickableArea_->GetGeometryNode()->GetFrameSize();
     auto clickableAreaZone = RectF(clickableAreaOffset.GetX(), clickableAreaOffset.GetY(),
         clickableAreaSize.Width(), clickableAreaSize.Height());
-    if (clickableAreaZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+    if (clickableAreaZone.IsInRegion(position)) {
         return host;
     }
     RefPtr<FrameNode> menuItem = nullptr;
@@ -2211,7 +2574,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
             auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
             auto menuItemZone = RectF(menuItemOffset.GetX(), menuItemOffset.GetY(),
                 menuItemSize.Width(), menuItemSize.Height());
-            if (menuItemZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+            if (menuItemZone.IsInRegion(position)) {
                 break;
             } else {
                 menuItem = nullptr;
@@ -2278,6 +2641,11 @@ void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateItalicFontStyle(value);
+}
+
+void MenuItemPattern::SetSelected(int32_t selected)
+{
+    rowSelected_ = selected;
 }
 
 void MenuItemPattern::SetBorderColor(const Color& color)
@@ -2512,7 +2880,7 @@ std::string MenuItemPattern::InspectorGetFont()
     return props->InspectorGetTextFont();
 }
 
-void MenuItemPattern::OnPress(const TouchEventInfo& info)
+void MenuItemPattern::OnPress(const UIState& state)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2520,24 +2888,21 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(props);
-    const auto& touches = info.GetTouches();
-    CHECK_EQUAL_VOID(touches.empty(), true);
-    auto touchType = touches.front().GetTouchType();
-
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
-    if (touchType == TouchType::DOWN) {
+    if (state == UI_STATE_PRESSED) {
         // change background color, update press status
         SetBgBlendColor(theme ? theme->GetClickedColor() : DEFAULT_CLICKED_COLOR);
         PlayBgColorAnimation(false);
 
         props->UpdatePress(true);
+        UpdateDividerPressStatus(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
         UpdateNextNodeDivider(false);
-    } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+    } else if (state == UI_STATE_NORMAL) {
         // leave press status
         if (IsHover()) {
             SetBgBlendColor(theme ? theme->GetHoverColor() : DEFAULT_HOVER_COLOR);
@@ -2547,6 +2912,7 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
         PlayBgColorAnimation(false);
 
         props->UpdatePress(false);
+        UpdateDividerPressStatus(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         if (!IsSelected()) {
             UpdateNextNodeDivider(true);
@@ -2639,6 +3005,15 @@ void MenuItemPattern::OptionOnModifyDone(const RefPtr<FrameNode>& host)
     }
     SetAccessibilityAction();
     InitFocusEvent();
+    auto textAlign = static_cast<TextAlign>(selectTheme_->GetOptionContentNormalAlign());
+    if (textAlign != TextAlign::CENTER) {
+        return;
+    }
+    CHECK_NULL_VOID(text_);
+    auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+    textProperty->UpdateTextAlign(textAlign);
+    text_->MarkModifyDone();
 }
 
 void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha)
@@ -2648,5 +3023,186 @@ void MenuItemPattern::UpdatePasteDisabledOpacity(const double disabledColorAlpha
     CHECK_NULL_VOID(pasteButtonRenderContext);
     pasteButtonRenderContext->UpdateOpacity(disabledColorAlpha);
     pasteButton_->MarkModifyDone();
+}
+
+void MenuItemPattern::UpdateDividerSelectedStatus(bool isSelected)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomSelected(isSelected);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopSelected(isSelected);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void MenuItemPattern::UpdateDividerHoverStatus(bool isHover)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomHover(isHover);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopHover(isHover);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void MenuItemPattern::UpdateDividerPressStatus(bool isPress)
+{
+    if (bottomDivider_) {
+        auto bottomPaintProperty = bottomDivider_->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(bottomPaintProperty);
+        bottomPaintProperty->UpdateBottomPress(isPress);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    auto topDivider = GetTopDivider();
+    if (topDivider) {
+        auto topPaintProperty = topDivider->GetPaintProperty<MenuDividerPaintProperty>();
+        CHECK_NULL_VOID(topPaintProperty);
+        topPaintProperty->UpdateTopPress(isPress);
+        topDivider->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void MenuItemPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    if (optionApply_ && !optionApply) {
+        ResetSelectTextProps();
+        ApplyOptionThemeStyles();
+        return;
+    }
+    optionApply_ = optionApply;
+    if (optionApply_) {
+        ResetSelectTextProps();
+        ApplyOptionThemeStyles();
+        ApplyTextModifier(optionApply_);
+    }
+}
+
+void MenuItemPattern::SetSelectedOptionTextModifier(
+    const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
+{
+    if (optionSelectedApply_ && !optionSelectedApply) {
+        ResetSelectTextProps();
+        ApplySelectedThemeStyles();
+        return;
+    }
+    optionSelectedApply_ = optionSelectedApply;
+    if (optionSelectedApply_) {
+        ResetSelectTextProps();
+        ApplySelectedThemeStyles();
+        ApplyTextModifier(optionSelectedApply_);
+    }
+}
+
+void MenuItemPattern::ApplyTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply)
+{
+    if (!optionApply) {
+        return;
+    }
+    auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    std::optional<Dimension> backupFontSize;
+    std::optional<Dimension> backupMaxFontSize;
+    std::optional<Dimension> backupMinFontSize;
+    if (textLayoutProperty->HasFontSize()) {
+        backupFontSize = textLayoutProperty->GetFontSizeValue(Dimension());
+    }
+    if (textLayoutProperty->HasAdaptMaxFontSize()) {
+        backupMaxFontSize = textLayoutProperty->GetAdaptMaxFontSizeValue(Dimension());
+    }
+    if (textLayoutProperty->HasAdaptMinFontSize()) {
+        backupMinFontSize = textLayoutProperty->GetAdaptMinFontSizeValue(Dimension());
+    }
+    textLayoutProperty->ResetFontSize();
+    textLayoutProperty->ResetAdaptMaxFontSize();
+    textLayoutProperty->ResetAdaptMinFontSize();
+    optionApply(AceType::WeakClaim(AceType::RawPtr(text_)));
+    if (!textLayoutProperty->HasFontSize() && !textLayoutProperty->HasAdaptMinFontSize() &&
+        !textLayoutProperty->HasAdaptMaxFontSize()) {
+        if (backupFontSize.has_value()) {
+            textLayoutProperty->UpdateFontSize(backupFontSize.value());
+        }
+        if (backupMaxFontSize.has_value()) {
+            textLayoutProperty->UpdateAdaptMaxFontSize(backupMaxFontSize.value());
+        }
+        if (backupMinFontSize.has_value()) {
+            textLayoutProperty->UpdateAdaptMinFontSize(backupMinFontSize.value());
+        }
+    }
+    text_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    text_->MarkModifyDone();
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& MenuItemPattern::GetOptionTextModifier()
+{
+    return optionApply_;
+}
+
+std::function<void(WeakPtr<NG::FrameNode>)>& MenuItemPattern::GetSelectedOptionTextModifier()
+{
+    return optionSelectedApply_;
+}
+
+void MenuItemPattern::ResetSelectTextProps()
+{
+    auto textLayoutProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto row = AceType::DynamicCast<FrameNode>(text_->GetParent());
+    CHECK_NULL_VOID(row);
+    auto textContent = UtfUtils::Str16ToStr8(textLayoutProperty->GetContentValue(u""));
+    row->RemoveChild(text_);
+    text_ = MenuView::CreateText(textContent, row);
+}
+
+void MenuItemPattern::ApplySelectedThemeStyles()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(selectTheme);
+    auto selectedColorText = selectTheme->GetSelectedColorText();
+    auto selectedFontSizeText = selectTheme->GetSelectFontSizeText();
+    auto selectedColor = selectTheme->GetSelectedColor();
+    auto selectedBorderColor = selectTheme->GetOptionSelectedBorderColor();
+    auto selectedBorderWidth = selectTheme->GetOptionSelectedBorderWidth();
+    SetFontColor(selectedColorText);
+    SetFontSize(selectedFontSizeText);
+    SetBgColor(selectedColor);
+    SetBorderColor(selectedBorderColor);
+    SetBorderWidth(selectedBorderWidth);
+}
+
+void MenuItemPattern::ApplyOptionThemeStyles()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(selectTheme && textTheme);
+    SetFontColor(selectTheme->GetMenuFontColor());
+    SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
+    SetFontSize(selectTheme->GetMenuFontSize());
+    SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+    SetBorderColor(GetBorderColor());
+    SetBorderWidth(GetBorderWidth());
+    SetBgColor(selectTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG

@@ -78,6 +78,10 @@ public:
 
     void SetAnimationEndEvent(AnimationEndEvent&& event);
 
+    void SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
+    void SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event);
+
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
@@ -148,8 +152,10 @@ public:
 
     void HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, const RefPtr<FrameNode>& tabBarNode);
 
-    void UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const RefPtr<FrameNode>& swiperNode,
-        const RefPtr<TabBarPattern>& tabBarPattern, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    void UpdateSelectedState(const RefPtr<FrameNode>& swiperNode, const RefPtr<TabBarPattern>& tabBarPattern,
+        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int index);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ReportComponentChangeEvent(int32_t currentIndex);
 
 private:
     void OnAttachToFrameNode() override;
@@ -166,21 +172,23 @@ private:
         const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
     void InitFocusEvent();
     RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
-    void SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
-        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index);
-
+    void InitAccessibilityZIndex();
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
     bool isInit_ = true;
 
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventWithPreIndexPtr onChangeEvent_;
+    ChangeEventPtr selectedEvent_;
+    ChangeEventPtr unselectedEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
     std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
+    BarPosition barPosition_ = BarPosition::START;
 };
 
 } // namespace OHOS::Ace::NG

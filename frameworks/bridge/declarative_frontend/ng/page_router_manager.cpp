@@ -16,13 +16,16 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
 #include "base/i18n/localization.h"
+#include "base/thread/task_dependency_manager.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/common/thread_checker.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -290,10 +293,14 @@ void PageRouterManager::PushNamedRouteInner(const RouterPageInfo& target)
     CleanPageOverlay();
     UpdateSrcPage();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto PageInfoByUrl = FindPageInStackByRouteName(target.url);
-        if (PageInfoByUrl.second) {
+        auto pageInfoByUrl = FindPageInStackByRouteName(target.url);
+        if (pageInfoByUrl.second) {
             // find page in stack, move postion and update params.
-            MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
+            auto pagePattern = pageInfoByUrl.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
+            MovePageToFront(pageInfoByUrl.first, pageInfoByUrl.second, target, true);
             return;
         }
         auto index = FindPageInRestoreStack(target.url);
@@ -437,12 +444,16 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
     CHECK_NULL_VOID(pagePattern);
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
 
     DialogProperties dialogProperties = {
         .content = message,
         .autoCancel = false,
-        .buttons = { { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" },
-            { .text = Localization::GetInstance()->GetEntryLetters("common.ok"), .textColor = "" } },
+        .buttons = { { .text = dialogTheme->GetCancelText(), .textColor = "" },
+            { .text = dialogTheme->GetConfirmText(), .textColor = "" } },
         .onSuccess =
             [weak = AceType::WeakClaim(this), weakPageInfo = AceType::WeakClaim(AceType::RawPtr(pageInfo))](
                 int32_t successType, int32_t successIndex) {
@@ -1147,6 +1158,10 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1220,6 +1235,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, true);
             return;
         }
@@ -1246,6 +1265,10 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(target.params);
+            }
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
             return;
         }
@@ -1434,6 +1457,9 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
     auto pageNode = CreatePage(pageId, target);
+
+    TaskDependencyManager::GetInstance()->Sync();
+
     if (!pageNode) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return;
@@ -1462,8 +1488,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
     ResSchedReportScope reportScope("push_page", reportData);
-    auto pageNode =
-        FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
     // !!! must push_back first for UpdateRootComponent
     pageRouterStack_.emplace_back(pageNode);
@@ -1490,14 +1515,13 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     if (keyInfo.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         // deal with @bundle url
         // @bundle format: @bundle:bundleName/moduleName/pagePath/fileName(without file extension)
-        // @bundle example: @bundle:com.example.applicationHsp/hsp/ets/pages/Index
-        // only moduleName and lastPagePath/fileName is needed: hsppages/Index
+        // @bundle example: @bundle:com.example.applicationHsp/hsp/ets/mylib/pages/Index
+        // only moduleName and pagePath/fileName is needed: hspmylib/pages/Index
         size_t bundleEndPos = keyInfo.find('/');
         size_t moduleStartPos = bundleEndPos + 1;
         size_t moduleEndPos = keyInfo.find('/', moduleStartPos);
         std::string moduleName = keyInfo.substr(moduleStartPos, moduleEndPos - moduleStartPos);
-        size_t fileNameStartPos = keyInfo.rfind('/');
-        size_t pageInfoStartPos = keyInfo.rfind('/', fileNameStartPos - 1);
+        size_t pageInfoStartPos = keyInfo.find('/', moduleEndPos + 1);
         keyInfo = keyInfo.substr(pageInfoStartPos + 1);
         keyInfo = moduleName + keyInfo;
     }
@@ -1532,7 +1556,7 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
         TAG_LOGE(AceLogTag::ACE_ROUTER, "Update RootComponent Failed or LoadNamedRouter Failed");
 #if !defined(PREVIEW)
         if (!target.isNamedRouterMode && target.url.substr(0, strlen(BUNDLE_TAG)) != BUNDLE_TAG) {
-            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_LOAD_PAGE_ERROR);
+            ThrowError("Load Page Failed: " + target.url, ERROR_CODE_INTERNAL_ERROR);
         }
 #endif
         pageRouterStack_.pop_back();
@@ -2108,6 +2132,11 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
         }
         if (pageInfo.first == popIndex) {
             // replace top self in SINGLE mode, do nothing.
+            CHECK_NULL_VOID(pageInfo.second);
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
             return;
         }
         if (pageInfo.second) {
@@ -2121,6 +2150,10 @@ void PageRouterManager::ReplacePageInNewLifecycle(const RouterPageInfo& info)
 #endif
             popIndex = popIndex - 1;
             findPage = true;
+            auto pagePattern = pageInfo.second->GetPattern<PagePattern>();
+            if (pagePattern) {
+                pagePattern->FireOnNewParam(info.params);
+            }
         } else {
             auto index = FindPageInRestoreStack(info.url);
             if (index != INVALID_PAGE_INDEX) {

@@ -473,6 +473,84 @@ HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest008, TestSiz
 }
 
 /**
+ * @tc.name: DrawCalendarPickerBackgroundAreaTest009
+ * @tc.desc: Test CalendarPaintMethod DrawCalendarPickerBackgroundArea Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, DrawCalendarPickerBackgroundAreaTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set today is disabled and isSelected is true and markToday is false.
+     * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
+     */
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    calendarDay.month.month = 1;
+    calendarDay.day = 1;
+    obtainedMonth.year = calendarDay.month.year;
+    obtainedMonth.month = 1;
+    calendarDay.isSelected = true;
+    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
+        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
+    CalendarPaintParams params;
+    params.startDate = startDate;
+    params.endDate = endDate;
+    params.markToday = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    std::pair<PickerDate, PickerDate> pair;
+    pair.first = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    pair.second = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    disabledDateRange.emplace_back(pair);
+    params.disabledDateRange = disabledDateRange;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
+    RSCanvas rsCanvas;
+    calendarDay.isKeyFocused = false;
+    paintMethod->calendarDay_ = calendarDay;
+    paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
+    /**
+     * @tc.steps: step3. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set markToday is true.
+     * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
+     */
+    params.markToday = true;
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
+    paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
+    /**
+     * @tc.steps: step4. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set isSelected is false.
+     * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
+     */
+    calendarDay.isSelected = false;
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
+    paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
+    /**
+     * @tc.steps: step5. call DrawCalendarPickerBackgroundArea.
+     * @tc.desc: set today is not disabled.
+     * @tc.expected: calendarDay.month.year equals obtainedMonth_.year.
+     */
+    params.disabledDateRange.clear();
+    paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    ASSERT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod->obtainedMonth_.year, calendarDay.month.year);
+    paintMethod->DrawCalendarPickerBackgroundArea(calendarDay, rsCanvas, 1.0, 1.0);
+}
+
+/**
  * @tc.name: InitTextStyleTest001
  * @tc.desc: Test CalendarPaintMethod InitTextStyle
  * @tc.type: FUNC
@@ -498,7 +576,7 @@ HWTEST_F(CalendarPaintMethTest, InitTextStyleTest001, TestSize.Level1)
     RSTextStyle lunarTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->InitTextStyle(dateTextStyle, lunarTextStyle);
-    EXPECT_TRUE(dateTextStyle.fontSize_ == paintMethod->dayFontSize_);
+    EXPECT_TRUE(dateTextStyle.fontSize == paintMethod->dayFontSize_);
 }
 
 /**
@@ -532,7 +610,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest001, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -565,7 +643,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest002, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
 }
 
 /**
@@ -599,7 +677,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest003, TestSize.L
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, startDate, endDate);
     RSTextStyle dateTextStyle;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -633,7 +711,7 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest004, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textNonCurrentMonthColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
 }
 
 /**
@@ -668,7 +746,160 @@ HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest005, TestSize.L
     RSTextStyle dateTextStyle;
     paintMethod->calendarDay_ = calendarDay;
     paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
-    EXPECT_TRUE(dateTextStyle.color_ == paintMethod->textSelectedDayColor_);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
+}
+
+/**
+ * @tc.name: SetCalendarPickerDayTextStyleTest006
+ * @tc.desc: Test CalendarPaintMethod SetCalendarPickerDayTextStyle Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step2. call SetCalendarPickerDayTextStyle.
+     * @tc.desc: set today is disabled and isSelected is true and markToday is false.
+     * @tc.expected: dateTextStyle.color_ equals textNonCurrentMonthColor_.
+     */
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    calendarDay.month.month = 1;
+    calendarDay.day = 1;
+    obtainedMonth.year = calendarDay.month.year;
+    obtainedMonth.month = 1;
+    calendarDay.isSelected = true;
+    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
+        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
+    CalendarPaintParams params;
+    params.startDate = startDate;
+    params.endDate = endDate;
+    params.markToday = false;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    std::pair<PickerDate, PickerDate> pair;
+    pair.first = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    pair.second = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    disabledDateRange.emplace_back(pair);
+    params.disabledDateRange = disabledDateRange;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    RSTextStyle dateTextStyle;
+    paintMethod->calendarDay_ = calendarDay;
+    paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthColor_);
+}
+
+/**
+ * @tc.name: SetCalendarPickerDayTextStyleTest007
+ * @tc.desc: Test CalendarPaintMethod SetCalendarPickerDayTextStyle Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step2. call SetCalendarPickerDayTextStyle.
+     * @tc.desc: set today is disabled and isSelected is true and markToday is true.
+     * @tc.expected: dateTextStyle.color_ equals textNonCurrentMonthTodayColor_.
+     */
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    calendarDay.month.month = 1;
+    calendarDay.day = 1;
+    obtainedMonth.year = calendarDay.month.year;
+    obtainedMonth.month = 1;
+    calendarDay.isSelected = true;
+    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
+        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
+    CalendarPaintParams params;
+    params.startDate = startDate;
+    params.endDate = endDate;
+    params.markToday = true;
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    std::pair<PickerDate, PickerDate> pair;
+    pair.first = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    pair.second = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    disabledDateRange.emplace_back(pair);
+    params.disabledDateRange = disabledDateRange;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    RSTextStyle dateTextStyle;
+    paintMethod->calendarDay_ = calendarDay;
+    paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textNonCurrentMonthTodayColor_);
+}
+
+/**
+ * @tc.name: SetCalendarPickerDayTextStyleTest008
+ * @tc.desc: Test CalendarPaintMethod SetCalendarPickerDayTextStyle Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, SetCalendarPickerDayTextStyleTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    /**
+     * @tc.steps: step2. call SetCalendarPickerDayTextStyle.
+     * @tc.desc: set today is not disabled and isSelected is true and markToday is true.
+     * @tc.expected: dateTextStyle.color_ equals textSelectedDayColor_.
+     */
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    calendarDay.month.month = 1;
+    calendarDay.day = 1;
+    obtainedMonth.year = calendarDay.month.year;
+    obtainedMonth.month = 1;
+    calendarDay.isSelected = true;
+    PickerDate startDate = PickerDate(calendarDay.month.year, calendarDay.month.month, 1);
+    PickerDate endDate = PickerDate(calendarDay.month.year, calendarDay.month.month,
+        PickerDate::GetMaxDay(calendarDay.month.year, calendarDay.month.month));
+    CalendarPaintParams params;
+    params.startDate = startDate;
+    params.endDate = endDate;
+    params.markToday = true;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, params);
+    RSTextStyle dateTextStyle;
+    paintMethod->calendarDay_ = calendarDay;
+    paintMethod->SetCalendarPickerDayTextStyle(dateTextStyle, calendarDay);
+    EXPECT_TRUE(dateTextStyle.color == paintMethod->textSelectedDayColor_);
 }
 
 /**
@@ -696,7 +927,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest001, TestSize.Level1)
     RSTextStyle offWorkTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_NE(offWorkTextStyle.fontSize_, 0);
+    EXPECT_NE(offWorkTextStyle.fontSize, 0);
 }
 
 /**
@@ -724,7 +955,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest002, TestSize.Level1)
     RSTextStyle offWorkTextStyle;
     paintMethod->appFontFamilies_.push_back("test");
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_EQ(offWorkTextStyle.locale_, Localization::GetInstance()->GetFontLocale());
+    EXPECT_EQ(offWorkTextStyle.locale, Localization::GetInstance()->GetFontLocale());
 }
 
 /**
@@ -751,7 +982,7 @@ HWTEST_F(CalendarPaintMethTest, SetOffWorkTextStyleTest003, TestSize.Level1)
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay, defaultDate, defaultDate);
     RSTextStyle offWorkTextStyle;
     paintMethod->SetOffWorkTextStyle(offWorkTextStyle, calendarDay);
-    EXPECT_EQ(offWorkTextStyle.fontWeight_, static_cast<RSFontWeight>(paintMethod->workStateFontWeight_));
+    EXPECT_EQ(offWorkTextStyle.fontWeight, static_cast<RSFontWeight>(paintMethod->workStateFontWeight_));
 }
 
 /**

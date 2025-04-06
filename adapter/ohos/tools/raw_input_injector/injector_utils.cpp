@@ -15,8 +15,6 @@
 
 #include "injector_utils.h"
 
-#include <cmath>
-#include <ctime>
 #include <iostream>
 #include <map>
 

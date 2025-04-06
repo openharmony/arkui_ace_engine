@@ -353,29 +353,6 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetVelocityScaleTest001
- * @tc.desc: Test SetVelocityScale method with valid and invalid values
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetVelocityScaleTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set VelocityScale to a valid value
-     * @tc.expected: VelocityScale is updated to the new value
-     */
-    double sVelocityScale = 2.0;
-    auto scrollable = AceType::MakeRefPtr<Scrollable>();
-    scrollable->SetVelocityScale(sVelocityScale);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-    /**
-     * @tc.steps: step2. Set VelocityScale to an invalid value (less than or equal to 0)
-     * @tc.expected: VelocityScale remains unchanged
-     */
-    scrollable->SetVelocityScale(-1.0);
-    EXPECT_EQ(scrollable->sVelocityScale_.value_or(0.0), sVelocityScale);
-}
-
-/**
  * @tc.name: HandleTouchCancel001
  * @tc.desc: Test the behavior of the HandleTouchCancel method
  * @tc.type: FUNC
@@ -1198,22 +1175,6 @@ HWTEST_F(ScrollableCoverTestNg, GetOrCreateScrollableItemWithParent002, TestSize
 }
 
 /**
- * @tc.name: SetFriction001
- * @tc.desc: Test SetFriction method
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollableCoverTestNg, SetFriction001, TestSize.Level1)
-{
-    double sFriction = -1.0;
-    /**
-     * @tc.steps: step1. Call SetFriction with sFriction LessOrEqual 0.0
-     * @tc.expected: sFriction_ dont change
-     */
-    Scrollable::SetFriction(sFriction);
-    EXPECT_FALSE(Scrollable::sFriction_.has_value());
-}
-
-/**
  * @tc.name: InitializeTest002
  * @tc.desc: Test Initialize method and covering actionUpdate, actionEnd, actionCancel
  * @tc.type: FUNC
@@ -1730,9 +1691,8 @@ HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
-    auto sheetContentNode =
-        FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto sheetContentNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() {return AceType::MakeRefPtr<LinearLayoutPattern>(true);});
     auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     sheetContentNode->AddChild(childFrameNode);
@@ -1747,12 +1707,15 @@ HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
     };
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
-    sheetStyle.showDragBar = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     auto sheetNode = overlayManager->modalStack_.top().Upgrade();
-    auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto scrollNode = sheetPattern->GetSheetScrollNode();
+    ASSERT_NE(scrollNode, nullptr);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
     double offset = 100.0;
     scrollPattern->GetParentModalSheet();

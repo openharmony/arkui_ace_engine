@@ -34,8 +34,6 @@ public:
 
 private:
     std::unique_ptr<EnvironmentInterface> delegate_;
-    static EnvironmentProxy* inst_;
-    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

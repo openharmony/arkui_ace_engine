@@ -170,11 +170,15 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
-    columnRenderContext->UpdateClipEdge(tabBarRenderContext->GetClipEdgeValue(true));
+    if (tabTheme->GetIsChangeFocusTextStyle()) {
+        columnRenderContext->UpdateClipEdge(false);
+    } else {
+        columnRenderContext->UpdateClipEdge(tabBarRenderContext->GetClipEdgeValue(true));
+    }
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
-    tabBarPattern->AddTabBarItemClickEvent(columnNode);
+    tabBarPattern->AddTabBarItemClickAndTouchEvent(columnNode);
     tabBarPattern->AddTabBarItemCallBack(columnNode);
     auto selectedMode = tabContentPattern->GetSelectedMode();
     auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
@@ -733,5 +737,20 @@ void TabContentModelNG::SetTabBarLabel(FrameNode* node, const std::string& label
     CHECK_NULL_VOID(frameNodePattern);
     frameNodePattern->SetTabBar(label, "", std::nullopt, nullptr);
     frameNodePattern->SetTabBarWithContent(nullptr);
+}
+
+void TabContentModelNG::SetOnWillShow(FrameNode* tabContentNode, std::function<void()>&& onWillShow)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillShow(onWillShow);
+}
+void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<void()>&& onWillHide)
+{
+    CHECK_NULL_VOID(tabContentNode);
+    auto tabContentEventHub = tabContentNode->GetEventHub<TabContentEventHub>();
+    CHECK_NULL_VOID(tabContentEventHub);
+    tabContentEventHub->SetOnWillHide(onWillHide);
 }
 } // namespace OHOS::Ace::NG

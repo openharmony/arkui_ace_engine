@@ -78,8 +78,7 @@ public:
     static RefPtr<JsAcePage> GetRunningPage(int32_t instanceId);
     static RefPtr<JsAcePage> GetStagingPage(int32_t instanceId);
     static shared_ptr<JsRuntime> GetCurrentRuntime();
-    static void PostJsTask(
-        const shared_ptr<JsRuntime>&, std::function<void()>&& task, const std::string& name, PriorityType priority);
+    static void PostJsTask(const shared_ptr<JsRuntime>&, std::function<void()>&& task, const std::string& name);
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);

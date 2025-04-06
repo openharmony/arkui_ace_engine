@@ -104,15 +104,11 @@ void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 ro
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        renderContext->SetRotation(rotationX, rotationY, rotationZ);
-    } else {
-        DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
-        Dimension first = Dimension(rotationX, unit);
-        Dimension second = Dimension(rotationY, unit);
-        Dimension third = Dimension(rotationZ, unit);
-        renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
-    }
+    DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
+    Dimension first = Dimension(rotationX, unit);
+    Dimension second = Dimension(rotationY, unit);
+    Dimension third = Dimension(rotationZ, unit);
+    renderContext->SetRotation(first.ConvertToPx(), second.ConvertToPx(), third.ConvertToPx());
     renderContext->RequestNextFrame();
 }
 
@@ -524,6 +520,22 @@ void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
     CHECK_NULL_VOID(renderContext);
 
     renderContext->SetMarkNodeGroup(isNodeGroup);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    if (frameNode) {
+        frameNode->SetApplicationRenderGroupMarked(true);
+    }
+    renderContext->RequestNextFrame();
+}
+
+void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    VectorF scaleValue = VectorF(xF, yF);
+    renderContext->UpdateTransformScale(scaleValue);
     renderContext->RequestNextFrame();
 }
 
@@ -568,6 +580,7 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setCommandPathClip = SetCommandPathClip,
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
+        .setTransformScale = SetTransformScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

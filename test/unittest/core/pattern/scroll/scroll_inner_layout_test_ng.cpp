@@ -45,7 +45,7 @@ void ScrollInnerLayoutTestNg::VerifyDrawScrollBar(bool needDraw)
         EXPECT_CALL(canvas, DrawRoundRect(_)).Times(0);
     }
     DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
     scrollBarOverlayModifier->onDraw(drawingContext);
 }
@@ -79,7 +79,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, DrawScrollBar001, TestSize.Level1)
      */
     scrollBar_->SetNormalWidth(Dimension(10.f));
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     VerifyDrawScrollBar(false);
 }
 
@@ -107,7 +107,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, AdaptAnimation001, TestSize.Level1)
     MockAnimationManager::GetInstance().SetTicks(TICK);
     const float contentHeight = HEIGHT - 10.f;
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(contentHeight));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     float ratio = contentHeight / CONTENT_MAIN_SIZE;
     float activeBarHeight = contentHeight * ratio;
     EXPECT_FLOAT_EQ(scrollBar_->activeRect_.Height(), activeBarHeight);
@@ -132,7 +132,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, Opacity001, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     mockTaskExecutor->RunDelayTask();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step1. DisplayMode::AUTO
@@ -340,7 +340,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
      */
     model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(BAR_WIDTH));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBar_->activeRect_.Width(), BAR_WIDTH);
     EXPECT_EQ(scrollBar_->barRect_.Width(), BAR_WIDTH);
 
@@ -350,7 +350,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
      */
     model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(HEIGHT + 1));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
     EXPECT_EQ(scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
@@ -362,7 +362,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
     float barWidth = HEIGHT - 1;
     model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(barWidth));
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollBar_->activeRect_.Width(), barWidth);
     EXPECT_EQ(scrollBar_->activeRect_.Height(), barWidth);
     EXPECT_EQ(scrollBar_->barRect_.Width(), barWidth);
@@ -389,7 +389,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRound001, TestSize.Level1)
 
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(WIDTH));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     scrollBar_->FlushBarWidth();
     EXPECT_EQ(scrollBar_->trickStartAngle_, -150);
 }
@@ -520,7 +520,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar001, TestSize.Level1)
     CreateScroll();
     CreateContent();
     CreateScrollDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step1. DisplayMode::AUTO
@@ -537,7 +537,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar001, TestSize.Level1)
      */
     paintProperty_->UpdateScrollBarMode(DisplayMode::OFF);
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Off");
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetScrollBarOverlayModifier()->GetOpacity(), 0);
 }
 
@@ -551,7 +551,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     CreateContent();
     CreateScrollDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step1. DisplayMode::OFF
@@ -559,7 +559,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetScrollBar002, TestSize.Level1)
      */
     paintProperty_->UpdateScrollBarMode(DisplayMode::OFF);
     pattern_->TriggerModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
     EXPECT_EQ(scrollBarOverlayModifier->GetOpacity(), 0);
     EXPECT_EQ(paintProperty_->GetBarStateString(), "BarState.Off");

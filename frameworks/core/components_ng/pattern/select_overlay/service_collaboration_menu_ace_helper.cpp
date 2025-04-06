@@ -801,9 +801,9 @@ RefPtr<PopupParam> ServiceCollaborationAceCallback::GetPopupParam(bool isShow, S
         }
     });
     Shadow shadow;
-    auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, popupParam);
+    auto colorMode = container->GetColorMode();
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, popupParam);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();

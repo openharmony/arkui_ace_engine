@@ -139,6 +139,7 @@ enum class CleanNodeStyle {
 };
 
 enum class MenuPolicy { DEFAULT = 0, HIDE, SHOW };
+enum class HandlePolicy { DEFAULT = 0, HIDE, SHOW };
 
 enum class CancelButtonStyle {
     CONSTANT,
@@ -148,6 +149,7 @@ enum class CancelButtonStyle {
 
 struct SelectionOptions {
     MenuPolicy menuPolicy = MenuPolicy::DEFAULT;
+    HandlePolicy handlePolicy = HandlePolicy::DEFAULT;
 };
 
 enum class PreviewTextStyle {
@@ -191,6 +193,8 @@ public:
     virtual int32_t AddText(std::u16string text, int32_t offset) { return 0; }
     virtual void DeleteText(int32_t start, int32_t end) {}
     virtual SelectionInfo GetSelection() { return {}; }
+    virtual void ClearPreviewText() {}
+    virtual std::u16string GetText() { return u""; }
 
     void SetGetCaretIndex(std::function<int32_t()>&& setGetCaretIndex)
     {
@@ -239,7 +243,7 @@ public:
                 auto nextChar = value.substr(i, 1);
                 auto mapTuple = escapeMap.find(nextChar);
                 if (mapTuple == escapeMap.end()) {
-                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\%{public}s failed", nextChar.c_str());
+                    TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Find escape \\ failed");
                     return false;
                 }
                 ch = mapTuple->second;
@@ -276,6 +280,7 @@ public:
     virtual void ResetPlaceholderColor() = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
+    virtual void SetCapitalizationMode(AutoCapitalizationMode value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
@@ -302,7 +307,7 @@ public:
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t)>&& func) = 0;
     virtual void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) = 0;
-    virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) = 0;
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnSecurityStateChange(std::function<void(bool)>&& func) = 0;
     virtual void SetOnContentScroll(std::function<void(float, float)>&& func) = 0;
@@ -334,6 +339,7 @@ public:
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) = 0;
     virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetFocusableAndFocusNode() {};
     virtual void SetSelectionMenuHidden(bool contextMenuHidden) = 0;
@@ -363,7 +369,6 @@ public:
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
     virtual void SetTextDecorationColor(const Color& value) {};
     virtual void SetTextDecorationStyle(Ace::TextDecorationStyle value) {};
-
     virtual void SetTextOverflow(Ace::TextOverflow value) {};
     virtual void SetTextIndent(const Dimension& value) {};
     virtual void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) = 0;
@@ -375,6 +380,7 @@ public:
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

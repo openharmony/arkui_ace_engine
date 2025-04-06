@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/view_stack_model_ng.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
@@ -24,6 +25,7 @@ namespace {
 const RefPtr<UINode> INVALID_NODE = nullptr;
 }
 thread_local std::unique_ptr<ViewStackProcessor> ViewStackProcessor::instance = nullptr;
+thread_local std::unique_ptr<ScopedViewStackProcessor> ViewStackModelNG::scopeStack_ = nullptr;
 
 ViewStackProcessor* ViewStackProcessor::GetInstance()
 {
@@ -256,10 +258,26 @@ RefPtr<UINode> ViewStackProcessor::GetNewUINode()
     return Finish();
 }
 
-ScopedViewStackProcessor::ScopedViewStackProcessor(int32_t containerId)
+void ScopedViewStackProcessor::Init(int32_t containerId)
 {
     std::swap(instance_, ViewStackProcessor::instance);
     ViewStackProcessor::GetInstance()->SetRebuildContainerId(containerId);
+}
+
+void ScopedViewStackProcessor::SwapViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance)
+{
+    std::swap(instance, ViewStackProcessor::instance);
+}
+
+ScopedViewStackProcessor::ScopedViewStackProcessor(int32_t containerId)
+{
+    Init(containerId);
+}
+
+ScopedViewStackProcessor::ScopedViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance, int32_t containerId)
+{
+    std::swap(instance_, instance);
+    Init(containerId);
 }
 
 ScopedViewStackProcessor::~ScopedViewStackProcessor()

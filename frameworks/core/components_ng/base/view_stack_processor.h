@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/state_attributes.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/state_style_manager.h"
@@ -176,6 +177,23 @@
     } while (false)
 
 namespace OHOS::Ace::NG {
+using PrebuildFunc = std::function<void()>;
+
+enum class PrebuildCompCmdType {
+    FRONT = 0,
+    BACK,
+};
+
+struct PrebuildCompCmd {
+    PrebuildCompCmdType commandType;
+    const char* commandName = "";
+    PrebuildFunc prebuildFunc;
+
+    PrebuildCompCmd(PrebuildCompCmdType commandType) : commandType(commandType) {}
+    PrebuildCompCmd(PrebuildCompCmdType commandType, const char* commandName,
+        PrebuildFunc& prebuildFunc) : commandType(commandType), commandName(commandName), prebuildFunc(prebuildFunc) {}
+};
+
 class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
@@ -499,6 +517,39 @@ public:
     {
         return elementsStack_.empty();
     }
+
+    void SetIsPrebuilding(bool isPrebuilding)
+    {
+        isPrebuilding_ = isPrebuilding;
+    }
+
+    bool CheckIsPrebuildTimeout()
+    {
+        if (!isPrebuildTimeout_) {
+            isPrebuildTimeout_ = prebuildDeadline_ > 0 && GetSysTimestamp() > prebuildDeadline_;
+        }
+        return isPrebuildTimeout_;
+    }
+
+    bool IsPrebuilding() const
+    {
+        return isPrebuilding_;
+    }
+
+    std::queue<PrebuildCompCmd>& GetPrebuildComponentCmds()
+    {
+        return PrebuildCompCmds_;
+    }
+
+    void PushPrebuildCompCmd()
+    {
+        PrebuildCompCmds_.emplace(PrebuildCompCmdType::FRONT);
+    }
+
+    void PushPrebuildCompCmd(const char* commandName, PrebuildFunc prebuildFunc)
+    {
+        PrebuildCompCmds_.emplace(PrebuildCompCmdType::BACK, commandName, prebuildFunc);
+    }
 private:
     ViewStackProcessor();
 
@@ -527,6 +578,10 @@ private:
     std::optional<UIState> visualState_ = std::nullopt;
     bool isBuilderNode_ = false;
     bool isExportTexture_ = false;
+    bool isPrebuilding_ = false;
+    bool isPrebuildTimeout_ = false;
+    int64_t prebuildDeadline_ = 0;
+    std::queue<PrebuildCompCmd> PrebuildCompCmds_;
     int32_t containerId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
     int32_t restoreInstanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
 
@@ -545,9 +600,13 @@ private:
 class ACE_FORCE_EXPORT ScopedViewStackProcessor final {
 public:
     ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    ScopedViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance,
+        int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ~ScopedViewStackProcessor();
+    void SwapViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance);
 
 private:
+    void Init(int32_t containerId);
     std::unique_ptr<ViewStackProcessor> instance_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScopedViewStackProcessor);

@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/image_animator/controlled_animator.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,7 +60,7 @@ void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 
 void ImageAnimatorModelNG::SetState(int32_t state)
 {
-    GetImageAnimatorPattern()->SetStatus(static_cast<Animator::Status>(state));
+    GetImageAnimatorPattern()->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetDuration(int32_t duration)
@@ -190,7 +192,7 @@ void ImageAnimatorModelNG::SetDuration(FrameNode* frameNode, int32_t duration)
 
 void ImageAnimatorModelNG::SetState(FrameNode* frameNode, int32_t state)
 {
-    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<Animator::Status>(state));
+    GetImageAnimatorPattern(frameNode)->SetStatus(static_cast<ControlledAnimator::ControlStatus>(state));
 }
 
 void ImageAnimatorModelNG::SetFixedSize(FrameNode* frameNode, bool fixedSize)

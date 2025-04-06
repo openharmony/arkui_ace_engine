@@ -105,4 +105,19 @@ const PreviewTextInfo RichEditorBaseController::GetPreviewTextInfo() const
     CHECK_NULL_RETURN(richEditorPattern, PreviewTextInfo());
     return richEditorPattern->GetPreviewTextInfo();
 }
+
+ColorMode RichEditorBaseController::GetColorMode()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, ColorMode::COLOR_MODE_UNDEFINED);
+    return richEditorPattern->GetColorMode();
+}
+
+RefPtr<NG::RichEditorTheme> RichEditorBaseController::GetTheme()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, {});
+    auto theme = richEditorPattern->GetTheme<NG::RichEditorTheme>();
+    return theme;
+}
 } // namespace OHOS::Ace::NG

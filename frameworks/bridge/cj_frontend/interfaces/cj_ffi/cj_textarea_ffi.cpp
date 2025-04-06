@@ -49,6 +49,40 @@ void NGNativeTextAreaController::SetTextSelection(
         controller_->SetTextSelection(selectionStart, selectionEnd, options);
     }
 }
+
+int32_t NGNativeTextAreaController::GetTextContentLinesNum()
+{
+    int32_t linesNum = -1;
+    if (controller_) {
+        linesNum = controller_->GetTextContentLinesNum();
+    }
+    return linesNum;
+}
+
+CJRectResult NGNativeTextAreaController::GetTextContentRect()
+{
+    CJRectResult result;
+    if (controller_) {
+        Rect rect = controller_->GetTextContentRect();
+        result.x = rect.Left();
+        result.y = rect.Top();
+        result.width = rect.Width();
+        result.height = rect.Height();
+    }
+    return result;
+}
+
+CJCaretOffset NGNativeTextAreaController::GetCaretOffset()
+{
+    CJCaretOffset result;
+    if (controller_) {
+        NG::OffsetF caretOffset = controller_->GetCaretPosition();
+        result.index = controller_->GetCaretIndex();
+        result.x = caretOffset.GetX();
+        result.y = caretOffset.GetY();
+    }
+    return result;
+}
 } // namespace OHOS::Ace::Framework
 
 extern "C" {
@@ -112,5 +146,41 @@ void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
     } else {
         LOGE("FfiTextArea: invalid textAreaControllerId");
     }
+}
+
+CJRectResult FfiOHOSAceFrameworkTextAreaControllerGetTextContentRect(int64_t selfID)
+{
+    CJRectResult result;
+    auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentRect();
+    } else {
+        LOGE("FfiTextArea: invalid textAreaControllerId");
+    }
+    return result;
+}
+
+int32_t FfiOHOSAceFrameworkTextAreaControllerGetTextContentLineCount(int64_t selfID)
+{
+    int32_t result = 0;
+    auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentLinesNum();
+    } else {
+        LOGE("FfiTextArea: invalid textAreaControllerId");
+    }
+    return result;
+}
+
+CJCaretOffset FfiOHOSAceFrameworkTextAreaControllerGetCaretOffset(int64_t selfID)
+{
+    CJCaretOffset result;
+    auto self = FFIData::GetData<NGNativeTextAreaController>(selfID);
+    if (self != nullptr) {
+        result = self->GetCaretOffset();
+    } else {
+        LOGE("FfiTextArea: invalid textAreaControllerId");
+    }
+    return result;
 }
 }

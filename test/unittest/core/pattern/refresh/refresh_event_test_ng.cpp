@@ -284,7 +284,7 @@ HWTEST_F(RefreshEventTestNg, VersionTenCustomHandleDrag003, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->isRefreshing_);
 
     /**
@@ -480,7 +480,7 @@ HWTEST_F(RefreshEventTestNg, VersionElevenHandleDrag005, TestSize.Level1)
      */
     layoutProperty_->UpdateIsRefreshing(true);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->isRefreshing_);
 
     /**

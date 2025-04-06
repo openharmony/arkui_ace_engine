@@ -15,6 +15,7 @@
 
 #include "napi_utils.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -184,10 +185,11 @@ RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
         if (bundleName.has_value() && moduleName.has_value()) {
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName.value_or(""), moduleName.value_or(""));
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+                bundleName.value_or(""), moduleName.value_or(""), Container::CurrentIdSafely());
             resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         } else {
-            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
         }
         if (!resourceAdapter) {
             return nullptr;
@@ -596,7 +598,15 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
-    colorResult = themeConstants->GetColor(resourceInfo.resId);
+    if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
+        if (resourceInfo.params.empty()) {
+            LOGE("resourceParams is empty");
+            return false;
+        }
+        colorResult = themeConstants->GetColorByName(resourceInfo.params[0]);
+    } else {
+        colorResult = themeConstants->GetColor(resourceInfo.resId);
+    }
     return true;
 }
 

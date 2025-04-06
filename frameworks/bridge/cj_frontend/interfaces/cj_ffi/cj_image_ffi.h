@@ -43,8 +43,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageDynamicRangeMode(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageCopyOption(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageDraggable(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnError(void (*callback)(CJImageError errorInfo));
+CJ_EXPORT void FfiOHOSAceFrameworkImageOnErrorV2(void (*callback)(CJImageErrorV2 errorInfo));
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnFinish(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkImageOnComplete(void (*callback)(CJImageComplete completeInfo));
+CJ_EXPORT void FfiOHOSAceFrameworkImageOnCompleteV2(void (*callback)(CJImageCompleteV2 completeInfo));
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_IMAGE_FFI_H

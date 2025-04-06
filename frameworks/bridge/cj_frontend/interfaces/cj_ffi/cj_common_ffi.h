@@ -160,7 +160,12 @@ struct CJTextPickerResult {
     uint32_t index;
 };
 
-struct CJImageComplete {
+struct CJDatePickerResult {
+    const char* value;
+    uint32_t index;
+};
+
+struct CJImageCompleteV2 {
     double width;
     double height;
     double componentWidth;
@@ -172,10 +177,23 @@ struct CJImageComplete {
     double contentOffsetY;
 };
 
-struct CJImageError {
+struct CJImageComplete {
+    double width;
+    double height;
+    double componentWidth;
+    double componentHeight;
+    int32_t loadingStatus;
+};
+
+struct CJImageErrorV2 {
     double componentWidth;
     double componentHeight;
     const char* message;
+};
+
+struct CJImageError {
+    double componentWidth;
+    double componentHeight;
 };
 
 struct CJPosition {
@@ -188,6 +206,11 @@ struct CJArea {
     double height;
     CJPosition* position;
     CJPosition* globalPosition;
+};
+
+struct CJSizeOptions {
+    double width;
+    double height;
 };
 
 struct CJEventTarget {
@@ -247,7 +270,7 @@ struct CJFingerInfo {
     double localY;
 };
 
-struct CJGestureEvent {
+struct CJGestureEventV2 {
     int64_t timestamp;
     CJEventTarget* target;
     bool repeat;
@@ -274,15 +297,37 @@ struct CJGestureEvent {
     const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
 };
 
+struct CJGestureEvent {
+    int64_t timestamp;
+    CJEventTarget* target;
+    bool repeat;
+    CJFingerInfo* fingerList;
+    int32_t fingerListSize;
+    int32_t source;
+    double offsetX;
+    double offsetY;
+    double scale;
+    double pinchCenterX;
+    double pinchCenterY;
+    double angle;
+    double speed;
+};
+
 struct CJDragInfo {
     const char* extraParams;
     CJPosition* position;
 };
 
+struct CJDragEvent {
+    void* evtPtr;
+    bool useCustomDropAnimation;
+    int32_t dragBehavior;
+};
+
 struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
-    const char* extraInfo;
+    char* extraInfo;
 };
 
 struct CJBaseEvent {
@@ -296,6 +341,14 @@ struct CJBaseEvent {
     float* axisHorizontal;
     float* axisVertical;
     int64_t deviceId;
+};
+
+struct NativeFont {
+    double size;
+    int32_t sizeUnit;
+    const char* weight;
+    const char* family;
+    uint32_t style;
 };
 
 struct AtCPackage;
@@ -345,9 +398,27 @@ struct AtCPackage {
     void (*atCOHOSAceFrameworkLazyForEachFuncsDataChangeListenerUnregister)(int64_t self, int64_t idx) = nullptr;
 };
 
+struct AtCXComponentCallback {
+    void (*atCXComponentControllerOnSurfaceCreated)(int64_t self, int64_t idx) = nullptr;
+    void (*atCXComponentControllerOnSurfaceChanged)(int64_t self, int64_t idx, CJRectResult rect) = nullptr;
+    void (*atCXComponentControllerOnSurfaceDestroyed)(int64_t self, int64_t idx) = nullptr;
+};
+
+struct AtCPackageV2 {
+    void (*atCOHOSAceFrameworkRemoteViewOnDidBuild)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToReuse)(int64_t self, const char* params) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewAboutToRecycle)(int64_t self) = nullptr;
+    void (*atCOHOSAceFrameworkRemoteViewRecycleSelf)(int64_t self, const char* params) = nullptr;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
+CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs));
+
+CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJXComponentCtrFuncs(AtCXComponentCallback cjCtrFuncs);
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
+
+CJ_EXPORT bool FfiOHOSAceFrameworkCanIUse(char* syscapString);
 
 struct CJIndicator {
     double left;
@@ -376,5 +447,7 @@ void AssambleCJEventTarget(
 
 void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clickInfo, CJEventTarget& eventTarget,
     CJArea& area, CJPosition& position, CJPosition& globalPosition);
+
+void ReleaseCJDragItemInfo(CJDragItemInfo& info);
 } // namespace OHOS::Ace
 #endif // OHOS_ACE_FRAMEWORK_CJ_COMMON_FFI_H

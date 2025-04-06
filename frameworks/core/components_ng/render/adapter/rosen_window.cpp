@@ -21,6 +21,7 @@
 #include "base/log/jank_frame_report.h"
 #include "core/common/container.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -44,7 +45,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
-            ArkUIPerfMonitor::GetInstance().StartPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->StartPerf();
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
@@ -56,10 +57,20 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
             window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
-            ArkUIPerfMonitor::GetInstance().FinishPerf();
+            ArkUIPerfMonitor::GetPerfMonitor(id)->FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            pipeline->OnIdle(std::min(ts, timeStampNanos) + refreshPeriod);
+            int64_t deadline = std::min(ts, timeStampNanos) + refreshPeriod;
+            bool dvsyncOn = window->GetUiDvsyncSwitch();
+            if (dvsyncOn) {
+                int64_t frameBufferCount = (refreshPeriod != 0 && timeStampNanos - ts > 0) ?
+                    (timeStampNanos - ts) / refreshPeriod : 0;
+                deadline = window->GetDeadlineByFrameCount(deadline, ts, frameBufferCount);
+                ACE_SCOPED_TRACE("timeStampNanos is %" PRId64 ", ts is %" PRId64 ", refreshPeriod is: %" PRId64 ",\
+                    frameBufferCount is %" PRId64 ", deadline is %" PRId64 "",\
+                    timeStampNanos, ts, refreshPeriod, frameBufferCount, deadline);
+            }
+            pipeline->OnIdle(deadline);
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
@@ -71,11 +82,10 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    if (window->GetSurfaceNode()) {
+    if (window && window->GetSurfaceNode()) {
         rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
     }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
@@ -88,6 +98,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
                 task, TaskExecutor::TaskType::UI, delay, "ArkUIRosenWindowRenderServiceTask", PriorityType::HIGH);
         },
         id);
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetRequestVsyncCallback([weak = weak_from_this()]() {
         auto self = weak.lock();
         CHECK_NULL_VOID(self);
@@ -95,13 +110,15 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
     });
 }
 
-void RosenWindow::Init()
+void RosenWindow::InitArkUI_X()
 {
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     CHECK_NULL_VOID(rsWindow_);
     auto surfaceNode = rsWindow_->GetSurfaceNode();
     if (rsUIDirector_ && surfaceNode) {
         rsUIDirector_->SetRSSurfaceNode(surfaceNode);
     }
+#endif
 }
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
@@ -116,6 +133,10 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
 {
     if (!rsWindow_) {
         return;
+    }
+    if (dvsyncOn_ != dvsyncSwitch) {
+        dvsyncOn_ = dvsyncSwitch;
+        lastDVsyncInbihitPredictTs_ = 0;
     }
     if (dvsyncSwitch) {
         ACE_SCOPED_TRACE("enable dvsync");
@@ -254,6 +275,18 @@ void RosenWindow::SetKeepScreenOn(bool keepScreenOn)
 #endif
 }
 
+void RosenWindow::SetViewKeepScreenOn(bool keepScreenOn)
+{
+#ifdef OHOS_PLATFORM
+    if (rsWindow_) {
+        rsWindow_->SetViewKeepScreenOn(keepScreenOn);
+    } else {
+        LOGE("SetViewKeepScreenOn Rosenwindow is null");
+    }
+#else
+#endif
+}
+
 int64_t RosenWindow::GetVSyncPeriod() const
 {
 #ifdef PREVIEW
@@ -265,7 +298,11 @@ int64_t RosenWindow::GetVSyncPeriod() const
 
 std::string RosenWindow::GetWindowName() const
 {
-    return rsWindow_->GetWindowName();
+    std::string windowName;
+    if (rsWindow_) {
+        windowName = rsWindow_->GetWindowName();
+    }
+    return windowName;
 }
 
 void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)

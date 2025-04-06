@@ -14,7 +14,8 @@
  */
 
 #include "text_input_base.h"
-
+#include "core/components_ng/pattern/select/select_pattern.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -453,19 +454,19 @@ HWTEST_F(TextFieldPatternTestThree, UnitResponseKeyEvent002, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd001
- * @tc.desc: test testInput text OnTextGenstureSelectionEnd001
+ * @tc.name: OnTextGestureSelectionEnd001
+ * @tc.desc: test testInput text OnTextGestureSelectionEnd001
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestThree, OnTextGenstureSelectionEnd001, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestThree, OnTextGestureSelectionEnd001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
     TouchLocationInfo locationInfo(0);
-    pattern_->OnTextGenstureSelectionEnd(locationInfo);
+    pattern_->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_FALSE(pattern_->IsContentRectNonPositive());
     pattern_->contentRect_.SetRect(10, 10, 0, 0);
-    pattern_->OnTextGenstureSelectionEnd(locationInfo);
+    pattern_->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_TRUE(pattern_->IsContentRectNonPositive());
 }
 
@@ -524,7 +525,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HandleAIWrite001
+ * @tc.name: HandleAIWrite002
  * @tc.desc: test HandleOnAIWrite
  * @tc.type: FUNC
  */
@@ -546,6 +547,7 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
+    pattern_->BeforeCreateLayoutWrapper();
     auto contentController = pattern_->GetTextContentController();
     auto sentenceContent = StringUtils::Str16ToStr8(contentController->GetSelectedValue(0, spanStr->GetLength()));
     ASSERT_EQ(sentenceContent, spanStr->GetString());

@@ -87,6 +87,7 @@ protected:
     void SetFriction(double friction) override;
     void HandleScrollBarOutBoundary() override;
     float GetSnapCenterOverScrollPos(float startPos, float prevScroll);
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -94,7 +95,6 @@ private:
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup) override;
 
     bool OnScrollCallback(float offset, int32_t source) override;
-    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
 
     bool GetOneItemSnapPosByFinalPos(float mainPos, float finalPos, float& snapPos);
     int32_t GetMidIndex();
@@ -104,21 +104,18 @@ private:
     float FixScrollOffset(float offset, int32_t source);
     void OnScrollVisibleContentChange(const RefPtr<ListEventHub>& listEventHub, bool indexChanged) override {}
     float GetScrollUpdateFriction(float overScroll) override;
-    float GetStartOverScrollOffset(float offset, float startMainPos) const override;
-    float GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const override;
     ScrollAlign GetScrollToNodeAlign() override
     {
         return ScrollAlign::CENTER;
     }
-    void OnMidIndexChanged(int32_t lastIndex, int32_t curIndex) override;
-#ifdef SUPPORT_DIGITAL_CROWN
-    void StartVibrator(bool bEdge);
-#endif
 
     RefPtr<FrameNode> header_ = nullptr;
     int32_t scrollStartMidIndex_ = -1;
     float startHeaderPos_ = 0.0f;
     float headerOffset_ = -1.0f;
+    float oldHeaderSize_ = 0.0f;
+    float oldFirstItemSize_ = -1.0f;
+    bool headerStayNear_ = false;
 #ifdef SUPPORT_DIGITAL_CROWN
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif

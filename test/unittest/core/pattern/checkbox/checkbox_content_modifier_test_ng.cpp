@@ -1301,7 +1301,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest028, TestSize
     /**
      * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
      */
-    checkBoxModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    checkBoxModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test GetContentModifierNode
@@ -1340,7 +1340,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest029, TestSize
     /**
      * @tc.steps: step3. Set parameters to checkBoxModelNG builderFunc
      */
-    checkBoxModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    checkBoxModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step4. Test GetContentModifierNode
@@ -1421,7 +1421,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest031, TestSize
     /**
      * @tc.steps: step4. Set parameters to checkBoxModelNG builderFunc
      */
-    checkBoxModelNG.SetBuilderFunc(frameNode.GetRawPtr(), node);
+    checkBoxModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), node);
     pattern->FireBuilder();
     /**
      * @tc.steps: step5. Test GetContentModifierNode
@@ -1434,7 +1434,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest031, TestSize
     /**
      * @tc.steps: step6. change builder func nullptr
      */
-    checkBoxModelNG.SetBuilderFunc(frameNode.GetRawPtr(), nullptr);
+    checkBoxModelNG.SetBuilderFunc(Referenced::RawPtr(frameNode), nullptr);
     pattern->FireBuilder();
     /**
      * @tc.steps: step7. Test UseContentModifier
@@ -1558,7 +1558,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest033, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), false);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), false);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1625,7 +1625,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest034, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), true);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), true);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1692,7 +1692,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest035, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), BIG_INT);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), BIG_INT);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1759,7 +1759,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest036, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), NEGATIVE_BIG_INT);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), NEGATIVE_BIG_INT);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1826,7 +1826,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest037, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), 0);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), 0);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1893,7 +1893,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest038, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), 1);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), 1);
     /**
      * @tc.steps: step7. Get isSelected
      */
@@ -1960,7 +1960,7 @@ HWTEST_F(CheckBoxContentModifierTestNG, CheckBoxContentModifierTest039, TestSize
     /**
      * @tc.steps: step6. Test SetChangeValue
      */
-    checkBoxModelNG.SetChangeValue(frameNode.GetRawPtr(), -1);
+    checkBoxModelNG.SetChangeValue(Referenced::RawPtr(frameNode), -1);
     /**
      * @tc.steps: step7. Get isSelected
      */

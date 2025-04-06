@@ -55,10 +55,10 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak001, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_ELLIPSIS);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -78,7 +78,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak002, Tes
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
 }
 
@@ -99,7 +99,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak003, Tes
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
     layoutProperty_->UpdateWordBreak(WORDBREAK_ALL);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetWordBreak(), WORDBREAK_ALL);
 }
 
@@ -119,7 +119,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak004, Tes
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
     layoutProperty_->UpdateTextOverflow(OVERFLOW_DEFAULT);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -138,7 +138,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak005, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, false, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), OVERFLOW_ELLIPSIS);
 }
 
@@ -157,7 +157,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyleTextOverflowAndWordBreak006, Tes
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_MARQUEE);
-    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_);
+    textInputLayoutAlgorithm->UpdateTextStyleTextOverflowAndWordBreak(textStyle, true, true, layoutProperty_, false);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::CLIP);
 }
 
@@ -178,9 +178,13 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle001, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutProperty_->UpdateErrorText(u"Error!");
+    layoutProperty_->UpdateShowErrorText(true);
+    layoutProperty_->UpdateItalicFontStyle(Ace::FontStyle::ITALIC);
     layoutProperty_->UpdateTextIndent(Dimension(10));
     textInputLayoutAlgorithm->UpdateTextStyleMore(frameNode_, layoutProperty_, textStyle, true);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+    textInputLayoutAlgorithm->ErrorLayout(&layoutWrapper);
     EXPECT_EQ(textStyle.GetTextIndent(), Dimension(10));
 }
 
@@ -205,6 +209,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle002, TestSize.Level1)
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, false);
+    textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
 }
 
 /**
@@ -224,6 +229,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutProperty_->UpdatePlaceholderTextAlign(TextAlign::START);
     textInputLayoutAlgorithm->UpdatePlaceholderTextStyle(
         frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
     EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::ELLIPSIS);
@@ -327,28 +333,6 @@ HWTEST_F(TextFieldAlgorithmTest, CounterLayout003, TestSize.Level1)
 
     textInputLayoutAlgorithm->CounterLayout(&layoutWrapper);
     EXPECT_FALSE(pattern_->IsTextArea());
-}
-
-/**
- * @tc.name: CounterNodeMeasure
- * @tc.desc: Test the function CounterNodeMeasure.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, CounterNodeMeasure, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
-        model.SetShowCounterBorder(true);
-        model.SetShowPasswordIcon(false);
-    });
-    auto textInputLayoutAlgorithm =
-        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm->UpdateUnitLayout(&layoutWrapper);
-    EXPECT_EQ(textInputLayoutAlgorithm->CounterNodeMeasure(1.0f, &layoutWrapper), 0.0);
 }
 
 /**

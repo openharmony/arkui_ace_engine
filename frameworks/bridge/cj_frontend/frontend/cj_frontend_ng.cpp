@@ -15,6 +15,8 @@
 
 #include "bridge/cj_frontend/frontend/cj_frontend_ng.h"
 
+#include "bridge/cj_frontend/frontend/container_modal_cj_utils.h"
+
 namespace OHOS::Ace::Framework {
 void CJFrontendNG::InternalInitialize()
 {
@@ -22,6 +24,17 @@ void CJFrontendNG::InternalInitialize()
     ngRouter_ = MakeRefPtr<CJPageRouterNG>(WeakClaim(this));
     pageRouterManager_ = ngRouter_;
     pageRouterManager_->SetManifestParser(manifestParser_);
+    // Register the node construction function with the container view
+    std::function<RefPtr<NG::FrameNode>()> title = []() -> RefPtr<NG::FrameNode> {
+        return OHOS::Ace::NG::BuildTitleNodeForCj();
+    };
+    std::function<RefPtr<NG::FrameNode>(
+        const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+        controlButton = [](const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+                            const RefPtr<NG::FrameNode>& containerTitleRow) -> RefPtr<NG::FrameNode> {
+        return OHOS::Ace::NG::AddControlButtonsForCj(weakPattern, containerTitleRow);
+    };
+    NG::ContainerModalView::RegistCustomBuilder(title, controlButton);
 }
 
 } // namespace OHOS::Ace::Framework

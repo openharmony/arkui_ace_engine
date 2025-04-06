@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -159,13 +160,24 @@ void ResetLinearIndicatorOnChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
 {
-    static const ArkUILinearIndicatorModifier modifier = { SetLinearIndicatorIndicatorStyleSpace,
-        ResetLinearIndicatorIndicatorStyleSpace, SetLinearIndicatorIndicatorStyleStrokeWidth,
-        ResetLinearIndicatorIndicatorStyleStrokeWidth, SetLinearIndicatorIndicatorStyleStrokeRadius,
-        ResetLinearIndicatorIndicatorStyleStrokeRadius, SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
-        ResetLinearIndicatorIndicatorStyleTrackBackgroundColor, SetLinearIndicatorIndicatorStyleTrackColor,
-        ResetLinearIndicatorIndicatorStyleTrackColor, SetLinearIndicatorIndicatorLoop,
-        ResetLinearIndicatorIndicatorLoop, SetLinearIndicatorOnChange, ResetLinearIndicatorOnChange };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUILinearIndicatorModifier modifier = {
+        .setLinearIndicatorIndicatorStyleSpace = SetLinearIndicatorIndicatorStyleSpace,
+        .resetLinearIndicatorIndicatorStyleSpace = ResetLinearIndicatorIndicatorStyleSpace,
+        .setLinearIndicatorIndicatorStyleStrokeWidth = SetLinearIndicatorIndicatorStyleStrokeWidth,
+        .resetLinearIndicatorIndicatorStyleStrokeWidth = ResetLinearIndicatorIndicatorStyleStrokeWidth,
+        .setLinearIndicatorIndicatorStyleStrokeRadius = SetLinearIndicatorIndicatorStyleStrokeRadius,
+        .resetLinearIndicatorIndicatorStyleStrokeRadius = ResetLinearIndicatorIndicatorStyleStrokeRadius,
+        .setLinearIndicatorIndicatorStyleTrackBackgroundColor = SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .resetLinearIndicatorIndicatorStyleTrackBackgroundColor = ResetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .setLinearIndicatorIndicatorStyleTrackColor = SetLinearIndicatorIndicatorStyleTrackColor,
+        .resetLinearIndicatorIndicatorStyleTrackColor = ResetLinearIndicatorIndicatorStyleTrackColor,
+        .setLinearIndicatorIndicatorLoop = SetLinearIndicatorIndicatorLoop,
+        .resetLinearIndicatorIndicatorLoop = ResetLinearIndicatorIndicatorLoop,
+        .setLinearIndicatorOnChange = SetLinearIndicatorOnChange,
+        .resetLinearIndicatorOnChange = ResetLinearIndicatorOnChange
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

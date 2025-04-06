@@ -18,15 +18,16 @@
 
 #include <memory>
 
+#include "cj_page_router_abstract.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/measure_util.h"
-#include "bridge/common/manifest/manifest_parser.h"
-#include "bridge/common/utils/pipeline_context_holder.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "cj_page_router_abstract.h"
+#include "bridge/common/manifest/manifest_parser.h"
+#include "bridge/common/utils/pipeline_context_holder.h"
 #include "core/common/frontend.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 #if defined(PREVIEW)
 #include "adapter/preview/osal/response_data.h"
@@ -35,7 +36,7 @@
 namespace OHOS::Ace {
 
 class ACE_EXPORT CJFrontendAbstract : public Frontend {
-DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend)
+    DECLARE_ACE_TYPE(CJFrontendAbstract, Frontend)
 public:
     // page lifecycle
     bool OnBackPressed() override;
@@ -65,16 +66,46 @@ public:
         return pageRouterManager_->GetParams();
     }
 
-    RefPtr<AccessibilityManager> GetAccessibilityManager() const override { return accessibilityManager_; }
-    WindowConfig& GetWindowConfig() override { return manifestParser_->GetWindowConfig(); }
-    bool IsForeground() override { return foregroundFrontend_; }
-    RefPtr<CJPageRouterAbstract> GetPageRouterManager() const { return pageRouterManager_; }
-    void SetStageModel(bool isStageModel) { isStageModel_ = isStageModel; }
-    bool IsStageModel() const { return isStageModel_; }
-    void SetRuntimeContext(std::weak_ptr<void> context) { runtimeContext_ = context; }
-    std::weak_ptr<void> GetRuntimeContext() const { return runtimeContext_; }
-    void SetAceAbility(std::weak_ptr<void> aceAbility) { aceAbility_ = aceAbility; }
-    std::weak_ptr<void> GetAceAbility() const { return aceAbility_; }
+    RefPtr<AccessibilityManager> GetAccessibilityManager() const override
+    {
+        return accessibilityManager_;
+    }
+    WindowConfig& GetWindowConfig() override
+    {
+        return manifestParser_->GetWindowConfig();
+    }
+    bool IsForeground() override
+    {
+        return foregroundFrontend_;
+    }
+    RefPtr<CJPageRouterAbstract> GetPageRouterManager() const
+    {
+        return pageRouterManager_;
+    }
+    void SetStageModel(bool isStageModel)
+    {
+        isStageModel_ = isStageModel;
+    }
+    bool IsStageModel() const
+    {
+        return isStageModel_;
+    }
+    void SetRuntimeContext(std::weak_ptr<void> context)
+    {
+        runtimeContext_ = context;
+    }
+    std::weak_ptr<void> GetRuntimeContext() const
+    {
+        return runtimeContext_;
+    }
+    void SetAceAbility(std::weak_ptr<void> aceAbility)
+    {
+        aceAbility_ = aceAbility;
+    }
+    std::weak_ptr<void> GetAceAbility() const
+    {
+        return aceAbility_;
+    }
     const RefPtr<PipelineBase>& GetPipelineContext()
     {
         return pipelineContextHolder_.Get();
@@ -92,7 +123,7 @@ public:
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom,
         const NG::ToastShowMode& showMode = NG::ToastShowMode::DEFAULT);
 
-    void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
+    void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
 
     void CloseCustomDialog(int32_t id);
 
@@ -105,7 +136,7 @@ public:
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
     void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
-    std::function<void(int32_t, int32_t)>&& callback);
+        std::function<void(int32_t, int32_t)>&& callback);
 
     // ----------------
     // Font
@@ -115,6 +146,18 @@ public:
 
     VectorStringHandle GetSystemFontList();
     NativeOptionFontInfo GetSystemFont(const std::string& fontName);
+    void BackIndex(int32_t index, const std::string& params);
+    void Clear();
+    int32_t GetLength();
+    void SetShowAlertBeforeBackPage(const char* msg, std::function<void(int32_t)>&& callback);
+    void SetHideAlertBeforeBackPage();
+    void GetState(CJPageRouterAbstract::RouterState* info);
+    void GetStateByIndex(CJPageRouterAbstract::RouterState* info);
+    CJPageRouterAbstract::RouterStateList GetStateByUrl(const char* url);
+    void PushPageWithCallback(const std::string& url, const std::string& params, CJPageRouterAbstract::RouterMode& mode,
+        std::function<void(int32_t)>&& callback);
+    void ReplacePageWithCallback(const std::string& url, const std::string& params,
+        CJPageRouterAbstract::RouterMode& mode, std::function<void(int32_t)>&& callback);
 
 #if defined(PREVIEW)
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
@@ -141,7 +184,10 @@ protected:
 public:
     // implement later
     void DumpFrontend() const override {}
-    std::string GetPagePath() const override { return ""; }
+    std::string GetPagePath() const override
+    {
+        return "";
+    }
     void TriggerGarbageCollection() override {}
     void DumpHeapSnapshot(bool isPrivate) override {}
     void OnSurfaceChanged(int32_t width, int32_t height) override {};
@@ -156,7 +202,10 @@ public:
     {
         return pageRouterManager_->GetStackSize();
     }
-    RefPtr<AcePage> GetPage(int32_t pageId) const override { return nullptr; }
+    RefPtr<AcePage> GetPage(int32_t pageId) const override
+    {
+        return nullptr;
+    }
     void SendCallbackMessage(const std::string& callbackId, const std::string& data) const override {}
     void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) const override {}
     void TransferComponentResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const override {}
@@ -172,19 +221,28 @@ public:
     void OnNewWant(const std::string& data) override {}
     void OnActive() override {}
     void OnInactive() override {}
-    bool OnStartContinuation() override { return false; }
+    bool OnStartContinuation() override
+    {
+        return false;
+    }
     void OnCompleteContinuation(int32_t code) override {}
     void OnSaveData(std::string& data) override {}
     void GetPluginsUsed(std::string& data) override {}
-    bool OnRestoreData(const std::string& data) override { return false; }
+    bool OnRestoreData(const std::string& data) override
+    {
+        return false;
+    }
     void OnRemoteTerminated() override {}
     void OnNewRequest(const std::string& data) override {}
     void OnMemoryLevel(const int32_t level) override {}
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
     void OnLayoutCompleted(const std::string& componentId) override {}
     void OnDrawCompleted(const std::string& componentId) override {}
-    RefPtr<AceEventHandler> GetEventHandler() override { return nullptr; };
+    RefPtr<AceEventHandler> GetEventHandler() override
+    {
+        return nullptr;
+    };
 };
-}
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CJ_FRONTEND_CJ_FRONTEDN_COMMON_H

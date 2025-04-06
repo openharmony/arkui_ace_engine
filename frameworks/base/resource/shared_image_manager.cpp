@@ -111,8 +111,7 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                     sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData",
-            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+            TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
 }
 
 bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedImage& sharedImage)
@@ -143,8 +142,10 @@ void SharedImageManager::AddPictureNamesToReloadMap(std::string&& name)
 bool SharedImageManager::FindImageInSharedImageMap(
     const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
 {
+    LOGD("find image %{public}s in SharedImageMap", name.c_str());
     auto loader = providerWp.Upgrade();
     if (!loader) {
+        LOGW("image %{public}s loader nullptr", name.c_str());
         return false;
     }
     std::lock_guard<std::mutex> lockImageMap(sharedImageMapMutex_);

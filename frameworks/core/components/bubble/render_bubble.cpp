@@ -17,6 +17,7 @@
 
 #include "base/log/event_report.h"
 #include "core/components/stack/stack_element.h"
+#include "core/event/ace_event_helper.h"
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing.h"
 #endif
@@ -1016,12 +1017,12 @@ void RenderBubble::OnPaintFinish()
         if (bubbleComponent_->GetPopupParam()->HasAction()) {
             std::vector<Rect> rects;
             rects.emplace_back(GetRectBasedWindowTopLeft());
-            SubwindowManager::GetInstance()->SetHotAreas(rects);
+            SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_POPUP);
             return;
         }
         std::vector<Rect> rects;
         rects.emplace_back(Rect(childOffset_, childSize_));
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_POPUP);
     }
 }
 

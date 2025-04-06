@@ -35,4 +35,24 @@ bool SymbolEffectOptions::operator!=(const SymbolEffectOptions& other) const
     return !(operator==(other));
 }
 
+std::string SymbolEffectOptions::ToString() const
+{
+    auto json = JsonUtil::Create(true);
+    json->Put("effectType", static_cast<int32_t>(effectType_));
+    json->Put("scopeType", static_cast<int32_t>(scopeType_.value_or(ScopeType::LAYER)));
+    json->Put("commonSubType", static_cast<int32_t>(commonSubType_.value_or(CommonSubType::DOWN)));
+    json->Put("fillStyle", static_cast<int32_t>(fillStyle_.value_or(FillStyle::CUMULATIVE)));
+    json->Put("isTxtActive", isTxtActive_);
+    if (triggerNum_.has_value()) {
+        json->Put("triggerNum", triggerNum_.value());
+    }
+    if (isTriggerNumChanged_.has_value()) {
+        json->Put("isTriggerNumChanged", isTriggerNumChanged_.value());
+    }
+    if (isActive_.has_value()) {
+        json->Put("isActive", isActive_.value());
+    }
+    return json->ToString();
+}
+
 } // namespace OHOS::Ace::NG

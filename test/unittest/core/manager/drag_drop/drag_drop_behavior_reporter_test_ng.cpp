@@ -46,486 +46,32 @@ struct DragReportData {
           dragBehavior(dragBehavior) {}
 };
 
-const std::vector<DragReportData> DRAG_START_TEST_CASES = {
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_START),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_START),
+const std::vector<DragStartResult> dragStartResult = {
+    DragStartResult::DRAG_START_SUCCESS,
+    DragStartResult::APP_REFUSE_DRAG,
+    DragStartResult::DRAG_START_SUCCESS,
+    DragStartResult::APP_REFUSE_DRAG,
+    DragStartResult::DRAGFWK_START_FAIL,
+    DragStartResult::SET_DATA_FAIL,
+    DragStartResult::REPEAT_DRAG_FAIL,
+    DragStartResult::SNAPSHOT_FAIL,
+    DragStartResult::TEXT_NOT_SELECT,
 };
 
-const std::vector<DragReportData> DRAG_STOP_TEST_CASES = {
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
+const std::vector<DragStopResult> dragStopResult = {
+    DragStopResult::DRAG_SOTP_SUCCESS,
+    DragStopResult::APP_REFUSE_DATA,
+    DragStopResult::APP_RECEIVE_FAIL,
+    DragStopResult::APP_DATA_UNSUPPORT,
+    DragStopResult::USER_STOP_DRAG,
+    DragStopResult::GET_UDKEY_FAIL,
+    DragStopResult::GET_UDMF_FAIL,
+    DragStopResult::DRAGFWK_STOP_FAIL,
+};
 
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::NOT_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAG_SOTP_SUCCESS,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_REFUSE_DATA,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_RECEIVE_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::APP_DATA_UNSUPPORT,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::USER_STOP_DRAG,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDKEY_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::GET_UDMF_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAG_START_SUCCESS, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::APP_REFUSE_DRAG, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::DRAGFWK_START_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SET_DATA_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::REPEAT_DRAG_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::SNAPSHOT_FAIL, DragStopResult::DRAGFWK_STOP_FAIL,
-        1, DragReporterPharse::DRAG_STOP),
-    DragReportData(CrossingEnd::IS_CROSSING, DragStartResult::TEXT_NOT_SELECT, DragStopResult::DRAGFWK_STOP_FAIL,
-        1,  DragReporterPharse::DRAG_STOP),
+const std::vector<CrossingEnd> crossingEnd = {
+    CrossingEnd::NOT_CROSSING,
+    CrossingEnd::IS_CROSSING,
 };
 
 class DragReporterTestNg : public testing::Test {
@@ -568,41 +114,53 @@ HWTEST_F(DragReporterTestNg, DragReporterTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. test drag start report.
      */
-    for (const auto& dragReportCase : DRAG_START_TEST_CASES) {
-        MockContainer::SetUp();
-        auto container = MockContainer::Current();
-        container->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
-        auto containerId = MockContainer::CurrentId();
-        DragReporterTestNg::SetDragStartReportData(dragReportCase);
-        auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-        MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
-        DragDropBehaviorReporter::GetInstance().Submit(dragReportCase.dragBehavior, containerId);
-        DragInfo dragReportInfo = MockEventReport::dragInfo_;
-        EXPECT_EQ(dragReportInfo.result, static_cast<int32_t>(dragReportCase.startResult));
-        EXPECT_EQ(dragReportInfo.summaryNum, static_cast<int32_t>(dragReportCase.summaryNum));
-        EXPECT_EQ(dragReportInfo.summaryType, dragReportCase.summaryType);
-        EXPECT_EQ(dragReportInfo.isCrossing, static_cast<int32_t>(dragReportCase.isCrossing));
-        MockContainer::TearDown();
+    for (const auto& isCrossing : crossingEnd) {
+        for (const auto& startResult : dragStartResult) {
+            for (const auto& stopResult : dragStopResult) {
+                DragReportData dragReportCase = DragReportData(isCrossing,
+                    startResult, stopResult, 1, DragReporterPharse::DRAG_START);
+                MockContainer::SetUp();
+                auto container = MockContainer::Current();
+                container->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+                auto containerId = MockContainer::CurrentId();
+                DragReporterTestNg::SetDragStartReportData(dragReportCase);
+                auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+                MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+                DragDropBehaviorReporter::GetInstance().Submit(dragReportCase.dragBehavior, containerId);
+                DragInfo dragReportInfo = MockEventReport::dragInfo_;
+                EXPECT_EQ(dragReportInfo.result, static_cast<int32_t>(dragReportCase.startResult));
+                EXPECT_EQ(dragReportInfo.summaryNum, static_cast<int32_t>(dragReportCase.summaryNum));
+                EXPECT_EQ(dragReportInfo.summaryType, dragReportCase.summaryType);
+                EXPECT_EQ(dragReportInfo.isCrossing, static_cast<int32_t>(dragReportCase.isCrossing));
+                MockContainer::TearDown();
+            }
+        }
     }
 
     /**
      * @tc.steps: step1. test drag stop report.
      */
-    for (const auto& dragReportCase : DRAG_STOP_TEST_CASES) {
-        MockContainer::SetUp();
-        auto container = MockContainer::Current();
-        container->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
-        auto containerId = MockContainer::CurrentId();
-        DragReporterTestNg::SetDragStartReportData(dragReportCase);
-        auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
-        MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
-        DragDropBehaviorReporter::GetInstance().Submit(dragReportCase.dragBehavior, containerId);
-        DragInfo dragReportInfo = MockEventReport::dragInfo_;
-        EXPECT_EQ(dragReportInfo.result, static_cast<int32_t>(dragReportCase.stopResult));
-        EXPECT_EQ(dragReportInfo.summaryNum, static_cast<int32_t>(dragReportCase.summaryNum));
-        EXPECT_EQ(dragReportInfo.summaryType, dragReportCase.summaryType);
-        EXPECT_EQ(dragReportInfo.isCrossing, static_cast<int32_t>(dragReportCase.isCrossing));
-        MockContainer::TearDown();
+    for (const auto& isCrossing : crossingEnd) {
+        for (const auto& startResult : dragStartResult) {
+            for (const auto& stopResult : dragStopResult) {
+                DragReportData dragReportCase = DragReportData(isCrossing,
+                    startResult, stopResult, 1, DragReporterPharse::DRAG_STOP);
+                MockContainer::SetUp();
+                auto container = MockContainer::Current();
+                container->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+                auto containerId = MockContainer::CurrentId();
+                DragReporterTestNg::SetDragStartReportData(dragReportCase);
+                auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+                MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+                DragDropBehaviorReporter::GetInstance().Submit(dragReportCase.dragBehavior, containerId);
+                DragInfo dragReportInfo = MockEventReport::dragInfo_;
+                EXPECT_EQ(dragReportInfo.result, static_cast<int32_t>(dragReportCase.stopResult));
+                EXPECT_EQ(dragReportInfo.summaryNum, static_cast<int32_t>(dragReportCase.summaryNum));
+                EXPECT_EQ(dragReportInfo.summaryType, dragReportCase.summaryType);
+                EXPECT_EQ(dragReportInfo.isCrossing, static_cast<int32_t>(dragReportCase.isCrossing));
+                MockContainer::TearDown();
+            }
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -21,8 +21,11 @@ NavigationItem::NavigationItem(const NavigationItemFFI& source)
 {
     value = source.value;
     icon = source.icon;
-    builderFFI = source.builder;
-    builder = CJLambda::Create(reinterpret_cast<void (*)()>(builderFFI));
+    isEnable = source.isEnable;
+    actionFFI = source.action;
+    action = CJLambda::Create(reinterpret_cast<void (*)()>(actionFFI));
+    status = source.status;
+    activeIcon = source.activeIcon;
 }
 
 extern "C" {

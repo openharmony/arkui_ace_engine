@@ -312,5 +312,12 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
+void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+    component->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
+}
+
 void TextModelImpl::SetHalfLeading(bool halfLeading) {}
 } // namespace OHOS::Ace::Framework

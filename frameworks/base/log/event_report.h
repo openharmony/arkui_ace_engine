@@ -21,6 +21,7 @@
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_scene_status.h"
 
 namespace OHOS::Ace {
 
@@ -145,6 +146,14 @@ enum class VsyncExcepType {
 
 enum class RawEventType { WARNING, FREEZE, RECOVER };
 
+enum class ScrollableErrorType {
+    GET_CHILD_FAILED = 0,
+    INTERNAL_ERROR,
+    GESTURE_MISMATCH,
+    CONTROLLER_NOT_BIND,
+    STOP_ANIMATION_TIMEOUT,
+};
+
 struct EventInfo {
     std::string eventType;
     int32_t errorType = 0;
@@ -161,6 +170,27 @@ struct DragInfo {
     std::string hostName;
     std::string summaryType;
     std::string allowDropType;
+};
+
+enum class RichEditorErrorType {
+    DELETE_BACKWARD = 0,
+    DELETE_FORWARD,
+    INSERT_VALUE,
+    DELETE_NODE,
+};
+
+struct RichEditorInfo {
+    RichEditorErrorType errorType;
+    int32_t spanLength = -1;
+    int32_t textLength = -1;
+    int32_t spanIndex = -1;
+};
+
+struct FRCSceneFpsInfo {
+    int32_t duration_120 = 0;
+    int32_t duration_90 = 0;
+    int32_t duration_72 = 0;
+    int32_t duration_60 = 0;
 };
 
 class ACE_FORCE_EXPORT EventReport {
@@ -181,6 +211,7 @@ public:
     static void SendEventException(EventExcepType type);
     static void SendInternalException(InternalExcepType type);
     static void SendAccessibilityException(AccessibilityExcepType type);
+    static void ReportAccessibilityFailEvent(const std::string& actionName);
     static void SendFormException(FormExcepType type);
 #ifdef VSYNC_TIMEOUT_CHECK
     static void SendVsyncException(VsyncExcepType type, uint32_t windowId, int32_t instanceId, uint64_t timeStamp);
@@ -188,7 +219,8 @@ public:
 
     static void JsEventReport(int32_t eventType, const std::string& jsonStr);
     static void JsErrReport(
-        const std::string& packageName, const std::string& reason, const std::string& summary);
+        const std::string& packageName, const std::string& reason, const std::string& summary,
+        const std::string& uniqueId = "");
     static void ANRRawReport(RawEventType type, int32_t uid, const std::string& packageName,
         const std::string& processName, const std::string& msg = " ");
     static void ANRShowDialog(int32_t uid, const std::string& packageName,
@@ -214,9 +246,21 @@ public:
     static void ReportUiExtensionTransparentEvent(const std::string& pageUrl, const std::string& bundleName,
         const std::string& moduleName);
     static void ReportDragInfo(const DragInfo& dragInfo);
+    static void ReportRichEditorInfo(const RichEditorInfo& richEditorInfo);
+    static void ReportScrollableErrorEvent(
+        const std::string& nodeType, ScrollableErrorType errorType, const std::string& subErrorType);
+    static void ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, const std::string& errorType);
+    static void ReportClipboardFailEvent(const std::string& errorType);
+    static void ReportReusedNodeSkipMeasureApp();
+    static void SendDiffFrameRatesDuring(const std::string& scene, const FRCSceneFpsInfo& curFRCSceneFpsInfo_);
+    static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
+    static void AddFrameRateDuration(int32_t frameRate, int32_t duration);
 
 private:
     static void SendEventInner(const EventInfo& eventInfo);
+    static FRCSceneFpsInfo curFRCSceneFpsInfo_;
+    static int64_t calTime_;
+    static int32_t calFrameRate_;
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     static void ReportAppFrameDropToRss(const bool isInteractionJank, const std::string &bundleName,
         const int64_t maxFrameTime = 0);

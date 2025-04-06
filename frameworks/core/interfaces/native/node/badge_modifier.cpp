@@ -67,7 +67,7 @@ void SetBadgeParamWithString(ArkUINodeHandle node, const struct ArkUIBadgeParam*
     CHECK_NULL_VOID(frameNode);
     BadgeParameters badgeParameters;
     SetBadgeBaseParam(badgeParameters, *style);
-    badgeParameters.badgeValue = value;
+    badgeParameters.badgeValue = std::string(value);
     BadgeModelNG::SetBadgeParam(frameNode, badgeParameters, style->isDefaultFontSize, style->isDefaultBadgeSize);
 }
 

@@ -47,6 +47,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     void SetOnDidChange(std::function<void(const NG::RichEditorChangeValue&)>&& func) override {}
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override {}
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override {}
+    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override {}
 };
 } // namespace OHOS::Ace::Framework
 

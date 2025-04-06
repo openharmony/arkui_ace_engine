@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 
 #include "base/geometry/axis.h"
+#include "base/log/event_report.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -142,6 +143,8 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling ScrollTo function");
         return;
     }
     ContainerScope scope(instanceId_);
@@ -177,6 +180,8 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling ScrollEdge function");
         return;
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
@@ -227,6 +232,8 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling ScrollToIndex function");
         return;
     }
     // 2: parameters count, 1: parameter index
@@ -274,6 +281,8 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling ScrollPage function");
         return;
     }
     ContainerScope scope(instanceId_);
@@ -284,6 +293,8 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling CurrentOffset function");
         return;
     }
     auto retObj = JSRef<JSObject>::New();
@@ -308,6 +319,8 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling ScrollBy function");
         return;
     }
 
@@ -337,6 +350,8 @@ void JSScroller::IsAtEnd(const JSCallbackInfo& args)
 {
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
+        EventReport::ReportScrollableErrorEvent("Scroller", ScrollableErrorType::CONTROLLER_NOT_BIND,
+            "The controller does not bind a component when calling IsAtEnd function");
         return;
     }
     ContainerScope scope(instanceId_);

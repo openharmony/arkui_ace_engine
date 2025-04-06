@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,6 +198,7 @@ public:
 
     inline void CacheItemHeight(int32_t idx, float height)
     {
+        heightSum_ -= idxToHeight_[idx];
         idxToHeight_[idx] = height;
         heightSum_ += height;
     }
@@ -210,6 +211,8 @@ public:
     void EstimateTotalOffset(int32_t prevStart, int32_t startIdx);
 
     float EstimateTotalHeight() const override;
+
+    bool EstimateVirtualTotalHeight(float average, float& virtualTotalHeight) const;
 
     /**
      * @brief If delta is large enough, convert it to a jump to improve layout performance.
@@ -228,8 +231,8 @@ public:
      */
     void PrepareSectionPos(int32_t idx, bool fillBack);
 
-    bool OverScrollTop() override;
-    bool OverScrollBottom() override;
+    bool IsAtTopWithDelta() override;
+    bool IsAtBottomWithDelta() override;
 
     void NotifyDataChange(int32_t index, int32_t count) override;
     void NotifySectionChange(int32_t index) override;
@@ -245,6 +248,17 @@ public:
     Lane* GetMutableLane(int32_t itemIdx);
 
     bool LaneOutOfRange(size_t laneIdx, int32_t section) const;
+
+    bool AtStartPos(int32_t startIdx) const
+    {
+        return startIdx == 0 || startIdx == Infinity<int32_t>();
+    }
+
+    float GetDistanceToTop(int32_t itemIdx, int32_t laneIdx, float mainGap) const;
+    float GetDistanceToBottom(int32_t itemIdx, int32_t laneIdx, float mainSize, float mainGap) const;
+    float GetCachedHeightInLanes(int32_t idx) const;
+    void SetHeightInLanes(int32_t idx, float mainHeight);
+    bool HaveRecordIdx(int32_t idx) const;
 
     /**
      * @brief lanes in multiple sections.
@@ -309,7 +323,7 @@ private:
     /**
      * @brief Sync state when there has no items in lanes.
      */
-    void SyncOnEmptyLanes();
+    void SyncOnEmptyLanes(float mainSize);
 
     /**
      * @brief cache main-axis length of measured FlowItems.

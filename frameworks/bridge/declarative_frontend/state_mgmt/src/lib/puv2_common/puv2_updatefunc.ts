@@ -22,6 +22,7 @@
  * 
  */
 
+
 /**
  * WeakRef
  * ref to an Object that does not prevent the Object from getting GC'ed
@@ -30,16 +31,16 @@
  *
  */
 declare class WeakRef<T extends Object> {
-    constructor(o: T);
-    deref(): T;
-  }
-  
+  constructor(o: T);
+  deref(): T;
+}
+
   declare class DumpLog {
     static print(depth: number, content: string): void;
   }
   
   // function type of partial update function
-  type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+  type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
   type UIClassObject = { prototype: Object, pop?: () => void };
   
   // UpdateFuncRecord: misc framework-internal info related to updating of a UINode C++ object 
@@ -50,6 +51,8 @@ declare class WeakRef<T extends Object> {
     private updateFunc_: UpdateFunc;
     private classObject_: UIClassObject;
     private node_?: ArkComponent;
+    private isPending_: boolean = false;
+    private isChanged_: boolean = false;
   
     constructor(params: { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: ArkComponent }) {
       this.updateFunc_ = params.updateFunc;
@@ -79,6 +82,22 @@ declare class WeakRef<T extends Object> {
   
     public setNode(node: ArkComponent | undefined): void {
       this.node_ = node;
+    }
+
+    public isPending(): boolean {
+      return this.isPending_;
+    }
+
+    public setPending(isPending: boolean): void {
+      this.isPending_ = isPending;
+    }
+
+    public isChanged(): boolean {
+      return this.isChanged_;
+    }
+
+    public setIsChanged(isChanged: boolean): void {
+      this.isChanged_ = isChanged;
     }
   } // UpdateFuncRecord
   

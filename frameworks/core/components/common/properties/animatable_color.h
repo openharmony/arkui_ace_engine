@@ -16,13 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATABLE_COLOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PROPERTIES_ANIMATABLE_COLOR_H
 
+#include "base/utils/macros.h"
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/color.h"
-#include "core/event/ace_event_helper.h"
 
 namespace OHOS::Ace {
+
+class PipelineContext;
 
 using RenderNodeAnimationCallback = std::function<void()>;
 
@@ -31,25 +33,13 @@ using RenderNodeAnimationCallback = std::function<void()>;
  */
 class AnimatableColor final : public Color {
 public:
-    AnimatableColor() = default;
-    explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption()) : Color(value)
-    {
-        animationOption_ = option;
-    }
+    ACE_FORCE_EXPORT AnimatableColor();
+    explicit AnimatableColor(uint32_t value, const AnimationOption& option = AnimationOption());
 
-    explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption())
-        : Color(color.GetValue())
-    {
-        animationOption_ = option;
-    }
+    explicit AnimatableColor(const Color& color, const AnimationOption& option = AnimationOption());
+    ACE_FORCE_EXPORT ~AnimatableColor();
 
-    ~AnimatableColor() = default;
-
-    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback)
-    {
-        context_ = context;
-        animationCallback_ = callback;
-    }
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
 
     const AnimationOption& GetAnimationOption() const
     {
@@ -61,89 +51,14 @@ public:
         animationOption_ = option;
     }
 
-    AnimatableColor& operator=(const AnimatableColor& newColor)
-    {
-        SetAnimationOption(newColor.GetAnimationOption());
-        auto pipelineContext = context_.Upgrade();
-        if (!pipelineContext || !animationCallback_) {
-            SetValue(newColor.GetValue());
-            return *this;
-        }
-        AnimationOption explicitAnim = pipelineContext->GetExplicitAnimationOption();
-        if (explicitAnim.IsValid()) {
-            SetAnimationOption(explicitAnim);
-            AnimateTo(newColor.GetValue());
-        } else if (animationOption_.IsValid()) {
-            AnimateTo(newColor.GetValue());
-        } else {
-            ResetController();
-            SetValue(newColor.GetValue());
-        }
-        isFirstAssign_ = false;
-        return *this;
-    }
+    AnimatableColor& operator=(const AnimatableColor& newColor);
 
 private:
-    void AnimateTo(uint32_t endValue)
-    {
-        if (isFirstAssign_) {
-            isFirstAssign_ = false;
-            SetValue(endValue);
-            return;
-        }
-        if (GetValue() == endValue) {
-            return;
-        }
-        ResetController();
-        if (!animationController_) {
-            animationController_ = CREATE_ANIMATOR(context_);
-        }
+    void AnimateTo(uint32_t endValue);
 
-        RefPtr<CurveAnimation<Color>> colorAnimation =
-            AceType::MakeRefPtr<CurveAnimation<Color>>(Color(GetValue()), Color(endValue), animationOption_.GetCurve());
-        colorAnimation->AddListener(std::bind(&AnimatableColor::OnAnimationCallback, this, std::placeholders::_1));
+    void ResetController();
 
-        animationController_->AddInterpolator(colorAnimation);
-        auto onFinishEvent = animationOption_.GetOnFinishEvent();
-        if (onFinishEvent) {
-            animationController_->AddStopListener([onFinishEvent, weakContext = context_] {
-                auto context = weakContext.Upgrade();
-                if (context) {
-                    context->PostAsyncEvent(onFinishEvent, "ArkUIAnimatableColorFinishEvent");
-                } else {
-                    LOGE("the context is null");
-                }
-            });
-        }
-        animationController_->SetDuration(animationOption_.GetDuration());
-        animationController_->SetStartDelay(animationOption_.GetDelay());
-        animationController_->SetIteration(animationOption_.GetIteration());
-        animationController_->SetTempo(animationOption_.GetTempo());
-        animationController_->SetAnimationDirection(animationOption_.GetAnimationDirection());
-        animationController_->SetFillMode(FillMode::FORWARDS);
-        animationController_->SetAllowRunningAsynchronously(animationOption_.GetAllowRunningAsynchronously());
-        animationController_->Play();
-    }
-
-    void ResetController()
-    {
-        if (animationController_) {
-            if (!animationController_->IsStopped()) {
-                animationController_->Stop();
-            }
-            animationController_->ClearInterpolators();
-            animationController_->ClearAllListeners();
-            animationController_.Reset();
-        }
-    }
-
-    void OnAnimationCallback(const Color& color)
-    {
-        SetValue(color.GetValue());
-        if (animationCallback_) {
-            animationCallback_();
-        }
-    }
+    void OnAnimationCallback(const Color& color);
 
 private:
     bool isFirstAssign_ = true;

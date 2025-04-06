@@ -165,6 +165,54 @@ void FfiOHOSAceFrameworkWaterFlowSetOnReachEndCallback(void (*callback)())
     WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
 }
 
+void FfiOHOSAceFrameworkWaterFlowScrollBar(int32_t value)
+{
+    auto displayMode = static_cast<DisplayMode>(value);
+    WaterFlowModel::GetInstance()->SetScrollBarMode(displayMode);
+}
+
+void FfiOHOSAceFrameworkWaterFlowScrollBarColor(uint32_t color)
+{
+    WaterFlowModel::GetInstance()->SetScrollBarColor(Color(color).ColorToString());
+}
+
+void FfiOHOSAceFrameworkWaterFlowScrollBarWidth(double value, int32_t valueUnit)
+{
+    Dimension dimWidth(value, static_cast<DimensionUnit>(valueUnit));
+    CalcDimension scrollBarWidth = CalcDimension(dimWidth);
+    if (scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
+        return;
+    }
+    WaterFlowModel::GetInstance()->SetScrollBarWidth(scrollBarWidth.ToString());
+}
+
+void FfiOHOSAceFrameworkWaterFlowEdgeEffect(int32_t value, bool isEnabled)
+{
+    auto edgeEffect = value;
+    if (edgeEffect < static_cast<int32_t>(EdgeEffect::SPRING) || edgeEffect > static_cast<int32_t>(EdgeEffect::NONE)) {
+        edgeEffect = static_cast<int32_t>(EdgeEffect::NONE);
+    }
+    WaterFlowModel::GetInstance()->SetEdgeEffect(static_cast<EdgeEffect>(edgeEffect), isEnabled);
+}
+
+void FfiOHOSAceFrameworkWaterFlowOnScrollStart(void (*callback)())
+{
+    auto lambda = CJLambda::Create(callback);
+    auto onScrollStart = [lambda]() {
+        lambda();
+    };
+    WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+}
+
+void FfiOHOSAceFrameworkWaterFlowOnScrollStop(void (*callback)())
+{
+    auto lambda = CJLambda::Create(callback);
+    auto onScrollStop = [lambda]() {
+        lambda();
+    };
+    WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+}
+
 void FfiOHOSAceFrameworkWaterFlowSetOnScrollFrameBegin(double (*callback)(double offset, int32_t state))
 {
     auto lambda = CJLambda::Create(callback);

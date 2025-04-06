@@ -166,17 +166,14 @@ void ComponentTestComponentImpl::ClearTextImpl(ErrInfo& errInfo) const
 
 RefPtr<NG::FrameNode> GetEndpointChildFrameNode(RefPtr<NG::UINode> parentNode, bool first)
 {
-    NG::UINode* node = parentNode.GetRawPtr();
+    auto node = parentNode;
     while (node && !node->IsAtomicNode()) {
-        node = first ? node->GetFirstChild().GetRawPtr() : node->GetLastChild().GetRawPtr();
+        node = first ? node->GetFirstChild() : node->GetLastChild();
         if (AceType::InstanceOf<NG::FrameNode>(node)) {
             break;
         }
     }
-    if (!node || !AceType::InstanceOf<NG::FrameNode>(node)) {
-        node = nullptr;
-    }
-    return AceType::Claim<NG::FrameNode>(AceType::DynamicCast<NG::FrameNode>(node));
+    return AceType::DynamicCast<NG::FrameNode>(node);
 }
 
 void ComponentTestComponentImpl::ScrollToBorderAsync(
@@ -197,7 +194,6 @@ void ComponentTestComponentImpl::ScrollToBorderAsync(
     float endY = toTop ? endFrameRect.GetY() : endFrameRect.GetY() + endFrameRect.Height();
     NG::PointF bottomPoint(parentRect.Center().GetX(), parentRect.Bottom());
     NG::PointF topPoint(parentRect.Center().GetX(), parentRect.Top());
-    MoveAction* moveAction;
     if (toTop) {
         if (LessOrEqual(parentRect.GetY(), endY) && GreatNotEqual(parentRect.GetY() + parentRect.Height(), endY)) {
             callback({ ErrCode::RET_OK, "" });

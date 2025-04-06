@@ -130,6 +130,8 @@ const RIGHT_ONLY_RADIO_WIDTH = '30vp';
 const RIGHT_ONLY_CHECKBOX_WIDTH = '30vp';
 const RIGHT_ONLY_SWITCH_WIDTH = '44vp';
 const ACCESSIBILITY_LEVEL_AUTO = 'auto';
+const ACCESSIBILITY_LEVEL_YES = 'yes';
+const ACCESSIBILITY_LEVEL_NO = 'no';
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const ICON_SIZE_MAP: Map<number, number> = new Map([
@@ -148,9 +150,7 @@ const IS_SUPPORT_SUBCOMPONENT_EVENT: boolean =
 const RECOVER_ITEM_SCALE: number = 1;
 const CLEAR_SHADOW: ShadowStyle = -1;
 const OPERATE_ITEM_RADIUS: number = 50;
-const OPERATE_ITEM_BACKGROUND_COLOR: ResourceColor = '#33000000';
 const DEFUALT_RADIO_CHECKBOX_BORDER_COLOR: ResourceColor = $r('sys.color.ohos_id_color_switch_outline_off');
-const OPERATE_ITEM_COLOR: ResourceColor = '#99000000';
 const TEXT_SUPPORT_MARQUEE: number = 1;
 const IS_MARQUEE_OR_ELLIPSIS: number = LengthMetrics.resource($r('sys.float.composeListItem_right_textOverflow')).value;
 const UNUSUAL: number = -1;
@@ -430,6 +430,15 @@ class CreateIconParam {
   public icon?: OperateIcon;
 }
 
+class OperateItemStructController {
+  public changeRadioState = () => {
+  };
+  public changeCheckboxState = () => {
+  };
+  public changeSwitchState = () => {
+  };
+}
+
 @Component
 struct OperateItemStruct {
   @Prop @Watch('onPropChange') arrow: OperateIcon | null = null;
@@ -461,7 +470,7 @@ struct OperateItemStruct {
   @State secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
   @State secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
-  @Link @Watch('onPropChange') isChecked: boolean;
+  private controller: OperateItemStructController = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.secondaryTextColor = theme.colors.fontSecondary;
@@ -481,13 +490,13 @@ struct OperateItemStruct {
 
   onPropChange(): void {
     if (this.switch != null) {
-      this.switchState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.switch.isCheck as boolean : this.isChecked;
+      this.switchState = this.switch.isCheck as boolean;
     }
     if (this.radio != null) {
-      this.radioState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.radio.isCheck as boolean : this.isChecked;
+      this.radioState = this.radio.isCheck as boolean;
     }
     if (this.checkBox != null) {
-      this.checkBoxState = IS_SUPPORT_SUBCOMPONENT_EVENT ? this.checkBox.isCheck as boolean : this.isChecked;
+      this.checkBoxState = this.checkBox.isCheck as boolean;
     }
 
     if ((this.button == null && this.image == null && this.symbolStyle == null && this.text != null) &&
@@ -498,26 +507,25 @@ struct OperateItemStruct {
     }
   }
 
-  getUnselectedColor(): ResourceColor {
-    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
-      return DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-    }
-    return this.isFocus ? OPERATE_ITEM_COLOR : DEFUALT_RADIO_CHECKBOX_BORDER_COLOR;
-  }
-
   aboutToAppear(): void {
-    if (this.switch !== null) {
-      this.isChecked = this.switch.isCheck as boolean;
-    }
-    if (this.radio !== null) {
-      this.isChecked = this.radio.isCheck as boolean;
-    }
-    if (this.checkBox !== null) {
-      this.isChecked = this.checkBox.isCheck as boolean;
-    }
     this.onPropChange();
     this.onFocusChange();
+    if (this.controller) {
+      this.controller.changeRadioState = this.changeRadioState;
+      this.controller.changeCheckboxState = this.changeCheckboxState;
+      this.controller.changeSwitchState = this.changeSwitchState;
+    }
   }
+
+  changeRadioState = () => {
+    this.radioState = !this.radioState;
+  };
+  changeCheckboxState = () => {
+    this.checkBoxState = !this.checkBoxState;
+  };
+  changeSwitchState = () => {
+    this.switchState = !this.switchState;
+  };
 
   @Builder
   createButton() {
@@ -616,7 +624,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(param.icon?.action)
-    .accessibilityLevel(param.icon?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
     .accessibilityText(getAccessibilityText(param.icon?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(param.icon?.accessibilityDescription ?? ''))
     .flexShrink(0)
@@ -727,7 +735,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(getAccessibilityText(this.arrow?.accessibilityText ?? ''))
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -738,15 +746,13 @@ struct OperateItemStruct {
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .checked(this.radioState)
       .radioStyle({
-        uncheckedBorderColor: this.getUnselectedColor()
+        uncheckedBorderColor: DEFUALT_RADIO_CHECKBOX_BORDER_COLOR
       })
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .backgroundColor(Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.radioState = isCheck;
-          this.isChecked = isCheck;
         }
         if (this.radio?.onChange) {
           this.radio?.onChange(isCheck);
@@ -773,7 +779,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.radio?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
       .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.radio?.accessibilityDescription ?? ''))
   }
@@ -782,15 +788,13 @@ struct OperateItemStruct {
   createCheckBox() {
     Checkbox()
       .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-      .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-      Color.Transparent)
+      .unselectedColor(DEFUALT_RADIO_CHECKBOX_BORDER_COLOR)
+      .backgroundColor(Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
           this.checkBoxState = isCheck;
-          this.isChecked = isCheck;
         }
         if (this.checkBox?.onChange) {
           this.checkBox?.onChange(isCheck);
@@ -817,7 +821,7 @@ struct OperateItemStruct {
           }
         }
       })
-      .accessibilityLevel(this.checkBox?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+      .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
       .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
       .accessibilityDescription(getAccessibilityText(this.checkBox?.accessibilityDescription ?? ''))
   }
@@ -827,15 +831,9 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
-        Color.Transparent)
-        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR :
-          UNUSUAL)
+        .backgroundColor(Color.Transparent)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
-          if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-            this.isChecked = isCheck;
-          }
           if (this.switch?.onChange) {
             this.switch?.onChange(isCheck);
           }
@@ -844,7 +842,7 @@ struct OperateItemStruct {
           this.switchState = !this.switchState;
         })
         .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
-        .accessibilityLevel(this.switch?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+        .accessibilityLevel(getAccessibilityLevelOnChange(this.switch?.accessibilityLevel, this.switch?.onChange))
         .accessibilityText(getAccessibilityText(this.switch?.accessibilityText ?? ''))
         .accessibilityDescription(getAccessibilityText(this.switch?.accessibilityDescription ?? ''))
     }
@@ -1004,7 +1002,7 @@ struct OperateItemStruct {
       }
     })
     .onClick(this.arrow?.action)
-    .accessibilityLevel(this.arrow?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
+    .accessibilityLevel(getAccessibilityLevelOnAction(this.arrow?.accessibilityLevel, this.arrow?.action))
     .accessibilityText(`${this.text} ${getAccessibilityText(this.arrow?.accessibilityText ?? '')}`)
     .accessibilityDescription(getAccessibilityText(this.arrow?.accessibilityDescription ?? ''))
   }
@@ -1078,6 +1076,40 @@ function getAccessibilityText(resource: ResourceStr): string {
   }
 }
 
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: (value: boolean) => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onChange) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
+/**
+ * Obtain accessible level
+ *
+ * @param resource
+ * @param selected select state
+ * @returns string
+ */
+function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: () => void): string {
+  if (accessibilityLevel) {
+    return accessibilityLevel;
+  }
+  if (onAction) {
+    return ACCESSIBILITY_LEVEL_YES;
+  }
+  return ACCESSIBILITY_LEVEL_NO;
+}
+
 @Component
 export struct ComposeListItem {
   @Prop @Watch('onPropChange') contentItem: ContentItem | null = null;
@@ -1104,8 +1136,9 @@ export struct ComposeListItem {
   private callbackId: number | undefined = undefined;
   @State accessibilityTextBuilder: string = '';
   @State isFocus: boolean = false;
-  @State isChecked: boolean = false;
   @State @Watch('onWrapChange') isWrapText: boolean = false;
+  @State listScale: ScaleOptions = { x: 1, y: 1 };
+  private operateItemStructRef = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
     this.hoveringColor = theme.colors.interactiveHover;
@@ -1139,11 +1172,12 @@ export struct ComposeListItem {
           (LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value);
       }
     } else if (this.contentItem.description === undefined) {
+      let iconStyle = this.contentItem.iconStyle as number;
       if (this.contentItem.icon === undefined ||
-        (this.contentItem.icon !== undefined && this.contentItem.iconStyle as number <= IconType.SYSTEM_ICON)) {
+        (this.contentItem.icon !== undefined && iconStyle <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
-        this.itemHeight = APPICON_ITEMLENGTH;
+        this.itemHeight = iconStyle === IconType.HEAD_SCULPTURE ? ItemHeight.FOURTH_HEIGHT : APPICON_ITEMLENGTH;
       }
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT;
@@ -1207,7 +1241,7 @@ export struct ComposeListItem {
   aboutToDisappear(): void {
     if (this.callbackId) {
       this.getUIContext()
-        .getHostContext()
+      ?.getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
@@ -1345,13 +1379,13 @@ export struct ComposeListItem {
   }
 
   getPadding(): Padding | undefined {
-    if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+    if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
       let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
       let compareSize = paddingNum > LISTITEM_PADDING;
       let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
       return {
-        top: paddingNum,
-        bottom: paddingNum,
+        top: this.isWrapText ? paddingNum : 0,
+        bottom: this.isWrapText ? paddingNum : 0,
         left: horizontalPadding,
         right: horizontalPadding
       };
@@ -1405,7 +1439,7 @@ export struct ComposeListItem {
             rightWidth: this.calculatedRightWidth(),
             parentDirection: this.containerDirection,
             isFocus: this.isFocus,
-            isChecked: this.isChecked,
+            controller: this.operateItemStructRef
           })
             .flexShrink(0)
             .onFocus(() => {
@@ -1440,7 +1474,8 @@ export struct ComposeListItem {
             (this.isActive ? this.activedColor : Color.Transparent.toString());
         }
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-          this.frontColor = isHover ? this.hoveringColor : NORMAL_BG_COLOR;
+          this.frontColor = isHover ? FOCUSED_BG_COLOR : NORMAL_BG_COLOR;
+          isHover ? this.zoomIn() : this.zoomOut();
         }
       })
       .stateStyles({
@@ -1471,14 +1506,15 @@ export struct ComposeListItem {
     .onFocus(() => {
       this.isFocus = true;
       this.frontColor = FOCUSED_BG_COLOR;
+      this.zoomIn();
     })
     .onBlur(() => {
       this.isFocus = false;
       this.frontColor = NORMAL_BG_COLOR;
+      this.zoomOut();
     })
     .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
     .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
-      this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
       if (this.operateItem?.icon && this.operateItem.icon?.action) {
         this.operateItem.icon.action();
       }
@@ -1488,11 +1524,17 @@ export struct ComposeListItem {
       if (this.operateItem?.arrow && this.operateItem.arrow?.action) {
         this.operateItem.arrow.action();
       }
+      if (this.operateItem?.radio) {
+        this.operateItemStructRef.changeRadioState();
+      }
+      if (this.operateItem?.checkbox) {
+        this.operateItemStructRef.changeCheckboxState();
+      }
+      if (this.operateItem?.switch) {
+        this.operateItemStructRef.changeSwitchState();
+      }
     })
-    .scale({
-      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE),
-      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE)
-    })
+    .scale(this.listScale)
     .shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW))
     .margin({
       left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
@@ -1502,5 +1544,19 @@ export struct ComposeListItem {
       left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
       right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
     })
+  }
+
+  private zoomIn(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : FOCUSED_ITEM_SCALE
+    };
+  }
+
+  private zoomOut(): void {
+    this.listScale = {
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE,
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : RECOVER_ITEM_SCALE
+    };
   }
 }

@@ -292,4 +292,39 @@ HWTEST_F(ScrollableUtilsTest, RecycleItemsOutOfBoundary011, TestSize.Level1)
 
     ClearChildren();
 }
+
+/**
+ * @tc.name: GetMoveOffset001
+ * @tc.desc: Test when frameNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. when frameNode is nullptr
+     * @tc.expected: return 0.0f;
+     */
+    auto parentFrameNode = FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
+    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, nullptr, true, 1.0f, 2.0f);
+    EXPECT_EQ(notMove, 0.0f);
+}
+
+/**
+ * @tc.name: GetMoveOffset002
+ * @tc.desc: Test when frameNode with default data
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableUtilsTest, GetMoveOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. when frameNode with default data
+     * @tc.expected: return 0.0f;
+     */
+    auto parentFrameNode = FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
+    parentFrameNode->geometryNode_->SetFrameSize({ 1000, 100 });
+    auto curFrameNode = FrameNode::CreateFrameNode("ScrollableContainer", -1, AceType::MakeRefPtr<Pattern>());
+    curFrameNode->geometryNode_->SetFrameSize({ 1000, 100 });
+    auto notMove = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, true, 1.0f, 2.0f);
+    EXPECT_EQ(notMove, 0.0f);
+}
 } // namespace OHOS::Ace::NG

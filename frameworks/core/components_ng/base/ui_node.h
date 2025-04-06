@@ -30,6 +30,7 @@
 #include "base/utils/macros.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/window_animation_config.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/export_texture_info/export_texture_info.h"
@@ -37,6 +38,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/event/touch_event.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
@@ -57,6 +59,32 @@ enum class RootNodeType : int32_t {
     PAGE_ETS_TAG = 0,
     NAVDESTINATION_VIEW_ETS_TAG = 1,
     WINDOW_SCENE_ETS_TAG = 2
+};
+
+struct InteractionEventBindingInfo  {
+    bool baseEventRegistered = false;
+    bool nodeEventRegistered = false;
+    bool nativeEventRegistered = false;
+    bool builtInEventRegistered = false;
+
+    void SetModifierEventRegistered(bool isCNode, bool state)
+    {
+        if (isCNode) {
+            nativeEventRegistered = state;
+        } else {
+            baseEventRegistered = state;
+        }
+    }
+
+    void SetNodeEventRegistered(bool state)
+    {
+        nodeEventRegistered = state;
+    }
+
+    void SetBuiltInEventRegistered(bool state)
+    {
+        builtInEventRegistered = state;
+    }
 };
 
 class InspectorFilter;
@@ -94,6 +122,8 @@ public:
     void MovePosition(int32_t slot);
     void MountToParent(const RefPtr<UINode>& parent, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false,
         bool addDefaultTransition = false, bool addModalUiextension = false);
+    void MountToParentAfter(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
+    void MountToParentBefore(const RefPtr<UINode>& parent, const RefPtr<UINode>& siblingNode);
     RefPtr<FrameNode> GetParentFrameNode() const;
     RefPtr<CustomNode> GetParentCustomNode() const;
     RefPtr<FrameNode> GetFocusParentWithBoundary() const;
@@ -113,6 +143,10 @@ public:
     void DetachFromMainTree(bool recursive = false);
     virtual void FireCustomDisappear();
     void UpdateConfigurationUpdate(const ConfigurationChange& configurationChange);
+
+    // Return value: 0 indicates successful execution, non - zero indicates failed execution.
+    virtual int32_t OnRecvCommand(const std::string& command) { return 0; }
+
     virtual void OnConfigurationUpdate(const ConfigurationChange& configurationChange) {}
 
     // process offscreen process.
@@ -145,6 +179,12 @@ public:
     std::pair<bool, int32_t> GetChildFlatIndex(int32_t id);
 
     virtual const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const
+    {
+        return children_;
+    }
+
+    // Return children for get inspector tree calling, return cache children directly
+    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector() const
     {
         return children_;
     }
@@ -203,6 +243,7 @@ public:
     bool NeedRequestAutoSave();
     // DFX info.
     virtual void DumpTree(int32_t depth, bool hasJson = false);
+    void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -301,6 +342,11 @@ public:
         return isInDestroying_;
     }
 
+    bool IsDestroyingState() const
+    {
+        return isDestroyingState_;
+    }
+
     void SetChildrenInDestroying();
 
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
@@ -350,6 +396,10 @@ public:
     virtual void OnWindowFocused() {}
 
     virtual void OnWindowUnfocused() {}
+
+    virtual void OnWindowActivated() {}
+
+    virtual void OnWindowDeactivated() {}
 
     virtual void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
 
@@ -700,6 +750,11 @@ public:
         return instanceId_;
     }
 
+    static std::set<std::string> GetLayoutTags()
+    {
+        return layoutTags_;
+    }
+
     virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
     {
         for (const auto& child : GetChildren()) {
@@ -792,7 +847,12 @@ public:
     ColorMode GetLocalColorMode() const;
 
     // Used to mark freeze and block dirty mark.
-    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
+    virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false, bool isUserFreeze = false);
+
+    void SetUserFreeze(bool isUserFreeze);
+
+    bool IsUserFreeze();
+
     bool IsFreeze() const
     {
         return isFreeze_;
@@ -806,6 +866,11 @@ public:
     void setIsCNode(bool createByCapi)
     {
         isCNode_ = createByCapi;
+    }
+
+    bool IsReusableNode() const
+    {
+        return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
     virtual RefPtr<UINode> GetCurrentPageRootNode()
@@ -824,6 +889,9 @@ public:
     void setIsMoving(bool isMoving)
     {
         isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
     }
 
     bool isCrossLanguageAttributeSetting() const
@@ -844,6 +912,74 @@ public:
      */
     void SetAllowReusableV2Descendant(bool allow);
     bool IsAllowReusableV2Descendant() const;
+
+    bool HasSkipNode();
+    virtual void OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
+    {
+        isDestroyingState_ = isDestroying;
+    }
+    virtual void SetDestroying(bool isDestroying = true, bool cleanStatus = true);
+
+    /**
+     * @description: Compare whether the target api version of the application is greater than or equal to the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool GreatOrEqualAPITargetVersion(PlatformVersion version) const;
+
+    /**
+     * @description: Compare whether the target api version of the application is less than the incoming
+     * target. It can be used in scenarios where the uiNode can be obtained.
+     * @param: Target version to be isolated.
+     * @return: return the compare result.
+     */
+    bool LessThanAPITargetVersion(PlatformVersion version) const;
+
+    bool IsArkTsRenderNode() const
+    {
+        return isArkTsRenderNode_;
+    }
+
+    void SetIsArkTsRenderNode(bool isArkTsRenderNode)
+    {
+        isArkTsRenderNode_ = isArkTsRenderNode;
+    }
+
+    void ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child);
+    virtual bool CheckVisibleOrActive()
+    {
+        return true;
+    }
+
+    void SetModifierEventRegistrationState(bool isCNode, bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetModifierEventRegistered(isCNode, state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetNodeEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetNodeEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetBuiltInEventRegistrationState(bool state) {
+        InteractionEventBindingInfo currentInfo = GetInteractionEventBindingInfo();
+        currentInfo.SetBuiltInEventRegistered(state);
+        SetInteractionEventBindingInfo(currentInfo);
+    }
+
+    void SetInteractionEventBindingInfo(const InteractionEventBindingInfo &eventBindingInfo)
+    {
+        eventBindingInfo_ = eventBindingInfo;
+    }
+
+    const InteractionEventBindingInfo& GetInteractionEventBindingInfo() const
+    {
+        return eventBindingInfo_;
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -905,6 +1041,10 @@ protected:
     void CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
         std::list<int32_t>& removedElmtId, bool isEntry);
     void CollectRemovedChild(const RefPtr<UINode>& child, std::list<int32_t>& removedElmtId);
+    void CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId,
+        std::list<int32_t>& reservedElmtId, bool isEntry);
+    void CollectReservedChildren(std::list<int32_t>& reservedElmtId);
+    virtual void OnCollectRemoved() {}
 
     bool needCallChildrenUpdate_ = true;
 
@@ -923,7 +1063,7 @@ protected:
      * @param id the accessibilityId of child.
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
-
+    const static std::set<std::string> layoutTags_;
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -935,7 +1075,7 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = 1;
+    int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
@@ -951,12 +1091,15 @@ private:
     bool isBuildByJS_ = false;
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
+    bool isArkTsRenderNode_ = false;
     bool isTraversing_ = false;
     bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
+    InteractionEventBindingInfo eventBindingInfo_;
     RefPtr<ExportTextureInfo> exportTextureInfo_;
     int32_t instanceId_ = -1;
+    int32_t apiVersion_ = 0;
     uint32_t nodeFlag_ { 0 };
 
     int32_t restoreId_ = -1;
@@ -964,6 +1107,7 @@ private:
     bool useOffscreenProcess_ = false;
 
     bool isCNode_ = false;
+    bool isDestroyingState_ = false;
     bool isAllowAddChildBelowModalUec_ = true;
 
     std::function<void(int32_t)> updateJSInstanceCallback_;
@@ -989,6 +1133,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
     bool isCrossLanguageAttributeSetting_ = false;
+    std::optional<bool> userFreeze_;
 };
 
 } // namespace OHOS::Ace::NG

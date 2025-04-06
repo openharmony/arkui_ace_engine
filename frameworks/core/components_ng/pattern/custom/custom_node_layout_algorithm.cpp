@@ -40,7 +40,8 @@ void CustomNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 frameNode = FrameNode::GetOrCreateFrameNode(
                     "dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
                 stack->Push(frameNode);
-                child = renderFunction_();
+                bool isTimeout = false;
+                child = renderFunction_(0, isTimeout);
                 renderFunction_ = nullptr;
                 stack->Pop();
             }

@@ -649,7 +649,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close()
           }
         }
@@ -747,7 +747,7 @@ struct ImageMenuItem {
         }
         if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
           this.isOnClick = false
-          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          if (this.fontSize >= this.minFontSize) {
             this.dialogController?.close()
           }
         }
@@ -836,7 +836,7 @@ struct SelectTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
@@ -866,7 +866,7 @@ struct SelectTitleBarDialog {
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)

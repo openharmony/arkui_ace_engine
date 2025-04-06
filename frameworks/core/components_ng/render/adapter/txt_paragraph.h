@@ -16,14 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_PARAGRAPH_H
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-#include "txt/font_collection.h"
-#include "txt/paragraph_builder.h"
-#include "txt/paragraph_txt.h"
-#else
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/text_layout_info.h"
@@ -36,17 +30,6 @@ class TxtParagraph : public Paragraph {
     DECLARE_ACE_TYPE(NG::TxtParagraph, NG::Paragraph)
 
 public:
-#ifndef USE_GRAPHIC_TEXT_GINE
-    TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
-        : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
-    {}
-
-    TxtParagraph(void* paragraph) : hasExternalParagraph_(true)
-    {}
-
-    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
-    {}
-#else
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
@@ -86,7 +69,6 @@ public:
             TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "HmSymbol txt_paragraph::SetAnimation success ");
         }
     }
-#endif
     ~TxtParagraph() override;
 
     // whether the paragraph has been build
@@ -104,6 +86,8 @@ public:
 
     // interfaces for layout
     void Layout(float width) override;
+    // interfaces for reLayout
+    void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
     float GetHeight() override;
     float GetTextWidth() override;
     size_t GetLineCount() override;
@@ -136,7 +120,7 @@ public:
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;
     const ParagraphStyle& GetParagraphStyle() const override;
-    bool empty() const
+    bool empty() const override
     {
         return GetParagraphLength() == 0;
     }
@@ -157,6 +141,16 @@ public:
         RectHeightStyle heightStyle, RectWidthStyle widthStyle,
         std::vector<RectF>& selectedRects, std::vector<TextDirection>& textDirections) override;
 
+protected:
+    virtual Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest);
+    ParagraphStyle paraStyle_;
+    RSParagraph* GetParagraph();
+    Rosen::RSSymbolAnimation rsSymbolAnimation_;
+    std::unique_ptr<RSParagraph> paragraph_;
+    RSParagraph* externalParagraph_ = nullptr;
+    std::unique_ptr<RSParagraphBuilder> builder_;
+    std::shared_ptr<RSFontCollection> fontCollection_;
+
 private:
     void CreateBuilder();
     bool CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent);
@@ -164,8 +158,8 @@ private:
     {
         return text_.length() + placeholderCnt_;
     }
-    float MakeEmptyOffsetX();
-    bool HandleCaretWhenEmpty(CaretMetricsF& result);
+    float MakeEmptyOffsetX(bool isLtr);
+    bool HandleCaretWhenEmpty(CaretMetricsF& result, bool needLineHighest);
     void HandleTextAlign(CaretMetricsF& result, TextAlign align);
     void HandleLeadingMargin(CaretMetricsF& result, LeadingMargin leadingMargin);
     void GetRectsForRangeInner(int32_t start, int32_t end, std::vector<RectF>& selectedRects,
@@ -176,21 +170,8 @@ private:
     int32_t GetIndexWithoutPlaceHolder(int32_t index);
     bool IsTargetCharAtIndex(char16_t targetChar, int32_t index);
     bool IsIndexAtLineEnd(const Offset& offset, int32_t index);
+    void ConvertTypographyStyle(Rosen::TypographyStyle& style, const ParagraphStyle& paraStyle);
 
-    ParagraphStyle paraStyle_;
-#ifndef USE_GRAPHIC_TEXT_GINE
-    txt::Paragraph* GetParagraph();
-    std::unique_ptr<txt::Paragraph> paragraph_;
-    std::unique_ptr<txt::ParagraphBuilder> builder_;
-    std::shared_ptr<txt::FontCollection> fontCollection_;
-#else
-    RSParagraph* GetParagraph();
-    Rosen::RSSymbolAnimation rsSymbolAnimation_;
-    std::unique_ptr<RSParagraph> paragraph_;
-    RSParagraph* externalParagraph_ = nullptr;
-    std::unique_ptr<RSParagraphBuilder> builder_;
-    std::shared_ptr<RSFontCollection> fontCollection_;
-#endif
     std::u16string text_;
     int32_t placeholderCnt_ = 0;
     TextAlign textAlign_ = TextAlign::START;

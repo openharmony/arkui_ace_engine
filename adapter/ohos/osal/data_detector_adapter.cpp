@@ -333,7 +333,7 @@ void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)
         }
         AISpan aiSpan;
         aiSpan.start = entity.charOffset;
-        aiSpan.end = aiSpan.start + static_cast<int32_t>(entity.text.length());
+        aiSpan.end = aiSpan.start + static_cast<int32_t>(UtfUtils::Str8DebugToStr16(entity.text).length());
         aiSpan.content = entity.text;
         aiSpan.type = TextDataDetectType::URL;
         aiSpanMap_[aiSpan.start] = aiSpan;
@@ -429,7 +429,7 @@ void DataDetectorAdapter::ParseAIJson(
         item->Put("costTime", costTime.count());
         item->Put("resultCode", textDetectResult_.code);
         entityJson_[start] = item->ToString();
-        TAG_LOGI(AceLogTag::ACE_TEXT, "The json of the entity is: %{private}s", entityJson_[start].c_str());
+        TAG_LOGI(AceLogTag::ACE_TEXT, "size of the entity json is: %{public}zu", entityJson_[start].size());
 
         AISpan aiSpan;
         aiSpan.start = start;

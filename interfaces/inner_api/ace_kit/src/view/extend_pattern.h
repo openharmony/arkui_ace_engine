@@ -31,8 +31,10 @@ public:
     ExtendPattern(const RefPtr<Kit::Pattern>& kitPattern);
     ~ExtendPattern() override = default;
 
-    virtual bool OnDirtyLayoutWrapperSwap(
+    bool OnDirtyLayoutWrapperSwap(
         const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig) override;
+
+    void OnModifyDone() override;
 
 private:
     RefPtr<Kit::Pattern> kitPattern_;

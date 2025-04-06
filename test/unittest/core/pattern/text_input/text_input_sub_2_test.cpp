@@ -414,7 +414,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(parentFrameNode);
     
     frameNode->SetActive();
-    FlushLayoutTask(frameNode, true);
+    FlushLayoutTask(frameNode);
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto contextPtr = pattern->GetHost()->GetContextRefPtr();
@@ -456,7 +456,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(parentFrameNode);
     
     frameNode->SetActive();
-    FlushLayoutTask(frameNode, true);
+    FlushLayoutTask(frameNode);
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto contextPtr = pattern->GetHost()->GetContextRefPtr();
@@ -530,10 +530,10 @@ HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
         []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     auto pipeline = MockPipelineContext::GetCurrent();
-    pattern->OnAttachContext(pipeline.GetRawPtr());
+    pattern->OnAttachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
 
-    pattern->OnDetachContext(pipeline.GetRawPtr());
+    pattern->OnDetachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), 0);
 }
 
@@ -554,10 +554,10 @@ HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
         []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     auto pipeline = MockPipelineContext::GetCurrent();
-    pattern->OnAttachContext(pipeline.GetRawPtr());
+    pattern->OnAttachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), pipeline->GetInstanceId());
 
-    pattern->OnDetachContext(pipeline.GetRawPtr());
+    pattern->OnDetachContext(Referenced::RawPtr(pipeline));
     ASSERT_EQ(pipeline->GetInstanceId(), 0);
 }
 

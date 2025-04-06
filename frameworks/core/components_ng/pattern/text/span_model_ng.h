@@ -107,11 +107,9 @@ public:
     static void SetAccessibilityDescription(UINode* uiNode, const std::string& description);
     static void SetAccessibilityImportance(UINode* uiNode, const std::string& importance);
     static std::vector<std::string> GetSpanFontFamily(UINode* uiNode);
-#ifdef USE_GRAPHIC_TEXT_GINE
     // impl in render/adapter/span_model_adapter.cpp
     static RefPtr<SpanItem> CreateSpanItem(ArkUI_SpanItem* item);
     static ParagraphStyle CreateParagraphStyle(ArkUI_StyledString* styledString);
-#endif
 };
 } // namespace OHOS::Ace::NG
 

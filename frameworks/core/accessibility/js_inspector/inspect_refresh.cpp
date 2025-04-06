@@ -28,7 +28,7 @@ void InspectRefresh::PackAttrAndStyle()
     DeviceType deviceType = SystemProperties::GetDeviceType();
     if (deviceType == DeviceType::PHONE) {
         attrs_.insert(std::make_pair("friction", "42"));
-    } else if (deviceType == DeviceType::WATCH) {
+    } else if (deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) {
         styles_.insert(std::make_pair("friction", "62"));
     }
     attrs_.insert(std::make_pair("disabled", "false"));

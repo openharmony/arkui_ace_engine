@@ -300,7 +300,7 @@ bool WebPattern::IsImageDrag()
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -1176,11 +1176,6 @@ void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
     renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 
-void WebPattern::OnSmoothDragResizeEnabledUpdate(bool value)
-{
-    // cross platform is not support now;
-}
-
 void WebPattern::OnRootLayerChanged(int width, int height)
 {
     // cross platform is not support now;
@@ -1320,6 +1315,11 @@ void WebPattern::OnOverlayScrollbarEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
@@ -1402,6 +1402,11 @@ void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 }
 
 void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     // cross platform is not support now;
 }

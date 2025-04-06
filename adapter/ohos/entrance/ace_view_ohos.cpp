@@ -14,13 +14,10 @@
  */
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
-#include "pointer_event.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/dump_log.h"
-#include "core/event/focus_axis_event.h"
-#include "core/event/non_pointer_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -95,6 +92,11 @@ void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t
     view->NotifyTransformHintChanged(transform);
 }
 
+bool IsAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    return pointerEvent->GetAxes() != 0;
+}
+
 void AceViewOhos::HandleMouseEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     int32_t pointerAction, bool isInjected, int32_t toolType)
@@ -104,7 +106,8 @@ void AceViewOhos::HandleMouseEvent(const RefPtr<AceViewOhos>& view,
         (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
         (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) ||
+        (pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL && IsAxisEvent(pointerEvent))) {
         view->ProcessAxisEvent(pointerEvent, node, isInjected);
     } else {
         view->ProcessDragEvent(pointerEvent, node);
@@ -323,11 +326,13 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
             finallyCallback();
         }
     };
-    if (touchPoint.type != TouchType::UNKNOWN) {
-        if (touchEventCallback_) {
-            touchEventCallback_(touchPoint, markProcess, node);
-        }
+    if (touchPoint.type == TouchType::UNKNOWN) {
+        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "ProcessTouchEvent pointerEvent action is unknown return.");
+        markProcess();
+        return;
     }
+    CHECK_NULL_VOID(touchEventCallback_);
+    touchEventCallback_(touchPoint, markProcess, node);
 }
 
 void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -359,6 +364,16 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             dragEventCallback_(event, action, node);
             break;
         }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_CANCEL: {
+            action = DragEventAction::DRAG_EVENT_PULL_CANCEL;
+            dragEventCallback_(event, action, node);
+            break;
+        }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_THROW: {
+            action = DragEventAction::DRAG_EVENT_PULL_THROW;
+            dragEventCallback_(event, action, node);
+            break;
+        }
         default:
             break;
     }
@@ -379,7 +394,7 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     if (pointerEvent) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        ConvertMouseEvent(pointerEvent, event, container->IsScenceBoardWindow());
+        ConvertMouseEvent(pointerEvent, event, container->IsSceneBoardWindow());
         markEnabled = pointerEvent->IsMarkEnabled();
     }
     event.isInjected = isInjected;

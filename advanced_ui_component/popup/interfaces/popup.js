@@ -20,8 +20,13 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
-
-export const e1 = {
+const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const componentUtils = requireNapi('arkui.componentUtils');
+const Configuration = requireNapi('configuration');
+const a1 = 10003;
+const b1 = 10002;
+const c1 = 10007;
+export const l1 = {
     icon: {
         size: { width: 32, height: 32 },
         margin: {
@@ -55,7 +60,7 @@ export const e1 = {
         },
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        h1: {
+        s2: {
             top: LengthMetrics.vp(8),
             bottom: LengthMetrics.vp(8),
             start: LengthMetrics.vp(8),
@@ -63,16 +68,16 @@ export const e1 = {
         },
         minFontSize: 9,
         fontWeight: FontWeight.Medium,
-        i1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        t2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
     message: {
         fontSize: { "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontColor: { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
         fontWeight: FontWeight.Regular,
-        j1: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        u2: { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
-    l1: {
+    z2: {
         padding: {
             top: LengthMetrics.vp(12),
             bottom: LengthMetrics.vp(12),
@@ -80,9 +85,8 @@ export const e1 = {
             end: LengthMetrics.vp(12)
         },
     },
-    m1: {
+    a3: {
         size: { width: 22, height: 22 },
-        imageSize: { width: 18, height: 18 },
         padding: {
             top: LengthMetrics.vp(2),
             bottom: LengthMetrics.vp(2),
@@ -95,21 +99,23 @@ export const e1 = {
             start: LengthMetrics.vp(12),
             end: LengthMetrics.vp(12)
         },
-        image: { "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_cancel'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        symbolStyle: new SymbolGlyphModifier({ "id": -1, "type": 40000, params: ['sys.symbol.xmark'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }),
         fillColor: { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        i1: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+        t2: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_hover'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+        v2: '18vp',
+        w2: { "id": -1, "type": 10003, params: ['sys.string.off_used_for_accessibility_text'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
     },
 };
-const f1 = () => {
+const m1 = () => {
 };
-const POPUP_DEFAULT_MAXWIDTH = 400;
+const n1 = 400;
 export function Popup(options, parent = null) {
-    const w1 = options;
+    const r2 = options;
     {
-        (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, options = w1) => {
+        (parent ? parent : this).observeComponentCreation2((elmtId, isInitialRender, options = r2) => {
             if (isInitialRender) {
-                let componentCall = new g1(parent ? parent : this, {
+                let componentCall = new o1(parent ? parent : this, {
                     icon: options.icon,
                     title: options.title,
                     message: options.message,
@@ -118,7 +124,7 @@ export function Popup(options, parent = null) {
                     onClose: options.onClose,
                     buttons: options.buttons,
                     maxWidth: options.maxWidth
-                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 198, n1: 3 });
+                }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/Popup.ets", line: 209, b3: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
                     return {
@@ -148,21 +154,57 @@ export function Popup(options, parent = null) {
         }, { name: "PopupComponent" });
     }
 }
-export class g1 extends ViewPU {
+function m(o2, q2) {
+    const matches = o2.match(q2);
+    if (!matches || matches.length < 3) {
+        return false;
+    }
+    const value = Number.parseFloat(matches[1]);
+    return value >= 0;
+}
+function o(n2) {
+    return m(n2, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i'));
+}
+function t(context, value) {
+    const resourceManager = context?.resourceManager;
+    if (value === void (0) || value === null || resourceManager === void (0)) {
+        return false;
+    }
+    if (value.type !== a1 && value.type !== c1 &&
+        value.type !== b1) {
+        return false;
+    }
+    if (value.type === c1 || value.type === b1) {
+        if (resourceManager.getNumber(value.id) >= 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    if (value.type === a1 && !o(resourceManager.getStringSync(value.id))) {
+        return false;
+    }
+    else {
+        return true;
+    }
+}
+export class o1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.onClose = f1;
-        this.theme = e1;
+        this.onClose = m1;
+        this.theme = l1;
         this.__icon = new SynchedPropertyObjectOneWayPU(params.icon, this, "icon");
+        this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, "maxWidth");
+        this.__messageMaxWidth = new SynchedPropertySimpleOneWayPU(params.messageMaxWidth, this, "messageMaxWidth");
         this.__title = new SynchedPropertyObjectOneWayPU(params.title, this, "title");
         this.__message = new SynchedPropertyObjectOneWayPU(params.message, this, "message");
         this.__popupDirection = new SynchedPropertySimpleOneWayPU(params.popupDirection, this, "popupDirection");
         this.__showClose = new SynchedPropertyObjectOneWayPU(params.showClose, this, "showClose");
         this.__buttons = new SynchedPropertyObjectOneWayPU(params.buttons, this, "buttons");
-        this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, 'maxWidth');
         this.textHeight = 0;
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
@@ -188,6 +230,9 @@ export class g1 extends ViewPU {
         }
         if (params.icon === undefined) {
             this.__icon.set({ image: '' });
+        }
+        if (params.messageMaxWidth === undefined) {
+            this.__messageMaxWidth.set(0);
         }
         if (params.title === undefined) {
             this.__title.set({ text: '' });
@@ -243,22 +288,21 @@ export class g1 extends ViewPU {
         if (params.listener !== undefined) {
             this.listener = params.listener;
         }
-        if (params.maxWidth !== undefined) {
-            this.maxWidth = params.maxWidth;
-        }
     }
     updateStateVars(params) {
         this.__icon.reset(params.icon);
+        this.__maxWidth.reset(params.maxWidth);
+        this.__messageMaxWidth.reset(params.messageMaxWidth);
         this.__title.reset(params.title);
         this.__message.reset(params.message);
         this.__popupDirection.reset(params.popupDirection);
         this.__showClose.reset(params.showClose);
         this.__buttons.reset(params.buttons);
-        this.__maxWidth.reset(params.maxWidth);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__icon.purgeDependencyOnElmtId(rmElmtId);
         this.__maxWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__messageMaxWidth.purgeDependencyOnElmtId(rmElmtId);
         this.__title.purgeDependencyOnElmtId(rmElmtId);
         this.__message.purgeDependencyOnElmtId(rmElmtId);
         this.__popupDirection.purgeDependencyOnElmtId(rmElmtId);
@@ -279,6 +323,7 @@ export class g1 extends ViewPU {
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
         this.__maxWidth.aboutToBeDeleted();
+        this.__messageMaxWidth.aboutToBeDeleted();
         this.__title.aboutToBeDeleted();
         this.__message.aboutToBeDeleted();
         this.__popupDirection.aboutToBeDeleted();
@@ -309,6 +354,12 @@ export class g1 extends ViewPU {
     }
     set maxWidth(newValue) {
         this.__maxWidth.set(newValue);
+    }
+    get messageMaxWidth() {
+        return this.__messageMaxWidth.get();
+    }
+    set messageMaxWidth(newValue) {
+        this.__messageMaxWidth.set(newValue);
     }
     get title() {
         return this.__title.get();
@@ -433,7 +484,7 @@ export class g1 extends ViewPU {
     getTitlePadding() {
         return {
             start: new LengthMetrics(this.theme.button.margin.start.value / 2, this.theme.button.margin.start.unit),
-            end: this.theme.m1.margin.end
+            end: this.theme.a3.margin.end
         };
     }
     getTitleMargin() {
@@ -452,31 +503,25 @@ export class g1 extends ViewPU {
         return this.title?.fontColor ?? this.theme.title.fontColor;
     }
     getCloseButtonWidth() {
-        return this.theme.m1.size.width;
+        return this.theme.a3.size.width;
     }
     getCloseButtonHeight() {
-        return this.theme.m1.size.height;
-    }
-    getCloseButtonImage() {
-        return this.theme.m1.image;
+        return this.theme.a3.size.height;
     }
     getCloseButtonFillColor() {
         return this.closeButtonFillColorWithTheme;
     }
     getCloseButtonHoverColor() {
-        return this.theme.m1.i1;
+        return this.theme.a3.t2;
     }
     getCloseButtonBackgroundColor() {
-        return this.theme.m1.backgroundColor;
+        return this.theme.a3.backgroundColor;
     }
     getCloseButtonPadding() {
-        return this.theme.m1.padding;
+        return this.theme.a3.padding;
     }
-    getCloseButtonImageWidth() {
-        return this.theme.m1.imageSize.width;
-    }
-    getCloseButtonImageHeight() {
-        return this.theme.m1.imageSize.height;
+    getCloseButtonSymbolSize() {
+        return this.theme.a3.v2;
     }
     getMessageText() {
         return this.message.text;
@@ -494,7 +539,7 @@ export class g1 extends ViewPU {
                 fontColor = this.theme.message.fontColor;
             }
             else {
-                fontColor = this.theme.message.j1;
+                fontColor = this.theme.message.u2;
             }
         }
         return fontColor;
@@ -507,61 +552,65 @@ export class g1 extends ViewPU {
         else {
             padding = {
                 start: LengthMetrics.vp(this.theme.button.margin.start.value / 2),
-                end: LengthMetrics.vp(this.theme.m1.margin.end.value)
+                end: LengthMetrics.vp(this.theme.a3.margin.end.value)
             };
         }
         return padding;
     }
     getMessageMaxWeight() {
-        let u1 = undefined;
-        let v1 = undefined;
+        let l2 = undefined;
+        let m2 = undefined;
         try {
-            v1 = display.getDefaultDisplaySync();
+            m2 = display.getDefaultDisplaySync();
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
-            return u1 = 400;
+            return l2 = 400;
         }
         if (this.showClose || this.showClose === void (0)) {
-            if (this.messageMaxWidth !== undefined) {
-                if (this.maxWidth > px2vp(v1.width)) {
-                    u1 = px2vp(v1.width);
-                } else {
-                    u1 = this.maxWidth;
+            if (this.messageMaxWidth != undefined) {
+                if (this.maxWidth != undefined && this.maxWidth > px2vp(m2.width)) {
+                    l2 = px2vp(m2.width);
                 }
-            } else {
-                if (v1.width != 0) {
-                    u1 = px2vp(v1.width);
-                } else {
-                    u1 = -1;
+                else {
+                    l2 = this.messageMaxWidth;
                 }
             }
-            u1 -= (this.theme.l1.padding.start.value - (this.theme.button.margin.end.value / 2));
-            u1 -= this.theme.l1.padding.end.value;
-            u1 -= this.theme.button.margin.start.value / 2;
-            u1 -= this.getCloseButtonWidth();
+            else {
+                if (m2.width != 0) {
+                    l2 = px2vp(m2.width);
+                }
+                else {
+                    l2 = -1;
+                }
+            }
+            l2 -= (this.theme.z2.padding.start.value - (this.theme.button.margin.end.value / 2));
+            l2 -= this.theme.z2.padding.end.value;
+            l2 -= this.theme.button.margin.start.value / 2;
+            l2 -= this.theme.a3.margin.end.value;
+            l2 -= this.getCloseButtonWidth();
         }
-        return u1;
+        return l2;
     }
     getMessageFontWeight() {
         return this.theme.message.fontWeight;
     }
     getButtonMargin() {
         return {
-            top: LengthMetrics.vp(this.theme.button.h1.top.value / 2 - 4),
-            bottom: LengthMetrics.vp(this.theme.button.h1.bottom.value / 2 - 4),
+            top: LengthMetrics.vp(this.theme.button.s2.top.value / 2 - 4),
+            bottom: LengthMetrics.vp(this.theme.button.s2.bottom.value / 2 - 4),
             start: LengthMetrics.vp(this.theme.button.margin.start.value / 2 - 4),
             end: LengthMetrics.vp(this.theme.button.margin.end.value / 2 - 4)
         };
     }
     getButtonTextMargin() {
-        return { top: LengthMetrics.vp(this.theme.button.h1.bottom.value) };
+        return { top: LengthMetrics.vp(this.theme.button.s2.bottom.value) };
     }
     getButtonTextPadding() {
         return this.theme.button.padding;
     }
     getButtonHoverColor() {
-        return this.theme.button.i1;
+        return this.theme.button.t2;
     }
     getButtonBackgroundColor() {
         return this.theme.button.backgroundColor;
@@ -591,51 +640,58 @@ export class g1 extends ViewPU {
         return this.theme.button.fontWeight;
     }
     getWindowsPadding() {
+        let top = this.theme.z2.padding.top;
+        let bottom = LengthMetrics.vp(this.theme.z2.padding.bottom.value - (this.theme.button.s2.bottom.value / 2));
+        let start = LengthMetrics.vp(this.theme.z2.padding.start.value - (this.theme.button.margin.end.value / 2));
+        let end = this.theme.z2.padding.end;
+        let k2 = this.toVp(this.maxWidth);
+        if (k2 === 0) {
+            start = LengthMetrics.vp(0);
+            end = LengthMetrics.vp(0);
+        }
         return {
-            top: this.theme.l1.padding.top,
-            bottom: LengthMetrics.vp(this.theme.l1.padding.bottom.value -
-                (this.theme.button.h1.bottom.value / 2)),
-            start: LengthMetrics.vp(this.theme.l1.padding.start.value -
-                (this.theme.button.margin.end.value / 2)),
-            end: this.theme.l1.padding.end
+            top: top,
+            bottom: bottom,
+            start: start,
+            end: end
         };
     }
     onWillApplyTheme(theme) {
         this.theme.title.fontColor = theme.colors.fontPrimary;
         this.theme.button.fontColor = theme.colors.fontEmphasize;
         this.theme.message.fontColor = theme.colors.fontSecondary;
-        this.theme.message.j1 = theme.colors.fontPrimary;
+        this.theme.message.u2 = theme.colors.fontPrimary;
         this.closeButtonFillColorWithTheme = theme.colors.iconSecondary;
     }
     aboutToAppear() {
-        this.listener.on("change", (t1) => {
-            this.currentScreenStatus = t1.matches;
+        this.listener.on("change", (j2) => {
+            this.currentScreenStatus = j2.matches;
         });
     }
     aboutToDisappear() {
         this.listener.off("change");
     }
     getScrollMaxHeight() {
-        let s1 = undefined;
+        let i2 = undefined;
         if (this.currentScreenStatus !== this.beforeScreenStatus) {
             this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
-            return s1;
+            return i2;
         }
-        s1 = this.applyHeight;
-        s1 -= this.titleHeight;
-        s1 -= this.buttonHeight;
-        s1 -= this.theme.l1.padding.top.value;
-        s1 -= (this.theme.button.h1.bottom.value / 2);
-        s1 -= this.theme.title.margin.bottom.value;
-        s1 -= (this.theme.l1.padding.bottom.value -
-            (this.theme.button.h1.bottom.value / 2));
-        if (Math.floor(this.textHeight) > Math.floor(s1 + 1)) {
-            return s1;
+        i2 = px2vp(componentUtils.getRectangleById('applyContent').size?.height);
+        i2 -= this.titleHeight;
+        i2 -= this.buttonHeight;
+        i2 -= this.theme.z2.padding.top.value;
+        i2 -= (this.theme.button.s2.bottom.value / 2);
+        i2 -= this.theme.title.margin.bottom.value;
+        i2 -= (this.theme.z2.padding.bottom.value -
+            (this.theme.button.s2.bottom.value / 2));
+        if (Math.floor(this.textHeight) > Math.floor(i2 + 1)) {
+            return i2;
         }
         else {
-            s1 = undefined;
-            return s1;
+            i2 = undefined;
+            return i2;
         }
     }
     getLayoutWeight() {
@@ -651,42 +707,51 @@ export class g1 extends ViewPU {
         }
         return layoutWeight;
     }
-    resourceToVp(r18) {
+    resourceToVp(value) {
         try {
-            if (r18.id !== -1) {
-                return px2vp(getContext(this).resourceManager.getNumber(r18.id));
+            if (value.id !== -1) {
+                return px2vp(getContext(this).resourceManager.getNumber(value.id));
             }
             else {
                 return px2vp(getContext(this)
                     .resourceManager
-                    .getNumberByName((r18.params[0]).split('.')[2]));
+                    .getNumberByName((value.params[0]).split('.')[2]));
             }
         }
-        catch (s18) {
-            return POPUP_DEFAULT_MAXWIDTH;
+        catch (error) {
+            return n1;
         }
     }
     toVp(value) {
-        let q1 = display.getDefaultDisplaySync();
-        if (value === void 0) {
+        let f2 = undefined;
+        try {
+            f2 = display.getDefaultDisplaySync();
+        }
+        catch (error) {
+            console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
             return Number.NEGATIVE_INFINITY;
         }
-        switch (typeof value) {
+        if (value === void (0)) {
+            return Number.NEGATIVE_INFINITY;
+        }
+        switch (typeof (value)) {
             case 'number':
                 return value;
             case 'object':
                 try {
-                    let q1 = this.resourceToVp(value);
-                    if (q1 === 0 && !m(getContext(this), value)) {
+                    let h2 = this.resourceToVp(value);
+                    if (h2 === 0 &&
+                        !t(getContext(this), value)) {
                         return Number.NEGATIVE_INFINITY;
                     }
-                    return q1;
-                } catch (error) {
+                    return h2;
+                }
+                catch (error) {
                     return Number.NEGATIVE_INFINITY;
                 }
             case 'string':
-                let p1 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
-                let matches = value.match(p1);
+                let g2 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+                let matches = value.match(g2);
                 if (!matches) {
                     return Number.NEGATIVE_INFINITY;
                 }
@@ -703,7 +768,7 @@ export class g1 extends ViewPU {
                         length = px2vp(lpx2px(length));
                         break;
                     case '%':
-                        length = length / 100 * px2vp(q1.width);
+                        length = length / 100 * px2vp(f2.width);
                         break;
                     case 'vp':
                         break;
@@ -716,50 +781,58 @@ export class g1 extends ViewPU {
         }
     }
     getApplyMaxSize() {
-        let n1 = undefined;
-        let o1 = undefined;
-        let p1 = undefined;
-        let q1 = undefined;
-        let f1 = 400;
+        let a2 = undefined;
+        let b2 = undefined;
+        let c2 = undefined;
+        let d2 = undefined;
+        let e2 = 400;
         try {
-            q1 = display.getDefaultDisplaySync();
+            d2 = display.getDefaultDisplaySync();
         }
         catch (error) {
             console.error(`Ace Popup getDefaultDisplaySync, error: ${error.toString()}`);
             this.messageMaxWeight = 400;
-            return p1 = { maxWidth: 400, maxHeight: 480 };
+            return c2 = { maxWidth: 400, maxHeight: 480 };
         }
         if (this.maxWidth !== undefined) {
             if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
-                f1 = px2vp(this.maxWidth);
-            } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
-                f1 = POPUP_DEFAULT_MAXWIDTH;
-            } else {
-                f1 = this.toVp(this.maxWidth);
+                e2 = this.maxWidth;
             }
-        }
-        if (px2vp(q1.width) > f1) {
-            n1 = f1;
-        }
-        else {
-            if (q1.width != 0) {
-                n1 = px2vp(q1.width);
+            else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
+                e2 = n1;
             }
             else {
-                n1 = -1;
+                e2 = this.toVp(this.maxWidth);
             }
         }
-
-        if (px2vp(q1.height) > 480) {
-            o1 = 480;
+        if (px2vp(d2.width) > e2) {
+            a2 = e2;
         }
         else {
-            o1 = px2vp(q1.height) - 40 - 40;
+            if (d2.width != 0) {
+                a2 = px2vp(d2.width);
+            }
+            else {
+                a2 = -1;
+            }
         }
-        p1 = { maxWidth: n1, maxHeight: o1 };
-        this.messageMaxWidth = n1;
+        if (px2vp(d2.height) > 480) {
+            b2 = 480;
+        }
+        else {
+            b2 = px2vp(d2.height) - 40 - 40;
+        }
+        c2 = { maxWidth: a2, maxHeight: b2 };
+        this.messageMaxWidth = a2;
         this.messageMaxWeight = this.getMessageMaxWeight();
-        return p1;
+        return c2;
+    }
+    getTitleTextAlign() {
+        let z1 = TextAlign.Start;
+        if ((Configuration.getLocale().dir === 'rtl') && this.popupDirection === Direction.Auto) {
+            z1 = TextAlign.End;
+        }
+        return z1;
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -768,8 +841,9 @@ export class g1 extends ViewPU {
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
             Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
-            Row.constraintSize(ObservedObject.GetRawObject(this.getApplyMaxSize()));
-            Row.onAreaChange((m1, rect) => {
+            Row.constraintSize(this.getApplyMaxSize());
+            Row.key('applyContent');
+            Row.onAreaChange((w1, rect) => {
                 this.applyHeight = rect.height;
             });
         }, Row);
@@ -809,7 +883,7 @@ export class g1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.width("100%");
                         Flex.margin(this.getTitleMargin());
-                        Flex.onAreaChange((l1, rect) => {
+                        Flex.onAreaChange((v1, rect) => {
                             this.titleHeight = rect.height;
                         });
                     }, Flex);
@@ -826,6 +900,7 @@ export class g1 extends ViewPU {
                         Text.fontSize(this.getTitleFontSize());
                         Text.fontColor(this.getTitleFontColor());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
+                        Text.textAlign(this.getTitleTextAlign());
                     }, Text);
                     Text.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -840,6 +915,7 @@ export class g1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
+                                    Button.accessibilityText(this.theme.a3.w2);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -855,14 +931,14 @@ export class g1 extends ViewPU {
                                     });
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.getCloseButtonImage());
-                                    Image.direction(this.popupDirection);
-                                    Image.focusable(true);
-                                    Image.width(this.getCloseButtonImageWidth());
-                                    Image.height(this.getCloseButtonImageHeight());
-                                    Image.fillColor(this.getCloseButtonFillColor());
-                                    Image.draggable(false);
-                                }, Image);
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
+                                    SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
+                                    SymbolGlyph.direction(this.popupDirection);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.a3.symbolStyle);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
                                 Button.pop();
                             });
                         }
@@ -882,7 +958,7 @@ export class g1 extends ViewPU {
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
-                        Scroll.edgeEffect(EdgeEffect.Spring);
+                        Scroll.edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false });
                     }, Scroll);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getMessageText());
@@ -891,7 +967,7 @@ export class g1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((k1, rect) => {
+                        Text.onAreaChange((u1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -902,8 +978,14 @@ export class g1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((j1, rect) => {
-                            this.buttonHeight = rect.height;
+                        Flex.onAreaChange((t1, rect) => {
+                            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+                                (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+                                this.buttonHeight = rect.height;
+                            }
+                            else {
+                                this.buttonHeight = 0;
+                            }
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -912,6 +994,8 @@ export class g1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Button.createWithChild();
+                                    Button.type(ButtonType.Normal);
+                                    Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
@@ -957,6 +1041,8 @@ export class g1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Button.createWithChild();
+                                    Button.type(ButtonType.Normal);
+                                    Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
@@ -1010,7 +1096,7 @@ export class g1 extends ViewPU {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Flex.create();
                         Flex.height(0);
-                        Flex.onAreaChange((m, rect) => {
+                        Flex.onAreaChange((s1, rect) => {
                             this.titleHeight = rect.height;
                         });
                     }, Flex);
@@ -1024,7 +1110,7 @@ export class g1 extends ViewPU {
                         Scroll.create();
                         Scroll.direction(this.popupDirection);
                         Scroll.layoutWeight(this.getLayoutWeight());
-                        Scroll.edgeEffect(EdgeEffect.Spring);
+                        Scroll.edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false });
                         Scroll.align(Alignment.TopStart);
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
@@ -1038,7 +1124,7 @@ export class g1 extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
-                        Text.onAreaChange((j, rect) => {
+                        Text.onAreaChange((q1, rect) => {
                             this.textHeight = rect.height;
                         });
                     }, Text);
@@ -1056,6 +1142,7 @@ export class g1 extends ViewPU {
                                     Button.padding(this.getCloseButtonPadding());
                                     Button.backgroundColor(ObservedObject.GetRawObject(this.closeButtonBackgroundColor));
                                     Button.flexShrink(0);
+                                    Button.accessibilityText(this.theme.a3.w2);
                                     Button.onHover((isHover) => {
                                         if (isHover) {
                                             this.closeButtonBackgroundColor = this.getCloseButtonHoverColor();
@@ -1071,13 +1158,14 @@ export class g1 extends ViewPU {
                                     });
                                 }, Button);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Image.create(this.getCloseButtonImage());
-                                    Image.direction(this.popupDirection);
-                                    Image.focusable(true);
-                                    Image.width(this.getCloseButtonImageWidth());
-                                    Image.height(this.getCloseButtonImageHeight());
-                                    Image.fillColor(this.getCloseButtonFillColor());
-                                }, Image);
+                                    SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([this.getCloseButtonFillColor()]);
+                                    SymbolGlyph.fontSize(this.getCloseButtonSymbolSize());
+                                    SymbolGlyph.direction(this.popupDirection);
+                                    SymbolGlyph.attributeModifier.bind(this)(this.theme.a3.symbolStyle);
+                                    SymbolGlyph.focusable(true);
+                                    SymbolGlyph.draggable(false);
+                                }, SymbolGlyph);
                                 Button.pop();
                             });
                         }
@@ -1093,8 +1181,14 @@ export class g1 extends ViewPU {
                         Flex.direction(this.popupDirection);
                         Flex.margin(this.getButtonTextMargin());
                         Flex.flexGrow(1);
-                        Flex.onAreaChange((i, rect) => {
-                            this.buttonHeight = rect.height;
+                        Flex.onAreaChange((p1, rect) => {
+                            if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
+                                (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+                                this.buttonHeight = rect.height;
+                            }
+                            else {
+                                this.buttonHeight = 0;
+                            }
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1103,6 +1197,8 @@ export class g1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Button.createWithChild();
+                                    Button.type(ButtonType.Normal);
+                                    Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());
@@ -1148,6 +1244,8 @@ export class g1 extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Button.createWithChild();
+                                    Button.type(ButtonType.Normal);
+                                    Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.popup_button_border_radius'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                                     Button.direction(this.popupDirection);
                                     Button.margin(this.getButtonMargin());
                                     Button.padding(this.getButtonTextPadding());

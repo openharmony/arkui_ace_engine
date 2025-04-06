@@ -176,6 +176,7 @@ ArkUINativeModuleValue RenderNodeBridge::CreateRenderNode(ArkUIRuntimeCallInfo* 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    frameNode->SetIsArkTsRenderNode(true);
     RenderNodeBridge::SetOnDraw(frameNode, runtimeCallInfo);
     return NativeUtilsBridge::CreateStrongRef(vm, frameNode);
 }

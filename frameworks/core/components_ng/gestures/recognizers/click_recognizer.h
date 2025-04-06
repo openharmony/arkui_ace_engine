@@ -35,7 +35,8 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity());
+    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity(),
+    bool isLimitFingerCount_ = false);
 
     ~ClickRecognizer() override = default;
 
@@ -73,6 +74,11 @@ public:
     int GetCount()
     {
         return count_;
+    }
+
+    double GetDistanceThreshold() const
+    {
+        return distanceThreshold_;
     }
 
     GestureEventFunc GetTapActionFunc()
@@ -131,6 +137,7 @@ private:
     void TriggerClickAccepted(const TouchEvent& event);
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
     void RecordClickEventIfNeed(const GestureEvent& info) const;
+    void AboutToAddToPendingRecognizers(const TouchEvent& event);
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();

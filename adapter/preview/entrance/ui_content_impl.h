@@ -47,8 +47,7 @@ public:
     }
     UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
         napi_value storage) override;
-    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
+    void InitializeDynamic(const DynamicInitialConfig& config) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -76,6 +75,8 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void SetIsFocusActive(bool isFocusActive) override {}
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    if (info_.childrenCount_ <= 0) {
+    if (info_.GetChildrenCount() <= 0) {
         return;
     }
     wrapper_ = layoutWrapper;
@@ -72,16 +72,20 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     CHECK_NULL_VOID(props);
 
-    const int32_t cacheCount = props->GetCachedCountValue(info.defCachedCount_);
+    const int32_t cacheLines = props->GetCachedCountValue(info.defCachedCount_);
     if (!props->HasCachedCount()) {
         info_.UpdateDefaultCachedCount();
     }
-    LayoutChildren(info.currentOffset_, cacheCount);
+    auto cachedItemCnt = LayoutChildren(info.currentOffset_, cacheLines);
 
-    const int32_t cacheCnt = cacheCount * info.crossCount_;
-    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cacheCnt, cacheCnt,
-        props->GetShowCachedItemsValue(false));
-    wrapper_->SetCacheCount(cacheCnt);
+    if (!props->GetShowCachedItemsValue(false)) {
+        // only use accurate counting method when cached items need to be shown
+        cachedItemCnt.first = cachedItemCnt.second = cacheLines * info.crossCount_;
+    }
+    wrapper_->SetActiveChildRange(std::min(info.startIndex_, info.endIndex_), info.endIndex_, cachedItemCnt.first,
+        cachedItemCnt.second, props->GetShowCachedItemsValue(false));
+    wrapper_->SetCacheCount(cachedItemCnt.first);
+    UpdateOverlay(wrapper_);
 }
 
 float GridIrregularLayoutAlgorithm::MeasureSelf(const RefPtr<GridLayoutProperty>& props)
@@ -117,7 +121,7 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
     }
 
     const float crossSize = contentSize.CrossSize(info_.axis_);
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info_.childrenCount_);
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), crossSize, crossGap_, info_.GetChildrenCount());
 
     crossLens_ = std::vector<float>(res.first.begin(), res.first.end());
     if (crossLens_.empty()) {
@@ -181,7 +185,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
         return;
     }
 
-    if (wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) {
+    if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
+        scrollSource_ != SCROLL_FROM_ANIMATION_SPRING) {
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
@@ -243,7 +248,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
         return;
     }
     // adjust offset
-    if (!canOverScrollEnd_ && info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (!canOverScrollEnd_ && info_.endIndex_ == info_.GetChildrenCount() - 1) {
         float overDis =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
@@ -316,12 +321,12 @@ void GridIrregularLayoutAlgorithm::Jump(float mainSize)
 {
     if (info_.jumpIndex_ == JUMP_TO_BOTTOM_EDGE) {
         GridIrregularFiller filler(&info_, wrapper_);
-        filler.FillMatrixOnly(info_.childrenCount_ - 1);
+        filler.FillMatrixOnly(info_.GetChildrenCount() - 1);
         info_.PrepareJumpToBottom();
     }
 
     if (info_.jumpIndex_ == LAST_ITEM) {
-        info_.jumpIndex_ = info_.childrenCount_ - 1;
+        info_.jumpIndex_ = info_.GetChildrenCount() - 1;
     }
 
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
@@ -352,7 +357,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
     info_.reachStart_ = info_.startIndex_ == 0 && NonNegative(info_.currentOffset_);
     // GridLayoutInfo::reachEnd_ has a different meaning
-    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
+    info_.reachEnd_ = info_.endIndex_ == info_.GetChildrenCount() - 1;
 
     float mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_.axis_);
 
@@ -401,7 +406,7 @@ void AdjustStartOffset(const std::map<int32_t, float>& lineHeights, int32_t star
 }
 } // namespace
 
-void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
+std::pair<int32_t, int32_t> GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cacheLine)
 {
     const auto& info = info_;
     const auto& props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
@@ -417,6 +422,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
     const int32_t cacheStartLine = info.startMainLineIndex_ - cacheLine;
     AdjustStartOffset(info.lineHeightMap_, info.startMainLineIndex_, cacheStartLine, mainGap_, mainOffset);
 
+    std::pair<int32_t, int32_t> cacheCnt = { 0, 0 };
     auto endIt = info.gridMatrix_.upper_bound(std::max(info.endMainLineIndex_ + cacheLine, info.startMainLineIndex_));
     for (auto it = info.gridMatrix_.lower_bound(cacheStartLine); it != endIt; ++it) {
         auto lineHeightIt = info.lineHeightMap_.find(it->first);
@@ -434,6 +440,12 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
             auto child = wrapper_->GetChildByIndex(itemIdx, isCache);
             if (!child) {
                 continue;
+            }
+
+            if (it->first < info.startMainLineIndex_) {
+                ++cacheCnt.first;
+            } else if (it->first > info.endMainLineIndex_) {
+                ++cacheCnt.second;
             }
 
             SizeF blockSize = SizeF(crossLens_.at(c), lineHeightIt->second, info.axis_);
@@ -456,6 +468,7 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset, int32_t cach
         // add mainGap below the item
         mainOffset += lineHeightIt->second + mainGap_;
     }
+    return cacheCnt;
 }
 
 std::vector<float> GridIrregularLayoutAlgorithm::CalculateCrossPositions(const PaddingPropertyF& padding)
@@ -617,7 +630,7 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
 void GridIrregularLayoutAlgorithm::SyncPreloadItems(int32_t cacheCnt)
 {
     const int32_t start = std::max(info_.startIndex_ - cacheCnt, 0);
-    const int32_t end = std::min(info_.endIndex_ + cacheCnt, info_.childrenCount_ - 1);
+    const int32_t end = std::min(info_.endIndex_ + cacheCnt, info_.GetChildrenCount() - 1);
     GridIrregularFiller filler(&info_, wrapper_);
     FillParams param { crossLens_, crossGap_, mainGap_ };
     auto it = info_.FindInMatrix(start);
@@ -634,13 +647,13 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             itemsToPreload.emplace_back(l);
         }
         const int32_t r = info_.endIndex_ + i;
-        if (r < info_.childrenCount_ && !wrapper_->GetChildByIndex(r, true)) {
+        if (r < info_.GetChildrenCount() && !wrapper_->GetChildByIndex(r, true)) {
             itemsToPreload.emplace_back(r);
         }
     }
 
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.FillMatrixOnly(std::min(info_.childrenCount_, info_.endIndex_ + cacheCnt));
+    filler.FillMatrixOnly(std::min(info_.GetChildrenCount(), info_.endIndex_ + cacheCnt));
 
     GridLayoutUtils::PreloadGridItems(wrapper_->GetHostNode()->GetPattern<GridPattern>(), std::move(itemsToPreload),
         [crossLens = crossLens_, crossGap = crossGap_, mainGap = mainGap_](

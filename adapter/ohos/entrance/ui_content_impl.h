@@ -28,6 +28,7 @@
 #include "key_event.h"
 #include "native_engine/native_engine.h"
 #include "native_engine/native_value.h"
+#include "wm/data_handler_interface.h"
 #include "wm/window.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
@@ -67,14 +68,15 @@ public:
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) override;
-    void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) override;
+    void InitializeDynamic(const DynamicInitialConfig& config) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
     void UnFocus() override;
+    void ActiveWindow() override;
+    void UnActiveWindow() override;
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
@@ -84,6 +86,7 @@ public:
     std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
+    void SetHostParams(const OHOS::AAFwk::WantParams& params) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     // UI content event process
@@ -97,6 +100,8 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) override;
@@ -108,6 +113,7 @@ public:
     void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
+    void RegisterGetCurrentPageName(const RefPtr<PipelineBase>& pipeline);
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
@@ -295,6 +301,7 @@ public:
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
+    bool GetContainerModalTitleVisible(bool isImmersive) override;
     void SetContainerModalTitleHeight(int32_t height) override;
     void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
@@ -342,6 +349,8 @@ public:
 
     void SetFormRenderingMode(int8_t renderMode) override;
 
+    void SetFormEnableBlurBackground(bool enableBlurBackground) override;
+
     void SetContentNodeGrayScale(float grayscale) override;
 
     void PreLayout() override;
@@ -356,8 +365,6 @@ public:
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage) override;
-
-    void UpdateDialogContainerConfig(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
@@ -390,6 +397,29 @@ public:
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 
     std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
+    void SetTopWindowBoundaryByID(const std::string& stringId) override;
+    void SetupGetPixelMapCallback(RefPtr<PipelineBase> pipeline);
+    void InitUISessionManagerCallbacks(RefPtr<PipelineBase> pipeline);
+    void InitSendCommandFunctionsCallbacks(RefPtr<PipelineBase> pipeline);
+    bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId) override;
+    void EnableContainerModalCustomGesture(bool enable) override;
+
+    void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback) override;
+    void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) override;
+    void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>& canvasNode) override;
+    void CacheAnimateInfo(const ViewportConfig& config,
+        OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
+    void ExecKeyFrameCachedAnimateAction();
+    void KeyFrameDragStartPolicy(RefPtr<NG::PipelineContext> context);
+    bool KeyFrameActionPolicy(const ViewportConfig& config,
+        OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
+        const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas);
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -410,6 +440,7 @@ private:
     RefPtr<PopupParam> CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config);
     void OnPopupStateChange(const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId);
     void SetCustomPopupConfig(int32_t nodeId, const CustomPopupUIExtensionConfig& config, int32_t popupId);
+    bool IfNeedTouchOutsideListener(const std::string& windowName);
 
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
@@ -420,6 +451,7 @@ private:
     void UnSubscribeEventsPassThroughMode();
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
+    void ChangeDisplayAvailableAreaListener(uint64_t displayId);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -428,6 +460,7 @@ private:
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IOccupiedAreaChangeListener> occupiedAreaChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::IAvoidAreaChangedListener> avoidAreaChangedListener_ = nullptr;
+    OHOS::sptr<OHOS::Rosen::IWaterfallModeChangeListener> waterfallModeChangeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IFoldStatusListener> foldStatusListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IDisplayModeListener> foldDisplayModeListener_ = nullptr;
     OHOS::sptr<OHOS::Rosen::DisplayManager::IAvailableAreaListener> availableAreaChangedListener_ = nullptr;
@@ -462,6 +495,7 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isUIExtensionAbilityProcess_ = false;
     bool isUIExtensionAbilityHost_ = false;
+    HostWindowInfo hostWindowInfo_;
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
     std::unordered_map<void*, std::function<void()>> destructCallbacks_;
@@ -472,6 +506,14 @@ private:
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
     OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
+    std::function<void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+        std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)> addNodeCallback_ = nullptr;
+    std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
+    std::atomic<bool> cachedAnimateFlag_ = false;
+    ViewportConfig cachedConfig_;
+    OHOS::Rosen::WindowSizeChangeReason cachedReason_;
+    std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
+    std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
 };
 
 } // namespace OHOS::Ace

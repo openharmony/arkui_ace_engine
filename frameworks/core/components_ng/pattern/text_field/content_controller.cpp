@@ -30,7 +30,7 @@ namespace {
 const std::u16string DIGIT_WHITE_LIST = u"[0-9]";
 const std::u16string DIGIT_DECIMAL_WHITE_LIST = u"[0-9.]";
 const std::u16string PHONE_WHITE_LIST = uR"([0-9 \+\-\*\#\(\)])";
-const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@-])";
+const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
@@ -107,6 +107,7 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
     auto str = content_;
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
     content_ = content_.substr(0, startIndex) + tmp +
                content_.substr(endIndex, static_cast<int32_t>(content_.length()) - endIndex);
     auto len = content_.length();
@@ -122,6 +123,7 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
 std::u16string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
 {
     FormatIndex(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
     auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
     if (selectedValue.empty()) {
         selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
@@ -270,6 +272,7 @@ std::u16string ContentController::RemoveErrorTextFromValue(const std::u16string&
         valuePtr++;
         errorTextPtr++;
     }
+    valuePtr = std::clamp(valuePtr, 0, static_cast<int32_t>(value.length()));
     result += value.substr(valuePtr);
     return result;
 }
@@ -327,7 +330,7 @@ bool ContentController::FilterWithAscii(std::u16string& result)
     if (errorText.empty()) {
         textChange = false;
     } else {
-        LOGI("FilterWithAscii Error text %{private}s", UtfUtils::Str16DebugToStr8(errorText).c_str());
+        LOGI("FilterWithAscii Error text size %{public}zu", UtfUtils::Str16DebugToStr8(errorText).size());
     }
     return textChange;
 }
@@ -423,6 +426,7 @@ std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 
 std::u16string ContentController::GetValueAfterIndex(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(content_.length()));
     return content_.substr(index, content_.length() - index);
 }
 

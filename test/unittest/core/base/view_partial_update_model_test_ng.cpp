@@ -235,7 +235,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg007, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
 
     NodeInfoPU info = {
         .renderFunc = renderFunction,
@@ -324,7 +324,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg010, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
 
     NodeInfoPU info = {
         .renderFunc = renderFunction,
@@ -365,7 +365,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg011, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
     auto measureSizeFunction = [&testMeasure](NG::LayoutWrapper* testMeasureWrapper = nullptr) {
         testMeasure = testMeasureWrapper;
     };
@@ -408,7 +408,7 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg012, TestSize
                                NG::LayoutWrapper* layoutWrapper = nullptr) { testLayoutFunc = layoutWrapper; };
     auto updateNodeFuncation = [&testUpdateNodeFunc](
                                    const RefPtr<AceType>& type = nullptr) { testUpdateNodeFunc = type; };
-    auto renderFunction = [&testRenderfunc]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [&testRenderfunc](int64_t deadline, bool& isTimeout) -> RefPtr<AceType> { return nullptr; };
     auto placeChildrenFunction = [&testPlaceChildrenFunc](NG::LayoutWrapper* testPlaceChildrenFuncWrapper = nullptr) {
         testPlaceChildrenFunc = testPlaceChildrenFuncWrapper;
     };

@@ -107,6 +107,7 @@ public:
     void OnCustomSelectMenuAppear();
     void FireCustomMenuChangeEvent(bool isMenuShow);
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    void UpdateToolBarFromMainWindow(bool menuItemChanged, bool noAnimation = false);
 
 private:
     void CreateToolBar();
@@ -119,17 +120,28 @@ private:
     bool AddSystemDefaultOptions(float maxWidth, float& allocatedSize);
     void LandscapeMenuAddMenuOptions(const std::vector<MenuOptionsParam>& menuOptionItems, bool isDefaultOverMaxWidth,
         float maxWidth, float allocatedSize, int32_t& extensionOptionStartIndex);
-    void ShowCut(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowTranslate(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowSearch(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
-    void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowCut(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowCopy(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowPaste(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowCopyAll(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowTranslate(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowSearch(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowShare(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowCamera(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
+    void ShowAIWrite(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     bool IsShowOnTargetAPIVersion();
+    bool IsShowTranslateOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
+    std::function<void(WeakPtr<NG::FrameNode>)> GetSymbolFunc(const std::string& symbolId);
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
     void GetFlexibleOptionsParams(
         const std::shared_ptr<SelectOverlayInfo>& info, std::vector<OptionParam>& params);

@@ -49,6 +49,40 @@ void NGNativeTextInputController::StopEditing()
         controller_->StopEditing();
     }
 }
+
+int32_t NGNativeTextInputController::GetTextContentLinesNum()
+{
+    int32_t linesNum = -1;
+    if (controller_) {
+        linesNum = controller_->GetTextContentLinesNum();
+    }
+    return linesNum;
+}
+
+CJRectResult NGNativeTextInputController::GetTextContentRect()
+{
+    CJRectResult result;
+    if (controller_) {
+        Rect rect = controller_->GetTextContentRect();
+        result.x = rect.Left();
+        result.y = rect.Top();
+        result.width = rect.Width();
+        result.height = rect.Height();
+    }
+    return result;
+}
+
+CJCaretOffset NGNativeTextInputController::GetCaretOffset()
+{
+    CJCaretOffset result;
+    if (controller_) {
+        NG::OffsetF caretOffset = controller_->GetCaretPosition();
+        result.index = controller_->GetCaretIndex();
+        result.x = caretOffset.GetX();
+        result.y = caretOffset.GetY();
+    }
+    return result;
+}
 } // namespace OHOS::Ace::Framework
 
 extern "C" {
@@ -113,5 +147,41 @@ void FfiOHOSAceFrameworkTextInputControllerStopEditing(int64_t selfID)
         return;
     }
     self->StopEditing();
+}
+
+CJRectResult FfiOHOSAceFrameworkTextInputControllerGetTextContentRect(int64_t selfID)
+{
+    CJRectResult result;
+    auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentRect();
+    } else {
+        LOGE("FfiTextInput: invalid textInputControllerId");
+    }
+    return result;
+}
+
+int32_t FfiOHOSAceFrameworkTextInputControllerGetTextContentLineCount(int64_t selfID)
+{
+    int32_t result = 0;
+    auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentLinesNum();
+    } else {
+        LOGE("FfiTextInput: invalid textInputControllerId");
+    }
+    return result;
+}
+
+CJCaretOffset FfiOHOSAceFrameworkTextInputControllerGetCaretOffset(int64_t selfID)
+{
+    CJCaretOffset result;
+    auto self = FFIData::GetData<NGNativeTextInputController>(selfID);
+    if (self != nullptr) {
+        result = self->GetCaretOffset();
+    } else {
+        LOGE("FfiTextInput: invalid textInputControllerId");
+    }
+    return result;
 }
 }

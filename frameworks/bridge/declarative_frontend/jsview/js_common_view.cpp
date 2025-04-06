@@ -59,6 +59,7 @@ void JSCommonView::JSBind(BindingTarget globalObj)
     JSClass<JSCommonView>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSCommonView>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCommonView>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSCommonView>::StaticMethod("onHoverMove", &JSInteractableView::JsOnHoverMove);
     JSClass<JSCommonView>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSCommonView>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSCommonView>::StaticMethod("onClick", &JSInteractableView::JsOnClick);

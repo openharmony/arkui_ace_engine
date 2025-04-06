@@ -16,7 +16,11 @@
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
 #include "base/utils/system_properties.h"
+#include "core/common/ace_engine.h"
+#include "core/common/ai/text_translation_adapter.h"
 #include "core/common/share/text_share_adapter.h"
+#include "core/components/select/select_theme.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -29,10 +33,15 @@ const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemS
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
+    if (!IsEnableSelectionMenu()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "The selectoverlay is not displayed cause enableSelectionMenu is false");
+        return;
+    }
     UpdateTransformFlag();
     if (!PreProcessOverlay(request) || AnimationUtils::IsImplicitAnimationOpen()) {
         return;
     }
+    isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
     auto checkClipboard = [weak = WeakClaim(this), request](bool hasData) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HasData callback from clipboard, data available ? %{public}d", hasData);
         auto overlay = weak.Upgrade();
@@ -250,6 +259,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
         CHECK_NULL_VOID(overlay);
         overlay->UpdateOriginalMenuIsShow();
     };
+    overlayInfo.enableSubWindowMenu = enableSubWindowMenu_;
 }
 
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
@@ -867,7 +877,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
         manager->HideOptionMenu(true);
         return;
     }
-    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
+    if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG && !GetIsHandleDragging()) {
         manager->ShowOptionMenu();
         return;
     }
@@ -1186,9 +1196,15 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
+            auto isOverTheParentBottom = GreatNotEqual(contentRect.Top(), parentContentRect.Bottom());
             contentRect = contentRect.IntersectRectT(parentContentRect);
+            if (isOverTheParentBottom) {
+                contentRect.SetTop(parentContentRect.Bottom());
+            }
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
+        contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
+        contentRect.SetHeight(std::max(contentRect.Height(), 0.0f));
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     contentRect.SetWidth(std::max(contentRect.Width(), 0.0f));
@@ -1253,6 +1269,11 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
         (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+        if (info->menuInfo.showTranslate != (menuTranslateIsSupport_ && AllowTranslate() &&
+            IsNeedMenuTranslate())) {
+            info->menuInfo.showTranslate = !info->menuInfo.showTranslate;
+            manager->NotifyUpdateToolBar(true);
+        }
         if (info->menuInfo.showSearch != (isSupportMenuSearch_ && AllowSearch() &&
             IsNeedMenuSearch())) {
             info->menuInfo.showSearch = !info->menuInfo.showSearch;
@@ -1271,6 +1292,67 @@ void BaseTextSelectOverlay::UpdateHandleColor()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
+}
+
+bool BaseTextSelectOverlay::IsNeedMenuTranslate()
+{
+    auto translation = GetSelectedText();
+    return !std::regex_match(translation, std::regex("^\\s*$"));
+}
+
+RectF BaseTextSelectOverlay::ConvertWindowToScreenDomain(RectF rect)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, rect);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, rect);
+    Rect windowOffset = pipeline->GetDisplayWindowRectInfo();
+    rect.SetLeft(rect.Left() + windowOffset.Left());
+    rect.SetTop(rect.Top() + windowOffset.Top());
+    return rect;
+}
+
+EdgeF BaseTextSelectOverlay::ConvertWindowToScreenDomain(EdgeF edge)
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, edge);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, edge);
+    Rect windowOffset = pipeline->GetDisplayWindowRectInfo();
+    edge.x += windowOffset.Left();
+    edge.y += windowOffset.Top();
+    return edge;
+}
+
+std::string BaseTextSelectOverlay::GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom)
+{
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("x", std::round(rect.GetX()));
+    jsonValue->Put("y", std::round(rect.GetY()));
+    jsonValue->Put("width", std::round(rect.Width()));
+    jsonValue->Put("height", std::round(rect.Height()));
+    jsonValue->Put("startLeft", std::round(rectLeftTop.x));
+    jsonValue->Put("startTop", std::round(rectLeftTop.y));
+    jsonValue->Put("endRight", std::round(rectRightBottom.x));
+    jsonValue->Put("endBottom", std::round(rectRightBottom.y));
+    return jsonValue->ToString();
+}
+
+void BaseTextSelectOverlay::HandleOnTranslate()
+{
+    HideMenu(true);
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!queryWord.empty()) {
+        RectF rect = GetSelectArea();
+        EdgeF rectLeftTop = GetSelectAreaStartLeftTop();
+        EdgeF rectRightBottom = GetSelectAreaEndRightBottom();
+        rect = ConvertWindowToScreenDomain(rect);
+        rectLeftTop = ConvertWindowToScreenDomain(rectLeftTop);
+        rectRightBottom = ConvertWindowToScreenDomain(rectRightBottom);
+        TextTranslationAdapter::StartAITextTranslationTask(queryWord,
+            GetTranslateParamRectStr(rect, rectLeftTop, rectRightBottom));
+    }
 }
 
 bool BaseTextSelectOverlay::IsNeedMenuSearch()
@@ -1294,7 +1376,7 @@ void BaseTextSelectOverlay::HandleOnSearch()
 bool BaseTextSelectOverlay::IsSupportMenuShare()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     return SystemProperties::IsSyscapExist(SYSTEM_CAPABILITY_OF_SHARE);
@@ -1485,5 +1567,49 @@ bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
     auto overlayInfo = overlayManager->GetSelectOverlayInfo();
     CHECK_NULL_RETURN(overlayInfo, false);
     return isFirst ? overlayInfo->firstHandle.isShow : overlayInfo->secondHandle.isShow;
+}
+
+void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
+{
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    if (overlayManager->IsRightClickSubWindowMenu()) {
+        if (NeedsProcessMenuOnWinChange()) {
+            CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+        }
+    } else if (overlayManager->IsSelectOverlaySubWindowMenu()) {
+        if (isSuperFoldDisplayDevice_ && NeedsProcessMenuOnWinChange()) {
+            CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+            return;
+        }
+        if (overlayManager->IsMenuShow() && NeedsProcessMenuOnWinChange()) {
+            HideMenu(true);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
+        }
+    }
+}
+
+bool BaseTextSelectOverlay::IsEnableSelectionMenu()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, true);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, true);
+    return textOverlayTheme->GetEnableSelectionMenu();
+}
+
+bool BaseTextSelectOverlay::NeedsProcessMenuOnWinChange()
+{
+    auto host = GetOwner();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto container = AceEngine::Get().GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, false);
+    return selectTheme->GetExpandDisplay() || container->IsFreeMultiWindow();
 }
 } // namespace OHOS::Ace::NG

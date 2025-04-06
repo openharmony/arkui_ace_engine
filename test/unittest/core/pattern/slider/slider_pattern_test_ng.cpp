@@ -91,6 +91,7 @@ constexpr Dimension BLOCK_SIZE_HEIGHT = Dimension(300.0);
 const SizeT<Dimension> BLOCK_SIZE(BLOCK_SIZE_WIDTH, BLOCK_SIZE_HEIGHT);
 const std::string SLIDER_MODEL_NG_BLOCK_IMAGE = "Default Image";
 const std::string SLIDER_TEST_BUNDLE_NAME = "com.test.slider";
+const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 const std::string SLIDER_TEST_MODULE_NAME = "testModule";
 const PointF POINTF_START { 10.0f, 10.0f };
 const PointF POINTF_END { 20.0f, 20.0f };
@@ -270,7 +271,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
-    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);
@@ -371,6 +371,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest003, TestSize.Level1)
     sliderTheme->outsetHotBlockShadowWidth_ = Dimension(20.0f);
     sliderTheme->insetHotBlockShadowWidth_ = Dimension(30.0f);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     sliderLayoutAlgorithm->trackThickness_ = 40.0f;
 
     auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -471,6 +472,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(sliderTheme));
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, sliderLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
@@ -908,6 +910,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest013, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
     sliderPattern->AttachToFrameNode(frameNode);
     ASSERT_NE(frameNode, nullptr);
@@ -993,6 +996,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
     ASSERT_NE(sliderNode, nullptr);
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    sliderNode->context_ = AceType::RawPtr(context);
     sliderPaintProperty->UpdateValue(VALUE);
     sliderPaintProperty->UpdateMin(MIN);
     sliderPaintProperty->UpdateMax(MAX);
@@ -1002,10 +1007,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
     int32_t setApiVersion = 13;
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = context->GetApiTargetVersion();
+    context->SetApiTargetVersion(setApiVersion);
     sliderPattern->OnWindowSizeChanged(FRAME_WIDTH, FRAME_HEIGHT, WindowSizeChangeReason::ROTATION);
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    context->SetApiTargetVersion(rollbackApiVersion);
     EXPECT_TRUE(sliderPattern->skipGestureEvents_);
 }
 
@@ -1218,9 +1223,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
     sliderPattern->InitTouchEvent(gestureHub);
     sliderPattern->InitPanEvent(gestureHub);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     sliderPattern->InitOnKeyEvent(focusHub);
-    auto inputEventHub = eventHub->GetInputEventHub();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     sliderPattern->InitMouseEvent(inputEventHub);
     EXPECT_EQ(sliderPattern->hoverEvent_, nullptr);
     EXPECT_EQ(sliderPattern->mouseEvent_, nullptr);
@@ -1378,9 +1384,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest004, TestSize.Level1
     ASSERT_NE(parent, nullptr);
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
-    frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
+    frameNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SliderTheme>()));
     /**
      * @tc.steps: step2. Add Slider virtual node.
      */
@@ -1502,7 +1509,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest006, TestSize.Level1
     accessibilityProperty->OnAccessibilityFocusCallback(true);
     auto sliderAccessibilityProperty = sliderNode->GetAccessibilityProperty<AccessibilityProperty>();
     ASSERT_NE(sliderAccessibilityProperty, nullptr);
-    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, AccessibilityProperty::Level::NO_STR);
+    EXPECT_EQ(sliderAccessibilityProperty->accessibilityLevel_, std::nullopt);
 }
 
 /**
@@ -1569,11 +1576,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest008, TestSize.Level1
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     AccessibilityHoverInfo info;
     auto actuator = eventHub->accessibilityHoverEventActuator_;
-    ASSERT_NE(actuator, nullptr);
-    auto callback = actuator->userCallback_;
-    ASSERT_NE(callback, nullptr);
-    auto hoverFunc = callback->GetOnAccessibilityHoverFunc();
-    ASSERT_NE(hoverFunc, nullptr);
+    EXPECT_EQ(actuator, nullptr);
 }
 
 /**
@@ -1609,7 +1612,7 @@ HWTEST_F(SliderPatternTestNg, SliderPatternAccessibilityTest009, TestSize.Level1
     contentModifier->stepPointVec_ = HORIZONTAL_STEP_POINTS;
     auto context = MockPipelineContext::GetCurrent();
     ASSERT_NE(context, nullptr);
-    frameNode->context_ = reinterpret_cast<PipelineContext*>(context.GetRawPtr());
+    frameNode->context_ = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(context));
     sliderPattern->InitAccessibilityVirtualNodeTask();
     ASSERT_NE(sliderPattern->parentAccessibilityNode_, nullptr);
     EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
@@ -1850,5 +1853,54 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
     sliderPattern->HandleTouchUp(localLocation, SourceType::TOUCH);
     EXPECT_EQ(sliderPattern->mousePressedFlag_, false);
     EXPECT_EQ(sliderPattern->sliderContentModifier_->isPressed_->Get(), false);
+}
+
+/**
+ * @tc.name: EnableHapticFeedbackTest001
+ * @tc.desc: Test SliderModelNG GetEnableHapticFeedback SetEnableHapticFeedback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, EnableHapticFeedbackTest001, TestSize.Level1)
+{
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetBlockColor(TEST_COLOR);
+    sliderModelNG.SetTrackBackgroundColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
+    sliderModelNG.SetSelectColor(TEST_COLOR);
+    sliderModelNG.SetEnableHapticFeedback(false);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_FALSE(sliderModelNG.GetEnableHapticFeedback(Referenced::RawPtr(frameNode)));
+}
+
+/**
+ * @tc.name: PlayHapticFeedbackTest001
+ * @tc.desc: Test PlayHapticFeedback &&  InitHapticController
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, PlayHapticFeedbackTest001, TestSize.Level1)
+{
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    float step = 10.0f;
+    float oldvalue = 1.0f;
+    sliderPattern->isEnableHaptic_ = false;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->isEnableHaptic_ = true;
+    sliderPattern->InitHapticController();
+    EXPECT_FALSE(sliderPattern->hapticApiEnabled);
+    sliderPattern->isEnableHaptic_ = true;
+    auto host = sliderPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    host->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    sliderPattern->InitHapticController();
+    EXPECT_TRUE(sliderPattern->hapticApiEnabled);
+    sliderPattern->valueRatio_ = 0.5f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->valueRatio_ = 0.0f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    sliderPattern->valueRatio_ = 1.0f;
+    sliderPattern->PlayHapticFeedback(false, step, oldvalue);
+    EXPECT_TRUE(sliderPattern->isEnableHaptic_);
 }
 } // namespace OHOS::Ace::NG

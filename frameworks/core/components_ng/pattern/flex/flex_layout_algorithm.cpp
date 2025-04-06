@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -309,10 +310,12 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 
 bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child)
 {
-    auto widthLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
-    auto heightLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_NULL_RETURN(child, false);
+    auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
+    CHECK_NULL_RETURN(childLayoutProperty, false);
+    auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
+    auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
     if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
         static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH) &&
         heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
@@ -1008,10 +1011,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto realSize =
         CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType, needToConstraint, calcConstraint)
             .ConvertToSizeT();
-    if (children.empty()) {
-        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
-        return;
-    }
     if (layoutWrapper->GetHostTag() == V2::COLUMN_ETS_TAG || layoutWrapper->GetHostTag() == V2::ROW_ETS_TAG) {
         auto widthLayoutPolicy =
             AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
@@ -1022,6 +1021,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)), axis)
                                     .ConvertToSizeT();
         realSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+    }
+    if (children.empty()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
+        return;
     }
     mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
     SetInitMainAxisSize(layoutWrapper);
@@ -1110,7 +1113,8 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
         allocatedSize_ = 0.0;
     }
     for (const auto& child : children) {
-        if (child->IsOutOfLayout() || IsVisibleGone(child)) {
+        if (child->IsOutOfLayout() || IsVisibleGone(child) ||
+            find(layoutPolicyChildren_.begin(), layoutPolicyChildren_.end(), child) != layoutPolicyChildren_.end()) {
             continue;
         }
         allocatedSize_ += GetChildMainAxisSize(child);

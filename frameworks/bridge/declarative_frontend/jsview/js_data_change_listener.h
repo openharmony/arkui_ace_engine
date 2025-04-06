@@ -24,7 +24,6 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -58,6 +57,21 @@ private:
         }
     }
 
+    bool ConvertFromJSCallbackInfo(const JSCallbackInfo& args, size_t index, size_t& result)
+    {
+        int32_t value = 0;
+        if (!args.GetInt32Arg(index, value)) {
+            return false;
+        }
+        if (value < 0) {
+            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Invalid index: %{public}d, change negative value to 0",
+                value);
+            value = 0;
+        }
+        result = static_cast<size_t>(value);
+        return true;
+    }
+
     void OnDataReloaded(const JSCallbackInfo& args)
     {
         useOldInterface = true;
@@ -85,8 +99,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int length = 2;
-        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataBulkAdded, index, count);
@@ -110,8 +124,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t index = 0;
         size_t count = 0;
-        int length = 2;
-        if (args.Length() < length || !ConvertFromJSValue(args[0], index) || !ConvertFromJSValue(args[1], count)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataBulkDeleted, index, count);
@@ -126,6 +140,22 @@ private:
         NotifyAll(&V2::DataChangeListener::OnDataChanged, args);
     }
 
+    void OnDataBulkChanged(const JSCallbackInfo& args)
+    {
+        useOldInterface = true;
+        if (useAnotherInterface(useNewInterface)) {
+            return;
+        }
+        ContainerScope scope(instanceId_);
+        size_t index = 0;
+        size_t count = 0;
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, index) ||
+            !ConvertFromJSCallbackInfo(args, 1, count)) {
+            return;
+        }
+        NotifyAll(&V2::DataChangeListener::OnDataBulkChanged, index, count);
+    }
+
     void OnDataMoved(const JSCallbackInfo& args)
     {
         useOldInterface = true;
@@ -135,7 +165,8 @@ private:
         ContainerScope scope(instanceId_);
         size_t from = 0;
         size_t to = 0;
-        if (args.Length() < 2 || !ConvertFromJSValue(args[0], from) || !ConvertFromJSValue(args[1], to)) {
+        if (args.Length() < 2 || !ConvertFromJSCallbackInfo(args, 0, from) ||
+            !ConvertFromJSCallbackInfo(args, 1, to)) {
             return;
         }
         NotifyAll(&V2::DataChangeListener::OnDataMoved, from, to);
@@ -168,11 +199,12 @@ private:
 
     void TransferJSInfoType(std::list<V2::Operation>& DataOperations, JSRef<JSObject> value)
     {
-        if (!value->GetProperty("type")->IsString()) {
+        auto jsType = value->GetProperty("type");
+        if (!jsType->IsString()) {
             return;
         }
         V2::Operation dataOperation;
-        std::string operationType = value->GetProperty("type")->ToString();
+        std::string operationType = jsType->ToString();
         dataOperation.type = operationType;
         dataOperation.count = 1;
         const int ADDOP = 1;
@@ -205,38 +237,45 @@ private:
 
     void transferIndex(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
-        if (value->GetProperty("index")->IsNumber()) {
-            dataOperation.index = value->GetProperty("index")->ToNumber<int32_t>();
-        } else if (value->GetProperty("index")->IsObject()) {
-            JSRef<JSObject> coupleIndex = JSRef<JSObject>::Cast(value->GetProperty("index"));
-            if (coupleIndex->GetProperty("from")->IsNumber()) {
-                dataOperation.coupleIndex.first = coupleIndex->GetProperty("from")->ToNumber<int32_t>();
+        auto jsIndex = value->GetProperty("index");
+        if (jsIndex->IsNumber()) {
+            dataOperation.index = jsIndex->ToNumber<int32_t>();
+        } else if (jsIndex->IsObject()) {
+            JSRef<JSObject> coupleIndex = JSRef<JSObject>::Cast(jsIndex);
+            auto jsFrom = coupleIndex->GetProperty("from");
+            if (jsFrom->IsNumber()) {
+                dataOperation.coupleIndex.first = jsFrom->ToNumber<int32_t>();
             }
-            if (coupleIndex->GetProperty("to")->IsNumber()) {
-                dataOperation.coupleIndex.second = coupleIndex->GetProperty("to")->ToNumber<int32_t>();
+            auto jsTo = coupleIndex->GetProperty("to");
+            if (jsTo->IsNumber()) {
+                dataOperation.coupleIndex.second = jsTo->ToNumber<int32_t>();
             }
-            if (coupleIndex->GetProperty("start")->IsNumber()) {
-                dataOperation.coupleIndex.first = coupleIndex->GetProperty("start")->ToNumber<int32_t>();
+            auto jsStart = coupleIndex->GetProperty("start");
+            if (jsStart->IsNumber()) {
+                dataOperation.coupleIndex.first = jsStart->ToNumber<int32_t>();
             }
-            if (coupleIndex->GetProperty("end")->IsNumber()) {
-                dataOperation.coupleIndex.second = coupleIndex->GetProperty("end")->ToNumber<int32_t>();
+            auto jsEnd = coupleIndex->GetProperty("end");
+            if (jsEnd->IsNumber()) {
+                dataOperation.coupleIndex.second = jsEnd->ToNumber<int32_t>();
             }
         }
     }
 
     void transferCount(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
-        if (value->GetProperty("count")->IsNumber()) {
-            dataOperation.count = value->GetProperty("count")->ToNumber<int32_t>();
+        auto jsCount = value->GetProperty("count");
+        if (jsCount->IsNumber()) {
+            dataOperation.count = jsCount->ToNumber<int32_t>();
         }
     }
 
     void transferKey(JSRef<JSObject> value, V2::Operation& dataOperation)
     {
-        if (value->GetProperty("key")->IsString()) {
-            dataOperation.key = value->GetProperty("key")->ToString();
-        } else if (value->GetProperty("key")->IsArray()) {
-            JSRef<JSArray> keys = JSRef<JSArray>::Cast(value->GetProperty("key"));
+        auto jsKey = value->GetProperty("key");
+        if (jsKey->IsString()) {
+            dataOperation.key = jsKey->ToString();
+        } else if (jsKey->IsArray()) {
+            JSRef<JSArray> keys = JSRef<JSArray>::Cast(jsKey);
             if (dataOperation.type == "add" && static_cast<size_t>(dataOperation.count) < keys->Length()) {
                 allocateMoreKeys = true;
                 return;
@@ -248,19 +287,23 @@ private:
                 }
             }
             dataOperation.keyList = keyList;
-        } else if (value->GetProperty("key")->IsObject()) {
-            JSRef<JSObject> coupleKey = JSRef<JSObject>::Cast(value->GetProperty("key"));
-            if (coupleKey->GetProperty("from")->IsString()) {
-                dataOperation.coupleKey.first = coupleKey->GetProperty("from")->ToString();
+        } else if (jsKey->IsObject()) {
+            JSRef<JSObject> coupleKey = JSRef<JSObject>::Cast(jsKey);
+            auto jsFrom = coupleKey->GetProperty("from");
+            if (jsFrom->IsString()) {
+                dataOperation.coupleKey.first = jsFrom->ToString();
             }
-            if (coupleKey->GetProperty("to")->IsString()) {
-                dataOperation.coupleKey.second = coupleKey->GetProperty("to")->ToString();
+            auto jsTo = coupleKey->GetProperty("to");
+            if (jsTo->IsString()) {
+                dataOperation.coupleKey.second = jsTo->ToString();
             }
-            if (coupleKey->GetProperty("start")->IsString()) {
-                dataOperation.coupleKey.first = coupleKey->GetProperty("start")->ToString();
+            auto jsStart = coupleKey->GetProperty("start");
+            if (jsStart->IsString()) {
+                dataOperation.coupleKey.first = jsStart->ToString();
             }
-            if (coupleKey->GetProperty("end")->IsString()) {
-                dataOperation.coupleKey.second = coupleKey->GetProperty("end")->ToString();
+            auto jsEnd = coupleKey->GetProperty("end");
+            if (jsEnd->IsString()) {
+                dataOperation.coupleKey.second = jsEnd->ToString();
             }
         }
     }
@@ -280,7 +323,7 @@ private:
     {
         ContainerScope scope(instanceId_);
         size_t index = 0;
-        if (args.Length() > 0 && ConvertFromJSValue(args[0], index)) {
+        if (args.Length() > 0 && ConvertFromJSCallbackInfo(args, 0, index)) {
             NotifyAll(method, index);
         }
     }

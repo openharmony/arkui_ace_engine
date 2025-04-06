@@ -70,7 +70,7 @@ void RenderSelectPopup::OnPaintFinish()
         // Now only one menu is supported, so just add one area.
         // When the framework support multiple menus, add all the areas.
         rects.emplace_back(renderPositioned_->GetRectBasedWindowTopLeft());
-        SubwindowManager::GetInstance()->SetHotAreas(rects);
+        SubwindowManager::GetInstance()->SetHotAreas(rects, SubwindowType::TYPE_MENU);
     }
 }
 

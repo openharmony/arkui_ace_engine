@@ -161,7 +161,7 @@ public:
 
     void UpdateMoveFromTo(int32_t from, int32_t to);
     void ResetMoveFromTo();
-    int32_t ConvertFormToIndex(int32_t index);
+    int32_t ConvertFromToIndex(int32_t index);
 
     void SetFlagForGeneratedItem(PropertyChangeFlag propertyChangeFlag)
     {
@@ -299,6 +299,8 @@ public:
     {
         return historicalTotalCount_;
     }
+
+    void SetDestroying(bool isDestroying, bool cleanStatus);
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;

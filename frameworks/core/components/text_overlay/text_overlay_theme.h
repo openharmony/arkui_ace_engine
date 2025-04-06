@@ -59,6 +59,7 @@ public:
             theme->cameraInputSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.auto_camera");
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
+            theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -128,6 +129,14 @@ public:
             theme->selectAllLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_select_all", "Ctrl+A");
             theme->cutLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_cut", "Ctrl+X");
             theme->showShortcut_ = static_cast<bool>(pattern->GetAttr<double>("text_overlay_menu_show_shortcut", 0.0));
+            theme->enableSelectionMenu_ = static_cast<bool>(pattern->GetAttr<double>("text_overlay_menu_enable", 1.0));
+            theme->cutLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_cut_label", "Cut");
+            theme->copyLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_copy_label", "Copy");
+            theme->pasteLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_paste_label", "Paste");
+            theme->selectAllLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_select_all_label", "Select all");
+            theme->translateLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_translate_label", "Translate");
+            theme->shareLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_share_label", "Share");
+            theme->searchLabel_ = pattern->GetAttr<std::string>("text_overlay_menu_search_label", "Search");
         }
     };
 
@@ -343,6 +352,11 @@ public:
         return searchSymbolId_;
     }
 
+    const uint32_t& GetTranslateSymbolId() const
+    {
+        return translateSymbolId_;
+    }
+
     const Dimension& GetSymbolSize() const
     {
         return symbolSize_;
@@ -352,7 +366,47 @@ public:
     {
         return symbolColor_;
     }
-    
+
+    bool GetEnableSelectionMenu() const
+    {
+        return enableSelectionMenu_;
+    }
+
+    const std::string& GetCutLabel() const
+    {
+        return cutLabel_;
+    }
+
+    const std::string& GetCopyLabel() const
+    {
+        return copyLabel_;
+    }
+
+    const std::string& GetPasteLabel() const
+    {
+        return pasteLabel_;
+    }
+
+    const std::string& GetSelectAllLabel() const
+    {
+        return selectAllLabel_;
+    }
+
+    const std::string& GetTranslateLabel() const
+    {
+        return translateLabel_;
+    }
+
+    const std::string& GetShareLabel() const
+    {
+        return shareLabel_;
+    }
+
+    const std::string& GetSearchLabel() const
+    {
+        return searchLabel_;
+    }
+
 protected:
     TextOverlayTheme() = default;
 
@@ -383,6 +437,14 @@ private:
     std::string selectAllLabelInfo_;
     std::string cutLabelInfo_;
     bool showShortcut_ = false;
+    bool enableSelectionMenu_ = true;
+    std::string cutLabel_;
+    std::string copyLabel_;
+    std::string pasteLabel_;
+    std::string selectAllLabel_;
+    std::string translateLabel_;
+    std::string shareLabel_;
+    std::string searchLabel_;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
@@ -398,6 +460,7 @@ private:
     uint32_t cameraInputSymbolId_ = 0;
     uint32_t aiWriteSymbolId_ = 0;
     uint32_t searchSymbolId_ = 0;
+    uint32_t translateSymbolId_ = 0;
 };
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_accessibility.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INDICATOR_DEFAULT_DURATION = 400;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+} // namespace
 class IndicatorPattern : public SwiperIndicatorPattern {
     DECLARE_ACE_TYPE(IndicatorPattern, SwiperIndicatorPattern);
 
@@ -34,6 +38,15 @@ public:
         return MakeRefPtr<IndicatorAccessibilityProperty>();
     }
 
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+            return MakeRefPtr<DotIndicatorPaintProperty>();
+        } else {
+            return MakeRefPtr<PaintProperty>();
+        }
+    }
+
     SwiperIndicatorType GetIndicatorType() const override
     {
         return GetIndicatorTypeFromProperty();
@@ -44,9 +57,28 @@ public:
         return MakeRefPtr<IndicatorEventHub>();
     }
 
+    void InitIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->SetIndicatorPattern(AceType::Claim(this));
+        indicatorController_->ResetJSIndicatorController();
+    }
+
     const RefPtr<IndicatorController>& GetIndicatorController() const
     {
         return indicatorController_;
+    }
+
+    void ResetSwiperNode() const
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetSwiperNode();
+    }
+
+    void ResetJSIndicatorController()
+    {
+        CHECK_NULL_VOID(indicatorController_);
+        indicatorController_->ResetJSIndicatorController();
     }
 
     void UpdateChangeEvent(ChangeEvent&& event)
@@ -84,7 +116,7 @@ public:
         auto controller = GetIndicatorController();
         CHECK_NULL_RETURN(controller, nullptr);
         auto weakUINode = controller->GetSwiperNode();
-        return WeakUINode2RefFrameNode(weakUINode);
+        return weakUINode.Upgrade();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -98,11 +130,13 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
             indicatorLayoutAlgorithm->SetIndicatorDisplayCount(GetCountFromProperty());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         }
     }
@@ -135,7 +169,11 @@ public:
 
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
+            singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         }
+        GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
+        float motionVelocity = 0.0f;
+        GetDotIndicatorModifier()->SetLongPointHeadCurve(DEFAULT_CURVE, motionVelocity);
 
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(GetDotIndicatorModifier());
         SetDotIndicatorPaintMethodInfoInSingleMode(paintMethod);
@@ -152,6 +190,7 @@ public:
         paintMethod->SetHorizontalAndRightToLeft(GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(RealTotalCount());
         paintMethod->SetGestureState(singleGestureState_);
+        singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         paintMethod->SetIsLoop(IsLoop());
         paintMethod->SetIsHover(IsHover());
         paintMethod->SetIsPressed(IsPressed());
@@ -161,7 +200,11 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
-        GetOptinalMouseClickIndex() = std::nullopt;
+        paintMethod->SetTouchBottomRate(touchBottomRate_);
+        paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+        singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        paintMethod->SetFirstIndex(lastIndex_);
+        ResetOptinalMouseClickIndex();
     }
 
     const bool& IsIndicatorCustomSize() const
@@ -188,14 +231,24 @@ public:
     void GetTextContentSub(std::string& firstContent, std::string& lastContent) const override;
     void SwipeTo(std::optional<int32_t> mouseClickIndex) override;
     void OnModifyDone() override;
+    int32_t GetTouchCurrentIndex() const override;
+    std::pair<int32_t, int32_t> CalMouseClickIndexStartAndEnd(int32_t itemCount, int32_t currentIndex) override;
+    bool CheckIsTouchBottom(const TouchLocationInfo& info);
+    void HandleDragEnd(double dragVelocity) override;
     void HandleLongDragUpdate(const TouchLocationInfo& info) override;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+    std::shared_ptr<SwiperParameters> GetIndicatorParameters() const
+    {
+        return swiperParameters_;
+    }
+
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
 
 protected:
     void FireChangeEvent() const override;
+    void FireIndicatorIndexChangeEvent(int32_t index) const override;
     SwiperIndicatorType GetIndicatorTypeFromProperty() const;
     Axis GetDirectionFromProperty() const;
     int32_t GetInitialIndexFromProperty() const;
@@ -203,7 +256,6 @@ protected:
     bool IsLoopFromProperty() const;
 
 private:
-    void InitIndicatorController();
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
     void SaveDotIndicatorProperty();
@@ -215,6 +267,9 @@ private:
     ChangeEventPtr changeEvent_;
     GestureState singleGestureState_ = GestureState::GESTURE_STATE_INIT;
     bool isCustomSize_ = false;
+    TouchBottomTypeLoop singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    int32_t lastIndex_ = 0;
+    float touchBottomRate_ = 1.0f;
 };
 } // namespace OHOS::Ace::NG
 

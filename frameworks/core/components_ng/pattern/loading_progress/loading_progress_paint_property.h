@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,11 +39,13 @@ public:
     RefPtr<PaintProperty> Clone() const override
     {
         auto paintProperty = MakeRefPtr<LoadingProgressPaintProperty>();
+        paintProperty->UpdatePaintPropertyHost(this);
         paintProperty->propColor_ = CloneColor();
         paintProperty->propEnableLoading_ = CloneEnableLoading();
         paintProperty->propLoadingProgressOwner_ = CloneLoadingProgressOwner();
         paintProperty->propRefreshAnimationState_ = CloneRefreshAnimationState();
         paintProperty->propRefreshSizeScaleRatio_ = CloneRefreshSizeScaleRatio();
+        paintProperty->SetHost(GetHost());
         return paintProperty;
     }
 
@@ -64,12 +66,16 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
+        auto host = GetHost();
+        auto themeScopeId = host ? host->GetThemeScopeId() : 0;
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+        auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
         CHECK_NULL_VOID(progressTheme);
 
         json->PutExtAttr("color",
+            propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("foregroundColor",
             propColor_.value_or(progressTheme->GetLoadingColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("enableLoading", GetEnableLoading().value_or(true) ? "true" : "false", filter);
     }

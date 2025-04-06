@@ -42,6 +42,8 @@
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
     "src/lib/common/arkts_util.d.ts",
+    "src/lib/common/finalization_registry.d.ts",
+    "src/lib/common/weakref_pool.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",
@@ -56,6 +58,7 @@
     "src/lib/full_update/fu_view.ts",
 
     // partial update and v2 common
+    "src/lib/puv2_common/puv2_view_buildnode_base.ts",
     "src/lib/puv2_common/puv2_viewstack_processor.d.ts",
     "src/lib/puv2_common/iview.ts",
     "src/lib/puv2_common/puv2_updatefunc.ts",
@@ -93,6 +96,7 @@
     "src/lib/partial_update/pu_repeat.ts",
     "src/lib/partial_update/pu_repeat_impl.ts",
     "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
+    "src/lib/partial_update/pu_repeat_virtual_scroll_2_impl.ts",
 
     // sdk
     "src/lib/sdk/v2_persistence.ts",

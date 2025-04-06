@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
@@ -140,6 +141,9 @@ void* GetNativeXComponent(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto xcPattern = frameNode->GetPattern<XComponentPattern>();
     CHECK_NULL_RETURN(xcPattern, nullptr);
+    if (xcPattern->HasGotSurfaceHolder()) {
+        return nullptr;
+    }
     auto pair = xcPattern->GetNativeXComponent();
     return reinterpret_cast<void*>(pair.second.lock().get());
 }
@@ -252,6 +256,170 @@ ArkUI_Int32 GetXComponentRenderFit(ArkUINodeHandle node)
     }
     return static_cast<ArkUI_Int32>(XComponentModelNG::GetSurfaceRenderFit(frameNode));
 }
+
+void SetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32 offsetX,
+    ArkUI_Int32 offsetY, ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (surfaceWidth <= 0 || surfaceHeight <= 0) {
+        return;
+    }
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, static_cast<float>(offsetX), static_cast<float>(offsetY),
+        static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight));
+}
+
+void GetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_Int32& offsetY,
+    ArkUI_Int32& surfaceWidth, ArkUI_Int32& surfaceHeight)
+{
+    float surfaceRectOffsetX = 0.0f;
+    float surfaceRectOffsetY = 0.0f;
+    float surfaceRectWidth = 0.0f;
+    float surfaceRectHeight = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::GetXComponentSurfaceRect(frameNode, surfaceRectOffsetX, surfaceRectOffsetY,
+        surfaceRectWidth, surfaceRectHeight);
+    offsetX = static_cast<ArkUI_Int32>(surfaceRectOffsetX);
+    offsetY = static_cast<ArkUI_Int32>(surfaceRectOffsetY);
+    surfaceWidth = static_cast<ArkUI_Int32>(surfaceRectWidth);
+    surfaceHeight = static_cast<ArkUI_Int32>(surfaceRectHeight);
+}
+
+void ResetXComponentSurfaceRect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float width  = ViewAbstract::GetWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    float height = ViewAbstract::GetHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, 0.0f, 0.0f, width, height);
+}
+
+ArkUI_Bool GetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type != XComponentType::SURFACE && type != XComponentType::TEXTURE) {
+        return false;
+    }
+    ArkUI_Bool isEnable = XComponentModelNG::GetXComponentEnableAnalyzer(frameNode);
+    return isEnable;
+}
+
+void StartImageAnalyzer(ArkUINodeHandle node, void* arkuiNode, void* userData,
+    XComponentAnalyzerCallback callback)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    std::function<void(int32_t)> nativeAnalyzerCallback = [arkuiNode, userData, callback](int32_t statusCode) {
+        if (callback) {
+            callback(arkuiNode, statusCode, userData);
+        }
+    };
+    xcPattern->NativeStartImageAnalyzer(nativeAnalyzerCallback);
+}
+
+void StopImageAnalyzer(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->StopImageAnalyzer();
+}
+
+void* CreateSurfaceHolder(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, nullptr);
+    if (xcPattern->IsCreateSurfaceHolderForbidden()) {
+        return nullptr;
+    }
+    OH_ArkUI_SurfaceHolder* surfaceHolder = xcPattern->GetSurfaceHolder();
+    if (surfaceHolder == nullptr) {
+        surfaceHolder = new OH_ArkUI_SurfaceHolder();
+        xcPattern->SetSurfaceHolder(surfaceHolder);
+    }
+    return reinterpret_cast<void*>(surfaceHolder);
+}
+
+void Dispose(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetSurfaceHolder(nullptr);
+}
+
+ArkUI_Int32 SetAutoInitialize(ArkUINodeHandle node, ArkUI_Bool autoInitialize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->SetAutoInitialize(autoInitialize);
+}
+
+ArkUI_Int32 Initialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->Initialize();
+}
+
+ArkUI_Int32 IsInitialized(ArkUINodeHandle node, ArkUI_Bool* isInitialized)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    bool value;
+    auto res = xcPattern->IsInitialized(value);
+    *isInitialized = value;
+    return res;
+}
+
+ArkUI_Int32 Finalize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
+    auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
+    CHECK_NULL_RETURN(xcPattern, ERROR_CODE_PARAM_INVALID);
+    auto nodeType = xcPattern->GetXComponentNodeType();
+    if (nodeType != XComponentNodeType::TYPE_NODE && nodeType != XComponentNodeType::CNODE) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return xcPattern->Finalize();
+}
+
+ArkUI_Bool GetXComponentIsBindNative(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_RETURN(xcPattern, false);
+    return static_cast<ArkUI_Bool>(xcPattern->IsBindNative());
+}
 } // namespace
 
 namespace NodeModifier {
@@ -285,6 +453,19 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
         .getXComponentRenderFit = GetXComponentRenderFit,
+        .setXComponentSurfaceRect = SetXComponentSurfaceRect,
+        .getXComponentSurfaceRect = GetXComponentSurfaceRect,
+        .resetXComponentSurfaceRect = ResetXComponentSurfaceRect,
+        .getXComponentEnableAnalyzer = GetXComponentEnableAnalyzer,
+        .startImageAnalyzer = StartImageAnalyzer,
+        .stopImageAnalyzer = StopImageAnalyzer,
+        .createSurfaceHolder = CreateSurfaceHolder,
+        .dispose = Dispose,
+        .setAutoInitialize = SetAutoInitialize,
+        .initialize = Initialize,
+        .isInitialized = IsInitialized,
+        .finalize = Finalize,
+        .getXComponentIsBindNative = GetXComponentIsBindNative,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

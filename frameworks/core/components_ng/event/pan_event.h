@@ -71,6 +71,8 @@ class ACE_FORCE_EXPORT PanEventActuator : public GestureEventActuator {
 public:
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
         float distance);
+    PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
+        PanDistanceMap distanceMap);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)
@@ -123,6 +125,8 @@ public:
     {
         isExcludedAxis_ = isExcludedAxis;
     }
+
+    void DumpVelocityInfo(int32_t fingerId);
 
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;

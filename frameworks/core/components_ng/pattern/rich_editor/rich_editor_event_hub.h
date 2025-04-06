@@ -138,7 +138,8 @@ public:
     VerticalAlign GetVerticalAlign() const;
     void SetImageFit(ImageFit objectFit);
     ImageFit GetObjectFit() const;
-
+    void SetUrlAddress(const std::u16string& urlAddress);
+    const std::u16string& GetUrlAddress() const;
     void SetBorderRadius(const std::string& borderRadius)
     {
         borderRadius_ = borderRadius;
@@ -178,6 +179,7 @@ private:
     int32_t eraseLength_ = 0;
     std::u16string value_;
     std::u16string previewText_;
+    std::u16string urlAddress_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
@@ -282,14 +284,14 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
-    void SetPreviewText(const std::u16string& previewText);
-    const std::u16string& GetPreviewText() const;
+    void SetPreviewText(const RefPtr<SpanStringBase>& previewText);
+    const RefPtr<SpanStringBase> GetPreviewText() const;
 
 private:
     TextRange rangeBefore_;
     TextRange rangeAfter_;
     RefPtr<SpanStringBase> replacementString_;
-    std::u16string previewText_;
+    RefPtr<SpanStringBase> previewText_;
 };
 
 class RichEditorEventHub : public EventHub {
@@ -376,6 +378,8 @@ public:
     void FireOnCut(NG::TextCommonEvent& value);
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
     void FireOnCopy(NG::TextCommonEvent& value);
+    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func);
+    void FireOnShare(NG::TextCommonEvent& value);
     void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func);
     bool FireOnStyledStringWillChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringWillChange() const;
@@ -400,6 +404,7 @@ private:
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
+    std::function<void(NG::TextCommonEvent&)> onShare_;
     std::function<bool(const StyledStringChangeValue&)> onStyledStringWillChange_;
     std::function<void(const StyledStringChangeValue&)> onStyledStringDidChange_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);

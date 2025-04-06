@@ -19,11 +19,12 @@
 #include <list>
 #include <unordered_set>
 
+#include "ffi_remote_data.h"
+
 #include "base/utils/macros.h"
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/components_ng/base/view_partial_update_model.h"
-#include "ffi_remote_data.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -53,6 +54,10 @@ public:
     void OnDisappear();
     void OnAboutToBeDeleted();
     void Reload(bool deep);
+    void OnDidBuild();
+    void AboutToReuse(const std::string&);
+    void AboutToRecycle();
+    void RecycleSelf(const std::string&);
 
 private:
     void VoidCallback(void (*cjFunc)(int64_t), const char* funcName);
@@ -94,7 +99,10 @@ public:
     {
         return needsUpdate_;
     }
-    bool IsFullUpdate() const { return !useNewPipeline_; }
+    bool IsFullUpdate() const
+    {
+        return !useNewPipeline_;
+    }
 
     void SetRenderDoneCallback(std::function<void()> callback)
     {
@@ -119,7 +127,10 @@ public:
         return isFirstRender_;
     }
 
-    bool IsUseNewPipeline() const { return useNewPipeline_; }
+    bool IsUseNewPipeline() const
+    {
+        return useNewPipeline_;
+    }
 
     /**
      * During render function execution, the child customview with same id will
@@ -136,6 +147,8 @@ public:
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
 
     static void Create(const sptr<NativeView>& view);
+    static void CreateRecycle(
+        const sptr<NativeView>& view, bool isRecycling, const std::string& nodeName, std::function<void()> callback);
 
     /**
      * Last step of executing an partial update function
@@ -180,6 +193,43 @@ public:
         return node_.Upgrade();
     }
 
+    void ResetRecycleCustomNode()
+    {
+        recycleCustomNode_.Reset();
+    }
+
+    void SetRecycleCustomNode(const RefPtr<NG::CustomNodeBase>& recycleNode)
+    {
+        recycleCustomNode_ = recycleNode;
+    }
+
+    RefPtr<NG::CustomNodeBase> GetCachedRecycleNode()
+    {
+        auto node = RefPtr<NG::CustomNodeBase>(recycleCustomNode_);
+        recycleCustomNode_.Reset();
+        return node;
+    }
+
+    const std::string& GetRecycleCustomNodeName()
+    {
+        return recycleCustomNodeName_;
+    }
+
+    void SetRecycleCustomNodeName(const std::string& recycleCustomNodeName)
+    {
+        recycleCustomNodeName_ = recycleCustomNodeName;
+    }
+
+    void SetIsRecycleRerender(bool isRecycleRerender)
+    {
+        isRecycleRerender_ = isRecycleRerender;
+    }
+
+    bool GetIsRecycleRerender()
+    {
+        return isRecycleRerender_;
+    }
+
 private:
     /**
      * cjView is the delegate for cj_custom_view object, it should be assigned once NativeView is created
@@ -209,6 +259,10 @@ private:
     <2> main Component
     */
     std::list<UpdateTask> pendingUpdateTasks_;
+
+    RefPtr<NG::CustomNodeBase> recycleCustomNode_;
+    std::string recycleCustomNodeName_;
+    bool isRecycleRerender_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

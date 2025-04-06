@@ -46,6 +46,7 @@ constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+using ScrollBarPositionCallback = std::function<bool(double, int32_t source, bool isMouseWheelScroll)>;
 
 enum class BarDirection {
     BAR_NONE = 0,
@@ -93,6 +94,14 @@ public:
     void SetForegroundColor(const Color& foregroundColor)
     {
         foregroundColor_ = foregroundColor;
+    }
+    void SetForegroundHoverColor(const Color& foregroundHoverBlendColor)
+    {
+        foregroundHoverColor_ = foregroundColor_.BlendColor(foregroundHoverBlendColor);
+    }
+    void SetForegroundPressedColor(const Color& foregroundPressedBlendColor)
+    {
+        foregroundPressedColor_ = foregroundColor_.BlendColor(foregroundPressedBlendColor);
     }
     double GetTopAngle() const
     {
@@ -173,10 +182,6 @@ public:
     void SetOutBoundary(double outBoundary)
     {
         outBoundary_ = outBoundary;
-    }
-    void SetIsOutOfBoundary(bool isOutOfBoundary)
-    {
-        isOutOfBoundary_ = isOutOfBoundary;
     }
     void SetPosition(const Dimension& position)
     {
@@ -274,11 +279,11 @@ public:
     {
         return hostBorderRadius_;
     }
-    void SetScrollPositionCallback(ScrollPositionCallback&& callback)
+    void SetScrollPositionCallback(ScrollBarPositionCallback&& callback)
     {
         scrollPositionCallback_ = std::move(callback);
     }
-    const ScrollPositionCallback& GetScrollPositionCallback() const
+    const ScrollBarPositionCallback& GetScrollPositionCallback() const
     {
         return scrollPositionCallback_;
     }
@@ -332,7 +337,7 @@ public:
     }
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, bool inBarRect = false);
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -364,6 +369,7 @@ public:
     virtual void CalcReservedHeight();
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
+    float GetMainSize(const Size& size) const;
     void SetReverse(bool reverse);
     BarDirection CheckBarDirection(const Point& point);
     void InitLongPressEvent();
@@ -394,6 +400,25 @@ public:
     void SetActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
     {
         activeScrollBarWidth_ = activeScrollBarWidth;
+    }
+
+    void SetArcBackgroundColor(const Color& backgroundColor)
+    {
+        arcBackgroundColor_ = backgroundColor;
+    }
+    const Color& GetArcBackgroundColor() const
+    {
+        return arcBackgroundColor_;
+    }
+
+    void SetArcForegroundColor(const Color& foregroundColor)
+    {
+        arcForegroundColor_ = foregroundColor;
+    }
+
+    Color GetArcForegroundColor() const
+    {
+        return IsPressed() ? arcForegroundColor_.BlendColor(PRESSED_BLEND_COLOR) : arcForegroundColor_;
     }
 #endif
 
@@ -610,6 +635,8 @@ private:
     Edge padding_;
     Color backgroundColor_;
     Color foregroundColor_;
+    Color foregroundHoverColor_;
+    Color foregroundPressedColor_;
     Rect touchRegion_;
     Rect hoverRegion_;
     Rect barRect_;
@@ -643,7 +670,6 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
-    bool isOutOfBoundary_ = false; // whether bar in the spring state
     bool positionModeUpdate_ = false;
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
@@ -662,7 +688,7 @@ private:
     RefPtr<Animator> frictionController_;
     RefPtr<FrictionMotion> frictionMotion_;
     std::function<void()> markNeedRenderFunc_;
-    ScrollPositionCallback scrollPositionCallback_;
+    ScrollBarPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     StartSnapAnimationCallback startSnapAnimationCallback_;
     ScrollPageCallback scrollPageCallback_;
@@ -677,9 +703,9 @@ private:
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+    bool isMousePressed_ = false;
 
 #ifdef ARKUI_CIRCLE_FEATURE
-    bool isMousePressed_ = false;
     Dimension normalBackgroundWidth_;
     Dimension activeBackgroundWidth_;
     double normalStartAngle_ = 0.0;
@@ -688,6 +714,8 @@ private:
     double activeMaxOffsetAngle_ = 0.0;
     Dimension normalScrollBarWidth_;
     Dimension activeScrollBarWidth_;
+    Color arcBackgroundColor_;
+    Color arcForegroundColor_;
 #endif // ARKUI_CIRCLE_FEATURE
 };
 

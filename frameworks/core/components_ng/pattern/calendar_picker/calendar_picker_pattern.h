@@ -176,6 +176,10 @@ public:
 
     void SetDate(const std::string& info);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void SetMarkToday(bool isMarkToday);
+    bool GetMarkToday();
+    void SetDisabledDateRange(const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange);
+    std::string GetDisabledDateRange();
 
 private:
     void OnModifyDone() override;
@@ -215,6 +219,8 @@ private:
     void NextDateBySelectedType(PickerDate& date);
 
     std::string GetEntryDateInfo();
+    bool ReportChangeEvent(const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
 
     uint32_t yearEnterCount_ = 0;
     uint32_t yearPrefixZeroCount_ = 0;
@@ -239,7 +245,9 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<InputEvent> hoverListener_;
     CalendarPickerSelectedType selected_ = CalendarPickerSelectedType::OTHER;
+    PickerDate reportedPickerDate_;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPickerPattern);
+    bool isMarkToday_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CALENDAR_PICKER_CALENDAR_PICKER_PATTERN_H

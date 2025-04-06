@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/common/autofill/auto_fill_trigger_state_holder.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -49,8 +50,8 @@ enum class DismissReason {
     CLOSE_BUTTON,
 };
 
-class BubblePattern : public PopupBasePattern, public FocusView {
-    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView);
+class BubblePattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
+    DECLARE_ACE_TYPE(BubblePattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
 
 public:
     BubblePattern() = default;
@@ -82,6 +83,14 @@ public:
         CHECK_NULL_RETURN(theme, bubbleMethod);
         bubbleMethod->SetOuterBorderWidth(theme->GetPopupOuterBorderWidth());
         bubbleMethod->SetInnerBorderWidth(theme->GetPopupInnerBorderWidth());
+        if (outlineWidth_.has_value()) {
+            bubbleMethod->SetOuterBorderWidthByUser(outlineWidth_.value());
+        }
+        if (innerBorderWidth_.has_value()) {
+            bubbleMethod->SetInnerBorderWidthByUser(innerBorderWidth_.value());
+        }
+        bubbleMethod->SetOutlineLinearGradient(outlineLinearGradient_);
+        bubbleMethod->SetInnerBorderLinearGradient(innerBorderLinearGradient_);
         return bubbleMethod;
     }
 
@@ -157,6 +166,11 @@ public:
         messageNode_ = messageNode;
     }
 
+    RefPtr<FrameNode> GetMessageNode()
+    {
+        return messageNode_;
+    }
+
     void SetCustomPopupTag(bool isCustomPopup)
     {
         isCustomPopup_ = isCustomPopup;
@@ -201,6 +215,8 @@ public:
     void CallOnWillDismiss(int32_t reason)
     {
         if (onWillDismiss_) {
+            TAG_LOGD(AceLogTag::ACE_OVERLAY,
+                "Popup CallOnWillDismiss, reason: %{public}d", reason);
             onWillDismiss_(reason);
         }
     }
@@ -278,6 +294,45 @@ public:
     {
         return customNode_.Upgrade();
     }
+    void SetOutlineLinearGradient(const PopupLinearGradientProperties& outlineLinearGradient)
+    {
+        outlineLinearGradient_ = outlineLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetOutlineLinearGradient() const
+    {
+        return outlineLinearGradient_;
+    }
+
+    void SetOutlineWidth(const std::optional<Dimension>& outlineWidth)
+    {
+        outlineWidth_ = outlineWidth;
+    }
+
+    const std::optional<Dimension>& GetOutlineWidth() const
+    {
+        return outlineWidth_;
+    }
+
+    void SetInnerBorderLinearGradient(const PopupLinearGradientProperties& innerBorderLinearGradient)
+    {
+        innerBorderLinearGradient_ = innerBorderLinearGradient;
+    }
+
+    const PopupLinearGradientProperties& GetInnerBorderLinearGradient() const
+    {
+        return innerBorderLinearGradient_;
+    }
+
+    void SetInnerBorderWidth(const std::optional<Dimension>& innerBorderWidth)
+    {
+        innerBorderWidth_ = innerBorderWidth;
+    }
+
+    const std::optional<Dimension>& GetInnerBorderWidth() const
+    {
+        return innerBorderWidth_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -307,12 +362,14 @@ private:
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
+    void PopTipsBubble();
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
     void ResetToInvisible();
+    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void StartOffsetEnteringAnimation();
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
@@ -371,6 +428,10 @@ private:
     std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
     RefPtr<PopupParam> popupParam_ = nullptr;
     WeakPtr<UINode> customNode_ = nullptr;
+    std::optional<Dimension> outlineWidth_;
+    std::optional<Dimension> innerBorderWidth_;
+    PopupLinearGradientProperties outlineLinearGradient_;
+    PopupLinearGradientProperties innerBorderLinearGradient_;
 };
 } // namespace OHOS::Ace::NG
 

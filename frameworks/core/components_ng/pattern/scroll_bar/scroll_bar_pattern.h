@@ -129,7 +129,7 @@ public:
 
     bool IsAtTop() const;
     bool IsAtBottom() const;
-    bool UpdateCurrentOffset(float offset, int32_t source);
+    bool UpdateCurrentOffset(float offset, int32_t source, bool isMouseWheelScroll = false);
 
     /**
      * @brief Stops the motion animator of the scroll bar.
@@ -168,7 +168,7 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        ResponseLinkResult& responseLinkResult);
+        ResponseLinkResult& responseLinkResult, bool inBarRect = false);
 
     float GetMainOffset(const Offset& offset) const
     {
@@ -367,11 +367,12 @@ public:
     }
 
 private:
-    void InitScrollPositionCallback();
+    bool ScrollPositionCallback(double offset, int32_t source, bool isMouseWheelScroll = false);
     void InitScrollEndCallback();
     void AddScrollableEvent();
     void SetInBarRegionCallback();
     void SetBarCollectTouchTargetCallback();
+    void SetBarRectCollectTouchTargetCallback();
     void SetBarCollectClickAndLongPressTargetCallback();
     void SetInBarRectRegionCallback();
     void OnAttachToFrameNode() override;
@@ -409,7 +410,6 @@ private:
     RefPtr<PanRecognizer> panRecognizer_;
     RefPtr<FrictionMotion> frictionMotion_;
     RefPtr<Animator> frictionController_;
-    ScrollPositionCallback scrollPositionCallback_;
     ScrollEndCallback scrollEndCallback_;
     RectF childRect_;
     uint8_t opacity_ = UINT8_MAX;

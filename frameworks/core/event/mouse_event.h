@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
 #include "base/mousestyle/mouse_style.h"
+#include "base/memory/ace_type.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -113,8 +114,10 @@ struct MouseEvent final : public PointerEvent {
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
     std::vector<MouseEvent> history;
+    WeakPtr<NG::FrameNode> node;
     bool isInjected = false;
     bool isPrivacyMode = false;
+    bool isMockWindowTransFlag = false;
 
     Offset GetOffset() const
     {
@@ -176,6 +179,9 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.isInjected = isInjected;
         mouseEvent.isPrivacyMode = isPrivacyMode;
         mouseEvent.mockFlushEvent = mockFlushEvent;
+        mouseEvent.rawDeltaX = rawDeltaX;
+        mouseEvent.rawDeltaY = rawDeltaY;
+        mouseEvent.pressedButtonsArray = pressedButtonsArray;
         return mouseEvent;
     }
 
@@ -371,6 +377,47 @@ class HoverInfo : public BaseEventInfo {
 public:
     HoverInfo() : BaseEventInfo("onHover") {}
     ~HoverInfo() override = default;
+
+    HoverInfo& SetGlobalLocation(const Offset& globalLocation)
+    {
+        globalLocation_ = globalLocation;
+        return *this;
+    }
+    HoverInfo& SetLocalLocation(const Offset& localLocation)
+    {
+        localLocation_ = localLocation;
+        return *this;
+    }
+
+    HoverInfo& SetScreenLocation(const Offset& screenLocation)
+    {
+        screenLocation_ = screenLocation;
+        return *this;
+    }
+
+    const Offset& GetScreenLocation() const
+    {
+        return screenLocation_;
+    }
+
+    const Offset& GetLocalLocation() const
+    {
+        return localLocation_;
+    }
+
+    const Offset& GetGlobalLocation() const
+    {
+        return globalLocation_;
+    }
+
+private:
+    // global position at which the touch point contacts the screen.
+    Offset globalLocation_;
+    // Different from global location, The local location refers to the location of the contact point relative to the
+    // current node which has the recognizer.
+    Offset localLocation_;
+
+    Offset screenLocation_;
 };
 
 class AccessibilityHoverInfo : public BaseEventInfo {
@@ -436,6 +483,7 @@ private:
 };
 
 using OnHoverFunc = std::function<void(bool, HoverInfo& info)>;
+using OnHoverMoveFunc = std::function<void(HoverInfo& info)>;
 using OnHoverEventFunc = std::function<void(bool)>;
 
 using OnAccessibilityHoverFunc = std::function<void(bool, AccessibilityHoverInfo& info)>;
@@ -494,11 +542,18 @@ public:
         onPenHoverEventCallback_ = onPenHoverEventCallback;
     }
 
+    void SetPenHoverMoveCallback(const OnHoverMoveFunc& onPenHoverMoveEventCallback)
+    {
+        onPenHoverMoveEventCallback_ = onPenHoverMoveEventCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered, const MouseEvent& event);
 
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
     bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool HandlePenHoverMoveEvent(const TouchEvent& event);
 
     bool IsHoverTarget() const
     {
@@ -513,6 +568,11 @@ public:
     bool IsPenHoverTarget() const
     {
         return onPenHoverEventCallback_ != nullptr;
+    }
+
+    bool IsPenHoverMoveTarget() const
+    {
+        return onPenHoverMoveEventCallback_ != nullptr;
     }
 
     bool HandleHoverEvent(bool isHovered)
@@ -540,6 +600,7 @@ private:
     OnHoverFunc onHoverEventCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverCallback_;
     OnHoverFunc onPenHoverEventCallback_;
+    OnHoverMoveFunc onPenHoverMoveEventCallback_;
 };
 
 class HoverEffectTarget : public virtual TouchEventTarget {

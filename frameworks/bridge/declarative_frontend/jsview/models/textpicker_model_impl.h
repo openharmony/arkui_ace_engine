@@ -31,6 +31,7 @@ public:
     void SetValue(const std::string& value) override {}
     void SetDefaultPickerItemHeight(const Dimension& value) override;
     void SetCanLoop(const bool value) override {};
+    void SetDigitalCrownSensitivity(int32_t value) override {};
     void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override {}
     void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
     void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
@@ -82,6 +83,7 @@ public:
     void SetDisableTextStyleAnimation(const bool value) override {};
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override {};
     void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
+    void UpdateUserSetSelectColor() override {};
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {

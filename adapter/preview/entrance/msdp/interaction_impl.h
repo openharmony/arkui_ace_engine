@@ -61,6 +61,10 @@ public:
     int32_t UnRegisterCoordinationListener() override;
 
     int32_t SetDraggableState(bool state) override;
+
+    int32_t GetAppDragSwitchState(bool& state) override;
+
+    void SetDraggableStateAsync(bool state, int64_t downTime) override;
 };
 
 } // namespace OHOS::Ace

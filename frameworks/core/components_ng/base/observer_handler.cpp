@@ -15,6 +15,8 @@
 
 #include "core/components_ng/base/observer_handler.h"
 
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -55,8 +57,13 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         }
         return;
     }
+    // api 16 trigger onActive and onInactive observer
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SEVENTEEN) && (
+        state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
+        return;
+    }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, std::to_string(uniqueId));
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
     navigationHandleFunc_(info);
 }
 
@@ -114,11 +121,12 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
-    CHECK_NULL_VOID(Container::Current());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
@@ -128,12 +136,27 @@ void UIObserverHandler::NotifyDidClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(didClickHandleFunc_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
+}
+
+void UIObserverHandler::NotifyPanGestureStateChange(const GestureEvent& gestureEventInfo,
+    const RefPtr<PanRecognizer>& current, const RefPtr<FrameNode>& frameNode, const PanGestureInfo& panGestureInfo)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(panGestureHandleFunc_);
+    auto getCurrent = Container::Current();
+    CHECK_NULL_VOID(getCurrent);
+    AbilityContextInfo info = { AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(), getCurrent->GetModuleName() };
+
+    panGestureHandleFunc_(info, gestureEventInfo, current, frameNode, panGestureInfo);
 }
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
@@ -147,17 +170,8 @@ UIObserverHandler::NavDestinationSwitchHandleFunc UIObserverHandler::GetHandleNa
     return navDestinationSwitchHandleFunc_;
 }
 
-std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavDestinationInfo(const RefPtr<UINode>& current)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    auto current = AceType::DynamicCast<UINode>(node);
-    while (current) {
-        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            break;
-        }
-        current = current->GetParent();
-    }
-    CHECK_NULL_RETURN(current, nullptr);
     auto nav = AceType::DynamicCast<FrameNode>(current);
     CHECK_NULL_RETURN(nav, nullptr);
     auto pattern = nav->GetPattern<NavDestinationPattern>();
@@ -180,7 +194,52 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
         state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
-        mode, std::to_string(uniqueId));
+        mode, uniqueId);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationInnerState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        current = current->GetFirstChild();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
+}
+
+std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationOuterState(const RefPtr<AceType>& node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        CHECK_NULL_RETURN(current->GetParent(), nullptr);
+        if (current->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG &&
+            current->GetParent()->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    return GetNavDestinationInfo(current);
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)
@@ -313,6 +372,11 @@ void UIObserverHandler::SetWillClickFunc(WillClickHandleFunc func)
 void UIObserverHandler::SetDidClickFunc(DidClickHandleFunc func)
 {
     didClickHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetPanGestureHandleFunc(PanGestureHandleFunc func)
+{
+    panGestureHandleFunc_ = func;
 }
 
 void UIObserverHandler::SetHandleTabContentStateUpdateFunc(TabContentStateHandleFunc func)

@@ -19,7 +19,6 @@
 #include <optional>
 
 #include "core/components/calendar/calendar_data_adapter.h"
-#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_type_define.h"
@@ -72,21 +71,7 @@ public:
 
     void HandleClickEvent(const GestureEvent& info);
 
-    FocusPattern GetFocusPattern() const override
-    {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, FocusPattern());
-        auto pickerTheme = pipeline->GetTheme<PickerTheme>();
-        RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
-        CHECK_NULL_RETURN(pickerTheme, FocusPattern());
-        CHECK_NULL_RETURN(calendarTheme, FocusPattern());
-        auto focusColor = pickerTheme->GetFocusColor();
-        FocusPaintParam focusPaintParams;
-        focusPaintParams.SetPaintColor(focusColor);
-        auto focusPaintWidth = calendarTheme->GetCalendarDayKeyFocusedPenWidth();
-        focusPaintParams.SetPaintWidth(focusPaintWidth);
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetHoverState(bool state)
     {
@@ -135,6 +120,10 @@ public:
     {
         titleNode_ = titleNode;
     }
+
+    bool CanReportChangeEvent(const PickerDate& pickerDate);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     void OnModifyDone() override;
@@ -203,6 +192,7 @@ private:
     std::vector<ButtonInfo> currentButtonInfos_;
     CalendarSettingData currentSettingData_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    PickerDate reportedPickerDate_;
     WeakPtr<FrameNode> titleNode_;
 };
 } // namespace OHOS::Ace::NG

@@ -72,6 +72,8 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 constexpr Dimension TEST_SETTING_RADIUS = Dimension(10.0, DimensionUnit::VP);
+const std::string PICKER_DATE_JSON_STR = "{\"year\":2024,\"month\":1,\"day\":21}";
+const std::string PICKER_DATE_JSON_STR2 = "{\"year\":2025,\"month\":2,\"day\":22}";
 } // namespace
 class CalendarPickerPatternTestNg : public testing::Test {
 public:
@@ -759,5 +761,181 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogPatternTest035, TestSize.Lev
     auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
     dialogPattern->HandleSurfaceChanged(1, 1, 2, 2);
     EXPECT_EQ(CalendarDialogView::previousOrientation_, SystemProperties::GetDeviceOrientation());
+}
+
+/**
+ * @tc.name: GetChangeEvent001
+ * @tc.desc: Get ChangeEvent Function Test for CalendarPickerDialog
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, GetChangeEvent001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+
+    CalendarSettingData settingData;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto callback = CalendarDialogView::GetChangeEvent(settingData, nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback = CalendarDialogView::GetChangeEvent(settingData, frameNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+
+    settingData.entryNode = frameNode;
+    callback = CalendarDialogView::GetChangeEvent(settingData, nullptr, dialogEvent);
+    ASSERT_EQ(callback, nullptr);
+    callback = CalendarDialogView::GetChangeEvent(settingData, frameNode, dialogEvent);
+    ASSERT_EQ(callback, nullptr);
+
+    bool result = false;
+    auto changeId = [&result](const std::string& info) {
+        result = true;
+    };
+    dialogEvent["changeId"] = changeId;
+    settingData.entryNode = nullptr;
+    result = false;
+    callback = CalendarDialogView::GetChangeEvent(settingData, nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+
+    result = false;
+    callback = CalendarDialogView::GetChangeEvent(settingData, frameNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+
+    settingData.entryNode = frameNode;
+    result = false;
+    callback = CalendarDialogView::GetChangeEvent(settingData, nullptr, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+
+    result = false;
+    callback = CalendarDialogView::GetChangeEvent(settingData, frameNode, dialogEvent);
+    ASSERT_NE(callback, nullptr);
+    callback("");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ReportChangeEvent001
+ * @tc.desc: ReportChangeEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, ReportChangeEvent001, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto calendarPickerNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(calendarPickerNode, nullptr);
+    auto calendarPickerPattern = calendarPickerNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(calendarPickerPattern, nullptr);
+
+    auto ret = calendarPickerPattern->ReportChangeEvent("CalendarPicker", "onChange",
+        PICKER_DATE_JSON_STR);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReportChangeEvent002
+ * @tc.desc: ReportChangeEvent, GetReportChangeEventDate, CanReportChangeEvent Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, ReportChangeEvent002, TestSize.Level1)
+{
+    CreateCalendarPicker();
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    ASSERT_NE(dialogNode, nullptr);
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto ret = CalendarDialogView::ReportChangeEvent(calendarDialogNode, "CalendarPickerDialog", "onChange",
+        PICKER_DATE_JSON_STR);
+    EXPECT_TRUE(ret);
+
+    auto dateJson = JsonUtil::ParseJsonString(PICKER_DATE_JSON_STR);
+    ASSERT_NE(dateJson, nullptr);
+    auto dateJson2 = JsonUtil::ParseJsonString(PICKER_DATE_JSON_STR2);
+    ASSERT_NE(dateJson2, nullptr);
+
+    PickerDate pickerDate;
+    PickerDate reportedPickerDate;
+    EXPECT_TRUE(CalendarDialogView::GetReportChangeEventDate(pickerDate, PICKER_DATE_JSON_STR));
+    EXPECT_EQ(pickerDate.GetYear(), dateJson->GetUInt("year"));
+    EXPECT_EQ(pickerDate.GetMonth(), dateJson->GetUInt("month"));
+    EXPECT_EQ(pickerDate.GetDay(), dateJson->GetUInt("day"));
+    EXPECT_TRUE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+    EXPECT_FALSE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+
+    EXPECT_TRUE(CalendarDialogView::GetReportChangeEventDate(pickerDate, PICKER_DATE_JSON_STR2));
+    EXPECT_EQ(pickerDate.GetYear(), dateJson2->GetUInt("year"));
+    EXPECT_EQ(pickerDate.GetMonth(), dateJson2->GetUInt("month"));
+    EXPECT_EQ(pickerDate.GetDay(), dateJson2->GetUInt("day"));
+    EXPECT_TRUE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+    EXPECT_FALSE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+
+    EXPECT_TRUE(CalendarDialogView::GetReportChangeEventDate(pickerDate, PICKER_DATE_JSON_STR));
+    EXPECT_EQ(pickerDate.GetYear(), dateJson->GetUInt("year"));
+    EXPECT_EQ(pickerDate.GetMonth(), dateJson->GetUInt("month"));
+    EXPECT_EQ(pickerDate.GetDay(), dateJson->GetUInt("day"));
+    EXPECT_TRUE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+    EXPECT_FALSE(CalendarDialogView::CanReportChangeEvent(reportedPickerDate, pickerDate));
+}
+
+/**
+ * @tc.name: CalendarDialogLayoutAlgorithmTest
+ * @tc.desc: MeasureWithAssertions Funtion Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogLayoutAlgorithmTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(node->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(node));
+    auto layoutWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetChildAtIndex(0));
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+    auto calendarNode = dialogPattern->GetCalendarFrameNode();
+    ASSERT_NE(calendarNode, nullptr);
+    EXPECT_EQ(calendarNode->GetTag(), V2::CALENDAR_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create LayoutAlgorithm.
+     * @tc.expected: step2. Create success.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapperNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dialogNode, geometryNode, dialogNode->GetLayoutProperty());
+    auto layoutAlgorithm = AceType::DynamicCast<CalendarDialogLayoutAlgorithm>(dialogPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapperNode->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Measure with assertions.
+     * @tc.expected: step3. Measure success.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize = OptionalSizeF(0.f, 0.f);
+    layoutWrapperNode->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapperNode));
+    EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Width(), 0.f);
+    EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Height(), 0.f);
 }
 } // namespace OHOS::Ace::NG

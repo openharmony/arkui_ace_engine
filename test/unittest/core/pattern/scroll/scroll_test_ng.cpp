@@ -132,6 +132,6 @@ void ScrollTestNg::CreateContentChild(int32_t childNumber)
 void ScrollTestNg::ScrollBy(double pixelX, double pixelY, bool smooth)
 {
     pattern_->ScrollBy(pixelX, pixelY, smooth);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 } // namespace OHOS::Ace::NG

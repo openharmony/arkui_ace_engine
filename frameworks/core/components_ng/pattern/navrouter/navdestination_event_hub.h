@@ -23,11 +23,12 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_event_hub.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
 using namespace Framework;
-class NavDestinationEventHub : public EventHub {
+class NavDestinationEventHub : public NavBarEventHub {
     DECLARE_ACE_TYPE(NavDestinationEventHub, EventHub)
 public:
     void SetOnStateChange(const OnStateChangeEvent& changeEvent)
@@ -188,6 +189,18 @@ public:
 
     void FireOnInactive(int32_t reason);
 
+    void SetOnNewParam(NavDestinationOnNewParamCallback&& onNewParamCallback)
+    {
+        onNewParamCallback_ = onNewParamCallback;
+    }
+
+    void FireOnNewParam(napi_value param)
+    {
+        if (onNewParamCallback_) {
+            onNewParamCallback_(param);
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -208,6 +221,7 @@ private:
     std::function<bool()> onBackPressedEvent_;
     std::function<void(int32_t)> onInactive_;
     std::function<void(int32_t)> onActive_;
+    NavDestinationOnNewParamCallback onNewParamCallback_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
     std::string name_;

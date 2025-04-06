@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_PARAGRAPH_MANAGER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARAGRAPH_MANAGER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_PARAGRAPH_MANAGER_H
 #include <list>
 #include <optional>
 
@@ -32,6 +32,8 @@ public:
         ParagraphStyle paragraphStyle;
         int32_t start = 0;
         int32_t end = 0;
+        float topPos = 0.0f;
+        float bottomPos = 0.0f;
 
         std::string ToString() const;
     };
@@ -49,14 +51,15 @@ public:
     PositionWithAffinity GetGlyphPositionAtCoordinate(Offset offset);
     float GetHeight() const;
 
-    const std::list<ParagraphInfo>& GetParagraphs() const
+    const std::vector<ParagraphInfo>& GetParagraphs() const
     {
         return paragraphs_;
     }
     void Reset();
 
-    std::vector<RectF> GetRects(int32_t start, int32_t end,
+    virtual std::vector<RectF> GetRects(int32_t start, int32_t end,
         RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
+    ParagraphManager::ParagraphInfo GetParagrahInfo(int32_t position) const;
     std::vector<std::pair<std::vector<RectF>, TextDirection>> GetParagraphsRects(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(
@@ -74,7 +77,7 @@ public:
         paragraphs_.emplace_back(std::move(info));
     }
 
-    void SetParagraphs(const std::list<ParagraphInfo>& paragraphs)
+    void SetParagraphs(const std::vector<ParagraphInfo>& paragraphs)
     {
         paragraphs_ = paragraphs;
     }
@@ -99,6 +102,9 @@ public:
     TextLineMetrics GetLineMetrics(size_t lineNumber);
     bool IsIndexAtParagraphEnd(int32_t index);
 
+protected:
+    std::vector<ParagraphInfo> paragraphs_;
+
 private:
     struct SelectData {
         float y = 0.0f;
@@ -106,6 +112,7 @@ private:
         CaretMetricsF secondMetrics;
         int32_t relativeStart = 0;
         int32_t relativeEnd = 0;
+        float paragraphSpacing = 0.0f;
     };
     static void MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
         const SelectData& selectData);
@@ -113,7 +120,9 @@ private:
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);
-    std::list<ParagraphInfo> paragraphs_;
+    static void AddParagraphSpacingBlankRect(
+        std::vector<RectF>& rects, const RectF& lastRect, const SelectData& selectData);
+    static void AppendParagraphSpacingBlankRect(std::vector<RectF>& rects, const SelectData& selectData);
 };
 } // namespace OHOS::Ace::NG
 #endif

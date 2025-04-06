@@ -58,7 +58,6 @@ build_component_ng("pattern_ng") {
     "canvas/canvas_model_ng.cpp",
     "canvas/canvas_modifier.cpp",
     "canvas/canvas_paint_method.cpp",
-    "canvas/canvas_paint_op.cpp",
     "canvas/canvas_pattern.cpp",
     "canvas/canvas_rendering_context_2d_model_ng.cpp",
     "canvas/custom_paint_paint_method.cpp",
@@ -165,10 +164,12 @@ build_component_ng("pattern_ng") {
     "hyperlink/hyperlink_pattern.cpp",
     "image/image_content_modifier.cpp",
     "image/image_layout_algorithm.cpp",
+    "image/image_layout_property.cpp",
     "image/image_model_ng.cpp",
     "image/image_overlay_modifier.cpp",
     "image/image_paint_method.cpp",
     "image/image_pattern.cpp",
+    "image_animator/controlled_animator.cpp",
     "image_animator/image_animator_model_ng.cpp",
     "image_animator/image_animator_pattern.cpp",
     "indexer/arc_indexer_content_modifier.cpp",
@@ -180,6 +181,10 @@ build_component_ng("pattern_ng") {
     "indexer/indexer_layout_property.cpp",
     "indexer/indexer_model_ng.cpp",
     "indexer/indexer_pattern.cpp",
+    "lazy_layout/grid_layout/lazy_grid_layout_algorithm.cpp",
+    "lazy_layout/grid_layout/lazy_grid_layout_info.cpp",
+    "lazy_layout/grid_layout/lazy_grid_layout_model.cpp",
+    "lazy_layout/grid_layout/lazy_grid_layout_pattern.cpp",
     "linear_indicator/linear_indicator_accessibility_property.cpp",
     "linear_indicator/linear_indicator_controller.cpp",
     "linear_indicator/linear_indicator_layout_property.cpp",
@@ -219,6 +224,10 @@ build_component_ng("pattern_ng") {
     "marquee/marquee_model_ng.cpp",
     "marquee/marquee_pattern.cpp",
     "menu/menu_accessibility_property.cpp",
+    "menu/menu_divider/menu_divider_layout_algorithm.cpp",
+    "menu/menu_divider/menu_divider_modifier.cpp",
+    "menu/menu_divider/menu_divider_paint_method.cpp",
+    "menu/menu_divider/menu_divider_pattern.cpp",
     "menu/menu_item/menu_item_accessibility_property.cpp",
     "menu/menu_item/menu_item_layout_algorithm.cpp",
     "menu/menu_item/menu_item_model_ng.cpp",
@@ -245,6 +254,7 @@ build_component_ng("pattern_ng") {
     "navigation/bar_item_layout_algorithm.cpp",
     "navigation/bar_item_node.cpp",
     "navigation/bar_item_pattern.cpp",
+    "navigation/custom_safe_area_expander.cpp",
     "navigation/inner_navigation_controller.cpp",
     "navigation/nav_bar_layout_algorithm.cpp",
     "navigation/nav_bar_node.cpp",
@@ -330,6 +340,7 @@ build_component_ng("pattern_ng") {
     "radio/radio_layout_algorithm.cpp",
     "radio/radio_model_ng.cpp",
     "radio/radio_paint_method.cpp",
+    "radio/radio_paint_property.cpp",
     "radio/radio_pattern.cpp",
     "rating/rating_accessibility_property.cpp",
     "rating/rating_layout_algorithm.cpp",
@@ -416,17 +427,25 @@ build_component_ng("pattern_ng") {
     "shape/shape_model_ng.cpp",
     "shape/shape_overlay_modifier.cpp",
     "shape/shape_paint_property.cpp",
+    "side_bar/side_bar_container_layout_algorithm.cpp",
+    "side_bar/side_bar_container_model_ng.cpp",
+    "side_bar/side_bar_container_paint_method.cpp",
+    "side_bar/side_bar_container_pattern.cpp",
     "slider/slider_accessibility_property.cpp",
     "slider/slider_content_modifier.cpp",
     "slider/slider_layout_algorithm.cpp",
     "slider/slider_model_ng.cpp",
     "slider/slider_paint_method.cpp",
     "slider/slider_pattern.cpp",
+    "slider/slider_tip_layout_algorithm.cpp",
     "slider/slider_tip_modifier.cpp",
+    "slider/slider_tip_paint_method.cpp",
+    "slider/slider_tip_pattern.cpp",
     "stack/stack_layout_algorithm.cpp",
     "stack/stack_model_ng.cpp",
     "stage/content_root_pattern.cpp",
     "stage/page_event_hub.cpp",
+    "stage/page_node.cpp",
     "stage/page_pattern.cpp",
     "stage/page_transition_model_ng.cpp",
     "stage/stage_layout_algorithm.cpp",
@@ -451,6 +470,7 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.cpp",
     "swiper_indicator/indicator_common/arc_swiper_indicator_pattern.cpp",
     "swiper_indicator/indicator_common/indicator_accessibility.cpp",
+    "swiper_indicator/indicator_common/indicator_controller.cpp",
     "swiper_indicator/indicator_common/indicator_model_ng.cpp",
     "swiper_indicator/indicator_common/indicator_pattern.cpp",
     "swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
@@ -536,10 +556,13 @@ build_component_ng("pattern_ng") {
     "toast/toast_pattern.cpp",
     "toast/toast_view.cpp",
     "toggle/switch_accessibility_property.cpp",
+    "toggle/switch_event_hub.cpp",
     "toggle/switch_layout_algorithm.cpp",
     "toggle/switch_paint_method.cpp",
+    "toggle/switch_paint_property.cpp",
     "toggle/switch_pattern.cpp",
     "toggle/toggle_model_ng.cpp",
+    "toolbaritem/toolbaritem_model_ng.cpp",
     "video/video_accessibility_property.cpp",
     "video/video_full_screen_node.cpp",
     "video/video_full_screen_pattern.cpp",
@@ -549,6 +572,9 @@ build_component_ng("pattern_ng") {
     "video/video_pattern.cpp",
     "view_context/view_context_model_ng.cpp",
   ]
+
+  # Add Cangjie application window registration
+  sources += [ "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp" ]
 
   if (!ace_engine_feature_wearable) {
     sources += [
@@ -573,10 +599,6 @@ build_component_ng("pattern_ng") {
       "select/select_layout_algorithm.cpp",
       "select/select_model_ng.cpp",
       "select/select_pattern.cpp",
-      "side_bar/side_bar_container_layout_algorithm.cpp",
-      "side_bar/side_bar_container_model_ng.cpp",
-      "side_bar/side_bar_container_paint_method.cpp",
-      "side_bar/side_bar_container_pattern.cpp",
       "stepper/stepper_accessibility_property.cpp",
       "stepper/stepper_item_model_ng.cpp",
       "stepper/stepper_layout_algorithm.cpp",
@@ -634,6 +656,17 @@ build_component_ng("pattern_ng") {
     ]
     if (!use_mingw_win && !use_mac && !use_linux) {
       external_deps += [ "window_manager:scene_session" ]
+    }
+    if (!build_ohos_sdk) {
+      sources += [
+        "form_button/form_button_model_ng.cpp",
+        "form_button/form_button_pattern.cpp",
+      ]
+
+      external_deps += [
+        "ability_base:want",
+        "form_fwk:fmskit_native",
+      ]
     }
   } else if (is_arkui_x) {
     deps += [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]

@@ -1507,7 +1507,7 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest055, TestSize.Level1
     dayNode->MountToParent(contentFrameNode);
 
     contentFrameNode->MountToParent(frameNode);
-    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+    calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 2000, 1, 1);
 }
 
 /**
@@ -1568,7 +1568,7 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest056, TestSize.Level1
     dayNode->MountToParent(contentFrameNode);
 
     contentFrameNode->MountToParent(frameNode);
-    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
+    calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 2000, 1, 1);
 }
 
 /**
@@ -1594,7 +1594,7 @@ HWTEST_F(CalendarPickerTestUpdate, CalendarPickerPatternTest057, TestSize.Level1
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     ASSERT_NE(frameNode, nullptr);
 
-    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 2000, 1, 1);
-    calendarPickerModel.SetSelectDateWithNode(frameNode.GetRawPtr(), 0, 0, 0);
+    calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 2000, 1, 1);
+    calendarPickerModel.SetSelectDateWithNode(Referenced::RawPtr(frameNode), 0, 0, 0);
 }
 } // namespace OHOS::Ace::NG

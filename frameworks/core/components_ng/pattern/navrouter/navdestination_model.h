@@ -17,15 +17,17 @@
 #define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVDESTINATION_NAVDESTINATION_MODEL_H
 
 #include <mutex>
+#include <optional>
 
 #include "base/system_bar/system_bar_style.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
-class NavDestinationModel {
+class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
     virtual ~NavDestinationModel() = default;
@@ -39,7 +41,8 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
         const std::string& src, const NG::ImageOption& imageOption, RefPtr<PixelMap>& pixMap,
-        const std::vector<std::string>& nameList) = 0;
+        const std::vector<std::string>& nameList, bool userDefinedAccessibilityText = false,
+        const std::string& backButtonAccessibilityText = "") = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) = 0;
@@ -56,11 +59,14 @@ public:
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;
     virtual void SetHideToolBar(bool hideToolBar, bool animated = false) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
+    virtual void SetHideItemText(bool isHideItemText) {};
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
+    virtual void SetToolbarMorebuttonOptions(NG::MoreButtonOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
+    virtual void SetMenuOptions(NG::NavigationMenuOptions&& opt) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
     virtual void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) {};
@@ -81,6 +87,11 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) {}
     virtual void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
+    virtual void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) {}
+    virtual void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) {}
+    virtual void SetPreferredOrientation(const std::optional<Orientation>& ori) {}
+    virtual void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) {}
+    virtual void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

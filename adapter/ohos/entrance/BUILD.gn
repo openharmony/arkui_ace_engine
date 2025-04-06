@@ -33,6 +33,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "$ace_root/adapter/ohos/entrance/ace_service_ability.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_translate_manager.cpp",
       "$ace_root/adapter/ohos/entrance/ace_view_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/aps_monitor_impl.cpp",
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
@@ -41,6 +42,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
+      "$ace_root/adapter/ohos/entrance/global_pipeline_context_manager.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/mmi_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",
@@ -49,6 +51,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/subwindow/subwindow_ohos.cpp",
       "$ace_root/adapter/ohos/entrance/touch_event_convertor.cpp",
       "$ace_root/adapter/ohos/entrance/window/foldable_window_ohos.cpp",
+      "$ace_root/adapter/ohos/entrance/window_free_container.cpp",
 
       # innerkits impl
       "$ace_root/adapter/ohos/entrance/ui_content_impl.cpp",
@@ -172,10 +175,6 @@ template("ace_ohos_standard_source_set") {
 
     if (enable_player_framework) {
       external_deps += [ "player_framework:audio_haptic" ]
-    }
-
-    if (enable_graphic_text_gine) {
-      external_deps += [ "graphic_2d:rosen_text" ]
     }
 
     if (os_account_exists) {

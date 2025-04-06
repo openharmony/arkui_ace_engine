@@ -29,28 +29,43 @@ class FrameNodeImpl : public FrameNode {
 
 public:
     FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>& pattern);
+    explicit FrameNodeImpl(const RefPtr<AceNode>& node);
     ~FrameNodeImpl();
 
     void Reset() override;
 
-    void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) override;
-
+    void Measure(const Kit::LayoutConstraintInfo& parentContraint) override;
     void Layout() override;
 
     void InitializePatternAndContext() override;
 
     RefPtr<NG::LayoutProperty> GetLayoutProperty() override;
     RefPtr<Pattern> GetPattern() override;
+    void PushAceNode(const RefPtr<AceNode>& node);
     RefPtr<AceNode> PopAceNode();
+    RefPtr<AceNode> GetAceNode() const;
     NG::LayoutWrapper* GetLayoutWrapper();
+    RefPtr<UIContext> GetUIContext() const override;
+    AceNode* GetAceNodePtr();
+    RefPtr<Property> GetProperty() override;
+
+    void AddChild(const RefPtr<FrameNode>& child) override;
+    std::list<RefPtr<FrameNode>> GetChildren() override;
+    void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
+    void RemoveChild(const RefPtr<FrameNode>& child) override;
+
+    std::string GetTag() const override;
+    int32_t GetId() const override;
 
     void MeasureChildren() override;
     void LayoutChildren() override;
+    NodeHandle GetHandle() override;
 
 private:
     AceNode* frameNode_;
     RefPtr<AceNode> nodeRef_;
     RefPtr<Pattern> pattern_;
+    RefPtr<Property> property_;
 };
 } // namespace OHOS::Ace::Kit
 

@@ -112,6 +112,17 @@ bool AceContainer::IsKeyboard()
     return true;
 }
 
+void AceContainer::SetAppRunningUniqueId(const std::string& uniqueId)
+{
+    return;
+}
+
+const std::string& AceContainer::GetAppRunningUniqueId() const
+{
+    static const std::string res;
+    return res;
+}
+
 void AceContainer::DestroyView() {}
 
 void AceContainer::Dispatch(const std::string& group, std::vector<uint8_t>&& data,
@@ -143,7 +154,7 @@ bool AceContainer::IsLauncherContainer()
 {
     return true;
 }
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     return instanceId_ % INSTANCEID_THREE == 0 ? true : false;
 }
@@ -258,7 +269,7 @@ sptr<IRemoteObject> AceContainer::GetParentToken()
 {
     return parentToken_;
 }
-Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type, int32_t apiVersion)
 {
     return {};
 }
@@ -268,4 +279,52 @@ uint32_t AceContainer::GetStatusBarHeight()
 }
 void AceContainer::NotifyConfigurationChange(
     bool needReloadTransition, const ConfigurationChange& configurationChange) {}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    return true;
+}
+
+Rect AceContainer::GetDisplayAvailableRect() const
+{
+    return Rect();
+}
+
+bool AceContainer::IsCrossAxisWindow()
+{
+    return false;
+}
+
+void AceContainer::GetExtensionConfig(AAFwk::WantParams& want) {}
+
+RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
+{
+    return nullptr;
+}
+
+RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
+    bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
+{
+    return nullptr;
+}
+
+void AceContainer::SetRequestedOrientation(
+    Orientation orientation, bool needAnimation)
+{
+}
+
+Orientation AceContainer::GetRequestedOrientation()
+{
+    return Orientation::UNSPECIFIED;
+}
+
+bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
+{
+    return false;
+}
+
+bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

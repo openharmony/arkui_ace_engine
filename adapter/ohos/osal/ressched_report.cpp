@@ -28,9 +28,25 @@ ReportDataFunc LoadReportDataFunc()
     CHECK_NULL_RETURN(handle, nullptr);
     auto func = reinterpret_cast<ReportDataFunc>(dlsym(handle, "ReportData"));
     if (func == nullptr) {
+        LOGW("dlsym function ReportData failed!");
         dlclose(handle);
         return nullptr;
     }
+    LOGI("dlsym function ReportData success.");
+    return func;
+}
+
+ReportSyncEventFunc LoadReportSyncEventFunc()
+{
+    auto handle = dlopen(RES_SCHED_CLIENT_SO.c_str(), RTLD_NOW);
+    CHECK_NULL_RETURN(handle, nullptr);
+    auto func = reinterpret_cast<ReportSyncEventFunc>(dlsym(handle, "ReportSyncEvent"));
+    if (func == nullptr) {
+        LOGW("dlsym function ReportSyncEvent failed!");
+        dlclose(handle);
+        return nullptr;
+    }
+    LOGI("dlsym function ReportSyncEvent success.");
     return func;
 }
 } // namespace OHOS::Ace

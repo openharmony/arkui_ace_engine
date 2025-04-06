@@ -1999,22 +1999,22 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest053, TestSize.Level1)
     uint32_t startYear = 2024;
     uint32_t startMonth = 1;
     uint32_t startDay = 8;
-    CalendarPickerModelNG::SetStartDateWithNode(frameNode.GetRawPtr(), startYear, startMonth, startDay);
-    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(startPickDate.GetYear(), startYear);
     EXPECT_EQ(startPickDate.GetMonth(), startMonth);
     EXPECT_EQ(startPickDate.GetDay(), startDay);
    
     startDay = 40;
-    CalendarPickerModelNG::SetStartDateWithNode(frameNode.GetRawPtr(), startYear, startMonth, startDay);
-    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(startPickDate.GetYear(), 0);
     EXPECT_EQ(startPickDate.GetMonth(), 0);
     EXPECT_EQ(startPickDate.GetDay(), 0);
 
     startDay = -1;
-    CalendarPickerModelNG::SetStartDateWithNode(frameNode.GetRawPtr(), startYear, startMonth, startDay);
-    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(startPickDate.GetYear(), 0);
     EXPECT_EQ(startPickDate.GetMonth(), 0);
     EXPECT_EQ(startPickDate.GetDay(), 0);
@@ -2041,8 +2041,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest054, TestSize.Level1)
     uint32_t startYear = 2024;
     uint32_t startMonth = 1;
     uint32_t startDay = 8;
-    CalendarPickerModelNG::SetStartDateWithNode(frameNode.GetRawPtr(), startYear, startMonth, startDay);
-    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetStartDateWithNode(Referenced::RawPtr(frameNode), startYear, startMonth, startDay);
+    auto startPickDate = CalendarPickerModelNG::GetStartDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(startPickDate.GetYear(), startYear);
     EXPECT_EQ(startPickDate.GetMonth(), startMonth);
     EXPECT_EQ(startPickDate.GetDay(), startDay);
@@ -2050,32 +2050,104 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest054, TestSize.Level1)
     uint32_t endYear = 2024;
     uint32_t endMonth = 1;
     uint32_t endDay = 7;
-    CalendarPickerModelNG::SetEndDateWithNode(frameNode.GetRawPtr(), endYear, endMonth, endDay);
-    auto endPickDate = CalendarPickerModelNG::GetEndDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    auto endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(endPickDate.GetYear(), 0);
     EXPECT_EQ(endPickDate.GetMonth(), 0);
     EXPECT_EQ(endPickDate.GetDay(), 0);
     
     endDay = 9;
-    CalendarPickerModelNG::SetEndDateWithNode(frameNode.GetRawPtr(), endYear, endMonth, endDay);
-    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(endPickDate.GetYear(), endYear);
     EXPECT_EQ(endPickDate.GetMonth(), endMonth);
     EXPECT_EQ(endPickDate.GetDay(), endDay);
 
     endDay = 40;
-    CalendarPickerModelNG::SetEndDateWithNode(frameNode.GetRawPtr(), endYear, endMonth, endDay);
-    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(endPickDate.GetYear(), 0);
     EXPECT_EQ(endPickDate.GetMonth(), 0);
     EXPECT_EQ(endPickDate.GetDay(), 0);
 
     endDay = -1;
-    CalendarPickerModelNG::SetEndDateWithNode(frameNode.GetRawPtr(), endYear, endMonth, endDay);
-    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(frameNode.GetRawPtr());
+    CalendarPickerModelNG::SetEndDateWithNode(Referenced::RawPtr(frameNode), endYear, endMonth, endDay);
+    endPickDate = CalendarPickerModelNG::GetEndDateWithNode(Referenced::RawPtr(frameNode));
     EXPECT_EQ(endPickDate.GetYear(), 0);
     EXPECT_EQ(endPickDate.GetMonth(), 0);
     EXPECT_EQ(endPickDate.GetDay(), 0);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest055
+ * @tc.desc: Test for SetMarkToday and GetMarkToday
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create calendar frameNode.
+     */
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetMarkToday.
+     * @tc.desc: set markToday.
+     * @tc.expected: GetMarkToday equals markToday.
+     */
+    bool markToday = true;
+    CalendarPickerModelNG::SetMarkToday(Referenced::RawPtr(frameNode), markToday);
+    EXPECT_EQ(CalendarPickerModelNG::GetMarkToday(Referenced::RawPtr(frameNode)), markToday);
+}
+
+/**
+ * @tc.name: CalendarPickerPatternTest056
+ * @tc.desc: Test for SetDisabledDateRange and GetDisabledDateRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest056, TestSize.Level1)
+{
+    CreateCalendarPicker();
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ASSERT_NE(element, nullptr);
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange is empty.
+     * @tc.expected: GetDisabledDateRange is empty.
+     */
+    std::vector<std::pair<PickerDate, PickerDate>> disabledDateRange;
+    CalendarPickerModelNG::SetDisabledDateRange(Referenced::RawPtr(frameNode), disabledDateRange);
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(Referenced::RawPtr(frameNode)), "");
+    /**
+     * @tc.steps: step2. call SetDisabledDateRange.
+     * @tc.desc: set disabledDateRange.
+     * @tc.expected: GetDisabledDateRange equals disabledDateRange.
+     */
+    std::pair<PickerDate, PickerDate> pair;
+    PickerDate defaultDate;
+    pair.first = defaultDate;
+    pair.second = defaultDate;
+    disabledDateRange.emplace_back(pair);
+    CalendarPickerModelNG::SetDisabledDateRange(Referenced::RawPtr(frameNode), disabledDateRange);
+    std::string ret = std::to_string(pair.first.GetYear()) + "-" + std::to_string(pair.first.GetMonth()) + "-" +
+                      std::to_string(pair.first.GetDay()) + "," + std::to_string(pair.second.GetYear()) + "-" +
+                      std::to_string(pair.second.GetMonth()) + "-" + std::to_string(pair.second.GetDay());
+    EXPECT_EQ(CalendarPickerModelNG::GetDisabledDateRange(Referenced::RawPtr(frameNode)), ret);
 }
 
 /**

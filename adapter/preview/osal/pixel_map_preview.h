@@ -49,6 +49,10 @@ public:
     }
     bool EncodeTlv(std::vector<uint8_t>& buff) override;
     uint32_t WritePixels(const WritePixelsOptions& opts) override;
+    bool GetIsWideColorGamut() const override
+    {
+        return false;
+    }
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

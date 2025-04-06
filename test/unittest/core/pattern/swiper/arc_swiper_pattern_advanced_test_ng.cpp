@@ -58,7 +58,7 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, PlayVerticalAnimation001, TestSize.Leve
     auto frameNode = CreateFrameNode();
     bool rollBack = true;
     pattern->PlayVerticalAnimation(offset, 1, frameNode, rollBack);
-    EXPECT_EQ(pattern->animationVector_.size(), 4);
+    EXPECT_EQ(pattern->animationVector_.size(), 5);
     pattern->animationVector_.clear();
     EXPECT_EQ(pattern->animationVector_.size(), 0);
     pattern->PlayVerticalAnimation(offset, 0, frameNode, rollBack);
@@ -82,9 +82,15 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish001, TestSize.Level1)
     auto pattern = frameNode_->GetPattern<ArcSwiperPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->itemPosition_.size(), 2);
+    pattern->propertyAnimationIsRunning_ = false;
     pattern->targetIndex_ = std::make_optional<int>(2);
     EXPECT_EQ(pattern->targetIndex_, 2);
     EXPECT_TRUE(pattern->targetIndex_.has_value());
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
     pattern->AnimationFinish();
     EXPECT_FALSE(pattern->targetIndex_.has_value());
     EXPECT_FALSE(pattern->targetIndex_);
@@ -111,6 +117,12 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish002, TestSize.Level1)
     EXPECT_EQ(pattern->targetIndex_, 2);
     EXPECT_TRUE(pattern->targetIndex_.has_value());
     pattern->SetHasTabsAncestor(true);
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
     pattern->AnimationFinish();
     EXPECT_FALSE(pattern->targetIndex_.has_value());
     EXPECT_FALSE(pattern->targetIndex_);
@@ -138,6 +150,12 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, AnimationFinish003, TestSize.Level1)
     EXPECT_TRUE(pattern->targetIndex_.has_value());
     pattern->itemPosition_.clear();
     EXPECT_EQ(pattern->itemPosition_.size(), 0);
+    pattern->propertyAnimationIsRunning_ = false;
+    pattern->AnimationFinish();
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_);
+
+    pattern->propertyAnimationIsRunning_ = true;
     pattern->AnimationFinish();
     EXPECT_FALSE(pattern->targetIndex_.has_value());
     EXPECT_FALSE(pattern->targetIndex_);
@@ -628,10 +646,12 @@ HWTEST_F(ArcSwiperPatternAdvancedTestNg, AddFinishAnimation, TestSize.Level1)
     for (int i = 0; i < 8; i++) {
         pattern->animationFinishList_.push_back(animationType);
     }
+    pattern->propertyAnimationIsRunning_ = false;
     pattern->targetIndex_ = std::make_optional<int>(2);
     pattern->AddFinishAnimation(animationType, true, false);
-    EXPECT_FALSE(pattern->targetIndex_.has_value());
+    EXPECT_TRUE(pattern->targetIndex_.has_value());
 
+    pattern->propertyAnimationIsRunning_ = true;
     pattern->animationFinishList_.clear();
     for (int i = 0; i < 7; i++) {
         pattern->animationFinishList_.push_back(animationType);

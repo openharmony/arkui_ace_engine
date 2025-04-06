@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 
 #include "core/components/badge/badge_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 

@@ -230,6 +230,7 @@ template("declarative_js_engine") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -284,6 +285,7 @@ template("declarative_js_engine") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -313,7 +315,9 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
+      "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
@@ -359,6 +363,7 @@ template("declarative_js_engine") {
       "jsview/js_relative_container.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_save_button.cpp",
@@ -372,6 +377,7 @@ template("declarative_js_engine") {
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
+      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
@@ -393,16 +399,19 @@ template("declarative_js_engine") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_touch_handler.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "jsview/text_menu/js_text_menu.cpp",
       "sharedata/js_share_data.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
@@ -475,6 +484,7 @@ template("declarative_js_engine") {
       "jsview/models/search_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
+      "jsview/models/side_bar_container_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
@@ -498,11 +508,9 @@ template("declarative_js_engine") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
-        "jsview/js_side_bar.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
         "jsview/js_water_flow.cpp",
@@ -510,7 +518,6 @@ template("declarative_js_engine") {
         "jsview/js_water_flow_sections.cpp",
         "jsview/models/linear_split_model_impl.cpp",
         "jsview/models/select_model_impl.cpp",
-        "jsview/models/side_bar_container_model_impl.cpp",
         "jsview/models/stepper_item_model_impl.cpp",
         "jsview/models/stepper_model_impl.cpp",
         "jsview/models/water_flow_item_model_impl.cpp",
@@ -539,6 +546,9 @@ template("declarative_js_engine") {
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
       ]
+    }
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
     }
 
     # rich components needed by phone and TV. wearable like watch do not need them
@@ -687,7 +697,7 @@ template("declarative_js_engine") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_base",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }
@@ -785,6 +795,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_function.cpp",
       "engine/functions/js_gesture_function.cpp",
       "engine/functions/js_gesture_judge_function.cpp",
+      "engine/functions/js_gesture_recognizer.cpp",
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
@@ -850,6 +861,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
+      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -877,7 +889,9 @@ template("declarative_js_engine_ng") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
+      "jsview/js_layoutable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
+      "jsview/js_lazy_grid.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
       "jsview/js_linear_indicator.cpp",
@@ -918,6 +932,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_refresh.cpp",
       "jsview/js_repeat.cpp",
       "jsview/js_repeat_virtual_scroll.cpp",
+      "jsview/js_repeat_virtual_scroll_2.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
       "jsview/js_save_button.cpp",
@@ -930,6 +945,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_sec_button_base.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
+      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
@@ -950,12 +966,15 @@ template("declarative_js_engine_ng") {
       "jsview/js_textpicker.cpp",
       "jsview/js_texttimer.cpp",
       "jsview/js_toggle.cpp",
+      "jsview/js_toolbaritem.cpp",
       "jsview/js_utils.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_abstract_bridge.cpp",
       "jsview/js_view_context.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
+      "jsview/text_menu/js_text_menu.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
 
@@ -966,11 +985,9 @@ template("declarative_js_engine_ng") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "jsview/js_column_split.cpp",
-        "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
         "jsview/js_select.cpp",
-        "jsview/js_side_bar.cpp",
         "jsview/js_stepper.cpp",
         "jsview/js_stepper_item.cpp",
         "jsview/js_water_flow.cpp",
@@ -1034,7 +1051,9 @@ template("declarative_js_engine_ng") {
         ]
       }
     }
-
+    if (is_ohos_standard_system && !build_ohos_sdk) {
+      sources += [ "jsview/js_form_button.cpp" ]
+    }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       sources += [
@@ -1122,6 +1141,7 @@ template("declarative_js_engine_ng") {
         "jsview/js_save_button.cpp",
         "jsview/js_sec_button_base.cpp",
         "jsview/menu/js_context_menu.cpp",
+        "jsview/text_menu/js_text_menu.cpp",
       ]
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       deps += [
@@ -1135,7 +1155,7 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_base",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }

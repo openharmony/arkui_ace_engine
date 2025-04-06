@@ -146,12 +146,21 @@ public:
     }
 
     void InitUIExtensionHostWindowRect();
-    
+
+    Rect GetUiExtensionHostWindowRect() const
+    {
+        return uiExtensionHostWindowRect_;
+    }
+    Dimension GetLimitPos() const
+    {
+        return limitPos_;
+    }
     RefPtr<PipelineContext> GetToastContext();
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
     void UpdateTextSizeConstraint(const RefPtr<FrameNode>& text);
+    void FoldStatusChangedAnimation();
     void UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastProps,
         const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom);
     Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);

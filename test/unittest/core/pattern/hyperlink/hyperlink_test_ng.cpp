@@ -447,40 +447,6 @@ HWTEST_F(HyperlinkTestNg, HyperlinkPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetColor001
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HYPERLINK_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<HyperlinkPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    HyperlinkModelNG hyperlinkModelNG;
-    hyperlinkModelNG.SetResponseRegion(true);
-    hyperlinkModelNG.SetColor(Color::BLACK);
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
-}
-
-/**
- * @tc.name: SetColor002
- * @tc.desc: Test SetColor.
- * @tc.type: FUNC
- */
-HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    HyperlinkModelNG hyperlinkModelNG;
-    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
-    ASSERT_NE(LayoutProperty, nullptr);
-    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
-    hyperlinkModelNG.SetColor(frameNode, Color::RED);
-    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
-}
-
-/**
  * @tc.name: EnableDrag001
  * @tc.desc: Test EnableDrag().
  * @tc.type: FUNC
@@ -590,4 +556,36 @@ HWTEST_F(HyperlinkTestNg, PreventDefault002, TestSize.Level1)
     EXPECT_FALSE(pattern->isTouchPreventDefault_);
 }
 
+/**
+ * @tc.name: SetColor001
+ * @tc.desc: Test SetColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, SetColor001, TestSize.Level1)
+{
+    HyperlinkModelNG hyperlinkModelNG;
+    hyperlinkModelNG.SetResponseRegion(true);
+    hyperlinkModelNG.SetColor(Color::BLACK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(LayoutProperty, nullptr);
+    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::BLACK);
+}
+
+/**
+ * @tc.name: SetColor002
+ * @tc.desc: Test SetColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HyperlinkTestNg, SetColor002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    HyperlinkModelNG hyperlinkModelNG;
+    auto LayoutProperty = frameNode->GetLayoutProperty<HyperlinkLayoutProperty>();
+    ASSERT_NE(LayoutProperty, nullptr);
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    hyperlinkModelNG.SetColor(frameNode, Color::RED);
+    EXPECT_EQ(LayoutProperty->GetTextColor().value(), Color::RED);
+}
 } // namespace OHOS::Ace::NG

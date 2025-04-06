@@ -46,6 +46,7 @@ public:
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void JsOpacity(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -114,6 +115,7 @@ public:
     static void JsOpacity(const JSCallbackInfo& info);
     static void EnableCascade(const JSCallbackInfo& info);
 
+    static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();

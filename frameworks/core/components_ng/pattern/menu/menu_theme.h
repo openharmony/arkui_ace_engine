@@ -37,6 +37,8 @@ constexpr float MENU_BIG_FONT_SIZE_SCALE = 1.75f;
 constexpr float MENU_LARGE_FONT_SIZE_SCALE_ = 2.0f;
 constexpr float MENU_MAX_FONT_SIZE_SCALE = 3.2f;
 constexpr int32_t MENU_TEXT_MAX_LINES = std::numeric_limits<int32_t>::max();
+constexpr int32_t SUB_MENU_SHOW_DELAY_DURATION = 300;
+constexpr int32_t SUB_MENU_HIDE_DELAY_DURATION = 500;
 
 /**
  * MenuTheme defines styles of menu item. MenuTheme should be built
@@ -121,6 +123,12 @@ public:
                 pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->menuBackGroundBlurStyle_ =
                 pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->subMenuShowDelayDuration_ =
+                pattern->GetAttr<int>("sub_menu_show_delay_duration", SUB_MENU_SHOW_DELAY_DURATION);
+            theme->subMenuHideDelayDuration_ =
+                pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
+            theme->menuHapticFeedback_ =
+                pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -131,6 +139,8 @@ public:
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
             theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
+            theme->pasteText_ = pattern->GetAttr<std::string>("textoverlay_paste", "");
+            theme->cancelText_ = pattern->GetAttr<std::string>("common_cancel_text", "");
         }
     };
 
@@ -381,6 +391,31 @@ public:
         return menuBackGroundBlurStyle_;
     }
 
+    int32_t GetSubMenuShowDelayDuration()
+    {
+        return subMenuShowDelayDuration_;
+    }
+
+    int32_t GetSubMenuHideDelayDuration()
+    {
+        return subMenuHideDelayDuration_;
+    }
+
+    const std::string& GetMenuHapticFeedback() const
+    {
+        return menuHapticFeedback_;
+    }
+
+    const std::string& GetPasteText() const
+    {
+        return pasteText_;
+    }
+
+    const std::string& GetCancelText() const
+    {
+        return cancelText_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -391,6 +426,8 @@ private:
     int32_t hoverImageDelayDuration_ = 0;
     int32_t hoverImageCustomPreviewScaleDuration_ = 0;
     int32_t hoverImagePreviewDisappearDuration_ = 0;
+    int32_t subMenuShowDelayDuration_ = SUB_MENU_SHOW_DELAY_DURATION;
+    int32_t subMenuHideDelayDuration_ = SUB_MENU_HIDE_DELAY_DURATION;
     float previewBeforeAnimationScale_ = 1.0f;
     float previewAfterAnimationScale_ = 1.0f;
     float menuAnimationScale_ = 1.0f;
@@ -434,6 +471,9 @@ private:
     double focusStyleType_ = 0.0;
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string menuHapticFeedback_;
+    std::string pasteText_;
+    std::string cancelText_;
 };
 
 } // namespace OHOS::Ace::NG

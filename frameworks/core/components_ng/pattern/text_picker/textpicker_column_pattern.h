@@ -31,6 +31,10 @@
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 using EventCallback = std::function<void(bool)>;
@@ -79,13 +83,18 @@ enum class OptionIndex {
     COLUMN_INDEX_6
 };
 
+
 class TextPickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TextPickerColumnPattern, LinearLayoutPattern);
 
 public:
     TextPickerColumnPattern() : LinearLayoutPattern(true) {};
-
-    ~TextPickerColumnPattern() override = default;
+    ~TextPickerColumnPattern() override
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     bool IsAtomicNode() const override
     {
@@ -108,7 +117,7 @@ public:
         return MakeRefPtr<LinearLayoutProperty>(true);
     }
 
-    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false, bool isDirectlyClear = false,
+    void FlushCurrentOptions(bool isDown = false, bool isUpdateTextContentOnly = false, bool isDirectlyClear = false,
         bool isUpdateAnimationProperties = false);
 
     void InitilaScorllEvent();
@@ -126,7 +135,7 @@ public:
 
     bool NotLoopOptions() const;
 
-    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false, bool isUpdateAnimationProperties = false);
+    bool InnerHandleScroll(bool isDown, bool isUpdatePropertiesOnly = false, bool isUpdateAnimationProperties = false);
 
     void SetDefaultPickerItemHeight(double defaultPickerItemHeight)
     {
@@ -204,7 +213,7 @@ public:
 
     void SetColumnKind(int32_t kind)
     {
-        columnkind_ = kind;
+        columnKind_ = kind;
     }
 
     float GetCurrentOffset() const
@@ -404,6 +413,18 @@ public:
         isDisableTextStyleAnimation_ = value;
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+    void StopHapticController();
+    void SetSelectedMarkListener(std::function<void(int& selectedColumnId)>& listener);
+    void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
+    void SetSelectedMarkId(const int strColumnId);
+    void UpdateUserSetSelectColor(void);
+#ifdef SUPPORT_DIGITAL_CROWN
+    int32_t& GetSelectedColumnId();
+    bool IsCrownEventEnded();
+    int32_t GetDigitalCrownSensitivity();
+    void SetDigitalCrownSensitivity(int32_t crownSensitivity);
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
 
 private:
     void OnModifyDone() override;
@@ -418,7 +439,15 @@ private:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
-
+    void SetSelectedMarkPaint(bool paint);
+    void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
+    void InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex, TextPickerOptionProperty &prop);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void HandleCrownBeginEvent(const CrownEvent& event);
+    void HandleCrownMoveEvent(const CrownEvent& event);
+    void HandleCrownEndEvent(const CrownEvent& event);
+#endif
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
     void HandleDragMove(const GestureEvent& event);
@@ -432,6 +461,7 @@ private:
     void ResetAlgorithmOffset();
     void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
     void SetOptionShiftDistance();
+    void SetOptionShiftDistanceByIndex(int32_t index, const bool isLandscape);
     double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
     double GetShiftDistance(int32_t index, ScrollDirection dir);
     double GetSelectedDistance(int32_t index, int32_t nextIndex, ScrollDirection dir);
@@ -446,10 +476,10 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly, bool isDirectlyClear);
+        bool isUpdateTextContentOnly, bool isDirectlyClear);
     void FlushCurrentImageOptions();
     void FlushCurrentMixtureOptions(
-        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, bool isUpateTextContentOnly);
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, bool isUpdateTextContentOnly);
     void UpdatePickerTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex,
         uint32_t showCount);
@@ -466,12 +496,14 @@ private:
     void UpdateTextPropertiesLinear(bool isDown, double scale);
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
         uint32_t showCount, bool isDown, double scale);
+    void SetSelectColor(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const Color& startColor, const Color& endColor, const float& percent, bool isEqual);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
-        bool isUpateTextContentOnly, bool isDirectlyClear);
+        bool isUpdateTextContentOnly, bool isDirectlyClear);
     void UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
@@ -499,7 +531,7 @@ private:
     double GetDragDeltaLessThanJumpInterval(
         double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
     void RegisterWindowStateChangedCallback();
-    void UnregisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback(FrameNode* frameNode);
 
     void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
 
@@ -534,7 +566,7 @@ private:
     std::vector<std::string> range_ { "" };
     uint32_t currentIndex_ = 0;
     std::vector<NG::RangeContent> options_;
-    int32_t columnkind_ = 0;
+    int32_t columnKind_ = TEXT;
     int32_t currentChildIndex_ = 0;
     float deltaSize_ = 0.0f;
     double totalDragDelta_ = 0.0;
@@ -582,11 +614,23 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     uint32_t currentEnterIndex_ = 0;
+    double enterDelta_ = 0.0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
+
+    friend class PickerColumnPatternCircleUtils<TextPickerColumnPattern>;
+    PickerColumnPatternCircleUtils<TextPickerColumnPattern> *circleUtils_ = nullptr;
+    int32_t selectedColumnId_ = -1;
+    std::function<void(int& selectedColumnId)> focusedListerner_ = nullptr;
+    bool isUserSetSelectColor_ = false;
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool isCrownEventEnded_ = true;
+    int32_t crownSensitivity_ = INVALID_CROWNSENSITIVITY;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

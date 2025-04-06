@@ -16,6 +16,9 @@
 #include "gtest/gtest.h"
 
 #include "core/components/web/web_event.h"
+#define protected public
+#include "core/components_ng/pattern/text/base_text_select_overlay.h"
+#undef protected
 #include "core/components_ng/pattern/web/web_context_select_overlay.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
@@ -509,6 +512,7 @@ HWTEST_F(WebContextSelectOverlayTest, OnMenuItemAction_001, TestSize.Level1)
     OptionMenuActionId actionId = OptionMenuActionId::AI_WRITE;
     OptionMenuType type = OptionMenuType::NO_MENU;
     overlay.OnMenuItemAction(actionId, type);
+    EXPECT_EQ(overlay.GetPattern<WebPattern>(), nullptr);
 }
 
 /**
@@ -611,6 +615,7 @@ HWTEST_F(WebContextSelectOverlayTest, OnHandleMoveDone_001, TestSize.Level1)
     RectF rect;
     bool isFirst = false;
     overlay.OnHandleMoveDone(rect, isFirst);
+    EXPECT_EQ(overlay.GetPattern<WebPattern>(), nullptr);
 }
 
 /**
@@ -651,6 +656,7 @@ HWTEST_F(WebContextSelectOverlayTest, OnCloseOverlay_001, TestSize.Level1)
     CloseReason reason = CloseReason::CLOSE_REASON_NORMAL;
     RefPtr<OverlayInfo> info;
     overlay.OnCloseOverlay(menuType, reason, info);
+    EXPECT_EQ(overlay.GetPattern<WebPattern>(), nullptr);
 }
 
 /**
@@ -723,10 +729,12 @@ HWTEST_F(WebContextSelectOverlayTest, OnHandleGlobalTouchEvent_001, TestSize.Lev
     SourceType sourceType = SourceType::MOUSE;
     TouchType touchType = TouchType::DOWN;
     overlay.OnHandleGlobalTouchEvent(sourceType, touchType);
+    EXPECT_TRUE(overlay.IsMouseClickDown(sourceType, touchType));
 
     sourceType = SourceType::TOUCH;
     touchType = TouchType::UP;
     overlay.OnHandleGlobalTouchEvent(sourceType, touchType);
+    EXPECT_TRUE(overlay.IsTouchUp(sourceType, touchType));
 
     sourceType = SourceType::NONE;
     touchType = TouchType::UNKNOWN;

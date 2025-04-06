@@ -359,7 +359,7 @@ void SystemWindowScene::LostViewFocus()
 }
 
 void SystemWindowScene::RegisterVisibleChangeCallback(
-    int32_t nodeId, std::function<void(bool)> callback)
+    int32_t nodeId, const std::function<void(bool)>& callback)
 {
     CHECK_NULL_VOID(callback);
     CHECK_NULL_VOID(session_);

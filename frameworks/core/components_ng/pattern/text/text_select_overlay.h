@@ -46,7 +46,6 @@ public:
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     void GetSelectAreaFromHandle(RectF& rect);
     std::string GetSelectedText() override;
 
@@ -92,12 +91,15 @@ protected:
         return !HasRenderTransform();
     }
     void UpdateClipHandleViewPort(RectF& rect) override;
+    bool AllowTranslate() override;
     bool AllowSearch() override;
     bool AllowShare() override;
     bool selectTextUseTopHandle = false;
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     OffsetF GetHotPaintOffset();
+    bool GetRenderClipValue() const;
     OffsetF handleGlobalOffset_;
     bool isDraggingFirstHandle_ = true;
     OffsetF hostPaintOffset_;

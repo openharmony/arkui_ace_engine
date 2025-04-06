@@ -41,6 +41,7 @@
 #include "core/components_v2/inspector/inspector.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -103,6 +104,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
+        TAG_LOGI(AceLogTag::ACE_FORM, "setOrCreate, dataList length: %{public}zu", data.length());
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
         auto child = jsonRoot->GetChild();
@@ -194,7 +196,7 @@ void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
 
 void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -357,7 +359,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
+    auto* view = JsiObjectTemplate::GetNativeView(obj, vm);
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -615,6 +617,9 @@ panda::Local<panda::JSValueRef> JsGetInspectorNodeById(panda::JsiRuntimeCallInfo
     }
     int32_t intValue = firstArg->Int32Value(vm);
     auto nodeInfo = accessibilityManager->DumpComposedElementToJson(intValue);
+    if (nodeInfo == nullptr) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     return panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, nodeInfo->ToString().c_str()));
 }
 
@@ -873,7 +878,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -931,7 +936,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -983,7 +988,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent", PriorityType::VIP);
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1433,6 +1438,10 @@ void JsRegisterFormViews(
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1449,6 +1458,7 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
@@ -1647,6 +1657,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     buttonType.Constant("Arc", (int)ButtonType::ARC);
     buttonType.Constant("ROUNDED_RECTANGLE", (int)ButtonType::ROUNDED_RECTANGLE);
 
+    JSObjectTemplate toolbaritemPlacement;
+    toolbaritemPlacement.Constant("TOP_BAR_LEADING", (int)ToolBarItemPlacement::TOP_BAR_LEADING);
+    toolbaritemPlacement.Constant("TOP_BAR_TRAILING", (int)ToolBarItemPlacement::TOP_BAR_TRAILING);
+
     JSObjectTemplate iconPosition;
     iconPosition.Constant("Start", 0);
     iconPosition.Constant("End", 1);
@@ -1668,6 +1682,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToolBarItemPlacement"), *toolbaritemPlacement);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);

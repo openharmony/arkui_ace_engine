@@ -619,10 +619,10 @@ HWTEST_F(TextFieldPatternTestFive, IssueFixTest001, TestSize.Level0)
     EXPECT_EQ(pattern_->cursorVisible_, true);
 
     /**
-     * press tab, HandleOnEscape should return true
+     * press tab, HandleOnEscape should return false
      */
     GetFocus();
-    EXPECT_EQ(pattern_->HandleOnEscape(), true);
+    EXPECT_EQ(pattern_->HandleOnEscape(), false);
 
     /**
      * password focus box rect is diffent between LRT and RTL
@@ -826,5 +826,480 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize
     selectionEnd = info.GetSelection().selection[1];
     EXPECT_EQ(selectionStart, 2);
     EXPECT_EQ(selectionEnd, 2);
+}
+
+/**
+ * @tc.name: EmojiCalSubU16stringRange
+ * @tc.desc: test CalSubU16stringRange function
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextFieldPatternTestFive, EmojiCalSubU16stringRange, TestSize.Level0)
+ {
+    // cases 1
+    // test CalSubU16stringRange function - normal
+    int32_t index = 0;
+    int32_t length = 5;
+    std::u16string content = u"Hello";
+    bool includeStartHalf = true;
+    bool includeEndHalf = true;
+    TextEmojiSubStringRange expected_1 = {0, 5};
+
+    TextEmojiSubStringRange result_1 =
+        TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected_1.startIndex, result_1.startIndex);
+    EXPECT_EQ(expected_1.endIndex, result_1.endIndex);
+
+    // case 2
+    // test CalSubU16stringRange function - boundary
+    index = 0;
+    length = 0;
+    content = u"";
+    includeStartHalf = false;
+    includeEndHalf = false;
+    TextEmojiSubStringRange expected_2 = {0, 0};
+
+    TextEmojiSubStringRange result_2 =
+        TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected_2.startIndex, result_2.startIndex);
+    EXPECT_EQ(expected_2.endIndex, result_2.endIndex);
+
+    // case 3
+    // test CalSubU16stringRange function - include emoji
+    index = 0;
+    length = 2;
+    content = u"😊Hello";
+    includeStartHalf = true;
+    includeEndHalf = true;
+    TextEmojiSubStringRange expected_3 = {0, 2};
+
+    TextEmojiSubStringRange result_3 =
+        TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected_3.startIndex, result_3.startIndex);
+    EXPECT_EQ(expected_3.endIndex, result_3.endIndex);
+
+    // case 4
+    // test CalSubU16stringRange function - no include emoji
+    index = 2;
+    length = 3;
+    content = u"Hello😊";
+    includeStartHalf = false;
+    includeEndHalf = false;
+    TextEmojiSubStringRange expected_4 = {2, 5};
+
+    TextEmojiSubStringRange result_4 =
+        TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected_4.startIndex, result_4.startIndex);
+    EXPECT_EQ(expected_4.endIndex, result_4.endIndex);
+
+    // case 5
+    // test CalSubU16stringRange function - length is INT32_MAX
+    index = 2;
+    length = INT32_MAX;
+    content = u"Hello😊";
+    includeStartHalf = false;
+    includeEndHalf = false;
+    TextEmojiSubStringRange expected_5;
+    if (std::numeric_limits<long>::max() == INT32_MAX) {
+        expected_5 = {2, -2147483647};
+    } else {
+        expected_5 = {2, 2147483647};
+    }
+
+    TextEmojiSubStringRange result_5 =
+        TextEmojiProcessor::CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected_5.startIndex, result_5.startIndex);
+    EXPECT_EQ(expected_5.endIndex, result_5.endIndex);
+}
+
+/**
+ * @tc.name: EmojiSubU16string
+ * @tc.desc: test SubU16string function
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextFieldPatternTestFive, EmojiSubU16string, TestSize.Level0)
+ {
+    // case 1
+    // test SubU16string function - normal
+    std::u16string content = u"🐶Hello, 🐱world!";
+    int32_t index = 0;
+    int32_t length = 11;
+    bool includeStartHalf = true;
+    bool includeEndHalf = true;
+
+    std::u16string expected = u"🐶Hello, 🐱";
+    std::u16string result =
+        TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+
+    // case 2
+    // test SubU16string function - empty
+    content = u"";
+    index = 0;
+    length = 0;
+    includeStartHalf = false;
+    includeEndHalf = false;
+
+    expected = u"";
+    result = TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+
+    // case 3
+    // test SubU16string function - includeStartHalf is true
+    content = u"Hello, 🐱world!";
+    index = 0;
+    length = 5;
+    includeStartHalf = true;
+    includeEndHalf = false;
+
+    expected = u"Hello";
+    result = TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+
+    // case 4
+    // test SubU16string function - includeEndHalf is true
+    content = u"Hello, 🐱world!";
+    index = 7;
+    length = 5;
+    includeStartHalf = false;
+    includeEndHalf = true;
+
+    expected = u"🐱wor";
+    result = TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+
+    // case 5
+    // test SubU16string function - length is 0
+    content = u"Hello, 🐱world!";
+    index = 0;
+    length = 0;
+    includeStartHalf = false;
+    includeEndHalf = false;
+
+    expected = u"";
+    result = TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+
+    // case 6
+    // test SubU16string function - length is INT_MAX
+    content = u"Hello, 🐱world!";
+    index = 0;
+    length = INT_MAX;
+    includeStartHalf = false;
+    includeEndHalf = false;
+
+    expected = u"Hello, 🐱world!";
+    result = TextEmojiProcessor::SubU16string(index, length, content, includeStartHalf, includeEndHalf);
+
+    EXPECT_EQ(expected, result);
+}
+
+/**
+ * @tc.name: EmojiConvertU8stringUnpairedSurrogates
+ * @tc.desc: test ConvertU8stringUnpairedSurrogates function
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextFieldPatternTestFive, EmojiConvertU8stringUnpairedSurrogates, TestSize.Level0)
+ {
+    // case 1
+    // test ConvertU8stringUnpairedSurrogates function - normal
+    std::string input = std::string("😓").substr(0, 1);
+    std::string expected = "�";
+
+    std::string result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
+
+    EXPECT_EQ(expected, result);
+
+    // case 2
+    // test ConvertU8stringUnpairedSurrogates function - empty
+    input = "";
+    expected = "";
+
+    result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
+
+    EXPECT_EQ(expected, result);
+
+    // case 3
+    // test ConvertU8stringUnpairedSurrogates function - no unpaired surrogates
+    input = "Hello, World!";
+    expected = "Hello, World!";
+
+    result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
+
+    EXPECT_EQ(expected, result);
+
+    // case 3
+    // test ConvertU8stringUnpairedSurrogates function - multiple unpaired surrogates
+    input = std::string("😓").substr(0, 1) + std::string("😓").substr(0, 1) + std::string("😓").substr(0, 1);
+    expected = "���";
+
+    result = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(input);
+
+    EXPECT_EQ(expected, result);
+}
+
+/**
+ * @tc.name: TextFieldControllerClearPreviewTextTest
+ * @tc.desc: test textfield controller ClearPreviewText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerClearPreviewTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    PreviewTextInfo info = {
+        .text = u"abc",
+        .range = {0, 2}
+    };
+    pattern_->SetPreviewTextOperation(info);
+    EXPECT_TRUE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+
+    pattern_->textFieldController_->ClearPreviewText();
+    EXPECT_FALSE(pattern_->GetIsPreviewText());
+    FlushLayoutTask(frameNode_);
+}
+
+/**
+ * @tc.name: TextFieldControllerGetTextTest
+ * @tc.desc: test textfield controller GetText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+    FlushLayoutTask(frameNode_);
+
+    pattern_->contentController_->content_ = u"123";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"123");
+
+    pattern_->contentController_->content_ = u"";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"");
+
+    pattern_->contentController_->content_ = u"😓";
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), u"😓");
+
+    pattern_->contentController_->content_ = std::u16string(u"😓").substr(0, 1);
+    EXPECT_EQ(pattern_->textFieldController_->GetText(), std::u16string(u"😓").substr(0, 1));
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest001
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest001, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::END);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest002
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest002, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+
+    layoutProperty->UpdateTextAlign(TextAlign::JUSTIFY);
+    rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest003
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest003, TestSize.Level0)
+{
+    CreateTextField("1234567", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest004
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest004, TestSize.Level0)
+{
+    CreateTextField("1234567", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest005
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest005, TestSize.Level0)
+{
+    CreateTextField("1234567", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 7);
+    EXPECT_EQ(selectionEnd, 7);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
+}
+
+/**
+ * @tc.name: TextFieldSelectControllerTest006
+ * @tc.desc: test textfield select controller function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Level0)
+{
+    CreateTextField("123", "7654321", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    controller->UpdateParagraph(nullptr);
+    auto rect = controller->CalculateEmptyValueCaretRect();
+    EXPECT_EQ(rect.Height(), 50);
 }
 } // namespace OHOS::Ace::NG

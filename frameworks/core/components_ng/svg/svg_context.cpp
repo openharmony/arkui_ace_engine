@@ -170,7 +170,7 @@ std::string SvgContext::GetCurrentTimeString()
 #ifdef __OHOS__
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    struct tm ptm = { 0 };
+    struct tm ptm;
     localtime_noenv_r(&tv.tv_sec, &ptm);
     char timeStr[TIME_LENGTH] = { 0 };
     size_t charsWritten = strftime(timeStr, TIME_LENGTH, "%Y-%m-%d %H:%M:%S:", &ptm);

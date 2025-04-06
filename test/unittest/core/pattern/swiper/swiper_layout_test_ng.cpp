@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
     swiperModel.Create();
     GetSwiper();
     CreateSwiperDone();
-    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(0.f, 0.f)));
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF()));
 
     /**
      * @tc.steps: step2. Add a item
@@ -52,7 +52,7 @@ HWTEST_F(SwiperLayoutTestNg, ChangeSwiperSize001, TestSize.Level1)
     currentFrameNode->MountToParent(frameNode_);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF(0.f, 0.f)));
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameSize(), SizeF()));
 
     /**
      * @tc.steps: step3. Set size
@@ -98,15 +98,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth001, TestSize.Level1)
     model.SetNextMargin(Dimension(20), false);
     CreateSwiperItems(5);
     CreateSwiperDone();
+    EXPECT_EQ(pattern_->RealTotalCount(), 5);
     EXPECT_EQ(pattern_->itemPosition_.size(), 5);
 
     ChangeIndex(1);
-    EXPECT_EQ(pattern_->currentIndex_, 1);
+    EXPECT_TRUE(CurrentIndex(1));
     const float itemWidth1 = (SWIPER_WIDTH - 2 * 20.0f) / 3.0f;
     CheckItems(0, 3, 20.0f, itemWidth1);
 
-    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1000.0f), CalcLength(300.0f)));
-    frameNode_->MarkModifyDone();
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(1000.0f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(300.0f));
     FlushUITasks();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 1000.0f);
     const float itemWidth2 = (1000.0f - 2 * 20.0f) / 3.0f;
@@ -154,12 +155,16 @@ HWTEST_F(SwiperLayoutTestNg, SwiperChangeWidth002, TestSize.Level1)
  */
 HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     auto layoutWrapper = LayoutWrapperNode(indicatorNode_, geometryNode, layoutProperty_);
     float startMainPos = 0.1f;
     float endMainPos = 0.0f;
@@ -340,5 +345,70 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutSkipMeasure001, TestSize.Level1)
     swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
     swiperLayoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
+}
+
+/**
+ * @tc.name: SwiperLayoutGetHeightForDigit001
+ * @tc.desc: Test GetHeightForDigit
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperLayoutGetHeightForDigit001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_NE(swiperLayoutAlgorithm, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF{10.f, 20.f});
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+    float height = swiperLayoutAlgorithm->GetHeightForDigit(&layoutWrapper, geometryNode->GetFrameSize().Height());
+    EXPECT_EQ(height, 20.f);
+}
+
+/**
+ * @tc.name: CalcCurrentPageStatusOnRTL001
+ * @tc.desc: Test CalcCurrentPageStatusOnRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, CalcCurrentPageStatusOnRTL001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    pattern_->itemPosition_.clear();
+    struct SwiperItemInfo swiperItemInfo1;
+    swiperItemInfo1.startPos = -240.0f;
+    swiperItemInfo1.endPos = 240.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    struct SwiperItemInfo swiperItemInfo2;
+    swiperItemInfo2.startPos = 240.0f;
+    swiperItemInfo2.endPos = 720.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
+    auto additionalOffset = 0.0f;
+    auto isTouchBottom = false;
+    pattern_->currentFirstIndex_ = 0;
+    auto pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
+
+    isTouchBottom = true;
+    pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
+
+    layoutProperty_->UpdateItemSpace(Dimension(50.0f, DimensionUnit::PX));
+    pattern_->itemPosition_.clear();
+    swiperItemInfo1.startPos = -240.0f;
+    swiperItemInfo1.endPos = 240.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
+    swiperItemInfo2.startPos = 290.0f;
+    swiperItemInfo2.endPos = 770.0f;
+    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo2));
+    pageRate = pattern_->CalcCurrentPageStatusOnRTL(additionalOffset, isTouchBottom).first;
+    EXPECT_EQ(pageRate, -0.5f);
 }
 } // namespace OHOS::Ace::NG

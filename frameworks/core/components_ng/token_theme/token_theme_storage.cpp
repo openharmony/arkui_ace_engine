@@ -91,7 +91,7 @@ const RefPtr<TokenTheme>& TokenThemeStorage::GetDefaultTheme()
 
 ColorMode TokenThemeStorage::CheckLocalAndSystemColorMode()
 {
-    auto sysColorMode = SystemProperties::GetColorMode();
+    auto sysColorMode = Container::CurrentColorMode();
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, sysColorMode);
     auto colorMode = pipelineContext->GetLocalColorMode();
@@ -103,22 +103,26 @@ ColorMode TokenThemeStorage::CheckLocalAndSystemColorMode()
 
 void TokenThemeStorage::CacheClear()
 {
+    std::lock_guard<std::mutex> lock(themeCacheMutex_);
     themeCache_.clear();
 }
 
 void TokenThemeStorage::CacheSet(const RefPtr<TokenTheme>& theme)
 {
     CHECK_NULL_VOID(theme);
+    std::lock_guard<std::mutex> lock(themeCacheMutex_);
     themeCache_[theme->GetId()] = theme;
 }
 
 const RefPtr<TokenTheme>& TokenThemeStorage::CacheGet(int32_t themeId)
 {
+    std::lock_guard<std::mutex> lock(themeCacheMutex_);
     return themeCache_[themeId];
 }
 
 void TokenThemeStorage::CacheRemove(int32_t themeId)
 {
+    std::lock_guard<std::mutex> lock(themeCacheMutex_);
     themeCache_.erase(themeId);
 }
 

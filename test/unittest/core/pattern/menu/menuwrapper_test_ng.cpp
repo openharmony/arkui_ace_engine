@@ -75,6 +75,8 @@ const std::string MENU_ITEM_GROUP_TEXT = "menuItemGroup";
 const std::string MENU_TOUCH_EVENT_TYPE = "1";
 const DirtySwapConfig configDirtySwap = { false, false, false, false, true, false };
 const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example.svg";
+constexpr Dimension BORDER_RADIUS = 50.0_vp;
+const BorderRadiusProperty& BORDER_RADIUS_PROPERTY = BorderRadiusProperty(BORDER_RADIUS);
 
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
@@ -82,6 +84,7 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr double BORDER_RADIUS_RATE = 1.5;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -643,19 +646,23 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     auto container =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
     auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
-    container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
-    menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
+    auto mockContainerContext = AceType::DynamicCast<MockRenderContext>(container->GetRenderContext());
+    mockContainerContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto mockMenuContext = AceType::DynamicCast<MockRenderContext>(menu->GetRenderContext());
+    mockMenuContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 70.0f, 70.0f));
     mockScroll->MountToParent(container);
     menu->MountToParent(mockScroll);
     container->MountToParent(wrapperNode);
 
     auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode1->MountToParent(menu);
-    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockMenuItemContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
 
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode2->MountToParent(menu);
-    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext2 = AceType::DynamicCast<MockRenderContext>(menuItemNode2->GetRenderContext());
+    mockMenuItemContext2->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
 
     TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
     TouchLocationInfo locationInfo(TARGET_ID);
@@ -907,15 +914,15 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg018, TestSize.Level1)
     ASSERT_NE(menuItemPattern2, nullptr);
 
     wrapperPattern->IncreaseEmbeddedSubMenuCount();
-    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(mainMenuPattern, mainMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 1);
     subMenu->MountToParent(wrapperNode);
 
     menu->GetLayoutProperty<MenuLayoutProperty>()->UpdateExpandingMode(SubMenuExpandingMode::STACK);
-    wrapperPattern->HideMenu(subMenuPattern, subMenu, OffsetF(0, 0));
+    wrapperPattern->HideMenu(subMenuPattern, subMenu, PointF(0, 0));
     EXPECT_EQ(wrapperNode->GetChildren().size(), 2);
 }
 
@@ -953,22 +960,26 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg019, TestSize.Level1)
     auto container =
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
     auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
-    container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
-    menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
+    auto mockContainerContext = AceType::DynamicCast<MockRenderContext>(container->GetRenderContext());
+    mockContainerContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 200.0f, 200.0f));
+    auto mockMenuContext = AceType::DynamicCast<MockRenderContext>(menu->GetRenderContext());
+    mockMenuContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 70.0f, 70.0f));
     mockScroll->MountToParent(container);
     menu->MountToParent(mockScroll);
     container->MountToParent(wrapperNode);
 
     auto menuItemNode1 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode1->MountToParent(menu);
-    menuItemNode1->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext1 = AceType::DynamicCast<MockRenderContext>(menuItemNode1->GetRenderContext());
+    mockMenuItemContext1->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
     auto curMenuItemPattern = menuItemNode1->GetPattern<MenuItemPattern>();
     ASSERT_NE(curMenuItemPattern, nullptr);
     curMenuItemPattern->isStackSubmenuHeader_ = true;
     
     auto menuItemNode2 = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
     menuItemNode2->MountToParent(menu);
-    menuItemNode2->GetGeometryNode()->SetFrameSize(SizeF(30, 30));
+    auto mockMenuItemContext2 = AceType::DynamicCast<MockRenderContext>(menuItemNode2->GetRenderContext());
+    mockMenuItemContext2->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 30.0f, 30.0f));
 
     TouchEventInfo info(MENU_TOUCH_EVENT_TYPE);
     TouchLocationInfo locationInfo(TARGET_ID);
@@ -1803,6 +1814,30 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg039, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MenuWrapperPatternTestNg040
+ * @tc.desc: test SetAnimationBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg040, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    menuWrapperPattern->SetAnimationBorderRadius(BORDER_RADIUS_RATE, BORDER_RADIUS_PROPERTY);
+    auto animationInfo_ = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusTopRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusTopRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomLeft.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomLeft->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+    EXPECT_TRUE(animationInfo_.borderRadius.radiusBottomRight.has_value());
+    EXPECT_EQ(animationInfo_.borderRadius.radiusBottomRight->Value(), BORDER_RADIUS.Value() * BORDER_RADIUS_RATE);
+}
+
+/**
  * @tc.name: MenuWrapperPaintMethodTestNg001
  * @tc.desc: test overlay draw function
  * @tc.type: FUNC
@@ -1826,7 +1861,8 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPaintMethodTestNg001, TestSize.Level1)
     function(canvas);
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     function(canvas);
-    wrapperNode->context_ = PipelineContext::GetCurrentContext().GetRawPtr();
+    auto context = PipelineContext::GetCurrentContext();
+    wrapperNode->context_ = AceType::RawPtr(context);
     auto pipline = wrapperNode->GetContext();
     ASSERT_NE(pipline, nullptr);
     auto menuTheme = pipline->GetTheme<MenuTheme>();

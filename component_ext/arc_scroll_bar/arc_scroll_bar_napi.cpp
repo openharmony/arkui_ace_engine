@@ -63,6 +63,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
             panda::Local<panda::ObjectRef> scrollerObject((uintptr_t)jsScroller);
             if (scrollerObject->GetNativePointerFieldCount(vm) > 0) {
                 Framework::JSScroller* scroller = (Framework::JSScroller*)scrollerObject->GetNativePointerField(vm, 0);
+                CHECK_NULL_RETURN(scroller, ExtNapiUtils::CreateNull(env));
                 scroller->SetInstanceId(Container::CurrentId());
                 auto scrollBarProxy = scroller->GetScrollBarProxy();
                 proxyFlag = true;

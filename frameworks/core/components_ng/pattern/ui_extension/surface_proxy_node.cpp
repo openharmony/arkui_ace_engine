@@ -17,6 +17,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/property/safe_area_insets.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void SurfaceProxyNode::SetHostNode(const WeakPtr<FrameNode>& host)

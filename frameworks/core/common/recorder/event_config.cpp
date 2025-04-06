@@ -71,6 +71,8 @@ void FillSwitch(std::vector<bool>& switches, const std::unique_ptr<JsonValue>& j
     switches[static_cast<int32_t>(EventCategory::CATEGORY_RECT)] = jsonObj->GetBool("rect", false);
     switches[static_cast<int32_t>(EventCategory::CATEGORY_WEB)] = jsonObj->GetBool("web", false);
     switches[static_cast<int32_t>(EventCategory::CATEGORY_TEXT_INPUT)] = jsonObj->GetBool("textInput", false);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_POINT)] = jsonObj->GetBool("point", false);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_PARENT_TEXT)] = jsonObj->GetBool("parentText", false);
 }
 
 void EventConfig::ParseSwitch(const std::unique_ptr<JsonValue>& jsonObj)

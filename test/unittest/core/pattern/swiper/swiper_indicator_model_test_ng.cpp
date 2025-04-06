@@ -75,7 +75,7 @@ void IndicatorModelTestNg::Create(const std::function<void(IndicatorModelNG)>& c
     EXPECT_NE(indicatorLayoutProperty_, nullptr);
     indicatorAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
     indicatorController_ = indicatorPattern_->GetIndicatorController();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::CreateWithItem(const std::function<void(IndicatorModelNG)>& callback, int32_t itemNumber)
@@ -90,19 +90,19 @@ void IndicatorModelTestNg::CreateWithItem(const std::function<void(IndicatorMode
 void IndicatorModelTestNg::ShowNextPage()
 {
     indicatorController_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::ShowPreviousPage()
 {
     indicatorController_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 void IndicatorModelTestNg::ChangeIndex(int32_t index, bool useAnimation)
 {
     indicatorController_->ChangeIndex(index, useAnimation);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 
 /**
@@ -441,6 +441,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg009, TestSize.Level1)
     EXPECT_NE(frameNode_, nullptr);
     indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
     EXPECT_NE(indicatorPattern_, nullptr);
+    indicatorPattern_->InitIndicatorController();
     indicatorLayoutProperty_ = frameNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     EXPECT_NE(indicatorLayoutProperty_, nullptr);
     indicatorController_ = indicatorPattern_->GetIndicatorController();
@@ -635,7 +636,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg012, TestSize.Level1)
     ChangeIndex(3, true);
     EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 3);
     ChangeIndex(4, true);
-    EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 3);
+    EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 0);
 }
 
 /**
@@ -680,7 +681,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg014, TestSize.Level1)
     });
     indicatorLayoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     indicatorPattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
     indicatorPattern_->isRepeatClicked_ = false;
     indicatorPattern_->mouseClickIndex_ = 0;
     std::optional<int32_t> mouseClickIndex;
@@ -702,5 +703,113 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg014, TestSize.Level1)
     indicatorPattern_->longPressEvent_->GetGestureEventFunc()(info);
     EXPECT_TRUE(indicatorPattern_->IsHorizontalAndRightToLeft());
     EXPECT_EQ(indicatorPattern_->GetCurrentShownIndex(), 1);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg015
+ * @tc.desc: Text dimBottom of DigitalIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg015, TestSize.Level1)
+{
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperDigitalParameters.dimBottom = std::make_optional<Dimension>(2.f);
+    swiperDigitalParameters.ignoreSizeValue = std::make_optional<bool>(false);
+    swiperDigitalParameters.setIgnoreSizeValue = std::make_optional<bool>(false);
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    EXPECT_NE(frameNode, nullptr);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->dimBottom, Dimension(2.f));
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->ignoreSizeValue, false);
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->setIgnoreSizeValue, false);
+
+    swiperDigitalParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::VP);
+    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->dimBottom, Dimension(2.f, DimensionUnit::VP));
+
+    swiperDigitalParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::FP);
+    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->dimBottom, Dimension(2.f, DimensionUnit::FP));
+
+    swiperDigitalParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::LPX);
+    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->dimBottom, Dimension(2.f, DimensionUnit::LPX));
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg016
+ * @tc.desc: Text dimBottom of DotIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg016, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    swiperParameters.dimBottom = std::make_optional<Dimension>(2.f);
+    swiperParameters.ignoreSizeValue = std::make_optional<bool>(false);
+    swiperParameters.setIgnoreSizeValue = std::make_optional<bool>(false);
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    EXPECT_NE(frameNode, nullptr);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimBottom, Dimension(2.f));
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->ignoreSizeValue, false);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->setIgnoreSizeValue, false);
+
+    swiperParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::VP);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimBottom, Dimension(2.f, DimensionUnit::VP));
+
+    swiperParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::FP);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimBottom, Dimension(2.f, DimensionUnit::FP));
+
+    swiperParameters.dimBottom = std::make_optional<Dimension>(2.f, DimensionUnit::LPX);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimBottom, Dimension(2.f, DimensionUnit::LPX));
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg017
+ * @tc.desc: Text dimSpace of DotIndicator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg017, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    swiperParameters.dimSpace = std::make_optional<Dimension>(2.f);
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+    EXPECT_NE(frameNode, nullptr);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimSpace, Dimension(2.f));
+
+    swiperParameters.dimSpace = std::make_optional<Dimension>(2.f, DimensionUnit::VP);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimSpace, Dimension(2.f, DimensionUnit::VP));
+
+    swiperParameters.dimSpace = std::make_optional<Dimension>(2.f, DimensionUnit::FP);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimSpace, Dimension(2.f, DimensionUnit::FP));
+
+    swiperParameters.dimSpace = std::make_optional<Dimension>(2.f, DimensionUnit::LPX);
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->swiperParameters_->dimSpace, Dimension(2.f, DimensionUnit::LPX));
 }
 } // namespace OHOS::Ace::NG

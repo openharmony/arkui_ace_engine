@@ -55,6 +55,7 @@ private:
 using MouseCallback = std::function<void(const MouseEventInfo&)>;
 using MouseHoverCallback = std::function<void()>;
 using OnHoverCallback = std::function<void(bool, HoverInfo& info)>;
+using OnHoverMoveCallback = std::function<void(HoverInfo& info)>;
 
 class MouseRawRecognizer : public virtual AceType {
     DECLARE_ACE_TYPE(MouseRawRecognizer, AceType);

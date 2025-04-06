@@ -52,6 +52,7 @@ namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
+constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -73,7 +74,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
     { "linearGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
              return SvgGradient::CreateLinearGradient();
         } else {
             return SvgLinearGradient::Create();
@@ -85,7 +86,7 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
     { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
     { "radialGradient", []() -> RefPtr<SvgNode> {
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             return SvgGradient::CreateRadialGradient();
         } else {
             return SvgRadialGradient::Create();
@@ -216,9 +217,17 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     if (fillColor_) {
+        std::string newValue;
         std::stringstream stream;
-        stream << std::hex << fillColor_.value().GetValue();
-        std::string newValue(stream.str());
+        auto fillColor = fillColor_.value();
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            stream << std::hex << fillColor.GetValue();
+            newValue = stream.str();
+        } else {
+            //convert color to #rgba format.
+            newValue = IntToHexString(fillColor.GetRed()) + IntToHexString(fillColor.GetGreen()) +
+                       IntToHexString(fillColor.GetBlue()) + IntToHexString(fillColor.GetAlpha());
+        }
         svgNode->SetAttr(SVG_FILL, "#" + newValue);
     } else {
         svgNode->SetAttr(SVG_FILL, value);
@@ -347,11 +356,16 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
     } else {
+        Size viewPort = svgContext_->GetRootViewBox().GetSize();
+        if (LessOrEqual(viewPort.Width(), 0.0) || LessOrEqual(viewPort.Height(), 0.0)) {
+            viewPort = svgContext_->GetViewPort();
+        }
         SvgLengthScaleRule lengthRule(Rect(0, 0, svgContext_->GetViewPort().Width(),
-            svgContext_->GetViewPort().Height()), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+            svgContext_->GetViewPort().Height()), viewPort,
+            SvgLengthScaleUnit::USER_SPACE_ON_USE);
         svgContext_->SetFillColor(fillColor_);
         root_->Draw(canvas, lengthRule);
     }
@@ -407,5 +421,12 @@ void SvgDom::SetSmoothEdge(float value)
 void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
 {
     colorFilter_ = colorFilter;
+}
+
+std::string SvgDom::IntToHexString(const int number)
+{
+    std::stringstream stringStream;
+    stringStream << std::setw(ONE_BYTE_TO_HEX_LEN) << std::setfill('0') << std::hex << number;
+    return stringStream.str();
 }
 } // namespace OHOS::Ace::NG

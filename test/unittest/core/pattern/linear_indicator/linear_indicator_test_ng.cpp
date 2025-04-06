@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void LinearIndicatorTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
@@ -64,6 +65,6 @@ void LinearIndicatorTestNg::Create(const std::function<void(LinearIndicatorModel
         callback(model);
     }
     GetInstance();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks(frameNode_);
 }
 } // namespace OHOS::Ace::NG

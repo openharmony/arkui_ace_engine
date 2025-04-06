@@ -29,6 +29,7 @@ public:
     static RefPtr<SvgNode> Create();
     void SetAttr(const std::string& name, const std::string& value) override;
     SvgRadialGradientInfo GetRadialGradientInfo(const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    SvgLengthScaleUnit GradientUnits();
 private:
     SvgRadialGradientAttribute radialGradientAttr_;
 };

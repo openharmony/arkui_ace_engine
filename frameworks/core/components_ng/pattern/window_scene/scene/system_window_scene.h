@@ -49,7 +49,7 @@ public:
 
     void LostViewFocus() override;
 
-    void RegisterVisibleChangeCallback(int32_t nodeId, std::function<void(bool)> callback);
+    void RegisterVisibleChangeCallback(int32_t nodeId, const std::function<void(bool)>& callback);
     void UnRegisterVisibleChangeCallback(int32_t nodeId);
     void HandleVisibleChangeCallback(bool visible);
 

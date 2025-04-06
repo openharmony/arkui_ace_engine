@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,14 +47,18 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+#include "core/event/statusbar/statusbar_event_proxy.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
+constexpr double SLOW_FRICTION_THRESHOLD = 3000.0;
+constexpr double SLOW_FRICTION = 1.0;
 constexpr double MAX_VELOCITY = 9000.0;
 constexpr double VELOCITY_SCALE = 1.0;
+constexpr double SLOW_VELOCITY_SCALE = 1.2;
 constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;
@@ -73,14 +77,12 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer {
+class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern() = default;
-    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-    {}
+    ScrollablePattern();
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     ~ScrollablePattern() override;
 
@@ -133,7 +135,7 @@ public:
         return false;
     }
     virtual bool IsAtTop() const = 0;
-    virtual bool IsAtBottom() const = 0;
+    virtual bool IsAtBottom(bool considerRepeat = false) const = 0;
     virtual bool IsAtTopWithDelta() const
     {
         return IsAtTop();
@@ -173,8 +175,8 @@ public:
     virtual bool OnScrollCallback(float offset, int32_t source);
     virtual void OnScrollStartCallback();
     virtual void FireOnScrollStart();
-    virtual void FireOnReachStart(const OnReachEvent& onReachStart) {}
-    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd) {}
+    virtual void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) {}
+    virtual void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) {}
     bool ScrollableIdle()
     {
         return !scrollableEvent_ || scrollableEvent_->Idle();
@@ -210,20 +212,13 @@ public:
     RefPtr<InputEventHub> GetInputHub();
 
     // edgeEffect
-    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const
-    {
-        return scrollEffect_;
-    }
+    const RefPtr<ScrollEdgeEffect>& GetScrollEdgeEffect() const;
     bool CanFadeEffect(float offset, bool isAtTop, bool isAtBottom) const;
     bool HandleEdgeEffect(float offset, int32_t source, const SizeF& size);
     void HandleFadeEffect(float offset, int32_t source, const SizeF& size,
         bool isNotPositiveScrollableDistance);
     virtual void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
-    bool IsRestrictBoundary()
-    {
-        return !scrollEffect_ || scrollEffect_->IsRestrictBoundary();
-    }
-
+    bool IsRestrictBoundary();
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
@@ -289,11 +284,7 @@ public:
         return false;
     }
 
-    bool IsScrollableSpringEffect() const
-    {
-        CHECK_NULL_RETURN(scrollEffect_, false);
-        return scrollEffect_->IsSpringEffect();
-    }
+    bool IsScrollableSpringEffect() const;
 
     void SetCoordEventNeedSpringEffect(bool IsCoordEventNeedSpring)
     {
@@ -396,6 +387,10 @@ public:
     {
         return 0.0f;
     }
+    virtual float GetContentStartOffset() const
+    {
+        return 0.0f;
+    }
     // main size of all children
     virtual float GetTotalHeight() const
     {
@@ -467,14 +462,6 @@ public:
 
     void SetScrollSource(int32_t scrollSource)
     {
-        if (scrollSource == SCROLL_FROM_JUMP || scrollSource == SCROLL_FROM_FOCUS_JUMP) {
-            if (scrollBar_ && scrollBar_->IsScrollable() && scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetOpacity(UINT8_MAX);
-                scrollBar_->ScheduleDisappearDelayTask();
-            }
-            StopScrollBarAnimatorByProxy();
-            StartScrollBarAnimatorByProxy();
-        }
         if (scrollSource == SCROLL_FROM_NONE) {
             if (lastScrollSource_ != scrollSource_) {
                 AddScrollableFrameInfo(scrollSource_);
@@ -510,9 +497,7 @@ public:
 
     float CalculateFriction(float gamma)
     {
-        if (GreatOrEqual(gamma, 1.0)) {
-            gamma = 1.0f;
-        }
+        gamma = std::clamp(gamma, 0.0f, 1.0f);
         return exp(-ratio_.value_or(1.848f) * gamma);
     }
     virtual float GetMainContentSize() const;
@@ -699,8 +684,8 @@ public:
     void GetPaintPropertyDumpInfo();
     void GetPaintPropertyDumpInfo(std::unique_ptr<JsonValue>& json);
 
-    void GetEventDumpInfo();
-    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
+    virtual void GetEventDumpInfo();
+    virtual void GetEventDumpInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -755,14 +740,6 @@ public:
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetCrownEventDragging();
     }
-
-    void SetReachBoundary(bool flag)
-    {
-        CHECK_NULL_VOID(scrollableEvent_);
-        auto scrollable = scrollableEvent_->GetScrollable();
-        CHECK_NULL_VOID(scrollable);
-        scrollable->SetReachBoundary(flag);
-    }
 #endif
 
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
@@ -815,6 +792,25 @@ public:
 
     void StopScrollableAndAnimate();
 
+    void SetBackToTop(bool backToTop);
+
+    void ResetBackToTop();
+
+    bool GetBackToTop() const
+    {
+        return backToTop_;
+    }
+
+    void UseDefaultBackToTop(bool useDefaultBackToTop)
+    {
+        useDefaultBackToTop_ = useDefaultBackToTop;
+    }
+
+    void OnStatusBarClick() override;
+
+    void GetRepeatCountInfo(
+        RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount);
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
     CrownSensitivity GetDigitalCrownSensitivity() const
@@ -826,6 +822,8 @@ public:
     {
         return DisplayMode::AUTO;
     }
+
+    void MarkScrollBarProxyDirty();
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -850,7 +848,8 @@ protected:
     void FireObserverOnScrollStop();
     void FireObserverOnDidScroll(float finalOffset);
 
-    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop);
+    virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
+    void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
 
     float FireOnWillScroll(float offset) const;
 
@@ -924,6 +923,11 @@ protected:
 
     void RecordScrollEvent(Recorder::EventType eventType);
 
+    bool IsBackToTopRunning() const
+    {
+        return isBackToTopRunning_;
+    }
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
@@ -951,7 +955,7 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected(float offsetX, float offsetY)
     {
         return false;
     }
@@ -1098,7 +1102,7 @@ private:
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
 
-    RefPtr<NavBarPattern> navBarPattern_;
+    RefPtr<NavDestinationPatternBase> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
@@ -1113,6 +1117,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
+    bool isBackToTopRunning_ = false;
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
@@ -1147,6 +1152,9 @@ private:
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
+
+    bool backToTop_ = false;
+    bool useDefaultBackToTop_ = true;
 };
 } // namespace OHOS::Ace::NG
 

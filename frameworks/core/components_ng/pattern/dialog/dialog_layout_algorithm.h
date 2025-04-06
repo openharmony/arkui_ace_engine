@@ -55,6 +55,8 @@ public:
     }
 
 private:
+    void ClipCustomMaskNode(const RefPtr<FrameNode>& dialog, const RectF& rect);
+    void UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog);
     LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
@@ -92,7 +94,7 @@ private:
     void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
-    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
+    void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
@@ -100,11 +102,16 @@ private:
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
 
+    bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
+    float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
     SafeAreaInsets safeAreaInsets_;
     bool isModal_ = true;
+    bool hasAddMaskNode_ = false;
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
@@ -132,6 +139,10 @@ private:
     std::optional<Dimension> keyboardAvoidDistance_;
 
     bool isShowInFloatingWindow_ = false;
+
+    float embeddedDialogOffsetY_ = 0.0f;
+    float stackRootDialogOffsetY_ = 0.0f;
+    float safeAreaBottomLength_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

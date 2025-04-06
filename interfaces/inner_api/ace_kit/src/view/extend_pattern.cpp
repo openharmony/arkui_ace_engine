@@ -14,6 +14,7 @@
  */
 
 #include "interfaces/inner_api/ace_kit/src/view/extend_pattern.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -26,6 +27,14 @@ bool ExtendPattern::OnDirtyLayoutWrapperSwap(
         return kitPattern_->OnDirtyLayoutrSwap(changeConfig);
     }
     return false;
+}
+
+void ExtendPattern::OnModifyDone()
+{
+    NG::Pattern::OnModifyDone();
+    if (kitPattern_) {
+        kitPattern_->OnModifyDone();
+    }
 }
 
 } // namespace OHOS::Ace::Kit

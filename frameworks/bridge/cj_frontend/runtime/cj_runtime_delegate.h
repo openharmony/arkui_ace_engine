@@ -41,9 +41,21 @@ private:
 
 public:
     void RegisterCJFuncs(AtCPackage funcs);
+    void RegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs));
+    void RegisterCJXCompCtrFuncs(AtCXComponentCallback funcs);
     const AtCPackage& GetCJFuncs() const
     {
         return atCPackage_;
+    }
+
+    const AtCPackageV2& GetCJFuncsV2() const
+    {
+        return atCPackageV2_;
+    }
+
+    const AtCXComponentCallback& GetCJXcompCtrFuncs() const
+    {
+        return atCXcompCtr_;
     }
 
     bool LoadAppEntry(const std::string& name);
@@ -57,6 +69,12 @@ private:
 
     AtCPackage atCPackage_;
     bool atCPackageLoaded_ = false;
+
+    AtCPackageV2 atCPackageV2_;
+    bool atCPackageLoadedV2_ = false;
+
+    AtCXComponentCallback atCXcompCtr_;
+    bool atCXcompCtrLoaded_ = false;
 };
 
 } // namespace OHOS::Ace::Framework

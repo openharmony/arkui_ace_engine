@@ -44,7 +44,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 static constexpr float ARC_LIST_MAIN_POS_OFFSET = 200.f;
-static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
+static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 153.0_vp;
 static constexpr float FLOAT_TWO = 2.0f;
 static constexpr float HEADER_DIST = 40.f;
 static constexpr float TRANSPARENCY_DIST = 40.f;
@@ -135,7 +135,9 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         if (NearZero(currentOffset_) || (!overScrollFeature_ && NonNegative(currentOffset_)) ||
             (overScrollFeature_ && overScrollTop) ||
             LessOrEqual(itemTotalSize, contentMainSize_ - contentStartOffset_ - contentEndOffset_)) {
-            startPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            if (midIndex > 0 || GreatNotEqual(startPos, GetHeaderAreaSize())) {
+                startPos = midItemMidPos - midItemHeight / FLOAT_TWO;
+            }
             if (childrenSize_) {
                 posMap_->OptimizeBeforeMeasure(startIndex, startPos, currentOffset_, contentMainSize_);
             }
@@ -153,6 +155,34 @@ void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
             }
         }
+    }
+}
+
+float ArcListLayoutAlgorithm::GetHeaderAreaSize() const
+{
+    if (headerIndex_ < 0) {
+        return 0.0f;
+    }
+    return headerMainSize_ + TRANSPARENCY_DIST;
+}
+
+void ArcListLayoutAlgorithm::HandleJumpCenter(LayoutWrapper* layoutWrapper)
+{
+    int32_t index = GetLanesFloor(layoutWrapper, jumpIndex_.value());
+    float mainLen = childrenSize_ ?
+        GetChildHeight(layoutWrapper, index) : MeasureAndGetChildHeight(layoutWrapper, index);
+    float startPos = (contentMainSize_ - mainLen) / 2.0f;
+    if (!isInitialized_ && index == 0 && headerIndex_ >= 0 && LessOrEqual(startPos, GetHeaderAreaSize())) {
+        startPos = GetHeaderAreaSize();
+    }
+    if (LessNotEqual(startPos, endMainPos_)) {
+        LayoutForward(layoutWrapper, index, startPos);
+    }
+    if (GreatNotEqual(GetStartPosition(), startMainPos_)) {
+        LayoutBackward(layoutWrapper, index - 1, GetStartPosition());
+    }
+    if ((GetEndIndex() < totalItemCount_ - 1) && LessNotEqual(GetEndPosition(), endMainPos_ - contentEndOffset_)) {
+        LayoutForward(layoutWrapper, GetEndIndex() + 1, GetEndPosition());
     }
 }
 
@@ -175,9 +205,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineForward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     endPos = startPos + mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
-
-    OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
     return 1;
 }
 
@@ -200,9 +228,7 @@ int32_t ArcListLayoutAlgorithm::LayoutALineBackward(
                                   : GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
 
     startPos = endPos - mainLen;
-    itemPosition_[currentIndex] = { id, startPos, endPos };
-
-    OnItemPositionAddOrUpdate(layoutWrapper, currentIndex);
+    itemPosition_[currentIndex] = { id, startPos, endPos, false };
     return 1;
 }
 
@@ -216,6 +242,24 @@ float ArcListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float ch
         return 0.0f;
     }
     return delta / FLOAT_TWO;
+}
+
+void ArcListLayoutAlgorithm::FixPredictSnapPos()
+{
+    if (!predictSnapEndPos_.has_value()) {
+        return;
+    }
+    float predictEndPos = predictSnapEndPos_.value();
+    int32_t predictIndex = -1;
+    int32_t curIndex = -1; // here invalid.
+    FindPredictSnapIndexInItemPositionsCenter(predictEndPos + currentOffset_, predictIndex, curIndex);
+    if (GetStartIndex() <= predictIndex && predictIndex <= GetEndIndex()) {
+        predictEndPos = CalculatePredictSnapEndPositionByIndex(predictIndex, predictEndPos + currentOffset_);
+        predictEndPos -= currentOffset_;
+    }
+    if (!NearEqual(predictEndPos, predictSnapEndPos_.value())) {
+        predictSnapEndPos_ = predictEndPos;
+    }
 }
 
 void ArcListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutProperty>& listLayoutProperty)
@@ -358,7 +402,7 @@ void ArcListLayoutAlgorithm::GenerateItemOffset(LayoutWrapper* layoutWrapper)
     }
 }
 
-float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos)
+float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t index, float prevPredictEndPos)
 {
     float predictSnapEndPos = prevPredictEndPos;
     float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
@@ -370,31 +414,6 @@ float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(uint32_t in
     predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
     predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;
     return predictSnapEndPos;
-}
-
-void ArcListLayoutAlgorithm::OnItemPositionAddOrUpdate(LayoutWrapper* layoutWrapper, uint32_t index)
-{
-    if (!predictSnapEndPos_.has_value()) {
-        return;
-    }
-
-    float startPos = 0.0f;
-    float endPos = 0.0f;
-    startPos = totalOffset_ + itemPosition_[index].startPos - spaceWidth_ / FLOAT_TWO;
-    endPos = totalOffset_ + itemPosition_[index].endPos + spaceWidth_ / FLOAT_TWO;
-
-    float predictSnapEndPos = predictSnapEndPos_.value();
-    float stopOnScreen = contentMainSize_ / FLOAT_TWO;
-    if (GreatOrEqual(predictSnapEndPos + stopOnScreen, startPos) &&
-        LessNotEqual(predictSnapEndPos + stopOnScreen, endPos)) {
-        predictSnapEndPos = CalculatePredictSnapEndPositionByIndex(index, predictSnapEndPos);
-    } else {
-        return;
-    }
-
-    if (!NearEqual(predictSnapEndPos, predictSnapEndPos_.value())) {
-        predictSnapEndPos_ = predictSnapEndPos;
-    }
 }
 
 float ArcListLayoutAlgorithm::GetItemSnapSize()
@@ -435,7 +454,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         float itemDeltaHeight = (info.endPos - info.startPos) * (info.scale - 1);
         float itemDispStartPos = info.startPos + info.offsetY - itemDeltaHeight / FLOAT_TWO;
         startHeaderPos_ = itemDispStartPos - headerMainSize_;
-        if (LessNotEqual(headerOffset_, 0.0f)) {
+        if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
             headerOffset_ = GreatNotEqual(startHeaderPos_, HEADER_DIST) ? startHeaderPos_ - HEADER_DIST : 0.0f;
         }
         startHeaderPos_ -= headerOffset_;
@@ -445,7 +464,7 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
         }
     } else {
         startHeaderPos_ = -chainOffset - headerMainSize_;
-        if (LessNotEqual(headerOffset_, 0.0f)) {
+        if (CheckNeedUpdateHeaderOffset(layoutWrapper)) {
             headerOffset_ = 0.0f;
         }
     }
@@ -474,6 +493,40 @@ void ArcListLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const Of
     }
 }
 
+bool ArcListLayoutAlgorithm::CheckNeedUpdateHeaderOffset(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pattern = host->GetPattern<ArcListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (!pattern->IsScrollableStopped()) {
+        return false;
+    }
+
+    if (headerStayNear_) {  // header offset set by init with no first item
+        return false;
+    }
+
+    bool offsetInvalid = LessNotEqual(headerOffset_, 0.0f);
+    if (itemPosition_.count(0) == 0) {
+        if (offsetInvalid) {
+            headerStayNear_ = true;
+            return true;
+        }
+        return false;
+    }
+
+    float firstItemSize = itemPosition_[0].endPos - itemPosition_[0].startPos;
+    bool itemChanged = !NearEqual(firstItemSize, oldFirstItemSize_);
+    bool headerChanged = !NearEqual(headerMainSize_, oldHeaderSize_);
+    if (offsetInvalid || itemChanged || headerChanged) {
+        oldFirstItemSize_ = firstItemSize;
+        oldHeaderSize_ = headerMainSize_;
+        return true;
+    }
+    return false;
+}
+
 void ArcListLayoutAlgorithm::UpdateZIndex(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -493,12 +546,19 @@ void ArcListLayoutAlgorithm::UpdateSnapCenterContentOffset(LayoutWrapper* layout
     if (GetStartIndex() == 0) {
         itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
         auto snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
-        contentStartOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, 0.0f);
+        contentStartOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, GetHeaderAreaSize());
     }
     if (GetEndIndex() == totalItemCount_ - 1) {
         itemHeight = itemPosition_.rbegin()->second.endPos - itemPosition_.rbegin()->second.startPos;
         auto snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
         contentEndOffset_ = std::max((contentMainSize_ - snapSize) / FLOAT_TWO, 0.0f);
+    }
+
+    if (childrenSize_ && totalItemCount_ - 1 > 0) {
+        auto startItemHeight = posMap_->GetPositionInfo(0).mainSize;
+        auto endItemHeight = posMap_->GetPositionInfo(totalItemCount_ - 1).mainSize;
+        contentStartOffset_ = std::max((contentMainSize_ - startItemHeight) / FLOAT_TWO, GetHeaderAreaSize());
+        contentEndOffset_ = std::max((contentMainSize_ - endItemHeight) / FLOAT_TWO, 0.0f);
     }
 }
 

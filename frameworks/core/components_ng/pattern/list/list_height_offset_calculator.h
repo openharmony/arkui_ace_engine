@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,12 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_position_map.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,8 +32,9 @@ constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
 class ListHeightOffsetCalculator {
 public:
-    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space,
-        int32_t lanes, Axis axis) : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition)
+    ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition, float space, int32_t lanes,
+        Axis axis, int32_t itemStartIndex)
+        : axis_(axis), spaceWidth_(space), lanes_(lanes), itemPosition_(itemPosition), itemStartIndex_(itemStartIndex)
     {
         if (!itemPosition.empty()) {
             targetPos_ = { itemPosition.begin()->second.startPos, itemPosition.begin()->second.endPos };
@@ -99,19 +103,108 @@ public:
         }
     }
 
-    void CalculateUINode(RefPtr<UINode> node)
+    void CalculatePosMapNode()
+    {
+        if (currentIndex_ > 0 && currLane_ == 0) {
+            estimateHeight_ += spaceWidth_;
+        }
+        if (currentIndex_ == startIndex_) {
+            estimateOffset_ = estimateHeight_ - targetPos_.first;
+        }
+        PositionInfo posInfo = posMap_ ? posMap_->GetPositionInfo(currentIndex_) : PositionInfo{ -1.0f, -1.0f };
+        float height = posInfo.mainSize < 0 ? GetAverageItemHeight() : posInfo.mainSize;
+        currRowHeight_ = std::max(currRowHeight_, height);
+        currLane_++;
+        if (currLane_ == lanes_ || posInfo.isGroup) {
+            estimateHeight_ += currRowHeight_;
+            currLane_ = 0;
+            currRowHeight_ = 0.0f;
+        }
+        currentIndex_++;
+        if (posInfo.mainSize >= 0) {
+            totalItemHeight_ += height;
+            totalItemCount_++;
+        }
+    }
+
+    int32_t GetPosMapStartIndex()
+    {
+        if (!posMap_) {
+            return -1;
+        }
+        return posMap_->GetStartIndexAndPos().first;
+    }
+
+    int32_t GetPosMapEndIndex()
+    {
+        if (!posMap_) {
+            return -1;
+        }
+        return posMap_->GetEndIndexAndPos().first;
+    }
+
+    void CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
+    {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
+        int32_t count = repeat2 ? repeat2->GetTotalCount() : node->FrameCount();
+        if (count <= 0) {
+            return;
+        }
+        int32_t lazyStartIndex = currentIndex_;
+        int32_t lazyEndIndex = currentIndex_ + count;
+        bool hasGroup = false;
+        while (currentIndex_ < lazyEndIndex) {
+            if (currentIndex_ < startIndex_) {
+                CalculatePosMapNode();
+            } else if (currentIndex_ <= endIndex_) {
+                auto child = node->GetFrameChildByIndex(currentIndex_ - lazyStartIndex, false);
+                auto frameNode = AceType::DynamicCast<FrameNode>(child);
+                if (!frameNode) {
+                    CalculatePosMapNode();
+                    continue;
+                }
+                float prevHeight = estimateHeight_;
+                CalculateFrameNode(frameNode);
+                if (frameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+                    totalItemHeight_ += estimateHeight_ - prevHeight - (currentIndex_ > 1 ? spaceWidth_ : 0);
+                    totalItemCount_++;
+                    hasGroup = true;
+                }
+            } else if (currentIndex_ < GetPosMapEndIndex()) {
+                CalculatePosMapNode();
+            } else if (currentIndex_ < lazyEndIndex) {
+                int32_t lanes = hasGroup ? 1 : lanes_;
+                int32_t remain = lazyEndIndex - currentIndex_;
+                estimateHeight_ += (GetAverageItemHeight() + spaceWidth_) * GetLines(lanes, remain);
+                currentIndex_ = lazyEndIndex;
+            }
+        }
+    }
+
+    void CalculateUINode(RefPtr<UINode> node, bool checkStart)
     {
         CHECK_NULL_VOID(node);
         auto children = node->GetChildren();
+        int32_t index = 0;
         for (const auto& child : children) {
+            index++;
+            if (checkStart && index <= itemStartIndex_) {  // ignore start header if exist
+                continue;
+            }
             if (AceType::InstanceOf<FrameNode>(child)) {
                 auto frameNode = AceType::DynamicCast<FrameNode>(child);
                 CalculateFrameNode(frameNode);
             } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
-                AceType::InstanceOf<RepeatVirtualScrollNode>(child)) {
-                CalculateLazyForEachNode(child);
+                AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+                auto posMapStart = GetPosMapStartIndex();
+                if (posMapStart >= 0 && posMapStart <= currentIndex_) {
+                    CalculateLazyForEachNodeWithPosMap(child);
+                } else {
+                    CalculateLazyForEachNode(child);
+                }
             } else {
-                CalculateUINode(child);
+                CalculateUINode(child, false);
             }
         }
     }
@@ -179,7 +272,11 @@ public:
 
     void CalculateLazyForEachNode(RefPtr<UINode> node)
     {
+        auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
         int32_t count = node->FrameCount();
+        if (repeat2) {
+            count = repeat2->GetTotalCount();
+        }
         if (count <= 0) {
             return;
         }
@@ -210,7 +307,7 @@ public:
 
     bool GetEstimateHeightAndOffset(RefPtr<UINode> node)
     {
-        CalculateUINode(node);
+        CalculateUINode(node, true);
         if (currLane_ > 0) {
             estimateHeight_ += currRowHeight_;
             currLane_ = 0;
@@ -227,6 +324,11 @@ public:
     float GetEstimateOffset() const
     {
         return estimateOffset_;
+    }
+
+    void SetPosMap(const RefPtr<ListPositionMap>& posMap)
+    {
+        posMap_ = posMap;
     }
 
 private:
@@ -274,6 +376,8 @@ private:
     float currRowHeight_ = 0.0f;
 
     const ListLayoutAlgorithm::PositionMap& itemPosition_;
+    int32_t itemStartIndex_ = 0;
+    RefPtr<ListPositionMap> posMap_;
 };
 } // namespace OHOS::Ace::NG
 #endif

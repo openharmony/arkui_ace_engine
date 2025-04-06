@@ -209,9 +209,6 @@ HWTEST_F(FormNodeTest, FormNodeTest_004, TestSize.Level1)
 HWTEST_F(FormNodeTest, FormNodeTest_005, TestSize.Level1)
 {
     auto formNode = CreateFromNode();
-    auto focusHub = formNode->GetFocusHub();
-    EXPECT_EQ(focusHub, nullptr);
-
     auto formNode1 = CreateFromNode();
     formNode->AddChild(formNode1);
     formNode1->OnDetachFromMainTree(true);

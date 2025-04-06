@@ -86,6 +86,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onSecurityStateChange", &JSTextField::SetOnSecurityStateChange);
     JSClass<JSTextInput>::StaticMethod("onSubmit", &JSTextField::SetOnSubmit);
+    JSClass<JSTextInput>::StaticMethod("onWillChange", &JSTextField::SetOnWillChange);
     JSClass<JSTextInput>::StaticMethod("onChange", &JSTextField::SetOnChange);
     JSClass<JSTextInput>::StaticMethod("onTextSelectionChange", &JSTextField::SetOnTextSelectionChange);
     JSClass<JSTextInput>::StaticMethod("onContentScroll", &JSTextField::SetOnContentScroll);
@@ -133,7 +134,9 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextInput>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextInput>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextInput>::StaticMethod("autoCapitalizationMode", &JSTextField::SetCapitalizationMode);
     JSClass<JSTextInput>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextInput>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextInput>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

@@ -507,65 +507,10 @@ HWTEST_F(RefreshNestedTestNg, RefreshScrollNest001, TestSize.Level1)
 
 /**
  * @tc.name: RefreshScrollNest002
- * @tc.desc: Create nest scroll, drag scroll down over the top, will not trigger refreshing when has EdgeEffect
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshNestedTestNg, DISABLED_RefreshScrollNest002, TestSize.Level1)
-{
-    NestedScrollOptions nestedOpt = {
-        .forward = NestedScrollMode::PARENT_FIRST,
-        .backward = NestedScrollMode::SELF_FIRST,
-    };
-    CreateRefresh();
-    CreateScroll();
-    CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
-    CreateContent(TOP_CONTENT_HEIGHT);
-    ViewStackProcessor::GetInstance()->Pop();
-    ScrollModelNG nestModel = CreateNestScroll();
-    nestModel.SetNestedScroll(nestedOpt);
-    nestModel.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent();
-    CreateDone();
-
-    /**
-     * @tc.steps: step1. HandleDragStart
-     * @tc.expected: Nothing changed
-     */
-    DragStart(nestNode_, Offset());
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-    EXPECT_TRUE(Position(nestNode_, 0));
-
-    /**
-     * @tc.steps: step2. HandleDragUpdate, the delta less than or equal TRIGGER_LOADING_DISTANCE
-     * @tc.expected: DRAG
-     */
-    DragUpdate(TRIGGER_LOADING_DISTANCE / pattern_->CalculatePullDownRatio());
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-    EXPECT_TRUE(Position(nestNode_, TRIGGER_LOADING_DISTANCE));
-
-    /**
-     * @tc.steps: step3. HandleDragUpdate, the delta(Plus previous delta) greater than or equal refreshOffset
-     * @tc.expected: OVER_DRAG
-     */
-    DragUpdate((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE) / pattern_->CalculatePullDownRatio());
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-    EXPECT_TRUE(Position(nestNode_, TRIGGER_REFRESH_DISTANCE));
-
-    /**
-     * @tc.steps: step4. HandleDragEnd
-     * @tc.expected: REFRESH
-     */
-    DragEnd(0);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-    EXPECT_TRUE(Position(nestNode_, TRIGGER_REFRESH_DISTANCE));
-}
-
-/**
- * @tc.name: RefreshScrollNest003
  * @tc.desc: Test onScrollEndRecursive
  * @tc.type: FUNC
  */
-HWTEST_F(RefreshNestedTestNg, RefreshScrollNest003, TestSize.Level1)
+HWTEST_F(RefreshNestedTestNg, RefreshScrollNest002, TestSize.Level1)
 {
     NestedScrollOptions nestedOpt = {
         .forward = NestedScrollMode::SELF_FIRST,
@@ -599,7 +544,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshScrollNest003, TestSize.Level1)
     EXPECT_TRUE(Position(scrollNode_, 0));
     EXPECT_TRUE(Position(nestNode_, 0));
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(scrollNode_);
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
 }
@@ -832,7 +777,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListNested003, TestSize.Level1)
      */
     pattern_->AddCustomBuilderNode(CreateCustomNode());
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(listNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.f);
     EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE);
 }
@@ -901,7 +846,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
      */
     DragStart(secondListNode, Offset(0, 0));
     DragUpdate(10);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->scrollOffset_, 10);
 }
 } // namespace OHOS::Ace::NG

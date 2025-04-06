@@ -146,9 +146,9 @@ public:
         return info_.reachStart_;
     }
 
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
-        return info_.offsetEnd_;
+        return considerRepeat ? (info_.offsetEnd_ && info_.repeatDifference_ == 0) : info_.offsetEnd_;
     }
 
     bool IsAtTopWithDelta() const override
@@ -210,6 +210,8 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
     void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
 
@@ -237,7 +239,7 @@ public:
 
     void StopAnimate() override;
 
-    bool IsPredictOutOfRange(int32_t index) const;
+    bool IsPredictOutOfCacheRange(int32_t index) const;
 
     bool IsReverse() const override;
 
@@ -279,7 +281,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected(float offsetX, float offsetY) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
@@ -296,8 +298,8 @@ private:
     void SyncLayoutBeforeSpring();
 
     void FireOnScrollStart() override;
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
 
     inline bool UseIrregularLayout() const;

@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -30,6 +31,11 @@ void ToggleButtonModelNG::Create(const std::string& tagName)
 void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor);
+}
+
+void ToggleButtonModelNG::ResetSelectedColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
 }
 
 void ToggleButtonModelNG::SetIsOn(bool isOn)
@@ -64,6 +70,12 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
 void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+}
+
+void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void ToggleButtonModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)

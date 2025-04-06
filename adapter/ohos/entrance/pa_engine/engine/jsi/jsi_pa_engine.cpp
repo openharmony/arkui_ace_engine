@@ -156,7 +156,7 @@ void JsiPaEngine::RegisterUncaughtExceptionHandler()
             .stack = errorObj.stack,
         };
         EventReport::JsErrReport(packageName, "", summary);
-        ExceptionHandler::HandleJsException(summary, errorInfo);
+        ExceptionHandler::HandleJsException(summary, errorInfo, false);
     };
 
     jsAbilityRuntime_->RegisterUncaughtExceptionHandler(uncaughtExceptionInfo);

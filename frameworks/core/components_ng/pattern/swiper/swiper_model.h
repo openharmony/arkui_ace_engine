@@ -49,6 +49,9 @@ struct SwiperParameters {
     std::optional<Color> colorVal;
     std::optional<Color> selectedColorVal;
     std::optional<int32_t> maxDisplayCountVal;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
+    std::optional<Dimension> dimSpace;
 };
 
 struct SwiperDigitalParameters {
@@ -64,6 +67,8 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> selectedFontSize;
     std::optional<FontWeight> fontWeight;
     std::optional<FontWeight> selectedFontWeight;
+    std::optional<bool> ignoreSizeValue;
+    std::optional<bool> setIgnoreSizeValue;
 };
 
 struct SwiperArcDotParameters {
@@ -140,6 +145,7 @@ public:
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetCachedIsShown(bool isShown) {}
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
+    virtual void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) {}
     virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}
     virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}
@@ -174,6 +180,8 @@ public:
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
     virtual void SetBindIndicator(bool bind) {}
+    virtual void SetJSIndicatorController(std::function<void()> resetFunc) {}
+    virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

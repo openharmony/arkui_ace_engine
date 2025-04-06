@@ -477,8 +477,7 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest007, TestSize.Level1)
      */
 
     // set touchEventActuator_
-    auto touchCallback = [](TouchEventInfo& info) {};
-    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    std::function<void(UIState)> touchEvent = [](const UIState& state) {};
     buttonPattern->touchListener_ = touchEvent;
     buttonPattern->OnModifyDone();
     auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());

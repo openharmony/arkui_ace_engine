@@ -28,11 +28,28 @@ void SvgClipPath::OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContex
     CHECK_NULL_VOID(context);
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(attributes_.clipState.GetClipPathUnits());
+    clipPathRule.SetPathTransform(true);
     auto clipPath = AsPath(clipPathRule);
     if (!clipPath.IsValid()) {
         LOGW("OnClipPath abandon, clipPath is empty");
         return;
     }
     canvas.ClipPath(clipPath, RSClipOp::INTERSECT, true);
+}
+
+RSRecordingPath SvgClipPath::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    RSRecordingPath path;
+    for (const auto& child : children_) {
+        auto childPath = child->AsPath(lengthRule);
+        //clip-rule in clipPath override the fill-rule in the Path base on SVG standard
+        if (attributes_.clipState.IsEvenodd()) {
+            childPath.SetFillStyle(RSPathFillType::EVENTODD);
+        } else {
+            childPath.SetFillStyle(RSPathFillType::WINDING);
+        }
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
 }
 } // namespace OHOS::Ace::NG

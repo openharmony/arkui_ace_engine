@@ -1,0 +1,6 @@
+{
+  "src": [
+    "pages/Index",
+    "extensionAbility/pages/Index"
+  ]
+}

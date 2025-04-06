@@ -82,6 +82,8 @@ public:
     static bool IsPanelScene(uint32_t type);
 
     static bool IsScreenScene(uint32_t type);
+
+    static bool IsNodeInKeyGuardWindow(const RefPtr<FrameNode>& node);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

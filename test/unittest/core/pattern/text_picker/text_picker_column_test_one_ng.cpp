@@ -58,6 +58,26 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+const int32_t HALF_NUMBER = 2;
+constexpr int32_t COLUMN_INDEX_1 = 1;
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+} // namespace
+
 class TextPickerColumnTestOneNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -66,6 +86,8 @@ public:
     void TearDown() override;
     void InitTextPickerColumnTestOneNg();
     void DestroyTextPickerColumnTestOneNgObject();
+    bool CompareTextPickerOptionProperties(std::vector<TextPickerOptionProperty> option1,
+        std::vector<TextPickerOptionProperty> option2);
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<TextPickerPattern> textPickerPattern_;
@@ -144,6 +166,22 @@ void TextPickerColumnTestOneNg::InitTextPickerColumnTestOneNg()
     stackNodeNext_->MountToParent(frameNode_);
 }
 
+bool TextPickerColumnTestOneNg::CompareTextPickerOptionProperties(std::vector<TextPickerOptionProperty> option1,
+    std::vector<TextPickerOptionProperty> option2)
+{
+    int32_t size = option1.size();
+
+    for (int32_t i = 0; i < size; i++) {
+        if (option1[i].height != option2[i].height ||
+            option1[i].fontheight != option2[i].fontheight ||
+            option1[i].prevDistance != option2[i].prevDistance ||
+            option1[i].nextDistance != option2[i].nextDistance) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void TextPickerColumnTestOneNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -163,16 +201,10 @@ void TextPickerColumnTestOneNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -865,7 +897,7 @@ HWTEST_F(TextPickerColumnTestOneNg, GetSelectedDistance001, TestSize.Level1)
     int32_t tstIndex = 0;
     int32_t tstNextIndex = 0;
     ScrollDirection dir = ScrollDirection::UP;
-    columnPattern->columnkind_ = TEXT;
+    columnPattern->columnKind_ = TEXT;
     columnPattern->optionProperties_[0].fontheight = 100.0f;
     columnPattern->optionProperties_[0].height = 800.0f;
     double distance = columnPattern->GetSelectedDistance(tstIndex, tstNextIndex, dir);
@@ -933,7 +965,7 @@ HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd001, TestSize.Level1)
     columnPattern->overscroller_.overScroll_ = 100.0f;
     auto tstToss = columnPattern->GetToss();
     tstToss->timeEnd_ = 100.0f;
-    auto tstWeak = AceType::WeakClaim(tstToss.GetRawPtr());
+    auto tstWeak = AceType::WeakClaim(Referenced::RawPtr(tstToss));
     auto tstRef = tstWeak.Upgrade();
     auto tstColumn = AceType::DynamicCast<TextPickerColumnPattern>(tstRef->column_.Upgrade());
     EXPECT_TRUE(tstColumn != nullptr);
@@ -1064,5 +1096,934 @@ HWTEST_F(TextPickerColumnTestOneNg, InitPanEvent001, TestSize.Level1)
     event.sourceTool_ = SourceTool::MOUSE;
     panEvent->actionEnd_(event);
     EXPECT_TRUE(event.GetSourceTool() == SourceTool::MOUSE);
+}
+
+/**
+ * @tc.name: SetCanLoop002
+ * @tc.desc: Test TextPickerColumnPattern SetCanLoop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetCanLoop002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(true);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->isLoop_ = true;
+    columnPattern->isTossStatus_ = true;
+
+    columnPattern->overscroller_.SetOverScroll(1.0f);
+    columnPattern->SetCanLoop(false);
+    EXPECT_EQ(columnPattern->isLoop_, false);
+}
+
+/**
+ * @tc.name: UpdateColumnChildPosition002
+ * @tc.desc: Test TextPickerColumnPattern UpdateColumnChildPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, UpdateColumnChildPosition002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->yLast_ = 0;
+    columnPattern->yOffset_ = 0;
+    columnPattern->overscroller_.SetOverScroll(1.0f);
+    auto midIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    columnPattern->optionProperties_[midIndex].nextDistance = 0.0f;
+    columnPattern->optionProperties_[midIndex].prevDistance = 0.0f;
+    columnPattern->pressed_ = false;
+    columnPattern->isTossStatus_ = true;
+    columnPattern->isReboundInProgress_ = false;
+    columnPattern->UpdateColumnChildPosition(0.0f);
+
+    columnPattern->optionProperties_[midIndex].nextDistance = 3.0f;
+    columnPattern->optionProperties_[midIndex].prevDistance = 3.0f;
+    pickerNodeLayout->UpdateCanLoop(true);
+    columnPattern->UpdateColumnChildPosition(4.0f);
+
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto column = columnPattern->overscroller_.column_.Upgrade();
+    ASSERT_NE(column, nullptr);
+    auto columnPattern1 = AceType::DynamicCast<TextPickerColumnPattern>(column);
+    NG::RangeContent option;
+    columnPattern1->options_.emplace_back(option);
+    auto hostNode = columnPattern1->GetHost();
+    ASSERT_NE(hostNode, nullptr);
+    auto geometryNode = hostNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameHeight(-5.0f);
+    auto toss = columnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+    auto snapPropertyCallback = [](float offset) {};
+    toss->property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+
+    columnPattern->UpdateColumnChildPosition(4.0f);
+    EXPECT_EQ(columnPattern->yOffset_, 0.0f);
+}
+
+/**
+ * @tc.name: SpringCurveTailEndProcess002
+ * @tc.desc: Test TextPickerColumnPattern SpringCurveTailEndProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SpringCurveTailEndProcess002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    pickerNodeLayout->UpdateCanLoop(false);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    auto toss = columnPattern->GetToss();
+    ASSERT_NE(toss, nullptr);
+    auto snapPropertyCallback = [](float offset) {};
+    toss->property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
+
+    columnPattern->SpringCurveTailEndProcess(false, true);
+    EXPECT_FALSE(toss->GetTossPlaying());
+
+    columnPattern->tossAnimationController_ = nullptr;
+
+    columnPattern->SpringCurveTailEndProcess(false, true);
+    EXPECT_FALSE(columnPattern->GetToss());
+}
+
+/**
+ * @tc.name: GetShiftDistance002
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetShiftDistance002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    int32_t index = 1;
+    ScrollDirection dir = ScrollDirection::UP;
+
+    auto distance = columnPattern->GetShiftDistanceForLandscape(index, dir);
+    EXPECT_EQ(distance, -10.0);
+
+    index = 7;
+    distance = columnPattern->GetShiftDistance(index, dir);
+    EXPECT_EQ(distance, 0.0);
+}
+
+/**
+ * @tc.name: HandleDragEnd002
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern and call HandleDragEnd.
+     * @tc.expected: step1. Create success and HandleDragEnd success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step2. Check the result.
+     * @tc.expected: step2. The toss is not playing and pressed is false.
+     */
+    EXPECT_FALSE(columnPattern->GetToss()->GetTossPlaying());
+    EXPECT_FALSE(columnPattern->pressed_);
+}
+
+/**
+ * @tc.name: HandleDragEnd003
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern.
+     * @tc.expected: step1. Create success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set the toss and call HandleDragEnd.
+     * @tc.expected: step2. The toss is not playing and pressed is false.
+     */
+    columnPattern->overscroller_.SetOverScroll(100.0f);
+    auto toss = columnPattern->GetToss();
+    toss->timeEnd_ = 10.0f;
+    auto weak = AceType::WeakClaim(Referenced::RawPtr(toss));
+    auto ref = weak.Upgrade();
+    auto column = AceType::DynamicCast<TextPickerColumnPattern>(ref->column_.Upgrade());
+    ASSERT_NE(column, nullptr);
+    column->mainVelocity_ = 0.0f;
+
+    columnPattern->animationCreated_ = false;
+    columnPattern->yOffset_ = 100.f;
+    columnPattern->yLast_ = 100.f;
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step3. Check the result.
+     * @tc.expected: steps. yLast and yOffset reset to 0.
+     */
+    EXPECT_DOUBLE_EQ(columnPattern->yOffset_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->yLast_, 0.f);
+}
+
+/**
+ * @tc.name: HandleDragEnd004
+ * @tc.desc: Test TextPickerColumnPattern HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, HandleDragEnd004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPickerColumnPattern.
+     * @tc.expected: step1. Create success.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    textPickerPattern->OnModifyDone();
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set the optionProperties and call HandleDragEnd.
+     */
+    columnPattern->animationCreated_ = true;
+    columnPattern->scrollDelta_ = 10.f;
+    columnPattern->optionProperties_.resize(6);
+    columnPattern->optionProperties_[5].nextDistance = 20.f;
+    columnPattern->optionProperties_[5].prevDistance = 10.f;
+
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+    columnPattern->HandleDragEnd();
+
+    /**
+     * @tc.steps: step3. Check the result.
+     * @tc.expected: step2. yLast and yOffset reset to 0 and scrollDelta is -10.f.
+     */
+    EXPECT_DOUBLE_EQ(columnPattern->yOffset_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->yLast_, 0.f);
+    EXPECT_DOUBLE_EQ(columnPattern->scrollDelta_, 0.f);
+}
+
+/**
+ * @tc.name: TextPickerColumnSetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnSetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    /**
+     * @tc.cases: case1. The default value of isDisableTextStyleAnimation_ is false.
+     */
+    EXPECT_FALSE(textPickerPattern->isDisableTextStyleAnimation_);
+    EXPECT_FALSE(columnPattern->isDisableTextStyleAnimation_);
+
+    /**
+     * @tc.cases: case2. Set the value of isDisableTextStyleAnimation_ to true.
+     */
+    TextPickerModelNG::GetInstance()->SetDisableTextStyleAnimation(true);
+    EXPECT_TRUE(textPickerPattern->isDisableTextStyleAnimation_);
+    EXPECT_TRUE(columnPattern->isDisableTextStyleAnimation_);
+}
+
+/**
+ * @tc.name: TextPickerColumnProperties001
+ * @tc.desc: Test TextPickerColumnPattern properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnProperties001, TestSize.Level1)
+{
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::PORTRAIT));
+
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    EXPECT_EQ(columnPattern->columnKind_, TEXT);
+
+    auto textNode = AceType::DynamicCast<FrameNode>(child->GetLastChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    std::vector<TextPickerOptionProperty> initOptionProperties = columnPattern->optionProperties_;
+
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    columnPattern->SetOptions(range);
+    columnPattern->SetColumnKind(TEXT);
+
+    TextPickerModelNG::GetInstance()->SetDisableTextStyleAnimation(true);
+    columnPattern->FlushCurrentOptions(false, true);
+    std::vector<TextPickerOptionProperty> enableOptionProperties = columnPattern->optionProperties_;
+    auto textOverflow = textLayoutProperty->GetTextOverflow();
+    EXPECT_TRUE(CompareTextPickerOptionProperties(enableOptionProperties, initOptionProperties));
+
+    TextPickerModelNG::GetInstance()->SetDisableTextStyleAnimation(false);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    TextPickerModelNG::GetInstance()->SetDisableTextStyleAnimation(true);
+    columnPattern->FlushCurrentOptions(false, true);
+    std::vector<TextPickerOptionProperty> reEnableOptionProperties = columnPattern->optionProperties_;
+    EXPECT_TRUE(CompareTextPickerOptionProperties(reEnableOptionProperties, enableOptionProperties));
+    EXPECT_EQ(textLayoutProperty->GetTextOverflow(), textOverflow);
+}
+
+/**
+ * @tc.name: TextPickerColumnInitHeightAndFontHeight001
+ * @tc.desc: Test when childIndex equals midIndex, the font height and height are calculated correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnInitHeightAndFontHeight001, TestSize.Level1)
+{
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    uint32_t childIndex = 3;
+    uint32_t midIndex = 3;
+    TextPickerOptionProperty prop;
+    columnPattern->InitTextHeightAndFontHeight(childIndex, midIndex, prop);
+    EXPECT_EQ(prop.height, columnPattern->dividerSpacing_);
+    EXPECT_GT(prop.fontheight, 0);
+}
+
+/**
+ * @tc.name: TextPickerColumnInitHeightAndFontHeight002
+ * @tc.desc: Test when childIndex equals (midIndex + 1), the font height and height are calculated correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnInitHeightAndFontHeight002, TestSize.Level1)
+{
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    uint32_t midIndex = 3;
+    uint32_t childIndex = midIndex + 1;
+    TextPickerOptionProperty prop;
+    columnPattern->InitTextHeightAndFontHeight(childIndex, midIndex, prop);
+    EXPECT_EQ(prop.height, columnPattern->gradientHeight_);
+    EXPECT_GT(prop.fontheight, 0);
+}
+
+/**
+ * @tc.name: TextPickerColumnInitHeightAndFontHeight003
+ * @tc.desc: Test when childIndex equals (midIndex - 1), the font height and height are calculated correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnInitHeightAndFontHeight003, TestSize.Level1)
+{
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    uint32_t midIndex = 3;
+    uint32_t childIndex = midIndex - 1;
+    TextPickerOptionProperty prop;
+    columnPattern->InitTextHeightAndFontHeight(childIndex, midIndex, prop);
+    EXPECT_EQ(prop.height, columnPattern->gradientHeight_);
+    EXPECT_GT(prop.fontheight, 0);
+}
+
+/**
+ * @tc.name: TextPickerColumnInitHeightAndFontHeight004
+ * @tc.desc: Test when childIndex is not equals to midIndex, (midIndex + 1), (midIndex - 1),
+ *           the font height and height are calculated correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnInitHeightAndFontHeight004, TestSize.Level1)
+{
+    uint32_t columnKind = TEXT;
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, columnKind);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto child = textPickerPattern->GetColumnNode();
+    ASSERT_NE(child, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(child)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    uint32_t midIndex = 3;
+    uint32_t childIndex = midIndex - 2;
+    TextPickerOptionProperty prop;
+    columnPattern->InitTextHeightAndFontHeight(childIndex, midIndex, prop);
+    EXPECT_EQ(prop.height, columnPattern->gradientHeight_);
+    EXPECT_GT(prop.fontheight, 0);
+}
+
+/**
+ * @tc.name: GetShiftDistanceForLandscape003
+ * @tc.desc: Test TextPickerColumnPattern GetShiftDistanceForLandscape when dir = UP and index = 1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, GetShiftDistanceForLandscape003, TestSize.Level1)
+{
+    InitTextPickerColumnTestOneNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    ScrollDirection dir = ScrollDirection::UP;
+    TextPickerOptionProperty prop;
+    prop.height = 2.0f;
+    prop.fontheight = 1.0f;
+    prop.prevDistance = 4.0f;
+    prop.nextDistance = 5.0f;
+
+    textPickerColumnPattern->optionProperties_.clear();
+    uint32_t showCount = textPickerColumnPattern->GetShowOptionCount();
+    for (uint32_t i = 0; i < showCount; i++) {
+        textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    }
+
+    int32_t currentIndex = COLUMN_INDEX_1;
+    int32_t nextIndex = COLUMN_INDEX_1 - 1;
+    double distance = 0.0f - std::round(textPickerColumnPattern->optionProperties_[currentIndex].height / HALF_NUMBER +
+        textPickerColumnPattern->optionProperties_[nextIndex].height -
+        textPickerColumnPattern->optionProperties_[nextIndex].fontheight / HALF_NUMBER);
+    EXPECT_EQ(textPickerColumnPattern_->GetShiftDistanceForLandscape(currentIndex, dir), distance);
+}
+
+/**
+ * @tc.name: SetOptionShiftDistance001
+ * @tc.desc: Test SetOptionShiftDistance when optionProperties_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance001, TestSize.Level1)
+{
+    InitTextPickerColumnTestOneNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+
+    textPickerColumnPattern->SetOptionShiftDistance();
+    EXPECT_TRUE(textPickerColumnPattern->optionProperties_.empty());
+}
+
+/**
+ * @tc.name: SetOptionShiftDistance002
+ * @tc.desc: Test SetOptionShiftDistance when isLandscape is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance002, TestSize.Level1)
+{
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+
+    InitTextPickerColumnTestOneNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 5;
+
+    TextPickerOptionProperty prop1;
+    prop1.height = 117.0f;
+    prop1.fontheight = 61.0f;
+    TextPickerOptionProperty prop2;
+    prop2.height = 117.0f;
+    prop2.fontheight = 69.0f;
+    TextPickerOptionProperty prop3;
+    prop3.height = 182.0f;
+    prop3.fontheight = 76.0f;
+
+    const TextPickerOptionProperty tmpOptionProperties[] = {prop1, prop2, prop3, prop2, prop1};
+
+    columnPattern->optionProperties_.clear();
+    for (const auto& prop: tmpOptionProperties) {
+        columnPattern->optionProperties_.emplace_back(prop);
+    }
+
+    columnPattern->SetOptionShiftDistance();
+
+    std::vector<std::pair<float, float>> expectedValues = {
+        {-117.0f, 117.0f},
+        {-117.0f, 117.0f},
+        {-117.0f, 206.0f},
+        {-203.0f, 145.0f},
+        {-141.0f, 117.0f}
+    };
+
+    for (size_t i = 0; i < columnPattern->optionProperties_.size(); i++) {
+        EXPECT_EQ(columnPattern->optionProperties_[i].prevDistance, expectedValues[i].first);
+        EXPECT_EQ(columnPattern->optionProperties_[i].nextDistance, expectedValues[i].second);
+    }
+}
+
+/**
+ * @tc.name: SetOptionShiftDistance003
+ * @tc.desc: Test SetOptionShiftDistance when isLandscape and isDisableTextStyleAnimation_ are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance003, TestSize.Level1)
+{
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::PORTRAIT));
+
+    InitTextPickerColumnTestOneNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 7;
+    columnPattern->isDisableTextStyleAnimation_ = false;
+
+    TextPickerOptionProperty prop1;
+    prop1.height = 117.0f;
+    prop1.fontheight = 61.0f;
+    TextPickerOptionProperty prop2;
+    prop2.height = 117.0f;
+    prop2.fontheight = 69.0f;
+    TextPickerOptionProperty prop3;
+    prop3.height = 182.0f;
+    prop3.fontheight = 76.0f;
+    const TextPickerOptionProperty tmpOptionProperties[] = {prop1, prop1, prop2, prop3, prop2, prop1, prop1};
+
+    columnPattern->optionProperties_.clear();
+    for (const auto& prop: tmpOptionProperties) {
+        columnPattern->optionProperties_.emplace_back(prop);
+    }
+
+    columnPattern->SetOptionShiftDistance();
+
+    std::vector<std::pair<float, float>> expectedValues = {
+        {-117.0f, 117.0f},
+        {-117.0f, 117.0f},
+        {-117.0f, 170.0f},
+        {-174.0f, 174.0f},
+        {-170.0f, 117.0f},
+        {-117.0f, 117.0f},
+        {-117.0f, 117.0f}
+    };
+
+    for (size_t i = 0; i < columnPattern->optionProperties_.size(); i++) {
+        EXPECT_EQ(columnPattern->optionProperties_[i].prevDistance, expectedValues[i].first);
+        EXPECT_EQ(columnPattern->optionProperties_[i].nextDistance, expectedValues[i].second);
+    }
+}
+
+/**
+ * @tc.name: SetOptionShiftDistance004
+ * @tc.desc: Test SetOptionShiftDistance when isLandscape is false and isDisableTextStyleAnimation_ is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, SetOptionShiftDistance004, TestSize.Level1)
+{
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::PORTRAIT));
+
+    InitTextPickerColumnTestOneNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 7;
+    columnPattern->isDisableTextStyleAnimation_ = true;
+
+    TextPickerOptionProperty prop1;
+    prop1.height = 117.0f;
+    prop1.fontheight = 61.0f;
+    TextPickerOptionProperty prop2;
+    prop2.height = 117.0f;
+    prop2.fontheight = 69.0f;
+    TextPickerOptionProperty prop3;
+    prop3.height = 182.0f;
+    prop3.fontheight = 76.0f;
+    const TextPickerOptionProperty tmpOptionProperties[] = {prop1, prop1, prop2, prop3, prop2, prop1, prop1};
+
+    columnPattern->optionProperties_.clear();
+    for (const auto& prop: tmpOptionProperties) {
+        columnPattern->optionProperties_.emplace_back(prop);
+    }
+
+    columnPattern->SetOptionShiftDistance();
+
+    std::vector<std::pair<float, float>> expectedValues = {
+        {-117.0f, 117.0f},
+        {-117.0f, 117.0f},
+        {-117.0f, 150.0f},
+        {-150.0f, 150.0f},
+        {-150.0f, 117.0f},
+        {-117.0f, 117.0f},
+        {-117.0f, 117.0f}
+    };
+
+    for (size_t i = 0; i < columnPattern->optionProperties_.size(); i++) {
+        EXPECT_EQ(columnPattern->optionProperties_[i].prevDistance, expectedValues[i].first);
+        EXPECT_EQ(columnPattern->optionProperties_[i].nextDistance, expectedValues[i].second);
+    }
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject001
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ is true and isColumnChange is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create TextPicker framenode and columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+     * @tc.step: step2. cover branch GetIsDeclarative() is true.
+     */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(false, 0);
+    std::string expectValue = R"({"value":"text1","index":0,"status":0})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject002
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ and isColumnChange are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject002, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is true.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(true, 1);
+    std::string expectValue = R"({"value":"text2","index":1,"status":1})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject003
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ and isColumnChange are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject003, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(false, 0);
+    std::string expectValue = R"({"newValue":"text1","newSelected":0,"status":0})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject004
+ * @tc.desc: Test GetSelectedObject when isDeclarative_ is false and isColumnChange are true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject004, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject.
+    */
+    std::string result = columnPattern->GetSelectedObject(true, 1);
+    std::string expectValue = R"({"newValue":"text2","newSelected":1,"status":1})";
+    EXPECT_EQ(result, expectValue);
+}
+
+/**
+ * @tc.name: TextPickerColumnGetSelectedObject005
+ * @tc.desc: Test GetSelectedObject when status is default value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestOneNg, TextPickerColumnGetSelectedObject005, TestSize.Level1)
+{
+    /**
+    * @tc.step: step1. create TextPicker framenode and columnPattern.
+    */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pickerNodeLayout = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+
+    /**
+    * @tc.step: step2. cover branch GetIsDeclarative() is true.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = true;
+
+    columnPattern->SetSelected(0);
+    columnPattern->SetCurrentIndex(1);
+    std::vector<RangeContent> options { { "icon1", "text1" }, { "icon2", "text2" } };
+    columnPattern->SetOptions(options);
+
+    /**
+    * @tc.step: step3. call method GetSelectedObject without status.
+    */
+    std::string result = columnPattern->GetSelectedObject(true);
+    std::string expectValue = R"({"value":"text2","index":1,"status":0})";
+    EXPECT_EQ(result, expectValue);
+
+    /**
+    * @tc.step: step4. cover branch GetIsDeclarative() is false.
+    */
+    MockPipelineContext::GetCurrent()->isDeclarative_ = false;
+
+    /**
+    * @tc.step: step5. call method GetSelectedObject without status.
+    */
+    result = columnPattern->GetSelectedObject(true);
+    expectValue = R"({"newValue":"text2","newSelected":1,"status":0})";
+    EXPECT_EQ(result, expectValue);
 }
 } // namespace OHOS::Ace::NG

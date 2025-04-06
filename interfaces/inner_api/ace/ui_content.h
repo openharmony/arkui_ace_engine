@@ -25,13 +25,15 @@
 #include <list>
 
 #include "arkui_rect.h"
+#include "constants.h"
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
-#include "serialized_gesture.h"
 #include "serializeable_object.h"
+#include "serialized_gesture.h"
+#include "ui_content_config.h"
 #include "viewport_config.h"
-#include "constants.h"
+
 namespace OHOS {
 
 namespace AbilityRuntime {
@@ -54,6 +56,7 @@ enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSNode;
+class RSCanvasNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
@@ -81,6 +84,12 @@ namespace AbilityBase {
 struct ViewData;
 enum class AutoFillType;
 } // namespace AbilityBase
+
+namespace Global {
+namespace Resource {
+class ResourceManager;
+}
+} // namespace Global
 
 class RefBase;
 class Parcelable;
@@ -121,8 +130,7 @@ public:
                                                 napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window *window,
         const std::string &name, napi_value storage, uint32_t focusWindowId) {};
-    virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
+    virtual void InitializeDynamic(const DynamicInitialConfig& config) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(
@@ -149,6 +157,8 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void SetIsFocusActive(bool isFocusActive) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
+    virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
@@ -167,6 +177,7 @@ public:
     virtual uint32_t GetBackgroundColor() = 0;
     virtual void SetBackgroundColor(uint32_t color) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
+    virtual void SetHostParams(const OHOS::AAFwk::WantParams& params) {};
     virtual void SetWindowContainerColor(uint32_t activeColor, uint32_t inactiveColor) = 0;
 
     // Judge whether window need soft keyboard or not
@@ -210,6 +221,7 @@ public:
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};
+    virtual void SetFormEnableBlurBackground(bool enableBlurBackground) {};
 
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
@@ -312,6 +324,8 @@ public:
     virtual void RecoverForm(const std::string &statusData) {}
 
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
+
+    virtual bool GetContainerModalTitleVisible(bool isImmersive) { return false; }
 
     virtual void SetContainerModalTitleHeight(int height) {}
 
@@ -496,6 +510,25 @@ public:
     {
         return nullptr;
     }
+
+    virtual void ActiveWindow() {};
+
+    virtual void UnActiveWindow() {};
+
+    virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
+
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    {
+        return false;
+    }
+
+    virtual void EnableContainerModalCustomGesture(bool enable) {};
+
+    virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
+    virtual void AddKeyFrameCanvasNodeCallback(const std::function<
+        void(std::shared_ptr<Rosen::RSCanvasNode>& canvasNode,
+            std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction)>& callback) {};
+    virtual void LinkKeyFrameCanvasNode(std::shared_ptr<OHOS::Rosen::RSCanvasNode>&) {};
 };
 
 } // namespace OHOS::Ace

@@ -25,6 +25,7 @@ typedef struct {
     int32_t frameNodeId = 0;
     std::string nodeType;
     std::string debugline;
+    int32_t parentNodeId = -1;
 } FrameNodeInfo;
 
 typedef std::function<void(bool)> ProfilerStatusCallback;
@@ -48,7 +49,7 @@ public:
     static bool GetStateProfilerStatus();
     static void SetStateProfilerStatus(bool status);
     static void TriggerJsStateProfilerStatusCallback(bool status);
-    static void SendStateProfilerMessage(const std::string& message);
+    static void SendMessage(const std::string& message);
     static void SetJsStateProfilerStatusCallback(ProfilerStatusCallback&& callback);
 
     // rs profiler
@@ -58,6 +59,7 @@ public:
     static void HandleStopRecord();
     static void HandleInnerCallback(FrameNodeInfo node);
     static void ConnectServerCallback();
+    using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 private:
     static bool stateProfilerStatus_;
@@ -67,6 +69,9 @@ private:
     static ProfilerStatusCallback jsStateProfilerStatusCallback_;
     static RsProfilerNodeMountCallback rsProfilerNodeMountCallback_;
     static bool isUseStageModel_;
+    static std::once_flag loadFlag;
+    static void* handlerConnectServerSo;
+    static SetArkUICallback setArkUICallback;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_LAYOUT_INSPECTOR_H

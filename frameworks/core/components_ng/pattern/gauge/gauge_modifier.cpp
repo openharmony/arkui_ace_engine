@@ -32,7 +32,7 @@ constexpr float PERCENT_HALF = 0.5f;
 }
 void GaugeModifier::onDraw(DrawingContext& context)
 {
-    if (useContentModifier_->Get()) {
+    if (useContentModifier_ && useContentModifier_->Get()) {
         return;
     }
     RSCanvas& canvas = context.canvas;
@@ -613,7 +613,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircular(
         info.drawSweepDegree = (weights[index] / totalWeight) * sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
         } else {
             DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);
@@ -651,7 +651,7 @@ void GaugeModifier::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, Re
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
         } else {
             DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);

@@ -110,9 +110,11 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     auto rowProperty = menuNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     rowProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, nullptr);
     CHECK_NULL_RETURN(navBarNode, nullptr);
+    auto frameNode = navBarNode->GetParent();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto theme = NavigationGetTheme(frameNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, nullptr);
     auto navBarPattern = AceType::DynamicCast<NavBarPattern>(navBarNode->GetPattern());
     auto navBarMaxNum = navBarPattern->GetMaxMenuNum();
     auto mostMenuItemCount =
@@ -122,7 +124,6 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
     navBarPattern->SetMaxMenuNum(mostMenuItemCount);
     bool needMoreButton = menuItems.size() > mostMenuItemCount;
 
-    auto frameNode = navBarNode->GetParent();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_RETURN(navigationGroupNode, nullptr);
     auto hub = navigationGroupNode->GetEventHub<EventHub>();
@@ -145,7 +146,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
                 V2::BAR_ITEM_ETS_TAG, barItemNodeId, []() { return AceType::MakeRefPtr<BarItemPattern>(); });
-            NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled);
+            NavigationTitleUtil::UpdateBarItemNodeWithItem(barItemNode, menuItem, isButtonEnabled, theme);
             auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
             CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
             barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -178,7 +179,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto barItemLayoutProperty = barItemNode->GetLayoutProperty();
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled);
+        NavigationTitleUtil::BuildMoreIemNode(barItemNode, isButtonEnabled, theme);
         auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
@@ -188,6 +189,13 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
             menuParam.placement = Placement::BOTTOM_RIGHT;
             targetId = menuItemNode->GetId();
             targetTag = menuItemNode->GetTag();
+        }
+        NavigationMenuOptions menuOptions = navBarPattern->GetMenuOptions();
+        if (menuOptions.mbOptions.bgOptions.blurStyleOption.has_value()) {
+            menuParam.backgroundBlurStyleOption = menuOptions.mbOptions.bgOptions.blurStyleOption.value();
+        }
+        if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
+            menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
         }
         auto barMenuNode = MenuView::Create(
             std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
@@ -370,6 +378,9 @@ void NavBarPattern::OnAttachToFrameNode()
 void NavBarPattern::OnCoordScrollStart()
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCoordScrollStartAction();
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -381,9 +392,12 @@ void NavBarPattern::OnCoordScrollStart()
     titlePattern->OnCoordScrollStart();
 }
 
-float NavBarPattern::OnCoordScrollUpdate(float offset)
+float NavBarPattern::OnCoordScrollUpdate(float offset, float currentOffset)
 {
     if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_RETURN(eventHub, 0.0f);
+        eventHub->FireOnCoordScrollUpdateAction(currentOffset);
         return 0.0f;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -400,6 +414,9 @@ void NavBarPattern::OnCoordScrollEnd()
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "OnCoordScroll end");
     if (titleMode_ != NavigationTitleMode::FREE) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleMode_ is not free");
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireOnCoordScrollEndAction();
         return;
     }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
@@ -467,9 +484,7 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
 void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContextWithCheck();
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
 }
@@ -482,7 +497,14 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     CHECK_NULL_RETURN(titleNode, false);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
-    return Negative(offset) && !titlePattern->IsCurrentMinTitle();
+    bool canScrollUp = false;
+    if (titleMode_ != NavigationTitleMode::FREE) {
+        auto eventHub = GetEventHub<NavBarEventHub>();
+        if (eventHub && eventHub->HasOnCoordScrollStartAction()) {
+            canScrollUp = true;
+        }
+    }
+    return (Negative(offset) && !titlePattern->IsCurrentMinTitle()) || canScrollUp;
 }
 
 float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
@@ -494,5 +516,13 @@ float NavBarPattern::GetTitleBarHeightLessThanMaxBarHeight() const
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, 0.f);
     return titlePattern->GetTitleBarHeightLessThanMaxBarHeight();
+}
+
+bool NavBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    hostNode->AdjustRenderContextIfNeeded();
+    return false;
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,6 @@ public:
     RefPtr<ScrollPattern> pattern_;
     RefPtr<ScrollEventHub> eventHub_;
     RefPtr<ScrollLayoutProperty> layoutProperty_;
-    RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
     std::vector<RefPtr<FrameNode>> contentChildren_;
     RefPtr<ScrollBar> scrollBar_;

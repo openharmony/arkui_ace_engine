@@ -74,6 +74,20 @@ void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType ev
     }
 }
 
+void AccessibilityProperty::UpdateAccessibilityNextFocusIdMap(const std::string& nextFocusInspectorKey)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+
+    auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    jsAccessibilityManager->UpdateAccessibilityNextFocusIdMap(containerId, nextFocusInspectorKey,
+                                                              frameNode->GetAccessibilityId());
+}
+
 std::string AccessibilityProperty::GetText() const
 {
     return propText_.value_or("");
@@ -373,8 +387,10 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
+    // hitTarget true means self hit hover, and will not search brothers
     if (hitSelf && shouldSearchSelf
-        && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node))) {
+        && CheckHoverConsumeByAccessibility(node)
+        && CheckHoverConsumeByComponent(node, selfPoint)) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -384,7 +400,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     }
 
     if (shouldSearchChildren) {
-        PointF noOffsetPoint = selfPoint - rect.GetOffset();
+        auto orginRect = renderContext->GetPaintRectWithoutTransform();
+        PointF noOffsetPoint = selfPoint - orginRect.GetOffset();
         RecursiveParam recursiveParam;
         recursiveParam.hitTarget = hitTarget;
         recursiveParam.ancestorGroupFlag = currentGroupFlag;
@@ -447,6 +464,21 @@ bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, false);
     return accessibilityProperty->IsAccessibilityHoverPriority();
+}
+
+bool AccessibilityProperty::CheckHoverConsumeByAccessibility(const RefPtr<FrameNode>& node)
+{
+    return (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node));
+}
+
+// hover hit but need be checked by component,
+// false means self and descendants no need to be hovered, should search brothers
+bool AccessibilityProperty::CheckHoverConsumeByComponent(const RefPtr<FrameNode>& node, const NG::PointF& point)
+{
+    CHECK_NULL_RETURN(node, true);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, true);
+    return accessibilityProperty->IsAccessibilityHoverConsume(point);
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -808,6 +840,26 @@ void AccessibilityProperty::ResetUserCheckable()
     isUserCheckable_.reset();
 }
 
+void AccessibilityProperty::SetUserScrollTriggerable(const bool& triggerable)
+{
+    isUserScrollTriggerable_ = triggerable;
+}
+
+bool AccessibilityProperty::HasUserScrollTriggerable()
+{
+    return isUserScrollTriggerable_.has_value();
+}
+
+bool AccessibilityProperty::IsUserScrollTriggerable()
+{
+    return isUserScrollTriggerable_.value_or(true);
+}
+
+void AccessibilityProperty::ResetUserScrollTriggerable()
+{
+    isUserScrollTriggerable_ = true;
+}
+
 void AccessibilityProperty::SetUserMinValue(const int32_t& minValue)
 {
     minValue_ = minValue;
@@ -962,6 +1014,7 @@ void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::str
         return;
     }
     accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
@@ -1022,14 +1075,9 @@ void AccessibilityProperty::SaveAccessibilityVirtualNode(const RefPtr<UINode>& n
     accessibilityVirtualNode_ = node;
 }
 
-RefPtr<UINode> AccessibilityProperty::GetAccessibilityVirtualNode()
+const RefPtr<UINode>& AccessibilityProperty::GetAccessibilityVirtualNode() const
 {
     return accessibilityVirtualNode_;
-}
-
-NG::UINode* AccessibilityProperty::GetAccessibilityVirtualNodePtr()
-{
-    return Referenced::RawPtr(accessibilityVirtualNode_);
 }
 
 bool AccessibilityProperty::HasAccessibilityVirtualNode() const
@@ -1241,4 +1289,39 @@ void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
     accessibilityHoverPriority_ = hoverPriority;
 }
 
+void AccessibilityProperty::SetFocusDrawLevel(int32_t drawLevel)
+{
+    if (static_cast<FocusDrawLevel>(drawLevel) == focusDrawLevel_) {
+        return;
+    }
+    focusDrawLevel_ = static_cast<FocusDrawLevel>(drawLevel);
+}
+
+int32_t AccessibilityProperty::GetFocusDrawLevel()
+{
+    return static_cast<int32_t>(focusDrawLevel_);
+}
+
+void AccessibilityProperty::SetAccessibilityZIndex(const int32_t& accessibilityZIndex)
+{
+    accessibilityZIndex_ = accessibilityZIndex;
+}
+
+int32_t AccessibilityProperty::GetAccessibilityZIndex() const
+{
+    return accessibilityZIndex_;
+}
+
+void AccessibilityProperty::OnAccessibilityDetachFromMainTree()
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto frameNode = host_.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto context = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(context);
+        auto accessibilityManager = context->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->OnAccessbibilityDetachFromMainTree(frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

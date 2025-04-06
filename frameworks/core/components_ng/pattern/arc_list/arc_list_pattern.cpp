@@ -46,13 +46,10 @@ namespace {
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
-constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
+constexpr float ARC_LIST_DRAG_OVER_RATES = 0.6f;
+constexpr float ARC_LIST_DRAG_OVER_KVALUE = 0.84f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
-#ifdef SUPPORT_DIGITAL_CROWN
-constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.feedback.crown.impact";
-#endif
 } // namespace
 
 ArcListPattern::ArcListPattern()
@@ -116,6 +113,9 @@ bool ArcListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     startHeaderPos_ = listLayoutAlgorithm->GetStartHeaderPos();
     headerOffset_ = listLayoutAlgorithm->GetHeaderOffset();
+    oldHeaderSize_ = listLayoutAlgorithm->GetOldHeaderSize();
+    oldFirstItemSize_ = listLayoutAlgorithm->GetOldFirstItemSize();
+    headerStayNear_ = listLayoutAlgorithm->GetHeaderStayNear();
     return ListPattern::OnDirtyLayoutWrapperSwap(dirty, config);
 }
 
@@ -138,46 +138,15 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
     if (!posMap_) {
         posMap_ = MakeRefPtr<ArcListPositionMap>(itemStartIndex_);
     }
-    if (childrenSize_) {
-        listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
-        listLayoutAlgorithm->SetListPositionMap(posMap_);
-    }
-    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
-        !isInitialized_ && !jumpIndex_ : !isInitialized_;
-    if (needUseInitialIndex) {
-        jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
-    }
-    if (jumpIndex_) {
-        listLayoutAlgorithm->SetIndex(jumpIndex_.value());
-        jumpIndex_.reset();
-    }
-    if (targetIndex_) {
-        listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
-    }
-    if (predictSnapOffset_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
-        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
-    }
-    listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
-    listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
-    listLayoutAlgorithm->SetIsNeedCheckOffset(isNeedCheckOffset_);
-    listLayoutAlgorithm->SetItemsPosition(itemPosition_);
-    listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    if (IsOutOfBoundary(false) && GetScrollSource() != SCROLL_FROM_AXIS) {
-        listLayoutAlgorithm->SetOverScrollFeature();
-    }
-    listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
-    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
-        SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
-        SetChainAnimationToPosMap();
-    }
-    if (predictSnapEndPos_.has_value()) {
-        listLayoutAlgorithm->SetPredictSnapEndPosition(predictSnapEndPos_.value());
-    }
+
+    SetLayoutAlgorithmParams(listLayoutAlgorithm, listLayoutProperty);
+
     listLayoutAlgorithm->SetStartHeaderPos(startHeaderPos_);
     listLayoutAlgorithm->SetHeaderOffset(headerOffset_);
+    listLayoutAlgorithm->SetOldHeaderSize(oldHeaderSize_);
+    listLayoutAlgorithm->SetOldFirstItemSize(oldFirstItemSize_);
+    listLayoutAlgorithm->SetHeaderStayNear(headerStayNear_);
+    listLayoutAlgorithm->SetIsInitialized(isInitialized_);
     return listLayoutAlgorithm;
 }
 
@@ -188,69 +157,6 @@ bool ArcListPattern::OnScrollCallback(float offset, int32_t source)
     }
     offset = FixScrollOffset(offset, source);
     return ListPattern::OnScrollCallback(offset, source);
-}
-
-void ArcListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect)
-{
-    scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        return list->startMainPos_ + list->GetChainDelta(list->startIndex_) - list->currentDelta_;
-    });
-    scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (!list->itemPosition_.empty()) {
-            float endItemHeight =
-                list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
-        }
-        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
-        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
-    });
-    scrollEffect->SetTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        if (!list->itemPosition_.empty()) {
-            float startItemHeight =
-                list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
-        }
-
-        return list->contentStartOffset_;
-    });
-    scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
-        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
-        if (!list->itemPosition_.empty()) {
-            float endItemHeight =
-                list->itemPosition_.rbegin()->second.endPos - list->itemPosition_.rbegin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(endItemHeight, snapSize) ? endItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO + snapHeight / FLOAT_TWO - (endPos - startPos);
-        }
-        float leading = list->contentMainSize_ - (endPos - startPos) - list->contentEndOffset_;
-        return (list->startIndex_ == 0) ? std::min(leading, list->contentStartOffset_) : leading;
-    });
-    scrollEffect->SetInitTrailingCallback([weak = AceType::WeakClaim(this)]() -> double {
-        auto list = weak.Upgrade();
-        CHECK_NULL_RETURN(list, 0.0);
-        if (!list->itemPosition_.empty()) {
-            float startItemHeight =
-                list->itemPosition_.begin()->second.endPos - list->itemPosition_.begin()->second.startPos;
-            float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-            float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-            return list->contentMainSize_ / FLOAT_TWO - snapHeight / FLOAT_TWO;
-        }
-
-        return list->contentStartOffset_;
-    });
 }
 
 std::function<bool(int32_t)> ArcListPattern::GetScrollIndexAbility()
@@ -534,79 +440,24 @@ float ArcListPattern::FixScrollOffset(float offset, int32_t source)
     return fixOffset;
 }
 
+bool ArcListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
+{
+    if (IsAtTop() && NearZero(snapAnimationOptions.animationVelocity)) {
+        return false;
+    }
+    return ListPattern::StartSnapAnimation(snapAnimationOptions);
+}
+
 float ArcListPattern::GetScrollUpdateFriction(float overScroll)
 {
-    return ARC_LIST_DRAG_OVER_FRICTION;
+    float contentMoveSize = contentMainSize_ / FLOAT_TWO * ARC_LIST_DRAG_OVER_RATES;
+    float scale = (contentMoveSize - overScroll) / contentMoveSize;
+    if (LessOrEqual(scale, 0.0f)) {
+        return 0.0f;
+    } else if (GreatOrEqual(scale, 1.0f)) {
+        return ARC_LIST_DRAG_OVER_RATES;
+    }
+    return -exp(-ARC_LIST_DRAG_OVER_KVALUE * scale) + 1;
 }
 
-void ArcListPattern::OnMidIndexChanged(int32_t lastIndex, int32_t curIndex)
-{
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    int32_t totalCnt = host->GetTotalChildCount() - itemStartIndex_;
-
-    StartVibrator(curIndex == 0 || curIndex == totalCnt - 1);
-#endif
-}
-
-#ifdef SUPPORT_DIGITAL_CROWN
-void ArcListPattern::StartVibrator(bool bEdge)
-{
-    if (!GetCrownEventDragging()) {
-        return;
-    }
-    const char* effectId = bEdge ? HAPTIC_STRENGTH5 : HAPTIC_STRENGTH1;
-    VibratorUtils::StartVibraFeedback(effectId);
-}
-#endif
-
-float ArcListPattern::GetStartOverScrollOffset(float offset, float startMainPos) const
-{
-    float startOffset = 0.0f;
-    float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(0, -offset) : 0.f;
-    auto startPos = startMainPos + ChainDelta - currentDelta_;
-    auto newStartPos = startPos + offset;
-    if (startPos > contentStartOffset_ && newStartPos > contentStartOffset_) {
-        startOffset = offset;
-    }
-    if (startPos > contentStartOffset_ && newStartPos <= contentStartOffset_) {
-        startOffset = contentStartOffset_ - startPos;
-    }
-    if (startPos <= contentStartOffset_ && newStartPos > contentStartOffset_) {
-        startOffset = newStartPos - contentStartOffset_;
-    }
-    if (!itemPosition_.empty()) {
-        float startItemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
-        float snapSize = ArcListLayoutAlgorithm::GetItemSnapSize();
-        float snapHeight = LessOrEqual(startItemHeight, snapSize) ? startItemHeight : snapSize;
-        if (GreatNotEqual(newStartPos, ((contentMainSize_ - snapHeight - spaceWidth_) / FLOAT_TWO))) {
-            startOffset = newStartPos - ((contentMainSize_ - snapHeight - spaceWidth_) / FLOAT_TWO);
-        }
-    }
-    return startOffset;
-}
-
-float ArcListPattern::GetEndOverScrollOffset(float offset, float endMainPos, float startMainPos) const
-{
-    float endOffset = 0.0f;
-    float ChainDelta = chainAnimation_ ? chainAnimation_->GetValuePredict(maxListItemIndex_, -offset) : 0.f;
-    auto endPos = endMainPos + ChainDelta - currentDelta_;
-    auto contentEndPos = contentMainSize_ - contentEndOffset_;
-    auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos)) {
-        endPos = startMainPos + contentMainSize;
-    }
-    auto newEndPos = endPos + offset;
-    if (endPos < contentEndPos && newEndPos < contentEndPos) {
-        endOffset = offset;
-    }
-    if (endPos < contentEndPos && newEndPos >= contentEndPos) {
-        endOffset = contentEndPos - endPos;
-    }
-    if (endPos >= contentEndPos && newEndPos < contentEndPos) {
-        endOffset = newEndPos - contentEndPos;
-    }
-    return endOffset;
-}
 } // namespace OHOS::Ace::NG

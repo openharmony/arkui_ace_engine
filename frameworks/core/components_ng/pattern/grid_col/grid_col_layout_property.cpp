@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid_col/grid_col_layout_property.h"
 
 #include "core/components_v2/grid_layout/grid_container_utils.h"
+#include <sstream>
 
 namespace OHOS::Ace::NG {
 
@@ -65,4 +66,17 @@ int32_t GridColLayoutProperty::GetPropValue(const V2::GridContainerSize& prop, V
     }
 }
 
+std::string GridColLayoutProperty::ToString() const
+{
+    auto sizeType = GetSizeTypeValue(V2::GridSizeType::UNDEFINED);
+    auto span = GetSpan(sizeType);
+    auto offset = GetOffset(sizeType);
+    auto order = GetOrder(sizeType);
+    std::stringstream ss;
+    ss << "[span:" << span << ", ";
+    ss << "offset:" << offset << ", ";
+    ss << "order:" << order << ", ";
+    ss << "sizeType:" << static_cast<int32_t>(sizeType) << "]";
+    return ss.str();
+}
 } // namespace OHOS::Ace::NG

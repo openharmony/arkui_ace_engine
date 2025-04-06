@@ -313,11 +313,13 @@ void OffscreenCanvasPattern::SetMiterLimit(double limit)
 void OffscreenCanvasPattern::SetTextAlign(TextAlign align)
 {
     offscreenPaintMethod_->SetTextAlign(align);
+    offscreenPaintMethod_->SetMeasureTextAlign(align);
 }
 
 void OffscreenCanvasPattern::SetTextBaseline(TextBaseline baseline)
 {
     offscreenPaintMethod_->SetTextBaseline(baseline);
+    offscreenPaintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void OffscreenCanvasPattern::SetShadowBlur(double blur)
@@ -373,26 +375,31 @@ void OffscreenCanvasPattern::SetStrokeColor(const Color& color)
 void OffscreenCanvasPattern::SetFontWeight(FontWeight weight)
 {
     offscreenPaintMethod_->SetFontWeight(weight);
+    offscreenPaintMethod_->SetMeasureFontWeight(weight);
 }
 
 void OffscreenCanvasPattern::SetFontStyle(FontStyle style)
 {
     offscreenPaintMethod_->SetFontStyle(style);
+    offscreenPaintMethod_->SetMeasureFontStyle(style);
 }
 
 void OffscreenCanvasPattern::SetFontFamilies(const std::vector<std::string>& fontFamilies)
 {
     offscreenPaintMethod_->SetFontFamilies(fontFamilies);
+    offscreenPaintMethod_->SetMeasureFontFamilies(fontFamilies);
 }
 
 void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
 {
     offscreenPaintMethod_->SetFontSize(size);
+    offscreenPaintMethod_->SetMeasureFontSize(size);
 }
 
 void OffscreenCanvasPattern::SetLetterSpacing(const Dimension& letterSpacing)
 {
     offscreenPaintMethod_->SetLetterSpacing(letterSpacing);
+    offscreenPaintMethod_->SetMeasureLetterSpacing(letterSpacing);
 }
 
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)

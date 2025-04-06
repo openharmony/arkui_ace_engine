@@ -128,8 +128,7 @@ void CustomDialogControllerModelImpl::ShowDialog(DialogProperties& dialogPropert
     auto stack = context->GetLastStack();
     auto result = false;
     if (stack) {
-        result = executor->PostTask(
-            task, TaskExecutor::TaskType::UI, "ArkUICustomDialogNotifyOpenOperation", PriorityType::VIP);
+        result = executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICustomDialogNotifyOpenOperation");
     } else {
         LOGE("JSCustomDialogController(ShowDialog) stack is null, post delay task.");
         result = executor->PostDelayedTask(
@@ -211,8 +210,7 @@ void CustomDialogControllerModelImpl::CloseDialog(DialogProperties& dialogProper
         this->NotifyDialogOperation(DialogOperation::DIALOG_CLOSE, dialogProperties, pending, isShown,
             std::move(cancelTask), dialogComponent, customDialog, dialogOperation);
     };
-    auto result = executor->PostTask(
-        task, TaskExecutor::TaskType::UI, "ArkUICustomDialogNotifyCloseOperation", PriorityType::VIP);
+    auto result = executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICustomDialogNotifyCloseOperation");
     if (!result) {
         LOGW("JSCustomDialogController(CloseDialog) fail to post task, reset pending status");
         pending = false;

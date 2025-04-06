@@ -805,7 +805,17 @@ class SelectionMenuComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Menu.create();
-                        Menu.onVisibleAreaChange([0.0, 1.0], () => {
+                        Menu.radius(this.theme.containerBorderRadius);
+                        Menu.clip(true);
+                        Menu.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
+                        Menu.constraintSize({
+                            minWidth: this.theme.defaultMenuWidth
+                        });
+                        Menu.onAreaChange((oldValue, newValue) => {
+                            let newValueWidth = newValue.width;
+                            this.customMenuWidth =
+                                this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ? newValueWidth :
+                                    this.theme.defaultMenuWidth;
                             if (!this.controller) {
                                 return;
                             }
@@ -821,19 +831,6 @@ class SelectionMenuComponent extends ViewPU {
                             } else {
                                 this.visibilityValue = Visibility.Visible;
                             }
-                        });
-                        Menu.radius(this.theme.containerBorderRadius);
-                        Menu.clip(true);
-                        Menu.width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth);
-                        Menu.constraintSize({
-                            minWidth: this.theme.defaultMenuWidth
-                        });
-                        Menu.onAreaChange((oldValue, newValue) => {
-                            let newValueWidth = newValue.width;
-                            this.customMenuWidth =
-                                this.fontScale > MAX_FONT_SCALE && newValueWidth > this.theme.defaultMenuWidth ?
-                                    newValueWidth :
-                                this.theme.defaultMenuWidth;
                         });
                     }, Menu);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {

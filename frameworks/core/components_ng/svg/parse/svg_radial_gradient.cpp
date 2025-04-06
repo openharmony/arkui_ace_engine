@@ -70,18 +70,30 @@ void SvgRadialGradient::SetAttr(const std::string& name, const std::string& valu
 SvgRadialGradientInfo SvgRadialGradient::GetRadialGradientInfo(
     const SvgCoordinateSystemContext& svgCoordinateSystemContext)
 {
-    auto gradientRule = svgCoordinateSystemContext.BuildScaleRule(radialGradientAttr_.gradientUnits);
-    auto cx = GetMeasuredPosition(radialGradientAttr_.cx, gradientRule, SvgLengthType::HORIZONTAL);
-    auto cy = GetMeasuredPosition(radialGradientAttr_.cy, gradientRule, SvgLengthType::VERTICAL);
-    auto r = GetMeasuredLength(radialGradientAttr_.r, gradientRule, SvgLengthType::OTHER);
-    auto fx = GetMeasuredPosition(radialGradientAttr_.fx.value_or(radialGradientAttr_.cx), gradientRule,
+    Rect defaultRect(0, 0, 1, 1);
+    auto viewPort = svgCoordinateSystemContext.GetViewPort();
+    SvgLengthScaleRule gradientRule =
+        radialGradientAttr_.gradientUnits == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX ?
+        SvgLengthScaleRule(defaultRect, viewPort, SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) :
+        svgCoordinateSystemContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    auto cx = GetRegionPosition(radialGradientAttr_.cx, gradientRule, SvgLengthType::HORIZONTAL);
+    auto cy = GetRegionPosition(radialGradientAttr_.cy, gradientRule, SvgLengthType::VERTICAL);
+    auto r = GetRegionLength(radialGradientAttr_.r, gradientRule, SvgLengthType::OTHER);
+    auto fx = GetRegionPosition(radialGradientAttr_.fx.value_or(radialGradientAttr_.cx), gradientRule,
         SvgLengthType::HORIZONTAL);
-    auto fy = GetMeasuredPosition(radialGradientAttr_.fy.value_or(radialGradientAttr_.cy), gradientRule,
+    auto fy = GetRegionPosition(radialGradientAttr_.fy.value_or(radialGradientAttr_.cy), gradientRule,
         SvgLengthType::VERTICAL);
     TAG_LOGD(AceLogTag::ACE_IMAGE, "cx:%{public}lf, cy:%{public}lf, r:%{public}lf, fx:%{public}lf, fy:%{public}lf",
         cx, cy, r, fx, fy);
-    return { .cx = cx, .cy = cy, .r = r, .fx = fx, .fy = fy,
+    return {
+        .cx = cx, .cy = cy, .r = r, .fx = fx, .fy = fy,
         .spreadMethod =static_cast<int32_t>(radialGradientAttr_.spreadMethod),
-        .gradientTransform = radialGradientAttr_.gradientTransform, .colors = GetStopColors()};
+        .gradientTransform = radialGradientAttr_.gradientTransform, .colors = GetStopColors()
+    };
+}
+
+SvgLengthScaleUnit SvgRadialGradient::GradientUnits()
+{
+    return radialGradientAttr_.gradientUnits;
 }
 } // namespace OHOS::Ace::NG

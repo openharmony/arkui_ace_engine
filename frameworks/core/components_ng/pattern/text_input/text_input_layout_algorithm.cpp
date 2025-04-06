@@ -140,23 +140,22 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto size = geometryNode->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
-    const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_VOID(content);
     SizeT<float> contentSize = content->GetRect().GetSize();
     auto layoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    PipelineContext* context = layoutWrapper->GetHostNode()->GetContext();
+    PipelineContext* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset(false, true) -
-        context->GetRootRect().GetOffset();
+    parentGlobalOffset_ = frameNode->GetPaintRectOffset(false, true) - context->GetRootRect().GetOffset();
     Alignment align = Alignment::CENTER;
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto hasAlign = false;
     if (layoutProperty->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
-        hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
     auto border = pattern->GetBorderWidthProperty();
     OffsetF offsetBase = OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(border),
@@ -305,20 +304,33 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     auto responseArea = pattern->GetResponseArea();
     auto cleanNodeResponseArea = pattern->GetCleanNodeResponseArea();
     float childWidth = 0.0f;
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, contentConstraint);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    CHECK_NULL_RETURN(textFieldTheme, contentConstraint);
+    float contentButtonPadding = 0.0f;
+    auto contentHoverPadding = textFieldTheme->GetContentHoverPadding().ConvertToPx();
     if (responseArea) {
         auto childIndex = frameNode->GetChildIndex(responseArea->GetFrameNode());
         childWidth += responseArea->Measure(layoutWrapper, childIndex).Width();
+        contentButtonPadding = responseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
     }
     if (cleanNodeResponseArea) {
         auto childIndex = frameNode->GetChildIndex(cleanNodeResponseArea->GetFrameNode());
         childWidth += cleanNodeResponseArea->Measure(layoutWrapper, childIndex).Width();
+        contentButtonPadding = cleanNodeResponseArea->GetHoverIconPadding() + static_cast<float>(contentHoverPadding);
+    }
+
+    if (frameNode->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        contentButtonPadding = 0.0f;
     }
 
     auto newLayoutConstraint = contentConstraint;
     newLayoutConstraint.maxSize.SetWidth(std::max(newLayoutConstraint.maxSize.Width() - childWidth, 0.0f));
     newLayoutConstraint.minSize.SetWidth(std::max(newLayoutConstraint.minSize.Width() - childWidth, 0.0f));
     if (newLayoutConstraint.selfIdealSize.Width()) {
-        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth);
+        newLayoutConstraint.selfIdealSize.SetWidth(newLayoutConstraint.selfIdealSize.Width().value() - childWidth -
+            contentButtonPadding);
     }
     return newLayoutConstraint;
 }

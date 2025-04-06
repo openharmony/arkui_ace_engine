@@ -33,6 +33,7 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 private:
+    LayoutConstraintF GetTextLayoutConstraint(LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(ToastLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

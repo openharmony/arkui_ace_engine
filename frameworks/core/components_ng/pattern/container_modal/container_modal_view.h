@@ -19,14 +19,18 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ContainerModalView : public AceType {
+class ACE_FORCE_EXPORT ContainerModalView : public AceType {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
     static bool ConfigCustomWindowMask(RefPtr<PipelineContext>& pipeline, bool enable);
+    static void RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+        std::function<RefPtr<NG::FrameNode>(const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+            const RefPtr<NG::FrameNode>& containerTitleRow)>& button);
 
 protected:
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& controlButtonsRow);
@@ -42,6 +46,10 @@ protected:
         RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
     static void AddButtonOnEvent(
         RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
+    static std::function<RefPtr<NG::FrameNode>()> customTitileBuilder_;
+    static std::function<RefPtr<NG::FrameNode>(
+        const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+        customControlButtonBuilder_;
 
 private:
     static float baseScale;

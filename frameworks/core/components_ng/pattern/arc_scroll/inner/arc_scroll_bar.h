@@ -55,7 +55,6 @@ private:
     double trickSweepAngle_ = 0.0;
     double width_ = 0.0;
     double centerDeviation_ = 0.0;
-    CancelableCallback<void()> shrinkDelayTask_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_INNER_ARC_SCROLL_BAR_H

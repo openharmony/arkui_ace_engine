@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
@@ -60,8 +61,9 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     }
     customNode->SetAppearFunction(std::move(info.appearFunc));
     customNode->SetDidBuildFunction(std::move(info.didBuildFunc));
-    auto renderFunc = [renderFunction = std::move(info.renderFunc)]() -> RefPtr<UINode> {
-        auto node = renderFunction();
+    auto renderFunc =
+        [renderFunction = std::move(info.renderFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        auto node = renderFunction(deadline, isTimeout);
         return AceType::DynamicCast<UINode>(node);
     };
     customNode->SetRenderFunction(std::move(renderFunc));
@@ -72,8 +74,9 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetHasNodeUpdateFunc(std::move(info.hasNodeUpdateFunc));
     customNode->SetReloadFunction(std::move(info.reloadFunc));
     customNode->SetThisFunc(std::move(info.getThisFunc));
-    auto completeReloadFunc = [reloadFunc = std::move(info.completeReloadFunc)]() -> RefPtr<UINode> {
-        return AceType::DynamicCast<UINode>(reloadFunc());
+    auto completeReloadFunc =
+        [reloadFunc = std::move(info.completeReloadFunc)](int64_t deadline, bool& isTimeout) -> RefPtr<UINode> {
+        return AceType::DynamicCast<UINode>(reloadFunc(deadline, isTimeout));
     };
     customNode->SetCompleteReloadFunc(std::move(completeReloadFunc));
     customNode->SetJSViewName(std::move(info.jsViewName));
@@ -106,14 +109,21 @@ bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>&
 {
     // check if this @ReusbaleV2 @ComponentV2 instance is inside RepeatVirtualScroll
     // and created within a .template builder function
-    auto weak = AceType::DynamicCast<NG::CustomNode>(viewNode);
+    // cast to UINode as here viewNode can be instance of CustomMeasureLayoutNode
+    auto weak = AceType::DynamicCast<NG::UINode>(viewNode);
     RefPtr<UINode> node = weak.Upgrade();
     CHECK_NULL_RETURN(node, false);
 
-    while ((node->GetParent()) && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG) &&
-           (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) == nullptr)) {
-            node = node->GetParent();
+    while (node->GetParent() && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG)) {
+        if (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) != nullptr) {
+            break;
+        }
+        if (AceType::DynamicCast<RepeatVirtualScroll2Node>(node->GetParent()) != nullptr) {
+            break;
+        }
+        node = node->GetParent();
     }
+
     bool result = ((node->GetParent() == nullptr) || (node->GetParent()->GetTag() == V2::JS_VIEW_ETS_TAG) ||
                    (node->IsAllowReusableV2Descendant()));
     return result;

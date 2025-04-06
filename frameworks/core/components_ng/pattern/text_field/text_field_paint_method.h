@@ -27,9 +27,7 @@
 #include "core/components_ng/pattern/text_field/text_field_foreground_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
@@ -71,7 +69,6 @@ private:
     RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     RefPtr<TextFieldForegroundModifier> textFieldForegroundModifier_;
     WeakPtr<ScrollBar> scrollBar_;
-
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPaintMethod);
 };
 

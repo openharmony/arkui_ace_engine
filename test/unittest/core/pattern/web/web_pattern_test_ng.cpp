@@ -286,54 +286,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_003, TestSize.Level1)
     webPattern->isEnhanceSurface_ = true;
     webPattern->delegate_ = nullptr;
     webPattern->OnModifyDone();
-#endif
-}
-
-/**
- * @tc.name: OnScrollBarColorUpdate004
- * @tc.desc: OnScrollBarColorUpdate.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTestNg, OnScrollBarColorUpdate004, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    EXPECT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    EXPECT_NE(webPattern->delegate_, nullptr);
-    webPattern->OnAreaChangedInner();
-    webPattern->isInWindowDrag_ = true;
-    webPattern->OnAreaChangedInner();
-    const std::string value;
-    webPattern->OnScrollBarColorUpdate(value);
-    SelectOverlayInfo selectInfo;
-    webPattern->RegisterSelectOverlayEvent(selectInfo);
-    TouchEventInfo event("webtest");
-    selectInfo.onTouchMove(event);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_START);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_END);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG_END);
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
-    webPattern->OnCompleteSwapWithNewSize();
-    webPattern->OnResizeNotWork();
-    webPattern->isInWindowDrag_ = true;
-    webPattern->OnCompleteSwapWithNewSize();
-    webPattern->OnResizeNotWork();
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
-    webPattern->isWaiting_ = true;
-    webPattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::DRAG);
-    webPattern->OnCompleteSwapWithNewSize();
-    webPattern->OnResizeNotWork();
-    webPattern->isInWindowDrag_ = false;
-    webPattern->OnCompleteSwapWithNewSize();
-    webPattern->OnResizeNotWork();
+    webPattern->GetCurrentLanguage();
 #endif
 }
 
@@ -1197,11 +1150,16 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     GestureEvent event;
     event.SetScale(-2);
     webPattern->preScale_ = 0;
-    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    webPattern->preScale_ = 1;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    event.SetScale(1);
+    webPattern->preScale_ = 0;
+    webPattern->HandleScaleGestureChange(event);
+    EXPECT_NE(webPattern->zoomErrorCount_, 0);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1226,14 +1184,13 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
-    webPattern->zoomStatus_ = 3;
+    event.SetScale(1);
+    webPattern->zoomStatus_ = 2;
     webPattern->zoomErrorCount_ = 1;
-    webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = true;
+    webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1258,11 +1215,10 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     GestureEvent event;
-    event.SetScale(-2);
+    event.SetScale(1);
     webPattern->zoomStatus_ = 3;
     webPattern->zoomErrorCount_ = 1;
     webPattern->preScale_ = 4;
-    webPattern->zoomOutSwitch_ = false;
 
     webPattern->HandleScaleGestureChange(event);
     EXPECT_EQ(webPattern->zoomErrorCount_, 0);

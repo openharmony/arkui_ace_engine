@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -231,6 +230,9 @@ public:
     TouchPosition GetTouchLinePos(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     void UpdateSelectWithBlank(const Offset& localOffset);
+    void AdjustHandleInBoundary(RectF& handleRect) const;
+    void AdjustHandleOffsetWithBoundary(RectF& handleRect);
+    void AdjustAllHandlesWithBoundary();
 
 private:
     constexpr static uint32_t SECONDS_TO_MILLISECONDS = 1000;

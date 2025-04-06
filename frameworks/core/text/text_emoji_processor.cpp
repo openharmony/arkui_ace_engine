@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <limits>
 
 #include "core/text/text_emoji_processor.h"
 
@@ -46,6 +47,21 @@ constexpr int32_t STATE_IN_TAG_QUEUE = 12;
 constexpr int32_t STATE_EVEN_RIS = 13;
 constexpr int32_t STATE_ODD_RIS = 14;
 constexpr int32_t STATE_FINISHED = 20;
+constexpr int32_t MAX_INT = std::numeric_limits<int32_t>::max();
+
+int32_t AddAndPreventOverflow(int32_t a, int32_t b)
+{
+    long tempA = static_cast<long>(a);
+    long tempB = static_cast<long>(b);
+    long ret = tempA + tempB;
+    if (ret > static_cast<long>(MAX_INT)) {
+        return MAX_INT;
+    } else if (ret < -static_cast<long>(MAX_INT)) {
+        return -MAX_INT;
+    } else {
+        return static_cast<int32_t>(ret);
+    }
+}
 
 } // namespace
 
@@ -56,17 +72,15 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
-    if (startIndex < 0 || length < 0) {
+    if (startIndex < 0 || length < 0 || u16.length() < unsigned(startIndex)) {
         return 0;
     }
-    int32_t substrLength = u16.length() - unsigned(startIndex);
-    if (substrLength < 0) {
-        return 0;
-    }
+    uint32_t substrLength = u16.length() - unsigned(startIndex);
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
             u32ContentToDelete = UtfUtils::Str16ToStr32(content);
         } else {
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(u16.length()));
             remainString = u16.substr(startIndex, substrLength);
             std::u16string temp = u16.substr(0, startIndex);
             u32ContentToDelete = UtfUtils::Str16ToStr32(temp);
@@ -84,6 +98,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
         if (startIndex == 0) {
             u32ContentToDelete = UtfUtils::Str16ToStr32(content);
         } else {
+            startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(u16.length()));
             remainString = u16.substr(0, startIndex);
             std::u16string temp = u16.substr(startIndex, substrLength);
             u32ContentToDelete = UtfUtils::Str16ToStr32(temp);
@@ -162,7 +177,9 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     int32_t emojiBackwardLengthU16 = 0;
     if (backwardLen > 0) {
         int32_t u32Length = static_cast<int32_t>(u32Content.length());
-        std::u16string tempstr = UtfUtils::Str32ToStr16(u32Content.substr(u32Length - backwardLen));
+        auto subIndex = u32Length - backwardLen;
+        subIndex = std::clamp(subIndex, 0, static_cast<int32_t>(u32Content.length()));
+        std::u16string tempstr = UtfUtils::Str32ToStr16(u32Content.substr(subIndex));
         emojiBackwardLengthU16 = static_cast<int32_t>(tempstr.length());
         index -= emojiBackwardLengthU16;
         emojiBackwardLengthU16 = endIndex - index; // calculate length of the part of emoji
@@ -178,6 +195,9 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
         startIndex = index;
         return EmojiRelation::IN_EMOJI;
     } else if (emojiBackwardLengthU16 == 0 && emojiForwardLengthU16 > 1) {
+        if (index > 0 && u16Content[index - 1] == u'\u200D') {
+            return EmojiRelation::IN_EMOJI;
+        }
         return EmojiRelation::BEFORE_EMOJI;
     } else if (emojiBackwardLengthU16 > 1 && emojiBackwardLengthU16 == emojiForwardLengthU16) {
         // emoji exists before index
@@ -261,25 +281,26 @@ std::u16string TextEmojiProcessor::SubU16string(
     if (rangeLength == 0) {
         return u"";
     }
-    return content.substr(range.startIndex, rangeLength);
+    range.startIndex = std::clamp(range.startIndex, 0, static_cast<int32_t>(content.length()));
+    return content.substr(static_cast<uint32_t>(range.startIndex), static_cast<uint32_t>(rangeLength));
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
     int32_t index, int32_t length, const std::u16string& content, bool includeStartHalf, bool includeEndHalf)
 {
     int32_t startIndex = index;
-    int32_t endIndex = index + length;
+    int32_t endIndex = AddAndPreventOverflow(index, length);
     int32_t emojiStartIndex = index;   // [emojiStartIndex, emojiEndIndex)
     int32_t emojiEndIndex = index;
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     // exclude right overflow emoji
     if (!includeEndHalf && IsIndexInEmoji(endIndex - 1, content, emojiStartIndex, emojiEndIndex) &&
-        emojiEndIndex > index + length) {
+        emojiEndIndex > AddAndPreventOverflow(index, length)) {
         emojiEndIndex = emojiStartIndex;
         length = emojiEndIndex - index;
         length = std::max(length, 0);
-        endIndex = index + length;
+        endIndex = AddAndPreventOverflow(index, length);
     }
     // process left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, content, emojiStartIndex, emojiEndIndex)) {
@@ -324,7 +345,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
         }
         ++startIndex;
     } while (1);
-    std::u16string temp = u16Content.substr(0, startIndex);
+    std::u16string temp = u16Content.substr(0, static_cast<uint32_t>(startIndex));
     u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtEnd(u32Content, false);
 }
@@ -351,6 +372,7 @@ int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
         }
         --startIndex;
     } while (1);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(u16Content.length()));
     std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
     u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtFront(u32Content, false);
@@ -805,6 +827,7 @@ bool TextEmojiProcessor::HandleDeleteAction(std::u32string& u32Content, int32_t 
     if (isBackward) {
         if (deleteCount > 0) {
             int32_t start = contentLength - deleteCount;
+            start = std::clamp(start, 0, static_cast<int32_t>(u32Content.length()));
             u32Content.erase(start, deleteCount);
             return true;
         }

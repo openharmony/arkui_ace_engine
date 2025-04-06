@@ -59,6 +59,22 @@ RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* val
     return style;
 }
 
+RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
+{
+    auto style = AceType::MakeRefPtr<SystemBarStyleOhos>();
+    CHECK_NULL_RETURN(style, nullptr);
+    Rosen::SystemBarPropertyFlag flag;
+    flag.contentColorFlag = true;
+    style->propertyFlags_.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, flag);
+    Rosen::SystemBarProperty property;
+    property.contentColor_ = colorValue;
+    style->properties_.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, property);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "style from Color, color: %{public}s, flag: %{public}s",
+        GetStatusBarContentColor(style->properties_).c_str(),
+        GetStatusBarContentColorFlag(style->propertyFlags_).c_str());
+    return style;
+}
+
 RefPtr<SystemBarStyleOhos> SystemBarStyleOhos::GetCurrentSystemBarStyle(const sptr<Rosen::Window>& window)
 {
     CHECK_NULL_RETURN(window, nullptr);

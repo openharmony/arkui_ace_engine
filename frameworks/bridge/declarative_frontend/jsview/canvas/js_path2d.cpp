@@ -28,7 +28,8 @@ void JSPath2D::Constructor(const JSCallbackInfo& args)
     jsPath2d->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsPath2d));
     int32_t unit = 0;
-    if (args.GetInt32Arg(std::abs(args.Length() - 1), unit) && (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
+    if ((args.Length() >= 1 && args.GetInt32Arg(args.Length() - 1, unit)) &&
+        (static_cast<CanvasUnit>(unit) == CanvasUnit::PX)) {
         jsPath2d->SetUnit(CanvasUnit::PX);
     }
     jsPath2d->SetCanvasPath2d(JSCanvasRenderer::JsMakePath2D(args));

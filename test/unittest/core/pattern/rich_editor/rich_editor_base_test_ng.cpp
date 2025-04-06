@@ -327,115 +327,6 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel009, TestSize.Level1)
 }
 
 /**
- * @tc.name: RichEditorModel010
- * @tc.desc: test set on text/image/symbol selection change
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel010, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto func = [](const BaseEventInfo* info) {
-        const auto* selectionRange = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
-        ASSERT_NE(selectionRange, nullptr);
-        testSelectionRange = *selectionRange;
-    };
-    richEditorModel.SetOnSelectionChange(std::move(func));
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    auto focusHub = richEditorPattern->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-
-    // insert value
-    richEditorPattern->InsertValue(INIT_VALUE_1);
-
-    // add image
-    ImageSpanOptions imageSpanOptions;
-    richEditorPattern->AddImageSpan(imageSpanOptions);
-    richEditorPattern->HandleOnSelectAll();
-    EXPECT_EQ(testSelectionRange.start_, 0);
-    EXPECT_EQ(testSelectionRange.end_, 7);
-
-    // add symbol
-    SymbolSpanOptions symbolSpanOptions;
-    symbolSpanOptions.symbolId = SYMBOL_ID;
-    auto richEditorController =  richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorController->AddSymbolSpan(symbolSpanOptions);
-    richEditorPattern->HandleOnSelectAll();
-    EXPECT_EQ(testSelectionRange.start_, 0);
-    EXPECT_EQ(testSelectionRange.end_, 9);
-
-    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
-        ViewStackProcessor::GetInstance()->elementsStack_.pop();
-    }
-}
-
-/**
- * @tc.name: RichEditorModel011
- * @tc.desc: test placeholder appear and disappear
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    PlaceholderOptions options;
-    options.value = INIT_VALUE_1;
-    richEditorModel.SetPlaceholder(options);
-
-    auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode, AceType::MakeRefPtr<GeometryNode>(), richEditorNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-
-    // test placeholder appear when there is nothing in richEditor
-    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    auto spanItemChildren = layoutAlgorithm->GetSpans();
-    EXPECT_EQ(spanItemChildren.size(), 0);
-
-    // test add Text then placeholder disappear
-    TextSpanOptions textOptions;
-    textOptions.value = INIT_VALUE_2;
-    richEditorController->AddTextSpan(textOptions);
-    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    spanItemChildren = layoutAlgorithm->GetSpans();
-    EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
-
-    // test when richEitor empty again,placeholder Appear again
-    RangeOptions rangeoptions;
-    richEditorController->DeleteSpans(rangeoptions);
-    richEditorPattern->BeforeCreateLayoutWrapper();
-    layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    spanItemChildren = layoutAlgorithm->GetSpans();
-    EXPECT_EQ(spanItemChildren.size(), 0);
-
-    while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
-        ViewStackProcessor::GetInstance()->elementsStack_.pop();
-    }
-}
-
-/**
  * @tc.name: RichEditorModel012
  * @tc.desc: test placeholder styel value
  * @tc.type: FUNC
@@ -575,6 +466,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
     richEditorTheme->textStyle_.SetTextColor(DEFAULT_TEXT_COLOR_VALUE);
     richEditorTheme->textStyle_.SetTextDecorationColor(DEFAULT_TEXT_COLOR_VALUE);
 
@@ -681,40 +573,6 @@ HWTEST_F(RichEditorBaseTestNg, CreateImageSourceInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreventDefault001
- * @tc.desc: test PreventDefault001 in ImageSpan and TextSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, PreventDefault001, TestSize.Level1)
-{
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    // add imageSpan
-    ClearSpan();
-    ImageSpanOptions imageSpanOptions;
-    GestureEventFunc callback2 = [](GestureEvent& info) {
-        info.SetPreventDefault(true);
-    };
-    imageSpanOptions.userGestureOption.onClick = callback2;
-    richEditorController->AddImageSpan(imageSpanOptions);
-
-    /**
-     * @tc.steps: step1. Click on imagespan
-     */
-    GestureEvent info2;
-    info2.localLocation_ = Offset(0, 0);
-    richEditorPattern->HandleClickEvent(info2);
-    EXPECT_FALSE(richEditorPattern->HasFocus());
-}
-
-/**
  * @tc.name: NeedSoftKeyboard001
  * @tc.desc: test NeedSoftKeyboard
  * @tc.type: FUNC
@@ -769,7 +627,8 @@ HWTEST_F(RichEditorBaseTestNg, MagnifierTest001, TestSize.Level1)
     localOffset.SetX(MAGNIFIERNODE_WIDTH.ConvertToPx());
     controller->SetLocalOffset(localOffset);
     magnifierOffset = geometryNode->GetFrameOffset();
-    EXPECT_EQ(magnifierOffset.GetX(), paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2);
+    EXPECT_EQ(magnifierOffset.GetX(),
+        paintOffset.GetX() + localOffset.GetX() - MAGNIFIERNODE_WIDTH.ConvertToPx() / 2 - 1.0f);
 
     /**
      * @tc.steps: step3. localOffset is on the far right.
@@ -837,7 +696,7 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);
-    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1);
+    richEditorPattern->HandleSurfaceChanged(1, 1, 1, 1, WindowSizeChangeReason::DRAG);
     EXPECT_FALSE(controller->GetShowMagnifier());
 
     controller->SetLocalOffset(localOffset);

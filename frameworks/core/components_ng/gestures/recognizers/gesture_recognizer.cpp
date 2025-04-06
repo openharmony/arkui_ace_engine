@@ -124,6 +124,7 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 {
     deviceId_ = point.deviceId;
     deviceType_ = point.sourceType;
+    deviceTool_ = point.sourceTool;
     inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
 
     auto result = AboutToAddCurrentFingers(point);
@@ -168,6 +169,7 @@ bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
+            deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
@@ -203,6 +205,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const TouchEvent& point)
         case TouchType::DOWN: {
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
+            deviceTool_ = point.sourceTool;
             if (deviceType_ == SourceType::MOUSE) {
                 inputEventType_ = InputEventType::MOUSE_BUTTON;
             } else {
@@ -255,6 +258,7 @@ void NGGestureRecognizer::HandleBridgeModeEvent(const AxisEvent& event)
         case AxisAction::BEGIN:
             deviceId_ = event.deviceId;
             deviceType_ = event.sourceType;
+            deviceTool_ = event.sourceTool;
             inputEventType_ = InputEventType::AXIS;
             HandleTouchDownEvent(event);
             break;
@@ -353,6 +357,9 @@ void NGGestureRecognizer::SetTransInfo(int transId)
 
 void NGGestureRecognizer::AboutToAccept()
 {
+    if (refereeState_ == RefereeState::FAIL) {
+        return;
+    }
     if (AceType::InstanceOf<RecognizerGroup>(this)) {
         HandleWillAccept();
         OnAccepted();
@@ -568,6 +575,7 @@ void NGGestureRecognizer::ResetStateVoluntarily()
     }
     group->ResetStateVoluntarily();
     auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    CHECK_NULL_VOID(recognizerGroup);
     recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
 }
 
@@ -581,4 +589,14 @@ bool NGGestureRecognizer::IsNeedResetRecognizerState()
     return isNeedResetRecognizerState_;
 }
 
+void NGGestureRecognizer::CheckPendingRecognizerIsInAttachedNode(const TouchEvent& event)
+{
+    bool isInAttachedNode = IsInAttachedNode(event, !AceType::InstanceOf<ClickRecognizer>(this));
+    if (!isInAttachedNode) {
+        if ((refereeState_ == RefereeState::PENDING || refereeState_ == RefereeState::PENDING_BLOCKED) &&
+            AceType::InstanceOf<ClickRecognizer>(this)) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

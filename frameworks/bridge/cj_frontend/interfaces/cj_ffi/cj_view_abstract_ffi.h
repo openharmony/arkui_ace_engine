@@ -29,18 +29,14 @@
 using VectorMenuValuePtr = void*;
 using VectorStringPtr = void*;
 using VectorNativeRectangleHandle = void*;
+using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
-static RefPtr<PipelineBase> GetPipelineContext()
-{
-    auto currentObj = Container::Current();
-    CHECK_NULL_RETURN(currentObj, nullptr);
-    return currentObj->GetPipelineContext();
-}
+RefPtr<PipelineBase> GetPipelineContext();
 
 template<typename T>
-static RefPtr<T> GetTheme()
+RefPtr<T> GetTheme()
 {
     auto pipelineContext = GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
@@ -72,6 +68,193 @@ struct CJBindPopupParams {
     void (*onStateChange)(bool);
 };
 
+struct CJBindPopupParamsV2 {
+    char* message;
+    bool placementOnTop;
+    char* primaryValue;
+    void (*primaryAction)();
+    char* secondaryValue;
+    void (*secondaryAction)();
+    void (*onStateChange)(bool);
+    uint32_t textColor;
+    char* fontWeight;
+    double fontSize;
+    int32_t fontSizeUnit;
+    int32_t fontStyle;
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    int32_t placement;
+    double offsetX;
+    double offsetY;
+    bool enableArrow;
+    uint32_t popupColor;
+    bool autoCancel;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
+};
+
+struct CJBindCustomPopup {
+    bool isShow;
+    void (*builder)();
+    int32_t placement;
+    uint32_t maskColor;
+    uint32_t backgroundColor;
+    bool enableArrow;
+    bool autoCancel;
+    void (*onStateChange)(bool);
+};
+
+struct CJBindCustomPopupV2 {
+    bool isShow;
+    void (*builder)();
+    int32_t placement;
+    uint32_t maskColor;
+    uint32_t backgroundColor;
+    bool enableArrow;
+    bool autoCancel;
+    void (*onStateChange)(bool);
+    uint32_t popupColor;
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    double offsetX;
+    double offsetY;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    bool focusable;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
+};
+
+struct NativePosition {
+    double x;
+    double y;
+};
+
+struct NativeBorderRadiuses {
+    double topLeftRadiuses;
+    int32_t topLeftUnit;
+    double topRightRadiuses;
+    int32_t topRightUnit;
+    double bottomLeftRadiuses;
+    int32_t bottomLeftUnit;
+    double bottomRightRadiuses;
+    int32_t bottomRightUnit;
+};
+
+struct NativeOptionRadius {
+    bool hasValue;
+    NativeBorderRadiuses value;
+};
+
+struct NativeMargin {
+    double top;
+    int32_t topUnit;
+    double right;
+    int32_t rightUnit;
+    double bottom;
+    int32_t bottomUnit;
+    double left;
+    int32_t leftUnit;
+};
+
+struct NativeOptionMargin {
+    bool hasValue;
+    NativeMargin value;
+};
+
+struct CJContextMenuAnimationOptions {
+    NativeOptionFloat64 scaleFrom;
+    NativeOptionFloat64 scaleTo;
+    NativeOptionInt64 transition;
+    NativeOptionFloat64 hoverScaleFrom;
+    NativeOptionFloat64 hoverScaleTo;
+};
+
+struct NativeOptionCJContextMenuAnimationOptions {
+    bool hasValue;
+    CJContextMenuAnimationOptions value;
+};
+
+struct CJContextMenuOptions {
+    NativePosition offset;
+    NativeOptionInt32 placement;
+    bool enableArrow;
+    NativeLength arrowOffset;
+    NativeOptionCallBack preview;
+    NativeOptionCJContextMenuAnimationOptions previewAnimationOptions;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack aboutToAppear;
+    NativeOptionCallBack aboutToDisappear;
+    uint32_t backgroundColor;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionRadius borderRadius;
+    NativeOptionMargin layoutRegionMargin;
+};
+
+struct CJMenuOptions {
+    NativePosition offset;
+    NativeOptionInt32 placement;
+    bool enableArrow;
+    NativeLength arrowOffset;
+    NativeOptionCallBack preview;
+    NativeOptionCJContextMenuAnimationOptions previewAnimationOptions;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack aboutToAppear;
+    NativeOptionCallBack aboutToDisappear;
+    uint32_t backgroundColor;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionRadius borderRadius;
+    NativeOptionMargin layoutRegionMargin;
+    NativeOptionCString title;
+    NativeOptionBool showInSubWindow;
+};
+
+struct NativeMenuElement {
+    NativeOptionCString value;
+    NativeOptionCString icon;
+    NativeOptionBool enabled;
+    NativeOptionCallBack action;
+};
+
+struct CArrNativeMenuElement {
+    NativeMenuElement* head;
+    int32_t size;
+};
+
 struct NativeShadowOptions {
     double radius;
     int32_t shadowType;
@@ -99,6 +282,24 @@ struct NativeOptionEdgeStyle {
 };
 
 struct CJSheetOptions {
+    NativeOptionUInt32 backgroundColor;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack onWillAppear;
+    NativeOptionCallBack onWillDisappear;
+    NativeOptionInt32 height;
+    NativeOptionCArrInt32 detents;
+    NativeOptionInt32 preferType;
+    NativeOptionBool showClose;
+    NativeOptionBool dragBarl;
+    NativeOptionInt32 blurStyle;
+    NativeOptionUInt32 maskColor;
+    NativeOptionCallBack title;
+    NativeOptionBool enableOutsideInteractive;
+    NativeOptionCallBack shouldDismiss;
+};
+
+struct CJSheetOptionsV2 {
     NativeOptionUInt32 backgroundColor;
     NativeOptionCallBack onAppear;
     NativeOptionCallBack onDisappear;
@@ -260,6 +461,27 @@ struct CJForegroundBlurStyle {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJBlurOptions blurOptions;
+    float scale;
+};
+
+struct CJBackgroundBlurStyleOptions {
+    int32_t colorMode;
+    int32_t adaptiveColor;
+    CJBlurOptions blurOptions;
+    float scale;
+    int32_t policy;
+    uint32_t inactiveColor;
+};
+
+struct CJBackgroundEffectOptions {
+    double radius;
+    double saturation;
+    double brightness;
+    uint32_t color;
+    int32_t adaptiveColor;
+    CJBlurOptions blurOptions;
+    int32_t policy;
+    uint32_t inactiveColor;
 };
 
 struct CJAlignRuleOption {
@@ -277,6 +499,26 @@ struct CJAlignRuleOption {
     int32_t centerVerticalAlign;
     float* horizontalBias;
     float* verticalBias;
+};
+
+struct CJCaretOffset {
+    double index;
+    double x;
+    double y;
+};
+
+struct CJVisibleAreaEventOptions {
+    VectorFloat64Ptr ratios;
+    double expectedUpdateInterval;
+};
+
+struct CJMutiShadowOptions {
+    double radiusValue;
+    double offsetXValue;
+    double offsetYValue;
+    int32_t radiusUnit;
+    int32_t offsetXUnit;
+    int32_t offsetYUnit;
 };
 
 struct CJChainInfo {
@@ -325,8 +567,11 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleX(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleY(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParamV2(bool isShow, void (*builder)(), CJSheetOptionsV2 option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractDismiss();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSpringBack();
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHitTestBehavior(int32_t hitTestMode);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractHoverEffect(int32_t hoverEffectValue);
 
 struct CJSetRotate {
     float dx;
@@ -348,6 +593,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateX(double translateValu
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateY(double translateValue, int32_t translateUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransition();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDirection(int32_t dirValue);
@@ -383,6 +629,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId,
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
+    double radius, int32_t direction, VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWindowBlur(float progress, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, double offsetX, double offsetY);
@@ -391,6 +639,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBrightness(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSaturate(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetContrast(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvert(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSepia(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type);
@@ -420,30 +670,32 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetZIndex(int32_t zIndex);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetVisibility(int32_t visibility);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClip(bool isClip);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClipByShape(int64_t shapeId);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackground(void (*builder)(), int32_t align);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyleOption(
+    int32_t blurStyle, CJBackgroundBlurStyleOptions options);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyle(int32_t blurStyle);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundImageResizable(CJEdge slice);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBrightness(double rate, double lightUpDegree);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundEffect(CJBackgroundEffectOptions value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMaskByProgressMask(int64_t progressId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractPop();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align, double x, double y);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindPopup(bool isShow, CJBindPopupParams bindPopupParams);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindPopupV2(bool isShow, CJBindPopupParamsV2 bindPopupParams);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
     int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     const char* value, int32_t* keysArray, int64_t size, void (*callback)(void));
-
-struct CJBindCustomPopup {
-    bool isShow;
-    void (*builder)();
-    int32_t placement;
-    uint32_t maskColor;
-    uint32_t backgroundColor;
-    bool enableArrow;
-    bool autoCancel;
-    void (*onStateChange)(bool);
-};
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopupV2(CJBindCustomPopupV2 value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomMenu(void (*builder)());
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindContextMenu(void (*builder)(), int32_t responseType);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenuElement(CArrNativeMenuElement elements, CJMenuOptions options);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindContextMenuOption(
+    void (*builder)(), int32_t responseType, CJContextMenuOptions options);
 struct CColors {
     uint32_t color;
     double location;
@@ -507,6 +759,14 @@ CJ_EXPORT void FFIOHOSAceFrameworkTabIndex(int32_t index);
 CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
 
 struct CJFocusBoxStyle {
@@ -528,6 +788,16 @@ CJ_EXPORT uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overla
 CJ_EXPORT void FFISetWidthWithEmpty();
 CJ_EXPORT void FFISetHeightWithEmpty();
 
+struct CJDismissContentCoverAction {
+    int32_t reason;
+    void (*dismissContentCover)();
+};
+
+struct NativeOptionOnWillDismiss {
+    bool hasValue;
+    void (*value)(CJDismissContentCoverAction action);
+};
+
 struct CJContentCoverOptions {
     uint32_t modalTransition;
     NativeOptionUInt32 backgroundColor;
@@ -536,7 +806,19 @@ struct CJContentCoverOptions {
     NativeOptionCallBack onWillAppear;
     NativeOptionCallBack onWillDisappear;
 };
+struct CJContentCoverOptionsV2 {
+    uint32_t modalTransition;
+    NativeOptionOnWillDismiss onWillDismiss;
+    NativeOptionInt64 transition;
+    NativeOptionUInt32 backgroundColor;
+    NativeOptionCallBack onAppear;
+    NativeOptionCallBack onDisappear;
+    NativeOptionCallBack onWillAppear;
+    NativeOptionCallBack onWillDisappear;
+};
+
 CJ_EXPORT void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJContentCoverOptions options);
+CJ_EXPORT void FFIOHOSAceFrameworkBindContentCoverV2(bool isShow, void (*builder)(), CJContentCoverOptionsV2 options);
 
 CJ_EXPORT ExternalString FFIGetResourceString(NativeResourceObject obj);
 CJ_EXPORT ExternalString FFIGetResourceMedia(NativeResourceObject obj);
@@ -548,6 +830,25 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
+CJ_EXPORT void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle);
+CJ_EXPORT void FFIOHOSAceFrameworkRestoreDefault();
+CJ_EXPORT void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize);
+CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
+
+struct CBorderImageOption {
+    CJEdge slice;
+    CJEdge width;
+    CJEdge outset;
+    int32_t repeat;
+    bool fill;
+};
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(const char* source, CBorderImageOption option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
+    LinearGradientParam source, CBorderImageOption option);
 }
 
 namespace OHOS::Ace {
@@ -558,6 +859,8 @@ bool ParseCjDimension(int64_t id, Dimension& result);
 bool ParseColorById(int64_t id, Color& color);
 void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result);
 void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect>& result);
+void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option);
+RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H

@@ -46,11 +46,13 @@ Flow B:
 
 type RemovedElementInfo = { elmtId : number, tag : string };
 // defined a globle function to clean up the removeItems when idle
-function uiNodeCleanUpIdleTask(): void {
-    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
+function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask(${maxTimeInMs}):`);
+    const deadline = Date.now() + maxTimeInMs;
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    UINodeRegisterProxy.cleanUpDeadReferences();
+    ObserveV2.getObserve().runIdleTasks(deadline);
+    ObserveV2.getObserve().runIdleCleanup(deadline);
 }
 
 class UINodeRegisterProxy {
@@ -102,9 +104,9 @@ class UINodeRegisterProxy {
             stateMgmtConsole.debug(`${this.removeElementsInfo_.length} elmtIds needs to purgeDelete. } .`);
             return;
         }
-        let owningView : IView | undefined;
+        let owningView : ViewBuildNodeBase | undefined;
         this.removeElementsInfo_.forEach((elmtId: number) => {
-            const owningViewPUWeak : WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+            const owningViewPUWeak : WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
             if (owningViewPUWeak !== undefined) {
                 owningView = owningViewPUWeak.deref();
                 if (owningView) {
@@ -117,17 +119,13 @@ class UINodeRegisterProxy {
             }
 
             ObserveV2.getObserve().clearBinding(elmtId);
+            delete ObserveV2.getObserve().id2cmp_[elmtId];
         })
 
         this.removeElementsInfo_.length = 0;
     }
 
-    public static cleanUpDeadReferences(): void {
-        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
-        ObserveV2.getObserve().cleanUpDeadReferences();
-    }
-
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<number> = new Array<number>();
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<ViewBuildNodeBase>> = new Map<number, WeakRef<ViewBuildNodeBase>>();
 }

@@ -19,6 +19,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -57,15 +58,10 @@ struct MenuItemInfo {
 };
 
 struct PreviewMenuAnimationInfo {
-    float previewScale = -1.0f;
-    float menuScale = -1.0f;
-    float borderRadius = -1.0f;
+    BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
-
-    OffsetF previewOffset = OffsetF();
-    OffsetF menuOffset = OffsetF();
 };
 
 class MenuPattern : public Pattern, public FocusView {
@@ -280,6 +276,24 @@ public:
         return options_;
     }
 
+    std::vector<RefPtr<FrameNode>>& GetEmbeddedMenuItems()
+    {
+        return embeddedMenuItems_;
+    }
+
+    void AddEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        embeddedMenuItems_.emplace_back(menuItem);
+    }
+
+    void RemoveEmbeddedMenuItem(const RefPtr<FrameNode>& menuItem)
+    {
+        auto iter = std::find(embeddedMenuItems_.begin(), embeddedMenuItems_.end(), menuItem);
+        if (iter != embeddedMenuItems_.end()) {
+            embeddedMenuItems_.erase(iter);
+        }
+    }
+
     void RemoveParentHoverStyle();
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
@@ -298,6 +312,7 @@ public:
     void MountOption(const RefPtr<FrameNode>& option);
 
     void RemoveOption();
+    RefPtr<FrameNode> DuplicateMenuNode(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
     RefPtr<FrameNode> GetMenuColumn() const;
 
@@ -583,12 +598,30 @@ public:
     {
         return pathParams_;
     }
+
+    void SetCustomNode(WeakPtr<UINode> customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_.Upgrade();
+    }
+
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
 
+    bool IsSelectOverlayDefaultModeRightClickMenu();
+    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
+    void UpdateMenuItemDivider();
+    void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
+
 protected:
-    void UpdateMenuItemChildren(RefPtr<UINode>& host);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -616,6 +649,7 @@ private:
     // reset outer menu container and only apply theme on the inner <Menu> node.
     void ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktopMenu);
     void ResetScrollTheme(const RefPtr<FrameNode>& host);
+    void ResetThemeByInnerMenuCount();
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -650,6 +684,7 @@ private:
     RefPtr<UINode> GetIfElseMenuItem(const RefPtr<UINode>& parent, bool next);
     void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
     void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
+    void SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     void UpdateMenuBorderAndBackgroundBlur()
     {
         auto host = GetHost();
@@ -731,9 +766,11 @@ private:
     bool expandDisplay_ = false;
     RefPtr<FrameNode> lastSelectedItem_ = nullptr;
     bool isEmbedded_ = false;
+    std::vector<RefPtr<FrameNode>> embeddedMenuItems_;
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);

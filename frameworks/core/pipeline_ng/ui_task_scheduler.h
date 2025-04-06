@@ -26,6 +26,7 @@
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::NG {
 
@@ -171,9 +172,6 @@ private:
             }
             if (nodeLeft->GetPageId() != nodeRight->GetPageId()) {
                 return nodeLeft->GetPageId() < nodeRight->GetPageId();
-            }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
-                return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() != nodeRight->GetDepth()) {
                 return nodeLeft->GetDepth() < nodeRight->GetDepth();

@@ -15,13 +15,15 @@
 #include "core/interfaces/native/node/button_modifier.h"
 
 #include "bridge/common/utils/utils.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "frameworks/core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
-constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN = (int32_t)ButtonType::ROUNDED_RECTANGLE;
+constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_EIGHTEEN = (int32_t)ButtonType::ROUNDED_RECTANGLE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
@@ -127,8 +129,8 @@ void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_EIGHTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
     }
@@ -623,8 +625,8 @@ void ResetButtonOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_EIGHTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
     }

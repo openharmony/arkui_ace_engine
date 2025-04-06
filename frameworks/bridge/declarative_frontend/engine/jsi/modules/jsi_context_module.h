@@ -37,12 +37,17 @@ public:
     static void RemoveContext(int32_t key);
     static std::shared_ptr<JsValue> GetContext(const std::shared_ptr<JsRuntime>& runtime,
         const std::shared_ptr<JsValue>& thisObj, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc);
+    static void RemoveDynamicComponentContext(int32_t key);
+    static std::shared_ptr<JsValue> GetDynamicComponentContext(
+        int32_t instanceId, const std::shared_ptr<JsRuntime>& runtime);
+    static void AddDynamicComponentContext(int32_t key, const std::shared_ptr<JsValue>& value);
 
 private:
     static int32_t GetInstanceIdByThis(
         const std::shared_ptr<JsRuntime>& runtime, const std::vector<std::shared_ptr<JsValue>>& argv, int32_t argc);
 
     static thread_local std::unordered_map<int32_t, std::shared_ptr<JsValue>> contexts_;
+    static std::unordered_map<int32_t, std::weak_ptr<JsValue>> weakptrContexts_;
 };
 
 } // namespace OHOS::Ace::Framework

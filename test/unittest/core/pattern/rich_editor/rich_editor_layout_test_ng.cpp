@@ -318,7 +318,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
 HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
 {
     std::list<RefPtr<SpanItem>> spans;
-    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraphManager = AceType::MakeRefPtr<RichEditorParagraphManager>();
     auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     ASSERT_NE(spanItem, nullptr);
@@ -327,7 +327,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
     spanItem->content = str;
     spans.emplace_back(spanItem);
     auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
-        std::nullopt);
+        std::nullopt, nullptr);
     ASSERT_NE(layoutAlgorithm, nullptr);
     EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
 }

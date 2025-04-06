@@ -298,11 +298,11 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
     int32_t direction = 3;
     MockAccessibilityElementOperatorCallback operatorCallback;
 
-    // 1 provider abnormal, callback should receive same request id and empty info
+    // 1 provider abnormal, callback should receive same request id and info of host
     ohAccessibilityProvider->SetInjectResult(-1);
     jsInteractionOperation->FocusMoveSearch(
         elementId, direction, requestId, operatorCallback);
-    EXPECT_EQ(operatorCallback.mockInfo_.GetAccessibilityId(), -1);
+    EXPECT_EQ(operatorCallback.mockInfo_.GetAccessibilityId(), frameNode->GetAccessibilityId());
     EXPECT_EQ(operatorCallback.mockRequestId, requestId);
 
     // 2 provider normal,callback should receive same request id and same info as provider
@@ -641,5 +641,34 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, FrameNodeAccessibilityVisible0
      * @tc.steps: step4. close Keyboard.
      */
     overlayManager->CloseKeyboard(frameNode->GetId());
+}
+
+/**
+ * @tc.name: GetNodeConfig01
+ * @tc.desc: Test the function GetNodeConfig
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, GetNodeConfig01, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create jsInteractionOperation.
+    */
+    auto ohAccessibilityProvider
+        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    frameNode->SetHostPageId(10);
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+
+    /**
+     * @tc.steps: step2. test func .
+     */
+    Framework::NodeConfig config;
+    jsInteractionOperation->GetNodeConfig(config);
+    EXPECT_EQ(config.pageId, 10);
 }
 } // namespace OHOS::Ace::NG

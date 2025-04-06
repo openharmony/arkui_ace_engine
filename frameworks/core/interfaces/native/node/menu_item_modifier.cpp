@@ -219,6 +219,26 @@ void ResetSelectIconSymbol(ArkUINodeHandle node)
     MenuItemModelNG::SetSelectIconSymbol(frameNode, nullptr);
 }
 
+void SetMenuItemOnChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(bool)>*>(callback);
+        MenuItemModelNG::SetOnChange(frameNode, std::move(*onChange));
+    } else {
+        MenuItemModelNG::SetOnChange(frameNode, nullptr);
+    }
+}
+
+void ResetMenuItemOnChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    MenuItemModelNG::SetOnChange(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
@@ -240,6 +260,8 @@ const ArkUIMenuItemModifier* GetMenuItemModifier()
         .resetSelectIconSrc = ResetSelectIconSrc,
         .setSelectIconSymbol = SetSelectIconSymbol,
         .resetSelectIconSymbol = ResetSelectIconSymbol,
+        .setOnChange = SetMenuItemOnChange,
+        .resetOnChange = ResetMenuItemOnChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -19,10 +19,11 @@ import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
+import { i18n } from '@kit.LocalizationKit';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -100,7 +101,8 @@ export class AdvancedDialogV2Button {
   public role?: ButtonRole;
   @Trace
   public defaultFocus?: boolean;
-
+  @Trace
+  public enabled?: boolean;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -109,6 +111,7 @@ export class AdvancedDialogV2Button {
     this.buttonStyle = options.buttonStyle;
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
+    this.enabled = options.enabled;
   };
 }
 
@@ -120,12 +123,15 @@ export declare interface AdvancedDialogV2ButtonOptions {
   buttonStyle?: ButtonStyleMode;
   role?: ButtonRole;
   defaultFocus?: boolean;
+  enabled?: boolean;
 }
 
 @ComponentV2
 export struct TipsDialogV2 {
   @Require @Param imageRes: ResourceStr | PixelMap;
   @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
+  @Param imageBorderColor?: ColorMetrics = undefined;
+  @Param imageBorderWidth?: LengthMetrics = undefined;
   @Param title?: ResourceStr | null = null;
   @Param content?: ResourceStr | null = null;
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
@@ -160,7 +166,7 @@ export struct TipsDialogV2 {
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   // themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = 160;
   private imageIndex: number = 0;
   private textIndex: number = 1;
@@ -177,7 +183,6 @@ export struct TipsDialogV2 {
         this.contentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -208,7 +213,7 @@ export struct TipsDialogV2 {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.checkedInner)
           .onChange((checked: boolean) => {
             this.checkedInner = checked;
@@ -236,7 +241,7 @@ export struct TipsDialogV2 {
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -260,6 +265,12 @@ export struct TipsDialogV2 {
         .constraintSize({
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
+        })
+        .outline({
+          width: `${lengthMetricsToPX(this.imageBorderWidth)}px`,
+          radius: `${lengthMetricsToPX(LengthMetrics.resource($r('sys.float.corner_radius_level6'))) +
+          lengthMetricsToPX(this.imageBorderWidth)}px`,
+          color: this.imageBorderColor?.color
         })
     }
     .width('100%')
@@ -357,7 +368,7 @@ struct TipsDialogContentLayout {
     }
     let height: number = 0;
     let checkBoxHeight: number = 0;
-    if (this.checkTips !== null) {
+    if (this.checkTips !== null && this.checkTips !== undefined) {
       let checkboxChild: Measurable = children[this.checkBoxIndex];
       let checkboxConstraint: ConstraintSizeOptions = {
         maxWidth: constraint.maxWidth,
@@ -426,7 +437,7 @@ export struct SelectDialogV2 {
   @Local dividerColorWithTheme: ResourceColor = $r('sys.color.comp_divider');
   // the controller of content list
   private contentScroller: Scroller = new Scroller();
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -503,6 +514,7 @@ export struct SelectDialogV2 {
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
+                      .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndexInner === index)
@@ -511,6 +523,7 @@ export struct SelectDialogV2 {
                       .focusable(false)
                       .accessibilityLevel('no')
                       .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
+                      .radioStyle({ uncheckedBorderColor: Color.Transparent })
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -591,7 +604,6 @@ export struct SelectDialogV2 {
       },
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
-      fontSizeScale: this.fontSizeScale!!,
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -683,7 +695,7 @@ export struct ConfirmDialogV2 {
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
   private marginOffset: number = 0 - PADDING_LEVEL_8;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
   private textIndex: number = 0;
   private checkboxIndex: number = 1;
@@ -766,7 +778,7 @@ export struct ConfirmDialogV2 {
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -801,7 +813,6 @@ export struct ConfirmDialogV2 {
       },
       minContentHeight: this.minContentHeight!!,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -821,7 +832,7 @@ export struct AlertDialogV2 {
   // the controller of content area
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   @Computed
@@ -847,7 +858,6 @@ export struct AlertDialogV2 {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -899,7 +909,7 @@ export struct CustomContentDialogV2 {
   @BuilderParam contentBuilder: CustomBuilder;
   @Param contentAreaPadding?: LocalizedPadding = undefined;
   @Param buttons?: AdvancedDialogV2Button[] = undefined;
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -913,7 +923,6 @@ export struct CustomContentDialogV2 {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -1018,8 +1027,7 @@ struct CustomDialogContentComponent {
   @Local titleHeight: number = 0;
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
-  @Param fontSizeScale: number = -1;
-  @Event $fontSizeScale?: (val: number) => void = undefined;
+  @Consumer() fontSizeScale: number = -1;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1059,7 +1067,8 @@ struct CustomDialogContentComponent {
         }
       }
       .constraintSize({ maxHeight: this.contentMaxHeight })
-      .backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE)
+      .backgroundBlurStyle(this.customStyle ?
+        BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true })
       .borderRadius(this.customStyle ? $r('sys.float.ohos_id_corner_radius_dialog') : 0)
       .margin(this.customStyle ? {
         start: LengthMetrics.resource($r('sys.float.ohos_id_dialog_margin_start')),
@@ -1076,7 +1085,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.$fontSizeScale?.(this.updateFontScale());
+    this.fontSizeScale = this.updateFontScale();
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1100,10 +1109,16 @@ struct CustomDialogContentComponent {
   }
 
   aboutToAppear(): void {
-    let uiContext: UIContext = this.getUIContext();
-    this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-    this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.$fontSizeScale?.(this.updateFontScale());
+    try {
+      let uiContext: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+      this.appMaxFontScale = uiContext?.getMaxFontScale();
+    } catch (err) {
+      let code: number = (err as BusinessError)?.code;
+      let message: string = (err as BusinessError)?.message;
+      hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+    }
+    this.fontSizeScale = this.updateFontScale();
     this.initTitleTextAlign();
   }
 
@@ -1484,6 +1499,7 @@ function setButtonProperties(
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+  .enabled(buttonOptions?.enabled ?? true)
 }
 
 /**
@@ -1641,7 +1657,7 @@ export struct LoadingDialogV2 {
   @Param content?: ResourceStr = '';
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local loadingProgressIconColorWithTheme: ResourceColor = $r('sys.color.icon_secondary');
-  @Local fontSizeScale: number = 1;
+  @Provider() fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
   build() {
@@ -1650,7 +1666,6 @@ export struct LoadingDialogV2 {
         contentBuilder: () => {
           this.contentBuilder();
         },
-        fontSizeScale: this.fontSizeScale!!,
         minContentHeight: this.minContentHeight!!,
       }).constraintSize({ maxHeight: '100%' });
     }
@@ -1762,6 +1777,54 @@ export struct PopoverDialogV2 {
       transition: this.popover?.transition,
       onWillDismiss: this.popover?.onWillDismiss
     })
+  }
+}
+
+function toLengthString(value?: LengthMetrics): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const length: number = value.value;
+  let lengthString: string = '';
+  switch (value.unit) {
+    case LengthUnit.PX:
+      lengthString = `${length}px`;
+      break;
+    case LengthUnit.FP:
+      lengthString = `${length}fp`;
+      break;
+    case LengthUnit.LPX:
+      lengthString = `${length}lpx`;
+      break;
+    case LengthUnit.PERCENT:
+      lengthString = `${length * 100}%`;
+      break;
+    case LengthUnit.VP:
+      lengthString = `${length}vp`;
+      break;
+    default:
+      lengthString = `${length}vp`;
+      break;
+  }
+  return lengthString;
+}
+
+function lengthMetricsToPX(value?: LengthMetrics): number {
+  if (!value) {
+    return 0;
+  }
+  const length: number = value.value;
+  switch (value.unit) {
+    case LengthUnit.PX:
+      return length;
+    case LengthUnit.FP:
+      return fp2px(length);
+    case LengthUnit.LPX:
+      return lpx2px(length);
+    case LengthUnit.VP:
+      return vp2px(length);
+    default:
+      return 0;
   }
 }
 

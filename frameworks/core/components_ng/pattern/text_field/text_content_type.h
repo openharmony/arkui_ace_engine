@@ -49,7 +49,19 @@ enum class TextContentType {
     NICKNAME = 23,
     DETAIL_INFO_WITHOUT_STREET = 24,
     FORMAT_ADDRESS = 25,
-    END = FORMAT_ADDRESS,
+    PASSPORT_NUMBER = 26,
+    VALIDITY = 27,
+    ISSUE_AT = 28,
+    ORGANIZATION = 29,
+    TAX_ID = 30,
+    ADDRESS_CITY_AND_STATE = 31,
+    FLIGHT_NUMBER = 32,
+    LICENSE_NUMBER = 33,
+    LICENSE_FILE_NUMBER = 34,
+    LICENSE_PLATE = 35,
+    ENGINE_NUMBER = 36,
+    LICENSE_CHASSIS_NUMBER = 37,
+    END = LICENSE_CHASSIS_NUMBER,
 };
 TextContentType CastToTextContentType(int32_t value);
 }; // namespace OHOS::Ace::NG

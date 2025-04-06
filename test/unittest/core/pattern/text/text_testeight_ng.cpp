@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,66 @@
  * limitations under the License.
  */
 
+#include "foundation/arkui/ace_engine/test/mock/core/rosen/testing_canvas.h"
+#include "gmock/gmock.h"
 #include "text_base.h"
+
+#include "test/mock/core/common/mock_theme_manager.h"
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 
+#define private public
+#define protected public
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
+#undef protected
+#undef private
+
 namespace OHOS::Ace::NG {
+
+using namespace testing;
+using namespace testing::ext;
+using namespace Testing;
+
+class MockCanvas : public TestingCanvas {
+public:
+    MockCanvas() = default;
+    explicit MockCanvas(void* rawCanvas) {}
+    ~MockCanvas() = default;
+
+    MOCK_METHOD2(DrawLine, void(const TestingPoint& startPt, const TestingPoint& endPt));
+    MOCK_METHOD1(DrawPath, void(const TestingPath& path));
+    MOCK_METHOD3(DrawArc, void(const TestingRect& oval, float startAngle, float sweepAngle));
+    MOCK_METHOD1(DrawRect, void(const TestingRect& rect));
+    MOCK_METHOD3(Rotate, void(float deg, float sx, float sy));
+    MOCK_METHOD1(Rotate, void(float deg));
+    MOCK_METHOD2(Translate, void(float tx, float ty));
+    MOCK_METHOD2(Scale, void(float sx, float sy));
+    MOCK_METHOD3(ClipRoundRectImpl, void(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias));
+    virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias = false)
+    {
+        ClipRoundRectImpl(roundRect, op, antiAlias);
+    }
+    MOCK_METHOD1(AttachPen, TestingCanvas&(const TestingPen& pen));
+    MOCK_METHOD1(AttachBrush, TestingCanvas&(const TestingBrush& brush));
+    MOCK_METHOD0(DetachPen, TestingCanvas&());
+    MOCK_METHOD0(DetachBrush, TestingCanvas&());
+    MOCK_METHOD0(Save, void());
+    MOCK_METHOD0(Restore, void());
+    MOCK_METHOD2(DrawCircle, void(const TestingPoint& centerPt, float radius));
+    MOCK_METHOD1(DrawRoundRect, void(const TestingRoundRect& roundRect));
+    MOCK_METHOD3(DrawBitmap, void(const TestingBitmap& bitmap, const float px, const float py));
+    MOCK_METHOD4(DrawImage,
+        void(const TestingImage& image, const float px, const float py, const TestingSamplingOptions& sampling));
+    MOCK_METHOD1(DrawBackground, void(const TestingBrush& brush));
+    MOCK_METHOD3(ClipRect, void(const TestingRect& rect, ClipOp op, bool doAntiAlias));
+    MOCK_METHOD3(ClipPath, void(const TestingPath& rect, ClipOp op, bool doAntiAlias));
+    MOCK_METHOD3(
+        DrawImageRect, void(const TestingImage& image, const TestingRect& dst, const TestingSamplingOptions& sampling));
+    MOCK_METHOD5(DrawImageRect, void(const TestingImage& image, const TestingRect& src, const TestingRect& dst,
+                                    const TestingSamplingOptions& sampling, SrcRectConstraint constraint));
+    MOCK_METHOD1(SaveLayer, void(const TestingSaveLayerOps& saveLayerOps));
+    MOCK_METHOD1(DrawOval, void(const TestingRect& oval));
+};
 
 class TextTestEightNg : public TextBases {
 public:
@@ -257,11 +312,11 @@ HWTEST_F(TextTestEightNg, OnTextGestureSelectionUpdate005, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd001
- * @tc.desc: test OnTextGenstureSelectionEnd.
+ * @tc.name: OnTextGestureSelectionEnd001
+ * @tc.desc: test OnTextGestureSelectionEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd001, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -272,17 +327,17 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
     pattern->magnifierController_->magnifierNodeExist_ = true;
     auto secondHandle_ = pattern->textSelector_.secondHandle;
     TouchLocationInfo locationInfo(0);
-    pattern->OnTextGenstureSelectionEnd(locationInfo);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_NE(secondHandle_, pattern->textSelector_.secondHandle);
     EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
 
 /**
- * @tc.name: OnTextGenstureSelectionEnd002
- * @tc.desc: test OnTextGenstureSelectionEnd.
+ * @tc.name: OnTextGestureSelectionEnd002
+ * @tc.desc: test OnTextGestureSelectionEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
+HWTEST_F(TextTestEightNg, OnTextGestureSelectionEnd002, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(frameNode, nullptr);
@@ -291,7 +346,7 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
     pattern->textForDisplay_ = u"";
     auto secondHandle_ = pattern->textSelector_.secondHandle;
     TouchLocationInfo locationInfo(0);
-    pattern->OnTextGenstureSelectionEnd(locationInfo);
+    pattern->OnTextGestureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
 }
 
@@ -571,6 +626,228 @@ HWTEST_F(TextTestEightNg, HandleUrlMouseEvent002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DoTextSelectionTouchCancel001
+ * @tc.desc: test DoTextSelectionTouchCancel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, DoTextSelectionTouchCancel001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    pattern->magnifierController_->magnifierNodeExist_ = false;
+    pattern->DoTextSelectionTouchCancel();
+    EXPECT_EQ(pattern->magnifierController_->magnifierNodeExist_, false);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged001
+ * @tc.desc: test OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnWindowSizeChanged001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(pattern->selectOverlay_, nullptr);
+    pattern->selectOverlay_->OnBind(manager);
+    SelectOverlayInfo overlayInfo;
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
+    ASSERT_NE(overlayNode, nullptr);
+    overlayNode->MountToParent(frameNode);
+    manager->selectOverlayNode_ = overlayNode;
+    manager->shareOverlayInfo_ = std::move(shareOverlayInfo);
+    ASSERT_NE(manager->shareOverlayInfo_, nullptr);
+    manager->shareOverlayInfo_->menuInfo.menuIsShow = true;
+
+    int32_t width = 1;
+    int32_t height = 2;
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::ROTATION);
+    pattern->OnWindowSizeChanged(width, height, WindowSizeChangeReason::MAXIMIZE);
+}
+
+/**
+ * @tc.name: GetCaretColor001
+ * @tc.desc: test GetCaretColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, GetCaretColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    auto ret = pattern->GetCaretColor();
+    EXPECT_EQ(ret, "#FF000000");
+}
+
+/**
+ * @tc.name: GetSelectedBackgroundColor001
+ * @tc.desc: test GetSelectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, GetSelectedBackgroundColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    auto ret = pattern->GetSelectedBackgroundColor();
+    EXPECT_EQ(ret, "#FF000000");
+}
+
+/**
+ * @tc.name: MarkDirtyNodeRender001
+ * @tc.desc: test MarkDirtyNodeRender.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, MarkDirtyNodeRender001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->MarkDirtyNodeRender();
+}
+
+/**
+ * @tc.name: OnSelectionMenuOptionsUpdate001
+ * @tc.desc: test OnSelectionMenuOptionsUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    /**
+     * @tc.steps: step2. construct menuOptionItems
+     */
+    pattern->copyOption_ = CopyOptions::InApp;
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 20);
+    OnCreateMenuCallback onCreateMenuCallback;
+    OnMenuItemClickCallback onMenuItemClick;
+    pattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+
+    /**
+     * @tc.steps: step2. call ShowSelectOverlay function
+     * @tc.expected: the property of selectInfo is assigned.
+     */
+    pattern->ShowSelectOverlay();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 20);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback001
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_SHOW, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback002
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback003
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, nullptr, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_HIDE, menuParams);
+}
+
+/**
+ * @tc.name: OnHandleSelectionMenuCallback004
+ * @tc.desc: test OnHandleSelectionMenuCallback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnHandleSelectionMenuCallback004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<SelectionMenuParams> menuParams = std::make_shared<SelectionMenuParams>(
+        TextSpanType::NONE, nullptr, [](int32_t a, int32_t b) -> void {}, nullptr, TextResponseType::NONE);
+    pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+}
+
+/**
+ * @tc.name: ResetCustomFontColor001
+ * @tc.desc: test ResetCustomFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, ResetCustomFontColor001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->ResetCustomFontColor();
+}
+
+/**
  * @tc.name: SetTextStyleDumpInfo001
  * @tc.desc: test SetTextStyleDumpInfo.
  * @tc.type: FUNC
@@ -664,7 +941,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD001, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 0.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 
@@ -688,7 +965,7 @@ HWTEST_F(TextTestEightNg, GetSuitableSizeLD002, TestSize.Level1)
     RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     double stepSize = 1.0;
     auto result = rowLayoutAlgorithm->GetSuitableSizeLD(
-        textStyle, content, contentConstraint, layoutWrapper.GetRawPtr(), stepSize);
+        textStyle, content, contentConstraint, Referenced::RawPtr(layoutWrapper), stepSize);
     EXPECT_FALSE(result.first);
 }
 
@@ -752,8 +1029,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan001, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 20, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {101, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 20, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 101, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -778,8 +1055,8 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan002, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
-    AISpan span2 = {10, 20, "example content2", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
+    AISpan span2 = { 10, 20, "example content2", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -802,7 +1079,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan003, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 10, 50, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
     EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
@@ -824,7 +1101,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan004, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {40, 60, "example content1", TextDataDetectType::EMAIL};
+    AISpan span1 = { 40, 60, "example content1", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -847,7 +1124,7 @@ HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan005, TestSize
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
-    AISpan span1 = {50, 54, "example content", TextDataDetectType::EMAIL};
+    AISpan span1 = { 50, 54, "example content", TextDataDetectType::EMAIL };
     pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
     CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
     pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
@@ -960,5 +1237,125 @@ HWTEST_F(TextTestEightNg, LocalOffsetInSelectedArea001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::None;
     auto res = pattern->LocalOffsetInSelectedArea(Offset(0, 0));
     EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: onDraw001
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw001, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    vector<RectF> selectedRects { { 5, 5, 5, 5 } };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.SetShowSelect(true);
+    textOverlayModifier.SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 } }, 1);
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw002
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw002, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetShowSelect(true);
+    vector<RectF> selectedRects = { { 5, 5, 5, 5 }, {} };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.isClip_ = nullptr;
+    textOverlayModifier.SetContentRect({});
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw003
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw003, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(0);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetShowSelect(true);
+    vector<RectF> selectedRects = { { 5, 5, 5, 5 }, {} };
+    textOverlayModifier.SetSelectedRects(selectedRects);
+    textOverlayModifier.SetIsClip(false);
+    textOverlayModifier.SetContentRect({});
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: onDraw004
+ * @tc.desc: test onDraw.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, onDraw004, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).Times(1);
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    DrawingContext drawingContext { canvas, 5, 5 };
+    textOverlayModifier.SetSelectedForegroundColorAndRects({ { 5, 5, 5, 5 }, { 0, 0, 0, 0 } }, 1);
+    textOverlayModifier.SetContentRect({ 3, 3, 3, 3 });
+    textOverlayModifier.SetShowSelect(true);
+    textOverlayModifier.onDraw(drawingContext);
+}
+
+/**
+ * @tc.name: IsSelectedRectsChanged001
+ * @tc.desc: test IsSelectedRectsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, IsSelectedRectsChanged001, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    vector<RectF> selectedRects { {} };
+    auto result = textOverlayModifier.IsSelectedRectsChanged(selectedRects);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: IsSelectedRectsChanged002
+ * @tc.desc: test IsSelectedRectsChanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, IsSelectedRectsChanged002, TestSize.Level1)
+{
+    TextOverlayModifier textOverlayModifier;
+    vector<RectF> selectedRects { {} };
+    textOverlayModifier.SetSelectedRects({ { 3, 3, 3, 3 } });
+    auto result = textOverlayModifier.IsSelectedRectsChanged(selectedRects);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG
