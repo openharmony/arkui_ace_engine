@@ -383,7 +383,6 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
     void StopFlingAnimation();
 
-#ifdef ARKUI_CIRCLE_FEATURE
     void SetActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
     {
         activeBackgroundWidth_ = activeBackgroundWidth;
@@ -393,7 +392,25 @@ public:
     {
         activeScrollBarWidth_ = activeScrollBarWidth;
     }
-#endif
+
+    void SetArcBackgroundColor(const Color& backgroundColor)
+    {
+        arcBackgroundColor_ = backgroundColor;
+    }
+    const Color& GetArcBackgroundColor() const
+    {
+        return arcBackgroundColor_;
+    }
+
+    void SetArcForegroundColor(const Color& foregroundColor)
+    {
+        arcForegroundColor_ = foregroundColor;
+    }
+
+    Color GetArcForegroundColor() const
+    {
+        return IsPressed() ? arcForegroundColor_.BlendColor(PRESSED_BLEND_COLOR) : arcForegroundColor_;
+    }
 
 protected:
     void InitTheme();
@@ -406,7 +423,6 @@ protected:
         return normalWidth_;
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     void SetMouseEventMember(RefPtr<InputEvent> mouseEvent)
     {
         mouseEvent_ = mouseEvent;
@@ -577,7 +593,6 @@ protected:
     {
         return activeScrollBarWidth_;
     }
-#endif
 
     double GetMinAngle() const
     {
@@ -676,7 +691,6 @@ private:
     bool needAddLayoutInfo = false;
     bool isMousePressed_ = false;
 
-#ifdef ARKUI_CIRCLE_FEATURE
     Dimension normalBackgroundWidth_;
     Dimension activeBackgroundWidth_;
     double normalStartAngle_ = 0.0;
@@ -685,7 +699,8 @@ private:
     double activeMaxOffsetAngle_ = 0.0;
     Dimension normalScrollBarWidth_;
     Dimension activeScrollBarWidth_;
-#endif // ARKUI_CIRCLE_FEATURE
+    Color arcBackgroundColor_;
+    Color arcForegroundColor_;
 };
 
 } // namespace OHOS::Ace::NG
