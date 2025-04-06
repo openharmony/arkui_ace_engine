@@ -2154,8 +2154,8 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
             nodeInfo, virtualInfo, ngPipeline);
         virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
-        infos.push_back(virtualInfo);
         UpdateVirtualNodeInfo(infos, virtualInfo, frameNodeChild, commonProperty, ngPipeline);
+        infos.push_back(virtualInfo);
     }
 }
 
@@ -4911,36 +4911,6 @@ void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
 void JsAccessibilityManager::WebInteractionOperation::OutsideTouch() {}
 #endif
 
-void LevelOrderTraversal(std::list<AccessibilityElementInfo>& infos)
-{
-    std::unordered_map<int64_t, std::vector<AccessibilityElementInfo*>> elementInfosMap;
-    std::queue<int64_t> q;
-    std::list<AccessibilityElementInfo*> result;
-    std::list<AccessibilityElementInfo> newInfos;
-
-    for (auto& info : infos) {
-        elementInfosMap[info.GetParentNodeId()].push_back(&info);
-    }
-
-    q.push(infos.front().GetParentNodeId());
-    while (!q.empty()) {
-        int64_t levelSize = q.size();
-        for (int64_t i = 0; i < levelSize; ++i) {
-            int64_t current = q.front();
-            q.pop();
-            for (auto child : elementInfosMap[current]) {
-                q.push(child->GetAccessibilityId());
-                result.push_back(child);
-            }
-        }
-    }
-
-    for (auto ptr : result) {
-        newInfos.push_back(std::move(*ptr));
-    }
-    infos = std::move(newInfos);
-}
-
 void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
     AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId)
 {
@@ -4954,7 +4924,6 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
             TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
                 "SearchElementInfoByAccessibilityIdNG info size: %{public}zu, elementId: %{public}" PRId64,
                 infos.size(), elementId);
-            LevelOrderTraversal(infos);
             SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
             return;
         }
