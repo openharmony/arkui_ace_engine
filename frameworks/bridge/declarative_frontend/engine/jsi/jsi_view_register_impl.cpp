@@ -752,10 +752,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
-#ifndef ARKUI_WEARABLE
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
-#endif
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
