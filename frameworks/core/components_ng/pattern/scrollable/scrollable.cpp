@@ -61,6 +61,8 @@ constexpr float START_FRICTION_VELOCITY_THRESHOLD = 240.0f;
 constexpr float FRICTION_VELOCITY_THRESHOLD = 120.0f;
 constexpr float SPRING_ACCURACY = 0.1;
 constexpr float DEFAULT_MINIMUM_AMPLITUDE_PX = 1.0f;
+constexpr float SCROLL_SNAP_MIN_STEP_THRESHOLD = 10.0f;
+constexpr float SCROLL_SNAP_MIN_STEP = 1.0f;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -1135,6 +1137,7 @@ void Scrollable::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSna
             scroll->updateSnapAnimationCount_--;
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->state_ = AnimationState::IDLE;
+                scroll->nextStep_.reset();
                 scroll->axisSnapDistance_ = 0.f;
                 scroll->snapDirection_ = SnapDirection::NONE;
                 ACE_SCOPED_TRACE("Scroll snap animation finish, id:%d", scroll->nodeId_);
@@ -1412,24 +1415,46 @@ void Scrollable::ProcessSpringMotion(double position)
     currentPos_ = position;
 }
 
+double Scrollable::CalcNextStep(double position, double mainDelta)
+{
+    auto finalDelta = finalPosition_ - currentPos_;
+    if (GreatNotEqual(std::abs(finalDelta), SCROLL_SNAP_MIN_STEP_THRESHOLD)) {
+        return mainDelta;
+    }
+    if (LessOrEqual(std::abs(finalDelta), SCROLL_SNAP_MIN_STEP)) {
+        return finalDelta;
+    }
+    if (nextStep_.has_value()) {
+        return nextStep_.value();
+    }
+    if (LessOrEqual(std::abs(mainDelta), SCROLL_SNAP_MIN_STEP)) {
+        nextStep_ = Positive(mainDelta) ? SCROLL_SNAP_MIN_STEP : -SCROLL_SNAP_MIN_STEP;
+        mainDelta = nextStep_.value();
+    }
+    return mainDelta;
+}
+
 void Scrollable::ProcessScrollMotion(double position, int32_t source)
 {
-    currentVelocity_ = frictionVelocity_;
     currentVelocity_ = state_ == AnimationState::SNAP ? snapVelocity_ : frictionVelocity_;
-    if (needScrollSnapToSideCallback_) {
-        needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
+    auto mainDelta = position - currentPos_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (state_ == AnimationState::SNAP) {
+        mainDelta = CalcNextStep(position, mainDelta);
+        position = currentPos_ + mainDelta;
     }
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE,
-        "position is %{public}f, currentVelocity_ is %{public}f, "
-        "needScrollSnapChange_ is %{public}u",
-        position, currentVelocity_, needScrollSnapChange_);
-    if (LessOrEqual(std::abs(currentPos_ - position), 1)) {
+#endif
+    if (needScrollSnapToSideCallback_) {
+        needScrollSnapChange_ = needScrollSnapToSideCallback_(mainDelta);
+    }
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}f, currentVelocity_ is %{public}f, "
+        "needScrollSnapChange_ is %{public}u", position, currentVelocity_, needScrollSnapChange_);
+    if (LessOrEqual(std::abs(mainDelta), 1)) {
         // trace stop at OnScrollStop
         AceAsyncTraceBeginCommercial(
             nodeId_, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") + nodeTag_).c_str());
     }
     // UpdateScrollPosition return false, means reach to scroll limit.
-    auto mainDelta = position - currentPos_;
     source = snapAnimationFromScrollBar_ && state_ == AnimationState::SNAP ? SCROLL_FROM_BAR_FLING : source;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
     if (!moved_) {
@@ -1437,7 +1462,11 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
         StopFrictionAnimation();
     }
     currentPos_ = position;
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (state_ == AnimationState::SNAP && NearEqual(currentPos_, finalPosition_)) {
+        StopSnapAnimation();
+    }
+#endif
     // spring effect special process
     if ((canOverScroll_ && source != SCROLL_FROM_AXIS) || needScrollSnapChange_) {
         ACE_SCOPED_TRACE("scrollPause set true to stop ProcessScrollMotion, canOverScroll:%u, needScrollSnapChange:%u, "
@@ -1708,6 +1737,7 @@ void Scrollable::StopSnapAnimation()
     if (state_ == AnimationState::SNAP) {
         ACE_SCOPED_TRACE("StopSnapAnimation, animation state:%d, id:%d, tag:%s", state_, nodeId_, nodeTag_.c_str());
         state_ = AnimationState::IDLE;
+        nextStep_.reset();
         CHECK_NULL_VOID(snapOffsetProperty_);
         AnimationOption option;
         option.SetCurve(Curves::EASE);
@@ -1717,7 +1747,9 @@ void Scrollable::StopSnapAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                scroll->snapOffsetProperty_->Set(scroll->currentPos_);
+                auto position = NearEqual(scroll->currentPos_, scroll->finalPosition_) ?
+                    scroll->finalPosition_ - 1.f : scroll->currentPos_;
+                scroll->snapOffsetProperty_->Set(position);
             },
             nullptr);
     }
