@@ -2142,12 +2142,8 @@ void JsAccessibilityManager::UpdateVirtualNodeInfo(std::list<AccessibilityElemen
     auto frameParentNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
     CHECK_NULL_VOID(frameParentNode);
     std::list<RefPtr<NG::FrameNode>> children;
+
     GetChildrenFromFrameNode(frameParentNode, children, commonProperty);
-
-    if (children.empty()) {
-        return;
-    }
-
     for (const auto& frameNodeChild : children) {
         AccessibilityElementInfo virtualInfo;
         UpdateVirtualNodeChildAccessibilityElementInfo(frameNodeChild, commonProperty,
