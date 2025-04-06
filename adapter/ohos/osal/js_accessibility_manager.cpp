@@ -4911,7 +4911,7 @@ void JsAccessibilityManager::WebInteractionOperation::GetCursorPosition(
 void JsAccessibilityManager::WebInteractionOperation::OutsideTouch() {}
 #endif
 
-void LevelOrderTraversal(std::lit<AccessibilityElementInfo>& infos)
+void LevelOrderTraversal(std::list<AccessibilityElementInfo>& infos)
 {
     std::unordered_map<int64_t, std::vector<AccessibilityElementInfo*>> elementInfosMap;
     std::queue<int64_t> q;
