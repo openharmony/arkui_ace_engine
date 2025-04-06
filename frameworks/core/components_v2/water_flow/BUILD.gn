@@ -15,23 +15,17 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
 build_component("water_flow_v2") {
-  sources = []
-  if (!ace_engine_feature_wearable) {
-    sources += [
-      "render_water_flow.cpp",
-      "render_water_flow_creator.cpp",
-      "render_water_flow_item.cpp",
-      "water_flow_component.cpp",
-      "water_flow_element.cpp",
-      "water_flow_item_component.cpp",
-      "water_flow_item_element.cpp",
-      "water_flow_position_controller.cpp",
-      "water_flow_scroll_controller.cpp",
-    ]
-  }
+  sources = [
+    "render_water_flow.cpp",
+    "render_water_flow_creator.cpp",
+    "render_water_flow_item.cpp",
+    "water_flow_component.cpp",
+    "water_flow_element.cpp",
+    "water_flow_item_component.cpp",
+    "water_flow_item_element.cpp",
+    "water_flow_position_controller.cpp",
+    "water_flow_scroll_controller.cpp",
+  ]
 
-  rosen_sources = []
-  if (!ace_engine_feature_wearable) {
-    rosen_sources += [ "rosen_render_water_flow.cpp" ]
-  }
+  rosen_sources = [ "rosen_render_water_flow.cpp" ]
 }

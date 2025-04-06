@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 13
+#define MODIFIER_COUNTS 12
 #define BLANK_LINES 6
 
 extern "C" {
@@ -218,11 +218,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
         .getMenuModifier = NodeModifier::GetMenuModifier,
         .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
-    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
-    #else
-        .getWaterFlowModifier = nullptr,
-    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetGaugeModifier,
@@ -389,11 +385,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getMenuItemModifier = nullptr,
         .getMenuModifier = NodeModifier::GetCJUIMenuModifier,
         .getDatePickerModifier = NodeModifier::GetCJUIDatePickerModifier,
-    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetCJUIWaterFlowModifier,
-    #else
-        .getWaterFlowModifier = nullptr,
-    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetCJUIAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetCJUIDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetCJUIGaugeModifier,
