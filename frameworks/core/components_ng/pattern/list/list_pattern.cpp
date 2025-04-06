@@ -2275,12 +2275,12 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
             if (groupAtStart) {
-                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             } else {
-                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             }
         } else {
-            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
         }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
@@ -2297,7 +2297,7 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
     auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
     delta = isStackFromEnd_ ? -(delta + sizeChange) : delta;
     if (Negative(prevPosInfo.mainPos)) {
-        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange});
+        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup});
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
@@ -2341,6 +2341,7 @@ void ListPattern::UpdateScrollBarOffset()
         estimatedHeight = listTotalHeight_;
     } else {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
+        calculate.SetPosMap(posMap_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset = calculate.GetEstimateOffset();
         estimatedHeight = calculate.GetEstimateHeight();
@@ -3202,6 +3203,7 @@ SizeF ListPattern::GetChildrenExpandedSize()
         estimatedHeight = listTotalHeight_;
     } else if (!itemPosition_.empty()) {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis, itemStartIndex_);
+        calculate.SetPosMap(posMap_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         estimatedHeight = calculate.GetEstimateHeight();
     }
