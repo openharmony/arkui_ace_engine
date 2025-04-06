@@ -4923,7 +4923,7 @@ void LevelOrderTraversal(std::list<AccessibilityElementInfo>& infos)
     }
 
     q.push(infos.front().GetParentNodeId());
-    while (!q.empty) {
+    while (!q.empty()) {
         int64_t levelSize = q.size();
         for (int64_t i = 0; i < levelSize; ++i) {
             int64_t current = q.front();
