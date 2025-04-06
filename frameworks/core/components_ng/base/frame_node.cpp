@@ -51,6 +51,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
+#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
@@ -517,6 +518,15 @@ void FrameNode::CreateEventHubInner()
     if (eventHub_) {
         eventHub_->AttachHost(WeakClaim(this));
     }
+}
+
+int32_t FrameNode::GetTotalChildCount() const
+{
+    auto overrideCount = pattern_->GetTotalChildCount();
+    if (overrideCount < 0) {
+        return UINode::TotalChildCount();
+    }
+    return overrideCount;
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -4812,6 +4822,18 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
+    auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    if (scrollWindowAdapter) {
+        auto child = scrollWindowAdapter->GetChildByIndex(index);
+        if (child) {
+            child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+            if (addToRenderTree) {
+                child->SetActive(true);
+            }
+        }
+        return child;
+    }
+
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
@@ -4824,6 +4846,10 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
+    auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    if (scrollWindowAdapter) {
+        return scrollWindowAdapter->GetChildByIndex(index);
+    }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
@@ -4873,7 +4899,20 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
+    auto* adapter = GetScrollWindowAdapter();
+    if (adapter) {
+        for (const auto& child : GetChildren()) {
+            const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+            child->SetActive(index >= start && index <= end);
+        }
+        return;
+    }
+    if (showCached) {
+        frameProxy_->SetActiveChildRange(
+            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
+    } else {
+        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+    }
 }
 
 void FrameNode::SetActiveChildRange(
@@ -6588,6 +6627,16 @@ const char* FrameNode::GetPaintPropertyTypeName() const
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
+}
+
+ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
+{
+    return pattern_->GetScrollWindowAdapter();
+}
+
+ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
+{
+    return pattern_->GetOrCreateScrollWindowAdapter();
 }
 
 bool FrameNode::IsDrawFocusOnTop() const

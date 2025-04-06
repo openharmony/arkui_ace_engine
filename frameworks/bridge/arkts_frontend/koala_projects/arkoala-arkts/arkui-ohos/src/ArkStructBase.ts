@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-import { remember } from "@koalaui/runtime"
+import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponentImpl } from "./ArkCustomComponent"
-import { ArkCommonMethodComponent } from "./generated/ArkCommon"
+import { ArkCommonMethodComponent } from "./generated"
 import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/ArkPageTransition";
 import { PageTransitionOptions } from "./component/pageTransition";
 import { ArkComponentRoot } from "./ArkComponentRoot"
+import { ArkColumnPeer } from "./generated/peers/ArkColumnPeer";
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl {
@@ -33,8 +34,13 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
         factory: () => T,
         /** @memo */
         arg1?: () => void,
-        arg2?: T_Options
+        arg2?: T_Options,
+        reuseKey?: string
     ): void {
+        if (reuseKey) {
+            ArkStructBase._instantiateReusable(reuseKey!, attributes, factory, arg1, arg2);
+            return
+        }
         const receiver = remember(() => {
             const instance = factory();
             instance.__initializeStruct(arg1, arg2);
@@ -76,7 +82,38 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
 
     /** @memo */
     pageTransition(): void {
-        ArkPageTransitionEnter(undefined, undefined, { duration: 100 } as PageTransitionOptions )
-        ArkPageTransitionExit(undefined, undefined, { duration: 100 } as PageTransitionOptions )
+        ArkPageTransitionEnter(undefined, undefined, { duration: 100 } as PageTransitionOptions)
+        ArkPageTransitionExit(undefined, undefined, { duration: 100 } as PageTransitionOptions)
     }
+
+    /** @memo */
+    static _instantiateReusable<T extends ArkStructBase<T, T_Options>, T_Options>(
+        reuseId: string,
+        /** @memo */
+        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
+        factory: () => T,
+        /** @memo */
+        arg1?: () => void,
+        arg2?: T_Options,
+    ): void {
+        /* need to wrap both states and build() of @Component */
+        NodeAttach(() => ArkColumnPeer.create(), (node: ArkColumnPeer) => { // replace with Frontend Node later
+            const component = remember(() => {
+                const instance = factory()
+                instance.__initializeStruct(arg1, arg2);
+                node.setOnRecycle(() =>
+                    instance.aboutToRecycle()
+                )
+                return instance
+            });
+            node.setOnReuse(
+                () => {
+                    if (arg2) component.aboutToReuse(component.__toRecord(arg2!! as Object))
+                }
+            )
+            component._buildWrapper(attributes, arg1, arg2);
+        }, reuseId)
+    }
+
+    abstract __toRecord(param: Object): Record<string, Object> // overridden by CustomDelegate
 }

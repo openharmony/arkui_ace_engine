@@ -44,7 +44,7 @@ export interface ArkCustomComponent {
     build(): void;
     aboutToAppear/* ? */(): void;
     aboutToDisappear/* ? */(): void;
-    aboutToReuse/* ? */(params: Object): void;
+    aboutToReuse/* ? */(params: Record<string, Object>): void;
     aboutToRecycle/* ? */(): void
     onWillApplyTheme/* ? */(theme: Theme): void
     onLayout/* ? */(children: Array<LayoutChild>, constraint: ConstraintSizeOptions): void
@@ -74,7 +74,7 @@ export class ArkCustomComponentImpl implements ArkCustomComponent {
     }
     aboutToDisappear(): void {
     }
-    aboutToReuse(params: Object): void {
+    aboutToReuse(params: Record<string, Object>): void {
     }
     aboutToRecycle(): void {
     }

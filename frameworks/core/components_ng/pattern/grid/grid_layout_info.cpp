@@ -1079,4 +1079,13 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
     }
     return true;
 }
+
+std::string GridLayoutInfo::ToString() const
+{
+    return "startMainLine = " + std::to_string(startMainLineIndex_) + ", offset = " + std::to_string(currentOffset_) +
+           ", endMainLine = " + std::to_string(endMainLineIndex_) + ", startIndex = " + std::to_string(startIndex_) +
+           ", endIndex = " + std::to_string(endIndex_) + ", jumpIndex = " + std::to_string(jumpIndex_) +
+           ", gridMatrix size = " + std::to_string(gridMatrix_.size()) +
+           ", lineHeightMap size = " + std::to_string(lineHeightMap_.size());
+}
 } // namespace OHOS::Ace::NG

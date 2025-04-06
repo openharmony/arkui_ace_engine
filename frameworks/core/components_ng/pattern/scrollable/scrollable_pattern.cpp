@@ -4121,6 +4121,10 @@ void ScrollablePattern::StopScrollableAndAnimate()
 void ScrollablePattern::GetRepeatCountInfo(
     RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
 {
+    if (auto* adapter = GetScrollWindowAdapter(); adapter) {
+        totalChildCount = adapter->GetTotalCount();
+        return;
+    }
     CHECK_NULL_VOID(node);
     auto& children = node->GetChildren();
     for (const auto& child : children) {

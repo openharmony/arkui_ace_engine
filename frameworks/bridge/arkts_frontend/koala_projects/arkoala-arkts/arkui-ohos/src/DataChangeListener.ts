@@ -17,19 +17,7 @@ import { pointer, nullptr } from "@koalaui/interop";
 import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation, DataChangeOperation, DataMoveOperation, DataExchangeOperation, LazyForEachOps } from "./generated";
 import { int32 } from "@koalaui/common"
 import { MutableState } from "@koalaui/runtime";
-
-export interface DataChangeListener {
-    onDataReloaded(): void;
-    onDataAdded(index: number): void;
-    onDataAdd(index: number): void;
-    onDataMoved(from: number, to: number): void;
-    onDataMove(from: number, to: number): void;
-    onDataDeleted(index: number): void;
-    onDataDelete(index: number): void;
-    onDataChanged(index: number): void;
-    onDataChange(index: number): void;
-    onDatasetChange(dataOperations: DataOperation[]): void;
-}
+import { DataChangeListener } from "./component/lazyForEach";
 
 export class InternalListener implements DataChangeListener {
     parent: pointer

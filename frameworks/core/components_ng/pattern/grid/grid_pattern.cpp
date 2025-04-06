@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,6 +37,15 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
+
+void GridPattern::OnAttachToFrameNode()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+        irregular_ = true; // GridScrollLayoutAlgorithm deprecated in ArkTS
+    }
+}
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
@@ -435,10 +445,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             offset *= friction;
         }
-        auto userOffset = FireOnWillScroll(-offset);
-        info_.currentOffset_ -= userOffset;
-
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        UpdateOffsetHelper(offset);
 
         if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
             info_.offsetEnd_ = false;
@@ -452,21 +459,27 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
         }
-        auto userOffset = FireOnWillScroll(-offset);
-        info_.currentOffset_ -= userOffset;
-
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        UpdateOffsetHelper(offset);
 
         if (LessNotEqual(info_.currentOffset_, 0.0)) {
             info_.reachStart_ = false;
         }
         return true;
     }
-    auto userOffset = FireOnWillScroll(-offset);
-    info_.currentOffset_ -= userOffset;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    UpdateOffsetHelper(offset);
     ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
+}
+
+void GridPattern::UpdateOffsetHelper(float offset)
+{
+    auto userOffset = FireOnWillScroll(-offset);
+    info_.currentOffset_ -= userOffset;
+    UpdateOffset(-userOffset);
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -522,6 +535,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckScrollable();
     MarkSelectedItems();
+
+    UpdateLayoutRange(info_.axis_, !isInitialized_);
+    RequestReset(info_.jumpForRecompose_, -info_.currentOffset_);
+    info_.jumpForRecompose_ = EMPTY_JUMP_INDEX;
     isInitialized_ = true;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
@@ -739,6 +756,7 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     info_.jumpIndex_ = index;
+    RequestJump(index, info_.scrollAlign_, -info_.extraOffset_.value_or(0.0f));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // AccessibilityEventType::SCROLL_END
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1329,7 +1347,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t totalChildCount = host->TotalChildCount();
+    int32_t totalChildCount = host->GetTotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (extraOffset.has_value()) {
             info_.extraOffset_ = -extraOffset.value();
@@ -1339,6 +1357,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             targetIndex_ = index;
             scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            RequestFillToTarget(index, align, extraOffset.value_or(0.0f));
         } else {
             UpdateStartIndex(index, align);
         }
@@ -1645,5 +1664,14 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
 void GridPattern::HandleOnItemFocus(int32_t index)
 {
     focusHandler_.SetFocusIndex(index);
+}
+
+RefPtr<FillAlgorithm> GridPattern::CreateFillAlgorithm()
+{
+    auto props = GetLayoutProperty<GridLayoutProperty>();
+    if (!props->IsConfiguredScrollable()) {
+        return nullptr;
+    }
+    return MakeRefPtr<GridFillAlgorithm>(*props, info_);
 }
 } // namespace OHOS::Ace::NG
