@@ -15,6 +15,7 @@
             "@koalaui/compat": ["../../../../../incremental/compat/src/arkts"],
             "@koalaui/runtime": ["../../../../../incremental/runtime/build/unmemoized/src"],
             "#helpindexarkui": ["index.ts"],
+            "@ohos/animator": ["../ohos.animator.ts"],
             "@ohos.arkui.UIContext": ["../ohos.arkui.UIContext.ts"],
             "@ohos.measure": ["../ohos.measure.ts"],
             "@ohos.font.font": ["../ohos.font.ts"],
@@ -23,7 +24,7 @@
     },
     "include": [
         "build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts", "build/unmemoized/ohos.arkui.UIContext.ts",
-        "build/unmemoized/ohos.measure.ts", "build/unmemoized/ohos.font.ts"
+        "build/unmemoized/ohos.measure.ts", "build/unmemoized/ohos.font.ts", "build/unmemoized/ohos.animator.ts"
     ],
     "exclude": [
         "**/index.ts",
