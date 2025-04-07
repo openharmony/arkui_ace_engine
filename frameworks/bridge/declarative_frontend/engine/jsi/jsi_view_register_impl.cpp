@@ -1015,7 +1015,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     if (cleanUpIdleTask->IsFunction()) {
         LOGI("CleanUpIdleTask is a valid function");
         const auto globalFunc = JSRef<JSFunc>::Cast(cleanUpIdleTask);
-        const auto callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
+        const std::function<void(int64_t)> callback = [jsFunc = globalFunc, globalObject = globalObject](int64_t maxTimeInNs) {
             auto params = ConvertToJSValues(maxTimeInNs / 1e6);
             jsFunc->Call(globalObject, params.size(), params.data());
         };
