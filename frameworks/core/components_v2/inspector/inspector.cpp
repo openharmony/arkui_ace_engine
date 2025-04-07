@@ -99,7 +99,7 @@ void ToJsonValue(const RefPtr<Element>& element,
         int type = StringUtils::StringToInt(shapeComposedElement->GetShapeType());
         json->Replace(INSPECTOR_TYPE, SHAPE_TYPE_STRINGS[type]);
     }
-    json->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    json->Put(INSPECTOR_ID, StringUtils::StringToInt(inspectorElement->GetId()));
     json->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
     json->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
     auto jsonObject = inspectorElement->ToJsonObject();
@@ -129,7 +129,7 @@ std::string Inspector::GetInspectorNodeByKey(const RefPtr<PipelineContext>& cont
 
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-    jsonNode->Put(INSPECTOR_ID, std::stoi(inspectorElement->GetId()));
+    jsonNode->Put(INSPECTOR_ID, StringUtils::StringToInt(inspectorElement->GetId()));
     jsonNode->Put(INSPECTOR_Z_INDEX, inspectorElement->GetZIndex());
     jsonNode->Put(INSPECTOR_RECT, inspectorElement->GetRenderRect().ToBounds().c_str());
     std::string debugLine = inspectorElement->GetDebugLine();
