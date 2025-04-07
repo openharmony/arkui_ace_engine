@@ -119,7 +119,6 @@ class UINodeRegisterProxy {
             }
 
             ObserveV2.getObserve().clearBinding(elmtId);
-            delete ObserveV2.getObserve().id2cmp_[elmtId];
         })
 
         this.removeElementsInfo_.length = 0;

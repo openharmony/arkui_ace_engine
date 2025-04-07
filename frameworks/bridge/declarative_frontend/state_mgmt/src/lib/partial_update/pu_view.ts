@@ -210,16 +210,9 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
     // purge the elmtIds owned by this viewPU from the updateFuncByElmtId and also the state variable dependent elmtIds
-    this.updateFuncByElmtId.forEach((_updateFun: UpdateFuncRecord, elmtId: number) => {
+    Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
       this.purgeDeleteElmtId(elmtId);
-      if (ConfigureStateMgmt.instance.needsV2Observe()) {
-        delete ObserveV2.getObserve().id2cmp_[elmtId];
-      }
-    });
-
-    if (ConfigureStateMgmt.instance.needsV2Observe()) {
-      delete ObserveV2.getObserve().id2cmp_[this.id_];
-    }
+    })
 
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode();
