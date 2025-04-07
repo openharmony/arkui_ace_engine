@@ -47,7 +47,7 @@ void ColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
-    // LoadingProgressModelNG::SetColor(frameNode, color);
+    LoadingProgressModelNG::SetColor(frameNode, color);
 }
 void EnableLoadingImpl(Ark_NativePointer node,
                        Ark_Boolean value)
