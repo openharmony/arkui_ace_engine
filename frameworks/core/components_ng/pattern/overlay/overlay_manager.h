@@ -339,8 +339,6 @@ public:
 
     RefPtr<FrameNode> GetDragPixelMapContentNode() const;
 
-    RefPtr<FrameNode> GetRelativeContainerNode() const;
-
     RefPtr<FrameNode> GetPixelMapBadgeNode() const;
 
     RefPtr<FrameNode> GetDragPixelMapBadgeNode() const;

@@ -524,8 +524,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         UpdateCurrentFocus();
         host->ChildrenUpdatedFrom(-1);
     }
-
     CheckLoopChange();
+    SetLazyLoadIsLoop();
     auto lastCurrentIndex = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
@@ -2097,6 +2097,7 @@ void SwiperPattern::FastAnimation(int32_t targetIndex)
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITaskWithSingleDirtyNode(host);
         pipeline->FlushSyncGeometryNodeTasks();
+        SetIndicatorIsInFast(true);
     }
 }
 
@@ -3340,13 +3341,19 @@ void SwiperPattern::TriggerAddTabBarEvent() const
     }
 }
 
-void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+void SwiperPattern::ReportTraceOnDragEnd() const
 {
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
+}
+
+void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+{
+    ReportTraceOnDragEnd();
+
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity) || !CheckContentWillScroll(dragVelocity, mainDelta)) {
@@ -3360,6 +3367,10 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    if (SupportSwiperCustomAnimation()) {
+        pipeline->FlushDirtyNodeUpdate();
+    }
+
     pipeline->FlushUITasks();
     if (itemPosition_.empty()) {
         EventReport::ReportScrollableErrorEvent(
@@ -5249,18 +5260,19 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     CHECK_NULL_VOID(host);
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
+        auto isLoop = IsLoop();
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
         if (lazyForEachNode) {
-            lazyForEachNode->SetIsLoop(IsLoop());
+            lazyForEachNode->SetIsLoop(isLoop);
         }
         auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
         if (repeatVirtualNode) {
-            repeatVirtualNode->SetIsLoop(IsLoop());
+            repeatVirtualNode->SetIsLoop(isLoop);
         }
 
         auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
         if (repeatVirtualNode2) {
-            repeatVirtualNode2->SetIsLoop(IsLoop());
+            repeatVirtualNode2->SetIsLoop(isLoop);
         }
     }
 }
@@ -6927,6 +6939,22 @@ void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
     indicatorPattern->SetJumpIndex(jumpIndex);
 }
 
+void SwiperPattern::SetIndicatorIsInFast(std::optional<bool> isInFast)
+{
+    if (GetMaxDisplayCount() <= 0) {
+        return;
+    }
+    auto indicatorNode = GetCommonIndicatorNode();
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
+        return;
+    }
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+
+    indicatorPattern->SetIsInFast(isInFast);
+}
+
 void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     CHECK_NULL_VOID(json);
@@ -7238,8 +7266,9 @@ bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
         if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
             return true;
-        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-                   AceType::InstanceOf<ForEachNode>(child)) {
+        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child)) {
             continue;
         } else {
             if (HasRepeatTotalCountDifference(child)) {

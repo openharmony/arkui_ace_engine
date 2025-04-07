@@ -124,6 +124,11 @@ public:
         groupTurnPageRate_ = groupTurnPageRate;
     }
 
+    GestureState GetGestureState()
+    {
+        return gestureState_;
+    }
+
     void SetGestureState(GestureState gestureState)
     {
         gestureState_ = gestureState;

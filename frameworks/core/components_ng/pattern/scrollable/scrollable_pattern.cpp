@@ -39,11 +39,8 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
-#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,9 +55,7 @@ constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
-#ifdef ARKUI_CIRCLE_FEATURE
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
-#endif
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -782,9 +777,9 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-    if (isClickAnimationStop_) {
+    if (isBackToTopRunning_) {
         StopAnimate();
-        isClickAnimationStop_ = false;
+        isBackToTopRunning_ = false;
     }
 }
 
@@ -1042,11 +1037,9 @@ void ScrollablePattern::InitScrollBarGestureEvent()
 
 RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     if (isRoundScroll_) {
         return AceType::MakeRefPtr<ArcScrollBar>();
     }
-#endif
     return AceType::MakeRefPtr<ScrollBar>();
 }
 
@@ -1126,10 +1119,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             if (isRoundScroll_) {
                 scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
                 scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
-#ifdef ARKUI_CIRCLE_FEATURE
                 scrollBar_->SetActiveBackgroundWidth(barWidth.value());
                 scrollBar_->SetActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
-#endif
             } else {
                 scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetNormalWidth(barWidth.value());
@@ -1149,8 +1140,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 {
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
-        auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
-        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
+        bool scrollable = IsScrollable();
         if (scrollBar_->IsScrollable() != scrollable) {
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
@@ -1257,7 +1247,6 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     if (isRoundScroll_ && scrollBar_) {
         auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
         auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
@@ -1268,7 +1257,6 @@ RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
         }
         return arcScrollBarOverlayModifier;
     }
-#endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }
 
@@ -1457,7 +1445,7 @@ void ScrollablePattern::OnAnimateFinish()
                 .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
-    isClickAnimationStop_ = false;
+    isBackToTopRunning_ = false;
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
@@ -1570,6 +1558,9 @@ void ScrollablePattern::InitSpringOffsetProperty()
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
         if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
+        }
+        if (pattern->isBackToTopRunning_) {
+            source = SCROLL_FROM_STATUSBAR;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
@@ -2153,6 +2144,7 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         { SCROLL_FROM_ANIMATION_CONTROLLER, ScrollSource::SCROLLER_ANIMATION },
         { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
         { SCROLL_FROM_CROWN, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_STATUSBAR, ScrollSource::OTHER_USER_INPUT },
     };
     ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
     int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);
@@ -2697,7 +2689,7 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    isClickAnimationStop_ = true; // set stop animation flag when click status bar.
+    isBackToTopRunning_ = true; // set stop animation flag when click status bar.
     AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
 }
 

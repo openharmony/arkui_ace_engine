@@ -388,65 +388,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetTextBoxes001, TestSize.Level1)
 }
 
 /**
- * @tc.name: MoveCaretToContentRect001
- * @tc.desc: test MoveCaretToContentRect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, MoveCaretToContentRect001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    SelectOverlayInfo overlayInfo;
-    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>(overlayInfo);
-    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo);
-    auto manager = SelectContentOverlayManager::GetOverlayManager();
-    CHECK_NULL_VOID(manager);
-    manager->selectOverlayNode_ = overlayNode;
-
-    richEditorPattern->OnAreaChangedInner();
-    OffsetF Offset = { 1, 2 };
-    EXPECT_NE(richEditorPattern->GetPaintRectGlobalOffset(), Offset);
-
-    richEditorPattern->contentChange_ = true;
-    richEditorPattern->keyboardAvoidance_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->rootHeight_ = 80.0;
-    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
-
-    int32_t scroll_from_update = 1;
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 140);
-    richEditorPattern->contentRect_ = RectF(0, 5, 100, 160);
-    richEditorPattern->UpdateScrollStateAfterLayout(true);
-    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, scroll_from_update));
-
-    /**
-     * @tc.steps: step1. set isShowPlaceholder_
-     */
-    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 120);
-    richEditorPattern->contentRect_ = RectF(0, 5, 100, 60);
-    auto offsetF = OffsetF(0.0f, 0.5f);
-    richEditorPattern->isShowPlaceholder_ = false;
-    richEditorPattern->MoveCaretToContentRect(offsetF, 80.0f);
-    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
-
-    /**
-     * @tc.steps: step2. set MoveCaretToContentRect second parameter
-     */
-    richEditorPattern->MoveCaretToContentRect(offsetF, 40.0f);
-    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
-
-    /**
-     * @tc.steps: step3. set MoveCaretToContentRect first parameter
-     */
-    auto offsetFtemp = OffsetF(0.0f, 10.0f);
-    richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
-    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
-}
-
-/**
  * @tc.name: GetThumbnailCallback002
  * @tc.desc: test GetThumbnailCallback
  * @tc.type: FUNC

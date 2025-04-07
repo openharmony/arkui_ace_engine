@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -967,7 +968,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
-    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING) {
+    if (source == SCROLL_FROM_BAR || source == SCROLL_FROM_BAR_FLING || source == SCROLL_FROM_STATUSBAR) {
         isNeedCheckOffset_ = true;
     }
     if (!NearZero(offset)) {
@@ -2274,12 +2275,12 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
             if (groupAtStart) {
-                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             } else {
-                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height });
+                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             }
         } else {
-            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height });
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
         }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
@@ -2296,7 +2297,7 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
     auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
     delta = isStackFromEnd_ ? -(delta + sizeChange) : delta;
     if (Negative(prevPosInfo.mainPos)) {
-        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange});
+        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup});
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
@@ -2340,6 +2341,7 @@ void ListPattern::UpdateScrollBarOffset()
         estimatedHeight = listTotalHeight_;
     } else {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
+        calculate.SetPosMap(posMap_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         currentOffset = calculate.GetEstimateOffset();
         estimatedHeight = calculate.GetEstimateHeight();
@@ -2347,10 +2349,9 @@ void ListPattern::UpdateScrollBarOffset()
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
-    if (!IsScrollSnapAlignCenter() || childrenSize_) {
-        currentOffset += contentStartOffset_;
-        estimatedHeight += contentStartOffset_ + contentEndOffset_;
-    }
+
+    currentOffset += contentStartOffset_;
+    estimatedHeight += contentStartOffset_ + contentEndOffset_;
 
     // calculate padding offset of list
     auto layoutPriority = host->GetLayoutProperty();
@@ -3202,6 +3203,7 @@ SizeF ListPattern::GetChildrenExpandedSize()
         estimatedHeight = listTotalHeight_;
     } else if (!itemPosition_.empty()) {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis, itemStartIndex_);
+        calculate.SetPosMap(posMap_);
         calculate.GetEstimateHeightAndOffset(GetHost());
         estimatedHeight = calculate.GetEstimateHeight();
     }

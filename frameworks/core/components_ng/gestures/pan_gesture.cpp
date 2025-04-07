@@ -147,5 +147,8 @@ int32_t PanGesture::Deserialize(const char* buff)
     return SizeofMe();
 }
 
-
+void PanGesture::SetDistanceMap(const PanDistanceMap& distanceMap)
+{
+    distanceMap_ = distanceMap;
+}
 } // namespace OHOS::Ace::NG

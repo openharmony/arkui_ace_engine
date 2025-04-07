@@ -80,6 +80,16 @@ public:
         return direction_;
     }
 
+    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    {
+        distanceMap_ = distanceMap;
+    }
+
+    PanDistanceMap GetDistanceMap() const
+    {
+        return distanceMap_;
+    }
+
     void HandlePanGestureAccept(
         const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback);
     

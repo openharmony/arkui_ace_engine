@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_gesture.h"
 
 #include "base/log/log_wrapper.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/jsview/models/gesture_model_impl.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
@@ -243,6 +244,7 @@ constexpr char PAN_DIRECTION[] = "direction";
 constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
 constexpr char LIMIT_FINGER_COUNT[] = "isFingerCountLimited";
+constexpr char GESTURE_DISTANCE_MAP[] = "distanceMap";
 } // namespace
 
 void JSGesture::Create(const JSCallbackInfo& info)
@@ -347,6 +349,56 @@ void JSLongPressGesture::Create(const JSCallbackInfo& args)
     LongPressGestureModel::GetInstance()->Create(fingersNum, repeatResult, durationNum, isLimitFingerCount);
 }
 
+napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done)
+{
+    napi_value next = nullptr;
+    NAPI_CALL(env, napi_call_function(env, iterator, func, 0, nullptr, &next));
+    napi_value doneValue = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, next, "done", &doneValue));
+    NAPI_CALL(env, napi_get_value_bool(env, doneValue, done));
+    return next;
+}
+
+napi_value JSPanGesture::ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap)
+{
+    napi_value emptyValue = nullptr;
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, emptyValue);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, emptyValue);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    auto jsVal = JSRef<JSVal>::Cast(jsDistanceMap);
+    panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    // parse map object
+    napi_value entriesFunc = nullptr;
+    napi_value iterator = nullptr;
+    napi_value nextFunc = nullptr;
+    NAPI_CALL(env, napi_get_named_property(env, nativeValue, "entries", &entriesFunc));
+    NAPI_CALL(env, napi_call_function(env, nativeValue, entriesFunc, 0, nullptr, &iterator));
+    NAPI_CALL(env, napi_get_named_property(env, iterator, "next", &nextFunc));
+
+    bool done = false;
+    napi_value next = nullptr;
+    while ((next = GetIteratorNext(env, iterator, nextFunc, &done)) != nullptr && !done) {
+        napi_value entry = nullptr;
+        napi_value key = nullptr;
+        napi_value value = nullptr;
+        NAPI_CALL(env, napi_get_named_property(env, next, "value", &entry));
+        NAPI_CALL(env, napi_get_element(env, entry, 0, &key));
+        NAPI_CALL(env, napi_get_element(env, entry, 1, &value));
+        int32_t sourceTool = 0;
+        NAPI_CALL(env, napi_get_value_int32(env, key, &sourceTool));
+        double distance = 0.0;
+        NAPI_CALL(env, napi_get_value_double(env, value, &distance));
+        distanceMap[static_cast<SourceTool>(sourceTool)] = distance;
+    }
+    return next;
+}
+
 void JSPanGesture::Create(const JSCallbackInfo& args)
 {
     int32_t fingersNum = DEFAULT_PAN_FINGER;
@@ -372,6 +424,7 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     JSRef<JSVal> distance = obj->GetProperty(GESTURE_DISTANCE);
     JSRef<JSVal> directionNum = obj->GetProperty(PAN_DIRECTION);
     JSRef<JSVal> limitFingerCount = obj->GetProperty(LIMIT_FINGER_COUNT);
+    JSRef<JSVal> jsDistanceMap = obj->GetProperty(GESTURE_DISTANCE_MAP);
 
     if (fingers->IsNumber()) {
         int32_t fingersNumber = fingers->ToNumber<int32_t>();
@@ -393,6 +446,9 @@ void JSPanGesture::Create(const JSCallbackInfo& args)
     }
     if (limitFingerCount->IsBoolean()) {
         isLimitFingerCount = limitFingerCount->ToBoolean();
+    }
+    if (jsDistanceMap->IsObject()) {
+        ParsePanDistanceMap(jsDistanceMap, distanceMap);
     }
 
     PanGestureModel::GetInstance()->Create(fingersNum, panDirection, distanceMap, isLimitFingerCount);

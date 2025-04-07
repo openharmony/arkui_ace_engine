@@ -289,40 +289,6 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCaretOffset
- * @tc.desc: test SetCaretOffset
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, SetCaretOffset, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add span
-     */
-    AddSpan(u"test");
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-
-    /**
-     * @tc.step: step3. Request focus
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-
-    /**
-     * @tc.steps: step4. call the callback function
-     */
-    richEditorPattern->SetCaretOffset(2);
-    EXPECT_TRUE(richEditorPattern->caretTwinkling_);
-    EXPECT_TRUE(richEditorPattern->caretVisible_);
-}
-
-/**
  * @tc.name: HandleBlurEvent
  * @tc.desc: test HandleBlurEvent
  * @tc.type: FUNC

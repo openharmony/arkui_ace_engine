@@ -41,6 +41,17 @@ struct struct_01_style_05_showError {
             .maxLength(10)
         }.borderWidth(2)
 
+        Column() {
+          Text('规格：错误提示信息超长，padding值很大时，错误提示信息与字符计数器重叠').fontColor(Color.Blue)
+          TextInput({ text: ' 错误提示信息与字符计数器重叠 ' })
+            .showError(this.errorMessage)
+            .showCounter(true)
+            .maxLength(10)
+            .padding({left:200, right:200})
+        }.borderWidth(2)
+
+
+
       }
     }
     .height('100%')

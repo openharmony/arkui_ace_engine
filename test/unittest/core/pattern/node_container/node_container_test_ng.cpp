@@ -1022,4 +1022,58 @@ HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnUnbind001, TestSize.Level
     pattern->FireOnUnbind(nodeContainerId);
     EXPECT_EQ(flag, nodeContainerId);
 }
+
+/**
+ * @tc.name: HandleTextureExport001
+ * @tc.desc: Test the HandleTextureExport function of NodeContainerPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, HandleTextureExport001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create node and get pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    auto frameNodeRef = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    pattern->surfaceId_ = 1U;
+    
+    auto exportNode = AceType::MakeRefPtr<FrameNode>("exportNode", -1, AceType::MakeRefPtr<Pattern>());
+    pattern->exportTextureNode_ = AceType::WeakClaim(AceType::RawPtr(exportNode));
+ 
+    /**
+     * @tc.steps: step2: Directly call HandleTextureExport with invalid surface ID.
+     * @tc.expected: ret is false.
+     */
+    bool ret = pattern->HandleTextureExport(false, frameNode);
+    EXPECT_FALSE(ret);
+    pattern->surfaceId_ = 1U;
+    bool res = pattern->HandleTextureExport(true, frameNode);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: GetNodeContainerEventHub001
+ * @tc.desc: Test the GetNodeContainerEventHub function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, GetNodeContainerEventHub001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    /**
+     * @tc.steps: step2. call the function GetNodeContainerEventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    auto eventHub = pattern->GetNodeContainerEventHub();
+    EXPECT_NE(eventHub, nullptr);
+}
 } // namespace OHOS::Ace::NG
