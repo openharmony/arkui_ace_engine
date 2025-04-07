@@ -14,6 +14,7 @@
  */
 
 #include "mock_pipeline_context.h"
+#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -169,6 +170,11 @@ void MockPipelineContext::TearDown()
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
+}
+
+void MockPipelineContext::ResetFontManager()
+{
+    pipeline_->fontManager_ = MockFontManager::Create();
 }
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
@@ -1211,6 +1217,14 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
+}
+
+bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    if (fontManager_) {
+        return fontManager_->GetSystemFont(fontName, fontInfo);
+    }
+    return false;
 }
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
