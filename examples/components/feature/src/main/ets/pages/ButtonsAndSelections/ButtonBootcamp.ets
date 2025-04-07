@@ -80,15 +80,18 @@ class MyModifier implements AttributeModifier<ButtonAttribute> {
     instance.backgroundColor('#ffedea21')
   }
 }
+
 class ButtonModifier implements AttributeModifier<ButtonAttribute> {
-  enableCompBackgroundColor: boolean = false
-  compBackgroundColor: ResourceColor = Color.Transparent
+  public enableCompBackgroundColor: boolean = false
+  public compBackgroundColor: ResourceColor = Color.Transparent
+
   applyNormalAttribute(instance: ButtonAttribute) {
-    if (this.enableCompBackgroundColor){
+    if (this.enableCompBackgroundColor) {
       instance.backgroundColor(this.compBackgroundColor)
     }
   }
 }
+
 class MyGestureModifier1 implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     event.addGesture(
@@ -243,17 +246,18 @@ export struct ButtonBootcamp {
   // background
   @State enableCompBackgroundAlign: boolean = false;
   @State compBackgroundAlign: Alignment = Alignment.Center;
+  @State buttonModifier: ButtonModifier = new ButtonModifier()
+  @State @Watch('onChang') enableCompBackgroundColor: boolean = false;
+  @State @Watch('onChang') compBackgroundColor: ResourceColor = Color.Transparent;
 
-  @State buttonModifier:ButtonModifier = new ButtonModifier()
-  @State @Watch('onChang')enableCompBackgroundColor: boolean = false;
-  @State @Watch('onChang')compBackgroundColor: ResourceColor = Color.Transparent;
-  onChang(name:string){
-    if (name == 'enableCompBackgroundColor'){
+  onChang(name: string) {
+    if (name == 'enableCompBackgroundColor') {
       this.buttonModifier.enableCompBackgroundColor = this.enableCompBackgroundColor
-    }else if (name == 'compBackgroundColor'){
+    } else if (name == 'compBackgroundColor') {
       this.buttonModifier.compBackgroundColor = this.compBackgroundColor
     }
   }
+
   @State enableCompBackgroundImageSrc: boolean = false;
   @State enableCompBackgroundImageRepeat: boolean = false;
   @State compBackgroundImageRepeat: ImageRepeat = ImageRepeat.NoRepeat;
@@ -489,7 +493,6 @@ export struct ButtonBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-
   //Focus Control
   @State enableCompFocusable: boolean = false;
   @State compFocusable: boolean = false;
@@ -627,7 +630,6 @@ export struct ButtonBootcamp {
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
-
   @State selection: string | null = null;
   scroller: Scroller = new Scroller()
 
@@ -693,7 +695,6 @@ export struct ButtonBootcamp {
     Text('123')
   }
 
-
   @Builder
   ListItemGroupHeaders(str: string) {
     Row() {
@@ -742,8 +743,7 @@ export struct ButtonBootcamp {
         .labelStyle({
           overflow: useEnabled(this.enableOverFlow, this.overflow),
           maxLines: useEnabled(this.enableMaxLines, this.maxLines),
-        })
-          //part1
+        })//part1
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
