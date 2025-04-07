@@ -23,6 +23,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string CUSTOM_DRAG_END_EVENT_TYPE = "custom drag end";
+const std::string DRAG_END_EVENT_TYPE = "drag end";
+} // namespace
 
 void DragDropInitiatingHandlerTestNg::SetUpTestCase()
 {
@@ -102,5 +106,86 @@ HWTEST_F(DragDropInitiatingHandlerTestNg, DragDropInitiatingHandlerTestNG001, Te
     auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
     ASSERT_NE(dragDropInitiatingHandler, nullptr);
     EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+}
+
+/**
+ * @tc.name: SetThumbnailCallbackNG001
+ * @tc.desc: Test DragDropInitiatingHandler Function When initiatingFlow_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingHandlerTestNg, SetThumbnailCallbackNG001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(dragDropInitiatingHandler, nullptr);
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+    dragDropInitiatingHandler->SetThumbnailCallback([](const Offset&) {});
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_->dragDropInitiatingParams_.getTextThumbnailPixelMapCallback,
+        nullptr);
+}
+
+/**
+ * @tc.name: FireCustomerOnDragEndNG001
+ * @tc.desc: Test DragDropInitiatingHandler Function When initiatingFlow_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingHandlerTestNg, FireCustomerOnDragEndNG001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(dragDropInitiatingHandler, nullptr);
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+    auto machine = dragDropInitiatingHandler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
+    DragDropGlobalController::GetInstance().SetDragStartRequestStatus(DragStartRequestStatus::WAITING);
+    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    std::string customerDragEventType;
+    std::string dragEventType;
+    auto customerOnDragEnd = [&customerDragEventType](const RefPtr<OHOS::Ace::DragEvent>& info) {
+        EXPECT_EQ(info->GetResult(), DragRet::DRAG_FAIL);
+        customerDragEventType = CUSTOM_DRAG_END_EVENT_TYPE;
+    };
+    eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, customerOnDragEnd);
+    auto onDragEnd = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& info) {
+        EXPECT_EQ(info->GetResult(), DragRet::DRAG_FAIL);
+        dragEventType = DRAG_END_EVENT_TYPE;
+    };
+    eventHub->SetOnDragEnd(onDragEnd);
+    ASSERT_NE(machine->dragDropInitiatingState_[machine->currentState_], nullptr);
+    machine->dragDropInitiatingState_[machine->currentState_]->Init(machine->currentState_);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, nullptr);
+    EXPECT_EQ(customerDragEventType, CUSTOM_DRAG_END_EVENT_TYPE);
+    EXPECT_EQ(dragEventType, DRAG_END_EVENT_TYPE);
+}
+
+/**
+ * @tc.name: IsAllowedDragNG001
+ * @tc.desc: Test DragDropInitiatingHandler Function When initiatingFlow_ is not nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropInitiatingHandlerTestNg, IsAllowedDragNG001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto dragDropInitiatingHandler = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
+    ASSERT_NE(dragDropInitiatingHandler, nullptr);
+    EXPECT_NE(dragDropInitiatingHandler->initiatingFlow_, nullptr);
+    auto machine = dragDropInitiatingHandler->initiatingFlow_;
+    ASSERT_NE(machine, nullptr);
+    machine->InitializeState();
+    machine->currentState_ = static_cast<int32_t>(DragDropInitiatingStatus::IDLE);
+    ASSERT_NE(machine->dragDropInitiatingState_[machine->currentState_], nullptr);
+    EXPECT_TRUE(machine->dragDropInitiatingState_[machine->currentState_]->IsAllowedDrag());
 }
 } // namespace OHOS::Ace::NG

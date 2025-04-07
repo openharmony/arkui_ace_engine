@@ -48,6 +48,18 @@ void DragDropInitiatingStateTestNG::DoMachineAction(
         case DragDropInitiatingReceivedInput::HandlePanOnReject:
             machine->HandlePanOnReject();
             break;
+        case DragDropInitiatingReceivedInput::HandleDragStart:
+            machine->HandleDragStart();
+            break;
+        case DragDropInitiatingReceivedInput::HandleDragEnd:
+            machine->HandleDragEnd();
+            break;
+        case DragDropInitiatingReceivedInput::TransDragWindowToFwk:
+            machine->TransDragWindowToFwk();
+            break;
+        case DragDropInitiatingReceivedInput::TransMenuShow:
+            machine->TransMenuShow(DragDropGlobalController::GetInstance().IsMenuShowing());
+            break;
         default:
             break;
     }
@@ -192,6 +204,20 @@ const std::vector<DragDropInitiatingStateIdleTestCase> DRAG_DROP_INITIATING_STAT
         DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
     DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandleSequenceOnActionCancel,
         DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandleTouchEvent,
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandlePullEvent,
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandleReStartDrag,
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandleDragStart,
+        DragDropInitiatingStatus::MOVING, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::HandleDragEnd, DragDropInitiatingStatus::IDLE,
+        false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::TransDragWindowToFwk,
+        DragDropInitiatingStatus::IDLE, false, false, SourceType::TOUCH),
+    DragDropInitiatingStateIdleTestCase(DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE,
+        false, false, SourceType::TOUCH),
 };
 
 void DragDropInitiatingStateIdleTestNG::SetUpTestCase()
