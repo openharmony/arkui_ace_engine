@@ -908,12 +908,16 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
     SetDigitalCrownSensitivity(frameNode, crownSensitivity);
 }
 
-void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
+void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt)
 {
+    if (!valueOpt) {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, frameNode);
+        return;
+    }
+    auto crownSensitivity = *valueOpt;
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
         return;
     }
-
     CHECK_NULL_VOID(frameNode);
     auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerPattern);
