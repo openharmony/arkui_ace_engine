@@ -4670,13 +4670,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     config.skipMeasure = layoutAlgorithmWrapper->SkipMeasure();
     config.skipLayout = layoutAlgorithmWrapper->SkipLayout();
     if (!config.skipMeasure && !config.skipLayout) {
-        auto pipeline = GetContext();
-        CHECK_NULL_RETURN(pipeline, false);
+        CHECK_NULL_RETURN(context, false);
         if (GetInspectorId()) {
-            pipeline->OnLayoutCompleted(GetInspectorId()->c_str());
+            context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
         if (eventHub_) {
-            eventHub_->FireLayoutNDKCallback(pipeline);
+            eventHub_->FireLayoutNDKCallback(context);
         }
     }
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
