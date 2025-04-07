@@ -4780,7 +4780,7 @@ void PipelineContext::OnIdle(int64_t deadline)
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
     if (currentTime < deadline) {
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
     }
     TriggerIdleCallback(deadline);
 }
