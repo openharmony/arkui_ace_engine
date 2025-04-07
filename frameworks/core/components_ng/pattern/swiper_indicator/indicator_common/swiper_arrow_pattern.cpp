@@ -419,7 +419,11 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     }
     renderContext->SetVisible(visible);
     // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
-    arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
+    } else {
+        arrowGestureHub->SetHitTestMode(visible ? HitTestMode::HTMDEFAULT : HitTestMode::HTMTRANSPARENT);
+    }
     if (arrowClickListener_) {
         arrowGestureHub->RemoveClickEvent(arrowClickListener_);
         if (visible) {
@@ -435,9 +439,15 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::AUTO);
     } else {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        auto totalCount = swiperPattern->RealTotalCount();
+        auto displayCount = swiperPattern->GetDisplayCount();
         accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         arrowAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
-        swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        if (totalCount > displayCount) {
+            swiperNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
+        }
     }
 }
 
