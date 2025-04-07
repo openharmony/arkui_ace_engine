@@ -132,7 +132,6 @@ export struct ImageAnimatorBootcamp {
   @State enableFillMode: boolean = false;
   @State fillMode: FillMode = FillMode.Forwards
   @State enableIterations: boolean = false;
-  @State eIterations: number = 1;
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
   @State enableCompHeight: boolean = false;
@@ -702,7 +701,7 @@ export struct ImageAnimatorBootcamp {
         .reverse(useEnabled(this.enableReverse, this.reverse))
         .fixedSize(useEnabled(this.enableFixedSize, this.fixedSize))
         .fillMode(useEnabled(this.enableFillMode, this.fillMode))
-        .iterations(useEnabled(this.enableIterations, this.eIterations))
+        .iterations(useEnabled(this.enableIterations, this.iterations))
         .onStart(() => {
           console.info('Start')
         })
