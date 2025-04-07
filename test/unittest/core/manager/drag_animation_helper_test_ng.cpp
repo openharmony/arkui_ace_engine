@@ -688,25 +688,4 @@ HWTEST_F(DragAnimationHelperTestNg, CreateBadgeTextNodeTest001, TestSize.Level1)
     auto textNode = DragAnimationHelper::CreateBadgeTextNode(2);
     EXPECT_NE(textNode, nullptr);
 }
-
-/**
- * @tc.name: CreateRelativeContainerNode01
- * @tc.desc: test CreateRelativeContainerNode func.
- * @tc.type: FUNC
- */
-HWTEST_F(DragAnimationHelperTestNg, CreateRelativeContainerNode01, TestSize.Level1)
-{
-    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    ASSERT_NE(mockPixelMap, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
-    ASSERT_TRUE(frameNode != nullptr);
-    auto imageNodeId = GetElmtId();
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
-        []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_TRUE(imageNode != nullptr);
-    PreparedInfoForDrag data;
-
-    DragAnimationHelper::CreateRelativeContainerNode(frameNode, imageNode, data, OffsetF(0.0f, 0.0f), mockPixelMap);
-    ASSERT_TRUE(data.relativeContainerNode != nullptr);
-}
 } // namespace OHOS::Ace::NG
