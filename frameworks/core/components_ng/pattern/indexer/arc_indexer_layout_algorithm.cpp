@@ -40,7 +40,8 @@ void ArcIndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutConstraint = layoutProperty->GetLayoutConstraint().value();
     }
     auto itemSize = layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP));
-    itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height()).value();
+    itemSize_ = ConvertToPx(itemSize, layoutConstraint.scaleProperty, layoutConstraint.maxSize.Height())
+                    .value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP).ConvertToPx());
     auto selfIdealSize = layoutConstraint.selfIdealSize;
     auto actualWidth = selfIdealSize.Width().has_value()
                            ? selfIdealSize.Width().value()
