@@ -199,6 +199,8 @@ public:
         JSMultiFingerRecognizer::Update(recognizer);
         SetPanGestureOptions(
             recognizer->GetFingers(), recognizer->GetDistance(), recognizer->GetDirection());
+        direction_ = recognizer->GetDirection();
+        distance_ = recognizer->GetDistance();
     }
 
     void GetPanGestureOptions(const JSCallbackInfo& args)
@@ -209,6 +211,11 @@ public:
         args.SetReturnValue(panGestureOptionObj);
     }
 
+    void GetDirection(const JSCallbackInfo& args);
+
+    void GetPanDistance(const JSCallbackInfo& args);
+
+    void GetPanDistanceMap(const JSCallbackInfo& args);
 private:
     static void Constructor(const JSCallbackInfo& args)
     {
@@ -232,6 +239,8 @@ private:
         panGestureOption_->SetDirection(direction);
     }
     RefPtr<PanGestureOption> panGestureOption_;
+    PanDirection direction_;
+    double distance_;
 };
 
 class JSPinchRecognizer : public JSMultiFingerRecognizer {
