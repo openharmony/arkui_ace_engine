@@ -195,7 +195,7 @@ void InspectorComposedElement::OnInactive()
 
 void InspectorComposedElement::OnActive()
 {
-    inspectorId_ = std::stoi(id_);
+    inspectorId_ = StringUtils::StringToInt(id_);
 }
 
 RefPtr<PopupElementV2> InspectorComposedElement::GetPopupElement() const
