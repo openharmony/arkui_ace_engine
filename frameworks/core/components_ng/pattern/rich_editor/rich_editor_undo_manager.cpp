@@ -85,20 +85,37 @@ void RichEditorUndoManager::ApplyOperationToRecord(
     record.SetOperationAfter(rangeAfter, styledString);
 }
 
+void RichEditorUndoManager::RecordSelectionBefore()
+{
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    auto& textSelector = pattern->textSelector_;
+    CHECK_NULL_VOID(!textSelector.SelectNothing());
+    selectionBefore_ = TextRange{ textSelector.GetStart(), textSelector.GetEnd() };
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RecordSelectionBefore:%{public}s", selectionBefore_.ToString().c_str());
+}
+
 void RichEditorUndoManager::UpdateRecordBeforeChange(
     int32_t start, int32_t length, UndoRedoRecord& record, bool isOnlyStyleChange)
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     CHECK_NULL_VOID(pattern->IsStyledStringModeEnabled());
+    record.isOnlyStyleChange = isOnlyStyleChange;
     auto rangeBefore = TextRange{ start, start + length };
     auto styledStringBefore = pattern->styledString_->GetSubSpanString(start, length);
+    auto caretAffinityBefore = pattern->caretAffinityPolicy_;
+    if (selectionBefore_.IsValid()) {
+        record.SetOperationBefore(rangeBefore, styledStringBefore, selectionBefore_, caretAffinityBefore);
+        ClearSelectionBefore();
+        return;
+    }
     auto caretPosition = pattern->caretPosition_;
     auto& textSelector = pattern->textSelector_;
     auto selection = textSelector.SelectNothing() ? TextRange{ caretPosition, caretPosition }
         : TextRange{ textSelector.GetStart(), textSelector.GetEnd() };
-    record.SetOperationBefore(rangeBefore, styledStringBefore, selection);
-    record.isOnlyStyleChange = isOnlyStyleChange;
+    record.SetOperationBefore(rangeBefore, styledStringBefore, selection, caretAffinityBefore);
 }
 
 void RichEditorUndoManager::UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record)
@@ -148,9 +165,10 @@ void RichEditorUndoManager::RecordUndoOperation(const UndoRedoRecord& record)
 // Records initial state when preview input start with selection
 void RichEditorUndoManager::RecordPreviewInputtingStart(int32_t start, int32_t length)
 {
-    previewInputRecord_.Reset();
+    ClearPreviewInputRecord();
     CHECK_NULL_VOID(length > 0);
     UpdateRecordBeforeChange(start, length, previewInputRecord_);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PreviewInputtingStart [%{public}s]", previewInputRecord_.ToString().c_str());
 }
 
 bool RichEditorUndoManager::RecordPreviewInputtingEnd(const UndoRedoRecord& record)
@@ -164,7 +182,7 @@ bool RichEditorUndoManager::RecordPreviewInputtingEnd(const UndoRedoRecord& reco
     previewInputRecord_.SetOperationAfter(rangeAfter, styledString);
     CHECK_NULL_RETURN(previewInputRecord_.IsValid(), false);
     RecordOperation(previewInputRecord_);
-    previewInputRecord_.Reset();
+    ClearPreviewInputRecord();
     return true;
 }
 
@@ -173,6 +191,6 @@ void RichEditorUndoManager::RecordInsertOperation(const UndoRedoRecord& record)
     // Record insert operation by initial state from preview input start
     CHECK_NULL_VOID(!RecordPreviewInputtingEnd(record));
     RecordOperation(record);
-    previewInputRecord_.Reset();
+    ClearPreviewInputRecord();
 }
 }

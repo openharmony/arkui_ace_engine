@@ -1339,7 +1339,7 @@ private:
     void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
     void StartFloatingCaretLand();
-    void ResetTouchAndMoveCaretState();
+    void ResetTouchAndMoveCaretState(bool needAnimation = true);
     void ResetTouchSelectState();
     void HandleTouchUpAfterLongPress();
     void HandleTouchCancelAfterLongPress();
