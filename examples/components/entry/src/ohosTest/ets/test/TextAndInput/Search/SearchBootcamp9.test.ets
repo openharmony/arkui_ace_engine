@@ -1605,29 +1605,6 @@ export default function SearchBootcampTest9() {
       })
       done();
     })
-    //bindContentCover.isShow
-    /*
-     * 测试组件bindContentCover.isShow支持设置true且获取属性正确
-     * */
-    it('ArkUI_Search_Comp_0649', 0, async (done: Function) => {
-      //无法获取属性
-      await titleSearch('基础属性', 'bindContentCover.isShow', '通用属性7')
-      await radioClick({
-        radioClickObj: 0,
-      })
-      done();
-    })
-    /*
-     * 测试组件bindContentCover.isShow支持设置false且获取属性正确
-     * */
-    it('ArkUI_Search_Comp_0650', 0, async (done: Function) => {
-      //无法获取属性
-      await titleSearch('基础属性', 'bindContentCover.isShow', '通用属性7')
-      await radioClick({
-        radioClickObj: 1
-      })
-      done();
-    })
 
   })
 }
