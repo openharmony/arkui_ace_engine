@@ -182,6 +182,7 @@ public:
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static size_t GetLineCount(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 
