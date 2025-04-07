@@ -747,7 +747,6 @@ void RatingPattern::SetRatingScore(double ratingScore)
         return;
     }
     UpdateRatingScore(ratingScore);
-    OnModifyDone();
 }
 
 void RatingPattern::UpdateRatingScore(double ratingScore)
