@@ -2822,7 +2822,6 @@ void PipelineContext::OnTouchEvent(
             eventManager_->FlushTouchEventsEnd({ scalePoint });
             eventManager_->DispatchTouchEvent(scalePoint);
             hasIdleTasks_ = true;
-            RequestFrame();
             return;
         }
         if (!eventManager_->GetInnerFlag() && formEventMgr) {
