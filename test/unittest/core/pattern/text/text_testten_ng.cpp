@@ -20,6 +20,7 @@
 
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
@@ -717,5 +718,438 @@ HWTEST_F(TextFieldTenPatternNg, OnWindowHide001, TestSize.Level1)
     symbolEffectOptions.SetIsTxtActive(false);
     pattern->OnWindowHide();
     EXPECT_FALSE(symbolEffectOptions.GetIsTxtActive());
+}
+
+/**
+ * @tc.name: SetOnClickMenu001
+ * @tc.desc: test text_pattern.cpp SetOnClickMenu function,
+    case action == COPY, action == SELECT_TEXT, calculateHandleFunc == nullptr,
+        showSelectOverlayFunc == nullptr, calculateHandleFunc != nullptr, showSelectOverlayFunc != nullptr,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetOnClickMenu001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    AISpan aiSpan;
+    CalculateHandleFunc calculateHandleFunc;
+    ShowSelectOverlayFunc showSelectOverlayFunc;
+    pattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+    std::string action("copy");
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 3;
+    pattern->shiftFlag_ = false;
+    pattern->dataDetectorAdapter_->onClickMenu_(action);
+    EXPECT_EQ(pattern->textSelector_.baseOffset, -1);
+    EXPECT_EQ(pattern->textSelector_.destinationOffset, -1);
+
+    bool flag = false;
+    int32_t value = 0;
+    action = "selectText";
+    pattern->dataDetectorAdapter_->onClickMenu_(action);
+    EXPECT_FALSE(flag);
+    EXPECT_EQ(value, 0);
+
+    calculateHandleFunc = [&value]() { value = 123;};
+    showSelectOverlayFunc = [&flag](const RectF&, const RectF&) { flag = true; };
+    pattern->SetOnClickMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+    pattern->dataDetectorAdapter_->onClickMenu_(action);
+    EXPECT_TRUE(flag);
+    EXPECT_EQ(value, 123);
+}
+
+/**
+ * @tc.name: ShowAIEntityMenu001
+ * @tc.desc: test text_pattern.cpp ShowAIEntityMenu function,
+    case mode == TextSelectableMode::UNSELECTABLE, !NearEqual(safeAreaManager->GetKeyboardInset().Length(), 0)
+        && mode == TextSelectableMode::SELECTABLE_FOCUSABLE,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ShowAIEntityMenu001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    AISpan aiSpan;
+    CalculateHandleFunc calculateHandleFunc;
+    ShowSelectOverlayFunc showSelectOverlayFunc;
+    auto host = pattern->GetHost();
+    auto context = host->GetContext();
+    auto safeAreaManager = context->GetSafeAreaManager();
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    safeAreaManager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    safeAreaManager->keyboardInset_.start = 0;
+    safeAreaManager->keyboardInset_.end = 2;
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::UNSELECTABLE);
+    pattern->copyOption_ = CopyOptions::InApp;
+    auto ret = pattern->ShowAIEntityMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+    EXPECT_TRUE(ret);
+
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
+    ret = pattern->ShowAIEntityMenu(aiSpan, calculateHandleFunc, showSelectOverlayFunc);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: InitMouseEvent001
+ * @tc.desc: test text_pattern.cpp InitMouseEvent function,
+    case pattern,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, InitMouseEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto host = pattern->GetHost();
+    auto eventHub = host->GetEventHub<EventHub>();
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    pattern->currentMouseStyle_ = MouseFormat::WEST;
+    pattern->InitMouseEvent();
+
+    bool isHover = true;
+    inputHub->hoverEventActuator_->inputEvents_.front()->GetOnHoverEventFunc()(isHover);
+    EXPECT_EQ(pattern->currentMouseStyle_, MouseFormat::DEFAULT);
+}
+
+/**
+ * @tc.name: AddIsFocusActiveUpdateEvent001
+ * @tc.desc: test text_pattern.cpp AddIsFocusActiveUpdateEvent function,
+    case !isFocusActiveUpdateEvent_,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, AddIsFocusActiveUpdateEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->isFocusActiveUpdateEvent_ = nullptr;
+    pattern->AddIsFocusActiveUpdateEvent();
+    EXPECT_NE(pattern->isFocusActiveUpdateEvent_, nullptr);
+}
+
+/**
+ * @tc.name: RecoverCopyOption001
+ * @tc.desc: test text_pattern.cpp RecoverCopyOption function,
+    case textDetectEnable_ && enabledCache != enabled_,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, RecoverCopyOption001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->enabled_ = false;
+    pattern->textDetectEnable_ = true;
+    pattern->RecoverCopyOption();
+    EXPECT_TRUE(pattern->enabled_);
+}
+
+/**
+ * @tc.name: InitCopyOption001
+ * @tc.desc: test text_pattern.cpp InitCopyOption function,
+    case longPressEvent_ && !hasSpanStringLongPressEvent_, !clipboard_ && context,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, InitCopyOption001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<GestureEventHub> gestureEventHub =
+        AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto longPressCallback = [](GestureEvent& info) {};
+    pattern->longPressEvent_ = AIWriteAdapter::MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+    pattern->hasSpanStringLongPressEvent_ = false;
+    pattern->onClick_ = [](GestureEvent& info) {};
+    pattern->textDetectEnable_ = true;
+    pattern->enabled_ = true;
+    RefPtr<SpanItem> item = nullptr;
+    pattern->spans_.push_back(item);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    pattern->clipboard_ = nullptr;
+    pattern->InitCopyOption(gestureEventHub, eventHub);
+    EXPECT_EQ(pattern->longPressEvent_, nullptr);
+}
+
+/**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: test text_pattern.cpp HandleMouseEvent function,
+    case isAutoScrollByMouse_ && GetHost(),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    MouseInfo info;
+    info.globalLocation_ = Offset(4, 5);
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::PRESS;
+    pattern->leftMousePressedOffset_ = Offset(0, 0);
+    pattern->isAutoScrollByMouse_ = true;
+    pattern->HandleMouseEvent(info);
+    EXPECT_EQ(pattern->leftMousePressedOffset_, Offset(4, 5));
+}
+
+/**
+ * @tc.name: OnDragEndNoChild001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnDragEndNoChild001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"TestChild");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    pattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step2. Test OnDragEndNoChild expected result is DRAG_DEFAULT and
+     * event is true when isSelectableAndCopy is true.
+     * @tc.expect: expect OnDragEndNoChild will set status None
+     */
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    event->SetResult(DragRet::DRAG_DEFAULT);
+    pattern->status_ = Status::DRAGGING;
+    pattern->OnDragEndNoChild(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+
+    /**
+     * @tc.steps: step3.test OnDragEndNoChild even result DRAG_SUCCESS
+     * @tc.expect: expect OnDragEndNoChild will set status None
+     */
+    event->SetResult(DragRet::DRAG_SUCCESS);
+    pattern->status_ = Status::DRAGGING;
+    pattern->OnDragEndNoChild(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+
+    /**
+     * @tc.steps: step4. test OnDragEndNoChild with drag tool FINGER.
+     * @tc.expect: expect OnDragEndNoChild will set status None, showSelect_ is true.
+     */
+    event->SetResult(DragRet::DRAG_DEFAULT);
+    pattern->status_ = Status::DRAGGING;
+    pattern->SetCurrentDragTool(SourceTool::FINGER);
+    pattern->OnDragEndNoChild(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    EXPECT_EQ(pattern->showSelect_, true);
+
+    /**
+     * @tc.steps: step5. call OnDragEndNoChild function with status NONE.
+     * @tc.expect: expect OnDragEndNoChild will not change status.
+     */
+    pattern->status_ = Status::NONE;
+    pattern->showSelect_ = false;
+    pattern->OnDragEndNoChild(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+}
+
+/**
+ * @tc.name: HandleOnSelect001
+ * @tc.desc: test HandleOnSelect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleOnSelect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    EXPECT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Initialize text and textSelector_.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"12345");
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step3. test verify switch-case KeyCode.
+     * @tc.expect: expect call HandleSelection/HandleSelectionDown/HandleSelectionUp function.
+     */
+    KeyCode code = KeyCode::KEY_DPAD_LEFT;
+    textPattern->HandleOnSelect(code);
+    EXPECT_NE(textPattern->textSelector_.GetEnd(), 5);
+
+    code = KeyCode::KEY_DPAD_RIGHT;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    code = KeyCode::KEY_DPAD_UP;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    code = KeyCode::KEY_DPAD_CENTER;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    /**
+     * @tc.steps: step4. test KEY_DPAD_UP with shiftFlag_ true.
+     * @tc.expect: expect ResetOriginCaretPosition is not called.
+     */
+    textPattern->shiftFlag_ =true;
+    code = KeyCode::KEY_DPAD_UP;
+    textPattern->HandleOnSelect(code);
+    
+    code = KeyCode::KEY_DPAD_DOWN;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+
+    /**
+     * @tc.steps: step5. test KEY_DPAD_UP with shiftFlag_ false.
+     * @tc.expect: expect HandleOnSelect is called.
+     */
+    textPattern->shiftFlag_ = false;
+    code = KeyCode::KEY_DPAD_UP;
+    textPattern->HandleOnSelect(code);
+
+    code = KeyCode::KEY_DPAD_DOWN;
+    textPattern->HandleOnSelect(code);
+    EXPECT_EQ(textPattern->textSelector_.GetEnd(), 6);
+}
+
+/**
+ * @tc.name: HandleMouseLeftReleaseAction001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftReleaseAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. Set blockPress_ to false and isDoubleClick_ to true.
+     * @tc.expect: blockPress_ value will not be changed.
+     */
+    MouseInfo info;
+    Offset offset = Offset(1, 1);
+    pattern->blockPress_ = false;
+    pattern->isDoubleClick_ = true;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+    EXPECT_FALSE(pattern->blockPress_);
+
+    /**
+     * @tc.steps: step3. Set mouseStatus_  and hasClickedAISpan_ is true.
+     * @tc.expect: blockPress_ value will be changed.
+     */
+    pattern->blockPress_ = true;
+    pattern->status_ = Status::FLOATING;
+    pattern->mouseStatus_ = MouseStatus::PRESSED;
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+    EXPECT_FALSE(pattern->blockPress_);
+}
+
+/**
+ * @tc.name: HiddenMenu001
+ * @tc.desc: test TextPattern HiddenMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HiddenMenu001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->sourceType_ = SourceType::MOUSE;
+    pattern->HiddenMenu();
+    EXPECT_TRUE(pattern->IsUsingMouse());
+}
+
+/**
+ * @tc.name: CreateHandles001
+ * @tc.desc: test CreateHandles
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CreateHandles001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->status_ = Status::DRAGGING;
+    pattern->CreateHandles();
+    EXPECT_TRUE(pattern->IsDragging());
+}
+
+/**
+ * @tc.name: AddSubComponentInfoForSpan001
+ * @tc.desc: test AddSubComponentInfoForSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, AddSubComponentInfoForSpan001, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    std::string content = "test";
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    GestureEventFunc onClick = [](GestureEvent& info) {
+        return;
+    };
+    RefPtr<SpanItem> span = AceType::MakeRefPtr<SpanItem>();
+    span->onClick = onClick;
+    span->accessibilityProperty = nullptr;
+    pattern->AddSubComponentInfoForSpan(subComponentInfos, content, span);
+    EXPECT_NE(subComponentInfos.size(), 0);
+}
+
+/**
+ * @tc.name: ToTreeJson001
+ * @tc.desc: test ToTreeJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ToTreeJson001, TestSize.Level1)
+{
+    std::string testJson = "\"Ace Unittest\"";
+    std::unique_ptr<JsonValue> stringValue = JsonUtil::ParseJsonString(testJson);
+    InspectorConfig config;
+    std::string defaultVal = "";
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->textForDisplay_.clear();
+    pattern->ToTreeJson(stringValue, config);
+    stringValue->GetString(TreeKey::CONTENT, defaultVal);
+    EXPECT_TRUE(defaultVal.empty());
+
+    pattern->textForDisplay_ = u"Some text";
+    pattern->ToTreeJson(stringValue, config);
+    stringValue->GetString(TreeKey::CONTENT, defaultVal);
+    EXPECT_FALSE(pattern->textForDisplay_.empty());
 }
 } // namespace OHOS::Ace::NG
