@@ -2412,33 +2412,6 @@ void DragDropManager::DragStartAnimation(
     }
 }
 
-void DragDropManager::HandleDragPreviewUpdate(const RefPtr<RenderContext>& renderContext, const DragPreviewInfo& info,
-    const Offset& newOffset, const RefPtr<OverlayManager>& overlayManager)
-{
-    if (!info.textNode) {
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateTransformScale({ info.scale, info.scale });
-        renderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-        UpdateGatherNodePosition(overlayManager, info.imageNode);
-        return;
-    }
-    
-    CHECK_NULL_VOID(info.relativeContainerNode);
-    auto relativeContainerRenderContext = info.relativeContainerNode->GetRenderContext();
-    CHECK_NULL_VOID(relativeContainerRenderContext);
-    relativeContainerRenderContext->UpdateTransformTranslate({ newOffset.GetX(), newOffset.GetY(), 0.0f });
-    
-    auto imageNode = DynamicCast<FrameNode>(info.relativeContainerNode->GetFirstChild());
-    CHECK_NULL_VOID(imageNode);
-    
-    auto imageLayoutProperty = imageNode->GetLayoutProperty();
-    CHECK_NULL_VOID(imageLayoutProperty);
-    
-    imageLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(info.width * info.scale, DimensionUnit::PX),
-        CalcLength(info.height * info.scale, DimensionUnit::PX) });
-    info.relativeContainerNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
-}
-
 void DragDropManager::SetDragStartAnimationOption(AnimationOption& option, int32_t containerId)
 {
     const RefPtr<Curve> curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.347f, 0.99f, 0.0f);
@@ -2483,6 +2456,7 @@ void DragDropManager::StartDragDefaultAnimation(AnimationOption option, const Of
     CHECK_NULL_VOID(renderContext);
     auto animateCallback = [renderContext, info = info_, newOffset, overlayManager, animateProperty, point]() {
         CHECK_NULL_VOID(renderContext);
+        DragAnimationHelper::UpdateStartAnimation(overlayManager, animateProperty, point, info, newOffset);
         if (!info.textNode) {
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateTransformScale({ info.scale, info.scale });
@@ -2494,7 +2468,6 @@ void DragDropManager::StartDragDefaultAnimation(AnimationOption option, const Of
         CHECK_NULL_VOID(imageLayoutProperty);
         imageLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(info.width * info.scale, DimensionUnit::PX),
             CalcLength(info.height * info.scale, DimensionUnit::PX) });
-        DragAnimationHelper::UpdateStartAnimation(overlayManager, animateProperty, point, info, newOffset);
         info.relativeContainerNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     };
     if (info_.textNode) {
