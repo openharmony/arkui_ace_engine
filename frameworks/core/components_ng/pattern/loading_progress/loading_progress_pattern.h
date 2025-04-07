@@ -94,17 +94,6 @@ public:
         return contentModifierNode_ != nullptr;
     }
 
-    void SetForegroundColorParseFailed(bool isParseFailed)
-    {
-        CHECK_NULL_VOID(loadingProgressModifier_);
-        loadingProgressModifier_->SetForegroundColorParseFailed(isParseFailed);
-    }
-
-    void SetColorLock(bool colorLock)
-    {
-        colorLock_ = colorLock;
-    }
-
 private:
     void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -142,7 +131,6 @@ private:
     bool isVisibleArea_ = false;
     bool isVisible_ = true;
     bool isShow_ = true;
-    bool colorLock_ = false;
     RefPtr<LoadingProgressModifier> loadingProgressModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressPattern);
 };

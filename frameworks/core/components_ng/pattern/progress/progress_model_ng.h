@@ -95,8 +95,8 @@ public:
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
     static void ResetGradientColor(FrameNode* frameNode);
-    static void SetModifierInitiatedColor(FrameNode* frameNode, bool value);
-    static void SetModifierInitiatedBgColor(FrameNode* frameNode, bool value);
+    static void ResetBorderColor(FrameNode* frameNode);
+    static void ResetFontColor(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

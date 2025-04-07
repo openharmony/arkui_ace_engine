@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/models/progress_model_impl.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_progress_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/progress/progress_theme.h"
 #include "core/components/text/text_theme.h"
@@ -93,6 +94,9 @@ void JSProgress::Create(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->Create(0.0, value, 0.0, total, static_cast<NG::ProgressType>(g_progressType));
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        JSProgressTheme::ApplyTheme(progressStyle);
+    }
 }
 
 void JSProgress::JSBind(BindingTarget globalObj)
@@ -139,12 +143,15 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            endColor = theme->GetRingProgressEndSideColor();
-            beginColor = theme->GetRingProgressBeginSideColor();
-            if (g_progressType == ProgressType::CAPSULE) {
-                colorVal = theme->GetCapsuleParseFailedSelectColor();
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+                endColor = theme->GetRingProgressEndSideColor();
+                beginColor = theme->GetRingProgressBeginSideColor();
+                colorVal = (g_progressType == ProgressType::CAPSULE) ? theme->GetCapsuleSelectColor()
+                                                                     : theme->GetTrackSelectedColor();
             } else {
-                colorVal = theme->GetTrackParseFailedSelectedColor();
+                ProgressModel::GetInstance()->ResetGradientColor();
+                ProgressModel::GetInstance()->ResetColor();
+                return;
             }
         } else {
             endColor = colorVal;
@@ -298,14 +305,19 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 {
     Color colorVal;
     if (!CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR)) {
-        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-        CHECK_NULL_VOID(theme);
-        if (g_progressType == ProgressType::CAPSULE) {
-            colorVal = theme->GetCapsuleParseFailedBgColor();
-        } else if (g_progressType == ProgressType::RING) {
-            colorVal = theme->GetRingProgressParseFailedBgColor();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetBackgroundColor();
+            return;
         } else {
-            colorVal = theme->GetTrackParseFailedBgColor();
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            CHECK_NULL_VOID(theme);
+            if (g_progressType == ProgressType::CAPSULE) {
+                colorVal = theme->GetCapsuleBgColor();
+            } else if (g_progressType == ProgressType::RING) {
+                colorVal = theme->GetRingProgressBgColor();
+            } else {
+                colorVal = theme->GetTrackBgColor();
+            }
         }
     }
 
@@ -340,7 +352,12 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     if (ParseJsColor(jsBorderColor, colorVal)) {
         ProgressModel::GetInstance()->SetBorderColor(colorVal);
     } else {
-        ProgressModel::GetInstance()->ResetBorderColor();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetBorderColor();
+        } else {
+            colorVal = theme->GetBorderColor();
+            ProgressModel::GetInstance()->SetBorderColor(colorVal);
+        }
     }
 
     auto jsSweepingEffect = paramObject->GetProperty("enableScanEffect");
@@ -385,12 +402,19 @@ void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
 void JSProgress::JsSetFontStyle(const JSCallbackInfo& info)
 {
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
     auto jsFontColor = paramObject->GetProperty("fontColor");
     Color fontColorVal;
-    if (!ParseJsColor(jsFontColor, fontColorVal)) {
-        ProgressModel::GetInstance()->ResetFontColor();
-    } else {
+    if (ParseJsColor(jsFontColor, fontColorVal)) {
         ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+    } else {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            ProgressModel::GetInstance()->ResetFontColor();
+        } else {
+            fontColorVal = theme->GetTextColor();
+            ProgressModel::GetInstance()->SetFontColor(fontColorVal);
+        }
     }
 
     auto textStyle = paramObject->GetProperty("font");

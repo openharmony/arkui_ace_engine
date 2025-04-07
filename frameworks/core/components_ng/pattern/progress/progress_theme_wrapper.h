@@ -50,6 +50,9 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+            return;
+        }
         if (auto themeColors = theme.Colors(); themeColors) {
             // update only required attributes by TokenTheme tokens
             loadingColor_ = themeColors->IconSecondary();
@@ -61,6 +64,9 @@ public:
             capsuleSelectColor_ = themeColors->CompEmphasizeSecondary();
             trackSelectedColor_ = themeColors->BackgroundEmphasize();
             borderColor_ = themeColors->CompEmphasizeSecondary();
+
+            ringProgressBeginSideColor_ =  themeColors->BackgroundEmphasize();
+            ringProgressEndSideColor_ = themeColors->BackgroundEmphasize();
         }
     }
 

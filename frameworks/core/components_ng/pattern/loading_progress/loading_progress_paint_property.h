@@ -70,7 +70,9 @@ public:
         auto themeScopeId = host ? host->GetThemeScopeId() : 0;
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
-        auto progressTheme = pipeline->GetTheme<ProgressTheme>(themeScopeId);
+        auto progressTheme = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)
+                                 ? pipeline->GetTheme<ProgressTheme>(themeScopeId)
+                                 : pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
 
         json->PutExtAttr("color",
