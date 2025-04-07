@@ -1448,7 +1448,7 @@ void SwiperIndicatorPattern::GetTextContentSub(std::string& firstContent, std::s
     auto currentIndex = GetDisplayCurrentIndex();
     bool isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
-    lastContent = isRtl ? std::to_string(currentIndex) + "\\" : "/" + std::to_string(swiperPattern->RealTotalCount());
+    lastContent = isRtl ? std::to_string(currentIndex) + "/" : "/" + std::to_string(swiperPattern->RealTotalCount());
 }
 
 void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
