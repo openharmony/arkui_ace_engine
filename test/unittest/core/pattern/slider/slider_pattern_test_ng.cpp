@@ -271,7 +271,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest001, TestSize.Level1)
     sliderPattern->bubbleFlag_ = true;
     sliderPattern->isVisibleArea_ = true;
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
-    sliderPattern->sliderTipModifier_->getBubbleVertexFunc_();
     sliderPattern->UpdateCircleCenterOffset();
     auto contentSize = sliderPattern->GetHostContentSize();
     EXPECT_EQ(sliderPattern->GetBlockCenter().GetY(), contentSize->Height() * HALF);
@@ -997,6 +996,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
     ASSERT_NE(sliderNode, nullptr);
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    sliderNode->context_ = AceType::RawPtr(context);
     sliderPaintProperty->UpdateValue(VALUE);
     sliderPaintProperty->UpdateMin(MIN);
     sliderPaintProperty->UpdateMax(MAX);
@@ -1006,10 +1007,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest015, TestSize.Level1)
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
     int32_t setApiVersion = 13;
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t rollbackApiVersion = context->GetApiTargetVersion();
+    context->SetApiTargetVersion(setApiVersion);
     sliderPattern->OnWindowSizeChanged(FRAME_WIDTH, FRAME_HEIGHT, WindowSizeChangeReason::ROTATION);
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+    context->SetApiTargetVersion(rollbackApiVersion);
     EXPECT_TRUE(sliderPattern->skipGestureEvents_);
 }
 

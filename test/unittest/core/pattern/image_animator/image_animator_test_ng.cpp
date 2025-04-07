@@ -14,9 +14,12 @@
  */
 
 #include <climits>
+
 #include "gtest/gtest.h"
 
 #define private public
+
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -26,7 +29,6 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1595,7 +1597,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Play_012, TestSize.Level1)
      */
     auto pipeline = MockPipelineContext::GetCurrentContext();
     pipeline->SetIsFormRender(true);
-    
+
     CreateImageAnimator(2);
     auto animator = pattern_->controlledAnimator_;
     animator->SetDuration(500); // Below minimum
@@ -1883,7 +1885,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Interpolator_001, TestSize.Level
      */
     CreateImageAnimator(0);
     auto animator = pattern_->controlledAnimator_;
-    std::vector<PictureInfo> frames {{0.5f, 100}, {0.5f, 200}};
+    std::vector<PictureInfo> frames { { 0.5f, 100 }, { 0.5f, 200 } };
     animator->AddInterpolator(frames);
     EXPECT_EQ(animator->pictureInfos_.size(), 2);
 }
@@ -1901,9 +1903,9 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Interpolator_002, TestSize.Level
      */
     CreateImageAnimator(0);
     auto animator = pattern_->controlledAnimator_;
-    std::vector<PictureInfo> frames {{0.2f, 101}, {0.3f, 102}, {0.5f, 103}};
+    std::vector<PictureInfo> frames { { 0.2f, 101 }, { 0.3f, 102 }, { 0.5f, 103 } };
     animator->AddInterpolator(frames);
-    
+
     const auto& pics = animator->pictureInfos_;
     EXPECT_FLOAT_EQ(pics[0].first, 0.2f);
     EXPECT_FLOAT_EQ(pics[1].first, 0.3f);
@@ -1940,9 +1942,9 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Interpolator_004, TestSize.Level
      */
     CreateImageAnimator(0);
     auto animator = pattern_->controlledAnimator_;
-    std::vector<PictureInfo> frames {{-0.5f, 100}, {0.0f, 200}, {1.5f, 300}};
+    std::vector<PictureInfo> frames { { -0.5f, 100 }, { 0.0f, 200 }, { 1.5f, 300 } };
     animator->AddInterpolator(frames);
-    
+
     const auto& pics = animator->pictureInfos_;
     EXPECT_EQ(pics.size(), 3); // Accepts values but may not behave correctly
 }
@@ -1960,13 +1962,13 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Interpolator_005, TestSize.Level
      */
     CreateImageAnimator(0);
     auto animator = pattern_->controlledAnimator_;
-    
-    std::vector<PictureInfo> set1 {{0.3f, 101}, {0.7f, 102}};
-    std::vector<PictureInfo> set2 {{0.5f, 201}, {0.5f, 202}};
-    
+
+    std::vector<PictureInfo> set1 { { 0.3f, 101 }, { 0.7f, 102 } };
+    std::vector<PictureInfo> set2 { { 0.5f, 201 }, { 0.5f, 202 } };
+
     animator->AddInterpolator(set1);
     animator->AddInterpolator(set2);
-    
+
     const auto& pics = animator->pictureInfos_;
     EXPECT_EQ(pics.size(), 2);
     EXPECT_EQ(pics[0].second, 201);
@@ -1987,11 +1989,11 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_001, TestSize.L
      */
     CreateImageAnimator(2);
     auto animator = pattern_->controlledAnimator_;
-    
+
     bool isCalled = false;
     animator->AddStartListener([&isCalled]() { isCalled = true; });
     animator->Forward();
-    
+
     EXPECT_FALSE(isCalled);
 }
 
@@ -2009,12 +2011,12 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_002, TestSize.L
      */
     CreateImageAnimator(1);
     auto animator = pattern_->controlledAnimator_;
-    
+
     int32_t callbackCount = 0;
     animator->AddStopListener([&callbackCount]() { callbackCount++; });
     animator->Forward();
     animator->Finish();
-    
+
     EXPECT_EQ(callbackCount, 1);
 }
 
@@ -2032,12 +2034,12 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_004, TestSize.L
      */
     CreateImageAnimator(2);
     auto animator = pattern_->controlledAnimator_;
-    
+
     std::string status = "unpaused";
     animator->AddPauseListener([&status]() { status = "paused"; });
     animator->Forward();
     animator->Pause();
-    
+
     EXPECT_EQ(status, "paused");
 }
 
@@ -2056,7 +2058,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_005, TestSize.L
     CreateImageAnimator(2);
     auto animator = pattern_->controlledAnimator_;
     animator->SetIteration(3);
-    
+
     bool isCalled = false;
     auto listener = [&isCalled]() { isCalled = true; };
     animator->AddRepeatListener(listener);
@@ -2078,17 +2080,17 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_006, TestSize.L
      */
     CreateImageAnimator(1);
     auto animator = pattern_->controlledAnimator_;
-    
+
     struct CallbackFlags {
         bool startCalled = false;
         bool stopCalled = false;
     } flags;
-    
+
     animator->AddStartListener([&flags]() { flags.startCalled = true; });
     animator->AddStopListener([&flags]() { flags.stopCalled = true; });
     animator->Forward();
     animator->Finish();
-    
+
     EXPECT_FALSE(flags.startCalled);
     EXPECT_TRUE(flags.stopCalled);
 }
@@ -2107,13 +2109,13 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_ListenerCallback_007, TestSize.L
      */
     CreateImageAnimator(2);
     auto animator = pattern_->controlledAnimator_;
-    
+
     std::string status = "unpaused";
     animator->AddPauseListener([&status]() { status = "paused"; });
     animator->AddStopListener([&status]() { status = "stopped"; });
     animator->Forward();
     animator->Pause();
-    
+
     EXPECT_EQ(status, "paused");
     animator->Finish();
     EXPECT_EQ(status, "stopped");
@@ -2133,14 +2135,14 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Edge_001, TestSize.Level1)
      */
     CreateImageAnimator(0); // 0 frames
     auto animator = pattern_->controlledAnimator_;
-    
+
     bool startCalled = false;
     animator->AddStartListener([&startCalled]() { startCalled = true; });
-    
+
     animator->Forward();
     animator->Backward();
     animator->Pause();
-    
+
     EXPECT_FALSE(startCalled);
     EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::IDLE);
 }
@@ -2160,13 +2162,502 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest_Edge_002, TestSize.Level1)
     CreateImageAnimator(1);
     auto animator = pattern_->controlledAnimator_;
     animator->SetIteration(INT_MAX);
-    
+
     int32_t callbackCount = 0;
     animator->AddRepeatListener([&callbackCount]() { callbackCount++; });
-    
+
     animator->Forward();
-    
+
     EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
-    EXPECT_EQ(callbackCount, 0);;
+    EXPECT_EQ(callbackCount, 0);
+    ;
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest001, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::IDLE);
+    EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::IDLE);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::RUNNING);
+    EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::RUNNING);
+    EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::PAUSED);
+    EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::PAUSED);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(animator->GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest002, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    animator->SetFillMode(FillMode::NONE);
+    EXPECT_EQ(animator->GetFillMode(), FillMode::NONE);
+    animator->SetFillMode(FillMode::FORWARDS);
+    EXPECT_EQ(animator->GetFillMode(), FillMode::FORWARDS);
+    animator->SetFillMode(FillMode::BACKWARDS);
+    EXPECT_EQ(animator->GetFillMode(), FillMode::BACKWARDS);
+    animator->SetFillMode(FillMode::BOTH);
+    EXPECT_EQ(animator->GetFillMode(), FillMode::BOTH);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest003, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    animator->SetRunningIdx(40);
+    EXPECT_EQ(animator->runningIdx_, 40);
+    animator->SetDuration(40);
+    EXPECT_EQ(animator->GetDuration(), 40);
+    std::vector<PictureInfo> pictureInfos;
+    PictureInfo info1 = { 122.0f, 661 };
+    PictureInfo info2 = { 133.0f, 662 };
+    PictureInfo info3 = { 155.0f, 663 };
+    PictureInfo info4 = { 771.0f, 664 };
+    pictureInfos.emplace_back(info1);
+    pictureInfos.emplace_back(info2);
+    pictureInfos.emplace_back(info3);
+    pictureInfos.emplace_back(info4);
+    animator->AddInterpolator(pictureInfos);
+    EXPECT_EQ(animator->pictureInfos_.size(), 4);
+    animator->ClearInterpolators();
+    EXPECT_EQ(animator->pictureInfos_.size(), 0);
+    AnimatorEvent event = []() {};
+    animator->AddStartListener(event);
+    EXPECT_NE(animator->startEvent_, nullptr);
+    animator->AddStopListener(event);
+    EXPECT_NE(animator->stopEvent_, nullptr);
+
+    animator->AddPauseListener(event);
+    EXPECT_NE(animator->pauseEvent_, nullptr);
+
+    animator->AddRepeatListener(event);
+    EXPECT_NE(animator->repeatEvent_, nullptr);
+
+    animator->AddInnerRepeatListener(event);
+    EXPECT_NE(animator->innerRepeatEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest004, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    AnimatorEvent event = []() {};
+    animator->AddRepeatListener(event);
+    EXPECT_NE(animator->repeatEvent_, nullptr);
+    animator->RemoveRepeatListener();
+    EXPECT_EQ(animator->pauseEvent_, nullptr);
+
+    animator->AddInnerRepeatListener(event);
+    EXPECT_NE(animator->innerRepeatEvent_, nullptr);
+    animator->RemoveInnerRepeatListener();
+    EXPECT_EQ(animator->innerRepeatEvent_, nullptr);
+
+    animator->AddCancelListener(event);
+    EXPECT_NE(animator->cancelEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest005, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    AnimatorEvent event = []() {};
+    animator->AddStartListener(event);
+    EXPECT_NE(animator->startEvent_, nullptr);
+    animator->AddStopListener(event);
+    EXPECT_NE(animator->stopEvent_, nullptr);
+
+    animator->AddPauseListener(event);
+    EXPECT_NE(animator->pauseEvent_, nullptr);
+
+    animator->AddRepeatListener(event);
+    EXPECT_NE(animator->repeatEvent_, nullptr);
+
+    animator->AddCancelListener(event);
+    EXPECT_NE(animator->cancelEvent_, nullptr);
+    animator->ClearAllListeners();
+    EXPECT_EQ(animator->startEvent_, nullptr);
+    EXPECT_EQ(animator->stopEvent_, nullptr);
+    EXPECT_EQ(animator->pauseEvent_, nullptr);
+    EXPECT_EQ(animator->cancelEvent_, nullptr);
+    EXPECT_EQ(animator->repeatEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest006, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+
+    animator->SetIteration(1);
+    EXPECT_EQ(animator->GetIteration(), 1);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::IDLE);
+    animator->SetIteration(3);
+
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::STOPPED);
+    animator->SetIteration(4);
+    AnimatorEvent event = []() {};
+    animator->AddStopListener(event);
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::PAUSED);
+    animator->SetIteration(5);
+
+    animator->SetControlStatus(ControlledAnimator::ControlStatus::RUNNING);
+    animator->SetIteration(6);
+    EXPECT_EQ(animator->GetIteration(), 6);
+}
+
+/**
+ * @tc.name: ImageAnimatorTest023
+ * @tc.desc: Verify the functionality of enabling and disabling the automatic monitoring of invisible areas
+ *            for the image animator.
+ *            - When SetAutoMonitorInvisibleArea(true) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * true.
+ *            - When SetAutoMonitorInvisibleArea(false) is called, the isAutoMonitorInvisibleArea_ flag should be set to
+ * false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest007, TestSize.Level1)
+{
+    auto animator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(animator, nullptr);
+    std::function<void(int32_t)> func = [](int32_t num) {};
+    animator->AddListener(func);
+    EXPECT_NE(animator->playbackListener_, nullptr);
+
+    animator->SetIteration(-1);
+    animator->PostPlayTask(2, 2, 2, 3);
+
+    animator->SetIteration(3);
+    animator->PostPlayTask(2, 2, 2, 3);
+
+    animator->SetIteration(-1);
+    animator->PostPlayTask(2, -2, 2, 3);
+    animator->SetIteration(1);
+
+    animator->PostPlayTask(2, 2, 2, 3);
+    animator->needFireRepeatEvent_ = true;
+    animator->repeatEvent_ = nullptr;
+    animator->innerRepeatEvent_ = nullptr;
+
+    AnimatorEvent event = []() {};
+    animator->PostPlayTask(2, 2, 2, 3);
+    animator->needFireRepeatEvent_ = true;
+    animator->repeatEvent_ = event;
+    animator->innerRepeatEvent_ = event;
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_001
+ * @tc.desc: Verify infinite iterations
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set single-frame animation with infinite iterations
+     * @tc.expected: Should not crash and iteration expect infinite
+     */
+    auto animator = ControlledAnimator();
+    animator.SetIteration(INT_MAX);
+    EXPECT_EQ(animator.GetIteration(), INT_MAX);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_002
+ * @tc.desc: Verify control status setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set control status
+     * @tc.expected: Control status should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetControlStatus(ControlledAnimator::ControlStatus::RUNNING);
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::RUNNING);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_003
+ * @tc.desc: Verify fill mode setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set fill mode
+     * @tc.expected: Fill mode should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetFillMode(FillMode::FORWARDS);
+    EXPECT_EQ(animator.GetFillMode(), FillMode::FORWARDS);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_004
+ * @tc.desc: Verify duration setting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create animator and set duration
+     * @tc.expected: Duration should be updated correctly
+     */
+    auto animator = ControlledAnimator();
+    animator.SetDuration(1000);
+    EXPECT_EQ(animator.GetDuration(), 1000);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_005
+ * @tc.desc: Verify forward playback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start forward playback
+     * @tc.expected: Control status should be RUNNING and not reversed
+     */
+    auto animator = ControlledAnimator();
+    std::vector<PictureInfo> frames { { 0.5f, 100 }, { 0.5f, 200 } };
+    animator.AddInterpolator(frames);
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+    EXPECT_FALSE(animator.isReverse_);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_006
+ * @tc.desc: Verify backward playback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_006, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start backward playback
+     * @tc.expected: Control status should be RUNNING and reversed
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Backward();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+    EXPECT_FALSE(animator.isReverse_);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_007
+ * @tc.desc: Verify pause functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_007, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then pause
+     * @tc.expected: Control status should be PAUSED
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Pause();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::PAUSED);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_008
+ * @tc.desc: Verify cancel functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_008, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then cancel
+     * @tc.expected: Control status should be IDLE
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Cancel();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::IDLE);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_009
+ * @tc.desc: Verify finish functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_009, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with test data
+     *   step2. Start playback and then finish
+     * @tc.expected: Control status should be STOPPED
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 }, { 0.2, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.Forward();
+    animator.Finish();
+    EXPECT_EQ(animator.GetControlStatus(), ControlledAnimator::ControlStatus::STOPPED);
+    EXPECT_EQ(flagNumber, 2);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_010
+ * @tc.desc: Verify listener functionality
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_010, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator and add listeners
+     *   step2. Trigger various events
+     * @tc.expected: Listener flags should be set correctly
+     */
+    auto animator = ControlledAnimator();
+    bool startCalled = false;
+    bool stopCalled = false;
+
+    animator.AddStartListener([&startCalled]() { startCalled = true; });
+    animator.AddStopListener([&stopCalled]() { stopCalled = true; });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+
+    animator.Forward();
+    EXPECT_FALSE(startCalled);
+
+    animator.Finish();
+    EXPECT_FALSE(stopCalled);
+    EXPECT_EQ(flagNumber, 1);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_011
+ * @tc.desc: Verify empty interpolators handling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_011, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with no interpolators
+     *   step2. Attempt to start playback
+     * @tc.expected: Control status should remain unchanged
+     */
+    auto animator = ControlledAnimator();
+    auto initialStatus = animator.GetControlStatus();
+    animator.Forward();
+    EXPECT_EQ(animator.GetControlStatus(), initialStatus);
+}
+
+/**
+ * @tc.name: ControlledAnimatorTest_012
+ * @tc.desc: Verify zero duration handling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_012, TestSize.Level1)
+{
+    /**
+     * @tc.steps:
+     *   step1. Create animator with zero duration
+     *   step2. Attempt to start playback
+     * @tc.expected: Should finish immediately
+     */
+    auto animator = ControlledAnimator();
+    animator.AddInterpolator({ { 0.1, 1 } });
+    int32_t flagNumber = 1;
+    animator.AddListener([&flagNumber](int32_t number) { flagNumber = 2; });
+    animator.SetDuration(0);
+    bool finished = false;
+    animator.AddStopListener([&finished]() { finished = true; });
+    animator.Forward();
+    EXPECT_TRUE(finished);
+    EXPECT_EQ(flagNumber, 1);
 }
 } // namespace OHOS::Ace::NG

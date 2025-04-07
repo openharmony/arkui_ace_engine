@@ -128,6 +128,9 @@ public:
                 "warning",
                 isLightMode ? Color(WARNING_LIGHT) : Color(WARNING_DARK)
             );
+
+            theme->windowScreenLeft_ = pattern->GetAttr<std::string>("window_left_screen", "");
+            theme->windowScreenRight_ = pattern->GetAttr<std::string>("window_right_screen", "");
         }
     };
     ContainerModalTheme() = default;
@@ -198,6 +201,11 @@ public:
         return resAdapter->GetResourceColorMode() == ColorMode::LIGHT;
     }
 
+    std::string GetWindowScreen(bool isLeftSplit)
+    {
+        return isLeftSplit ? windowScreenLeft_ : windowScreenRight_;
+    }
+
 private:
     Color backgroundColor_;
     Color backgroundUnfocusColor_;
@@ -209,6 +217,9 @@ private:
     Color interactiveClickColor_;
     Color warningColor_;
     RefPtr<ThemeConstants> themeConstants_ = nullptr;
+
+    std::string windowScreenLeft_;
+    std::string windowScreenRight_;
 };
 
 } // namespace OHOS::Ace

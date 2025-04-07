@@ -1055,7 +1055,7 @@ export default function Stepper7() {
         radioClickObj: 0
       })
       await driver.delayMs(3500);
-      await driver.click(645, 115)
+      await driver.pressBack()
       done();
     })
     /*

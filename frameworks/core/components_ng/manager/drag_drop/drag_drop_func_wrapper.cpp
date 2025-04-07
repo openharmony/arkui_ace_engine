@@ -1234,7 +1234,7 @@ std::shared_ptr<PixelMapInfo> DragDropFuncWrapper::GetTiledPixelMapInfo(const st
         auto gestureHub = node->GetOrCreateGestureEventHub();
         gestureHub->SetDragPreviewPixelMap(pixelMap);
         CHECK_NULL_RETURN(pixelMap, nullptr);
-        auto offset = DragDropFuncWrapper::GetPaintRectCenter(node, true);
+        auto offset = node->GetPositionToWindowWithTransform();
         minX = std::min(minX, offset.GetX());
         minY = std::min(minY, offset.GetY());
         maxX = std::max(maxX, offset.GetX() + pixelMap->GetWidth());
@@ -1264,8 +1264,9 @@ void DragDropFuncWrapper::DrawTiledPixelMap(
         CHECK_NULL_VOID(gestureHub);
         auto pixelMap = gestureHub->GetDragPreviewPixelMap();
         CHECK_NULL_VOID(pixelMap);
-        auto offsetX = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetX();
-        auto offsetY = DragDropFuncWrapper::GetPaintRectCenter(node, true).GetY();
+        auto offset = node->GetPositionToWindowWithTransform();
+        auto offsetX = offset.GetX();
+        auto offsetY = offset.GetY();
         auto result =
             tiledPixelMap->WritePixels({ pixelMap->GetPixels(), pixelMap->GetByteCount(), 0, pixelMap->GetRowStride(),
                 { offsetX - pixelMapRect.GetOffset().GetX(), offsetY - pixelMapRect.GetOffset().GetY(),
@@ -1466,7 +1467,7 @@ RefPtr<DragDropManager> DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
         SubwindowManager::GetInstance()->GetParentContainerId(instanceId) : instanceId;
     auto container = Container::GetContainer(mainContainerId);
     CHECK_NULL_RETURN(container, dragDropManager);
-    if (!container->IsScenceBoardWindow()) {
+    if (!container->IsSceneBoardWindow()) {
         return dragDropManager;
     }
     CHECK_NULL_RETURN(subWindow, dragDropManager);

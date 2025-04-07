@@ -1025,7 +1025,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(ButtonProperties& buttonParam, int32_
     } else {
         buttonProp->UpdatePadding(buttonPadding);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonProp->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         auto popupButtonType = static_cast<ButtonType>(popupTheme->GetPopupButtonType());

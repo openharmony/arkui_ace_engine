@@ -1041,29 +1041,6 @@ HWTEST_F(WebPatternTouchTestNg, UnregisterWebComponentClickCallback_001, TestSiz
 }
 
 /**
- * @tc.name: RequestFocus_001
- * @tc.desc: RequestFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternTouchTestNg, RequestFocus_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    auto* stack = ViewStackProcessor::GetInstance();
-    EXPECT_NE(stack, nullptr);
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    EXPECT_NE(frameNode, nullptr);
-    stack->Push(frameNode);
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
-    webPattern->OnModifyDone();
-    ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->RequestFocus();
-#endif
-}
-
-/**
  * @tc.name: OnRebuildFrame_001
  * @tc.desc: OnRebuildFrame.
  * @tc.type: FUNC

@@ -495,6 +495,8 @@ public:
 
     bool IsPreviewMenuNotNeedShowPreview();
 
+    bool RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback);
+
     void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
 

@@ -25,7 +25,7 @@ import {
   sliderDrag,
   titleSearch,
   ToggleClick,
-} from '../../utils';
+} from '../../../utils';
 import { NavDestination } from './NavDestination';
 
 const driver = Driver.create();

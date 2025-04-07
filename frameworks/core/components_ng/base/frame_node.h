@@ -88,6 +88,11 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
+enum {
+    RET_FAILED = 11,
+    RET_SUCCESS = 10,
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -437,11 +442,6 @@ public:
 
     bool IsAtomicNode() const override;
 
-    int32_t OnRecvCommand(const std::string& command) override
-    {
-        return 0;
-    }
-
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
     void RebuildRenderContextTree() override;
@@ -474,6 +474,8 @@ public:
     }
 
     void ChangeSensitiveStyle(bool isSensitive);
+
+    bool IsJsCustomPropertyUpdated() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -1164,7 +1166,7 @@ public:
     void SetDeleteRsNode(bool isDelete) {
         isDeleteRsNode_ = isDelete;
     }
- 
+
     bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
@@ -1172,7 +1174,7 @@ public:
     void SetPositionZ(bool hasPositionZ) {
         hasPositionZ_ = hasPositionZ;
     }
- 
+
     bool HasPositionZ() const {
         return hasPositionZ_;
     }
@@ -1221,7 +1223,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
@@ -1348,6 +1351,12 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    {
+        detachRelatedNodeCallback_ = std::move(callback);
+    }
+
+    int32_t OnRecvCommand(const std::string& command) override;
 
 protected:
     void DumpInfo() override;
@@ -1524,6 +1533,7 @@ private:
     std::set<std::string> allowDrop_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
+    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1646,6 +1656,8 @@ private:
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    std::function<void()> detachRelatedNodeCallback_;
 };
 } // namespace OHOS::Ace::NG
 

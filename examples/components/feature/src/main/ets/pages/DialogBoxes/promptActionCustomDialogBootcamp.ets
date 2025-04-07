@@ -91,6 +91,9 @@ export struct promptActionCustomDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -437,6 +440,11 @@ export struct promptActionCustomDialogBootcamp {
     }
     .height('52%')
     .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

@@ -10,7 +10,7 @@ import {
   sliderDrag,
   Search,
   ToggleClick
-} from './utils';
+} from '../../utils';
 import { Point } from '@ohos.UiTest';
 
 
@@ -741,6 +741,9 @@ export default function promptActionCustomDialogBootcampTest() {
       await Search('参数列表', 'CustomDialogOptions.shadow')
       await radioClick({
         radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
       })
 
       done()

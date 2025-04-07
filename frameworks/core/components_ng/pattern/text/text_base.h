@@ -78,7 +78,13 @@ class TextGestureSelector : public virtual AceType {
     DECLARE_ACE_TYPE(TextGestureSelector, AceType);
 
 public:
-    virtual void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset);
+    virtual void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset)
+    {
+        start_ = start;
+        end_ = end;
+        isStarted_ = start_ <= end_;
+        startOffset_ = startOffset;
+    }
 
     void CancelGestureSelection()
     {
@@ -88,7 +94,7 @@ public:
 
     void EndGestureSelection(const TouchLocationInfo& locationInfo)
     {
-        OnTextGenstureSelectionEnd(locationInfo);
+        OnTextGestureSelectionEnd(locationInfo);
         ResetGestureSelection();
     }
 
@@ -100,7 +106,7 @@ protected:
         return -1;
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
-    virtual void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) {}
+    virtual void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) {}
     virtual void DoTextSelectionTouchCancel() {}
     int32_t GetSelectingFingerId()
     {
@@ -112,7 +118,15 @@ protected:
         return isSelecting_;
     }
 private:
-    void ResetGestureSelection();
+    void ResetGestureSelection()
+    {
+        start_ = -1;
+        end_ = -1;
+        isStarted_ = false;
+        startOffset_.Reset();
+        isSelecting_ = false;
+        selectingFingerId_ = -1;
+    }
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
     int32_t end_ = -1;

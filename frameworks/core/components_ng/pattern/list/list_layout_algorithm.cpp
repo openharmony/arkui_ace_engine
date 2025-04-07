@@ -74,6 +74,9 @@ void ListLayoutAlgorithm::ReviseSpace(const RefPtr<ListLayoutProperty>& listLayo
             spaceWidth_ = std::max(spaceWidth_, static_cast<float>(Round(dividerSpace.value())));
         }
     }
+    if (isRoundingMode_) {
+        spaceWidth_ = Round(spaceWidth_);
+    }
     spaceWidth_ += chainInterval_;
 }
 

@@ -212,7 +212,8 @@ public:
 private:
     static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
     static void ExtractInfoToXComponentOptions(
-        XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info);
+        XComponentOptions& options, JSRef<JSObject>& controllerObj,
+        const JSRef<JSObject>& paramObject, const JSCallbackInfo& info);
 
     RefPtr<AceType> frameNode_;
 };

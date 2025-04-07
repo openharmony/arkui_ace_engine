@@ -422,7 +422,7 @@ void SelectPattern::InitFocusEvent()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusStyleTask();
@@ -644,7 +644,7 @@ void SelectPattern::SetDisabledStyle()
     }
     spinner_->MarkModifyDone();
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(renderContext->GetBackgroundColor()
@@ -687,7 +687,7 @@ void SelectPattern::BuildChild()
     // get theme from SelectThemeManager
     auto* pipeline = select->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
 
     bool hasRowNode = HasRowNode();

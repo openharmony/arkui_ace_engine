@@ -368,7 +368,7 @@ public:
 
     void HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
 
-    void HandleJumpCenter(LayoutWrapper* layoutWrapper);
+    virtual void HandleJumpCenter(LayoutWrapper* layoutWrapper);
 
     void HandleJumpStart(LayoutWrapper* layoutWrapper);
 
@@ -460,6 +460,11 @@ public:
     }
 
     void CalculateTotalCountByRepeat(LayoutWrapper* layoutWrapper);
+
+    void SetIsRoundingMode()
+    {
+        isRoundingMode_ = true;
+    }
 
 protected:
     virtual void UpdateListItemConstraint(
@@ -661,6 +666,7 @@ private:
     bool forwardFeature_ = false;
     bool backwardFeature_ = false;
     bool isNeedCheckOffset_ = false;
+    bool isRoundingMode_ = false;
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 

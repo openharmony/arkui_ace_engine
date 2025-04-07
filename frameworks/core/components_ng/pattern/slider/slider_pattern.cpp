@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -39,6 +40,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/slider/slider_tip_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -106,9 +108,6 @@ void SliderPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitializeBubble();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        HandleEnabled();
-    }
     SetAccessibilityAction();
 #ifdef SUPPORT_DIGITAL_CROWN
     crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
@@ -119,6 +118,91 @@ void SliderPattern::OnModifyDone()
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
     InitHapticController();
+}
+
+void SliderPattern::CreateTipToMountRoot()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!sliderTipNode_) {
+        auto rootNode = host->GetCurrentPageRootNode();
+        CHECK_NULL_VOID(rootNode);
+        sliderTipNode_ = FrameNode::CreateFrameNode(V2::SLIDER_TIP_NODE_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<SliderTipPattern>(host->GetPattern<SliderPattern>()));
+        CHECK_NULL_VOID(sliderTipNode_);
+        if (rootNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            MountToNavigation(sliderTipNode_);
+        } else {
+            sliderTipNode_->MountToParent(rootNode);
+        }
+        sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    return;
+}
+
+void SliderPattern::MountToNavigation(RefPtr<FrameNode>& tipNode)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentNode = host->GetParent();
+    while (parentNode) {
+        if (parentNode) {
+            if (parentNode->GetTag() == V2::NAVBAR_CONTENT_ETS_TAG ||
+                parentNode->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+                tipNode->MountToParent(parentNode);
+                navigationNode_ = parentNode;
+                return;
+            }
+        }
+        parentNode = parentNode->GetParent();
+    }
+}
+
+void SliderPattern::CalculateOffset()
+{
+    if (sliderTipNode_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto xOffsetSlider = host->GetPositionToScreen().GetX();
+        auto yOffsetSlider = host->GetPositionToScreen().GetY();
+        auto xOffsetTip = sliderTipNode_->GetPositionToScreen().GetX();
+        auto yOffsetTip = sliderTipNode_->GetPositionToScreen().GetY();
+        if ((xOffsetSlider != xLastSlider_) || (yOffsetSlider != yLastSlider_)) {
+            xLastSlider_ = xOffsetSlider;
+            yLastSlider_ = yOffsetSlider;
+            auto renderContext = sliderTipNode_->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateOffset(
+                OffsetT<Dimension>(Dimension(xOffsetSlider - xOffsetTip), Dimension(yOffsetSlider - yOffsetTip)));
+        }
+
+        auto width = host->GetGeometryNode()->GetFrameSize().Width();
+        auto height = host->GetGeometryNode()->GetFrameSize().Height();
+        auto layoutProperty = sliderTipNode_->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (width > height) {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(1)));
+        } else {
+            layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1), CalcLength(height)));
+        }
+    }
+}
+
+void SliderPattern::RemoveTipFromRoot()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(sliderTipNode_);
+    auto rootNode = host->GetCurrentPageRootNode();
+    CHECK_NULL_VOID(rootNode);
+    if (rootNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        CHECK_NULL_VOID(navigationNode_);
+        navigationNode_->RemoveChild(sliderTipNode_);
+    } else {
+        rootNode->RemoveChild(sliderTipNode_);
+    }
+    sliderTipNode_ = nullptr;
 }
 
 void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
@@ -194,6 +278,14 @@ public:
         CHECK_NULL_RETURN(sliderPattern, false);
         if (state) {
             sliderPattern->InitAccessibilityVirtualNodeTask();
+        } else {
+            sliderPattern->SetBubbleFlag(false);
+            auto sliderContentModifier = sliderPattern->GetSliderContentModifier();
+            CHECK_NULL_RETURN(sliderContentModifier, false);
+            sliderContentModifier->SetIsHovered(false);
+            auto host = sliderPattern->GetHost();
+            CHECK_NULL_RETURN(host, false);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
         sliderPattern->SetIsAccessibilityOn(state);
         return true;
@@ -634,8 +726,10 @@ bool SliderPattern::UpdateParameters()
 
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (type == WindowSizeChangeReason::ROTATION &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SetSkipGestureEvents();
     }
 }
@@ -753,12 +847,12 @@ bool SliderPattern::AtPanArea(const Offset& offset, const SourceType& sourceType
 
 void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touch event");
     auto touchList = info.GetChangedTouches();
     CHECK_NULL_VOID(!touchList.empty());
     auto touchInfo = touchList.front();
     auto touchType = touchInfo.GetTouchType();
     if (touchType == TouchType::DOWN) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touchDown");
         ResetSkipGestureEvents();
         if (fingerId_ != -1) {
             return;
@@ -766,6 +860,8 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         fingerId_ = touchInfo.GetFingerId();
         HandleTouchDown(touchInfo.GetLocalLocation(), info.GetSourceDevice());
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider handle touchUp, isVisibleArea:%{public}d, isShow:%{public}d",
+            isVisibleArea_, isShow_);
         ResetSkipGestureEvents();
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
@@ -842,6 +938,21 @@ void SliderPattern::InitializeBubble()
     sliderPaintProperty->UpdateTextColor(sliderTheme->GetTipTextColor());
     sliderPaintProperty->UpdateFontSize(sliderTheme->GetTipFontSize());
     sliderPaintProperty->UpdateContent(content);
+}
+
+void SliderPattern::OnFinishEventTipSize()
+{
+    CHECK_NULL_VOID(sliderTipNode_);
+    auto layoutProperty = sliderTipNode_->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
+    sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::RefreshTipNode()
+{
+    CHECK_NULL_VOID(sliderTipNode_);
+    sliderTipNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::HandlingGestureStart(const GestureEvent& info)
@@ -1098,9 +1209,15 @@ void SliderPattern::UpdateCircleCenterOffset()
 void SliderPattern::UpdateBubble()
 {
     CHECK_NULL_VOID(bubbleFlag_);
+    CalculateOffset();
+    CHECK_NULL_VOID(sliderTipNode_);
+    auto layoutProperty = sliderTipNode_->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
     // update the tip value according to the slider value, update the tip position according to current block position
     UpdateTipsValue();
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    RefreshTipNode();
 }
 
 void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1197,7 +1314,7 @@ void SliderPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 
-    auto onFocus = [wp = WeakClaim(this)]() {
+    auto onFocus = [wp = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider on focus");
         auto pattern = wp.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1971,6 +2088,9 @@ void SliderPattern::RegisterVisibleAreaChange()
         CHECK_NULL_VOID(pattern);
         pattern->isVisibleArea_ = visible;
         visible ? pattern->StartAnimation() : pattern->StopAnimation();
+        if (visible) {
+            pattern->CreateTipToMountRoot();
+        }
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2110,6 +2230,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    RemoveTipFromRoot();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2120,6 +2241,7 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
 }
 

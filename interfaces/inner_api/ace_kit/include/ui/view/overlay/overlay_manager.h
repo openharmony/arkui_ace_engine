@@ -19,6 +19,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/geometry/ng/offset_t.h"
 #include "ui/base/macros.h"
+#include "ui/properties/safe_area_insets.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/ui_context.h"
 
@@ -32,6 +33,10 @@ public:
 
     // menus
     virtual void ShowMenu(const int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode>& menu) = 0;
+
+    // safeArea
+    virtual NG::SafeAreaInsets GetSafeAreaInsets(
+        const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false) = 0;
 };
 } // OHOS::Ace::Kit
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_OVERLAY_OVERLAY_MANAGER_H

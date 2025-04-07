@@ -652,7 +652,7 @@ public:
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
     bool IsLauncherContainer() override;
-    bool IsScenceBoardWindow() override;
+    bool IsSceneBoardWindow() override;
     bool IsCrossAxisWindow() override;
     bool IsUIExtensionWindow() override;
     bool IsSceneBoardEnabled() override;

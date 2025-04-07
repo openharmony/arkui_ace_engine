@@ -1140,7 +1140,9 @@ void TextFieldPattern::ClearFocusStyle()
 
 void TextFieldPattern::ProcessAutoFillOnFocus()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
 
@@ -1360,7 +1362,7 @@ void TextFieldPattern::InitFocusEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusEvent();
@@ -1822,7 +1824,7 @@ void TextFieldPattern::HandleOnPaste()
 bool TextFieldPattern::IsShowTranslate()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
 
@@ -1836,7 +1838,7 @@ bool TextFieldPattern::IsShowTranslate()
 bool TextFieldPattern::IsShowSearch()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
     auto host = GetHost();
@@ -3406,7 +3408,7 @@ void TextFieldPattern::OnModifyDone()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         InitCancelButtonMouseEvent();
         InitPasswordButtonMouseEvent();
     }
@@ -4190,8 +4192,7 @@ void TextFieldPattern::RestoreDefaultMouseState()
     pipeline->ChangeMouseStyle(id, MouseFormat::DEFAULT, windowId);
 }
 
-void TextFieldPattern::ChangeMouseState(
-    const Offset location, int32_t frameId, bool isByPass)
+void TextFieldPattern::ChangeMouseState(const Offset location, int32_t frameId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4217,7 +4218,7 @@ void TextFieldPattern::ChangeMouseState(
         } else {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "ChangeMouseState Id:%{public}d, winId:%{public}d", frameId, windowId);
             pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId, isByPass);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR, windowId);
         }
     } else {
         RestoreDefaultMouseState();
@@ -4244,7 +4245,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
     }
-    ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
+    if (info.GetAction() != MouseAction::WINDOW_LEAVE) {
+        ChangeMouseState(info.GetLocalLocation(), frameId);
+    }
 
     if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
         selectOverlay_->SetUsingMouse(true);
@@ -4816,13 +4819,6 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::OnAutoCapitalizationModeUpdate(AutoCapitalizationMode value) {}
 
-void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
-{
-    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
-    CHECK_NULL_VOID(passwordArea);
-    passwordArea->UpdatePasswordIconColor(color);
-}
-
 bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 {
     bool result = false;
@@ -4861,8 +4857,12 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         updateFlag = false;
     }
-    // no interface to set password icon color, should update every time
-    UpdatePasswordIconColor(textFieldTheme->GetSymbolColor());
+    if (responseArea_) {
+        responseArea_->OnThemeScopeUpdate(textFieldTheme);
+    }
+    if (cleanNodeResponseArea_) {
+        cleanNodeResponseArea_->OnThemeScopeUpdate(textFieldTheme);
+    }
     return updateFlag;
 }
 
@@ -6008,17 +6008,6 @@ bool TextFieldPattern::IsModalCovered()
     return pagePattern->GetIsModalCovered();
 }
 
-void TextFieldPattern::OnVisibleChange(bool isVisible)
-{
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "visible change to %{public}d", isVisible);
-    if (!isVisible && HasFocus()) {
-        CloseKeyboard(true);
-        if (SelectOverlayIsOn()) {
-            StartTwinkling();
-        }
-    }
-}
-
 void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
     if (newWidth == prevWidth && newHeight == prevHeight) {
@@ -6883,14 +6872,16 @@ std::string TextFieldPattern::GetMinFontSize() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetAdaptMinFontSize()->ToString();
+    auto minFontSize = layoutProperty->GetAdaptMinFontSize();
+    return minFontSize.has_value() ? minFontSize->ToString() : "";
 }
 
 std::string TextFieldPattern::GetMaxFontSize() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetAdaptMaxFontSize()->ToString();
+    auto maxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    return maxFontSize.has_value() ? maxFontSize->ToString() : "";
 }
 
 std::string TextFieldPattern::GetMinFontScale() const
@@ -6919,7 +6910,8 @@ std::string TextFieldPattern::GetTextIndent() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetTextIndent()->ToString();
+    auto textIndent = layoutProperty->GetTextIndent();
+    return textIndent.has_value() ? textIndent->ToString() : "";
 }
 
 Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
@@ -8694,10 +8686,12 @@ void TextFieldPattern::GetIconPaintRect(const RefPtr<TextInputResponseArea>& res
 
 void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (focusIndex_ == FocuseIndex::CANCEL) {
         CHECK_NULL_VOID(cleanNodeResponseArea_);
         GetIconPaintRect(cleanNodeResponseArea_, paintRect);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             cleanNodeResponseArea_->CreateIconRect(paintRect, true);
             float cornerRadius = paintRect.GetRect().Width() / 2;
             paintRect.SetCornerRadius(cornerRadius);
@@ -8706,7 +8700,7 @@ void TextFieldPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
             GetIconPaintRect(responseArea_, paintRect);
-            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+            if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
                 responseArea_->CreateIconRect(paintRect, true);
             }
             float cornerRadius = paintRect.GetRect().Width() / 2;
@@ -9661,7 +9655,7 @@ void TextFieldPattern::UpdateSelectionByLongPress(int32_t start, int32_t end, co
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo)
+void TextFieldPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo)
 {
     SetIsSingleHandle(!IsSelected());
     bool isScrolling = contentScroller_.isScrolling;
@@ -9761,7 +9755,7 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 bool TextFieldPattern::IsShowAIWrite()
 {
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         return false;
     }
 
@@ -10528,23 +10522,25 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!HasFocus() && reason != InputReason::PASTE) {
-        int32_t frameId = host->GetId();
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
-        int32_t depth = host->GetDepth();
-        std::string errorType = "textfield on blur, can't insert value";
-        EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
-        auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
-        auto curFocusNode = currentFocusNode.Upgrade();
-        CHECK_NULL_VOID(curFocusNode);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
-        return;
-    }
-    if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
-            isEdit_, IsDragging());
-        return;
+    if (reason != InputReason::PASTE) {
+        if (!HasFocus()) {
+            int32_t frameId = host->GetId();
+            TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
+            int32_t depth = host->GetDepth();
+            std::string errorType = "textfield on blur, can't insert value";
+            EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
+            auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
+            auto curFocusNode = currentFocusNode.Upgrade();
+            CHECK_NULL_VOID(curFocusNode);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
+            return;
+        }
+        if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
+                isEdit_, IsDragging());
+            return;
+        }
     }
     if (focusIndex_ != FocuseIndex::TEXT) {
         if (insertValue == u" ") {
@@ -10653,6 +10649,7 @@ void TextFieldPattern::ClearTextContent()
             .range = {-1, -1}
         };
         SetPreviewTextOperation(info);
+        hasPreviewText_ = false;
     }
     if (contentController_->IsEmpty()) {
         return;

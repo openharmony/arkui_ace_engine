@@ -328,7 +328,7 @@ void ListLanesLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutProperty>& 
     float laneGutter = 0.0f;
     if (layoutProperty->GetLaneGutter().has_value()) {
         laneGutter = ConvertToPx(layoutProperty->GetLaneGutter().value(),
-            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value();
+            layoutConstraint.scaleProperty, crossSizeOptional.value_or(0.0)).value_or(0.0f);
         SetLaneGutter(laneGutter);
     }
     lanes_ = CalculateLanesParam(minLaneLength_, maxLaneLength_, lanes, crossSizeOptional, laneGutter);

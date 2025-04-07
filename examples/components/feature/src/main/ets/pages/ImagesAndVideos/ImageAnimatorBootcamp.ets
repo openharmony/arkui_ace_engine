@@ -919,6 +919,9 @@ export struct ImageAnimatorBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -1092,8 +1095,8 @@ export struct ImageAnimatorBootcamp {
           console.info('Finish')
           this.state = AnimationStatus.Stopped
         })
-        .width(useEnabled(this.enableCompWidth, this.compWidth))
-        .height(useEnabled(this.enableCompHeight, this.compHeight))
+        .width(this.enableCompWidth ? useEnabled(this.enableCompWidth, this.compWidth) : 150)
+        .height(this.enableCompHeight ? useEnabled(this.enableCompHeight, this.compHeight) : 150)
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
         .margin(useEnabled(this.enableCompMargin, this.compMargin))
         .constraintSize({

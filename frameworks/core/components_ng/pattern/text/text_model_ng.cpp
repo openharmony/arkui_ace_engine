@@ -17,6 +17,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
+#include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -24,7 +25,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_event_hub.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -423,6 +424,9 @@ void TextModelNG::SetOnClick(std::function<void(BaseEventInfo* info)>&& click, d
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(std::move(clickFunc), distanceThreshold);
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
 }
 
 void TextModelNG::ClearOnClick()
@@ -1012,6 +1016,9 @@ void TextModelNG::SetOnClick(FrameNode* frameNode, GestureEventFunc&& click)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(std::move(click));
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), true);
 }
 
 void TextModelNG::ClearOnClick(FrameNode* frameNode)
@@ -1020,6 +1027,9 @@ void TextModelNG::ClearOnClick(FrameNode* frameNode)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetOnClickEvent(nullptr);
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetModifierEventRegistrationState(uiNode->IsCNode(), false);
 }
 
 void TextModelNG::SetOnDetectResultUpdate(FrameNode* frameNode,  std::function<void(const std::string&)>&& onResult)

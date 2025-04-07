@@ -157,7 +157,7 @@ float ParseSaturation(const ArkUI_AttributeItem* item, int32_t index)
     float saturation = 1.0f;
     if (size > index) {
         float value = item->value[index].f32;
-        if (value > 0.0f || NearZero(value)) {
+        if (GreatOrEqual(value, 0.0f)) {
             saturation = value;
         }
     }
@@ -170,7 +170,7 @@ float ParseBrightness(const ArkUI_AttributeItem* item, int32_t index)
     float brightness = 1.0f;
     if (size > index) {
         float value = item->value[index].f32;
-        if (value > 0.0f || NearZero(value)) {
+        if (GreatOrEqual(value, 0.0f)) {
             brightness = value;
         }
     }

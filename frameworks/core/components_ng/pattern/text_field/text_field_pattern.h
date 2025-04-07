@@ -473,7 +473,7 @@ public:
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
     void OnHandleAreaChanged() override;
-    void OnVisibleChange(bool isVisible) override;
+
     void HandleCounterBorder();
 
     int32_t GetCaretIndex() const override
@@ -1593,13 +1593,12 @@ protected:
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
+    void OnTextGestureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
-    void UpdatePasswordIconColor(const Color& color);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
@@ -1663,8 +1662,7 @@ private:
     void UpdatePressStyle(bool isPressed);
     void PlayAnimationHoverAndPress(const Color& color);
     void UpdateTextFieldBgColor(const Color& color);
-    void ChangeMouseState(
-        const Offset location, int32_t frameId, bool isByPass = false);
+    void ChangeMouseState(const Offset location, int32_t frameId);
     void FreeMouseStyleHoldNode(const Offset location);
     void HandleMouseEvent(MouseInfo& info);
     void FocusAndUpdateCaretByMouse(MouseInfo& info);

@@ -34,8 +34,6 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    void CalcHeightAndWidth(float& height, float& width, float frameHeight, float frameWidth);
-
     void OnReset() override {}
 
     float GetHeight() const
@@ -49,6 +47,9 @@ public:
     }
 
 private:
+    void CalcHeightAndWidth(
+        const RefPtr<FrameNode>& host, float& height, float& width, float frameHeight, float frameWidth);
+
     ACE_DISALLOW_COPY_AND_MOVE(SwitchLayoutAlgorithm);
     float width_ = 0.0f;
     float height_ = 0.0f;

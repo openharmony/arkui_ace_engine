@@ -1556,7 +1556,7 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (!pattern) {
             return;
@@ -2404,6 +2404,7 @@ void SearchPattern::SetSearchIconColor(const Color& color)
         imageIconOptions.UpdateColor(Color(color));
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
+        CHECK_NULL_VOID(imageLayoutProperty->GetImageSourceInfo());
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
         if (imageSourceInfo.IsSvg()) {
             imageSourceInfo.SetFillColor(color);

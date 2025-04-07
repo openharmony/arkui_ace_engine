@@ -1318,8 +1318,10 @@ HWTEST_F(ViewAbstractTestNg, FocusActivateTest001, TestSize.Level1)
     auto instanceId = context->GetInstanceId();
 
     ViewAbstract::FocusActivate(instanceId, false, true);
-    ASSERT_FALSE(context->isFocusActive_);
-    ASSERT_TRUE(context->autoFocusInactive_);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    ASSERT_FALSE(focusManager->isFocusActive_);
+    ASSERT_TRUE(focusManager->autoFocusInactive_);
 }
 
 /**

@@ -2230,4 +2230,28 @@ void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         filter);
     json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
 }
+
+bool VideoPattern::ParseCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return false;
+    }
+    std::string value = json->GetString("cmd");
+    return value == "play";
+}
+
+int32_t VideoPattern::OnInjectionEvent(const std::string& command)
+{
+    TAG_LOGD(AceLogTag::ACE_VIDEO, "OnInjectionEvent command : %{public}s", command.c_str());
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    auto pattern = host->GetPattern<VideoPattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    pattern->Start();
+    return RET_SUCCESS;
+}
 } // namespace OHOS::Ace::NG

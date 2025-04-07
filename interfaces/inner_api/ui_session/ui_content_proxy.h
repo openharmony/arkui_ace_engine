@@ -35,6 +35,7 @@ public:
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     virtual int32_t SendCommand(int32_t id, const std::string& command) override;
     virtual int32_t SendCommandAsync(int32_t id, const std::string& command) override;
+    virtual int32_t SendCommand(const std::string command) override;
     virtual int32_t UnregisterClickEventCallback() override;
     virtual int32_t UnregisterSearchEventCallback() override;
     virtual int32_t UnregisterRouterChangeEventCallback() override;
@@ -56,6 +57,8 @@ public:
     virtual int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
+    virtual int32_t GetVisibleInspectorTree(
+        const std::function<void(std::string, int32_t, bool)>& eventCallback) override;
 
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;

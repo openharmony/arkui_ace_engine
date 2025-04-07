@@ -145,6 +145,8 @@ adapter/ohos/osal/navigation_route_ohos.cpp @arkui_superman
 adapter/ohos/osal/navigation_route_ohos.h @arkui_superman
 adapter/ohos/osal/page_url_checker_ohos.cpp @arkui_superman
 adapter/ohos/osal/page_url_checker_ohos.h @arkui_superman
+adapter/ohos/osal/page_viewport_config_ohos.cpp @arkui_superman
+adapter/ohos/osal/page_viewport_config_ohos.h @arkui_superman
 adapter/ohos/osal/pixel_map_ohos.cpp @arkui_image
 adapter/ohos/osal/pixel_map_ohos.h @arkui_image
 adapter/ohos/osal/resource_adapter_impl.cpp @arkuiframework
@@ -1322,6 +1324,8 @@ frameworks/bridge/declarative_frontend/jsview/js_texttimer.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_texttimer.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_toggle.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_toggle.h @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.cpp @arkuievent
+frameworks/bridge/declarative_frontend/jsview/js_toolbaritem.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.cpp @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_touch_handler.h @arkuievent
 frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp @arkuiabilitygroup
@@ -1845,6 +1849,7 @@ frameworks/core/common/manager_interface.h @arkuiframework
 frameworks/core/common/message_bridge.h @arkuiframework
 frameworks/core/common/modal_ui_extension.h @arkuiabilitygroup
 frameworks/core/common/page_url_checker.h @arkui_superman
+frameworks/core/common/page_viewport_config.h @arkui_superman
 frameworks/core/common/platform_bridge.cpp @arkuiframework
 frameworks/core/common/platform_bridge.h @arkuiframework
 frameworks/core/common/platform_res_register.h @arkuiframework
@@ -2374,6 +2379,7 @@ frameworks/core/components_ng/manager/safe_area/ @arkuilayout
 frameworks/core/components_ng/manager/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/shared_overlay/ @arkuiframework
+frameworks/core/components_ng/manager/toolbar/ @arkuievent
 frameworks/core/components_ng/pattern/ability_component/ @arkuilayout
 frameworks/core/components_ng/pattern/action_sheet/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/animator/ @arkui_superman
@@ -2500,6 +2506,8 @@ frameworks/core/components_ng/pattern/stage/content_root_pattern.h @arkuievent
 frameworks/core/components_ng/pattern/stage/page_event_hub.cpp @arkui_superman
 frameworks/core/components_ng/pattern/stage/page_event_hub.h @arkui_superman
 frameworks/core/components_ng/pattern/stage/page_info.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_node.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_node.h @arkui_superman
 frameworks/core/components_ng/pattern/stage/page_pattern.cpp @arkui_superman
 frameworks/core/components_ng/pattern/stage/page_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/stage/page_transition_effect.h @arkui_superman
@@ -2528,6 +2536,7 @@ frameworks/core/components_ng/pattern/texttimer/ @arkui_image
 frameworks/core/components_ng/pattern/time_picker/ @arkui_image
 frameworks/core/components_ng/pattern/toast/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/toggle/ @arkuipopupwindow
+frameworks/core/components_ng/pattern/toolbaritem/ @arkuievent
 frameworks/core/components_ng/pattern/ui_extension/ @arkuiabilitygroup
 frameworks/core/components_ng/pattern/video/ @arkuilayout
 frameworks/core/components_ng/pattern/view_context/ @arkuiframework

@@ -839,7 +839,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest001, TestSize.Level1)
     event.y = 200.0f;
     event.action = MouseAction::PRESS;
     eventManager->DispatchMouseEventNG(event);
-    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), 300.0f);
+    EXPECT_EQ(mouseInfo.GetLocalLocation().GetX(), 200.0f);
     EXPECT_EQ(mouseInfo.GetLocalLocation().GetY(), 200.0f);
 }
 

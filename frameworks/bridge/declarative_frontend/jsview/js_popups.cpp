@@ -1274,16 +1274,15 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
                 return;
             }
         }
+        RefPtr<NG::UINode> customNode;
         if (popupParam->IsShow() && !IsPopupCreated()) {
             auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
             CHECK_NULL_VOID(builderFunc);
-            ViewStackModel::GetInstance()->NewScope();
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
             builderFunc->Execute();
-            auto customNode = ViewStackModel::GetInstance()->Finish();
-            ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
-        } else {
-            ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
     } else {
         return;
     }
@@ -2381,14 +2380,16 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
     CalcDimension borderWidth;
     if (JSViewAbstract::ParseJsDimensionVp(outlineWidthValue, borderWidth)) {
         if (borderWidth.IsNegative() || borderWidth.Unit() == DimensionUnit::PERCENT) {
-            borderWidth.Reset();
+            outlineWidth.SetBorderWidth(Dimension { -1 });
+            menuParam.outlineWidth = outlineWidth;
+            return;
         }
         outlineWidth.SetBorderWidth(borderWidth);
         menuParam.outlineWidth = outlineWidth;
         return;
     }
     if (!outlineWidthValue->IsObject()) {
-        outlineWidth.SetBorderWidth(Dimension {});
+        outlineWidth.SetBorderWidth(Dimension { -1 });
         menuParam.outlineWidth = outlineWidth;
         return;
     }

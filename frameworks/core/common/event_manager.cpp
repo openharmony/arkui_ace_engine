@@ -979,11 +979,16 @@ void EventManager::DispatchTouchCancelToRecognizer(
     TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
 {
     TouchEvent touchEvent;
-    touchEvent.type = TouchType::CANCEL;
-    touchEvent.isFalsified = true;
     for (auto& item : items) {
-        touchEvent.originalId = item.first;
-        touchEvent.id = item.first;
+        if (idToTouchPoints_.find(item.first) == idToTouchPoints_.end()) {
+            touchEvent.originalId = item.first;
+            touchEvent.id = item.first;
+        } else {
+            touchEvent = idToTouchPoints_[item.first];
+            touchEvent.history.clear();
+        }
+        touchEvent.type = TouchType::CANCEL;
+        touchEvent.isFalsified = true;
         touchEventTarget->HandleMultiContainerEvent(touchEvent);
         eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(touchEventTarget), "",
             std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");

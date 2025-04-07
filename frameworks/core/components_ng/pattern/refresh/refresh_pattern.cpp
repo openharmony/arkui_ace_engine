@@ -495,12 +495,12 @@ float RefreshPattern::CalculatePullDownRatio()
     if (!ratio_.has_value()) {
         auto context = GetContext();
         CHECK_NULL_RETURN(context, 1.0f);
-        auto scrollableTheme = context->GetTheme<ScrollableTheme>();
-        CHECK_NULL_RETURN(scrollableTheme, 1.0f);
+        auto refreshTheme = context->GetTheme<RefreshTheme>();
+        CHECK_NULL_RETURN(refreshTheme, 1.0f);
         if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            ratio_ = scrollableTheme->GetGreatApiRatio();
+            ratio_ = refreshTheme->GetGreatApiRatio();
         } else {
-            ratio_ = scrollableTheme->GetRatio();
+            ratio_ = refreshTheme->GetRatio();
         }
     }
     auto gamma = scrollOffset_ / contentHeight;

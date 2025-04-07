@@ -837,7 +837,7 @@ void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& men
             accessibilityProperty->SetAccessibilityHoverPriority(true); // consume barrierfree hover event
         }
         // set filter
-        if (container->IsScenceBoardWindow()) {
+        if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
             manager->ShowFilterAnimation(columnNode);
@@ -1044,6 +1044,8 @@ void MenuView::SetHasCustomOutline(
     if (!menuParam.outlineWidth.has_value() || menuParam.outlineWidth->leftDimen->IsNegative() ||
         menuParam.outlineWidth->rightDimen->IsNegative() || menuParam.outlineWidth->topDimen->IsNegative() ||
         menuParam.outlineWidth->bottomDimen->IsNegative()) {
+        menuWrapperPattern->SetHasCustomOutlineWidth(false);
+        menuWrapperPattern->SetHasCustomOutlineColor(false);
         return;
     }
     menuWrapperPattern->SetHasCustomOutlineWidth(true);

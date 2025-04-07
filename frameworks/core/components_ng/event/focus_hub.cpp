@@ -65,6 +65,42 @@ bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefP
     return false;
 }
 
+template<bool isReverse>
+bool AnyOfUINodeInMainTree(const RefPtr<UINode>& node, RefPtr<FocusHub>& lastFocusNode,
+    const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+{
+    const auto& children = node->GetChildren(true);
+    using IterType = std::conditional_t<isReverse, decltype(children.crbegin()), decltype(children.cbegin())>;
+    IterType begin;
+    IterType end;
+    if constexpr (isReverse) {
+        begin = children.crbegin();
+        end = children.crend();
+    } else {
+        begin = children.cbegin();
+        end = children.cend();
+    }
+    for (auto iter = begin; iter != end; ++iter) {
+        const auto& uiChild = *iter;
+        if (!uiChild) {
+            continue;
+        }
+        auto frameChild = AceType::DynamicCast<FrameNode>(uiChild);
+        if (frameChild && frameChild->GetFocusType() != FocusType::DISABLE) {
+            const auto focusHub = frameChild->GetFocusHub();
+            if (!uiChild->IsOnMainTree() && lastFocusNode != focusHub) {
+                continue;
+            }
+            if (focusHub && operation(focusHub)) {
+                return true;
+            }
+        } else if (AnyOfUINodeInMainTree<isReverse>(uiChild, lastFocusNode, operation)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 RefPtr<FocusHub> GetNextFocusNodeCustom(const RefPtr<FocusHub>& node, FocusReason focusReason)
 {
     auto onGetNextFocusNodeFunc = node->GetOnGetNextFocusNodeFunc();
@@ -187,6 +223,19 @@ bool FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&
     return isReverse ? AnyOfUINode<true>(node, wrappedOpration) : AnyOfUINode<false>(node, wrappedOpration);
 }
 
+bool FocusHub::AllChildFocusHubInMainTree(
+    const std::function<void(const RefPtr<FocusHub>&)>& operation, RefPtr<FocusHub>& lastFocusNode, bool isReverse)
+{
+    RefPtr<UINode> node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto wrappedOpration = [&operation](const RefPtr<FocusHub>& focusHub) {
+        operation(focusHub);
+        return false;
+    };
+    return isReverse ? AnyOfUINodeInMainTree<true>(node, lastFocusNode, wrappedOpration)
+                     : AnyOfUINodeInMainTree<false>(node, lastFocusNode, wrappedOpration);
+}
+
 bool FocusHub::SkipFocusMoveBeforeRemove()
 {
     return ((GetFrameName() == V2::MENU_WRAPPER_ETS_TAG) ||
@@ -199,14 +248,16 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
     auto lastFocusNode = lastWeakFocusNode_.Upgrade();
     decltype(focusNodes.begin()) lastIter;
     bool hasLastFocus = false;
-    AllChildFocusHub([&focusNodes, &lastIter, &hasLastFocus, lastFocusNode](const RefPtr<FocusHub>& child) {
-        auto iter = focusNodes.emplace(focusNodes.end(), child);
-        if (child && lastFocusNode == child) {
-            lastIter = iter;
-            hasLastFocus = true;
-        }
-        return false;
-    });
+    AllChildFocusHubInMainTree(
+        [&focusNodes, &lastIter, &hasLastFocus, lastFocusNode](const RefPtr<FocusHub>& child) {
+            auto iter = focusNodes.emplace(focusNodes.end(), child);
+            if (child && lastFocusNode == child) {
+                lastIter = iter;
+                hasLastFocus = true;
+            }
+            return false;
+        },
+        lastFocusNode);
     return hasLastFocus ? lastIter : focusNodes.end();
 }
 
@@ -1349,7 +1400,7 @@ void FocusHub::OnFocusNode(bool currentHasFocused)
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
-        onFocusInternal_();
+        onFocusInternal_(focusReason_);
     }
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);

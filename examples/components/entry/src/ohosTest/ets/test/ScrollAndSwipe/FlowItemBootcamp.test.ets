@@ -31,7 +31,7 @@ export default function FlowItemBootcampTest() {
         });
         await driver.delayMs(5000);
 
-        let atomNavigates: Component = await driver.findComponent(ON.text('容器类'));
+        let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
         await atomNavigates.click();
         await driver.delayMs(3500);
 

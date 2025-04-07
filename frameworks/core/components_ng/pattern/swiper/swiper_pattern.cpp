@@ -55,7 +55,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 namespace OHOS::Ace::NG {
 namespace {
 
@@ -94,9 +94,6 @@ const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 
 constexpr int32_t JUMP_NEAR_VALUE = 3;
-constexpr float MASS = 1.0f;
-constexpr float STIFFNESS = 328.0f;
-constexpr float DAMPING = 34.0f;
 constexpr int32_t MIN_DUMP_VELOCITY_THRESHOLD = 500;
 constexpr float MAX_INDICATOR_VELOCITY = 1200.0f;
 constexpr Dimension DEFAULT_INDICATOR_HEAD_DISTANCE = 14.0_vp;
@@ -208,7 +205,6 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     if (NonPositive(totalCount)) {
         return;
     }
-
     auto oldIndex = GetLoopIndex(oldIndex_);
     if (oldChildrenSize_.has_value() && oldChildrenSize_.value() != totalCount) {
         oldIndex = GetLoopIndex(oldIndex_, oldChildrenSize_.value());
@@ -528,8 +524,8 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         UpdateCurrentFocus();
         host->ChildrenUpdatedFrom(-1);
     }
-
     CheckLoopChange();
+    SetLazyLoadIsLoop();
     auto lastCurrentIndex = currentIndex_;
     auto userSetCurrentIndex = CurrentIndex();
     userSetCurrentIndex = CheckUserSetIndex(userSetCurrentIndex);
@@ -1312,18 +1308,27 @@ void SwiperPattern::HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const 
                             LessNotEqual(iter->second.endPos - iter->second.startPos, CalculateVisibleSize());
         float offset = isNeedOffset ? CalculateVisibleSize() - iter->second.endPos + iter->second.startPos : 0.0;
         targetPos -= offset;
+        std::optional<float> pixelRoundTargetPos;
+#ifdef SUPPORT_DIGITAL_CROWN
+        // translate property will be pixel rounded in common scenarios.
+        if (!isNeedOffset && !IsHorizontalAndRightToLeft() && SwiperUtils::CheckIsSingleCase(props) &&
+            iter->second.node && iter->second.node->GetRenderContext()) {
+            auto paintRect = iter->second.node->GetRenderContext()->GetPaintRectWithoutTransform();
+            pixelRoundTargetPos = -(GetDirection() == Axis::HORIZONTAL ? paintRect.GetX() : paintRect.GetY());
+        }
+#endif
         if (propertyAnimationIsRunning_ && targetIndex_ == runningTargetIndex_) {
             // If property animation is running and the target index is the same as the running target index, the
             // animation is not played
             return;
         }
-        context->AddAfterLayoutTask(
-            [weak = WeakClaim(this), targetPos, velocity = velocity_.value_or(0.0f), nextIndex = iter->first]() {
-                auto swiper = weak.Upgrade();
-                CHECK_NULL_VOID(swiper);
-                swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false);
-                swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
-            });
+        context->AddAfterLayoutTask([weak = WeakClaim(this), targetPos, pixelRoundTargetPos,
+                                        velocity = velocity_.value_or(0.0f), nextIndex = iter->first]() {
+            auto swiper = weak.Upgrade();
+            CHECK_NULL_VOID(swiper);
+            swiper->PlayPropertyTranslateAnimation(-targetPos, nextIndex, velocity, false, pixelRoundTargetPos);
+            swiper->PlayIndicatorTranslateAnimation(-targetPos, nextIndex);
+        });
         runningTargetIndex_ = targetIndex_;
     } else {
         PlayTranslateAnimation(
@@ -1527,6 +1532,7 @@ void SwiperPattern::FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool
         CHECK_NULL_VOID(host);
         host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
     }
+    ReportComponentChangeEvent("onChange", currentIndex, false);
 }
 
 void SwiperPattern::FireAnimationStartEvent(
@@ -1553,6 +1559,7 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, info.currentOffset.value_or(0.0));
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -2090,6 +2097,7 @@ void SwiperPattern::FastAnimation(int32_t targetIndex)
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITaskWithSingleDirtyNode(host);
         pipeline->FlushSyncGeometryNodeTasks();
+        SetIndicatorIsInFast(true);
     }
 }
 
@@ -2680,7 +2688,7 @@ void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleFocusInternal();
@@ -3333,13 +3341,19 @@ void SwiperPattern::TriggerAddTabBarEvent() const
     }
 }
 
-void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+void SwiperPattern::ReportTraceOnDragEnd() const
 {
     if (!hasTabsAncestor_) {
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
+}
+
+void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
+{
+    ReportTraceOnDragEnd();
+
     isTouchDown_ = false;
     isTouchDownOnOverlong_ = false;
     if (!CheckSwiperPanEvent(dragVelocity) || !CheckContentWillScroll(dragVelocity, mainDelta)) {
@@ -3353,6 +3367,10 @@ void SwiperPattern::HandleDragEnd(double dragVelocity, float mainDelta)
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    if (SupportSwiperCustomAnimation()) {
+        pipeline->FlushDirtyNodeUpdate();
+    }
+
     pipeline->FlushUITasks();
     if (itemPosition_.empty()) {
         EventReport::ReportScrollableErrorEvent(
@@ -3672,7 +3690,7 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
 }
 
 void SwiperPattern::PlayPropertyTranslateAnimation(
-    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay)
+    float translate, int32_t nextIndex, float velocity, bool stopAutoPlay, std::optional<float> pixelRoundTargetPos)
 {
     if (NearZero(translate)) {
         SetIndicatorChangeIndexStatus(false, GetLoopIndex(currentIndex_));
@@ -3754,6 +3772,15 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             adOffset.SetY(-adOffset.GetY());
         }
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (pixelRoundTargetPos.has_value()) {
+        if (GetDirection() == Axis::HORIZONTAL) {
+            adOffset.SetX(pixelRoundTargetPos.value());
+        } else {
+            adOffset.SetY(pixelRoundTargetPos.value());
+        }
+    }
+#endif
     // property callback will call immediately.
     auto propertyUpdateCallback = [swiper = WeakClaim(this), offset = adOffset]() {
         auto swiperPattern = swiper.Upgrade();
@@ -3929,6 +3956,16 @@ void SwiperPattern::StopPropertyTranslateAnimation(
     PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
 }
 
+void SwiperPattern::InitAnimationCurve()
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    animationCurveStiffness_ = swiperTheme->GetAnimationCurveStiffness();
+    animationCurveDamping_ = swiperTheme->GetAnimationCurveDamping();
+}
+
 RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 {
     auto curve = GetCurve();
@@ -3964,16 +4001,20 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 #endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
-    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, MASS, STIFFNESS, DAMPING);
+    InitAnimationCurve();
+    return AceType::MakeRefPtr<InterpolatingSpring>(
+        motionVelocity_, SWIPER_CURVE_MASS, animationCurveStiffness_, animationCurveDamping_);
 }
 
-RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve() const
+RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve()
 {
     auto curve = GetCurve();
     auto maxMotionVelocity = static_cast<float>(MAX_INDICATOR_VELOCITY / DEFAULT_INDICATOR_HEAD_DISTANCE.ConvertToPx());
     auto motionVelocity = std::min(motionVelocity_, maxMotionVelocity);
     if (!curve) {
-        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity, MASS, STIFFNESS, DAMPING);
+        InitAnimationCurve();
+        return AceType::MakeRefPtr<InterpolatingSpring>(
+            motionVelocity, SWIPER_CURVE_MASS, animationCurveStiffness_, animationCurveDamping_);
     }
 
     if (InstanceOf<SpringCurve>(curve)) {
@@ -5219,18 +5260,19 @@ void SwiperPattern::SetLazyLoadIsLoop() const
     CHECK_NULL_VOID(host);
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
+        auto isLoop = IsLoop();
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
         if (lazyForEachNode) {
-            lazyForEachNode->SetIsLoop(IsLoop());
+            lazyForEachNode->SetIsLoop(isLoop);
         }
         auto repeatVirtualNode = AceType::DynamicCast<RepeatVirtualScrollNode>(targetNode.value());
         if (repeatVirtualNode) {
-            repeatVirtualNode->SetIsLoop(IsLoop());
+            repeatVirtualNode->SetIsLoop(isLoop);
         }
 
         auto repeatVirtualNode2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(targetNode.value());
         if (repeatVirtualNode2) {
-            repeatVirtualNode2->SetIsLoop(IsLoop());
+            repeatVirtualNode2->SetIsLoop(isLoop);
         }
     }
 }
@@ -6295,7 +6337,7 @@ int32_t SwiperPattern::CalcComingIndex(float mainDelta) const
     auto firstEndPos = firstItemInfoInVisibleArea.second.endPos;
     auto firstItemLength = firstEndPos - firstStartPos;
     if (LessOrEqual(firstItemLength, 0)) {
-        return true;
+        return GetLoopIndex(currentIndex_);
     }
 
     auto firstIndex = firstItemInfoInVisibleArea.first;
@@ -6897,6 +6939,22 @@ void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
     indicatorPattern->SetJumpIndex(jumpIndex);
 }
 
+void SwiperPattern::SetIndicatorIsInFast(std::optional<bool> isInFast)
+{
+    if (GetMaxDisplayCount() <= 0) {
+        return;
+    }
+    auto indicatorNode = GetCommonIndicatorNode();
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
+        return;
+    }
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+
+    indicatorPattern->SetIsInFast(isInFast);
+}
+
 void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     CHECK_NULL_VOID(json);
@@ -7208,8 +7266,9 @@ bool SwiperPattern::HasRepeatTotalCountDifference(RefPtr<UINode> node) const
         auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(child);
         if (repeat2 && repeat2->GetTotalCount() > repeat2->FrameCount()) {
             return true;
-        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-                   AceType::InstanceOf<ForEachNode>(child)) {
+        } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child)) {
             continue;
         } else {
             if (HasRepeatTotalCountDifference(child)) {
@@ -7263,5 +7322,78 @@ void SwiperPattern::ResetIndicatorNode()
     CHECK_NULL_VOID(indicatorPattern);
     indicatorPattern->ResetSwiperNode();
     indicatorNode_ = nullptr;
+}
+
+bool SwiperPattern::GetTargetIndex(const std::string& command, int32_t& targetIndex)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return false;
+    }
+
+    if (json->GetString("cmd") != "changeIndex") {
+        TAG_LOGW(AceLogTag::ACE_SWIPER, "Invalid command");
+        return false;
+    }
+
+    auto paramJson = json->GetValue("params");
+    if (!paramJson || !paramJson->IsObject()) {
+        return false;
+    }
+
+    targetIndex = paramJson->GetInt("index");
+    return true;
+}
+
+int32_t SwiperPattern::OnInjectionEvent(const std::string& command)
+{
+    if (hasTabsAncestor_) {
+        return RET_FAILED;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    int32_t targetIndex = 0;
+    if (!GetTargetIndex(command, targetIndex)) {
+        return RET_FAILED;
+    }
+    ChangeIndex(targetIndex, true);
+    return RET_SUCCESS;
+}
+
+int32_t SwiperPattern::GetNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    if (hasTabsAncestor_) {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+        CHECK_NULL_RETURN(tabsNode, -1);
+        return tabsNode->GetId();
+    }
+    return host->GetId();
+}
+
+void SwiperPattern::ReportComponentChangeEvent(
+    const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset) const
+{
+    if (!UiSessionManager::GetInstance()->IsHasReportObject()) {
+        return;
+    }
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("index", currentIndex);
+    if (includeOffset) {
+        params->Put("currentOffset", offset);
+    }
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("cmd", eventType.data());
+    json->Put("params", params);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    int32_t nodeId = GetNodeId();
+    result->Put("nodeId", nodeId);
+    result->Put("event", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
 } // namespace OHOS::Ace::NG

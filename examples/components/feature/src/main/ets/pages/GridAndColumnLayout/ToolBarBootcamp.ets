@@ -179,11 +179,19 @@ export struct ToolBarBootcamp {
         },
         parameters: () => {
           this.Parameters()
+        },
+        generic: () => {
+          this.Generic()
         }
       })
     }
     .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
     .hideTitleBar(true)
+  }
+
+  @Builder
+  Generic() {
+
   }
 
   @Builder

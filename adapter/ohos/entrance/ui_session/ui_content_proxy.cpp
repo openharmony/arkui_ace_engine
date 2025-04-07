@@ -42,6 +42,28 @@ int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::st
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::GetVisibleInspectorTree(
+    const std::function<void(std::string, int32_t, bool)>& eventCallback)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("GetVisibleInspectorTree write interface token failed");
+        return FAILED;
+    }
+    if (report_ == nullptr) {
+        LOGW("reportStub is nullptr");
+        return FAILED;
+    }
+    report_->RegisterGetInspectorTreeCallback(eventCallback);
+    if (Remote()->SendRequest(GET_VISIBLE_TREE, data, reply, option) != ERR_NONE) {
+        LOGW("GetVisibleInspectorTree send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
+}
+
 int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback)
 {
     MessageParcel data;
@@ -214,6 +236,33 @@ int32_t UIContentServiceProxy::SendCommandAsync(int32_t id, const std::string& c
         return FAILED;
     }
     return Remote()->SendRequest(SENDCOMMAND_ASYNC_EVENT, data, reply, option);
+}
+
+int32_t UIContentServiceProxy::SendCommand(const std::string command)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendCommand write interface token failed");
+        return FAILED;
+    }
+
+    if (report_ == nullptr) {
+        LOGW("SendCommand is nullptr,connect is not execute");
+        return FAILED;
+    }
+
+    if (!data.WriteString(command)) {
+        LOGW("SendCommand WriteStringVector  failed");
+        return FAILED;
+    }
+
+    if (Remote()->SendRequest(SEND_COMMAND, data, reply, option) != ERR_NONE) {
+        LOGW("SendCommand send request failed");
+        return REPLY_ERROR;
+    }
+    return NO_ERROR;
 }
 
 int32_t UIContentServiceProxy::UnregisterClickEventCallback()

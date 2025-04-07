@@ -131,6 +131,9 @@ export struct DatePickerDialogBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -150,7 +153,7 @@ export struct DatePickerDialogBootcamp {
             start: new Date('2000-1-1'),
             end: new Date('2100-12-31'),
             selected: this.selectedDate,
-            // mode: useEnabled(this.enableMode, this.datePickerMode),
+            mode: useEnabled(this.enableMode, this.datePickerMode),
             lunar: useEnabled(this.enableLunar, this.lunar),
             lunarSwitch: useEnabled(this.enableLunarSwitch, this.lunarSwitch),
             showTime: useEnabled(this.enableShowTime, this.showTime),
@@ -671,6 +674,11 @@ export struct DatePickerDialogBootcamp {
         })
       }.width('100%')
     }.height('50%').id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 

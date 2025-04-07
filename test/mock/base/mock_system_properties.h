@@ -16,6 +16,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_BASE_MOCK_SYSTEM_PROPERTIES_H
 #include "core/common/ace_application_info.h"
 namespace OHOS::Ace {
+namespace MockSystemProperties {
+extern bool g_isSuperFoldDisplayDevice;
+}
 // unit test globals
 extern bool g_irregularGrid;
 extern bool g_segmentedWaterflow;

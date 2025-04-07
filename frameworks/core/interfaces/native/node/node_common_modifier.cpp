@@ -6634,6 +6634,9 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
     keyEvent.deviceId = arkUIkeyEvent->deviceId;
     keyEvent.unicode = arkUIkeyEvent->unicode;
+    keyEvent.numLock = arkUIkeyEvent->isNumLockOn;
+    keyEvent.scrollLock = arkUIkeyEvent->isScrollLockOn;
+    keyEvent.enableCapsLock = arkUIkeyEvent->isCapsLockOn;
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
     TimeStamp timeStamp(nanoseconds);
     keyEvent.timeStamp = timeStamp;
@@ -8010,6 +8013,8 @@ void SetOnClickInfo(ArkUINodeEvent& event, GestureEvent& info, bool usePx)
         usePx ? info.GetTiltX().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltX().value_or(0.0f));
     event.clickEvent.tiltY =
         usePx ? info.GetTiltY().value_or(0.0f) : PipelineBase::Px2VpWithCurrentDensity(info.GetTiltY().value_or(0.0f));
+    // rollAngle
+    event.clickEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     //pressure
     event.clickEvent.pressure = info.GetForce();
     // sourcetool
@@ -8136,6 +8141,9 @@ void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8172,7 +8180,10 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
-
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
+    
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(event.keyEvent.stopPropagation);
@@ -8208,6 +8219,9 @@ void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
         }
         event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
         event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+        event.keyEvent.isNumLockOn = info.GetNumLock();
+        event.keyEvent.isCapsLockOn = info.GetCapsLock();
+        event.keyEvent.isScrollLockOn = info.GetScrollLock();
 
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         SendArkUISyncEvent(&event);
@@ -8307,7 +8321,6 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.contactAreaHeight = locationInfo.GetSize();
     touchPoint.tiltX = locationInfo.GetTiltX().value_or(0.0f);
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
-    touchPoint.rollAngle = locationInfo.GetRollAngle().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
     touchPoint.operatingHand = locationInfo.GetOperatingHand();
@@ -8343,7 +8356,6 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].pressure = touchPoint.force;
         points[i].tiltX = touchPoint.tiltX.value_or(0.0f);
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
-        points[i].rollAngle = touchPoint.rollAngle.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
         points[i].operatingHand = touchPoint.operatingHand;
@@ -8383,6 +8395,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                                        : eventInfo.GetTarget().area.GetWidth().ConvertToVp();
         event.touchEvent.height = usePx ? eventInfo.GetTarget().area.GetHeight().ConvertToPx()
                                         : eventInfo.GetTarget().area.GetHeight().ConvertToVp();
+        // rollAngle
+        event.touchEvent.rollAngle = eventInfo.GetRollAngle().value_or(0.0f);
         // deviceid
         event.touchEvent.deviceId = eventInfo.GetDeviceId();
         //modifierkeystates

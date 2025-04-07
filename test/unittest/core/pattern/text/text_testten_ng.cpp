@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
 
@@ -433,5 +434,288 @@ HWTEST_F(TextFieldTenPatternNg, TextFieldDeleteRange006, TestSize.Level1)
     textFieldPatternObject.contentController_->SetTextValue(str1);
     textFieldPatternObject.DeleteRange(start, end);
     EXPECT_TRUE(textFieldPatternObject.showCountBorderStyle_);
+}
+
+/**
+ * @tc.name: HandleClickEvent001
+ * @tc.desc: test text_pattern.cpp HandleClickEvent function,
+    case dataDetectorAdapter_->hasClickedAISpan_,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleClickEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    GestureEvent info;
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    pattern->HandleClickEvent(info);
+    EXPECT_FALSE(pattern->dataDetectorAdapter_->hasClickedAISpan_);
+}
+
+/**
+ * @tc.name: HandleUrlClick001
+ * @tc.desc: test text_pattern.cpp HandleUrlClick function,
+    case iter == spans_.end(), span && span->urlOnRelease,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleUrlClick001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->clickedSpanPosition_ = 1;
+    auto ret = pattern->HandleUrlClick();
+    EXPECT_FALSE(ret);
+
+    RefPtr<SpanItem> item = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> item1 = AceType::MakeRefPtr<SpanItem>();
+    item1->urlOnRelease = []{};
+    pattern->spans_.push_back(item);
+    pattern->spans_.push_back(item1);
+    ret = pattern->HandleUrlClick();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: HandleSingleClickEvent001
+ * @tc.desc: test text_pattern.cpp HandleSingleClickEvent function,
+    case IsUsingMouse() && isMousePressed_ && leftMousePressed_ && moveOverClickThreshold_,
+        HandleUrlClick(), dataDetectorAdapter_->hasClickedAISpan_,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleSingleClickEvent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    GestureEvent info;
+    pattern->sourceType_ = SourceType::MOUSE;
+    pattern->isMousePressed_ = true;
+    pattern->leftMousePressed_ = true;
+    pattern->moveOverClickThreshold_= true;
+    pattern->HandleSingleClickEvent(info);
+    EXPECT_FALSE(pattern->moveOverClickThreshold_);
+
+    pattern->sourceType_ = SourceType::NONE;
+    pattern->isMousePressed_ = false;
+    pattern->leftMousePressed_ = false;
+    pattern->moveOverClickThreshold_= false;
+    pattern->clickedSpanPosition_ = 1;
+    RefPtr<SpanItem> item = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> item1 = AceType::MakeRefPtr<SpanItem>();
+    item1->urlOnRelease = []{};
+    pattern->spans_.push_back(item);
+    pattern->spans_.push_back(item1);
+    pattern->HandleSingleClickEvent(info);
+    EXPECT_FALSE(pattern->moveOverClickThreshold_);
+
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    pattern->isMousePressed_ = true;
+    pattern->clickedSpanPosition_ = -1;
+    pattern->HandleSingleClickEvent(info);
+    EXPECT_TRUE(pattern->selectOverlay_->originalMenuIsShow_);
+}
+
+/**
+ * @tc.name: HandleClickOnTextAndSpan001
+ * @tc.desc: test text_pattern.cpp HandleClickOnTextAndSpan function,
+    case iter == spans_.end(), !(span && span->onClick),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleClickOnTextAndSpan001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    GestureEvent info;
+    pattern->isMousePressed_ = true;
+    pattern->clickedSpanPosition_ = 0;
+    bool flag = false;
+    pattern->onClick_ = [&flag] (GestureEvent& info) { flag = true;};
+    pattern->HandleClickOnTextAndSpan(info);
+    EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: CheckClickedOnSpanOrText001
+ * @tc.desc: test text_pattern.cpp CheckClickedOnSpanOrText function,
+    case onClick_,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CheckClickedOnSpanOrText001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RectF textContentRect;
+    Offset localLocation;
+    pattern->onClick_ = [] (GestureEvent& info) {};
+    auto ret = pattern->CheckClickedOnSpanOrText(textContentRect, localLocation);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CalculateClickedSpanPosition001
+ * @tc.desc: test text_pattern.cpp CalculateClickedSpanPosition function,
+    case !item,
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CalculateClickedSpanPosition001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    PointF textOffset;
+    RefPtr<SpanItem> item = nullptr;
+    pattern->spans_.push_back(item);
+    auto ret = pattern->CalculateClickedSpanPosition(textOffset);
+    EXPECT_EQ(pattern->clickedSpanPosition_, -1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CheckAndClick001
+ * @tc.desc: test text_pattern.cpp CheckAndClick function,
+    case !(item->onClick || item->urlOnRelease),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, CheckAndClick001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<SpanItem> item = AceType::MakeRefPtr<SpanItem>();
+    item->onClick = nullptr;
+    item->urlOnRelease = nullptr;
+    auto ret = pattern->CheckAndClick(item);
+    EXPECT_EQ(pattern->clickedSpanPosition_, -1);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ClickAISpan001
+ * @tc.desc: test text_pattern.cpp ClickAISpan function,
+    case !(item->onClick || item->urlOnRelease),
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ClickAISpan001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    PointF textOffset;
+    AISpan aiSpan;
+    auto textLayoutProperty =  pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    ParagraphManager::ParagraphInfo info;
+    ParagraphStyle paragraphStyle;
+    info.paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    //info.paragraph->paragraph_
+    pattern->pManager_->paragraphs_.push_back(info);
+    auto ret = pattern->ClickAISpan(textOffset, aiSpan);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: OnDragEnd001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnDragEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Step1. Create text pattern and prepare basic environment
+     */
+    TextModelNG textModel;
+    textModel.Create("Test");
+    auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = host->GetPattern<TextPattern>();
+
+    /**
+     * @tc.steps: Step2 Empty dragResultObjects_
+     */
+    pattern->dragResultObjects_.clear();
+    pattern->status_ = Status::DRAGGING;
+    pattern->OnDragEnd(nullptr);
+    EXPECT_NE(pattern->status_, Status::DRAGGING);
+
+    /**
+     * @tc.steps: Step3 Non-empty dragResultObjects_
+     */
+    ResultObject resultObject;
+    pattern->dragResultObjects_.emplace_back(resultObject);
+    EXPECT_FALSE(pattern->dragResultObjects_.empty());
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    event->SetResult(DragRet::DRAG_DEFAULT);
+
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    EXPECT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    textPattern->status_ = Status::DRAGGING;
+    textPattern->dragResultObjects_.emplace_back(resultObject);
+    textPattern->copyOption_ = CopyOptions::Local;
+    textPattern->lastDragTool_ = SourceTool::FINGER;
+    EXPECT_EQ(textPattern->GetCurrentDragTool(), SourceTool::FINGER);
+    textPattern->OnDragEnd(event);
+    EXPECT_TRUE(textPattern->dragResultObjects_.empty());
+}
+
+/**
+ * @tc.name: OnWindowHide001
+ * @tc.desc: test TextPattern OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnWindowHide001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->tag_ = V2::SYMBOL_ETS_TAG;
+
+    (void)pattern->GetOrCreateMagnifier();
+    (void)pattern->CreateNodePaintMethod();
+    pattern->magnifierController_ = nullptr;
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->isLoopAnimation_ = true;
+    EXPECT_TRUE(layoutProperty->GetIsLoopAnimation());
+    auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+
+    /**
+     * @tc.expected: Cover the branch when magnifierController_ is nullptr,
+     * and expecting GetIsTxtActive in the function PauseSymbolAnimation() to return true.
+     */
+    symbolEffectOptions.SetIsTxtActive(true);
+    pattern->OnWindowHide();
+    EXPECT_TRUE(symbolEffectOptions.GetIsTxtActive());
+
+    /**
+     * @tc.expected: Cover the branch when magnifierController_ is nullptr,
+     * and expecting GetIsTxtActive in the function PauseSymbolAnimation() to return false.
+     */
+    symbolEffectOptions.SetIsTxtActive(false);
+    pattern->OnWindowHide();
+    EXPECT_FALSE(symbolEffectOptions.GetIsTxtActive());
 }
 } // namespace OHOS::Ace::NG

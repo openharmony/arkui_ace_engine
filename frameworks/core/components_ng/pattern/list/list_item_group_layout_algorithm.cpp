@@ -93,6 +93,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
         }
     }
+    if (IsRoundingMode(layoutWrapper)) {
+        spaceWidth_ = Round(spaceWidth_);
+    }
     MeasureHeaderFooter(layoutWrapper);
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
     if (isStackFromEnd_) {
@@ -1331,7 +1334,7 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
         if (layoutProperty->GetLaneGutter().has_value()) {
             auto laneGutter = ConvertToPx(
                 layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value());
-            laneGutter_ = laneGutter.value();
+            laneGutter_ = laneGutter.value_or(0.0f);
         }
     }
     lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(
@@ -1598,5 +1601,14 @@ void ListItemGroupLayoutAlgorithm::ReportGetChildError(const std::string& funcNa
     }
     std::string subErrorType = funcName + " get item: " + std::to_string(index) + " failed.";
     EventReport::ReportScrollableErrorEvent("ListItemGroup", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
+}
+
+bool ListItemGroupLayoutAlgorithm::IsRoundingMode(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
 }
 } // namespace OHOS::Ace::NG

@@ -608,7 +608,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest009, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     menuNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
 
     /**
      * @tc.steps: step2. call showMenu when menuNode already appended.
@@ -670,7 +670,7 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest010, TestSize.Level1)
     auto subMenuNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", MenuType::MENU));
     subMenuNode->MountToParent(menuNode);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
 
     /**
      * @tc.steps: step2. call showMenu when menuNode is nullptr and menuMap is empty.

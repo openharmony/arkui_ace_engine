@@ -674,12 +674,12 @@ NWebScreenLockCallbackImpl::NWebScreenLockCallbackImpl(const WeakPtr<PipelineBas
 
 void NWebScreenLockCallbackImpl::Handle(bool key)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetKeepScreenOn %{public}d", key);
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetViewKeepScreenOn %{public}d", key);
     auto weakContext = context_.Upgrade();
     CHECK_NULL_VOID(weakContext);
     auto window = weakContext->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 WebDelegateObserver::~WebDelegateObserver() {}
@@ -3190,7 +3190,7 @@ void WebDelegate::SetKeepScreenOn(bool key)
     CHECK_NULL_VOID(context);
     auto window = context->GetWindow();
     CHECK_NULL_VOID(window);
-    window->SetKeepScreenOn(key);
+    window->SetViewKeepScreenOn(key);
 }
 
 void WebDelegate::UpdateUserAgent(const std::string& userAgent)
@@ -3283,9 +3283,6 @@ void WebDelegate::Resize(const double& width, const double& height, bool isKeybo
     if (width <= 0 || height <= 0) {
         return;
     }
-
-    // Trigger OnAreaChange, when the size or offset changes
-    OnAreaChange({windowRelativeOffset_.GetX(), windowRelativeOffset_.GetY(), width, height});
 
     if ((resizeWidth_ == width) && (resizeHeight_ == height)) {
         return;
@@ -6486,7 +6483,6 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, 
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         return;
     }
-    windowRelativeOffset_ = Offset(offset.GetX(), offset.GetY());
     if (isEnhanceSurface_) {
         if (surfaceDelegate_) {
             if (needResizeAtFirst_) {
@@ -6975,9 +6971,6 @@ void WebDelegate::OnNativeEmbedVisibilityChange(const std::string& embedId, bool
 void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> event)
 {
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
-        auto webPattern = webPattern_.Upgrade();
-        CHECK_NULL_VOID(webPattern);
-        webPattern->RequestFocus();
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);
@@ -6997,11 +6990,6 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                     std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
                 if (!param->HasSendTask()) {
                     param->SetGestureEventResult(true);
-                }
-                if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
-                    auto webPattern = delegate->webPattern_.Upgrade();
-                    CHECK_NULL_VOID(webPattern);
-                    webPattern->RequestFocus();
                 }
             }
         },
@@ -7873,6 +7861,14 @@ void WebDelegate::MaximizeResize()
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->MaximizeResize();
+    }
+}
+
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->SetNativeInnerWeb(isInnerWeb);
     }
 }
 

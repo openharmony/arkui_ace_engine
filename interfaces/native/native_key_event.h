@@ -565,6 +565,42 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent* event, bool isConsu
  * @since 15
  */
 void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
+
+/**
+ * @brief Get the Num lock state of the key event.
+ *
+ * @param event event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param state Return whether the Num Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsNumLockOn(const ArkUI_UIInputEvent* event, bool* state);
+
+/**
+ * @brief Get the Caps lock state of the key event.
+ *
+ * @param event event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param state Return whether the Caps Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsCapsLockOn(const ArkUI_UIInputEvent* event, bool* state);
+
+/**
+ * @brief Get the Scroll lock state of the key event.
+ *
+ * @param event event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @param state Return whether the Scroll Lock is on.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 18
+ */
+ArkUI_ErrorCode OH_ArkUI_KeyEvent_IsScrollLockOn(const ArkUI_UIInputEvent* event, bool* state);
 #ifdef __cplusplus
 };
 #endif

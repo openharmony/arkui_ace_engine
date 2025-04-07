@@ -651,7 +651,6 @@ public:
     void OnTextSelected();
     void DestroyAnalyzerOverlay();
     WebInfoType GetWebInfoType();
-    void RequestFocus();
     bool IsCurrentFocus();
     void SetCustomKeyboardBuilder(std::function<void()> customKeyboardBuilder)
     {
@@ -695,7 +694,8 @@ public:
     void UnregisterWebComponentClickCallback();
     WebComponentClickCallback GetWebComponentClickCallback() const { return webComponentClickCallback_; }
     void DumpInfo() override;
-    float DumpGpuInfo();
+    void DumpGpuInfo();
+    void DumpSurfaceInfo();
     void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId);
     bool OnAccessibilityChildTreeRegister();
     bool OnAccessibilityChildTreeDeregister();

@@ -383,7 +383,6 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent000, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->ExecSubComponent(-1), false);
 }
 
-
 /**
  * @tc.name: ExecSubComponent001
  * @tc.desc: Test ExecSubComponent for SetStyledString.

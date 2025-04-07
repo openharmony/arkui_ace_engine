@@ -37,6 +37,7 @@ public:
 
     void SetWidth(const CalcDimension& width) override;
     void SetHeight(const CalcDimension& height) override;
+    void SetToolbarBuilder(std::function<void()>&& buildFunc) override;
     void ClearWidthOrHeight(bool isWidth) override {};
     void SetMinWidth(const CalcDimension& minWidth) override;
     void SetMinHeight(const CalcDimension& minHeight) override;

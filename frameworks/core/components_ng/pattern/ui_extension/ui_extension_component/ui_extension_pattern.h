@@ -295,6 +295,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
     bool CheckConstraint();
+    bool CheckHostUiContentConstraint();
 
     void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);

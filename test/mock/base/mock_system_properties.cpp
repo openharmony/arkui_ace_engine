@@ -20,6 +20,9 @@
 #include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
+namespace MockSystemProperties {
+bool g_isSuperFoldDisplayDevice = false;
+}
 namespace {
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
@@ -274,12 +277,12 @@ int32_t SystemProperties::GetDragDropFrameworkStatus()
 
 bool SystemProperties::GetContainerDeleteFlag()
 {
-    return false;
+    return containerDeleteFlag_;
 }
 
 bool SystemProperties::IsSuperFoldDisplayDevice()
 {
-    return false;
+    return MockSystemProperties::g_isSuperFoldDisplayDevice;
 }
 
 bool SystemProperties::IsPageTransitionFreeze()

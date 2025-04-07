@@ -23,6 +23,8 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DEFAULT_VELOCITY_COEFFICIENT = 1.0;
+constexpr float DEFAULT_STIFFNESS = 328.0f;
+constexpr float DEFAULT_DAMPING = 34.0f;
 } // namespace
 
 class SwiperTheme : public virtual Theme {
@@ -56,6 +58,10 @@ public:
             }
             theme->touchPadVelocityCoefficient_ =
                 pattern->GetAttr<double>("swiper_velocity_coefficient_touch_pad", DEFAULT_VELOCITY_COEFFICIENT);
+            theme->animationCurveStiffness_ =
+                pattern->GetAttr<double>("swiper_fling_animation_stiffness", DEFAULT_STIFFNESS);
+            theme->animationCurveDamping_ =
+                pattern->GetAttr<double>("swiper_fling_animation_damping", DEFAULT_DAMPING);
         }
     };
 
@@ -67,8 +73,20 @@ public:
         return touchPadVelocityCoefficient_;
     }
 
+    double GetAnimationCurveStiffness() const
+    {
+        return animationCurveStiffness_;
+    }
+
+    double GetAnimationCurveDamping() const
+    {
+        return animationCurveDamping_;
+    }
+
 private:
     double touchPadVelocityCoefficient_ = DEFAULT_VELOCITY_COEFFICIENT;
+    double animationCurveStiffness_ = DEFAULT_STIFFNESS;
+    double animationCurveDamping_ = DEFAULT_DAMPING;
 };
 } // namespace OHOS::Ace::NG
 

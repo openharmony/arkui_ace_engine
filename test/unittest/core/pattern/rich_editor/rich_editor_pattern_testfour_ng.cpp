@@ -642,63 +642,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CalcCursorOffsetByPosition001, TestSize.Le
 }
 
 /**
- * @tc.name: GetAdjustedSelectionInfo001
- * @tc.desc: test GetAdjustedSelectionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::vector<std::tuple<SelectSpanType, std::u16string, RefPtr<PixelMap>>> testTuples;
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u" ", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u"", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u" ", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u"", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u" ", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u"", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u" ", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u"", nullptr);
-    std::list<ResultObject> resultObjectList;
-    ResultObject obj;
-    for (const auto& testcase : testTuples) {
-        obj.type = std::get<0>(testcase);
-        obj.valueString = std::get<1>(testcase);
-        obj.valuePixelMap = std::get<2>(testcase);
-        resultObjectList.emplace_back(obj);
-    }
-
-    SelectionInfo textSelectInfo;
-    textSelectInfo.SetResultObjectList(resultObjectList);
-    richEditorPattern->GetAdjustedSelectionInfo(textSelectInfo);
-
-    ASSERT_EQ(resultObjectList.empty(), false);
-}
-
-/**
- * @tc.name: HandleTouchUp001
- * @tc.desc: test HandleTouchUp
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleTouchUp001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
-    richEditorPattern->editingLongPress_ = true;
-    richEditorPattern->isEditing_ = false;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_EQ(richEditorPattern->editingLongPress_, false);
-    richEditorPattern->editingLongPress_ = true;
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->HandleTouchUp();
-    EXPECT_TRUE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
  * @tc.name: CheckEditorTypeChange001
  * @tc.desc: test CheckEditorTypeChange
  * @tc.type: FUNC
@@ -738,48 +681,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CheckEditorTypeChange001, TestSize.Level1)
     richEditorPattern->CheckEditorTypeChange();
 
     EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
-}
-
-/**
- * @tc.name: GetSelectSpansPositionInfo001
- * @tc.desc: test GetSelectSpansPositionInfo
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, GetSelectSpansPositionInfo001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    ClearSpan();
-    AddSpan(INIT_VALUE_2);
-    auto spanItem = richEditorPattern->spans_.back();
-    spanItem->unicode = 1;
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    ClearSpan();
-    AddImageSpan();
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    ClearSpan();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->textSelector_.baseOffset = 7;
-    richEditorPattern->textSelector_.destinationOffset = 8;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_FALSE(richEditorPattern->hasClicked_);
-    ClearSpan();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->textSelector_.baseOffset = 5;
-    richEditorPattern->textSelector_.destinationOffset = 6;
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_FALSE(richEditorPattern->hasClicked_);
 }
 
 /**
@@ -864,35 +765,6 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
     richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
 
     EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
-}
-
-/**
- * @tc.name: InitSelection_ABOVE_LINE
- * @tc.desc: test InitSelection with SELECT_ABOVE_LINE
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, InitSelection_ABOVE_LINE, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AddSpan("ab\n\nab");
-
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    PositionWithAffinity positionWithAffinity(3, TextAffinity::DOWNSTREAM);
-    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-
-    Offset touchOffset = Offset(0.0f, 0.0f);
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->InitSelection(touchOffset);
-
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
 /**

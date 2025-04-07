@@ -88,7 +88,10 @@ HWTEST_F(FocusHubTestNg, PaintAllFocusState002, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto context = PipelineContext::GetCurrentContext();
-    context->isFocusActive_ = true;
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     OnPaintFocusStateFunc onPaintFocusCallback;
@@ -129,7 +132,10 @@ HWTEST_F(FocusHubTestNg, PaintAllFocusState003, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto context = PipelineContext::GetCurrentContext();
-    context->isFocusActive_ = true;
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     OnPaintFocusStateFunc onPaintFocusCallback;
@@ -192,7 +198,9 @@ HWTEST_F(FocusHubTestNg, PaintInnerFocusState001, TestSize.Level1)
     focusBoxStyle.margin = margin;
     focusHub->box_.SetStyle(focusBoxStyle);
     RoundRect focusRectInner;
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     EXPECT_TRUE(focusHub->PaintInnerFocusState(focusRectInner));
 
@@ -240,7 +248,9 @@ HWTEST_F(FocusHubTestNg, PaintInnerFocusState002, TestSize.Level1)
     CalcDimension margin(100);
     Color color;
     RoundRect focusRectInner;
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
 
     FocusBoxStyle focusBoxStyle3;

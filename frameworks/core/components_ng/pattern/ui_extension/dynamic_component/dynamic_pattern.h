@@ -103,6 +103,9 @@ private:
     void RegisterPipelineEvent(int32_t instanceId);
     void UnRegisterPipelineEvent(int32_t instanceId);
 
+    void AddToPageEventController();
+    void ReleasePageEvent() const;
+
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;
     bool adaptiveHeight_ = false;

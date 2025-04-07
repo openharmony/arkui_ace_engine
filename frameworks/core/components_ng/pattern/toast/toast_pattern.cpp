@@ -21,7 +21,6 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -96,11 +95,6 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
 
 void ToastPattern::InitUIExtensionHostWindowRect()
 {
-    if (!IsAlignedWithHostWindow()) {
-        uiExtensionHostWindowRect_ = Rect();
-        return;
-    }
-
     auto currentId = Container::CurrentId();
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -477,6 +471,7 @@ void ToastPattern::OnAttachToFrameNode()
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+    InitUIExtensionHostWindowRect();
 }
 
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)

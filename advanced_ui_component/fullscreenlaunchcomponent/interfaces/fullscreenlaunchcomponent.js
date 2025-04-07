@@ -19,7 +19,8 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const hilog = requireNapi('hilog');
 const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
-const j = 100014;
+const t = 100014;
+const u = 801;
 
 export class FullScreenLaunchComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -138,23 +139,27 @@ export class FullScreenLaunchComponent extends ViewPU {
     }
     async checkAbility() {
         this.resetOptions();
-        try {
-            const i = await abilityManager.queryAtomicServiceStartupRule(this.context, this.appId);
-            if (i.isOpenAllowed) {
-                if (i.isEmbeddedAllowed) {
-                  this.isShow = true;
-                  hilog.info(0x3900, 'FullScreenLaunchComponent', 'EmbeddedOpen is Allowed!');
-                } else {
-                  this.popUp();
-                  hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!');
-                 }
-            } else {
-                hilog.info(0x3900, 'FullScreenLaunchComponent', 'is not allowed open!')
+        abilityManager.queryAtomicServiceStartupRule(this.context, this.appId)
+            .then((data) => {
+            if (data.isOpenAllowed) {
+                if (data.isEmbeddedAllowed) {
+                    this.isShow = true;
+                    hilog.info(0x3900, 'FullScreenLaunchComponent', 'EmbeddedOpen is Allowed!');
+                }
+                else {
+                    this.popUp();
+                    hilog.info(0x3900, 'FullScreenLaunchComponent', 'popUp is Allowed!');
+                }
             }
-        }
-        catch (e) {
-            hilog.error(0x3900, 'FullScreenLaunchComponent', 'isEmbeddedOpenAllowed called error!%{public}s', e.message);
-        }
+            else {
+                hilog.info(0x3900, 'FullScreenLaunchComponent', 'is not allowed open!');
+            }
+        }).catch((err) => {
+            hilog.error(0x3900, 'FullScreenLaunchComponent', 'queryAtomicServiceStartupRule called error!%{public}d:%{public}s', err.code, err.message);
+            if (u === err.code) {
+                this.popUp();
+            }
+        });
     }
     async popUp() {
         this.isShow = false;
@@ -195,7 +200,7 @@ export class FullScreenLaunchComponent extends ViewPU {
                 }
                 this.isShow = false;
                 hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error:%{public}d!%{public}s', err.code, err.message);
-                if (err.code != j) {
+                if (err.code != t) {
                     this.getUIContext().showAlertDialog({
                         message: err.message
                     });

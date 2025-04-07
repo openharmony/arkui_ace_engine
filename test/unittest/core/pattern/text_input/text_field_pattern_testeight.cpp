@@ -654,7 +654,7 @@ HWTEST_F(TextFieldPatternTestEight, IsShowTranslate001, TestSize.Level0)
     GetFocus();
 
     auto container = MockContainer::Current();
-    container->SetIsScenceBoardWindow(true);
+    container->SetIsSceneBoardWindow(true);
     pattern_->IsShowTranslate();
     auto textFieldTheme = pattern_->GetTheme();
     EXPECT_NE(textFieldTheme, nullptr);
@@ -673,7 +673,7 @@ HWTEST_F(TextFieldPatternTestEight, IsShowSearch001, TestSize.Level0)
     GetFocus();
 
     auto container = MockContainer::Current();
-    container->SetIsScenceBoardWindow(true);
+    container->SetIsSceneBoardWindow(true);
     pattern_->IsShowSearch();
     auto textFieldTheme = pattern_->GetTheme();
     EXPECT_NE(textFieldTheme, nullptr);
@@ -1085,17 +1085,16 @@ HWTEST_F(TextFieldPatternTestEight, ChangeMouseState001, TestSize.Level0)
 
     Offset location;
     int32_t frameId = 0;
-    bool isByPass = false;
     location.deltaX_ = 1;
     location.deltaY_ = 1;
     pattern_->frameRect_.height_ = 2;
     pattern_->frameRect_.width_ = 2;
-    pattern_->ChangeMouseState(location, frameId, isByPass);
+    pattern_->ChangeMouseState(location, frameId);
     auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
 
     layoutProperty->layoutDirection_ = TextDirection::RTL;
-    pattern_->ChangeMouseState(location, frameId, isByPass);
+    pattern_->ChangeMouseState(location, frameId);
     EXPECT_EQ(layoutProperty->GetNonAutoLayoutDirection(), TextDirection::RTL);
 }
 

@@ -127,7 +127,7 @@ void DragDropInitiatingStateLifting::HandleTouchEvent(const TouchEvent& touchEve
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->SetDragMoveLastPoint(point);
+        dragDropManager->UpdatePointInfoForFinger(touchEvent.id, point);
     }
 }
 
@@ -295,7 +295,7 @@ void DragDropInitiatingStateLifting::SetPixelMap()
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = manager->FindWindowScene(frameNode);
         manager->MountPixelMapToWindowScene(columnNode, windowScene);
     } else {
@@ -419,7 +419,7 @@ void DragDropInitiatingStateLifting::SetEventColumn()
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto machine = GetStateMachine();
         CHECK_NULL_VOID(machine);
         auto params = machine->GetDragDropInitiatingParams();

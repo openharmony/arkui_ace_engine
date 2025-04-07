@@ -442,6 +442,7 @@ private:
     void SetSelectedMarkPaint(bool paint);
     void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme);
     void InitTextHeightAndFontHeight(uint32_t childIndex, uint32_t midIndex, TextPickerOptionProperty &prop);
+    void UpdateAnimationColor(const RefPtr<PickerTheme>& pickerTheme);
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownBeginEvent(const CrownEvent& event);
     void HandleCrownMoveEvent(const CrownEvent& event);

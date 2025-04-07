@@ -378,6 +378,10 @@ ACE_EXPORT extern const char INDEXER_ETS_TAG[];
 ACE_EXPORT extern const char SLIDER_COMPONENT_TAG[];
 ACE_EXPORT extern const char SLIDER_ETS_TAG[];
 
+// sliderTip
+ACE_EXPORT extern const char SLIDER_TIP_NODE_COMPONENT_TAG[];
+ACE_EXPORT extern const char SLIDER_TIP_NODE_ETS_TAG[];
+
 // rating
 ACE_EXPORT extern const char RATING_COMPONENT_TAG[];
 ACE_EXPORT extern const char RATING_ETS_TAG[];
@@ -411,6 +415,12 @@ ACE_EXPORT extern const char STEPPER_ETS_TAG[];
 // stepperItem
 ACE_EXPORT extern const char STEPPER_ITEM_COMPONENT_TAG[];
 ACE_EXPORT extern const char STEPPER_ITEM_ETS_TAG[];
+
+// toolbar
+ACE_EXPORT extern const char TOOLBAR_ETS_TAG[];
+
+// toolbaritem
+ACE_EXPORT extern const char TOOLBARITEM_ETS_TAG[];
 
 // scrollBar
 ACE_EXPORT extern const char SCROLL_BAR_COMPONENT_TAG[];

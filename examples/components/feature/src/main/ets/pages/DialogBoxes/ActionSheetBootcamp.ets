@@ -92,6 +92,9 @@ export struct ActionSheetBootcamp {
         content: () => {
           this.Content()
         },
+        generic: () => {
+          this.Generic()
+        },
         parameters: () => {
           this.Parameters()
         }
@@ -508,7 +511,7 @@ export struct ActionSheetBootcamp {
         })
 
         IconBlock({
-          title: '是否显示后缀图标',
+          title: 'SuffixIcon',
           isEnabled: $enableSheetsIcon,
           icon: $sheetsIcon,
         })
@@ -516,5 +519,10 @@ export struct ActionSheetBootcamp {
     }
     .height('52%')
     .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }

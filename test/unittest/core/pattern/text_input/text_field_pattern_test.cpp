@@ -2179,29 +2179,29 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     auto frameId = tmpHost->GetId();
     Offset offset1(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
-    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->ChangeMouseState(offset1, frameId);
     Offset offset2(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->ChangeMouseState(offset2, frameId);
     Offset offset3(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->ChangeMouseState(offset3, frameId);
     Offset offset4(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
-    pattern->ChangeMouseState(offset4, frameId, true);
+    pattern->ChangeMouseState(offset4, frameId);
 
     // test rtl
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
-    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->ChangeMouseState(offset1, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->ChangeMouseState(offset2, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
-    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->ChangeMouseState(offset3, frameId);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
-    pattern->ChangeMouseState(offset4, frameId, true);
+    pattern->ChangeMouseState(offset4, frameId);
 }
 
 /**

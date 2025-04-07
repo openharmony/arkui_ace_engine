@@ -24,8 +24,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/common/container.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT HyperlinkLayoutProperty : public TextLayoutProperty {
@@ -62,12 +60,12 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
             if (propColor_.has_value()) {
                 json->PutExtAttr("color", propColor_.value().ColorToString().c_str(), filter);
             } else {
-                auto host = GetHost();
-                CHECK_NULL_VOID(host);
                 auto pipeline = host->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 auto themeManager = pipeline->GetThemeManager();

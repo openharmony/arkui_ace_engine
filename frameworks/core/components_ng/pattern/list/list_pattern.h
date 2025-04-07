@@ -354,6 +354,8 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void GetEventDumpInfo() override;
+    void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void SetNeedToUpdateListDirectionInCardStyle(bool isNeedToUpdateListDirection)
     {
@@ -470,8 +472,8 @@ protected:
     bool isStackFromEnd_ = true;
 private:
     void OnScrollEndCallback() override;
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent& onScrollIndex);
     void ChangeAxis(RefPtr<UINode> node);
     bool HandleTargetIndex(bool isJump);

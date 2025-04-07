@@ -137,6 +137,7 @@ using OnPanDirectionFunc = EventCallback<void(const PanDirection& direction)>;
 using PanDirectionFuncType = OnPanDirectionFunc::FunctionType;
 using OnPanDistanceFunc = EventCallback<void(double distance)>;
 using PanDistanceFuncType = OnPanDistanceFunc::FunctionType;
+using PanDistanceMap = std::unordered_map<SourceTool, float>;
 
 class PanGestureOption : public AceType {
     DECLARE_ACE_TYPE(PanGestureOption, AceType);
@@ -161,9 +162,20 @@ public:
     void SetDistance(double distance)
     {
         distance_ = distance;
+        distanceMap_[SourceTool::UNKNOWN] = distance;
         for (const auto& callback : onPanDistanceIds_) {
             (callback.second.GetCallback())(distance);
         }
+    }
+
+    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    {
+        distanceMap_ = distanceMap;
+    }
+
+    const PanDistanceMap& GetPanDistanceMap() const
+    {
+        return distanceMap_;
     }
 
     double GetDistance() const
@@ -227,6 +239,7 @@ public:
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    PanDistanceMap distanceMap_;
     int32_t fingers_ = 1;
     bool isLimitFingerCount_ = false;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;

@@ -24,7 +24,7 @@ import {
   buttonClick,
   titleSearch,
   Search
-} from '../../utils';
+} from '../../../utils';
 import { NavDestination } from './NavDestination';
 import { Driver, ON } from '@kit.TestKit';
 
@@ -1700,139 +1700,6 @@ export default function NavDestination6(){
 
       await sliderDrag({
         slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0576', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 5,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0577', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 6,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0578', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 7,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0579', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 8,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0580', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 9,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0581', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 10,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0582', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.value', '通用属性5')
-
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 11,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // foregroundBlurStyle.options.colorMode
-    it('ArkUI_NavDestination_Comp_0583', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0584', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_NavDestination_Comp_0585', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'foregroundBlurStyle.options.colorMode', '通用属性5')
-
-      // 取不到foregroundBlurStyle值
-      await radioClick({
-        radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         }

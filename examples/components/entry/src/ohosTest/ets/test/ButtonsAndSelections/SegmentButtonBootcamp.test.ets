@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2025 Hunan OpenValley Digital Industry Development Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
 import { abilityDelegatorRegistry, Driver } from '@kit.TestKit';
 import { Point, Component, ON } from '@ohos.UiTest';
@@ -996,6 +1010,449 @@ export default function SegmentButtonBootcampTest() {
       await radioClick({
         radioClickObj: 4,
         toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+    //localizedTextPadding.top.value
+    it('ArkUI_SegmentButton_083', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.top.value')
+      await sliderDrag({
+        slideStar: Slide.start
+      })
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done()
+    })
+    //localizedTextPadding.end.unit
+    /*
+     测试组件localizedTextPadding.end.unit支持设置PX且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_084', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.unit')
+      await radioClick({
+        radioClickObj: 0
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.end.unit支持设置VP且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_085', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.unit')
+      await radioClick({
+        radioClickObj: 1
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.end.unit支持设置FP且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_086', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.unit')
+      await radioClick({
+        radioClickObj: 2
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.end.unit支持设置PERCENT且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_087', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.unit')
+      await radioClick({
+        radioClickObj: 3
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.end.unit支持设置LPX且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_088', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.unit')
+      await radioClick({
+        radioClickObj: 4,
+        toggleClick:{
+          toggleClickType:ToggleClick.Close
+        }
+      })
+      done();
+    })
+    //localizedTextPadding.end.value
+    it('ArkUI_SegmentButton_089', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.end.value')
+      await sliderDrag({
+        slideStar: Slide.start
+      })
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done()
+    })
+    //localizedTextPadding.bottom.unit
+    /*
+     测试组件localizedTextPadding.bottom.unit支持设置PX且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_090', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.unit')
+      await radioClick({
+        radioClickObj: 0
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.bottom.unit支持设置VP且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_091', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.unit')
+      await radioClick({
+        radioClickObj: 1
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.bottom.unit支持设置FP且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_092', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.unit')
+      await radioClick({
+        radioClickObj: 2
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.bottom.unit支持设置PERCENT且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_093', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.unit')
+      await radioClick({
+        radioClickObj: 3
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.bottom.unit支持设置LPX且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_094', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.unit')
+      await radioClick({
+        radioClickObj: 4,
+        toggleClick:{
+          toggleClickType:ToggleClick.Close
+        }
+      })
+      done();
+    })
+    //localizedTextPadding.bottom.value
+    it('ArkUI_SegmentButton_095', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.bottom.value')
+      await sliderDrag({
+        slideStar: Slide.start
+      })
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done()
+    })
+    //localizedTextPadding.start.unit
+    /*
+     测试组件localizedTextPadding.start.unit支持设置PX且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_096', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.unit')
+      await radioClick({
+        radioClickObj: 0
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.start.unit支持设置VP且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_097', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.unit')
+      await radioClick({
+        radioClickObj: 1
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.start.unit支持设置FP且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_098', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.unit')
+      await radioClick({
+        radioClickObj: 2
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.start.unit支持设置PERCENT且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_099', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.unit')
+      await radioClick({
+        radioClickObj: 3
+      })
+      done();
+    })
+    /**
+     * 测试组件localizedTextPadding.start.unit支持设置LPX且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_100', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.unit')
+      await radioClick({
+        radioClickObj: 4,
+        toggleClick:{
+          toggleClickType:ToggleClick.Close
+        }
+      })
+      done();
+    })
+    //localizedTextPadding.start.value
+    it('ArkUI_SegmentButton_101', 0, async (done: Function) => {
+      await Search('参数列表', 'localizedTextPadding.start.value')
+      await sliderDrag({
+        slideStar: Slide.start
+      })
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done()
+    })
+    //Direction
+    /*
+     测试组件Direction支持设置Auto且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_102', 0, async (done: Function) => {
+      await Search('参数列表', 'Direction')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick:{
+          toggleClickObj:'Direction'
+        }
+      })
+      done();
+    })
+    /**
+     * 测试组件Direction支持设置Rtl且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_103', 0, async (done: Function) => {
+      await Search('参数列表', 'Direction')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick:{
+          toggleClickObj:'Direction'
+        }
+      })
+      done();
+    })
+    /**
+     * 测试组件Direction支持设置Ltr且获取属性正确
+     **/
+    it('ArkUI_SegmentButton_104', 0, async (done: Function) => {
+      await Search('参数列表', 'Direction')
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick:{
+          toggleClickType:ToggleClick.Close,
+          toggleClickObj:'Direction'
+        }
+      })
+      done();
+    })
+    //backgroundBlurStyle
+    /*
+     * 测试组件backgroundBlurStyle支持设置Thin且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_105', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置Regular且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_106', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置Thick且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_107', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置BACKGROUND_THIN且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_108', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 3,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置BACKGROUND_REGULAR且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_109', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 4,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置BACKGROUND_THICK且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_110', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 5,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置BACKGROUND_ULTRA_THICK且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_111', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 6,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置NONE且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_112', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 7,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置COMPONENT_ULTRA_THIN且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_113', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 8,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置COMPONENT_THIN且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_114', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 9,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置COMPONENT_REGULAR且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_115', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 10,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置COMPONENT_THICK且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_116', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 11,
+        toggleClick:{
+          toggleClickObj:'backgroundBlurStyle'
+        }
+      })
+      done();
+    })
+    /*
+     * 测试组件backgroundBlurStyle支持设置COMPONENT_ULTRA_THICK且获取属性正确
+     * */
+    it('ArkUI_SegmentButton_117', 0, async (done: Function) => {
+      //无法获取属性
+      await Search('参数列表', 'backgroundBlurStyle')
+      await radioClick({
+        radioClickObj: 12,
+        toggleClick: {
+          toggleClickObj:'backgroundBlurStyle',
           toggleClickType: ToggleClick.Close
         }
       })

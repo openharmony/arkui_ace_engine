@@ -1074,8 +1074,24 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
+    EXPECT_EQ(rootNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step3. create dialog mask node
+     */
+    DialogProperties maskProps {
+        .isMask = true,
+        .type = DialogType::ACTION_SHEET,
+        .title = "title",
+        .content = MESSAGE,
+        .width = 200,
+        .height = 300,
+    };
+    auto maskNode_ = DialogView::CreateDialogNode(props, nullptr);
+    EXPECT_NE(maskNode_, nullptr);
+    overlayManager->OpenDialogAnimation(maskNode_, maskProps);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1109,7 +1125,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1117,7 +1133,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     EXPECT_NE(contentNode1_, nullptr);
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
     overlayManager->OpenDialogAnimation(dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
@@ -1153,7 +1169,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->OpenDialogAnimation(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1161,7 +1177,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     EXPECT_NE(contentNode1_, nullptr);
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
     overlayManager->OpenDialogAnimation(dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
@@ -1205,7 +1221,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
@@ -1240,7 +1256,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect002, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
@@ -1283,7 +1299,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     EXPECT_NE(contentNode_, nullptr);
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     overlayManager->SetDialogTransitionEffect(dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 

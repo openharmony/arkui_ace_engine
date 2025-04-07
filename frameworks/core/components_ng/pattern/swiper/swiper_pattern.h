@@ -64,6 +64,9 @@ constexpr SwiperHoverFlag HOVER_SWIPER = 1;
 constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
 constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
 constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
+constexpr float SWIPER_CURVE_MASS = 1.0f;
+constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
+constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -327,7 +330,7 @@ public:
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
-    
+
     void ResetIndicatorParameters()
     {
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
@@ -592,8 +595,9 @@ public:
         tabsPaddingAndBorder_ = tabsPaddingAndBorder;
     }
 
+    void InitAnimationCurve();
     RefPtr<Curve> GetCurveIncludeMotion();
-    RefPtr<Curve> GetIndicatorHeadCurve() const;
+    RefPtr<Curve> GetIndicatorHeadCurve();
     float GetMotionVelocity()
     {
         return motionVelocity_;
@@ -798,8 +802,8 @@ public:
     {
         gestureStatus_ = gestureStatus;
     }
-
     bool HasRepeatTotalCountDifference(RefPtr<UINode> node) const;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
 protected:
     void MarkDirtyNodeSelf();
@@ -927,8 +931,8 @@ private:
     virtual void ResetParentNodeColor() {};
     // ArcSwiper will implement this interface in order to achieve the function of the manual effect.
     virtual void PlayScrollAnimation(float currentDelta, float currentIndexOffset) {};
-    virtual void PlayPropertyTranslateAnimation(
-        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
+    virtual void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f,
+        bool stopAutoPlay = false, std::optional<float> pixelRoundTargetPos = std::nullopt);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex = std::nullopt);
     void PropertyCancelAnimationFinish(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper, bool isInterrupt);
@@ -1189,6 +1193,7 @@ private:
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
+    void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
@@ -1235,7 +1240,11 @@ private:
     void HandleTabsCachedMaxCount(int32_t startIndex, int32_t endIndex);
     void PostIdleTaskToCleanTabContent();
     std::shared_ptr<SwiperParameters> GetBindIndicatorParameters() const;
-
+    int32_t GetNodeId() const;
+    bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
+    void ReportComponentChangeEvent(
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+    void ReportTraceOnDragEnd() const;
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1369,6 +1378,8 @@ private:
     bool prevMarginIgnoreBlank_ = false;
     float ignoreBlankOffset_ = 0.0f;
     int32_t swiperId_ = -1;
+    float animationCurveStiffness_ = SWIPER_CURVE_STIFFNESS;
+    float animationCurveDamping_ = SWIPER_CURVE_DAMPING;
 
     std::optional<int32_t> cachedCount_;
 

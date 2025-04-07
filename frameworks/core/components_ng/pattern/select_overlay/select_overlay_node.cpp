@@ -2193,7 +2193,7 @@ void SelectOverlayNode::ShowCamera(
 bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return false;
     }
     return true;
@@ -2202,7 +2202,7 @@ bool SelectOverlayNode::IsShowOnTargetAPIVersion()
 bool SelectOverlayNode::IsShowTranslateOnTargetAPIVersion()
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
         return false;
     }
     return true;

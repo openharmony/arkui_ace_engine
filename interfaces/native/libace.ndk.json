@@ -2616,6 +2616,18 @@
         "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsNumLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsCapsLockOn"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_KeyEvent_IsScrollLockOn"
+    },
+    {
         "first_introduced": "16",
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
@@ -2832,11 +2844,11 @@
         "name": "OH_ArkUI_GetGestureParam_distanceThreshold"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_AxisEvent_SetPropagation"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_AxisEvent_GetScrollStep"
     },
     {
@@ -2852,35 +2864,35 @@
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetHeight"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionX"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetPositionY"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionX"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetGlobalPositionY"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_UIInputEvent_GetModifierKeyStates"
     },
     {
-        "first_introduced": "18",
+        "first_introduced": "17",
         "name": "OH_ArkUI_HoverEvent_IsHovered"
     },
     {
@@ -3302,5 +3314,13 @@
     {
         "first_introduced": "18",
         "name": "OH_ArkUI_TextCascadePickerRangeContentArray_Destroy"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PanGesture_SetDistanceMap"
+    },
+    {
+        "first_introduced": "18",
+        "name": "OH_ArkUI_PanGesture_GetDistanceByToolType"
     }
 ]

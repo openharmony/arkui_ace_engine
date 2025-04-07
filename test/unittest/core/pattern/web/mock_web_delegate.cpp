@@ -1232,4 +1232,5 @@ std::string WebDelegate::GetCurrentLanguage()
 void WebDelegate::RegisterWebWindowFocusChangedListener() {}
 void WebDelegate::UnRegisterWebWindowFocusChangedListener() {}
 void WebDelegate::OnDragAttach() {}
+void WebDelegate::SetNativeInnerWeb(bool isInnerWeb) {}
 } // namespace OHOS::Ace

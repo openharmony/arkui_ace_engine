@@ -68,14 +68,14 @@ bool ContainerIsService()
     return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
 }
 
-bool ContainerIsScenceBoard()
+bool ContainerIsSceneBoard()
 {
     auto container = Container::CurrentSafely();
     if (!container) {
         container = Container::GetActive();
     }
 
-    return container && container->IsScenceBoardWindow();
+    return container && container->IsSceneBoardWindow();
 }
 #endif
 } // namespace
@@ -478,7 +478,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
@@ -579,7 +579,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
         }
     };
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
@@ -2302,10 +2302,10 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
         .levelOrder = GetLevelOrderParam(env, asyncContext),
+        .focusable = GetFocusableParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
-        .focusable = GetFocusableParam(env, asyncContext),
     };
     return promptDialogAttr;
 }

@@ -69,7 +69,7 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 
 std::string SimplifiedInspector::GetInspector()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree: container %{public}d", containerId_);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector1:container %{public}d", containerId_);
     auto jsonRoot = JsonUtil::Create(true);
     RefPtr<FrameNode> pageRootNode;
     auto success = GetInspectorStep1(jsonRoot, pageRootNode);
@@ -297,7 +297,7 @@ void SimplifiedInspector::GetInspectorAsync(const std::shared_ptr<Recorder::Insp
     collector->CreateJson();
     collector_ = collector;
     isAsync_ = true;
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree async: container %{public}d", containerId_);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector2:container %{public}d", containerId_);
     collector->IncreaseTaskNum();
     auto& jsonRoot = collector->GetJson();
     RefPtr<FrameNode> pageRootNode;
@@ -319,7 +319,7 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
     collector_ = collector;
     isAsync_ = true;
     isBackground_ = true;
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "Inspector tree bg async: container %{public}d", containerId_);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector3:container %{public}d", containerId_);
     auto context = NG::PipelineContext::GetContextByContainerId(containerId_);
     CHECK_NULL_VOID(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();

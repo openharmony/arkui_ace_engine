@@ -27,6 +27,7 @@
 
 #include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 #include "js_third_accessibility_hover_ng.h"
@@ -103,7 +104,8 @@ enum class DumpMode {
     NODE,
     HANDLE_EVENT,
     HOVER_TEST,
-    EVENT_TEST
+    EVENT_TEST,
+    INJECT_ACTION_TEST,
 };
 
 struct DumpInfoArgument {
@@ -372,6 +374,12 @@ public:
         AccessibilityElementOperatorCallback& callback,
         const int32_t requestId);
 
+    void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) override;
+
+    void AddToPageEventController(const RefPtr<NG::FrameNode>& node) override;
+
+    bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) override;
+
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
     void DumpHandleEvent(const std::vector<std::string>& params) override;
@@ -587,6 +595,7 @@ private:
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
     void DumpSendEventTest(int64_t nodeId, int32_t eventId, const std::vector<std::string>& params);
+    void DumpInjectActionTest(const std::vector<std::string>& params);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
@@ -688,6 +697,8 @@ private:
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
 
+    void ReleaseCacheAccessibilityEvent(const int32_t pageId);
+
     std::string callbackKey_;
     uint32_t windowId_ = 0;
     std::unordered_map<uint32_t, std::shared_ptr<JsAccessibilityStateObserver>> stateObserver_;
@@ -721,6 +732,7 @@ private:
     mutable std::mutex nextFocusMapWithSubWindowMutex_;
 
     AccessibilityParentRectInfo uecRectInfo_;
+    NG::PageEventController pageController_;
 };
 
 } // namespace OHOS::Ace::Framework

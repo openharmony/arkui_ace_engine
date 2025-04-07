@@ -25,7 +25,7 @@ import {
   titleSearch,
   searchToggle,
   getToggle
-} from '../../utils';
+} from '../../../utils';
 import { NavDestination } from './NavDestination';
 import { Driver } from '@kit.TestKit';
 
@@ -107,7 +107,7 @@ export default function NavDestination8(){
         radioClickObj: 0
       })
       await driver.delayMs(3500);
-      await driver.click(645, 115)
+      await driver.pressBack()
       done();
     })
     /*

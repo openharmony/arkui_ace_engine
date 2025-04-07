@@ -254,7 +254,11 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 
 void PasswordResponseArea::AddIconHotZoneRect()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(stackNode_);
@@ -490,7 +494,7 @@ float PasswordResponseArea::GetIconSize()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto iconSize = textFieldTheme->GetIconSize().ConvertToPx();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (tmpHost->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         iconSize = textFieldTheme->GetPasswordIconSize().ConvertToPx();
     }
     return static_cast<float>(iconSize);
@@ -508,7 +512,7 @@ float PasswordResponseArea::GetIconRightOffset()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     auto themePadding = textFieldTheme->GetPadding();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (tmpHost->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         auto passwordIconPadding = textFieldTheme->GetPasswordIconPadding();
         return static_cast<float>(passwordIconPadding.ConvertToPx());
     }
@@ -617,7 +621,7 @@ void PasswordResponseArea::UpdateSymbolSource()
     symbolColor_ = textFieldTheme->GetSymbolColor();
     symbolProperty->UpdateSymbolColorList({ symbolColor_ });
     symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         symbolProperty->UpdateFontSize(textFieldTheme->GetPasswordIconSize());
     }
 
@@ -691,6 +695,13 @@ bool PasswordResponseArea::IsShowPasswordIcon()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_RETURN(textFieldPattern, false);
     return textFieldPattern->IsShowPasswordIcon();
+}
+
+void PasswordResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
+{
+    // no interface to set password icon color, should update every time
+    CHECK_NULL_VOID(theme);
+    UpdatePasswordIconColor(theme->GetSymbolColor());
 } // PasswordResponseArea end
 
 // UnitResponseArea begin
@@ -771,7 +782,11 @@ SizeF CleanNodeResponseArea::Measure(LayoutWrapper* layoutWrapper, int32_t index
 
 void CleanNodeResponseArea::AddIconHotZoneRect()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     CHECK_NULL_VOID(cleanNode_);
@@ -946,7 +961,7 @@ void CleanNodeResponseArea::SetCancelSymbolIconSize()
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
     symbolProperty->UpdateFontSize(textFieldTheme->GetSymbolSize());
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         symbolProperty->UpdateFontSize(textFieldTheme->GetCancelIconSize());
     }
 }
@@ -994,7 +1009,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     symbolProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value_or(0.0f));
 
     auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-    if (iconSymbol && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (iconSymbol && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
         // reset symbol effect
         auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
@@ -1003,7 +1018,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     }
 
     Dimension fontSize;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetCancelIconSize());
     } else {
         fontSize = symbolProperty->GetFontSize().value_or(textFieldTheme->GetSymbolSize());
@@ -1267,5 +1282,12 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
         imageRenderProperty->UpdateSvgFillColor(iconColor_);
     }
     return info;
+}
+
+void CleanNodeResponseArea::OnThemeScopeUpdate(const RefPtr<TextFieldTheme>& theme)
+{
+    if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
+        UpdateSymbolSource();
+    }
 }
 } // namespace OHOS::Ace::NG

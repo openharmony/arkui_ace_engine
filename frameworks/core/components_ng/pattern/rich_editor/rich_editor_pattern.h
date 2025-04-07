@@ -497,7 +497,8 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledString(const std::u16string& insertValue, bool shouldCommitInput = false);
+    void InsertValueInStyledString(
+        const std::u16string& insertValue, bool shouldCommitInput = false, bool isPaste = false);
     void HandleStyledStringInsertion(RefPtr<SpanString> insertStyledString, const UndoRedoRecord& record,
         std::u16string& subValue, bool needReplaceInTextPreview, bool shouldCommitInput);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
@@ -590,6 +591,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
+    void HandleSetSelection(int32_t start, int32_t end, bool showHandle) override;
     void HandleExtendAction(int32_t action) override;
     bool BeforeStatusCursorMove(bool isLeft);
     bool CursorMoveLeft();
@@ -597,8 +599,8 @@ public:
     bool CursorMoveUp();
     bool CursorMoveDown();
     void CursorMoveToNextWord(CaretMoveIntent direction);
-    int32_t GetLeftWordIndex();
-    int32_t GetRightWordIndex();
+    int32_t GetLeftWordIndex(int32_t index);
+    int32_t GetRightWordIndex(int32_t index);
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
@@ -690,7 +692,7 @@ public:
     int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
         bool needLeadingMargin = false, bool updateCaretPosition = true);
     void AdjustAddPosition(TextSpanOptions& options);
-    int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddSymbolSpan(SymbolSpanOptions options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
@@ -1599,6 +1601,7 @@ private:
     void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
     void SetIsEnableSubWindowMenu();
+    void OnReportRichEditorEvent(const std::string& event);
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

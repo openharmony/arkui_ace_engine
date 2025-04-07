@@ -97,7 +97,7 @@ void SwitchPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch button handle focus event");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);

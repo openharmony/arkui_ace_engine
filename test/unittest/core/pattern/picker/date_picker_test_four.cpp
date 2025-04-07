@@ -20,9 +20,9 @@
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/pattern/mock_picker_haptic_impl.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_stub.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -955,6 +955,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest111, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -966,7 +967,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest111, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -1134,6 +1135,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -1145,7 +1147,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
@@ -1158,14 +1160,14 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
-    textCancelLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    textCancelLayoutProperty->UpdateContent(dialogTheme->GetCancelText());
     ASSERT_NE(textCancelLayoutProperty, nullptr);
     textCancelNode->MountToParent(buttonCancelNode);
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
     std::string nodeInfo = "";
-    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    auto cancel = dialogTheme->GetCancelText();
     EXPECT_EQ(cancel, nodeInfo);
 }
 
@@ -1543,19 +1545,20 @@ HWTEST_F(DatePickerTestFour, UpdateColumnChildPositionTest001, TestSize.Level1)
     columnPattern_->hapticController_ = PickerAudioHapticFactory::GetInstance();
     columnPattern_->isShow_ = false;
     ASSERT_NE(columnPattern_->hapticController_, nullptr);
-    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern_->hapticController_);
-    ASSERT_NE(pickerAudioHapticStub, nullptr);
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    auto pickerAudioHapticController =
+        std::static_pointer_cast<MockPickerAudioHapticImpl>(columnPattern_->hapticController_);
+    ASSERT_NE(pickerAudioHapticController, nullptr);
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     columnPattern_->isShow_ = true;
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::HANDLE_DELTA);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::HANDLE_DELTA);
     columnPattern_->isEnableHaptic_ = false;
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     columnPattern_->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
 }
 
 /**
@@ -1646,16 +1649,17 @@ HWTEST_F(DatePickerTestFour, InnerHandleScrollTest001, TestSize.Level1)
     CreateDatePickerColumnNode();
     ASSERT_NE(columnNode_, nullptr);
     ASSERT_NE(columnPattern_, nullptr);
-    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern_->hapticController_);
-    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    auto pickerAudioHapticController =
+        std::static_pointer_cast<MockPickerAudioHapticImpl>(columnPattern_->hapticController_);
+    ASSERT_NE(pickerAudioHapticController, nullptr);
     auto result = columnPattern_->InnerHandleScroll(true, true, true);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::PLAY_ONCE);
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::PLAY_ONCE);
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     EXPECT_TRUE(result);
     columnPattern_->isEnableHaptic_ = false;
     result = columnPattern_->InnerHandleScroll(true, true, true);
     EXPECT_TRUE(result);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     columnPattern_->hapticController_ = nullptr;
     result = columnPattern_->InnerHandleScroll(true, true, true);
     EXPECT_TRUE(result);
@@ -1727,6 +1731,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto pickerStack = DatePickerDialogView::CreateStackNode();
     ASSERT_NE(pickerStack, nullptr);
     auto datePickerNode = FrameNode::GetOrCreateFrameNode(
@@ -1738,7 +1743,7 @@ HWTEST_F(DatePickerTestFour, DatePickerPatternTest112, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
+    textLayoutProperty->UpdateContent(dialogTheme->GetConfirmText());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);

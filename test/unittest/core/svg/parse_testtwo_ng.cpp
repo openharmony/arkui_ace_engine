@@ -1665,6 +1665,121 @@ HWTEST_F(ParseTestTwoNg, ParseMaskTest001, TestSize.Level1)
     EXPECT_EQ(attrValue, 2.0);
 }
 
+
+/**
+ * @tc.name: ParseMaskTest001
+ * @tc.desc: test Mask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseMaskTest002, TestSize.Level1)
+{
+    auto svgMask = AceType::DynamicCast<SvgMask>(SvgMask::Create());
+    EXPECT_NE(svgMask, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    svgMask->OnMaskEffect(canvas, context);
+
+    SvgLengthScaleRule lengthRule;
+    svgMask->smoothEdge_ = false;
+
+    RefPtr<SvgNode> svgNode1 = nullptr;
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    svgNode2->drawTraversed_ = false;
+    RefPtr<SvgNode> svgNode3 = SvgPattern::Create();
+    svgNode3->drawTraversed_ = true;
+    svgMask->children_.emplace_back(svgNode1);
+    svgMask->children_.emplace_back(svgNode2);
+    svgMask->children_.emplace_back(svgNode3);
+
+    svgMask->DrawChildren(canvas, lengthRule);
+    EXPECT_TRUE(lengthRule.UseFillColor());
+
+    svgMask->smoothEdge_ = true;
+    svgMask->DrawChildren(canvas, lengthRule);
+    EXPECT_TRUE(lengthRule.UseFillColor());
+}
+
+/**
+ * @tc.name: ParseMaskTest001
+ * @tc.desc: test Mask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseMaskTest003, TestSize.Level1)
+{
+    auto svgMask = AceType::DynamicCast<SvgMask>(SvgMask::Create());
+    EXPECT_NE(svgMask, nullptr);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto result = svgMask->ParseAndSetSpecializedAttr("maskunits", "objectBoundingBox");
+    EXPECT_TRUE(result);
+    result = svgMask->ParseAndSetSpecializedAttr("maskunits", "objectBoundingBox222");
+    EXPECT_TRUE(result);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+
+/**
+ * @tc.name: ParseFilterTest002
+ * @tc.desc: parse Filter label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFilterTest003, TestSize.Level1)
+{
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+
+    svgFilter->children_.at(0) = nullptr;
+    svgFilter->OnAsPaint();
+    auto nodeFe1 = AceType::DynamicCast<SvgFe>(svgFilter->children_.at(0));
+    auto nodeFe2 = AceType::DynamicCast<SvgFe>(svgFilter->children_.at(1));
+    EXPECT_EQ(nodeFe1, nullptr);
+    EXPECT_NE(nodeFe2, nullptr);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: ParseFilterTest002
+ * @tc.desc: parse Filter label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFilterTest004, TestSize.Level1)
+{
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(SvgFilter::Create());
+    EXPECT_NE(svgFilter, nullptr);
+    RSCanvas canvas;
+    Rect rect(10, 12, 13, 15);
+    Size size(10, 10);
+    SvgCoordinateSystemContext context(rect, size);
+    float useOffsetX = 10.f;
+    float useOffsetY = 10.f;
+
+    RefPtr<SvgNode> svgNode1 = nullptr;
+    RefPtr<SvgNode> svgNode2 = SvgPattern::Create();
+    svgFilter->children_.emplace_back(svgNode1);
+    svgFilter->children_.emplace_back(svgNode2);
+    svgFilter->OnFilterEffect(canvas, context, useOffsetX, useOffsetY);
+    EXPECT_TRUE(context.UseFillColor());
+}
+
 /**
  * @tc.name: ParseRectTest005
  * @tc.desc: parse rect label
@@ -2090,8 +2205,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform001, TestSize.Level1)
     info1.paramVec = paramVec1;
     transformVec.emplace_back(info1);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2124,8 +2245,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform002, TestSize.Level1)
     info1.paramVec = paramVec1;
     transformVec.emplace_back(info1);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2166,8 +2293,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform003, TestSize.Level1)
     info2.paramVec = paramVec2;
     transformVec.emplace_back(info2);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2204,8 +2337,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform004, TestSize.Level1)
     info2.paramVec = paramVec2;
     transformVec.emplace_back(info2);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2237,8 +2376,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform005, TestSize.Level1)
     info1.paramVec = paramVec1;
     transformVec.emplace_back(info1);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2270,8 +2415,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform006, TestSize.Level1)
     info1.paramVec = paramVec1;
     transformVec.emplace_back(info1);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2312,8 +2463,14 @@ HWTEST_F(ParseTestTwoNg, SvgTransform007, TestSize.Level1)
     info2.paramVec = paramVec2;
     transformVec.emplace_back(info2);
 
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     Offset offset;
-    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset);
+    auto result = NGSvgTransform::CreateMatrix4(transformVec, offset, rule);
     EXPECT_EQ(result.Get(1, 0), 0);
 }
 
@@ -2353,15 +2510,21 @@ HWTEST_F(ParseTestTwoNg, SvgTransform008, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, SvgTransform009, TestSize.Level1)
 {
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     std::vector<std::string> paramVec;
     Matrix4 matrix;
 
     std::string funcType = "asd";
-    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "matrix";
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "matrix";
@@ -2372,36 +2535,36 @@ HWTEST_F(ParseTestTwoNg, SvgTransform009, TestSize.Level1)
     paramVec.emplace_back("4");
     paramVec.emplace_back("5");
     paramVec.emplace_back("6");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "rotate";
     paramVec.clear();
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "rotate";
     paramVec.clear();
     paramVec.emplace_back("1");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "scale";
     paramVec.clear();
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "scale";
     paramVec.clear();
     paramVec.emplace_back("1");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "scale";
     paramVec.clear();
     paramVec.emplace_back("1");
     paramVec.emplace_back("2");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 }
 
@@ -2412,48 +2575,54 @@ HWTEST_F(ParseTestTwoNg, SvgTransform009, TestSize.Level1)
  */
 HWTEST_F(ParseTestTwoNg, SvgTransform010, TestSize.Level1)
 {
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    Rect containerRect(0, 0, 1, 1);
+    Size viewPort(1, 1);
+    SvgCoordinateSystemContext context(containerRect, viewPort);
+    auto rule = svgNode->BuildContentScaleRule(context, OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(rule.GetLengthScaleUnit(), OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     std::vector<std::string> paramVec;
     Matrix4 matrix;
     std::string funcType = "asd";
 
     funcType = "skewX";
     paramVec.clear();
-    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    auto result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "skewX";
     paramVec.clear();
     paramVec.emplace_back("1");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "skewY";
     paramVec.clear();
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "skewY";
     paramVec.clear();
     paramVec.emplace_back("1");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "translate";
     paramVec.clear();
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_FALSE(result);
 
     funcType = "translate";
     paramVec.clear();
     paramVec.emplace_back("1");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 
     funcType = "translate";
     paramVec.clear();
     paramVec.emplace_back("1");
     paramVec.emplace_back("2");
-    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix);
+    result = NGSvgTransform::UpdateSingleTransform(funcType, paramVec, matrix, rule);
     EXPECT_TRUE(result);
 }
 

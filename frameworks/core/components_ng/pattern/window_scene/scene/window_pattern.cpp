@@ -254,18 +254,19 @@ void WindowPattern::CreateAppWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateAppWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    appWindow_ = FrameNode::CreateFrameNode(
+    RefPtr<FrameNode> tempWindow = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    appWindow_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    appWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    tempWindow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    tempWindow->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(tempWindow->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetVisible(true);
     }
+    (!appWindow_) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
 }
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
@@ -609,7 +610,11 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
                 return;
             }
             auto self = weakThis.Upgrade();
-            CHECK_NULL_VOID(self && self->snapshotWindow_);
+            CHECK_NULL_VOID(self);
+            if (self->session_->IsExitSplitOnBackground()) {
+                return;
+            }
+            CHECK_NULL_VOID(self->snapshotWindow_);
             TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
                 self->session_->GetPersistentId());
             auto context = self->snapshotWindow_->GetRenderContext();

@@ -18,112 +18,6 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
-    
-/**
- * @tc.name: OH_ArkUI_UIInputEvent_GetModifierKeyStates001
- * @tc.desc: Test OH_ArkUI_UIInputEvent_GetModifierKeyStates
- * @tc.type: FUNC
- */
-HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetModifierKeyStates001, TestSize.Level1)
-{
-    auto state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(nullptr, nullptr);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-
-    ArkUI_UIInputEvent event;
-    uint64_t key = 1;
-
-    ArkUITouchEvent touchEvent;
-    touchEvent.modifierKeyState = 1;
-    event.eventTypeId = C_TOUCH_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &touchEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 1);
-
-    OHOS::Ace::TouchEvent aceTouchEvent;
-    aceTouchEvent.modifierKeyState = 2;
-    event.eventTypeId = TOUCH_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &aceTouchEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 2);
-
-    OHOS::Ace::AxisEvent aceAxisEvent;
-    aceAxisEvent.modifierKeyState = 3;
-    event.eventTypeId = AXIS_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &aceAxisEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 3);
-
-    ArkUIMouseEvent mouseEvent;
-    mouseEvent.modifierKeyState = 4;
-    event.eventTypeId = C_MOUSE_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &mouseEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 4);
-}
-
-/**
- * @tc.name: OH_ArkUI_UIInputEvent_GetModifierKeyStates002
- * @tc.desc: Test OH_ArkUI_UIInputEvent_GetModifierKeyStates
- * @tc.type: FUNC
- */
-HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetModifierKeyStates002, TestSize.Level1)
-{
-    int32_t state = 1;
-    ArkUI_UIInputEvent event;
-    uint64_t key = 1;
-
-    ArkUIAxisEvent axisEvent;
-    axisEvent.modifierKeyState = 5;
-    event.eventTypeId = C_AXIS_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &axisEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 5);
-
-    ArkUIFocusAxisEvent focusAxisEvent;
-    focusAxisEvent.modifierKeyState = 6;
-    event.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &focusAxisEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 6);
-
-    ArkUIHoverEvent hoverEvent;
-    hoverEvent.modifierKeyState = 7;
-    event.eventTypeId = C_HOVER_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &hoverEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 7);
-
-    ArkUIClickEvent clickEvent;
-    clickEvent.modifierKeyState = 8;
-    event.eventTypeId = C_CLICK_EVENT_ID;
-    event.inputEvent = nullptr;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, ARKUI_ERROR_CODE_PARAM_INVALID);
-    event.inputEvent = &clickEvent;
-    state = OH_ArkUI_UIInputEvent_GetModifierKeyStates(&event, &key);
-    EXPECT_EQ(state, 8);
-}
 
 /**
  * @tc.name: OH_ArkUI_HoverEvent_IsHovered
@@ -1655,9 +1549,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetRollAngle, TestSize.Level1)
     event.inputEvent = nullptr;
     ArkUITouchEvent touchEvent;
     touchEvent.actionTouchPoint.rollAngle = 3.0;
-    ArkUITouchPoint pointes[3];
-    pointes[2].rollAngle = 4.0;
-    touchEvent.touchPointes = pointes;
+    touchEvent.rollAngle = 4.0;
     touchEvent.touchPointSize = 0;
     touchEvent.subKind = ON_AXIS;
     ret = OH_ArkUI_PointerEvent_GetRollAngle(&event, &rollAngle);

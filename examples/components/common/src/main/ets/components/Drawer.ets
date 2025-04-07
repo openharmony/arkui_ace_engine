@@ -38,7 +38,7 @@ export struct Drawer {
   @Prop @Require title: ResourceStr;
   @Link showParameters: boolean
   @BuilderParam content: () => void;
-  @BuilderParam generic: () => void;
+  @BuilderParam generic?: () => void;
   @BuilderParam parameters: () => void;
   @Consume('router') router: NavPathStack;
   @State tabSelectedIndexes: number[] = [0];
@@ -98,7 +98,7 @@ export struct Drawer {
 
           if (this.tabSelectedIndexes[0] === 0) {
             this.parameters()
-          } else if (this.tabSelectedIndexes[0] === 1) {
+          } else if (this.tabSelectedIndexes[0] === 1 && this.generic) {
             this.generic()
           } else {
             Stack() {

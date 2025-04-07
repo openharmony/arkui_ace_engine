@@ -974,6 +974,9 @@ void RosenRenderTextField::SetShaderIfNeeded(std::unique_ptr<Rosen::TypographySt
 
     std::unique_ptr<Rosen::TypographyCreate> builder =
         Rosen::TypographyCreate::Create(*paragraphStyle, GetFontCollection());
+    if (!txtStyle) {
+        return;
+    }
 #ifndef USE_ROSEN_DRAWING
     txtStyle->foreground->setShader(shader);
 #else
@@ -1303,10 +1306,9 @@ int32_t RosenRenderTextField::GetCursorPositionForMoveUp()
         return 0;
     }
     double verticalOffset = -textOffsetForShowCaret_.GetY() - PreferredLineHeight();
-    return static_cast<int32_t>(paragraph_
-                                    ->GetGlyphIndexByCoordinate(
-                                        caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
-                                    .index);
+    return static_cast<int32_t>(
+        paragraph_->GetGlyphIndexByCoordinate(caretRect_.Left() - innerRect_.Left(), caretRect_.Top() + verticalOffset)
+            .index);
 }
 
 int32_t RosenRenderTextField::GetCursorPositionForMoveDown()

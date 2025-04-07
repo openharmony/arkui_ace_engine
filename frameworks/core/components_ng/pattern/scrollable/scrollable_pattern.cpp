@@ -39,11 +39,8 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
-#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,9 +55,7 @@ constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
-#ifdef ARKUI_CIRCLE_FEATURE
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
-#endif
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -782,9 +777,9 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-    if (isClickAnimationStop_) {
+    if (isBackToTopRunning_) {
         StopAnimate();
-        isClickAnimationStop_ = false;
+        isBackToTopRunning_ = false;
     }
 }
 
@@ -1042,11 +1037,9 @@ void ScrollablePattern::InitScrollBarGestureEvent()
 
 RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     if (isRoundScroll_) {
         return AceType::MakeRefPtr<ArcScrollBar>();
     }
-#endif
     return AceType::MakeRefPtr<ScrollBar>();
 }
 
@@ -1126,10 +1119,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             if (isRoundScroll_) {
                 scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
                 scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
-#ifdef ARKUI_CIRCLE_FEATURE
                 scrollBar_->SetActiveBackgroundWidth(barWidth.value());
                 scrollBar_->SetActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
-#endif
             } else {
                 scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetNormalWidth(barWidth.value());
@@ -1149,8 +1140,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 {
     // inner scrollbar, viewOffset is padding offset
     if (scrollBar_) {
-        auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
-        bool scrollable = GreatNotEqual(estimatedHeight, mainSize) && IsScrollable();
+        bool scrollable = IsScrollable();
         if (scrollBar_->IsScrollable() != scrollable) {
             scrollBar_->SetScrollable(scrollable);
             if (scrollBarOverlayModifier_) {
@@ -1257,7 +1247,6 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     if (isRoundScroll_ && scrollBar_) {
         auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
         auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
@@ -1268,7 +1257,6 @@ RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
         }
         return arcScrollBarOverlayModifier;
     }
-#endif
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }
 
@@ -1457,7 +1445,7 @@ void ScrollablePattern::OnAnimateFinish()
                 .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
-    isClickAnimationStop_ = false;
+    isBackToTopRunning_ = false;
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
@@ -1570,6 +1558,9 @@ void ScrollablePattern::InitSpringOffsetProperty()
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
         if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
+        }
+        if (pattern->isBackToTopRunning_) {
+            source = SCROLL_FROM_STATUSBAR;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
@@ -2153,6 +2144,7 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         { SCROLL_FROM_ANIMATION_CONTROLLER, ScrollSource::SCROLLER_ANIMATION },
         { SCROLL_FROM_BAR_FLING, ScrollSource::SCROLL_BAR_FLING },
         { SCROLL_FROM_CROWN, ScrollSource::OTHER_USER_INPUT },
+        { SCROLL_FROM_STATUSBAR, ScrollSource::OTHER_USER_INPUT },
     };
     ScrollSource sourceType = ScrollSource::OTHER_USER_INPUT;
     int64_t idx = BinarySearchFindIndex(scrollSourceMap, ArraySize(scrollSourceMap), source);
@@ -2522,12 +2514,20 @@ void ScrollablePattern::ExecuteScrollFrameBegin(float& mainDelta, ScrollState st
     auto eventHub = GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto scrollFrameBeginCallback = eventHub->GetOnScrollFrameBegin();
-    if (!context || !scrollFrameBeginCallback) {
+    auto onJSFrameNodeScrollFrameBegin = eventHub->GetJSFrameNodeOnScrollFrameBegin();
+    if (!context) {
         return;
     }
 
     auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
-    auto scrollRes = scrollFrameBeginCallback(-offset, state);
+    ScrollFrameResult scrollRes { .offset = -offset };
+    if (scrollFrameBeginCallback) {
+        scrollRes = scrollFrameBeginCallback(scrollRes.offset, state);
+    }
+    if (onJSFrameNodeScrollFrameBegin) {
+        scrollRes = onJSFrameNodeScrollFrameBegin(scrollRes.offset, state);
+    }
+
     mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
@@ -2689,7 +2689,7 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    isClickAnimationStop_ = true; // set stop animation flag when click status bar.
+    isBackToTopRunning_ = true; // set stop animation flag when click status bar.
     AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
 }
 
@@ -2739,7 +2739,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(hub);
     SuggestOpIncGroup(true);
     if (scrollStop_ && !GetScrollAbort()) {
-        OnScrollStop(hub->GetOnScrollStop());
+        OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
@@ -2759,10 +2759,16 @@ void ScrollablePattern::FireOnScrollStart()
     isScrolling_ = true;
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID(onScrollStart);
+    auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
+    CHECK_NULL_VOID(onScrollStart || onJSFrameNodeScrollStart);
     ACE_SCOPED_TRACE(
         "OnScrollStart, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    onScrollStart();
+    if (onScrollStart) {
+        onScrollStart();
+    }
+    if (onJSFrameNodeScrollStart) {
+        onJSFrameNodeScrollStart();
+    }
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_START);
 }
 
@@ -2896,7 +2902,8 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     }
 }
 
-void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
+void ScrollablePattern::OnScrollStop(
+    const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2913,15 +2920,7 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         }
         isScrolling_ = false;
         FireObserverOnScrollStop();
-        if (onScrollStop) {
-            ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
-                host->GetTag().c_str());
-            onScrollStop();
-            AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
-            SetScrollSource(SCROLL_FROM_NONE);
-            ResetLastSnapTargetIndex();
-            ResetScrollableSnapDirection();
-        }
+        FireOnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
             scrollBar->ScheduleDisappearDelayTask();
@@ -2951,6 +2950,25 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
     SetScrollAbort(false);
+}
+
+void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
+    const OnScrollStopEvent& onJSFrameNodeScrollStop)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
+        host->GetTag().c_str());
+    if (onScrollStop) {
+        onScrollStop();
+    }
+    if (onJSFrameNodeScrollStop) {
+        onJSFrameNodeScrollStop();
+    }
+    AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
+    SetScrollSource(SCROLL_FROM_NONE);
+    ResetLastSnapTargetIndex();
+    ResetScrollableSnapDirection();
 }
 
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
@@ -2983,10 +3001,17 @@ float ScrollablePattern::FireOnWillScroll(float offset) const
     auto eventHub = GetEventHub<ScrollableEventHub>();
     CHECK_NULL_RETURN(eventHub, offset);
     auto onScroll = eventHub->GetOnWillScroll();
-    CHECK_NULL_RETURN(onScroll, offset);
+    auto onJSFrameNodeScroll = eventHub->GetJSFrameNodeOnWillScroll();
+    CHECK_NULL_RETURN(onScroll || onJSFrameNodeScroll, offset);
     auto offsetPX = Dimension(offset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-    auto scrollRes = onScroll(offsetVP, GetScrollState(), ConvertScrollSource(scrollSource_));
+    ScrollFrameResult scrollRes = { .offset = offsetVP};
+    if (onScroll) {
+        scrollRes = onScroll(scrollRes.offset, GetScrollState(), ConvertScrollSource(scrollSource_));
+    }
+    if (onJSFrameNodeScroll) {
+        scrollRes =  onJSFrameNodeScroll(scrollRes.offset, GetScrollState(), ConvertScrollSource(scrollSource_));
+    }
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, offset);
     return context->NormalizeToPx(scrollRes.offset);
@@ -3631,34 +3656,61 @@ void ScrollablePattern::GetEventDumpInfo()
     auto onScrollStart = hub->GetOnScrollStart();
     onScrollStart ? DumpLog::GetInstance().AddDesc("hasOnScrollStart: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollStart: false");
+    auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
+    onJSFrameNodeScrollStart ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStart: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStart: false");
     auto onScrollStop = hub->GetOnScrollStop();
     onScrollStop ? DumpLog::GetInstance().AddDesc("hasOnScrollStop: true")
                  : DumpLog::GetInstance().AddDesc("hasOnScrollStop: false");
+    auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
+    onJSFrameNodeScrollStop ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: true")
+                            : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollStop: false");
     auto scrollHub = host->GetEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
                      : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onJSFrameNodeScrollWillScroll = scrollHub->GetJSFrameNodeOnScrollWillScroll();
+        onJSFrameNodeScrollWillScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: true")
+                                      : DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: false");
         auto onDidScroll = scrollHub->GetOnDidScrollEvent();
         onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
                     : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+        auto onJSFrameNodeScrollDidScroll = scrollHub->GetJSFrameNodeOnScrollDidScroll();
+        onJSFrameNodeScrollDidScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: true")
+                                     : DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: false");
     } else {
         auto onWillScroll = hub->GetOnWillScroll();
         onWillScroll ? DumpLog::GetInstance().AddDesc("hasOnWillScroll: true")
                      : DumpLog::GetInstance().AddDesc("hasOnWillScroll: false");
+        auto onJSFrameNodeWillScroll = hub->GetJSFrameNodeOnWillScroll();
+        onJSFrameNodeWillScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: true")
+                                : DumpLog::GetInstance().AddDesc("hasFrameNodeOnWillScroll: false");
         auto onDidScroll = hub->GetOnDidScroll();
         onDidScroll ? DumpLog::GetInstance().AddDesc("hasOnDidScroll: true")
                     : DumpLog::GetInstance().AddDesc("hasOnDidScroll: false");
+        auto onJSFrameNodeDidScroll = hub->GetJSFrameNodeOnDidScroll();
+        onJSFrameNodeDidScroll ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: true")
+                               : DumpLog::GetInstance().AddDesc("hasFrameNodeOnDidScroll: false");
     }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
     onScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: true")
                        : DumpLog::GetInstance().AddDesc("hasOnScrollFrameBegin: false");
+    auto onJSFrameNodeScrollFrameBegin = hub->GetJSFrameNodeOnScrollFrameBegin();
+    onJSFrameNodeScrollFrameBegin ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollFrameBegin: true")
+                                  : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollFrameBegin: false");
     auto onReachStart = hub->GetOnReachStart();
     onReachStart ? DumpLog::GetInstance().AddDesc("hasOnReachStart: true")
                  : DumpLog::GetInstance().AddDesc("hasOnReachStart: false");
+    auto onJSFrameNodeReachStart = hub->GetJSFrameNodeOnReachStart();
+    onJSFrameNodeReachStart ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachStart: true")
+                            : DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachStart: false");
     auto onReachEnd = hub->GetOnReachEnd();
     onReachEnd ? DumpLog::GetInstance().AddDesc("hasOnReachEnd: true")
                : DumpLog::GetInstance().AddDesc("hasOnReachEnd: false");
+    auto onJSFrameNodeReachEnd = hub->GetJSFrameNodeOnReachEnd();
+    onJSFrameNodeReachEnd ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachEnd: true")
+                          : DumpLog::GetInstance().AddDesc("hasFrameNodeOnReachEnd: false");
 }
 
 void ScrollablePattern::DumpAdvanceInfo()
@@ -3823,27 +3875,49 @@ void ScrollablePattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     CHECK_NULL_VOID(hub);
     auto onScrollStart = hub->GetOnScrollStart();
     json->Put("hasOnScrollStart", onScrollStart ? "true" : "false");
+    auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
+    json->Put("hasFrameNodeOnScrollStart", onJSFrameNodeScrollStart ? "true" : "false");
     auto onScrollStop = hub->GetOnScrollStop();
     json->Put("hasOnScrollStop", onScrollStop ? "true" : "false");
+    auto onJSFrameNodeScrollStop = hub->GetJSFrameNodeOnScrollStop();
+    json->Put("hasFrameNodeOnScrollStop", onJSFrameNodeScrollStop ? "true" : "false");
 
     auto scrollHub = host->GetEventHub<ScrollEventHub>();
     if (scrollHub) {
         auto onWillScroll = scrollHub->GetOnWillScrollEvent();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
+        auto onJSFrameNodeScrollWillScroll = scrollHub->GetJSFrameNodeOnScrollWillScroll();
+        json->Put("hasFrameNodeOnWillScroll", onJSFrameNodeScrollWillScroll ? "true" : "false");
+
         auto onDidScroll = scrollHub->GetOnDidScrollEvent();
         json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
+        auto onJSFrameNodeScrollDidScroll = scrollHub->GetJSFrameNodeOnScrollDidScroll();
+        json->Put("hasFrameNodeOnDidScroll", onJSFrameNodeScrollDidScroll ? "true" : "false");
     } else {
         auto onWillScroll = hub->GetOnWillScroll();
         json->Put("hasOnWillScroll", onWillScroll ? "true" : "false");
+        auto onJSFrameNodeWillScroll = hub->GetJSFrameNodeOnWillScroll();
+        json->Put("hasFrameNodeOnWillScroll", onJSFrameNodeWillScroll ? "true" : "false");
+
         auto onDidScroll = hub->GetOnDidScroll();
         json->Put("hasOnDidScroll", onDidScroll ? "true" : "false");
+        auto onJSFrameNodeDidScroll = hub->GetJSFrameNodeOnDidScroll();
+        json->Put("hasFrameNodeOnDidScroll", onJSFrameNodeDidScroll ? "true" : "false");
     }
     auto onScrollFrameBegin = hub->GetOnScrollFrameBegin();
     json->Put("hasOnScrollFrameBegin", onScrollFrameBegin ? "true" : "false");
+    auto onJSFrameNodeScrollFrameBegin = hub->GetJSFrameNodeOnScrollFrameBegin();
+    json->Put("hasFrameNodeOnScrollFrameBegin", onJSFrameNodeScrollFrameBegin ? "true" : "false");
+
     auto onReachStart = hub->GetOnReachStart();
     json->Put("hasOnReachStart", onReachStart ? "true" : "false");
+    auto onJSFrameNodeReachStart = hub->GetJSFrameNodeOnReachStart();
+    json->Put("hasFrameNodeOnReachStart", onJSFrameNodeReachStart ? "true" : "false");
+
     auto onReachEnd = hub->GetOnReachEnd();
     json->Put("hasOnReachEnd", onReachEnd ? "true" : "false");
+    auto onJSFrameNodeReachEnd = hub->GetJSFrameNodeOnReachEnd();
+    json->Put("hasFrameNodeOnReachEnd", onJSFrameNodeReachEnd ? "true" : "false");
 }
 
 void ScrollablePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)

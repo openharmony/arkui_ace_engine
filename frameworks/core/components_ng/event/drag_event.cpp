@@ -271,6 +271,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         IsBelongToMultiItemNode(frameNode)) {
         return;
     }
+    RecordTouchDownPoint(touchRestrict.touchEvent);
     lastTouchFingerId_ = touchRestrict.touchEvent.id;
     dragDropManager->SetIsDisableDefaultDropAnimation(false);
     dragDropManager->SetIsDragNodeNeedClean(false);
@@ -927,7 +928,7 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
         // set filter
         TAG_LOGI(AceLogTag::ACE_DRAG, "User Device use default Filter");
         auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow()) {
+        if (container && container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(frameNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
         } else {
@@ -1020,6 +1021,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
         if (dragPreviewOption.options.shadow.has_value()) {
@@ -1041,7 +1043,6 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
     }
-    imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
@@ -1103,7 +1104,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     hub->SetPixelMap(gestureHub->GetPixelMap());
     // mount to rootNode
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = manager->FindWindowScene(frameNode);
         manager->MountPixelMapToWindowScene(columnNode, windowScene);
     } else {
@@ -1228,7 +1229,7 @@ void DragEventActuator::SetEventColumn(const RefPtr<DragEventActuator>& actuator
     BindClickEvent(columnNode);
     columnNode->MarkModifyDone();
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto gestureHub = actuator->gestureEventHub_.Upgrade();
         CHECK_NULL_VOID(gestureHub);
         auto frameNode = gestureHub->GetFrameNode();
@@ -1815,7 +1816,7 @@ void DragEventActuator::MountGatherNode(const RefPtr<OverlayManager>& overlayMan
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "Mount gather node");
     auto container = Container::Current();
-    if (container && container->IsScenceBoardWindow()) {
+    if (container && container->IsSceneBoardWindow()) {
         auto windowScene = overlayManager->FindWindowScene(frameNode);
         overlayManager->MountGatherNodeToWindowScene(gatherNode, gatherNodeChildrenInfo, windowScene);
     } else {
@@ -1969,7 +1970,11 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->SetDragMoveLastPoint(touchPoint);
+    for (const auto& touchInfo : info.GetTouches()) {
+        auto point = Point(touchInfo.GetGlobalLocation().GetX(), touchInfo.GetGlobalLocation().GetY(),
+            touchInfo.GetScreenLocation().GetX(), touchInfo.GetScreenLocation().GetY());
+        dragDropManager->UpdatePointInfoForFinger(touchInfo.GetFingerId(), point);
+    }
     if (isRestartDrag) {
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
