@@ -102,7 +102,7 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier();
 const GENERATED_ArkUICircleModifier* GetCircleModifier();
 const GENERATED_ArkUIColumnModifier* GetColumnModifier();
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier();
-const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier() { return nullptr; };
+const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier();
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier();
 const GENERATED_ArkUICommonModifier* GetCommonModifier();
 const GENERATED_ArkUIScrollableCommonMethodModifier* GetScrollableCommonMethodModifier();
