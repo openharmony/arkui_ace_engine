@@ -3284,12 +3284,6 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_onWillScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onDidScrollAttribute(value: ScrollOnScrollCallback): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._ScrollableCommonMethod_onDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     onReachStartAttribute(value: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)

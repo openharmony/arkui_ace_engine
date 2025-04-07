@@ -704,8 +704,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _ScrollableCommonMethod_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _ScrollableCommonMethod_onReachStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ScrollableCommonMethod_onReachEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -956,6 +954,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GridAttribute_onScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _GridAttribute_onReachStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_onReachEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1177,6 +1177,8 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_onScrollIndex(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_onScrollVisibleContentChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_onReachStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3061,6 +3063,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WaterFlowAttribute_cachedCount0(ptr: KPointer, value: number): void
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_cachedCount1(ptr: KPointer, count: number, show: KInt): void
+    @ani.unsafe.Direct
+    native static _WaterFlowAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _WaterFlowAttribute_onReachStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
