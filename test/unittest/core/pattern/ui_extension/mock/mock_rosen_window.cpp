@@ -21,7 +21,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
 
 void RosenWindow::Init() {}
 
-void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) {}
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType,
+    int32_t dragScene = 0) {}
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch) {}
 

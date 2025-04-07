@@ -121,12 +121,13 @@ void RosenWindow::InitArkUI_X()
 #endif
 }
 
-void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
+void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType,
+    int32_t dragScene)
 {
     if (!rsWindow_ || rate < 0) {
         return;
     }
-    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
+    rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType, dragScene);
 }
 
 void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)

@@ -1156,13 +1156,14 @@ void PipelineContext::FlushFrameRate()
     int32_t currAnimatorExpectedFrameRate = GetOrCreateUIDisplaySyncManager()->GetAnimatorRate();
     if (frameRateManager_->IsRateChanged() || currAnimatorExpectedFrameRate != lastAnimatorExpectedFrameRate_) {
         auto [rate, rateType] = frameRateManager_->GetExpectedRate();
+        auto dragScene = frameRateManager_->GetDragScene();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d frameRateType = %d "
-            "currAnimatorExpectedFrameRate = %d, lastAnimatorExpectedFrameRate = %d",
-            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_);
-        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FlushFrameRate Expected frameRate = %{public}d "
-            "frameRateType = %{public}d currAnimatorExpectedFrameRate = %{public}d, lastRate = %{public}d",
-            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_);
-        window_->FlushFrameRate(rate, currAnimatorExpectedFrameRate, rateType);
+            "currAnimatorExpectedFrameRate = %d, lastAnimatorExpectedFrameRate = %d, dragScene = %d",
+            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_, dragScene);
+        TAG_LOGD(AceLogTag::ACE_DISPLAY_SYNC, "FlushFrameRate Expected frameRate = %{public}d frameRateType = "
+            "%{public}d currAnimatorExpectedFrameRate = %{public}d, lastRate = %{public}d, dragScene = %{public}d",
+            rate, rateType, currAnimatorExpectedFrameRate, lastAnimatorExpectedFrameRate_, dragScene);
+        window_->FlushFrameRate(rate, currAnimatorExpectedFrameRate, rateType, dragScene);
         frameRateManager_->SetIsRateChanged(false);
         lastAnimatorExpectedFrameRate_ = currAnimatorExpectedFrameRate;
     }

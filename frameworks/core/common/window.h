@@ -48,7 +48,7 @@ public:
 
     virtual void RequestFrame();
 
-    virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte) {}
+    virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte, int32_t dragScene) {}
 
     virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
 

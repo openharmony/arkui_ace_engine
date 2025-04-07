@@ -4222,6 +4222,7 @@ void FrameNode::AddFRCSceneInfo(const std::string& scene, float speed, SceneStat
     auto frameRateManager = pipelineContext->GetFrameRateManager();
     CHECK_NULL_VOID(frameRateManager);
 
+    frameRateManager->SetDragScene(status == SceneStatus::END ? 0 : 1);
     auto expectedRate = renderContext->CalcExpectedFrameRate(scene, std::abs(speed));
     auto nodeId = GetId();
     auto iter = sceneRateMap_.find(scene);

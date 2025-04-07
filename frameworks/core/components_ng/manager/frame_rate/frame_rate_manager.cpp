@@ -97,4 +97,14 @@ std::pair<int32_t, int32_t> FrameRateManager::GetExpectedRate()
     }
     return {expectedRate, rateType};
 }
+
+void FrameRateManager::SetDragScene(int32_t status)
+{
+    dragScene_ = status;
+}
+
+int32_t FrameRateManager::GetDragScene()
+{
+    return dragScene_;
+}
 } // namespace OHOS::Ace::NG

@@ -158,7 +158,8 @@ void FormRenderWindow::Unlock()
 {
 }
 
-void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType)
+void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType,
+    int32_t dragScene)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (frameRateLinker_ == nullptr) {
