@@ -7362,20 +7362,20 @@ void WebDelegate::OnSafeInsetsChange()
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
         left = static_cast<int>(
-            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), windowRect.Left()));
+            resultSafeArea.left_.start + resultSafeArea.left_.end - std::max(currentArea_.Left(), 0.0));
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - std::max(windowRect.Top(), currentArea_.Top()));
+        top = static_cast<int>(resultSafeArea.top_.end - std::max(currentArea_.Top(), 0.0));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
-        right = static_cast<int>(std::min(windowRect.Right(), currentArea_.Right()) +
-            windowRect.Right() - resultSafeArea.right_.end - resultSafeArea.right_.start);
+        right = static_cast<int>(std::min(windowRect.Width(), currentArea_.Right()) +
+            windowRect.Width() - resultSafeArea.right_.end - resultSafeArea.right_.start);
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(std::min(windowRect.Bottom(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(std::min(windowRect.Height(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
 
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
@@ -7386,10 +7386,10 @@ void WebDelegate::OnSafeInsetsChange()
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDelegate::OnSafeInsetsChange left:%{public}d top:%{public}d right:%{public}d bottom:%{public}d "
         "systemSafeArea:%{public}s cutoutSafeArea:%{public}s navigationIndicatorSafeArea:%{public}s "
-        "resultSafeArea:%{public}s currentArea:%{public}s", left, top, right, bottom,
+        "resultSafeArea:%{public}s currentArea:%{public}s windowRect:%{public}s", left, top, right, bottom,
         systemSafeArea_.ToString().c_str(), cutoutSafeArea_.ToString().c_str(),
         navigationIndicatorSafeArea_.ToString().c_str(), resultSafeArea.ToString().c_str(),
-        currentArea_.ToString().c_str());
+        currentArea_.ToString().c_str(), windowRect.ToString().c_str());
 
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this), left, top, right, bottom]() {
