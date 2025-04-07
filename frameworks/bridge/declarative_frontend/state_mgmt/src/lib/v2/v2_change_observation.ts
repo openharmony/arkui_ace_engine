@@ -262,13 +262,6 @@ class ObserveV2 {
       }
     }
 
-    // If there's still time, do low-priority cleanup
-    for (let id in this.id2targets_) {
-      if (!this.id2targets_[id]?.size) {
-        delete this.id2targets_[id];
-      }
-    }
-
     this.idleTasks_.first = 0;
     this.idleTasks_.end = 0;
   }
