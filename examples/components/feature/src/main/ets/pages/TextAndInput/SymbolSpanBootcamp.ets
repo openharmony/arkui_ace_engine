@@ -22,11 +22,6 @@ class MyButtonModifierNormal implements AttributeModifier<SymbolSpanAttribute> {
   public isDark: boolean = false;
 
   applyNormalAttribute(instance: SymbolSpanAttribute): void {
-    if (this.isDark) {
-      instance.backgroundColor(Color.Black)
-    } else {
-      instance.backgroundColor(Color.Red)
-    }
   }
 }
 
@@ -34,11 +29,6 @@ class MyButtonModifierPressed implements AttributeModifier<SymbolSpanAttribute> 
   public isDark: boolean = false
 
   applyPressedAttribute(instance: SymbolSpanAttribute): void {
-    if (this.isDark) {
-      instance.backgroundColor(Color.Black)
-    } else {
-      instance.backgroundColor(Color.Red)
-    }
   }
 }
 
@@ -46,11 +36,6 @@ class MyButtonModifierFocused implements AttributeModifier<SymbolSpanAttribute> 
   public isDark: boolean = false
 
   applyFocusedAttribute(instance: SymbolSpanAttribute): void {
-    if (this.isDark) {
-      instance.backgroundColor(Color.Black)
-    } else {
-      instance.backgroundColor(Color.Red)
-    }
   }
 }
 
@@ -58,11 +43,6 @@ class MyButtonModifierDisabled implements AttributeModifier<SymbolSpanAttribute>
   public isDark: boolean = false
 
   applyDisabledAttribute(instance: SymbolSpanAttribute): void {
-    if (this.isDark) {
-      instance.backgroundColor(Color.Black)
-    } else {
-      instance.backgroundColor(Color.Red)
-    }
   }
 }
 
@@ -70,11 +50,6 @@ class MyButtonModifierSelected implements AttributeModifier<SymbolSpanAttribute>
   public isDark: boolean = false
 
   applySelectedAttribute(instance: SymbolSpanAttribute): void {
-    if (this.isDark) {
-      instance.backgroundColor(Color.Black)
-    } else {
-      instance.backgroundColor(Color.Red)
-    }
   }
 }
 
