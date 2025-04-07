@@ -269,6 +269,7 @@ void TabBar0Impl(Ark_NativePointer node,
     } else {
         LOGE("ARKOALA TabContentAttributeModifier.TabBar0Impl unknown value format.");
     }
+    TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
     TabContentModelNG::SetTabBar(frameNode, label, icon, std::move(builder));
 }
 void TabBar1Impl(Ark_NativePointer node,
