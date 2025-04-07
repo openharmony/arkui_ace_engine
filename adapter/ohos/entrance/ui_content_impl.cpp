@@ -3566,7 +3566,7 @@ int32_t UIContentImpl::AddFocusActiveChangeCallback(const std::function<void(boo
     CHECK_NULL_RETURN(pipelineContext, 0);
     auto focusManager = pipelineContext->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, 0);
-    return focusManager->AddFocusActiveChangeListener(callback);
+    return focusManager->AddFocusActiveChangeCallback(callback);
 }
 
 void UIContentImpl::RemoveFocusActiveChangeCallback(int32_t handler)
@@ -3577,7 +3577,7 @@ void UIContentImpl::RemoveFocusActiveChangeCallback(int32_t handler)
     CHECK_NULL_VOID(pipelineContext);
     auto focusManager = pipelineContext->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->RemoveFocusActiveChangeListener(handler);
+    focusManager->RemoveFocusActiveChangeCallback(handler);
 }
 
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)

@@ -46,7 +46,9 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     eventHub->AddSupportedState(NG::UI_STATE_FOCUSED);
     ASSERT_NE(eventHub->stateStyleMgr_, nullptr);
@@ -55,7 +57,7 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
 
     eventHub->stateStyleMgr_ = nullptr;
     ASSERT_EQ(eventHub->stateStyleMgr_, nullptr);
-    context->isFocusActive_ = true;
+    focusManager->isFocusActive_ = true;
     FocusBoxStyle styledStyle;
     styledStyle.strokeColor = Color::RED;
     focusHub->box_.SetStyle(styledStyle);
@@ -64,7 +66,7 @@ HWTEST_F(FocusHubTestNg, PaintFocusState0002, TestSize.Level1)
     EXPECT_FALSE(focusHub->HasFocusStateStyle());
     EXPECT_FALSE(focusHub->PaintFocusState(false));
 
-    context->isFocusActive_ = true;
+    focusManager->isFocusActive_ = true;
     EXPECT_TRUE(focusHub->IsNeedPaintFocusState());
     focusHub->focusStyleType_ = FocusStyleType::FORCE_NONE;
     EXPECT_FALSE(focusHub->HasFocusStateStyle());
