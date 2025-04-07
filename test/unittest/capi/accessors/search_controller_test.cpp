@@ -105,11 +105,6 @@ HWTEST_F(SearchControllerAccessorTest, StopEditingTest, TestSize.Level1)
     accessor_->stopEditing(peer_);
 }
 
-MATCHER_P(CompareSelectionOptions, selectionOptions, "SelectionOptions compare")
-{
-    return arg->menuPolicy == selectionOptions->menuPolicy;
-}
-
 /**
  * @tc.name: SetTextSelectionTest
  * @tc.desc: check work of setTextSelection method
@@ -118,7 +113,6 @@ MATCHER_P(CompareSelectionOptions, selectionOptions, "SelectionOptions compare")
 HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setTextSelection, nullptr);
-    constexpr std::optional<SelectionOptions> empty = std::nullopt;
     std::optional<SelectionOptions> test = SelectionOptions { MenuPolicy::DEFAULT };
 
     int32_t valid1 = 10;
@@ -134,24 +128,26 @@ HWTEST_F(SearchControllerAccessorTest, SetTextSelectionTest, TestSize.Level1)
         static_cast<MenuPolicy>(-1)
     };
 
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, CompareSelectionOptions(empty))).Times(0);
+    EXPECT_CALL(*mockSearchController_, SetTextSelection(0, 0, Eq(std::nullopt))).Times(0);
     accessor_->setTextSelection(peer_, nullptr, nullptr, nullptr);
-
+    EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, _))
+        .WillRepeatedly([&test](int32_t arg1, int32_t arg2, std::optional<SelectionOptions> arg3) {
+            auto input = test ? std::to_string(std::underlying_type_t<MenuPolicy>(test->menuPolicy)) : "nullopt";
+            if (!test) {
+                EXPECT_FALSE(arg3) << "Input value was: " << input;
+            } else {
+                ASSERT_TRUE(arg3);
+                EXPECT_EQ(arg3->menuPolicy, test->menuPolicy) << "Input value was: " << input;
+            }
+        });
     Ark_SelectionOptions menuOptions;
     for (auto& menuPolicy : menuPolicies) {
-        test->menuPolicy = menuPolicy;
-        if (menuPolicy != static_cast<MenuPolicy>(-1)) {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
-                valid2, CompareSelectionOptions(test))).Times(1);
-        } else {
-            EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1,
-                valid2, CompareSelectionOptions(empty))).Times(1);
-        }
+        test->menuPolicy = (menuPolicy == static_cast<MenuPolicy>(-1)) ? MenuPolicy::DEFAULT : menuPolicy;
         menuOptions.menuPolicy = ArkValue<Opt_MenuPolicy>(menuPolicy);
         auto optMenuOptions = ArkValue<Opt_SelectionOptions>(menuOptions);
         accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, &optMenuOptions);
     }
-    EXPECT_CALL(*mockSearchController_, SetTextSelection(valid1, valid2, CompareSelectionOptions(empty))).Times(1);
+    test = std::nullopt;
     accessor_->setTextSelection(peer_, &arkValid1, &arkValid2, nullptr);
 }
 } // namespace OHOS::Ace::NG

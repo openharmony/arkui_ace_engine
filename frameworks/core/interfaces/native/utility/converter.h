@@ -557,6 +557,7 @@ namespace Converter {
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src);
     template<> TextRange Convert(const Ark_TextRange& src);
+    template<> OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> float Convert(const Ark_Float32& src);

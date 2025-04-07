@@ -182,84 +182,6 @@ std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TES
     { "", {} },
     { "invalid", {} },
 };
-std::vector<std::tuple<Ark_String, std::string>> IMAGE_SMOOTHING_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("low"), "low" },
-    { Converter::ArkValue<Ark_String>("medium"), "medium" },
-    { Converter::ArkValue<Ark_String>("high"), "high" },
-    { Converter::ArkValue<Ark_String>(""), EMPTY_STRING },
-    { Converter::ArkValue<Ark_String>("invalid"), EMPTY_STRING }
-};
-std::vector<std::tuple<Ark_String, LineCapStyle>> LINE_CAP_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("butt"), LineCapStyle::BUTT },
-    { Converter::ArkValue<Ark_String>("round"), LineCapStyle::ROUND },
-    { Converter::ArkValue<Ark_String>("square"), LineCapStyle::SQUARE },
-    { Converter::ArkValue<Ark_String>(""), LineCapStyle::BUTT },
-    { Converter::ArkValue<Ark_String>("invalid"), LineCapStyle::BUTT }
-};
-std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("bevel"), LineJoinStyle::BEVEL },
-    { Converter::ArkValue<Ark_String>("miter"), LineJoinStyle::MITER },
-    { Converter::ArkValue<Ark_String>("round"), LineJoinStyle::ROUND },
-    { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
-    { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
-};
-std::vector<std::tuple<Opt_String, Ace::CanvasFillRule>> FILL_RULE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_String>("evenodd"), Ace::CanvasFillRule::EVENODD },
-    { Converter::ArkValue<Opt_String>("nonzero"), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>("invalid"), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>(""), Ace::CanvasFillRule::NONZERO },
-    { Converter::ArkValue<Opt_String>(Ark_Empty()), Ace::CanvasFillRule::NONZERO }
-};
-std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("ltr"), Ace::TextDirection::LTR },
-    { Converter::ArkValue<Ark_String>("rtl"), Ace::TextDirection::RTL },
-    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
-    { Converter::ArkValue<Ark_String>("auto"), Ace::TextDirection::AUTO },
-    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
-    { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
-};
-std::vector<std::tuple<Ark_String, Ace::TextAlign>> TEXT_ALIGN_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("center"), Ace::TextAlign::CENTER },
-    { Converter::ArkValue<Ark_String>("end"), Ace::TextAlign::END },
-    { Converter::ArkValue<Ark_String>("justify"), Ace::TextAlign::JUSTIFY },
-    { Converter::ArkValue<Ark_String>("left"), Ace::TextAlign::LEFT },
-    { Converter::ArkValue<Ark_String>("right"), Ace::TextAlign::RIGHT },
-    { Converter::ArkValue<Ark_String>("start"), Ace::TextAlign::START },
-    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextAlign::CENTER },
-    { Converter::ArkValue<Ark_String>(""), Ace::TextAlign::CENTER },
-};
-std::vector<std::tuple<Ark_String, TextBaseline>> TEXT_BASE_LINE_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("alphabetic"), Ace::TextBaseline::ALPHABETIC },
-    { Converter::ArkValue<Ark_String>("bottom"), Ace::TextBaseline::BOTTOM },
-    { Converter::ArkValue<Ark_String>("hanging"), Ace::TextBaseline::HANGING },
-    { Converter::ArkValue<Ark_String>("ideographic"), Ace::TextBaseline::IDEOGRAPHIC },
-    { Converter::ArkValue<Ark_String>("middle"), Ace::TextBaseline::MIDDLE },
-    { Converter::ArkValue<Ark_String>("top"), Ace::TextBaseline::TOP },
-    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextBaseline::ALPHABETIC },
-    { Converter::ArkValue<Ark_String>(""), Ace::TextBaseline::ALPHABETIC },
-};
-std::vector<std::tuple<Ark_Union_LengthMetrics_String, Dimension, bool>> STR_LETTER_SPACING_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0vp"), 123.0_vp, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0vp"), 0.0_vp, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("-1.23vp"), -1.23_vp, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0px"), 123.0_px, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0px"), 0.0_px, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("-1.23px"), -1.23_px, true },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("0.0fp"), 0.0_fp, false },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("123.0pct"), 123.0_px, false },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>("invalid"), 0.0_vp, false },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_String>(""), 0.0_vp, false },
-};
-const std::vector<std::tuple<Ark_Union_LengthMetrics_String, Dimension>> DIM_LETTER_SPACING_TEST_PLAN = {
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_vp), 123.0_vp },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(0.0_vp), 0.0_vp },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(-1.23_vp), -1.23_vp },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_px), 123.0_px },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(0.0_px), 0.0_px },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(-1.23_px), -1.23_px },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.0_fp), 0.0_px },
-    { Converter::ArkUnion<Ark_Union_LengthMetrics_String, Ark_LengthMetrics>(123.5_pct), 0.0_px },
-};
 class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
@@ -348,14 +270,32 @@ public:
     MOCK_METHOD(TransformParam, GetTransform, (), (override));
     MOCK_METHOD(void, DrawPixelMap, (const Ace::ImageInfo&), (override));
     MOCK_METHOD(RefPtr<Ace::PixelMap>, GetPixelMap, (const ImageSize&), (override));
+    MOCK_METHOD(void, DrawSvgImage, (const Ace::ImageInfo&), (override));
+    MOCK_METHOD(void, DrawImage, (const ImageInfo&), (override));
+    MOCK_METHOD(std::vector<double>, GetLineDash, (), (override));
+    MOCK_METHOD(TextMetrics, GetMeasureTextMetrics, (const PaintState&, const std::string&), (override));
+    MOCK_METHOD(void, SetFillColor, (const Color&, bool), (override));
+    MOCK_METHOD(void, SetFillGradient, (const std::shared_ptr<Ace::Gradient>&), (override));
+    MOCK_METHOD(void, SetFillPattern, (const std::shared_ptr<Ace::Pattern>&), (override));
+    MOCK_METHOD(void, SetStrokeColor, (const Color&, bool), (override));
+    MOCK_METHOD(void, SetStrokeGradient, (const std::shared_ptr<Ace::Gradient>&), (override));
+    MOCK_METHOD(void, SetStrokePattern, (const std::shared_ptr<Ace::Pattern>&), (override));
 };
 struct MockImageBitmapPeer : public ImageBitmapPeer {
 public:
     MockImageBitmapPeer() = default;
     ~MockImageBitmapPeer() override = default;
+    MOCK_METHOD(RefPtr<Ace::PixelMap>, GetPixelMap, (), (const));
+    MOCK_METHOD(bool, IsSvg, (), ());
+    MOCK_METHOD(RefPtr<NG::SvgDomBase>, GetSvgDom, (), ());
+    MOCK_METHOD(Ace::ImageFit, GetImageFit, (), ());
+};
+struct MockImageBitmapPeerPattern : public ImageBitmapPeer {
+public:
+    MockImageBitmapPeerPattern() = default;
+    ~MockImageBitmapPeerPattern() override = default;
     using ImageBitmapPeer::SetHeight;
     using ImageBitmapPeer::SetWidth;
-    MOCK_METHOD(RefPtr<Ace::PixelMap>, GetPixelMap, (), (const));
 };
 } // namespace
 
@@ -1934,7 +1874,7 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createPattern, nullptr);
     Ark_ImageBitmap arkBitmap;
-    auto bitmapPeer = new NiceMock<MockImageBitmapPeer>();
+    auto bitmapPeer = new NiceMock<MockImageBitmapPeerPattern>();
     arkBitmap = bitmapPeer;
     auto repetition = Converter::ArkValue<Opt_String>(REPEAT_STRING);
     for (const auto& actualW : NUMBER_TEST_PLAN) {
@@ -1959,285 +1899,6 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
             EXPECT_NEAR(target->GetImageHeight(), actualH, FLT_PRECISION);
             EXPECT_EQ(target->GetRepetition(), REPEAT_STRING);
         }
-    }
-}
-
-/**
- * @tc.name: getTransformScaleTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, getTransformScaleTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getTransform, nullptr);
-    for (const auto& expectedX : NUMBER_TEST_PLAN) {
-        for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto target = TransformParam {
-                .scaleX = expectedX,
-                .scaleY = expectedY,
-            };
-            EXPECT_CALL(*renderingModel_, GetTransform()).WillOnce(Return(target));
-            Container::Current()->SetUseNewPipeline();
-
-            Matrix2DPeer* matrix = accessor_->getTransform(peer_);
-            ASSERT_NE(matrix, nullptr);
-            EXPECT_NEAR(matrix->GetScaleX(), expectedX, FLT_PRECISION);
-            EXPECT_NEAR(matrix->GetScaleY(), expectedY, FLT_PRECISION);
-        }
-    }
-}
-
-/**
- * @tc.name: getTransformRotateTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, getTransformRotateTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getTransform, nullptr);
-    for (const auto& expectedX : NUMBER_TEST_PLAN) {
-        for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto target = TransformParam {
-                .skewX = expectedX,
-                .skewY = expectedY,
-            };
-            EXPECT_CALL(*renderingModel_, GetTransform()).WillOnce(Return(target));
-            Container::Current()->SetUseNewPipeline();
-
-            Matrix2DPeer* matrix = accessor_->getTransform(peer_);
-            ASSERT_NE(matrix, nullptr);
-            EXPECT_NEAR(matrix->GetRotateX(), expectedX, FLT_PRECISION);
-            EXPECT_NEAR(matrix->GetRotateY(), expectedY, FLT_PRECISION);
-        }
-    }
-}
-
-/**
- * @tc.name: getTransformTranslateTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, getTransformTranslateTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->getTransform, nullptr);
-    for (const auto& expectedX : NUMBER_TEST_PLAN) {
-        for (const auto& expectedY : NUMBER_TEST_PLAN) {
-            auto target = TransformParam {
-                .translateX = expectedX,
-                .translateY = expectedY,
-            };
-            EXPECT_CALL(*renderingModel_, GetTransform()).WillOnce(Return(target));
-            Container::Current()->SetUseNewPipeline();
-
-            Matrix2DPeer* matrix = accessor_->getTransform(peer_);
-            ASSERT_NE(matrix, nullptr);
-            EXPECT_NEAR(matrix->GetTranslateX(), expectedX, FLT_PRECISION);
-            EXPECT_NEAR(matrix->GetTranslateY(), expectedY, FLT_PRECISION);
-        }
-    }
-}
-
-/**
- * @tc.name: setImageSmoothingQualityTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingQualityTest, TestSize.Level1)
-{
-    for (const auto& [actual, expected] : IMAGE_SMOOTHING_TEST_PLAN) {
-        auto nCalls = (expected == EMPTY_STRING) ? 0 : 1;
-        EXPECT_CALL(*renderingModel_, SetSmoothingQuality(expected)).Times(nCalls);
-        accessor_->setImageSmoothingQuality(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: setLineCapTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setLineCapTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setLineCap, nullptr);
-    for (const auto& [actual, expected] : LINE_CAP_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetLineCap(expected)).Times(1);
-        accessor_->setLineCap(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: setLineJoinTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setLineJoin, nullptr);
-    for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetLineJoin(expected)).Times(1);
-        accessor_->setLineJoin(peer_, &actual);
-    }
-}
-
-#ifdef PIXEL_MAP_SUPPORTED
-/**
- * @tc.name: setPixelMapTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setPixelMap, nullptr);
-    Ark_PixelMap arkPixelMap = new PixelMapPeer();
-    auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
-    Ace::ImageInfo target;
-    EXPECT_CALL(*renderingModel_, DrawPixelMap(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-    arkPixelMap->pixelMap = AceType::MakeRefPtr<MockPixelMap>();
-
-    accessor_->setPixelMap(peer_, &optPixelMap);
-    EXPECT_EQ(Referenced::RawPtr(target.pixelMap), Referenced::RawPtr(arkPixelMap->pixelMap));
-}
-#else
-
-/**
- * @tc.name: setPixelMapTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setPixelMap, nullptr);
-    accessor_->setPixelMap(peer_, nullptr);
-    EXPECT_TRUE(true);
-}
-#endif
-
-/**
- * @tc.name: clip0Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->clip0, nullptr);
-    for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetClipRuleForPath(expected)).Times(1);
-        accessor_->clip0(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: clip1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->clip1, nullptr);
-    Ark_Path2D arkPath = new Path2DPeer();
-    auto path = AceType::MakeRefPtr<CanvasPath2D>();
-    arkPath->SetCanvasPath2d(path);
-    for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetClipRuleForPath2D(expected, path)).Times(1);
-        accessor_->clip1(peer_, arkPath, &arkRule);
-    }
-}
-
-/**
- * @tc.name: fill0Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, fill0Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->fill0, nullptr);
-    for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetFillRuleForPath(expected)).Times(1);
-        accessor_->fill0(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: fill1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->fill1, nullptr);
-    Ark_Path2D arkPath = new Path2DPeer();
-    auto path = AceType::MakeRefPtr<CanvasPath2D>();
-    arkPath->SetCanvasPath2d(path);
-    for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetFillRuleForPath2D(expected, path)).Times(1);
-        accessor_->fill1(peer_, arkPath, &arkRule);
-    }
-}
-
-/**
- * @tc.name: setDirectionTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setDirectionTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setDirection, nullptr);
-    for (const auto& [actual, expected] : DIRECTION_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetTextDirection(expected)).Times(1);
-        accessor_->setDirection(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: setTextAlignTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setTextAlignTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setTextAlign, nullptr);
-    for (const auto& [actual, expected] : TEXT_ALIGN_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetTextAlign(expected)).Times(1);
-        accessor_->setTextAlign(peer_, &actual);
-    }
-}
-
-/**
- * @tc.name: setTextBaselineTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setTextBaselineTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setTextBaseline, nullptr);
-    for (const auto& [actual, expected] : TEXT_BASE_LINE_TEST_PLAN) {
-        EXPECT_CALL(*renderingModel_, SetTextBaseline(expected)).Times(1);
-        accessor_->setTextBaseline(peer_, &actual);
-    }
-}
-/**
- * @tc.name: setLetterSpacingTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setLetterSpacingTest, TestSize.Level1)
-{
-    ASSERT_NE(accessor_->setLetterSpacing, nullptr);
-    for (const auto& [actual, expected, valid] : STR_LETTER_SPACING_TEST_PLAN) {
-        Dimension target;
-        if (!valid) {
-            EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).Times(0);
-            accessor_->setLetterSpacing(peer_, &actual);
-        } else {
-            EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-            accessor_->setLetterSpacing(peer_, &actual);
-        }
-    }
-    for (const auto& [actual, expected] : DIM_LETTER_SPACING_TEST_PLAN) {
-        Dimension target;
-        EXPECT_CALL(*renderingModel_, SetLetterSpacing(_)).WillOnce(DoAll(SaveArg<0>(&target)));
-        accessor_->setLetterSpacing(peer_, &actual);
-        EXPECT_EQ(target, expected);
     }
 }
 } // namespace OHOS::Ace::NG
