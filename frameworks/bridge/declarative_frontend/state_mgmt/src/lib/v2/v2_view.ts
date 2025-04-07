@@ -303,13 +303,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         stateMgmtConsole.debug(`${this.constructor.name}: aboutToBeDeletedInternal `);
 
         // purge the elmtIds owned by this ViewV2 from the updateFuncByElmtId and also the state variable dependent elmtIds
-        this.updateFuncByElmtId.forEach((_updateFun: UpdateFuncRecord, elmtId: number) => {
-            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
-            ObserveV2.getObserve().clearBinding(elmtId);
-            delete ObserveV2.getObserve().id2cmp_[elmtId];
+        Array.from(this.updateFuncByElmtId.keys()).forEach((elmtId: number) => {
+            // FIXME split View: enable delete  this purgeDeleteElmtId(elmtId);
         });
-
-        delete ObserveV2.getObserve().id2cmp_[this.id_];
 
         // unregistration of ElementIDs
         stateMgmtConsole.debug(`${this.debugInfo__()}: onUnRegElementID`);
@@ -409,14 +405,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             ObserveV2.getObserve().startRecordDependencies(this, elmtId);
 
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
-
-            // After first render, new bindings (pending) need to be recorded
-            // immediately, as they may fire changes before the next idle time,
-            // e.g. in the onAreaChange handler
-            if (isFirstRender) {
-                ObserveV2.getObserve().runIdleTasks();
-            }
-
             if (!isFirstRender) {
                 _popFunc();
             }

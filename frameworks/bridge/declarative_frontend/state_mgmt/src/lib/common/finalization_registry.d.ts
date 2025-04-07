@@ -15,7 +15,7 @@
  */
 
 declare class FinalizationRegistry {
-  constructor(onCleanup: (heldValue: any) => void);
-  register(target: Object | Symbol, heldValue: any, unregisterToken?: any): void;
-  unregister(unregisterToken: any): void;
-}
+    constructor(onCleanup: (heldValue: any) => void);
+    register(target: Object | Symbol, heldValue: any, unregisterToken?: any): void;
+    unregister(unregisterToken: any): void;
+  }

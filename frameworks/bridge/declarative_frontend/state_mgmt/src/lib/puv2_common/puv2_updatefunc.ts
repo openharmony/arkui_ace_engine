@@ -22,7 +22,6 @@
  * 
  */
 
-
 /**
  * WeakRef
  * ref to an Object that does not prevent the Object from getting GC'ed
@@ -31,10 +30,10 @@
  *
  */
 declare class WeakRef<T extends Object> {
-  constructor(o: T);
-  deref(): T;
-}
-
+    constructor(o: T);
+    deref(): T;
+  }
+  
   declare class DumpLog {
     static print(depth: number, content: string): void;
   }
