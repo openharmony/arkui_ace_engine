@@ -50,7 +50,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
+    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,
@@ -63,7 +63,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
         optValue.reset();
     }
-    // DividerModelNG::StrokeWidth(frameNode, optValue);
+    DividerModelNG::StrokeWidth(frameNode, optValue);
 }
 
 void LineCapImpl(Ark_NativePointer node,
@@ -71,7 +71,7 @@ void LineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(value));
+    DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(value));
 }
 
 } // DividerAttributeModifier

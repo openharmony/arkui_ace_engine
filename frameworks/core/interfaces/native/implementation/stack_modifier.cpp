@@ -43,11 +43,10 @@ namespace StackModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = StackModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = StackModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // StackModifier
 namespace StackInterfaceModifier {
@@ -58,7 +57,7 @@ void SetStackOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto opts = Converter::OptConvert<StackOptions>(*options);
     auto align = opts ? opts->alignContent : std::nullopt;
-    // StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
+    StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
 }
 } // StackInterfaceModifier
 namespace StackAttributeModifier {
@@ -67,7 +66,7 @@ void AlignContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value, Alignment::CENTER));
+    StackModelNG::SetAlignment(frameNode, Converter::ConvertOrDefault(value, Alignment::CENTER));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
@@ -76,10 +75,10 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
-    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
-    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
-    CHECK_NULL_VOID(themeConstants);
+    // auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    // auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    // auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    // CHECK_NULL_VOID(themeConstants);
     // if (pointLightStyle) {
     //     if (pointLightStyle->lightSource) {
     //         ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
