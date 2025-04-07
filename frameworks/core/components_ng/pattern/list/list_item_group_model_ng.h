@@ -41,7 +41,7 @@ public:
     void RemoveHeader() override;
     void RemoveFooter() override;
 
-    static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
+    static void SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
     static void SetFooter(FrameNode* frameNode, FrameNode* footerNode);

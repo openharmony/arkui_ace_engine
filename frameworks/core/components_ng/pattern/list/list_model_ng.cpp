@@ -73,6 +73,19 @@ RefPtr<ScrollControllerBase> ListModelNG::GetOrCreateController(FrameNode* frame
     return pattern->GetPositionController();
 }
 
+RefPtr<ScrollProxy> ListModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto scrollBarProxy = pattern->GetScrollBarProxy();
+    if (scrollBarProxy == nullptr) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    return scrollBarProxy;
+}
+
 void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth)
 {
     CHECK_NULL_VOID(frameNode);
@@ -486,9 +499,13 @@ void ListModelNG::AddDragFrameNodeToManager() const
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
-void ListModelNG::SetInitialIndex(FrameNode* frameNode, int32_t initialIndex)
+void ListModelNG::SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex, frameNode);
+    if (initialIndex.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, frameNode);
+    }
 }
 
 void ListModelNG::SetEditMode(FrameNode* frameNode, bool editMode)
@@ -557,9 +574,13 @@ int32_t ListModelNG::GetListDirection(FrameNode* frameNode)
     return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListDirection().value());
 }
 
-void ListModelNG::SetListDirection(FrameNode* frameNode, int32_t axis)
+void ListModelNG::SetListDirection(FrameNode* frameNode, const std::optional<int32_t>& axis)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, static_cast<Axis>(axis), frameNode);
+    if (axis.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, static_cast<Axis>(axis.value()), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListDirection, frameNode);
+    }
 }
 
 float ListModelNG::GetListFriction(FrameNode* frameNode)
@@ -619,11 +640,14 @@ int32_t ListModelNG::GetListScrollBar(FrameNode* frameNode)
     return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
 }
 
-void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
+void ListModelNG::SetListScrollBar(FrameNode* frameNode, const std::optional<int32_t>& barState)
 {
+    CHECK_NULL_VOID(frameNode);
     int32_t displayNumber;
     DisplayMode mode;
-    if (barState < 0 || barState >= static_cast<int32_t>(DISPLAY_MODE.size())) {
+
+    if (!barState.has_value() || (barState.has_value() &&
+        (barState.value() < 0 || barState.value() >= static_cast<int32_t>(DISPLAY_MODE.size())))) {
         auto list = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ListPattern>();
         if (!list) {
             mode = DisplayMode::AUTO;
@@ -632,8 +656,9 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
         }
         displayNumber = static_cast<int32_t>(mode);
     } else {
-        displayNumber = barState;
+        displayNumber = barState.value();
     }
+
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
 }
 
@@ -729,9 +754,13 @@ int32_t ListModelNG::GetListItemAlign(FrameNode* frameNode)
         frameNode->GetLayoutProperty<ListLayoutProperty>()->GetListItemAlignValue(V2::ListItemAlign::START));
 }
 
-void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)
+void ListModelNG::SetListItemAlign(FrameNode* frameNode, const std::optional<V2::ListItemAlign>& listItemAlign)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign, frameNode);
+    if (listItemAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, frameNode);
+    }
 }
 
 float ListModelNG::GetListSpace(FrameNode* frameNode)
@@ -741,9 +770,13 @@ float ListModelNG::GetListSpace(FrameNode* frameNode)
     return value.ConvertToVp();
 }
 
-void ListModelNG::SetListSpace(FrameNode* frameNode, const Dimension& space)
+void ListModelNG::SetListSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space, frameNode);
+    if (space.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, frameNode);
+    }
 }
 
 int32_t ListModelNG::GetEdgeEffect(FrameNode* frameNode)
@@ -770,9 +803,13 @@ int32_t ListModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
-void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign)
+void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, const std::optional<ScrollSnapAlign>& scrollSnapAlign)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
+    if (scrollSnapAlign.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, frameNode);
+    }
 }
 
 int32_t ListModelNG::GetScrollSnapAlign(FrameNode* frameNode)

@@ -83,9 +83,13 @@ void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
     pattern->SetFooterComponentContentExist(false);
 }
 
-void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
+void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+    if (divider.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, frameNode);
+    }
 }
 
 void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)

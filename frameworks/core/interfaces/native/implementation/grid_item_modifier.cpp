@@ -139,7 +139,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
     };
-    // GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
+    GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()
