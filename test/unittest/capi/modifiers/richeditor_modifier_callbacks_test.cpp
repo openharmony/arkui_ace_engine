@@ -702,6 +702,59 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnWillChangeTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWillChange2Test
+ * @tc.desc: setOnWillChange test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierCallbacksTest, OnWillChange2Test, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    struct CheckEvent {
+        int32_t resourceId;
+        RichEditorChangeValue info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto inputCallback = [] (Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_RichEditorChangeValue parameter, const Callback_Boolean_Void continuation) {
+        RichEditorChangeValue value;
+        auto& spanPosition = parameter.replacedSpans.array[0].spanPosition;
+        auto idx = Converter::OptConvert<int32_t>(spanPosition.spanIndex).value_or(-1);
+        auto start = Converter::OptConvert<int32_t>(spanPosition.spanRange.value0).value_or(-1);
+        auto end = Converter::OptConvert<int32_t>(spanPosition.spanRange.value1).value_or(-1);
+        RichEditorAbstractSpanResult span;
+        span.SetSpanIndex(idx);
+        span.SetSpanRangeStart(start);
+        span.SetSpanRangeEnd(end);
+        value.SetRichEditorReplacedSpans(span);
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+            .info = value,
+        };
+        CallbackHelper(continuation).InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
+    };
+    auto func = Converter::ArkValue<Callback_RichEditorChangeValue_Boolean>(nullptr, inputCallback, frameNode->GetId());
+    modifier_->setOnWillChange(node_, &func);
+    RichEditorChangeValue value;
+    RichEditorAbstractSpanResult span;
+    span.SetSpanIndex(TEST_OFFSET);
+    span.SetSpanRangeStart(TEST_START);
+    span.SetSpanRangeEnd(TEST_END);
+    value.SetRichEditorReplacedSpans(span);
+    auto eventHub = frameNode->GetEventHub<NG::RichEditorEventHub>();
+    ASSERT_TRUE(eventHub);
+    auto result = eventHub->FireOnWillChange(value);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_TRUE(result);
+    auto& testSpans = checkEvent->info.GetRichEditorReplacedSpans();
+    EXPECT_FALSE(testSpans.empty());
+    auto& testSpan = testSpans[0];
+    EXPECT_EQ(testSpan.GetSpanIndex(), TEST_OFFSET);
+    EXPECT_EQ(testSpan.GetSpanRangeStart(), TEST_START);
+    EXPECT_EQ(testSpan.GetSpanRangeEnd(), TEST_END);
+}
+
+/**
  * @tc.name: OnDidChangeTest
  * @tc.desc: setOnDidChange test
  * @tc.type: FUNC
