@@ -1199,6 +1199,8 @@ public:
     
     void OnDragAttach();
 
+    void SetNativeInnerWeb(bool isInnerWeb);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
