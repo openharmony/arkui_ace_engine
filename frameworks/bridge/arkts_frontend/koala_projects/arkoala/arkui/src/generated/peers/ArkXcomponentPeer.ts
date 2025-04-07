@@ -143,6 +143,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
     }
     setXComponentOptions2Attribute(options: XComponentOptions): void {
         const thisSerializer: Serializer = Serializer.hold()
+        options.controller?.holdXComponentCallback();
         thisSerializer.writeXComponentOptions(options)
         ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions2(this.peer.ptr, thisSerializer.asArray(), thisSerializer.length())
         thisSerializer.release()

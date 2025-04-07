@@ -5367,6 +5367,26 @@ void deserializeAndCallSyncWithThemeInterface(Ark_VMContext vmContext, KSerializ
     Callback_WithThemeAttribute_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_WithThemeAttribute value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_WithThemeAttribute_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_WithThemeAttribute value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_WithThemeAttribute_Void))))};
     _callSync(vmContext, _resourceId, options, _continuation);
 }
+void deserializeAndCallCallback_String_SurfaceRect_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_String surfaceId = static_cast<Ark_String>(thisDeserializer.readString());
+    Ark_SurfaceRect rect = thisDeserializer.readSurfaceRect();
+    _call(_resourceId, surfaceId, rect);
+}
+void deserializeAndCallSyncCallback_String_SurfaceRect_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect)>(thisDeserializer.readPointer());
+    Ark_String surfaceId = static_cast<Ark_String>(thisDeserializer.readString());
+    Ark_SurfaceRect rect = thisDeserializer.readSurfaceRect();
+    _callSync(vmContext, _resourceId, surfaceId, rect);
+}
 void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     switch (kind) {
@@ -5611,6 +5631,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -2038961969/*Kind_VoidCallback*/: return deserializeAndCallVoidCallback(thisArray, thisLength);
         case -1829763354/*Kind_WebKeyboardCallback*/: return deserializeAndCallWebKeyboardCallback(thisArray, thisLength);
         case 219587748/*Kind_WithThemeInterface*/: return deserializeAndCallWithThemeInterface(thisArray, thisLength);
+        case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }
@@ -5859,6 +5880,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -2038961969/*Kind_VoidCallback*/: return deserializeAndCallSyncVoidCallback(vmContext, thisArray, thisLength);
         case -1829763354/*Kind_WebKeyboardCallback*/: return deserializeAndCallSyncWebKeyboardCallback(vmContext, thisArray, thisLength);
         case 219587748/*Kind_WithThemeInterface*/: return deserializeAndCallSyncWithThemeInterface(vmContext, thisArray, thisLength);
+        case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallSyncCallback_String_SurfaceRect_Void(vmContext, thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }

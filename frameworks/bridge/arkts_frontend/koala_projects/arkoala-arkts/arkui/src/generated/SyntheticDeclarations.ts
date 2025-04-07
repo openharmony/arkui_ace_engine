@@ -71,6 +71,7 @@ import { WebKeyboardOptions, Header, OnPageEndEvent, OnPageBeginEvent, OnProgres
 import { WebResourceRequest } from "./ArkWebResourceRequestMaterialized"
 import { WebResourceResponse } from "./ArkWebResourceResponseMaterialized"
 import { XComponentController } from "./ArkXComponentControllerMaterialized"
+import { SurfaceRect } from "./ArkXcomponentInterfaces"
 import { UIExtensionProxy } from "./ArkUIExtensionProxyMaterialized"
 import { IsolatedComponentAttribute } from "./ArkIsolatedComponentInterfaces"
 import { StyledString } from "./ArkStyledStringMaterialized"
@@ -434,6 +435,7 @@ export interface Literal_String_plainText {
     plainText: string;
 }
 export type Callback_Literal_String_plainText_Void = (selectedText: Literal_String_plainText) => void;
+export type Callback_String_SurfaceRect_Void = (surfaceId: string, rect: SurfaceRect) => void;
 export interface Literal_Number_surfaceHeight_surfaceWidth {
     surfaceWidth: number;
     surfaceHeight: number;

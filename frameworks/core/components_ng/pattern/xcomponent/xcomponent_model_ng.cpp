@@ -621,4 +621,27 @@ bool XComponentModelNG::GetXComponentEnableAnalyzer(FrameNode* frameNode)
     CHECK_NULL_RETURN(xcPattern, false);
     return xcPattern->GetEnableAnalyzer();
 }
+
+void XComponentModelNG::SetXComponentController(FrameNode* frameNode,
+    std::shared_ptr<InnerXComponentController> controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetXComponentController(controller);
+}
+
+// for arkts1.2 XComponent
+RefPtr<FrameNode> XComponentModelNG::CreateFrameNodePeer(int32_t nodeId, const std::optional<std::string>& id,
+    XComponentType type, const std::optional<std::string>& libraryname)
+{
+    std::shared_ptr<InnerXComponentController> controller = nullptr;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, controller));
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateXComponentType(type);
+    }
+    return frameNode;
+}
 } // namespace OHOS::Ace::NG

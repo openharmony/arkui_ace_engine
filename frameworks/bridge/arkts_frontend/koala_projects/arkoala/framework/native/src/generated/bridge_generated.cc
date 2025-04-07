@@ -24874,6 +24874,27 @@ void impl_XComponentController_stopImageAnalyzer(Ark_NativePointer thisPtr) {
         GetAccessors()->getXComponentControllerAccessor()->stopImageAnalyzer(self);
 }
 KOALA_INTEROP_DIRECT_V1(XComponentController_stopImageAnalyzer, Ark_NativePointer)
+void impl_XComponentController_setOnSurfaceCreatedCallback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_String_Void onSurfaceCreatedCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_Void))))};;
+    GetAccessors()->getXComponentControllerAccessor()->setOnSurfaceCreatedCallback(self, (const Callback_String_Void*)&onSurfaceCreatedCallback_value);
+}
+KOALA_INTEROP_DIRECT_V3(XComponentController_setOnSurfaceCreatedCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_XComponentController_setOnSurfaceChangedCallback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_String_SurfaceRect_Void onSurfaceChangedCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_SurfaceRect_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String surfaceId, const Ark_SurfaceRect rect)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_SurfaceRect_Void))))};;
+    GetAccessors()->getXComponentControllerAccessor()->setOnSurfaceChangedCallback(self, (const Callback_String_SurfaceRect_Void*)&onSurfaceChangedCallback_value);
+}
+KOALA_INTEROP_DIRECT_V3(XComponentController_setOnSurfaceChangedCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_XComponentController_setOnSurfaceDestroyedCallback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+    Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_String_Void onSurfaceDestroyedCallback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_String_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String breakpoints)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_String_Void))))};;
+    GetAccessors()->getXComponentControllerAccessor()->setOnSurfaceDestroyedCallback(self, (const Callback_String_Void*)&onSurfaceDestroyedCallback_value);
+}
+KOALA_INTEROP_DIRECT_V3(XComponentController_setOnSurfaceDestroyedCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_WaterFlowSections_ctor() {
         return GetAccessors()->getWaterFlowSectionsAccessor()->ctor();
 }
