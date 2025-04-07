@@ -13110,7 +13110,8 @@ void impl_TabContentAttribute_onWillHide(Ark_NativePointer thisPtr, KSerializerB
 }
 KOALA_INTEROP_DIRECT_V3(TabContentAttribute_onWillHide, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Text_construct(Ark_Int32 id, Ark_Int32 flags) {
-        return GetNodeModifiers()->getTextModifier()->construct(id, flags);
+        auto textModifier = GetNodeModifiers()->getTextModifier();
+        return textModifier->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Text_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
 void impl_TextInterface_setTextOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {

@@ -278,7 +278,7 @@ generated_sources = [
   #"implementation/text_input_modifier.cpp",
   "implementation/text_menu_item_id_accessor.cpp",
 
-  #"implementation/text_modifier.cpp",
+  "implementation/text_modifier.cpp",
   "implementation/text_picker_dialog_accessor.cpp",
   "implementation/text_picker_modifier.cpp",
   "implementation/text_shadow_style_accessor.cpp",

@@ -184,7 +184,7 @@ const GENERATED_ArkUISymbolGlyphModifier* GetSymbolGlyphModifier();
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier();
 const GENERATED_ArkUITabsModifier* GetTabsModifier();
 const GENERATED_ArkUITabContentModifier* GetTabContentModifier();
-const GENERATED_ArkUITextModifier* GetTextModifier() { return nullptr; };
+const GENERATED_ArkUITextModifier* GetTextModifier();
 const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier() { return nullptr; };
 const GENERATED_ArkUITextClockModifier* GetTextClockModifier();
 const GENERATED_ArkUITextInputModifier* GetTextInputModifier() { return nullptr; };
