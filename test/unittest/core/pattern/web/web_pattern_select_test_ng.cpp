@@ -27,6 +27,7 @@
 #undef protected
 #undef private
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
@@ -830,6 +831,28 @@ HWTEST_F(WebPatternSelectTestNg, OnPopupShow_003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetVisibleRectToWeb_001
+ * @tc.desc: GetVisibleRectToWeb
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, GetVisibleRectToWeb_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->GetVisibleRectToWeb(0, 0, 100, 100);
+#endif
+}
+
+/**
  * @tc.name: AttachCustomKeyboard_001
  * @tc.desc: AttachCustomKeyboard
  * @tc.type: FUNC
@@ -947,10 +970,12 @@ HWTEST_F(WebPatternSelectTestNg, HandleShowTooltip_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
     const std::string& tooltip = "";
     int64_t tooltipTimestamp = 0;
     webPattern->tooltipTimestamp_ = 0;
     webPattern->HandleShowTooltip(tooltip, tooltipTimestamp);
+    MockPipelineContext::TearDown();
 #endif
 }
 
@@ -972,10 +997,12 @@ HWTEST_F(WebPatternSelectTestNg, HandleShowTooltip_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
     const std::string& tooltip = "tooltip";
     int64_t tooltipTimestamp = -1;
     webPattern->tooltipTimestamp_ = -1;
     webPattern->HandleShowTooltip(tooltip, tooltipTimestamp);
+    MockPipelineContext::TearDown();
 #endif
 }
 
@@ -997,10 +1024,12 @@ HWTEST_F(WebPatternSelectTestNg, HandleShowTooltip_003, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    MockPipelineContext::SetUp();
     const std::string& tooltip = "";
     int64_t tooltipTimestamp = -1;
     webPattern->tooltipTimestamp_ = 0;
     webPattern->HandleShowTooltip(tooltip, tooltipTimestamp);
+    MockPipelineContext::TearDown();
 #endif
 }
 
