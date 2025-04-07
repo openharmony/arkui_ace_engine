@@ -73,6 +73,11 @@ bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
     return direction == TextDirection::RTL ? !reverse : reverse;
 }
 
+inline std::string ToString(const bool boolean)
+{
+    return std::string(boolean ? "true" : "false");
+}
+
 inline std::string ToString(const SliderModel::SliderMode& mode)
 {
     static const LinearEnumMapNode<SliderModel::SliderMode, std::string> table[] = {
@@ -2254,8 +2259,7 @@ void SliderPattern::DumpInfo()
         DumpLog::GetInstance().AddDesc("Direction: " + ToString(paintProperty->GetDirection().value()));
     }
     if (paintProperty->HasReverse()) {
-        DumpLog::GetInstance().AddDesc(
-            "Reverse: " + std::string(paintProperty->GetReverse().value() ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc("Reverse: " + ToString(paintProperty->GetReverse().value()));
     }
     if (paintProperty->HasBlockColor()) {
         DumpLog::GetInstance().AddDesc("BlockColor: " + paintProperty->GetBlockColor().value().ToString());
@@ -2276,12 +2280,10 @@ void SliderPattern::DumpInfo()
             "MinResponsiveDistance: " + std::to_string(paintProperty->GetMinResponsiveDistance().value()));
     }
     if (paintProperty->HasShowSteps()) {
-        DumpLog::GetInstance().AddDesc(
-            "ShowSteps: " + std::string(paintProperty->GetShowSteps().value() ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc("ShowSteps: " + ToString(paintProperty->GetShowSteps().value()));
     }
     if (paintProperty->HasShowTips()) {
-        DumpLog::GetInstance().AddDesc(
-            "ShowTips: " + std::string(paintProperty->GetShowTips().value() ? "true" : "false"));
+        DumpLog::GetInstance().AddDesc("ShowTips: " + ToString(paintProperty->GetShowTips().value()));
     }
 
     DumpSubInfo(paintProperty);
