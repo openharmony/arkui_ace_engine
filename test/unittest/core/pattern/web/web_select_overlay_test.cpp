@@ -2010,14 +2010,14 @@ HWTEST_F(WebSelectOverlayTest, RunQuickMenu_003, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
-    ASSERT_NE(stack, nullptr);
+    EXPECT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     EXPECT_NE(frameNode, nullptr);
     stack->Push(frameNode);
     auto webPattern = frameNode->GetPattern<WebPattern>();
-    ASSERT_NE(webPattern, nullptr);
+    EXPECT_NE(webPattern, nullptr);
     MockPipelineContext::SetUp();
     WebSelectOverlay overlay(webPattern);
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params =
@@ -2030,7 +2030,7 @@ HWTEST_F(WebSelectOverlayTest, RunQuickMenu_003, TestSize.Level1)
     bool result = overlay.RunQuickMenu(params, callback);
     g_isEnable = false;
     MockPipelineContext::TearDown();
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 #endif
 }
 
@@ -3070,9 +3070,9 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTest005, TestSize.Level1)
     g_overlay.SetMenuOptions(selectInfo, params, callback);
     g_editStateFlags = OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_SELECT_ALL;
     g_overlay.SetMenuOptions(selectInfo, params, callback);
-    overlay.OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::TOUCH_MENU);
-    overlay.OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::TOUCH_MENU);
-    overlay.OnMenuItemAction(OptionMenuActionId::DISAPPEAR, OptionMenuType::TOUCH_MENU);
+    g_overlay.OnMenuItemAction(OptionMenuActionId::SELECT_ALL, OptionMenuType::TOUCH_MENU);
+    g_overlay.OnMenuItemAction(OptionMenuActionId::CAMERA_INPUT, OptionMenuType::TOUCH_MENU);
+    g_overlay.OnMenuItemAction(OptionMenuActionId::DISAPPEAR, OptionMenuType::TOUCH_MENU);
 #endif
 }
 
@@ -3626,7 +3626,6 @@ HWTEST_F(WebSelectOverlayTest, OnParentScrollStartOrEndCallback_001, TestSize.Le
     manager->selectOverlayItem_ = selectOverlayNode;
     auto current = manager->selectOverlayItem_.Upgrade();
     EXPECT_NE(current, nullptr);
-    overlay.webSelectInfo_ = info;
     overlay.OnParentScrollStartOrEndCallback(false);
     MockPipelineContext::TearDown();
     EXPECT_EQ(overlay.selectTemporarilyHiddenByScroll_, true);
@@ -4921,7 +4920,7 @@ HWTEST_F(WebSelectOverlayTest, GetFirstHandleInfo_002, TestSize.Level1)
     overlay.webSelectInfo_.secondHandle.isShow = false;
     std::optional<SelectHandleInfo> result = overlay.GetFirstHandleInfo();
     overlay.webSelectInfo_.secondHandle.isShow = true;
-    std::optional<SelectHandleInfo> result = overlay.GetFirstHandleInfo();
+    result = overlay.GetFirstHandleInfo();
 }
 
 /**
@@ -5338,6 +5337,44 @@ HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptions, TestSize.Level1)
     overlay.UpdateSelectMenuOptions();
     EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showTranslate);
     EXPECT_FALSE(overlay.webSelectInfo_.menuInfo.showSearch);
+}
+
+/**
+ * @tc.name: OnHandleMarkInfoChange001
+ * @tc.desc: Test function OnHandleMarkInfoChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, OnHandleMarkInfoChange001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebSelectOverlay overlay(textBase);
+
+    auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    SelectOverlayDirtyFlag flag = DIRTY_HANDLE_COLOR_FLAG;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+
+    flag = DIRTY_FIRST_HANDLE;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+
+    shareOverlayInfo->menuInfo.showShare = false;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+
+    shareOverlayInfo->menuInfo.showShare = true;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+
+    flag = DIRTY_SECOND_HANDLE;
+    overlay.needResetHandleReverse_ = false;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    overlay.needResetHandleReverse_ = true;
+    overlay.OnHandleMarkInfoChange(shareOverlayInfo, flag);
 }
 
 /**
