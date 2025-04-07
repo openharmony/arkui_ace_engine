@@ -41,8 +41,6 @@ import { CompRenderFitBlocks } from '../../components/CompRenderFitBlocks'
 import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopolizationBlocks'
 import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
 import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
-import { CompPopupControlBlocks } from '../../components/CompBindPopupBlocks';
-import { CompMenuControlBlocks } from '../../components/CompMenuControlBlocks';
 import { CompFocusControlBlocks } from '../../components/CompFocusControlBlocks';
 import { CompHoverEffectBlocks } from '../../components/CompHoverEffectBlocks';
 import { CompComponentIDBlocks } from '../../components/CompComponentIDBlocks';
@@ -1352,7 +1350,7 @@ export struct CalendarPickerBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-        // .markToday(useEnabled(this.enableCompMarkToday, this.compMarkToday))
+        .markToday(useEnabled(this.enableCompMarkToday, this.compMarkToday))
     }.width('100%').height('100%')
   }
 

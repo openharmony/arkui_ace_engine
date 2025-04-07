@@ -1386,12 +1386,12 @@ export struct TimePickerBootcamp {
         })
 
         RadioBlock({
-          title: '切换12小时制/24小时制',
+          title: 'useMilitaryTime',
           isEnabled: this.enableIsMilitaryTime,
           value: this.isMilitaryTime,
           dataSource: [
-            { label: '12小时制', value: false },
-            { label: '24小时制', value: true }
+            { label: 'false', value: false },
+            { label: 'true', value: true }
           ]
         })
 
