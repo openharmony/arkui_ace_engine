@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include <list>
+#include <shared_mutex>
 
 #include "ability_info.h"
 #include "display_manager.h"
@@ -368,13 +369,13 @@ public:
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
-        std::lock_guard<std::mutex> lock(destructMutex_);
+        std::unique_lock<std::shared_mutex> lock(destructMutex_);
         destructCallbacks_.emplace(key, callback);
     }
 
     void RemoveDestructCallback(void* key)
     {
-        std::lock_guard<std::mutex> lock(destructMutex_);
+        std::unique_lock<std::shared_mutex> lock(destructMutex_);
         destructCallbacks_.erase(key);
     }
 
@@ -515,7 +516,7 @@ private:
     OHOS::Rosen::WindowSizeChangeReason cachedReason_;
     std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
-    std::mutex destructMutex_;
+    std::shared_mutex destructMutex_;
 };
 
 } // namespace OHOS::Ace

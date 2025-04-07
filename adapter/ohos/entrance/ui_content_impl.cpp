@@ -4738,6 +4738,7 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
 
 void UIContentImpl::ProcessDestructCallbacks()
 {
+    std::shared_lock<std::shared_mutex> reportLock(destructMutex_);
     for (auto& [_, callback] : destructCallbacks_) {
         callback();
     }
