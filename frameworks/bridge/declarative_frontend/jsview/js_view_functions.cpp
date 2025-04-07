@@ -110,7 +110,7 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
         measureWidth = { -1.0f };
     }
     if (!JSViewAbstract::ParseJsDimensionVp(result->GetProperty("height"), measureHeight)) {
-        measureHeight = { -1.0f };
+        measureWidth = { -1.0f };
     }
     NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
