@@ -74,7 +74,7 @@ HWTEST_F(TextTestFourNg, SetLineSpacing001, TestSize.Level1)
 
     textModelNG.SetLineSpacing(LINE_SPACING_VALUE);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE);
-    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1);
+    TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1, false);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
 }
 

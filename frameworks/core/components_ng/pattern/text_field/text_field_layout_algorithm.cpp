@@ -709,7 +709,8 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .fontSize = fontSize
+        .fontSize = fontSize,
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines()
     };
 }
 
@@ -751,7 +752,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
-        .fontSize = paragraphData.fontSize };
+        .fontSize = paragraphData.fontSize,
+        .isOnlyBetweenLines = textStyle.GetIsOnlyBetweenLines() };
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = style->GetTextAlign();
     }
@@ -1136,6 +1138,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     }
     if (layoutProperty->HasLineSpacing()) {
         textStyle.SetLineSpacing(layoutProperty->GetLineSpacing().value());
+    }
+    if (layoutProperty->HasIsOnlyBetweenLines()) {
+        textStyle.SetIsOnlyBetweenLines(layoutProperty->GetIsOnlyBetweenLines().value_or(false));
     }
 }
 

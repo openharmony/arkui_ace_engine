@@ -511,6 +511,21 @@ void JSText::SetLineSpacing(const JSCallbackInfo& info)
         value.Reset();
     }
     TextModel::GetInstance()->SetLineSpacing(value);
+    if (info.Length() < 2) { // 2 : two args
+        return;
+    }
+    auto jsonValue = info[1];
+    if (!jsonValue->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(jsonValue);
+    auto param = paramObject->GetProperty("onlyBetweenLines");
+    if (!param->IsBoolean() || param->IsUndefined() || param->IsNull()) {
+        TextModel::GetInstance()->SetIsOnlyBetweenLines(false);
+    } else {
+        auto isOnlyBetweenLines = param->ToBoolean();
+        TextModel::GetInstance()->SetIsOnlyBetweenLines(isOnlyBetweenLines);
+    }
 }
 
 void JSText::SetFontFamily(const JSCallbackInfo& info)

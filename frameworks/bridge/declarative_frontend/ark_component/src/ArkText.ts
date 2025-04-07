@@ -403,8 +403,8 @@ class TextLetterSpacingModifier extends ModifierWithKey<number | string | Resour
   }
 }
 
-class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
-  constructor(value: LengthMetrics) {
+class TextLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
+  constructor(value: ArkLineSpacing) {
     super(value);
   }
   static identity: Symbol = Symbol('textLineSpacing');
@@ -414,7 +414,8 @@ class TextLineSpacingModifier extends ModifierWithKey<LengthMetrics> {
     } else if (!isObject(this.value)) {
       getUINativeModule().text.resetLineSpacing(node);
     } else {
-      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.unit);
+      getUINativeModule().text.setLineSpacing(node, this.value.value.value, this.value.value.unit,
+        this.value.onlyBetweenLines);
     }
   }
 
@@ -955,8 +956,11 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
-  lineSpacing(value: LengthMetrics): TextAttribute {
-    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, value);
+  lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute {
+    let arkLineSpacing = new ArkLineSpacing();
+    arkLineSpacing.value = value;
+    arkLineSpacing.onlyBetweenLines = options.onlyBetweenLines;
+    modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
   textCase(value: TextCase): TextAttribute {

@@ -1948,7 +1948,7 @@ HWTEST_F(TextTestThreeNg, TextModelNgProperty001, TestSize.Level1)
     TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
     TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
     TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
-    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE);
+    TextModelNG::SetLineSpacing(node, ADAPT_LINE_SPACING_VALUE, false);
 
     /**
      * @tc.steps: step2. test property.

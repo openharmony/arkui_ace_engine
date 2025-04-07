@@ -332,9 +332,15 @@ void TextModelNG::SetLineSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value);
 }
 
-void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
+void TextModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value, bool isOnlyBetweenLines)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineSpacing, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines, frameNode);
+}
+
+void TextModelNG::SetIsOnlyBetweenLines(bool isOnlyBetweenLines)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines);
 }
 
 void TextModelNG::SetTextDecoration(Ace::TextDecoration value)
