@@ -10255,6 +10255,11 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& inse
     record.addText = insertValue;
     record.beforeCaretPosition = dragRange_.first;
     RichEditorChangeValue changeValue;
+    // drag not move, do not fire contentChange
+    if (dragRange_.first <= currentPosition && currentPosition <= dragRange_.second) {
+        lastCaretPosition_ = dragRange_.first;
+        return;
+    }
     CHECK_NULL_VOID(BeforeChangeText(changeValue, record, RecordType::DRAG));
     if (currentPosition < dragRange_.first) {
         InsertValueByOperationType(insertValue, OperationType::DRAG);
@@ -10267,8 +10272,6 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& inse
         int32_t delLength = HandleOnDragDeleteForward();
         caretPosition_ -= delLength;
         lastCaretPosition_ = currentPosition - strLength;
-    } else {
-        lastCaretPosition_ = dragRange_.first;
     }
 
     AfterContentChange(changeValue);
