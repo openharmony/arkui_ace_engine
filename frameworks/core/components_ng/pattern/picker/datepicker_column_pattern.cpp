@@ -1650,7 +1650,7 @@ void DatePickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pi
             pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
 
-    int32_t middleIndex = GetShowCount() / PICKER_SELECT_AVERAGE;
+    uint32_t middleIndex = GetShowCount() / PICKER_SELECT_AVERAGE;
     if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
         animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
         animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;
