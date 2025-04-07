@@ -176,9 +176,7 @@ void ResetPopupItemBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    Color color = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-                        ? indexerTheme->GetPopupUnclickedBgAreaColor()
-                        : indexerTheme->GetPopupBackgroundColor();
+    Color color = indexerTheme->GetPopupUnclickedBgAreaColor();
     IndexerModelNG::SetPopupItemBackground(frameNode, color);
 }
 

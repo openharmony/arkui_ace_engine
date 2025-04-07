@@ -99,6 +99,10 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     if (filter.IsFastFilter()) {
         return;
     }
+    auto pipelineContext = GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     auto tabBar = JsonUtil::Create(true);
     auto tabContentPattern = GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
@@ -122,7 +126,18 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
 
     auto font = JsonUtil::Create(true);
     auto labelStyle = tabContentPattern->GetLabelStyle();
-    font->Put("size", labelStyle.fontSize.value_or(Dimension(0)).ToString().c_str());
+    auto layoutMode = tabContentPattern->GetBottomTabBarStyle().layoutMode;
+    Dimension fontSize;
+    if (labelStyle.fontSize.has_value()) {
+        fontSize = labelStyle.fontSize.value();
+    } else if (layoutMode == LayoutMode::VERTICAL) {
+        fontSize = tabTheme->GetBottomTabTextSize();
+    } else if (layoutMode == LayoutMode::HORIZONTAL) {
+        fontSize = tabTheme->GetBottomTabHorizontalTextSize();
+    } else {
+        fontSize = GetDefaultFontSize();
+    }
+    font->Put("size", fontSize.ToString().c_str());
     font->Put("weight",
         V2::ConvertWrapFontWeightToStirng(labelStyle.fontWeight.value_or(FontWeight::NORMAL)).c_str());
     std::vector<std::string> emptyFontFamily = { "HarmonyOS Sans" };
@@ -145,10 +160,6 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     label->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
         labelStyle.heightAdaptivePolicy.value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     label->Put("font", font);
-    auto pipelineContext = GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
     label->Put("unselectedColor", labelStyle.unselectedColor.value_or(
         tabTheme->GetSubTabTextOffColor()).ColorToString().c_str());
     auto selectColor = tabContentPattern->GetSelectedMode() == SelectedMode::BOARD &&
@@ -167,7 +178,7 @@ void TabContentNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     tabBar->Put("padding", tabContentPattern->GetPadding().ToJsonString().c_str());
     tabBar->Put(
         "verticalAlign", ConvertFlexAlignToString(tabContentPattern->GetBottomTabBarStyle().verticalAlign).c_str());
-    tabBar->Put("layoutMode", ConvertLayoutModeToString(tabContentPattern->GetBottomTabBarStyle().layoutMode).c_str());
+    tabBar->Put("layoutMode", ConvertLayoutModeToString(layoutMode).c_str());
     tabBar->Put(
         "symmetricExtensible", tabContentPattern->GetBottomTabBarStyle().symmetricExtensible ? "true" : "false");
     tabBar->Put("id", tabContentPattern->GetId().c_str());
@@ -207,5 +218,19 @@ std::string TabContentNode::ConvertLayoutModeToString(LayoutMode layoutMode) con
         return "LayoutMode.HORIZONTAL";
     }
     return "LayoutMode.AUTO";
+}
+
+Dimension TabContentNode::GetDefaultFontSize() const
+{
+    if (!tabBarItemId_.has_value()) {
+        return Dimension(0);
+    }
+    auto columnNode = GetFrameNode(V2::COLUMN_ETS_TAG, tabBarItemId_.value());
+    CHECK_NULL_RETURN(columnNode, Dimension(0));
+    auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(1));
+    CHECK_NULL_RETURN(textNode, Dimension(0));
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textNode->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, Dimension(0));
+    return textLayoutProperty->GetFontSizeValue(Dimension(0));
 }
 } // namespace OHOS::Ace::NG
