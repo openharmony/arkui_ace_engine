@@ -240,6 +240,30 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractS
         dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource(), ctx);
     }
     dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
+    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.GetSpanIndex());
+    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.OffsetInSpan());
+}
+
+void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
+{
+    dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
+
+    if (src.GetValuePixelMap()) {
+        Ark_PixelMap arkPixelMap = new PixelMapPeer();
+        arkPixelMap->pixelMap = src.GetValuePixelMap();
+        dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+    }
+
+    if (!src.GetValueResourceStr().empty()) {
+        dst.valueResourceStr = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.GetValueResourceStr(), ctx);
+    }
+
+    dst.imageStyle.size.value0 = Converter::ArkValue<Ark_Number>(src.GetSizeWidth());
+    dst.imageStyle.size.value1 = Converter::ArkValue<Ark_Number>(src.GetSizeHeight());
+    dst.imageStyle.objectFit = Converter::ArkValue<Ark_ImageFit>(src.GetObjectFit());
+    dst.imageStyle.verticalAlign = Converter::ArkValue<Ark_ImageSpanAlignment>(src.GetVerticalAlign());
+    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.GetSpanIndex());
+    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.OffsetInSpan());
 }
 
 void AssignArkValue(Ark_TextRange& dst, const TextRange& src)
@@ -255,11 +279,16 @@ void AssignArkValue(Ark_RichEditorDeleteValue& dst, const RichEditorDeleteValue&
     dst.length = Converter::ArkValue<Ark_Number>(src.GetLength());
 }
 
-void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src)
+void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue& src, Converter::ConvContext *ctx)
 {
     auto rangeBefore = src.GetRangeBefore();
     dst.rangeBefore.start = Converter::ArkValue<Opt_Number>(rangeBefore.start);
     dst.rangeBefore.end = Converter::ArkValue<Opt_Number>(rangeBefore.end);
+    dst.replacedSpans = Converter::ArkValue<Array_RichEditorTextSpanResult>(src.GetRichEditorReplacedSpans(), ctx);
+    dst.replacedImageSpans = Converter::ArkValue<Array_RichEditorImageSpanResult>(
+        src.GetRichEditorReplacedImageSpans(), ctx);
+    dst.replacedSymbolSpans = Converter::ArkValue<Array_RichEditorTextSpanResult>(
+        src.GetRichEditorReplacedSymbolSpans(), ctx);
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleResult& src)
@@ -545,8 +574,8 @@ void OnWillChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onCallback = [arkCallback = CallbackHelper(*value),
         frameNode](const RichEditorChangeValue& param) -> bool {
-        auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param);
-        LOGW("OnWillChangeImpl :: Ark_RichEditorChangeValue don't fully filled from RichEditorChangeValue");
+        Converter::ConvContext ctx;
+        auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param, &ctx);
         auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
