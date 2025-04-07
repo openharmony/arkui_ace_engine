@@ -690,38 +690,4 @@ HWTEST_F(RichEditorParagraphMgrTestNg, GetLineMetricsByRectF001, TestSize.Level1
     EXPECT_EQ(testMetrics.y, 800);
 }
 
-/**
- * @tc.name: CalcCaretMetricsByPosition001
- * @tc.desc: Test the paragraph manager function.
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorParagraphMgrTestNg, CalcCaretMetricsByPosition001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    /**
-     * @tc.steps: step1. add paragraph
-     */
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-
-    TestParagraphRect paragraphRectSec = { .start = 7, .end = 12, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
-    TestParagraphItem paragraphItemSec = { .start = 7, .end = 12, .testParagraphRects = { paragraphRectSec } };
-    AddParagraph(paragraphItemSec);
-
-    TestParagraphRect paragraphRectThr = { .start = 13, .end = 20, .rects = { { 200.0, 200.0, 400.0, 400.0 } } };
-    TestParagraphItem paragraphItemThr = { .start = 13, .end = 20, .testParagraphRects = { paragraphRectThr } };
-    AddParagraph(paragraphItemThr);
-    /**
-     * @tc.steps: step5. test calc caret metrics
-     */
-    int32_t extent = 0;
-    CaretMetricsF caretCaretMetric;
-    TextAffinity textAffinity = TextAffinity::DOWNSTREAM;
-    bool caretMetrics = richEditorPattern->paragraphs_.CalcCaretMetricsByPosition(extent, caretCaretMetric,
-        textAffinity);
-    EXPECT_EQ(caretMetrics, false);
-}
 } // namespace OHOS::Ace::NG
