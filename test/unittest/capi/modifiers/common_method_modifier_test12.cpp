@@ -86,7 +86,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestCustomBuilderTest, TestS
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 /*
@@ -124,7 +124,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestDragItemInfoTest, TestSi
     EXPECT_EQ(builderHelper.GetCustomNode(), Referenced::RawPtr(resultDragPreview.customNode));
     EXPECT_EQ(resultDragPreview.extraInfo, expectedExtraInfo);
     EXPECT_EQ(resultDragPreview.pixelMap, expectedPixelMapRefPtr);
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 /*
@@ -146,7 +146,7 @@ HWTEST_F(CommonMethodModifierTest12, setDragPreview0TestString, TestSize.Level1)
 
     const DragDropInfo resultDragPreview = frameNode->GetDragPreview();
 
-    EXPECT_EQ(resultDragPreview.extraInfo, expectedString);
+    EXPECT_EQ(resultDragPreview.inspectorId, expectedString);
 }
 
 //////// AccessibilityVirtualNode
