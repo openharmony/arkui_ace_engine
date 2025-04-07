@@ -38,16 +38,17 @@ RSRecordingPath SvgCircle::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgCircle::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
-        return path_.value();
-    }
     RSRecordingPath path;
-    auto cx = GetMeasuredPosition(circleAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL);
-    auto cy = GetMeasuredPosition(circleAttr_.cy, lengthRule, SvgLengthType::VERTICAL);
-    path.AddCircle(cx, cy, GetMeasuredLength(circleAttr_.r, lengthRule, SvgLengthType::OTHER));
-    lengthRule_ = lengthRule;
-    path_ = path;
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        path = path_.value();
+    } else {
+        auto cx = GetMeasuredPosition(circleAttr_.cx, lengthRule, SvgLengthType::HORIZONTAL);
+        auto cy = GetMeasuredPosition(circleAttr_.cy, lengthRule, SvgLengthType::VERTICAL);
+        path.AddCircle(cx, cy, GetMeasuredLength(circleAttr_.r, lengthRule, SvgLengthType::OTHER));
+        lengthRule_ = lengthRule;
+        path_ = path;
+    }
     /* Apply path transform for clip-path only */
     if (lengthRule.GetPathTransform()) {
         ApplyTransform(path);

@@ -72,22 +72,25 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 
 RSRecordingPath SvgPolygon::AsPath(const SvgLengthScaleRule& lengthRule)
 {
-    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
-        return path_.value();
-    }
     RSRecordingPath path;
-    if (polyAttr_.points.empty()) {
-        return path;
+    /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        path = path_.value();
+    } else {
+        if (polyAttr_.points.empty()) {
+            return path;
+        }
+        std::vector<RSPoint> rsPoints;
+        RosenSvgPainter::StringToPoints(polyAttr_.points.c_str(), rsPoints);
+        if (rsPoints.empty()) {
+            return RSRecordingPath();
+        }
+        ConvertPoints(rsPoints, lengthRule);
+        //isClose_ cannot be modified
+        path.AddPoly(rsPoints, rsPoints.size(), isClose_);
+        lengthRule_ = lengthRule;
+        path_ = path;
     }
-    std::vector<RSPoint> rsPoints;
-    RosenSvgPainter::StringToPoints(polyAttr_.points.c_str(), rsPoints);
-    if (rsPoints.empty()) {
-        return RSRecordingPath();
-    }
-    ConvertPoints(rsPoints, lengthRule);
-    path.AddPoly(rsPoints, rsPoints.size(), isClose_);
-
     if (attributes_.fillState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);
     }
