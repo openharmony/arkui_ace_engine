@@ -67,9 +67,6 @@ public:
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::GRAY)
                     .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, ERR_TEXT_COLOR_ALPHA)));
             theme->textStyleClock_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
-            theme->SetTextParseFailedColor(
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK)
-                    .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, ERR_TEXT_COLOR_ALPHA)));
         }
     };
 
@@ -80,23 +77,9 @@ public:
         return textStyleClock_;
     }
 
-    const Color& GetTextParseFailedColor() const
-    {
-        return textClockParseFailedColor_;
-    }
-
-    void SetTextParseFailedColor(const Color& textColor)
-    {
-        textClockParseFailedColor_ = textColor;
-    }
-
 protected:
     TextClockTheme() = default;
     TextStyle textStyleClock_;
-
-private:
-    // For Parse Failed
-    Color textClockParseFailedColor_;
 };
 
 } // namespace OHOS::Ace

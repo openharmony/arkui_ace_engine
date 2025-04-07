@@ -94,11 +94,6 @@ void TextClockModelNG::ResetTextColor()
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
-    auto textClockNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(textClockNode);
-    auto textNode = AceType::DynamicCast<FrameNode>(textClockNode->GetLastChild());
-    CHECK_NULL_VOID(textNode);
-    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -160,9 +155,16 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     }
     auto pipeline = textClockNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto textTheme = pipeline->GetTheme<TextClockTheme>(textClockNode->GetThemeScopeId());
-    if (textTheme) {
-        InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyleClock());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto textTheme = pipeline->GetTheme<TextTheme>();
+        if (textTheme) {
+            InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyle());
+        }
+    } else {
+        auto textTheme = pipeline->GetTheme<TextClockTheme>(textClockNode->GetThemeScopeId());
+        if (textTheme) {
+            InitFontDefault(AceType::RawPtr(textClockNode), textTheme->GetTextStyleClock());
+        }
     }
     return textClockNode;
 }
@@ -214,10 +216,6 @@ void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
-    CHECK_NULL_VOID(frameNode);
-    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild());
-    CHECK_NULL_VOID(textNode);
-    TextModelNG::ResetTextColor(Referenced::RawPtr<FrameNode>(textNode));
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
