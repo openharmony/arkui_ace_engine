@@ -766,6 +766,7 @@ void CalcPreviewPaintRect(const RefPtr<FrameNode> menuWrapperNode, PreparedInfoF
     auto menuPreview = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(menuPreview);
     auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
     auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
