@@ -4920,7 +4920,7 @@ HWTEST_F(WebSelectOverlayTest, GetFirstHandleInfo_002, TestSize.Level1)
     overlay.webSelectInfo_.secondHandle.isShow = false;
     std::optional<SelectHandleInfo> result = overlay.GetFirstHandleInfo();
     overlay.webSelectInfo_.secondHandle.isShow = true;
-    result = overlay.GetFirstHandleInfo();
+    result  = overlay.GetFirstHandleInfo();
 }
 
 /**
