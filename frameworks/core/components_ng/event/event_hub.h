@@ -637,7 +637,7 @@ public:
     void ClearStateStyle();
     void OnDetachClear();
     void FireDrawCompletedNDKCallback(const RefPtr<PipelineContext>& pipeline);
-    void FireLayoutNDKCallback(const RefPtr<PipelineContext>& pipeline);
+    void FireLayoutNDKCallback(const PipelineContext* pipeline);
     void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
     {
         ndkDrawCompletedCallback_ = std::move(callback);
