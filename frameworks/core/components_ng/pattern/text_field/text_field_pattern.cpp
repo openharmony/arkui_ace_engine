@@ -6713,6 +6713,8 @@ std::string TextFieldPattern::TextInputTypeToString() const
             return "InputType.NUMBER_PASSWORD";
         case TextInputType::NUMBER_DECIMAL:
             return IsTextArea() ? "TextAreaType.NUMBER_DECIMAL" : "InputType.NUMBER_DECIMAL";
+        case TextInputType::ONE_TIME_CODE:
+            return IsTextArea() ? "TextAreaType.ONE_TIME_CODE" : "InputType.ONE_TIME_CODE";
         default:
             return isTextInput_ ? "InputType.Normal" : "TextAreaType.NORMAL";
     }

@@ -25,6 +25,9 @@ TextInputType CastToTextInputType(int32_t value)
     if (value == static_cast<int32_t>(TextInputType::JS_ENUM_URL)) {
         return TextInputType::URL;
     }
+    if (value == static_cast<int32_t>(TextInputType::JS_ONE_TIME_CODE)) {
+        return TextInputType::ONE_TIME_CODE;
+    }
     return static_cast<TextInputType>(value);
 }
 

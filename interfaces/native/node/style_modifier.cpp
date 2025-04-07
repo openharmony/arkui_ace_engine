@@ -55,6 +55,7 @@ constexpr int NUM_10 = 10;
 constexpr int NUM_11 = 11;
 constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
+constexpr int NUM_14 = 14;
 constexpr int NUM_15 = 15;
 constexpr int NUM_16 = 16;
 constexpr int NUM_23 = 23;
@@ -4518,7 +4519,7 @@ int32_t SetTextInputType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || item->value[NUM_0].i32 < static_cast<int32_t>(ARKUI_TEXTINPUT_TYPE_NORMAL) ||
-        item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_TEXTINPUT_TYPE_NUMBER_DECIMAL)) {
+        item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_TEXTINPUT_TYPE_ONE_TIME_CODE)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -6656,7 +6657,7 @@ int32_t SetTextAreaType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     // already check in entry point.
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
-    if (actualSize < 0 || !InRegion(NUM_0, NUM_5, item->value[0].i32)) {
+    if (actualSize < 0 || !InRegion(NUM_0, NUM_14, item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();

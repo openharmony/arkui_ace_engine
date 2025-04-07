@@ -1777,6 +1777,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.URL";
         case TextInputType::NUMBER_DECIMAL:
             return "SearchType.NUMBER_DECIMAL";
+        case TextInputType::ONE_TIME_CODE:
+            return "SearchType.ONE_TIME_CODE";
         default:
             return "SearchType.NORMAL";
     }

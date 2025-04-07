@@ -1020,6 +1020,7 @@ let InputType;
   InputType[InputType.NEW_PASSWORD = 11] = 'NEW_PASSWORD';
   InputType[InputType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   InputType[InputType.URL = 13] = 'URL';
+  InputType[InputType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(InputType || (InputType = {}));
 
 let SearchType;
@@ -1030,6 +1031,7 @@ let SearchType;
   SearchType[SearchType.EMAIL = 5] = 'EMAIL';
   SearchType[SearchType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   SearchType[SearchType.URL = 13] = 'URL';
+  SearchType[SearchType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(SearchType || (SearchType = {}));
 
 let AutoCapitalizationMode;
@@ -1048,6 +1050,7 @@ let TextAreaType;
   TextAreaType[TextAreaType.EMAIL = 5] = 'EMAIL';
   TextAreaType[TextAreaType.NUMBER_DECIMAL = 12] = 'NUMBER_DECIMAL';
   TextAreaType[TextAreaType.URL = 13] = 'URL';
+  TextAreaType[TextAreaType.ONE_TIME_CODE = 14] = 'ONE_TIME_CODE';
 })(TextAreaType || (TextAreaType = {}));
 
 let EnterKeyType;
