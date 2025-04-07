@@ -62,7 +62,10 @@ void ParseReferencedId(EcmaVM* vm, int32_t referenceSize,
         Local<JSValueRef> referencedId = panda::ArrayRef::GetValueAt(vm, array, i);
         if (referencedId->IsString(vm)) {
             std::string str = referencedId->ToString(vm)->ToString(vm);
-            referencedIds.push_back(ParseStringToCharPtr(str));
+            auto idChar = ParseStringToCharPtr(str);
+            if (idChar) {
+                referencedIds.push_back(idChar);
+            }
         }
     }
 }
