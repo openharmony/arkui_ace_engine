@@ -1073,18 +1073,12 @@ void DragDropManager::ResetDraggingStatus(const TouchEvent& touchPoint)
     if (IsDraggingPressed(touchPoint.id)) {
         SetDraggingPressedState(false);
     }
-    DragPointerEvent dragPointerEvent;
-    DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
     if (!IsItemDragging() && IsDragging() && IsSameDraggingPointer(touchPoint.id)) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Reset dragging status, stop drag. pointerId: %{public}d", touchPoint.id);
+        DragPointerEvent dragPointerEvent;
+        DragDropFuncWrapper::ConvertPointerEvent(touchPoint, dragPointerEvent);
         SetIsDisableDefaultDropAnimation(true);
         OnDragEnd(dragPointerEvent, "");
-    }
-    if (touchPoint.type == TouchType::CANCEL) {
-        if (IsUIExtensionComponent(preTargetFrameNode_)) {
-            HandleUIExtensionDragEvent(preTargetFrameNode_, dragPointerEvent, DragEventType::LEAVE);
-        }
-        NotifyDragFrameNode(dragPointerEvent.GetPoint(), DragEventType::LEAVE);
     }
 }
 
