@@ -37,20 +37,23 @@ namespace {
 } // namespace
 
 namespace Validator {
-void ValidatePaddingProperty(PaddingProperty& opt)
+void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
 {
-    Validator::ValidateNonNegative(opt.left);
-    Validator::ValidateNonPercent(opt.left);
-    Validator::ValidateNonNegative(opt.top);
-    Validator::ValidateNonPercent(opt.top);
-    Validator::ValidateNonNegative(opt.right);
-    Validator::ValidateNonPercent(opt.right);
-    Validator::ValidateNonNegative(opt.bottom);
-    Validator::ValidateNonPercent(opt.bottom);
-    Validator::ValidateNonNegative(opt.start);
-    Validator::ValidateNonPercent(opt.start);
-    Validator::ValidateNonNegative(opt.end);
-    Validator::ValidateNonPercent(opt.end);
+    if (!opt.has_value()) {
+        return;
+    }
+    Validator::ValidateNonNegative(opt->left);
+    Validator::ValidateNonPercent(opt->left);
+    Validator::ValidateNonNegative(opt->top);
+    Validator::ValidateNonPercent(opt->top);
+    Validator::ValidateNonNegative(opt->right);
+    Validator::ValidateNonPercent(opt->right);
+    Validator::ValidateNonNegative(opt->bottom);
+    Validator::ValidateNonPercent(opt->bottom);
+    Validator::ValidateNonNegative(opt->start);
+    Validator::ValidateNonPercent(opt->start);
+    Validator::ValidateNonNegative(opt->end);
+    Validator::ValidateNonPercent(opt->end);
 }
 } // namespace Validator
 
@@ -97,9 +100,8 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         },
         []() {}
     );
-    PaddingProperty paddingProperty = optPadding.value_or(PaddingProperty());
-    Validator::ValidatePaddingProperty(paddingProperty);
-    TabContentModelNG::SetPadding(frameNode, paddingProperty);
+    Validator::ValidatePaddingProperty(optPadding);
+    TabContentModelNG::SetPadding(frameNode, optPadding);
     TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
@@ -141,9 +143,8 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         },
         []() {}
     );
-    PaddingProperty paddingProperty = optPadding.value_or(PaddingProperty());
-    Validator::ValidatePaddingProperty(paddingProperty);
-    TabContentModelNG::SetPadding(frameNode, paddingProperty);
+    Validator::ValidatePaddingProperty(optPadding);
+    TabContentModelNG::SetPadding(frameNode, optPadding);
     TabContentModelNG::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // verticalAlign
     TabContentModelNG::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
