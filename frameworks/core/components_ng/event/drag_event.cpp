@@ -97,6 +97,12 @@ DragEventActuator::DragEventActuator(
     isNewFwk_ = false;
 }
 
+DragEventActuator::DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
+    : gestureEventHub_(gestureEventHub)
+{
+    isNotInPreviewState_ = false;
+}
+
 void DragEventActuator::StartDragTaskForWeb(const GestureEvent& info)
 {
     auto gestureInfo = const_cast<GestureEvent&>(info);

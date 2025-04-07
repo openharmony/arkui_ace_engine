@@ -37,9 +37,7 @@ constexpr PanDirection DEFAULT_DRAG_DIRECTION = { PanDirection::ALL };
 } // namespace
 
 DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
-    : DragEventActuator(
-          gestureEventHub, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DISTANCE.ConvertToPx()),
-      gestureEventHub_(gestureEventHub)
+    : DragEventActuator(gestureEventHub), gestureEventHub_(gestureEventHub)
 {
     panRecognizer_ =
         MakeRefPtr<PanRecognizer>(DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
@@ -60,6 +58,7 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
         AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECOGNIZER, DEFAULT_DRAG_FINGERS, false, true);
     previewLongPressRecognizer_->SetGestureInfo(
         MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, GestureTypeName::DRAG, true));
+    previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     auto frameNode = gestureEventHub.Upgrade()->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     dragDropInitiatingHandler_ = AceType::MakeRefPtr<DragDropInitiatingHandler>(frameNode);
@@ -135,6 +134,7 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         !DragDropFuncWrapper::IsSelectedItemNode(frameNode))) {
         return;
     }
+    CHECK_NULL_VOID(dragDropInitiatingHandler_);
     auto touchEvent = touchRestrict.touchEvent;
     RecordTouchDownPoint(touchEvent);
     dragDropInitiatingHandler_->NotifyHitTesting(touchEvent);
@@ -158,7 +158,6 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
         return;
     }
     InitLongPressAction();
-    previewLongPressRecognizer_->SetGestureHub(gestureEventHub_);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     SequencedRecognizer_->RemainChildOnResetStatus();
