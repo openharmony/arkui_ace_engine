@@ -1244,7 +1244,7 @@ export struct ComposeListItem {
   aboutToDisappear(): void {
     if (this.callbackId) {
       this.getUIContext()
-        .getHostContext()
+      ?.getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
       this.callbackId = void (0);
