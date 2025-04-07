@@ -27,7 +27,6 @@
 #undef protected
 #undef private
 
-#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 

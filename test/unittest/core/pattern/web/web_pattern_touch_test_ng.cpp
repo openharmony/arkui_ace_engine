@@ -436,7 +436,7 @@ HWTEST_F(WebPatternTouchTestNg, SuggestionSelected_002, TestSize.Level1)
  * @tc.desc: OnShowAutofillPopup
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, OnShowAutofillPopup_001, TestSize.Level1)
+HWTEST_F(WebPatternTouchTestNg, OnShowAutofillPopup_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -450,7 +450,7 @@ HWTEST_F(WebPatternSelectTestNg, OnShowAutofillPopup_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    std::vector<std::string> menu_items = { "test" };
+    std::vector<std::string> menu_items;
     webPattern->OnShowAutofillPopup(0, 0, menu_items);
     MockPipelineContext::TearDown();
 #endif
@@ -461,7 +461,7 @@ HWTEST_F(WebPatternSelectTestNg, OnShowAutofillPopup_001, TestSize.Level1)
  * @tc.desc: OnShowAutofillPopupV2
  * @tc.type: FUNC
  */
-HWTEST_F(WebPatternSelectTestNg, OnShowAutofillPopupV2_001, TestSize.Level1)
+HWTEST_F(WebPatternTouchTestNg, OnShowAutofillPopupV2_001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -475,7 +475,7 @@ HWTEST_F(WebPatternSelectTestNg, OnShowAutofillPopupV2_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    std::vector<std::string> menu_items = { "test" };
+    std::vector<std::string> menu_items;
     webPattern->OnShowAutofillPopupV2(0, 0, 10, 10, menu_items);
     MockPipelineContext::TearDown();
 #endif
