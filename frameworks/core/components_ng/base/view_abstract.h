@@ -436,6 +436,7 @@ public:
     // clip and mask
     static void SetClipShape(const RefPtr<BasicShape> &basicShape);
     static void SetClipEdge(bool isClip);
+    static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
     static void SetMask(const RefPtr<BasicShape> &basicShape);
     // overlay
     static void SetOverlay(const NG::OverlayOptions &overlay);
