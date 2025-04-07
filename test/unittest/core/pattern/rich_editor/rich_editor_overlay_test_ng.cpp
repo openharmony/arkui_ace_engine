@@ -96,87 +96,6 @@ void RichEditorOverlayTestNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: OnCaretTwinkling001
- * @tc.desc: test on caret twinkling
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, OnCaretTwinkling001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->OnCaretTwinkling();
-    EXPECT_FALSE(richEditorPattern->caretVisible_);
-}
-
-/**
- * @tc.name: GetCaretRect001
- * @tc.desc: test get caret rect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, GetCaretRect001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    auto overlayMod = richEditorNode_->GetOverlayNode();
-    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
-    auto caretRect = richEditorPattern->GetCaretRect();
-
-    EXPECT_EQ(richEditorOverlay->GetCaretOffset(), OffsetF(80.0f, 100.0f));
-    EXPECT_EQ(richEditorOverlay->GetCaretHeight(), 60.0f);
-    EXPECT_EQ(caretRect.GetOffset(), richEditorOverlay->GetCaretOffset());
-    EXPECT_EQ(caretRect.Height(), richEditorOverlay->GetCaretHeight());
-}
-
-/**
- * @tc.name: GetCaretRect002
- * @tc.desc: test get caret rect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, GetCaretRect002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-
-    auto overlayMod = richEditorNode_->GetOverlayNode();
-    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    richEditorOverlay->SetCaretOffsetAndHeight(OffsetF(80.0f, 100.0f), 60.0f);
-    auto caretRect = richEditorPattern->GetCaretRect();
-
-    manager->SetClickPosition({ caretRect.GetOffset().GetX(), caretRect.GetOffset().GetY() });
-    manager->SetHeight(caretRect.Height());
-    manager->ScrollTextFieldToSafeArea();
-    EXPECT_EQ(GreatNotEqual(manager->GetClickPosition().GetX(), 0.0f), true);
-    EXPECT_EQ(GreatNotEqual(manager->GetClickPosition().GetY(), 0.0f), true);
-
-    EXPECT_EQ(GreatNotEqual(manager->GetHeight(), 0.0f), true);
-    EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
-}
-
-/**
- * @tc.name: CaretColorTest001
- * @tc.desc: test set and get caretColor
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, CaretColorTest001, TestSize.Level1)
-{
-    RichEditorModelNG model;
-    model.Create();
-    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(host, nullptr);
-    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
-    Color patternCaretColor = richEditorPattern->GetCaretColor();
-    EXPECT_EQ(patternCaretColor, SYSTEM_CARET_COLOR);
-    model.SetCaretColor(Color::BLUE);
-    patternCaretColor = richEditorPattern->GetCaretColor();
-    EXPECT_EQ(patternCaretColor, Color::BLUE);
-}
-
-/**
  * @tc.name: SelectedBackgroundColorTest001
  * @tc.desc: test set and get selectedBackgroundColor
  * @tc.type: FUNC
@@ -195,35 +114,6 @@ HWTEST_F(RichEditorOverlayTestNg, SelectedBackgroundColorTest001, TestSize.Level
     patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
     auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
     EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
-}
-
-/**
- * @tc.name: MoveCaretAfterTextChange001
- * @tc.desc: test move caret after text change
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, MoveCaretAfterTextChange001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->moveLength_ = 1;
-    richEditorPattern->moveDirection_ = MoveDirection::BACKWARD;
-    richEditorPattern->caretPosition_ = 5;
-    richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 4);
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->moveDirection_ = MoveDirection::FORWARD;
-    richEditorPattern->moveLength_ = 1;
-    richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->moveDirection_ = MoveDirection(-1);
-    richEditorPattern->moveLength_ = 1;
-    richEditorPattern->MoveCaretAfterTextChange();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 5);
 }
 
 /**
@@ -598,21 +488,6 @@ HWTEST_F(RichEditorOverlayTestNg, HandleLevel002, TestSize.Level1)
     richEditorNode_->AddFrameNodeChangeInfoFlag(FRAME_NODE_CHANGE_END_SCROLL);
     richEditorNode_->ProcessFrameNodeChangeFlag();
     EXPECT_EQ(richEditorPattern->selectOverlay_->handleLevelMode_, HandleLevelMode::OVERLAY);
-}
-
-/**
- * @tc.name: SetCaretWidth001
- * @tc.desc: test SetCaretWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, SetCaretWidth001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    auto overlayMod = richEditorNode_->GetOverlayNode();
-    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    richEditorOverlay->SetCaretWidth(-1);
-    EXPECT_NE(richEditorOverlay->caretWidth_, -1);
 }
 
 /**

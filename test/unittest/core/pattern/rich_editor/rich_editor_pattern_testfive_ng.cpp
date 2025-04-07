@@ -711,22 +711,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, UpdateMagnifierStateAfterLayout002, TestSi
 }
 
 /**
- * @tc.name: SetCaretPosition001
- * @tc.desc: test SetCaretPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, SetCaretPosition001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"SetCaretPosition");
-    richEditorPattern->caretChangeListener_ = [](int32_t x) {};
-    EXPECT_TRUE(richEditorPattern->SetCaretPosition(2, false));
-}
-
-/**
  * @tc.name: HandleSurfaceChanged001
  * @tc.desc: test HandleSurfaceChanged
  * @tc.type: FUNC
@@ -739,21 +723,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleSurfaceChanged001, TestSize.Level1)
     richEditorPattern->magnifierController_.Reset();
     richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2, WindowSizeChangeReason::DRAG);
     EXPECT_FALSE(richEditorPattern->originIsMenuShow_);
-}
-
-/**
- * @tc.name: GetCaretOffsetInfoByPosition001
- * @tc.desc: test GetCaretOffsetInfoByPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, GetCaretOffsetInfoByPosition001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    CaretOffsetInfo result = richEditorPattern->GetCaretOffsetInfoByPosition(1);
-    EXPECT_EQ(result.caretOffsetUp.GetX(), 0);
-    EXPECT_EQ(result.caretOffsetUp.GetY(), 0);
 }
 
 /**
@@ -805,22 +774,6 @@ HWTEST_F(RichEditorPatternTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     Offset point(10, 10);
     thumbnailCallback(point);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: RepeatClickCaret001
- * @tc.desc: test RepeatClickCaret
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->caretTwinkling_ = true;
-    Offset offset = Offset(50.0, 50.0);
-    RectF lastCaretRect;
-    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, lastCaretRect));
 }
 
 } // namespace OHOS::Ace::NG

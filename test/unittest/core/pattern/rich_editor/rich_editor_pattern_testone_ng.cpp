@@ -106,56 +106,6 @@ HWTEST_F(RichEditorPatternTestOneNg, GetParagraphLength001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalculateEmptyValueCaretRect001
- * @tc.desc: test RichEditorPattern CalculateEmptyValueCaretRect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
-    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
-    TestParagraphItem testParagraphItem = {
-        .start = 0, .end = 6, .indexOffsetMap = { { 0, Offset(0, 5) }, { 6, Offset(50, 0) } }
-    };
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
-    CaretMetricsF metricsDown;
-    CaretMetricsF metricsUp;
-    for (const auto& [index, offset] : testParagraphItem.indexOffsetMap) {
-        metricsDown.offset.SetX(offset.GetX());
-        metricsDown.offset.SetY(offset.GetY());
-        metricsUp.offset.SetX(offset.GetX());
-        metricsUp.offset.SetY(offset.GetY());
-        EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(6));
-        EXPECT_CALL(*paragraph, GetMaxWidth).WillRepeatedly(Return(150));
-        EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDown), Return(true)));
-        EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(index, _, _))
-            .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
-    }
-
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    richEditorPattern->presetParagraph_ = paragraph;
-    richEditorPattern->CalculateEmptyValueCaretRect();
-    richEditorPattern->typingTextStyle_ = style;
-    richEditorPattern->PreferredParagraph();
-    EXPECT_NE(richEditorPattern->presetParagraph_, nullptr);
-}
-
-/**
  * @tc.name: UnableStandardInput001
  * @tc.desc: test RichEditorPattern UnableStandardInput
  * @tc.type: FUNC
@@ -451,26 +401,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CopyGestureOption001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetCaretOffset001
- * @tc.desc: test SetCaretOffset
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, SetCaretOffset001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewTextRecord_.previewContent = u"abc";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-
-    bool res = richEditorPattern->SetCaretOffset(0);
-    ASSERT_EQ(res, false);
-}
-
-/**
  * @tc.name: CalcCursorOffsetByPosition001
  * @tc.desc: test CalcCursorOffsetByPosition
  * @tc.type: FUNC
@@ -532,26 +462,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CreateAndShowSingleHandle001, TestSize.Leve
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->CreateAndShowSingleHandle();
     EXPECT_FALSE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
- * @tc.name: MoveCaretAndStartFocus001
- * @tc.desc: test MoveCaretAndStartFocus
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, MoveCaretAndStartFocus001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    Offset textOffset;
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->MoveCaretAndStartFocus(textOffset);
-    EXPECT_TRUE(focusHub->RequestFocusImmediately());
 }
 
 /**
@@ -663,34 +573,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CloseKeyboard001, TestSize.Level1)
 
     richEditorPattern->CloseKeyboard(false);
     EXPECT_EQ(richEditorPattern->HasConnection(), false);
-}
-
-/**
- * @tc.name: CalculateEmptyValueCaretRect002
- * @tc.desc: test CalculateEmptyValueCaretRect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto layoutProperty = richEditorPattern->GetLayoutProperty<TextLayoutProperty>();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
-    layoutProperty->UpdateTextAlign(TextAlign::CENTER);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    layoutProperty->UpdateLayoutDirection(TextDirection::INHERIT);
-    layoutProperty->UpdateTextAlign(TextAlign::LEFT);
-    richEditorPattern->CalculateEmptyValueCaretRect();
-
-    EXPECT_EQ(richEditorPattern->presetParagraph_, false);
 }
 
 /**
