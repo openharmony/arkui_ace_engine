@@ -28,6 +28,11 @@ build_component_ng("pattern_ng") {
     "arc_list/arc_list_layout_algorithm.cpp",
     "arc_list/arc_list_layout_property.cpp",
     "arc_list/arc_list_pattern.cpp",
+    "arc_scroll/inner/arc_scroll_bar.cpp",
+    "arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+    "arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
+    "arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
+    "arc_scroll_bar/arc_scroll_bar_pattern.cpp",
     "badge/badge_accessibility_property.cpp",
     "badge/badge_layout_algorithm.cpp",
     "badge/badge_layout_property.cpp",
@@ -624,16 +629,6 @@ build_component_ng("pattern_ng") {
       "stepper/stepper_pattern.cpp",
       "text_picker/textpicker_dialog_view.cpp",
       "time_picker/timepicker_dialog_view.cpp",
-    ]
-  }
-
-  if (ace_engine_enable_circle_feature) {
-    sources += [
-      "arc_scroll/inner/arc_scroll_bar.cpp",
-      "arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
-      "arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
-      "arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
-      "arc_scroll_bar/arc_scroll_bar_pattern.cpp",
     ]
   }
 

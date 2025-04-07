@@ -721,7 +721,6 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     void SetScrollBarShape(const ScrollBarShape &shape)
     {
         if (shape == ScrollBarShape::ARC) {
@@ -730,7 +729,6 @@ public:
             isRoundScroll_ = false;
         }
     }
-#endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
     bool GetCrownEventDragging() const

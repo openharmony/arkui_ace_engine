@@ -17,11 +17,8 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
-
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
-#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
@@ -207,7 +204,6 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     auto shapeMode = scrollBar->GetShapeMode();
     if (shapeMode == ShapeMode::ROUND) {
         auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
@@ -224,11 +220,6 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     }
-#else
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
-    scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
-        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
-#endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
