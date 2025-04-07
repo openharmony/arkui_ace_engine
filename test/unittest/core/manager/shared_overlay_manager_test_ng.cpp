@@ -22,6 +22,7 @@
 
 #include "test/mock/core/render/mock_render_context.h"
 
+#include "base/log/dump_log.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
@@ -603,5 +604,197 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest016, TestSize.Level
     }
     test.PerformFinishCallback();
     EXPECT_TRUE(flag);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest017
+ * @tc.desc: PrepareEachTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+    ShareId shareId = "adc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test PrepareEachTransition.
+     */
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+    effect->dest_ = nullptr;
+    effect->src_ = nullptr;
+    bool res = sharedOverlayManager->PrepareEachTransition(effect);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest018
+ * @tc.desc: CheckAndPrepareTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+    ShareId shareId = "adc";
+    ShareId shareId2 = "abc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    std::shared_ptr<SharedTransitionOption> sharedOption2;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    sharedOption2 = std::make_shared<SharedTransitionOption>();
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test ClearAllEffects.
+     */
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+    RefPtr<SharedTransitionEffect> effect2 = AceType::MakeRefPtr<SharedTransitionExchange>(shareId2, sharedOption2);
+    effect->dest_ = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    effect->src_ =  FrameNode::CreateFrameNode("srcNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    bool res = sharedOverlayManager->PrepareEachTransition(effect);
+
+    std::list<RefPtr<SharedTransitionEffect>> effects;
+    std::list<RefPtr<SharedTransitionEffect>> effectiveEffects;
+    effectiveEffects.emplace_back(effect2);
+    effects.emplace_back(effect);
+    sharedOverlayManager->CheckAndPrepareTransition(effects, effectiveEffects);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest019
+ * @tc.desc: ClearAllEffects
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ShareId shareId = "adc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+    effect->dest_ = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+    std::list<RefPtr<SharedTransitionEffect>> effects;
+    effects.emplace_back(effect);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test ClearAllEffects.
+     */
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+    sharedOverlayManager-> effects_ = effects;
+    sharedOverlayManager->ClearAllEffects();
+    EXPECT_FALSE(!sharedOverlayManager->effects_.empty());
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest020
+ * @tc.desc: CheckIn
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ShareId shareId = "adc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+
+    /**
+     * @tc.steps: step2. test CheckIn.
+     */
+    bool res = sharedOverlayManager->CheckIn(effect);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest021
+ * @tc.desc: PassengerAboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ShareId shareId = "adc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+    auto destNode = FrameNode::CreateFrameNode("destNode", 1, AceType::MakeRefPtr<PagePattern>(nullptr), true);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test PassengerAboard.
+     */
+    std::unique_ptr<MarginProperty> ptr1 = std::make_unique<MarginProperty>();
+    destNode->layoutProperty_->margin_ = std::move(ptr1);
+
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+    sharedOverlayManager->PassengerAboard(effect, destNode);
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("Transition passenger"));
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest022
+ * @tc.desc: AboardShuttle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    ShareId shareId = "adc";
+    std::shared_ptr<SharedTransitionOption> sharedOption;
+    sharedOption = std::make_shared<SharedTransitionOption>();
+    RefPtr<SharedTransitionEffect> effect = AceType::MakeRefPtr<SharedTransitionExchange>(shareId, sharedOption);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test AboardShuttle.
+     */
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto sharedOverlayManager = AceType::MakeRefPtr<SharedOverlayManager>(root);
+    bool res = sharedOverlayManager->AboardShuttle(effect);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: SharedOverlayManagerTest023
+ * @tc.desc: OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto destNodeShareId = CreateSharedNode(SHARE_ID1, DEST_DURATION, DEST_SIZE);
+    destNodeShareId->GetRenderContext()->GetSharedTransitionOption()->type =
+        SharedTransitionEffectType::SHARED_EFFECT_STATIC;
+    destPage_->AddChild(destNodeShareId);
+
+    /**
+     * @tc.steps: step2. set different variables to meet the conditional values and test OnBackPressed.
+     */
+    destPage_->GetPattern<PagePattern>()->sharedTransitionMap_.emplace(SHARE_ID1, destNodeShareId);
+    manager_->StartSharedTransition(srcPage_, destPage_);
+    auto effect = *manager_->effects_.begin();
+    auto staticEffect = AceType::DynamicCast<SharedTransitionStatic>(effect);
+    bool res = manager_->OnBackPressed();
+    EXPECT_TRUE(res);
 }
 } // namespace OHOS::Ace::NG
