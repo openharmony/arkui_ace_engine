@@ -231,7 +231,7 @@ generated_sources = [
   "implementation/scroller_accessor.cpp",
   "implementation/search_controller_accessor.cpp",
 
-  #"implementation/search_modifier.cpp",
+  "implementation/search_modifier.cpp",
   "implementation/security_component_method_modifier.cpp",
 
   #"implementation/select_modifier.cpp",
@@ -266,7 +266,7 @@ generated_sources = [
   "implementation/tap_gesture_interface_accessor.cpp",
   "implementation/text_area_controller_accessor.cpp",
 
-  #"implementation/text_area_modifier.cpp",
+  "implementation/text_area_modifier.cpp",
   "implementation/text_base_controller_accessor.cpp",
   "implementation/text_clock_controller_accessor.cpp",
   "implementation/text_clock_modifier.cpp",
@@ -275,7 +275,7 @@ generated_sources = [
   "implementation/text_edit_controller_ex_accessor.cpp",
   "implementation/text_input_controller_accessor.cpp",
 
-  #"implementation/text_input_modifier.cpp",
+  "implementation/text_input_modifier.cpp",
   "implementation/text_menu_item_id_accessor.cpp",
 
   "implementation/text_modifier.cpp",

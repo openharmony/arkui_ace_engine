@@ -30,7 +30,7 @@ namespace TextAreaModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(id, "", "", true);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(id, u"", u"", true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -222,8 +222,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& text, PreviewText& prevText) {
-        auto textArkString = Converter::ArkValue<Ark_String>(text);
+    auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& changeValueInfo) {
+        const std::string u8Text = UtfUtils::Str16DebugToStr8(changeValueInfo.value);
+        PreviewText prevText = changeValueInfo.previewText;
+        auto textArkString = Converter::ArkValue<Ark_String>(u8Text);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText);
         arkCallback.Invoke(textArkString, textArkPrevText);
     };
@@ -272,8 +274,9 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::string& value) {
-        auto textArkString = Converter::ArkValue<Ark_String>(value);
+    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
+        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
+        auto textArkString = Converter::ArkValue<Ark_String>(u8Value);
         arkCallback.Invoke(textArkString);
     };
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
@@ -284,8 +287,9 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [arkCallback = CallbackHelper(*value)](const std::string& value) {
-        auto textArkString = Converter::ArkValue<Ark_String>(value);
+    auto onCut = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
+        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
+        auto textArkString = Converter::ArkValue<Ark_String>(u8Value);
         arkCallback.Invoke(textArkString);
     };
     TextFieldModelNG::SetOnCut(frameNode, std::move(onCut));
@@ -296,10 +300,11 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::string& content,
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
         NG::TextCommonEvent& event) -> void {
+        const std::string u8Content = UtfUtils::Str16DebugToStr8(content);
         Converter::ConvContext ctx;
-        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        auto arkContent = Converter::ArkValue<Ark_String>(u8Content, &ctx);
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
         });
@@ -499,9 +504,10 @@ void OnWillInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
+        std::string u8InsertValue = UtfUtils::Str16DebugToStr8(value.insertValue);
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(u8InsertValue)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
             .value_or(true);
@@ -516,9 +522,10 @@ void OnDidInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
+        std::string u8InsertValue = UtfUtils::Str16DebugToStr8(value.insertValue);
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
+            .insertValue = Converter::ArkValue<Ark_String>(u8InsertValue, &ctx)
         };
         arkCallback.Invoke(insertValue);
     };
@@ -531,10 +538,11 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
+        std::string u8DeleteValue = UtfUtils::Str16DebugToStr8(value.deleteValue);
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(u8DeleteValue)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
             .value_or(true);
@@ -549,10 +557,11 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onDidDelete = [arkCallback = CallbackHelper(*value)](const DeleteValueInfo& value) {
         Converter::ConvContext ctx;
+        std::string u8DeleteValue = UtfUtils::Str16DebugToStr8(value.deleteValue);
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
+            .deleteValue = Converter::ArkValue<Ark_String>(u8DeleteValue, &ctx)
         };
         arkCallback.Invoke(deleteValue);
     };
@@ -591,13 +600,14 @@ void InputFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    std::function<void(const std::string&)> onErrorEvent = nullptr;
+    std::function<void(const std::u16string&)> onErrorEvent = nullptr;
     if (error) {
         auto arkOnError = Converter::OptConvert<Callback_String_Void>(*error);
         if (arkOnError) {
-            onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::string& val) {
+            onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::u16string& val) {
                 Converter::ConvContext ctx;
-                arkCallback.Invoke(Converter::ArkValue<Ark_String>(val, &ctx));
+                const std::string u8Val = UtfUtils::Str16DebugToStr8(val);
+                arkCallback.Invoke(Converter::ArkValue<Ark_String>(u8Val, &ctx));
             };
         }
     }
@@ -650,8 +660,9 @@ void _onChangeEvent_textImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::string& content) {
-        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content);
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+        const std::string u8Content = UtfUtils::Str16DebugToStr8(content);
+        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(u8Content);
         arkCallback.Invoke(arkContent);
     };
     TextFieldModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
