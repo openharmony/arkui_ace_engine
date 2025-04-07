@@ -2105,18 +2105,5 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
-
-    auto menu = GetMenuNode();
-    CHECK_NULL_VOID(menu);
-    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_VOID(menuLayoutProps);
-    if (menuLayoutProps->HasSelectMenuModifiedWidth()) {
-        DumpLog::GetInstance().AddDesc(
-            "OptionWidth: " + std::to_string(menuLayoutProps->GetSelectMenuModifiedWidthValue()));
-    }
-    if (menuLayoutProps->HasSelectModifiedHeight()) {
-        DumpLog::GetInstance().AddDesc(
-            "OptionHeight: " + std::to_string(menuLayoutProps->GetSelectModifiedHeightValue()));
-    }
 }
 } // namespace OHOS::Ace::NG
