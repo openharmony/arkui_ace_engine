@@ -37,6 +37,9 @@
             "#components": [
                 "./src/generated/ts"
             ],
+            "@ohos/animator": [
+                "./ohos.animator.ts"
+            ],
             "@ohos.arkui.UIContext": [
                 "./ohos.arkui.UIContext.ts"
             ],
@@ -49,6 +52,7 @@
     "include": [
         "./src/**/*.ts",
         "./ohos.arkui.UIContext.ts",
+        "./ohos.animator.ts",
         "./global/**/*.ts"
     ],
     "exclude": [

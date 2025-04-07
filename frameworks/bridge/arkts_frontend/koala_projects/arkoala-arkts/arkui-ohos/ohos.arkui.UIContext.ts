@@ -22,6 +22,7 @@ import { int32 } from "@koalaui/common"
 import { nullptr } from "@koalaui/interop"
 import { _animateTo } from "./src/handwritten"
 import { AnimateParam } from './src/generated'
+import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
 
 export class UIContext {
     instanceId_: int32 = 10001;
@@ -46,6 +47,12 @@ export class UIContext {
         ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
         _animateTo(param, event);
         ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+    }
+    public createAnimator(options: AnimatorOptions): AnimatorResult {
+        ArkUIGeneratedNativeModule._SystemOps_syncInstanceId(this.instanceId_);
+        let animatorRet = Animator.create(options);
+        ArkUIGeneratedNativeModule._SystemOps_restoreInstanceId();
+        return animatorRet;
     }
 }
 export abstract class FrameCallback {

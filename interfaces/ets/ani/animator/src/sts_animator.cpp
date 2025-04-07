@@ -319,6 +319,7 @@ static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<An
     option->duration = durationAni > 0 ? durationAni : 0;
     option->iterations = iterationsAni >= -1 ? iterationsAni : 1;
     option->begin = beginAni;
+    option->delay = delayAni;
     option->end = endAni;
     option->easing = easing;
     option->fill = fill;
