@@ -10488,23 +10488,25 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!HasFocus()) {
-        int32_t frameId = host->GetId();
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
-        int32_t depth = host->GetDepth();
-        std::string errorType = "textfield on blur, can't insert value";
-        EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
-        auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
-        auto curFocusNode = currentFocusNode.Upgrade();
-        CHECK_NULL_VOID(curFocusNode);
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
-        return;
-    }
-    if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
-            isEdit_, IsDragging());
-        return;
+    if (reason != InputReason::PASTE) {
+        if (!HasFocus()) {
+            int32_t frameId = host->GetId();
+            TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", frameId);
+            int32_t depth = host->GetDepth();
+            std::string errorType = "textfield on blur, can't insert value";
+            EventReport::ReportTextFieldErrorEvent(frameId, depth, errorType);
+            auto currentFocusNode = InputMethodManager::GetInstance()->GetCurFocusNode();
+            auto curFocusNode = currentFocusNode.Upgrade();
+            CHECK_NULL_VOID(curFocusNode);
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "curFocusNode:%{public}s, ", curFocusNode->GetTag().c_str());
+            return;
+        }
+        if (!isEdit_ || (reason == InputReason::IME && IsDragging())) {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+                "textfield %{public}d NOT allow input, isEdit_ = %{public}d, IsDragging = %{public}d", host->GetId(),
+                isEdit_, IsDragging());
+            return;
+        }
     }
     if (focusIndex_ != FocuseIndex::TEXT) {
         if (insertValue == u" ") {
@@ -10613,6 +10615,7 @@ void TextFieldPattern::ClearTextContent()
             .range = {-1, -1}
         };
         SetPreviewTextOperation(info);
+        hasPreviewText_ = false;
     }
     if (contentController_->IsEmpty()) {
         return;
