@@ -2352,6 +2352,18 @@ void DragDropManager::UpdateDragPreviewScale()
     renderContext->UpdateTransformScale({ info_.scale, info_.scale });
 }
 
+void DragDropManager::InitDragAnimationPointerEvent(const GestureEvent& event, bool isDragStartPending)
+{
+    if (isDragStartPending) {
+        auto dragMoveLastPoint = GetDragMoveLastPointByCurrentPointer(event.GetPointerId());
+        dragAnimationPointerEvent_ = DragPointerEvent(dragMoveLastPoint.GetX(),
+            dragMoveLastPoint.GetY(), dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY());
+        return;
+    }
+    dragAnimationPointerEvent_ = DragPointerEvent(event.GetGlobalLocation().GetX(),
+        event.GetGlobalLocation().GetY(), event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY());
+}
+
 void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event,
     const RefPtr<GestureEventHub>& gestureHub, PreparedInfoForDrag& data)
 {
@@ -2376,8 +2388,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     }
     CHECK_NULL_VOID(info_.imageNode);
     isDragFwkShow_ = false;
-    dragAnimationPointerEvent_ = DragPointerEvent(event.GetGlobalLocation().GetX(), event.GetGlobalLocation().GetY(),
-        event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY());
+    InitDragAnimationPointerEvent(event, isDragStartPending);
     ResetPullMoveReceivedForCurrentDrag();
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(info_.imageNode);
     Point point = { static_cast<int32_t>(event.GetGlobalLocation().GetX()),

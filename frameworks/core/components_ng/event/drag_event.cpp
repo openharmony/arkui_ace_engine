@@ -1020,6 +1020,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     CHECK_NULL_VOID(imageNode);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     auto dragPreviewOption = frameNode->GetDragPreviewOption();
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
         if (dragPreviewOption.options.shadow.has_value()) {
@@ -1041,7 +1042,6 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     if (optionsFromModifier.blurbgEffect.backGroundEffect.radius.IsValid()) {
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundEffect, optionsFromModifier.blurbgEffect.backGroundEffect, imageNode);
     }
-    imageContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
 }
 
 void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
