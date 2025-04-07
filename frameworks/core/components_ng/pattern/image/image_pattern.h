@@ -508,6 +508,8 @@ private:
     void ControlAnimation(int32_t index);
     void SetObscured();
     void OnKeyEvent();
+    void ReportComponentChangeEvent(const std::string& value);
+
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
