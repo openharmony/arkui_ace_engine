@@ -67,6 +67,7 @@
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "core/gestures/gesture_info.h"
 
 #define ARK_TAG_UNDEFINED INTEROP_TAG_UNDEFINED
 #define ARK_TAG_OBJECT INTEROP_TAG_OBJECT
@@ -532,6 +533,13 @@ namespace Converter {
     template<> RefPtr<Curve> Convert(const Ark_ICurve& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<FrameRateRange> Convert(const Ark_ExpectedFrameRateRange& src);
+    template<> RefPtr<Gesture> Convert(const Ark_GestureGroupInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_LongPressGestureInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_PanGestureInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_PinchGestureInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_RotationGestureInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_SwipeGestureInterface& src);
+    template<> RefPtr<Gesture> Convert(const Ark_TapGestureInterface& src);
     template<> RefPtr<PixelMap> Convert(const Ark_PixelMap& src);
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
@@ -622,6 +630,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);
+    template<> void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src);
     template<> void AssignCast(std::optional<Gradient>& dst, const Ark_LinearGradient& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
@@ -655,6 +664,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);
     template<> void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src);
+    template<> void AssignCast(std::optional<PanDirection>& dst, const Ark_PanDirection& src);
     template<> void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
@@ -687,6 +697,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<SslError>& dst, const Ark_SslError& src);
     template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);
     template<> void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src);
+    template<> void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& src);
     template<> void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src);
     template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);

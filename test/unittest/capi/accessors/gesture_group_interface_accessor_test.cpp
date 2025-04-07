@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 #include "accessor_test_base.h"
+#include "core/components/common/layout/constants.h"
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
+#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/unittest/capi/accessors/accessor_test_fixtures.h"
@@ -62,6 +65,90 @@ public:
     }
     RefPtr<MockGestureGroup> gesture_;
 };
+
+/**
+ * @tc.name: CtorTestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+{
+    auto peer = accessor_->ctor(static_cast<Ark_GestureMode>(100), nullptr);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto mode = peer->gesture->GetMode();
+    EXPECT_EQ(mode, GestureMode::Sequence);
+    std::vector<RefPtr<Gesture>> gestures = peer->gesture->GetGestures();
+    EXPECT_TRUE(gestures.empty());
+    finalyzer_(peer);
+}
+
+/**
+ * @tc.name: CtorTestMode
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestMode, TestSize.Level1)
+{
+    const std::vector<std::pair<Ark_GestureMode, GestureMode>> TEST_PLAN = {
+        { Ark_GestureMode::ARK_GESTURE_MODE_EXCLUSIVE, GestureMode::Exclusive },
+        { Ark_GestureMode::ARK_GESTURE_MODE_PARALLEL, GestureMode::Parallel },
+        { Ark_GestureMode::ARK_GESTURE_MODE_SEQUENCE, GestureMode::Sequence },
+    };
+
+    for (auto& value : TEST_PLAN) {
+        auto peer = accessor_->ctor(value.first, nullptr);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto mode = peer->gesture->GetMode();
+        EXPECT_EQ(mode, value.second);
+        std::vector<RefPtr<Gesture>> gestures = peer->gesture->GetGestures();
+        EXPECT_TRUE(gestures.empty());
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestGestures
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestGestures, TestSize.Level1)
+{
+    Ark_GestureMode someMode = Ark_GestureMode::ARK_GESTURE_MODE_PARALLEL;
+    std::vector<Ark_GestureType> vectorData;
+    std::vector<GestureTypeName> vectorGestureType;
+
+    auto tapGestureInterfacePeer = fullAPI_->getAccessors()->getTapGestureInterfaceAccessor()->ctor(nullptr);
+    vectorData.push_back({ .selector = 0, .value0 = tapGestureInterfacePeer });
+    vectorGestureType.push_back(GestureTypeName::TAP_GESTURE);
+
+    auto longPressGestureInterfacePeer =
+        fullAPI_->getAccessors()->getLongPressGestureInterfaceAccessor()->ctor(nullptr);
+    vectorData.push_back({ .selector = 1, .value1 = longPressGestureInterfacePeer });
+    vectorGestureType.push_back(GestureTypeName::LONG_PRESS_GESTURE);
+
+    Converter::ArkArrayHolder<Array_GestureType> vectorHolder(vectorData);
+    Array_GestureType gestureArray = vectorHolder.ArkValue();
+
+    auto peer = accessor_->ctor(someMode, &gestureArray);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto mode = peer->gesture->GetMode();
+    EXPECT_EQ(mode, GestureMode::Parallel);
+    std::vector<RefPtr<Gesture>> gestures = peer->gesture->GetGestures();
+    EXPECT_EQ(gestures.size(), vectorData.size());
+    EXPECT_EQ(gestures.size(), vectorGestureType.size());
+    for (int i = 0; i < vectorGestureType.size(); i++) {
+        ASSERT_NE(gestures[i], nullptr);
+        auto typeOpt = gestures[i]->GetType();
+        ASSERT_TRUE(typeOpt.has_value());
+        EXPECT_EQ(typeOpt.value(), vectorGestureType[i]);
+    }
+    PeerUtils::DestroyPeer(tapGestureInterfacePeer);
+    PeerUtils::DestroyPeer(longPressGestureInterfacePeer);
+    finalyzer_(peer);
+}
 
 /**
  * @tc.name: OnCancelTest

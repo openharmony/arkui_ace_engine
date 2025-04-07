@@ -15,24 +15,41 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "rotation_gesture_interface_peer.h"
 #include "arkoala_api_generated.h"
-#include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureInterfaceAccessor {
+namespace {
+    constexpr int32_t DEFAULT_ROTATION_FINGERS = 2;
+    constexpr double DEFAULT_ROTATION_ANGLE = 1.0;
+    constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+}
 void DestroyPeerImpl(Ark_RotationGestureInterface peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_RotationGestureInterface CtorImpl(const Opt_Literal_Number_angle_fingers* value)
 {
-    int32_t fingersNum = DEFAULT_SLIDE_FINGER;
-    double angleNum = 0;
-    auto peer = new RotationGestureInterfacePeer();
-    peer->gesture = AceType::MakeRefPtr<RotationGesture>(fingersNum, angleNum);
+    auto peer =  PeerUtils::CreatePeer<RotationGestureInterfacePeer>();
+    int32_t fingers = DEFAULT_ROTATION_FINGERS;
+    double angle = DEFAULT_ROTATION_ANGLE;
+    bool isLimitFingerCount = DEFAULT_IS_LIMIT_FINGER_COUNT;
+    std::optional<Ark_Literal_Number_angle_fingers> params = value ? Converter::GetOpt(*value) : std::nullopt;
+    if (params.has_value()) {
+        fingers = Converter::OptConvert<int32_t>(params->fingers).value_or(DEFAULT_ROTATION_FINGERS);
+        fingers = fingers <= DEFAULT_ROTATION_FINGERS ? DEFAULT_ROTATION_FINGERS : fingers;
+        auto angleOpt = Converter::OptConvert<float>(params->angle);
+        if (angleOpt.has_value()) {
+            angle = static_cast<double>(angleOpt.value());
+            angle = LessNotEqual(angle, 0.0) ? DEFAULT_ROTATION_ANGLE : angle;
+        }
+        LOGE("Arkoala method RotationGestureInterfaceAccessor.CtorImpl use default value for isLimitFingerCount");
+    }
+    peer->gesture = AceType::MakeRefPtr<RotationGesture>(fingers, angle, isLimitFingerCount);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()

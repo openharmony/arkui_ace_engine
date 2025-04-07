@@ -25,6 +25,12 @@ constexpr int32_t EXPECTED_ID = 111;
 struct CheckEvent {
     int32_t resourceId;
 };
+
+constexpr int32_t DEFAULT_FINGERS = 1;
+constexpr double DEFAULT_SPEED = 100.0;
+constexpr auto DEFAULT_DIRECTION = SwipeDirection{};
+constexpr bool DEFAULT_IS_LIMIT_FINGER_COUNT = false;
+constexpr double FLT_PRECISION = 0.001;
 }
 
 using namespace testing;
@@ -51,6 +57,203 @@ public:
     }
     RefPtr<SwipeGesture> gesture_;
 };
+
+/**
+ * @tc.name: CtorTestFingers
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestFingers, TestSize.Level1)
+{
+    const std::vector<std::pair<int32_t, int32_t>> TEST_PLAN = {
+        { -10, DEFAULT_FINGERS },
+        { 0, DEFAULT_FINGERS },
+        { 1, 1 },
+        { 10, 10 },
+        { 11, 11 },
+    };
+    Ark_SwipeDirection arkSomeDirection = Ark_SwipeDirection::ARK_SWIPE_DIRECTION_HORIZONTAL;
+    SwipeDirection someDirection = {.type = SwipeDirection::HORIZONTAL};
+    double someSpeed = 50.5;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>(arkSomeDirection);
+        params.speed = Converter::ArkValue<Opt_Number>(someSpeed);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, someDirection.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, someSpeed, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>(value.first);
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>();
+        params.speed = Converter::ArkValue<Opt_Number>();
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, value.second);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, DEFAULT_DIRECTION.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, DEFAULT_SPEED, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestDirection
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestDirection, TestSize.Level1)
+{
+    const std::vector<std::pair<Ark_SwipeDirection, SwipeDirection>> TEST_PLAN = {
+        { ARK_SWIPE_DIRECTION_NONE, { .type = SwipeDirection::NONE } },
+        { static_cast<Ark_SwipeDirection>(100), { .type = SwipeDirection::ALL } },
+        { ARK_SWIPE_DIRECTION_HORIZONTAL, { .type = SwipeDirection::HORIZONTAL } },
+        { ARK_SWIPE_DIRECTION_VERTICAL, { .type = SwipeDirection::VERTICAL } },
+        { ARK_SWIPE_DIRECTION_ALL, { .type = SwipeDirection::ALL } },
+    };
+    int32_t someFingers = 5;
+    double someSpeed = 50.5;
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>(value.first);
+        params.speed = Converter::ArkValue<Opt_Number>(someSpeed);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, someFingers);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, value.second.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, someSpeed, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>(value.first);
+        params.speed = Converter::ArkValue<Opt_Number>();
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, value.second.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, DEFAULT_SPEED, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestSpeed
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestSpeed, TestSize.Level1)
+{
+    const std::vector<std::pair<double, double>> TEST_PLAN = {
+        { -10.0, DEFAULT_SPEED },
+        { 10.0, 10.0 },
+        { 100.0, 100.0 },
+        { 200.05, 200.05 },
+        { 0.0, DEFAULT_SPEED },
+    };
+    int32_t someFingers = 5;
+    Ark_SwipeDirection arkSomeDirection = Ark_SwipeDirection::ARK_SWIPE_DIRECTION_HORIZONTAL;
+    SwipeDirection someDirection = {.type = SwipeDirection::HORIZONTAL};
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>(someFingers);
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>(arkSomeDirection);
+        params.speed = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, someFingers);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, someDirection.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, value.second, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+
+    for (auto& value : TEST_PLAN) {
+        Ark_Literal_Number_fingers_speed_SwipeDirection_direction params;
+        params.fingers = Converter::ArkValue<Opt_Number>();
+        params.direction = Converter::ArkValue<Opt_SwipeDirection>();
+        params.speed = Converter::ArkValue<Opt_Number>(value.first);
+        auto optParam = Converter::ArkValue<Opt_Literal_Number_fingers_speed_SwipeDirection_direction>(params);
+        auto peer = accessor_->ctor(&optParam);
+        ASSERT_NE(peer, nullptr);
+        ASSERT_NE(peer->gesture, nullptr);
+        auto fingers = peer->gesture->GetFingers();
+        EXPECT_EQ(fingers, DEFAULT_FINGERS);
+        auto direction = peer->gesture->GetDirection();
+        EXPECT_EQ(direction.type, DEFAULT_DIRECTION.type);
+        auto speed = peer->gesture->GetSpeed();
+        EXPECT_NEAR(speed, value.second, FLT_PRECISION);
+        auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+        EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+        finalyzer_(peer);
+    }
+}
+
+/**
+ * @tc.name: CtorTestInvalid
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwipeGestureIntrfaceAccessorTest, CtorTestInvalid, TestSize.Level1)
+{
+    auto peer = accessor_->ctor(nullptr);
+    ASSERT_NE(peer, nullptr);
+    ASSERT_NE(peer->gesture, nullptr);
+    auto fingers = peer->gesture->GetFingers();
+    EXPECT_EQ(fingers, DEFAULT_FINGERS);
+    auto direction = peer->gesture->GetDirection();
+    EXPECT_EQ(direction.type, DEFAULT_DIRECTION.type);
+    auto speed = peer->gesture->GetSpeed();
+    EXPECT_NEAR(speed, DEFAULT_SPEED, FLT_PRECISION);
+    auto limitFingerCount = peer->gesture->GetLimitFingerCount();
+    EXPECT_EQ(limitFingerCount, DEFAULT_IS_LIMIT_FINGER_COUNT);
+    finalyzer_(peer);
+}
 
 /**
  * @tc.name: OnActionTest

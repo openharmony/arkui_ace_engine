@@ -124,7 +124,7 @@ HWTEST_F(PanGestureOptionsAccessorTest, setDistanceTest, TestSize.Level1)
 
 typedef std::pair<int32_t, Ark_Number> SetFingersTestStep;
 const std::vector<SetFingersTestStep> SET_FINGERS_TEST_PLAN = {
-    { 0, Converter::ArkValue<Ark_Number>(0) },
+    { 1, Converter::ArkValue<Ark_Number>(0) },
     { 1, Converter::ArkValue<Ark_Number>(1) },
     { 2, Converter::ArkValue<Ark_Number>(2) },
     { 5, Converter::ArkValue<Ark_Number>(5) },
