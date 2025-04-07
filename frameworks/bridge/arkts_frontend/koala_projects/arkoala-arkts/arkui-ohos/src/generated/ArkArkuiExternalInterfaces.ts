@@ -20,8 +20,6 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { BusinessError } from "./ArkBaseInterfaces"
-import { Resource } from "global/resource";
-import { FontStyle, FontWeight, TextAlign, TextOverflow, TextCase, WordBreak } from "./../component/enums"
 export interface NodeController {
 }
 export interface TextModifier {
@@ -91,39 +89,6 @@ export interface RoundRectShapeOptions extends ShapeSize {
 }
 export interface PathShapeOptions {
     commands?: string;
-}
-export interface FontOptions {
-    familyName: string | Resource;
-    familySrc: string | Resource;
-}
-export interface FontInfo {
-    path: string;
-    postScriptName: string;
-    fullName: string;
-    family: string;
-    subfamily: string;
-    weight: number;
-    width: number;
-    italic: boolean;
-    monoSpace: boolean;
-    symbolic: boolean;
-}
-export interface MeasureOptions {
-    textContent: string | Resource;
-    constraintWidth?: number | string | Resource;
-    fontSize?: number | string | Resource;
-    fontStyle?: number | FontStyle;
-    fontWeight?: number | string | FontWeight;
-    fontFamily?: string | Resource;
-    letterSpacing?: number | string;
-    textAlign?: number | TextAlign;
-    overflow?: number | TextOverflow;
-    maxLines?: number;
-    lineHeight?: number | string | Resource;
-    baselineOffset?: number | string;
-    textCase?: number | TextCase;
-    textIndent?: number | string;
-    wordBreak?: WordBreak;
 }
 export enum EffectDirection {
     DOWN = 0,

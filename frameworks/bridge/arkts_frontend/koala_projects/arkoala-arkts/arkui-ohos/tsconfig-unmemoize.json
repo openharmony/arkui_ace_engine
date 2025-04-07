@@ -43,6 +43,12 @@
             "@ohos.arkui.UIContext": [
                 "./ohos.arkui.UIContext.ts"
             ],
+            "@ohos.measure": [
+                "./ohos.measure.ts"
+            ],
+            "@ohos.font.font": [
+                "./ohos.font.ts"
+            ],
             "global/resource": [
                 "./global/resource/resource.ts"
             ]
@@ -51,6 +57,8 @@
     },
     "include": [
         "./src/**/*.ts",
+        "./ohos.measure.ts",
+        "./ohos.font.ts",
         "./ohos.arkui.UIContext.ts",
         "./ohos.animator.ts",
         "./global/**/*.ts"
