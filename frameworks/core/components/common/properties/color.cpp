@@ -118,19 +118,19 @@ Color Color::FromString(std::string colorStr, uint32_t maskAlpha, Color defaultC
     // Regex match for rgb(90,254,180).
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGB)) {
         if (matches.size() == RGB_SUB_MATCH_SIZE) {
-            auto red = static_cast<uint8_t>(std::stoi(matches[1]));   // red value.
-            auto green = static_cast<uint8_t>(std::stoi(matches[2])); // green value.
-            auto blue = static_cast<uint8_t>(std::stoi(matches[3]));  // blue value.
+            auto red = static_cast<uint8_t>(StringUtils::StringToInt(matches[1]));   // red value.
+            auto green = static_cast<uint8_t>(StringUtils::StringToInt(matches[2])); // green value.
+            auto blue = static_cast<uint8_t>(StringUtils::StringToInt(matches[3]));  // blue value.
             return FromRGB(red, green, blue);
         }
     }
     // Regex match for rgba(90,254,180,0.5).
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGBA)) {
         if (matches.size() == RGBA_SUB_MATCH_SIZE) {
-            auto red = static_cast<uint8_t>(std::stoi(matches[1]));
-            auto green = static_cast<uint8_t>(std::stoi(matches[2]));
-            auto blue = static_cast<uint8_t>(std::stoi(matches[3]));
-            auto opacity = static_cast<double>(std::stod(matches[4]));
+            auto red = static_cast<uint8_t>(StringUtils::StringToInt(matches[1]));
+            auto green = static_cast<uint8_t>(StringUtils::StringToInt(matches[2]));
+            auto blue = static_cast<uint8_t>(StringUtils::StringToInt(matches[3]));
+            auto opacity = StringUtils::StringToDouble(matches[4]);
             return FromRGBO(red, green, blue, opacity);
         }
     }
@@ -540,10 +540,10 @@ bool Color::MatchColorWithRGBA(const std::string& colorStr, Color& color)
     std::smatch matches;
     if (std::regex_match(colorStr, matches, COLOR_WITH_RGBA)) {
         if (matches.size() == RGBA_SUB_MATCH_SIZE) {
-            auto redInt = std::stoi(matches[1]);
-            auto greenInt = std::stoi(matches[2]);
-            auto blueInt = std::stoi(matches[3]);
-            auto opacityDouble = std::stod(matches[4]);
+            auto redInt = StringUtils::StringToInt(matches[1]);
+            auto greenInt = StringUtils::StringToInt(matches[2]);
+            auto blueInt = StringUtils::StringToInt(matches[3]);
+            auto opacityDouble = StringUtils::StringToDouble(matches[4]);
             if (!IsRGBValid(redInt) || !IsRGBValid(greenInt) || !IsRGBValid(blueInt) ||
                 !IsOpacityValid(opacityDouble)) {
                 return false;
