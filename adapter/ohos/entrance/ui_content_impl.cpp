@@ -4998,6 +4998,18 @@ bool UIContentImpl::GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReaso
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
         reasonDragFlag = false;
     }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG_START &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG_END) {
+        reasonDragFlag = false;
+    }
     return reasonDragFlag;
 }
 
