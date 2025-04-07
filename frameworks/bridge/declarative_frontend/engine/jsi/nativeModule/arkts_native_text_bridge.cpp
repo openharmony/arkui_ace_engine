@@ -70,8 +70,8 @@ ArkUINativeModuleValue TextBridge::SetFontWeight(ArkUIRuntimeCallInfo* runtimeCa
         if (weightArg->IsNumber()) {
             weight = std::to_string(weightArg->Int32Value(vm));
             variableFontWeight = weightArg->Int32Value(vm);
-        } else if (weightArg->IsString(vm)) {
-            weight = weightArg->ToString(vm)->ToString(vm);
+        } else if ((weightArg->IsString(vm) || weightArg->IsObject(vm)) &&
+            (!ArkTSUtils::ParseJsString(vm, weightArg, weight))) {
             variableFontWeight = StringUtils::StringToInt(weight);
         }
     }

@@ -55,9 +55,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> fiveArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-
-    if (!secondArg->IsNull() && !secondArg->IsUndefined() && secondArg->IsString(vm)) {
-        std::string stringValue = secondArg->ToString(vm)->ToString(vm);
+    std::string stringValue = "";
+    if (!secondArg->IsNull() && !secondArg->IsUndefined() &&
+       (secondArg->IsString(vm) || secondArg->IsObject(vm)) && ArkTSUtils::ParseJsString(vm, secondArg, stringValue)) {
         GetArkUINodeModifiers()->getSearchModifier()->setSearchValue(nativeNode, stringValue.c_str());
     }
     if (!threeArg->IsNull() && !threeArg->IsUndefined() && threeArg->IsString(vm)) {
@@ -547,8 +547,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
     struct ArkUISearchButtonOptionsStruct value = {"", 0.0, 0, INVALID_COLOR_VALUE};
     
     std::string valueString = "";
-    if (secondArg->IsString(vm)) {
-        valueString = secondArg->ToString(vm)->ToString(vm);
+    if ((secondArg->IsString(vm) || secondArg->IsObject(vm)) && ArkTSUtils::ParseJsString(vm, secondArg, valueString)) {
         value.value = valueString.c_str();
     }
 

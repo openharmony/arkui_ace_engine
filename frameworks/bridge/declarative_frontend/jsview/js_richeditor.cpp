@@ -1836,8 +1836,8 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
     }
     TextSpanOptions options;
     std::u16string spanValue;
-    if (auto tempArg = args[0]; tempArg->IsEmpty() || !tempArg->IsString() || tempArg->ToString() == "" ||
-        !JSContainerBase::ParseJsString(tempArg, spanValue)) {
+    if (auto tempArg = args[0]; tempArg->IsEmpty() || (!tempArg->IsString() && !tempArg->IsObject()) ||
+        !JSContainerBase::ParseJsString(tempArg, spanValue) || spanValue.empty()) {
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "args error");
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;
