@@ -113,7 +113,7 @@ public:
     static void TriggerAllCallbacks(std::vector<MediaQueryListener*>& copyListeners)
     {
         MediaQueryer queryer;
-        std::string str;
+        std::string mediaInfo;
         for (auto& listener : copyListeners) {
             OHOS::Ace::ContainerScope scope(listener->GetInstanceId());
             auto json = MediaQueryInfo::GetMediaQueryJsonInfo();
@@ -142,7 +142,7 @@ public:
                 napi_value resultArg = nullptr;
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
-                str += listener->media_ + ":" + (listener->matches_ ? "1" : "0") + " ";
+                mediaInfo += listener->media_ + ":" + (listener->matches_ ? "1" : "0") + " ";
                 napi_value result = nullptr;
                 napi_status status = napi_call_function(listener->env_, nullptr, cb, 1, &resultArg, &result);
                 if (status != napi_ok) {
@@ -152,7 +152,7 @@ public:
                 napi_close_handle_scope(listener->env_, scope);
             }
         }
-        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "trigger: %{public}s", str.c_str());
+        TAG_LOGI(AceLogTag::ACE_MEDIA_QUERY, "trigger: %{public}s", mediaInfo.c_str());
     }
 
     static napi_value On(napi_env env, napi_callback_info info)
