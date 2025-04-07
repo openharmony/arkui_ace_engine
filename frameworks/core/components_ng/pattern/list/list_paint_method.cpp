@@ -17,11 +17,8 @@
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/render/divider_painter.h"
-
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
-#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
@@ -207,25 +204,22 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
 
-#ifdef ARKUI_CIRCLE_FEATURE
     auto shapeMode = scrollBar->GetShapeMode();
     if (shapeMode == ShapeMode::ROUND) {
         auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
         CHECK_NULL_VOID(arcScrollBarOverlayModifier);
         auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
         CHECK_NULL_VOID(arcScrollBar);
-        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        scrollBarOverlayModifier->SetBarColor(arcScrollBar->GetArcForegroundColor());
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetArcBackgroundColor());
         arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
             arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
             arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
     } else {
+        scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     }
-#else
-    scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
-        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
-#endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);

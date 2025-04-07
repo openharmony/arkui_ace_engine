@@ -54,9 +54,7 @@ constexpr float FLOAT_TWO = 2.0f;
 
 ArcListPattern::ArcListPattern()
 {
-#ifdef ARKUI_CIRCLE_FEATURE
     SetScrollBarShape(ScrollBarShape::ARC);
-#endif
     SetFriction(ARC_LIST_FRICTION);
     scrollAlign_ = ScrollAlign::CENTER;
     auto pipelineContext = PipelineBase::GetCurrentContext();
