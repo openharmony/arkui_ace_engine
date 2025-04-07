@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+
 #include <cmath>
 #include <cstdlib>
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
@@ -43,6 +44,7 @@
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
 #include "feature/anco_manager/rs_ext_node_operation.h"
+
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 
@@ -59,6 +61,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 
 std::string XComponentRenderFitToString(RenderFit renderFit)
@@ -524,8 +527,8 @@ void XComponentPattern::SetSurfaceNodeToGraphic()
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
     CHECK_NULL_VOID(rsSurfaceNode);
 
-    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(GetId(), parentNode->GetId(),
-        canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
+    Rosen::RSExtNodeOperation::GetInstance().ProcessRSExtNode(
+        GetId(), parentNode->GetId(), canvasRect.GetX(), canvasRect.GetY(), rsSurfaceNode);
 #endif
 }
 
@@ -692,8 +695,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
     CHECK_NULL_VOID(geometryNode);
     drawSize_ = geometryNode->GetContentSize();
     if (!drawSize_.IsPositive()) {
-        TAG_LOGW(
-            AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s size is not positive", GetId().c_str());
         return;
     }
     globalPosition_ = geometryNode->GetFrameOffset();
@@ -960,7 +962,7 @@ bool XComponentPattern::OnAccessibilityChildTreeDeregister()
 void XComponentPattern::OnSetAccessibilityChildTree(
     int32_t childWindowId, int32_t childTreeId)
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnAccessibilityChildTreeDeregister, "
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "OnSetAccessibilityChildTree, "
         "windowId: %{public}d, treeId: %{public}d.", childWindowId, childTreeId);
     windowId_ = static_cast<uint32_t>(childWindowId);
     treeId_ = childTreeId;
@@ -1036,8 +1038,8 @@ void XComponentPattern::InitNativeNodeCallbacks()
         host->RemoveChild(node);
     };
 
-    nativeXComponentImpl_->registerNativeNodeCallbacks(std::move(OnAttachRootNativeNode),
-        std::move(OnDetachRootNativeNode));
+    nativeXComponentImpl_->registerNativeNodeCallbacks(
+        std::move(OnAttachRootNativeNode), std::move(OnDetachRootNativeNode));
 }
 
 void XComponentPattern::InitEvent()
@@ -1163,20 +1165,18 @@ void XComponentPattern::InitAxisEvent(const RefPtr<InputEventHub>& inputHub)
 
 void XComponentPattern::InitOnTouchIntercept(const RefPtr<GestureEventHub>& gestureHub)
 {
-    gestureHub->SetOnTouchIntercept(
-        [weak = WeakClaim(this)](
-            const TouchEventInfo& touchEvent) -> HitTestMode {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
-            auto hostNode = pattern->GetHost();
-            CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
-            CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
-            const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
-            CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
-            auto event = touchEvent.ConvertToTouchEvent();
-            ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
-            return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
-        });
+    gestureHub->SetOnTouchIntercept([weak = WeakClaim(this)](const TouchEventInfo& touchEvent) -> HitTestMode {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, NG::HitTestMode::HTMDEFAULT);
+        auto hostNode = pattern->GetHost();
+        CHECK_NULL_RETURN(hostNode, NG::HitTestMode::HTMDEFAULT);
+        CHECK_NULL_RETURN(pattern->nativeXComponentImpl_, hostNode->GetHitTestMode());
+        const auto onTouchInterceptCallback = pattern->nativeXComponentImpl_->GetOnTouchInterceptCallback();
+        CHECK_NULL_RETURN(onTouchInterceptCallback, hostNode->GetHitTestMode());
+        auto event = touchEvent.ConvertToTouchEvent();
+        ArkUI_UIInputEvent uiEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, TOUCH_EVENT_ID, &event };
+        return static_cast<NG::HitTestMode>(onTouchInterceptCallback(pattern->nativeXComponent_.get(), &uiEvent));
+    });
 }
 
 void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -1418,8 +1418,8 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     return historicalPoints;
 }
 
-void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
-    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
+void XComponentPattern::FireExternalEvent(
+    RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
 #ifdef NG_BUILD
@@ -1954,6 +1954,82 @@ void XComponentPattern::OnWindowShow()
     hasReleasedSurface_ = false;
 }
 
+RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
+{
+    RectF rect;
+    float relativeLeft = positionX;
+    float relativeTop = positionY;
+    float nodeWidth = width;
+    float nodeHeight = height;
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    float roundToPixelErrorX = 0;
+    float roundToPixelErrorY = 0;
+
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
+    roundToPixelErrorX += nodeLeftI - relativeLeft;
+    roundToPixelErrorY += nodeTopI - relativeTop;
+    rect.SetLeft(nodeLeftI);
+    rect.SetTop(nodeTopI);
+
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
+    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
+    roundToPixelErrorX += nodeWidthI - nodeWidth;
+    if (roundToPixelErrorX > 0.5f) {
+        nodeWidthI -= 1.0f;
+        roundToPixelErrorX -= 1.0f;
+    }
+    if (roundToPixelErrorX < -0.5f) {
+        nodeWidthI += 1.0f;
+        roundToPixelErrorX += 1.0f;
+    }
+    if (nodeWidthI < nodeWidthTemp) {
+        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
+        nodeWidthI = nodeWidthTemp;
+    }
+
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
+    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
+    roundToPixelErrorY += nodeHeightI - nodeHeight;
+    if (roundToPixelErrorY > 0.5f) {
+        nodeHeightI -= 1.0f;
+        roundToPixelErrorY -= 1.0f;
+    }
+    if (roundToPixelErrorY < -0.5f) {
+        nodeHeightI += 1.0f;
+        roundToPixelErrorY += 1.0f;
+    }
+    if (nodeHeightI < nodeHeightTemp) {
+        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
+        nodeHeightI = nodeHeightTemp;
+    }
+
+    rect.SetWidth(nodeWidthI);
+    rect.SetHeight(nodeHeightI);
+    return rect;
+}
+
+float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
+{
+    float fractials = fmod(value, 1.0f);
+    if (fractials < 0.0f) {
+        ++fractials;
+    }
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
+            return (value - fractials + 1.0f);
+        } else {
+            return (value - fractials);
+        }
+    }
+    return value;
+}
+
 void XComponentPattern::EnableAnalyzer(bool enable)
 {
     isEnableAnalyzer_ = enable;
@@ -1968,7 +2044,7 @@ void XComponentPattern::EnableAnalyzer(bool enable)
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
 }
 
-void XComponentPattern::SetImageAIOptions(void *options)
+void XComponentPattern::SetImageAIOptions(void* options)
 {
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
@@ -2064,82 +2140,6 @@ void XComponentPattern::ReleaseImageAnalyzer()
     imageAnalyzerManager_->ReleaseImageAnalyzer();
 }
 
-RectF XComponentPattern::AdjustPaintRect(float positionX, float positionY, float width, float height, bool isRound)
-{
-    RectF rect;
-    float relativeLeft = positionX;
-    float relativeTop = positionY;
-    float nodeWidth = width;
-    float nodeHeight = height;
-    float absoluteRight = relativeLeft + nodeWidth;
-    float absoluteBottom = relativeTop + nodeHeight;
-    float roundToPixelErrorX = 0;
-    float roundToPixelErrorY = 0;
-
-    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, false, false);
-    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, false, false);
-    roundToPixelErrorX += nodeLeftI - relativeLeft;
-    roundToPixelErrorY += nodeTopI - relativeTop;
-    rect.SetLeft(nodeLeftI);
-    rect.SetTop(nodeTopI);
-
-    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, false, false) - nodeLeftI;
-    float nodeWidthTemp = RoundValueToPixelGrid(nodeWidth, isRound, false, false);
-    roundToPixelErrorX += nodeWidthI - nodeWidth;
-    if (roundToPixelErrorX > 0.5f) {
-        nodeWidthI -= 1.0f;
-        roundToPixelErrorX -= 1.0f;
-    }
-    if (roundToPixelErrorX < -0.5f) {
-        nodeWidthI += 1.0f;
-        roundToPixelErrorX += 1.0f;
-    }
-    if (nodeWidthI < nodeWidthTemp) {
-        roundToPixelErrorX += nodeWidthTemp - nodeWidthI;
-        nodeWidthI = nodeWidthTemp;
-    }
-
-    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, false, false) - nodeTopI;
-    float nodeHeightTemp = RoundValueToPixelGrid(nodeHeight, isRound, false, false);
-    roundToPixelErrorY += nodeHeightI - nodeHeight;
-    if (roundToPixelErrorY > 0.5f) {
-        nodeHeightI -= 1.0f;
-        roundToPixelErrorY -= 1.0f;
-    }
-    if (roundToPixelErrorY < -0.5f) {
-        nodeHeightI += 1.0f;
-        roundToPixelErrorY += 1.0f;
-    }
-    if (nodeHeightI < nodeHeightTemp) {
-        roundToPixelErrorY += nodeHeightTemp - nodeHeightI;
-        nodeHeightI = nodeHeightTemp;
-    }
-
-    rect.SetWidth(nodeWidthI);
-    rect.SetHeight(nodeHeightI);
-    return rect;
-}
-
-float XComponentPattern::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
-{
-    float fractials = fmod(value, 1.0f);
-    if (fractials < 0.0f) {
-        ++fractials;
-    }
-    if (forceCeil) {
-        return (value - fractials + 1.0f);
-    } else if (forceFloor) {
-        return (value - fractials);
-    } else if (isRound) {
-        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.50f)) {
-            return (value - fractials + 1.0f);
-        } else {
-            return (value - fractials);
-        }
-    }
-    return value;
-}
-
 void XComponentPattern::SetSurfaceRotation(bool isLock)
 {
     if (type_ != XComponentType::SURFACE) {
@@ -2149,6 +2149,13 @@ void XComponentPattern::SetSurfaceRotation(bool isLock)
 
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     handlingSurfaceRenderContext_->SetSurfaceRotation(isLock);
+}
+
+void XComponentPattern::SetRenderFit(RenderFit renderFit)
+{
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    renderFit_ = renderFit;
+    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 
 void XComponentPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
@@ -2165,13 +2172,6 @@ void XComponentPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     if (renderSurface_) {
         renderSurface_->DumpInfo(json);
     }
-}
-
-void XComponentPattern::SetRenderFit(RenderFit renderFit)
-{
-    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
-    renderFit_ = renderFit;
-    handlingSurfaceRenderContext_->SetRenderFit(renderFit);
 }
 
 void XComponentPattern::SetScreenId(uint64_t screenId)
@@ -2261,6 +2261,6 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
             CHECK_NULL_VOID(pattern);
             pattern->CreateAnalyzerOverlay();
         },
-        "ArkUIXComponentCreateAnalyzerOverlay", PriorityType::VIP);
+        "ArkUIXComponentCreateAnalyzerOverlay");
 }
 } // namespace OHOS::Ace::NG
