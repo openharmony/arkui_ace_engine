@@ -36,7 +36,6 @@ public:
     // task schedule
     virtual void RunScopeUITaskSync(Task&& task, const std::string& name) = 0;
     virtual void RunScopeUITask(Task&& task, const std::string& name) = 0;
-    void AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask = false) override;
 
     // page operation
     virtual void OnBackPressed() = 0;
