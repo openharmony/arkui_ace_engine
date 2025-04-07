@@ -6454,6 +6454,33 @@ std::optional<bool> SwiperPattern::OnContentWillScroll(int32_t currentIndex, int
     return ret;
 }
 
+void SwiperPattern::UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex)
+{
+    CHECK_NULL_VOID(targetIndex_);
+    auto targetIndex = targetIndex_.value();
+    if (targetIndex < currentIndex_ && GetLoopIndex(targetIndex) == 0) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex > currentIndex_ && GetLoopIndex(targetIndex) == TotalCount() - 1) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == TotalCount() - 1 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        return;
+    }
+}
+
 void SwiperPattern::HandleTouchBottomLoopOnRTL()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -6488,6 +6515,37 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
     }
 
     if (releaseRightTouchBottom && currentIndex == 0 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        return;
+    }
+
+    if (GetDisplayCount() > 1) {
+        UpdateBottomTypeOnMultipleRTL(currentFirstIndex);
+    }
+}
+
+void SwiperPattern::UpdateBottomTypeOnMultiple(int32_t currentFirstIndex)
+{
+    CHECK_NULL_VOID(targetIndex_);
+    auto targetIndex = targetIndex_.value();
+    if (targetIndex < currentIndex_ && GetLoopIndex(targetIndex) == 0) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex > currentIndex_ && GetLoopIndex(targetIndex) == TotalCount() - 1) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == TotalCount() - 1 &&
+        gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
+        touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        return;
+    }
+
+    if (targetIndex != currentIndex_ && currentFirstIndex == 0 &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         return;
@@ -6528,12 +6586,17 @@ void SwiperPattern::HandleTouchBottomLoop()
         if (currentIndex == 0) {
             // left bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+            return;
         } else if (releaseTouchBottom) {
             // right bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+            return;
         }
     }
-    return;
+
+    if (GetDisplayCount() > 1) {
+        UpdateBottomTypeOnMultiple(currentFirstIndex);
+    }
 }
 
 void SwiperPattern::CalculateGestureStateOnRTL(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
