@@ -7853,7 +7853,8 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
         ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "type", "keyCode", "keyText", "keySource", "deviceId", "metaKey", "timestamp",
-            "stopPropagation", "getModifierKeyState", "intentionCode" };
+            "stopPropagation", "getModifierKeyState", "intentionCode", "isNumLockOn", "isCapsLockOn",
+            "isScrollLockOn" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyType())),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyCode())),
             panda::StringRef::NewFromUtf8(vm, info.GetKeyText()),
@@ -7862,7 +7863,10 @@ ArkUINativeModuleValue CommonBridge::SetOnKeyPreIme(ArkUIRuntimeCallInfo* runtim
             panda::NumberRef::New(vm, static_cast<double>(info.GetTimeStamp().time_since_epoch().count())),
             panda::FunctionRef::New(vm, Framework::JsStopPropagation),
             panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
-            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())) };
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetKeyIntention())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetNumLock())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetCapsLock())),
+            panda::NumberRef::New(vm, static_cast<int32_t>(info.GetScrollLock())) };
         auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
