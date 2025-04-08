@@ -3121,14 +3121,7 @@ class CustomDialogContentComponent extends ViewPU {
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
-                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                    WithTheme.create({
-                                                        theme: this.theme,
-                                                        colorMode: this.themeColorMode
-                                                    });
-                                                }, WithTheme);
-                                                this.ButtonBuilder.bind(this)();
-                                                WithTheme.pop();
+                                                this.buildButton.bind(this)();
                                             });
                                         }
                                     }, If);
@@ -3183,14 +3176,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        WithTheme.create({
-                                                            theme: this.theme,
-                                                            colorMode: this.themeColorMode
-                                                        });
-                                                    }, WithTheme);
-                                                    this.ButtonBuilder.bind(this)();
-                                                    WithTheme.pop();
+                                                    this.buildButton.bind(this)();
                                                 });
                                             }
                                         }, If);
@@ -3647,6 +3633,42 @@ class CustomDialogContentComponent extends ViewPU {
         }, If);
         If.pop();
         Column.pop();
+    }
+
+    isSetCustomButtonTheme() {
+        // is set fadeout style: now only on TV
+        if (IS_FADEOUT_ENABLE()) {
+            // has set button background color prop
+            if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+                return true;
+            }
+            // has set button font color prop
+            if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    buildButton(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isSetCustomButtonTheme()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
+                    }, WithTheme);
+                    this.ButtonBuilder.bind(this)();
+                    WithTheme.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.ButtonBuilder.bind(this)();
+                });
+            }
+        }, If);
+        If.pop();
     }
 
     /**

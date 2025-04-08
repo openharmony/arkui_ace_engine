@@ -1123,9 +1123,7 @@ struct CustomDialogContentComponent {
                   }
                 }.padding(this.getContentPadding())
               } else {
-                WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
-                  this.ButtonBuilder();
-                }
+                this.buildButton();
               }
             });
           }
@@ -1405,6 +1403,33 @@ struct CustomDialogContentComponent {
     }
     .width('100%')
     .padding(this.getOperationAreaPadding());
+  }
+
+  private isSetCustomButtonTheme(): boolean {
+    // is set fadeout style: now only on TV
+    if (IS_FADEOUT_ENABLE()) {
+      // has set button background color prop
+      if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+        return true;
+      }
+      // has set button font color prop
+      if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  @Builder
+  buildButton() {
+    if (this.isSetCustomButtonTheme()) {
+      WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
+        this.ButtonBuilder();
+      }
+    } else {
+      this.ButtonBuilder();
+    }
   }
 
   /**
