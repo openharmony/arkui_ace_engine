@@ -31,6 +31,7 @@
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -1171,6 +1172,14 @@ public:
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
     }
 
+    WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter()
+    {
+        if (!aiWriteAdapter_) {
+            aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+        }
+        return aiWriteAdapter_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1489,6 +1498,7 @@ private:
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     friend class ScopedLayout;
     friend class FormGestureManager;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
 };
 
 /**

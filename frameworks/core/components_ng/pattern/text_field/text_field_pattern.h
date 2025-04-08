@@ -2073,7 +2073,7 @@ private:
     bool isPasswordSymbol_ = true;
     bool isEnableHapticFeedback_ = true;
     RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
-    RefPtr<AIWriteAdapter> aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+    WeakPtr<AIWriteAdapter> aiWriteAdapter_;
     std::optional<Dimension> adaptFontSize_;
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;

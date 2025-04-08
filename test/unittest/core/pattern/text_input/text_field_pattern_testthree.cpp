@@ -505,6 +505,8 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite001, TestSize.Level0)
      */
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
+    auto aiWriteAdapter = AceType::MakeRefPtr<AIWriteAdapter>();
+    pattern_->aiWriteAdapter_ = aiWriteAdapter;
 
     /**
      * @tc.steps: step2. test GetAIWriteInfo
