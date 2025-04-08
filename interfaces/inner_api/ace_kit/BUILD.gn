@@ -17,7 +17,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 config("ace_kit_config") {
   include_dirs = [
     "$ace_root/interfaces/inner_api/ace_kit/include",
-    "$ace_root/interfaces/inner_api/ace",
   ]
 }
 
@@ -77,7 +76,10 @@ ohos_source_set("ace_kit") {
       "//foundation/arkui/napi",
       "//third_party/node/src",
     ]
-    deps += [ "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static" ]
+    deps += [ 
+      "${ace_graphic}/rosen/modules/render_service_client:librender_service_client_static",
+      "//third_party/libuv:uv_static"
+    ]
   } else {
     external_deps += [
       "graphic_2d:librender_service_client",
