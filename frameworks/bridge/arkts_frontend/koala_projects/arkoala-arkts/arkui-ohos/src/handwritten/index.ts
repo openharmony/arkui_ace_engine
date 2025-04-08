@@ -3,8 +3,6 @@ export * from "./ArkPageTransition"
 export * from "./ArkPageTransitionData"
 export * from "./Router"
 export * from "./ForeignFunctions"
-export * from "./AttributeModifier"
-
 
 // TODO: implement this
 export interface SubscribaleAbstract {}

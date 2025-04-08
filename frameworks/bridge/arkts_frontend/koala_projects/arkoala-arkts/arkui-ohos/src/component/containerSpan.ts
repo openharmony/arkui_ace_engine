@@ -20,7 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TextBackgroundStyle } from "./span"
-import { AttributeModifier } from "./../handwritten"
+import { AttributeModifier } from "./../component/common" 
 import { ArkContainerSpanComponent } from "./../generated/ArkContainerSpan"
 import { ArkContainerSpanPeer } from "./../generated/peers/ArkContainerSpanPeer"
 /** @memo:stable */

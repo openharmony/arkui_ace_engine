@@ -23,7 +23,7 @@ import { ComponentBase } from "../ComponentBase"
 import { TypeChecker } from "#components"
 import { ArkContainerSpanPeer } from "./peers/ArkContainerSpanPeer"
 import { TextBackgroundStyle } from "./../component/span"
-import { AttributeModifier } from "./../handwritten"
+import { AttributeModifier } from "./../component/common" 
 import { ContainerSpanAttribute } from "./../component/containerSpan"
 /** @memo:stable */
 export class ArkContainerSpanComponent extends ComponentBase implements ContainerSpanAttribute {

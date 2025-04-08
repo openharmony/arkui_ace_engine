@@ -15,7 +15,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include <ani.h>
-
+#include <sstream>
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
 
