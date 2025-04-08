@@ -717,6 +717,14 @@ void LayoutProperty::ConstraintContentByPadding()
 void LayoutProperty::ConstraintContentByBorder()
 {
     CHECK_NULL_VOID(borderWidth_);
+    auto host = GetHost();
+    if (host) {
+        auto pattern = host->GetPattern();
+        if (pattern && pattern->BorderUnoccupied()) {
+            return;
+        }
+    }
+
     auto borderWidthF = ConvertToBorderWidthPropertyF(
         *borderWidth_, contentConstraint_->scaleProperty, layoutConstraint_->percentReference.Width());
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -785,6 +793,13 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
             padding_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width());
+        auto host = GetHost();
+        if (host) {
+            auto pattern = host->GetPattern();
+            if (pattern && pattern->BorderUnoccupied()) {
+                borderWidth = BorderWidthPropertyF();
+            }
+        }
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, {});
     }
     auto padding = ConvertToPaddingPropertyF(
