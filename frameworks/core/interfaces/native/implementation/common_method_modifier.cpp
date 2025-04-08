@@ -3488,9 +3488,9 @@ void ShadowImpl(Ark_NativePointer node,
 void Clip0Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void Clip1Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
