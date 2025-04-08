@@ -1809,14 +1809,17 @@ class ForegroundColorModifier extends ModifierWithKey<ResourceColor | ColoringSt
 
 declare type ClickCallback = (event: ClickEvent) => void;
 class OnClickModifier extends ModifierWithKey<ClickCallback> {
+  private _clickEvent: ClickCallback = null;
   constructor(value: ClickCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onClick');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._clickEvent = null;
       getUINativeModule().common.resetOnClick(node);
     } else {
+      this._clickEvent = this.value;
       getUINativeModule().common.setOnClick(node, this.value);
     }
   }
@@ -1914,14 +1917,17 @@ class DragEndModifier extends ModifierWithKey<DragEndCallback> {
 
 declare type TouchCallback = (event: TouchEvent) => void;
 class OnTouchModifier extends ModifierWithKey<TouchCallback> {
+  private _touchEvent: TouchCallback = null;
   constructor(value: TouchCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onTouch');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._touchEvent = null;
       getUINativeModule().common.resetOnTouch(node);
     } else {
+      this._touchEvent = this.value;
       getUINativeModule().common.setOnTouch(node, this.value);
     }
   }
@@ -1929,56 +1935,68 @@ class OnTouchModifier extends ModifierWithKey<TouchCallback> {
 
 declare type VoidCallback = () => void;
 class OnAppearModifier extends ModifierWithKey<VoidCallback> {
+  private _onAppearEvent: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAppear');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onAppearEvent = null;
       getUINativeModule().common.resetOnAppear(node);
     } else {
+      this._onAppearEvent = this.value;
       getUINativeModule().common.setOnAppear(node, this.value);
     }
   }
 }
 
 class OnDisappearModifier extends ModifierWithKey<VoidCallback> {
+  private _onDisappearEvent: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onDisappear');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onDisappearEvent = null;
       getUINativeModule().common.resetOnDisappear(node);
     } else {
+      this._onDisappearEvent = this.value;
       getUINativeModule().common.setOnDisappear(node, this.value);
     }
   }
 }
 
 class OnAttachModifier extends ModifierWithKey<VoidCallback> {
+  private _onAttach: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAttach');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onAttach = null;
       getUINativeModule().common.resetOnAttach(node);
     } else {
+      this._onAttach = this.value;
       getUINativeModule().common.setOnAttach(node, this.value);
     }
   }
 }
 
 class OnDetachModifier extends ModifierWithKey<VoidCallback> {
+  private _onDetach: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onDetach');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onDetach = null;
       getUINativeModule().common.resetOnDetach(node);
     } else {
+      this._onDetach = this.value;
       getUINativeModule().common.setOnDetach(node, this.value);
     }
   }
@@ -1986,56 +2004,68 @@ class OnDetachModifier extends ModifierWithKey<VoidCallback> {
 
 declare type KeyEventCallback = (event: KeyEvent) => void;
 class OnKeyEventModifier extends ModifierWithKey<KeyEventCallback> {
+  private _onKeyEvent: KeyEventCallback = null;
   constructor(value: KeyEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onKeyEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onKeyEvent = null;
       getUINativeModule().common.resetOnKeyEvent(node);
     } else {
+      this._onKeyEvent = this.value;
       getUINativeModule().common.setOnKeyEvent(node, this.value);
     }
   }
 }
 
 class OnKeyPreImeModifier extends ModifierWithKey<Callback<KeyEvent, boolean>> {
+  private _onKeyPreIme: Callback<KeyEvent, boolean> = null;
   constructor(value: Callback<KeyEvent, boolean>) {
     super(value);
   }
   static identity: Symbol = Symbol('onKeyPreIme');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onKeyPreIme = null;
       getUINativeModule().common.resetOnKeyPreIme(node);
     } else {
+      this._onKeyPreIme = this.value;
       getUINativeModule().common.setOnKeyPreIme(node, this.value);
     }
   }
 }
 
 class OnFocusModifier extends ModifierWithKey<VoidCallback> {
+  private _onFocus: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onFocus = null;
       getUINativeModule().common.resetOnFocus(node);
     } else {
+      this._onFocus = this.value;
       getUINativeModule().common.setOnFocus(node, this.value);
     }
   }
 }
 
 class OnBlurModifier extends ModifierWithKey<VoidCallback> {
+  private _onBlur: VoidCallback = null;
   constructor(value: VoidCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onBlur');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onBlur = null;
       getUINativeModule().common.resetOnBlur(node);
     } else {
+      this._onBlur = this.value;
       getUINativeModule().common.setOnBlur(node, this.value);
     }
   }
@@ -2043,14 +2073,17 @@ class OnBlurModifier extends ModifierWithKey<VoidCallback> {
 
 declare type HoverEventCallback = (isHover: boolean, event: HoverEvent) => void;
 class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
+  private _onHover: HoverEventCallback = null;
   constructor(value: HoverEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onHover');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onHover = null;
       getUINativeModule().common.resetOnHover(node);
     } else {
+      this._onHover = this.value;
       getUINativeModule().common.setOnHover(node, this.value);
     }
   }
@@ -2058,14 +2091,17 @@ class OnHoverModifier extends ModifierWithKey<HoverEventCallback> {
 
 declare type HoverMoveEventCallback = (event: HoverEvent) => void;
 class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
+  private _onHoverMove: HoverMoveEventCallback = null;
   constructor(value: HoverMoveEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onHoverMove');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onHoverMove = null;
       getUINativeModule().common.resetOnHoverMove(node);
     } else {
+      this._onHoverMove = this.value;
       getUINativeModule().common.setOnHoverMove(node, this.value);
     }
   }
@@ -2073,14 +2109,17 @@ class OnHoverMoveModifier extends ModifierWithKey<HoverMoveEventCallback> {
 
 declare type MouseEventCallback = (event: MouseEvent) => void;
 class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
+  private _onMouse: MouseEventCallback = null;
   constructor(value: MouseEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onMouse');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onMouse = null;
       getUINativeModule().common.resetOnMouse(node);
     } else {
+      this._onMouse = this.value;
       getUINativeModule().common.setOnMouse(node, this.value);
     }
   }
@@ -2088,14 +2127,17 @@ class OnMouseModifier extends ModifierWithKey<MouseEventCallback> {
 
 declare type AxisEventCallback = (event: AxisEvent) => void;
 class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
+  private _onAxis: AxisEventCallback = null;
   constructor(value: AxisEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAxisEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onAxis = null;
       getUINativeModule().common.resetOnAxisEvent(node);
     } else {
+      this._onAxis = this.value;
       getUINativeModule().common.setOnAxisEvent(node, this.value);
     }
   }
@@ -2103,14 +2145,17 @@ class OnAxisEventModifier extends ModifierWithKey<AxisEventCallback> {
 
 declare type SizeChangeEventCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
 class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
+  private _onSizeChange: SizeChangeEventCallback = null;
   constructor(value: SizeChangeEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onSizeChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onSizeChange = null;
       getUINativeModule().common.resetOnSizeChange(node);
     } else {
+      this._onSizeChange = this.value;
       getUINativeModule().common.setOnSizeChange(node, this.value);
     }
   }
@@ -2118,14 +2163,17 @@ class OnSizeChangeModifier extends ModifierWithKey<SizeChangeEventCallback> {
 
 declare type AreaChangeEventCallback = (oldValue: Area, newValue: Area) => void;
 class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
+  private _onAreaChange: AreaChangeEventCallback = null;
   constructor(value: AreaChangeEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onAreaChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onAreaChange = null;
       getUINativeModule().common.resetOnAreaChange(node);
     } else {
+      this._onAreaChange = this.value;
       getUINativeModule().common.setOnAreaChange(node, this.value);
     }
   }
@@ -2133,14 +2181,17 @@ class OnAreaChangeModifier extends ModifierWithKey<AreaChangeEventCallback> {
 
 declare type GestureJudgeBeginCallback = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallback> {
+  private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   constructor(value: GestureJudgeBeginCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onGestureJudgeBegin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onGestureJudgeBegin = null;
       getUINativeModule().common.resetOnGestureJudgeBegin(node);
     } else {
+      this._onGestureJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureJudgeBegin(node, this.value);
     }
   }
@@ -2148,14 +2199,17 @@ class OnGestureJudgeBeginModifier extends ModifierWithKey<GestureJudgeBeginCallb
 
 declare type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
 class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecognizerJudgeBeginCallback> {
+  private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
   constructor(value: GestureRecognizerJudgeBeginCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onGestureRecognizerJudgeBegin');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._onGestureRecognizerJudgeBegin = null;
       getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
     } else {
+      this._onGestureRecognizerJudgeBegin = this.value;
       getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
     }
   }
@@ -2163,14 +2217,17 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
 
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
+  private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('shouldBuiltInRecognizerParallelWith');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
+      this._shouldBuiltInRecognizerParallelWith = null;
       getUINativeModule().common.resetShouldBuiltInRecognizerParallelWith(node);
     } else {
+      this._shouldBuiltInRecognizerParallelWith = this.value;
       getUINativeModule().common.setShouldBuiltInRecognizerParallelWith(node, this.value);
     }
   }
@@ -2178,15 +2235,18 @@ class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<Should
 
 declare type FocusAxisEventCallback = (event: FocusAxisEvent) => void;
 class OnFocusAxisEventModifier extends ModifierWithKey<FocusAxisEventCallback> {
+  private _onFocusAxisEvent: FocusAxisEventCallback = null;
   constructor(value: FocusAxisEventCallback) {
     super(value);
   }
   static identity: Symbol = Symbol('onFocusAxisEvent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().common.resetOnKeyEvent(node);
+      this._onFocusAxisEvent = null;
+      getUINativeModule().common.resetOnFocusAxisEvent(node);
     } else {
-      getUINativeModule().common.setOnKeyEvent(node, this.value);
+      this._onFocusAxisEvent = this.value;
+      getUINativeModule().common.setOnFocusAxisEvent(node, this.value);
     }
   }
 }
