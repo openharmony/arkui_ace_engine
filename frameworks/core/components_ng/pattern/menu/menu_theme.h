@@ -127,6 +127,8 @@ public:
                 pattern->GetAttr<int>("sub_menu_show_delay_duration", SUB_MENU_SHOW_DELAY_DURATION);
             theme->subMenuHideDelayDuration_ =
                 pattern->GetAttr<int>("sub_menu_hide_delay_duration", SUB_MENU_HIDE_DELAY_DURATION);
+            theme->menuHapticFeedback_ =
+                pattern->GetAttr<std::string>("menu_haptic_feedback", "haptic.long_press_medium");
             ParseWideScreenAttrs(theme, pattern);
         }
 
@@ -397,6 +399,11 @@ public:
         return subMenuHideDelayDuration_;
     }
 
+    const std::string& GetMenuHapticFeedback() const
+    {
+        return menuHapticFeedback_;
+    }
+
 protected:
     MenuTheme() = default;
 
@@ -452,6 +459,7 @@ private:
     double focusStyleType_ = 0.0;
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    std::string menuHapticFeedback_;
 };
 
 } // namespace OHOS::Ace::NG
