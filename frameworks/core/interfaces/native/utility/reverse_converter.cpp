@@ -16,6 +16,7 @@
 #include "reverse_converter.h"
 
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
@@ -263,7 +264,8 @@ void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src)
 void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
 {
     dst.offset = ArkValue<Ark_Number>(src.offset);
-    // dst.value = ArkValue<Ark_String>(src.value);
+    std::string u8Value = UtfUtils::Str16DebugToStr8(src.value);
+    dst.value = ArkValue<Ark_String>(u8Value);
 }
 
 void AssignArkValue(Ark_Length& dst, const int& src)

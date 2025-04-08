@@ -25,10 +25,10 @@ namespace SymbolSpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = SymbolSpanModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
+    auto frameNode = SymbolSpanModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
     return nullptr;
 }
 } // SymbolSpanModifier
@@ -55,7 +55,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
-    // SymbolSpanModelNG::SetFontSize(frameNode, optValue);
+    SymbolSpanModelNG::SetFontSize(frameNode, optValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Array_ResourceColor* value)
@@ -79,7 +79,7 @@ void FontWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
-    // SymbolSpanModelNG::SetFontWeight(frameNode, convValue);
+    SymbolSpanModelNG::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
                         Ark_SymbolEffectStrategy value)
@@ -87,7 +87,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<SymbolEffectType>(value); // for enums
-    // SymbolSpanModelNG::SetSymbolEffect(frameNode, EnumToInt(convValue));
+    SymbolSpanModelNG::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
                            Ark_SymbolRenderingStrategy value)
@@ -95,7 +95,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<RenderingStrategy>(value); // for enums
-    // SymbolSpanModelNG::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
+    SymbolSpanModelNG::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 } // SymbolSpanAttributeModifier
 const GENERATED_ArkUISymbolSpanModifier* GetSymbolSpanModifier()

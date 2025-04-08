@@ -24,10 +24,10 @@ namespace SpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto spanNode = SpanModelNG::CreateSpanNode(id, "");
-    // CHECK_NULL_RETURN(spanNode, nullptr);
-    // spanNode->IncRefCount();
-    // return AceType::RawPtr(spanNode);
+    auto spanNode = SpanModelNG::CreateSpanNode(id, u"");
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
     return nullptr;
 }
 } // SpanModifier
@@ -39,7 +39,8 @@ void SetSpanOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto text = Converter::OptConvert<std::string>(*value);
-    // SpanModelNG::InitSpan(frameNode, text);
+    std::u16string u16Text = UtfUtils::Str8DebugToStr16(text.value_or(""));
+    SpanModelNG::InitSpan(frameNode, u16Text);
 }
 } // SpanInterfaceModifier
 namespace SpanAttributeModifier {
@@ -52,16 +53,16 @@ void FontImpl(Ark_NativePointer node,
     auto fontSizeValue = Converter::OptConvert<Dimension>(value->size);
     Validator::ValidateNonNegative(fontSizeValue);
     Validator::ValidateNonPercent(fontSizeValue);
-    // SpanModelNG::SetFontSize(frameNode, fontSizeValue);
+    SpanModelNG::SetFontSize(frameNode, fontSizeValue);
     auto fontWeightValue = Converter::OptConvert<FontWeight>(value->weight);
-    // SpanModelNG::SetFontWeight(frameNode, fontWeightValue);
+    SpanModelNG::SetFontWeight(frameNode, fontWeightValue);
     std::optional<StringArray> families;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(value->family); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    // SpanModelNG::SetFontFamily(frameNode, families);
+    SpanModelNG::SetFontFamily(frameNode, families);
     auto fontStyleValue = Converter::OptConvert<Ace::FontStyle>(value->style);
-    // SpanModelNG::SetItalicFontStyle(frameNode, fontStyleValue);
+    SpanModelNG::SetItalicFontStyle(frameNode, fontStyleValue);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -70,7 +71,7 @@ void FontColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Color>(*value);
-    // SpanModelNG::SetTextColor(frameNode, convValue);
+    SpanModelNG::SetTextColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Union_Number_String_Resource* value)
@@ -81,7 +82,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    // SpanModelNG::SetFontSize(frameNode, convValue);
+    SpanModelNG::SetFontSize(frameNode, convValue);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
@@ -89,7 +90,7 @@ void FontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Ace::FontStyle>(value);
-    // SpanModelNG::SetItalicFontStyle(frameNode, convValue);
+    SpanModelNG::SetItalicFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -98,7 +99,7 @@ void FontWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<FontWeight>(*value);
-    // SpanModelNG::SetFontWeight(frameNode, convValue);
+    SpanModelNG::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -110,7 +111,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    // SpanModelNG::SetFontFamily(frameNode, families);
+    SpanModelNG::SetFontFamily(frameNode, families);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_DecorationStyleInterface* value)
@@ -119,11 +120,11 @@ void DecorationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto decoration = Converter::OptConvert<TextDecoration>(value->type);
-    // SpanModelNG::SetTextDecoration(frameNode, decoration);
+    SpanModelNG::SetTextDecoration(frameNode, decoration);
     auto color = Converter::OptConvert<Color>(value->color);
-    // SpanModelNG::SetTextDecorationColor(frameNode, color);
+    SpanModelNG::SetTextDecorationColor(frameNode, color);
     auto style = Converter::OptConvert<TextDecorationStyle>(value->style);
-    // SpanModelNG::SetTextDecorationStyle(frameNode, style);
+    SpanModelNG::SetTextDecorationStyle(frameNode, style);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
                        const Ark_Union_Number_String* value)
@@ -133,7 +134,7 @@ void LetterSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonPercent(convValue);
-    // SpanModelNG::SetLetterSpacing(frameNode, convValue);
+    SpanModelNG::SetLetterSpacing(frameNode, convValue);
 }
 void TextCaseImpl(Ark_NativePointer node,
                   Ark_TextCase value)
@@ -141,7 +142,7 @@ void TextCaseImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<TextCase>(value);
-    // SpanModelNG::SetTextCase(frameNode, convValue);
+    SpanModelNG::SetTextCase(frameNode, convValue);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Length* value)
@@ -151,7 +152,7 @@ void LineHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    // SpanModelNG::SetLineHeight(frameNode, convValue);
+    SpanModelNG::SetLineHeight(frameNode, convValue);
 }
 void TextShadowImpl(Ark_NativePointer node,
                     const Ark_Union_ShadowOptions_Array_ShadowOptions* value)
@@ -160,7 +161,7 @@ void TextShadowImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto shadowList = Converter::OptConvert<std::vector<Shadow>>(*value);
-    // SpanModelNG::SetTextShadow(frameNode, shadowList);
+    SpanModelNG::SetTextShadow(frameNode, shadowList);
 }
 } // SpanAttributeModifier
 const GENERATED_ArkUISpanModifier* GetSpanModifier()
