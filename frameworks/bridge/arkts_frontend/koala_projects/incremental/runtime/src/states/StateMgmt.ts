@@ -7,30 +7,19 @@ export interface IObservedObject {
     _permissibleAddRefDepth: number;
 }
 
-function isIObservedObject<T>(obj: T): boolean {
-    if (obj === null || obj === undefined || typeof obj !== "object") {
-        return false;
-    }
-    interface SafeAccess {
-        _permissibleAddRefDepth?: number;
-    }
-    const value = (obj as SafeAccess)._permissibleAddRefDepth;
-    return value !== undefined && typeof value === "number";
-}
-
-function castToIObservedObject<T>(obj: T): IObservedObject | undefined {
-    return isIObservedObject(obj) ? (obj as IObservedObject) : undefined;
-}
+// function castToIObservedObject<T>(obj: T): IObservedObject | undefined {
+//     return isIObservedObject(obj) ? (obj as IObservedObject) : undefined;
+// }
 
 
 /**
 * The helper function sets the observation depth in given `IObservedObject`
 */
 export function setObservationDepth<T>(obj: T, depth: number): void {
-    const objOpt = castToIObservedObject(obj);
-    if (objOpt) {
-        objOpt._permissibleAddRefDepth = depth;
-    }
+    // const objOpt = castToIObservedObject(obj);
+    // if (objOpt) {
+    //     objOpt._permissibleAddRefDepth = depth;
+    // }
 }
 
 /***************************************************** BackingValue ********************************************** */
@@ -204,7 +193,7 @@ export abstract class DecoratedVariableBase<T> {
 
     // FIXME compiler bug: why public is needed that derived class can use
     public validateValue(newValue: T): boolean {
-        return ((typeof newValue === 'object') && !(isIObservedObject(newValue)));
+        return ((typeof newValue === 'object'));
     }
 }
 
