@@ -8590,6 +8590,25 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnHover(frameNode, onEvent);
 }
 
+void SetOnTextSpanLongPress(ArkUINodeHandle node, void* extraParam)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG || uiNode->GetTag() == V2::IMAGE_ETS_TAG ||
+        uiNode->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+        int32_t nodeId = uiNode->GetId();
+        auto onEvent = [nodeId, extraParam](GestureEvent& info) {
+            ArkUINodeEvent event;
+            event.kind = COMPONENT_ASYNC_EVENT;
+            event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+            event.nodeId = nodeId;
+            event.componentAsyncEvent.subKind = ON_TEXT_SPAN_LONG_PRESS;
+            SendArkUISyncEvent(&event);
+        };
+        SpanModelNG::SetOnLongPress(uiNode, std::move(onEvent));
+    }
+}
+
 void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -8807,6 +8826,16 @@ void ResetOnClick(ArkUINodeHandle node)
     } else {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         ViewAbstract::DisableOnClick(frameNode);
+    }
+}
+
+void ResetOnTextSpanLongPress(ArkUINodeHandle node)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG || uiNode->GetTag() == V2::IMAGE_ETS_TAG ||
+        uiNode->GetTag() == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
+        SpanModelNG::ClearOnLongPress(uiNode);
     }
 }
 

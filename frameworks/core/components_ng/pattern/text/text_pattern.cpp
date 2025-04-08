@@ -3466,6 +3466,19 @@ void TextPattern::PreCreateLayoutWrapper()
     textLayoutProperty->OnPropertyChangeMeasure();
 }
 
+void TextPattern::InitSpanItemEvent(bool& isSpanHasClick, bool& isSpanHasLongPress)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    if (isSpanHasClick) {
+        InitClickEvent(gestureEventHub);
+    }
+    if (isSpanHasLongPress) {
+        InitLongPressEvent(gestureEventHub);
+    }
+}
+
 void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 {
     auto host = GetHost();
@@ -3482,7 +3495,8 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
     }
 
     bool isSpanHasClick = false;
-    CollectSpanNodes(nodes, isSpanHasClick);
+    bool isSpanHasLongPress = false;
+    CollectSpanNodes(nodes, isSpanHasClick, isSpanHasLongPress);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (childNodes_.empty()) {
@@ -3505,10 +3519,7 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
         }
         ResetAfterTextChange();
     }
-    if (isSpanHasClick) {
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
-        InitClickEvent(gestureEventHub);
-    }
+    InitSpanItemEvent(isSpanHasClick, isSpanHasLongPress);
     if (textForAICache != dataDetectorAdapter_->textForAI_) {
         dataDetectorAdapter_->aiDetectInitialized_ = false;
     }
@@ -3550,7 +3561,30 @@ void TextPattern::BeforeCreateLayoutWrapper()
     selectOverlay_->MarkOverlayDirty();
 }
 
-void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick)
+void TextPattern::SetSpanEventFlagValue(
+    const RefPtr<UINode>& node, bool& isSpanHasClick, bool& isSpanHasLongPress)
+{
+    auto spanNode = DynamicCast<FrameNode>(node);
+    CHECK_NULL_VOID(spanNode);
+    auto focus_hub = spanNode->GetOrCreateFocusHub();
+    if (focus_hub && focus_hub->GetOnClickCallback()) {
+        isSpanHasClick = true;
+    }
+    if (focus_hub && focus_hub->GetOnLongPressCallback()) {
+        isSpanHasLongPress = true;
+    }
+}
+
+void TextPattern::CollectSymbolSpanNodes(const RefPtr<SpanNode>& spanNode, const RefPtr<UINode>& node)
+{
+    spanNode->CleanSpanItemChildren();
+    spanNode->MountToParagraph();
+    textForDisplay_.append(u"    ");
+    dataDetectorAdapter_->textForAI_.append(SYMBOL_TRANS);
+    childNodes_.push_back(node);
+}
+
+void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick, bool& isSpanHasLongPress)
 {
     while (!nodes.empty()) {
         auto current = nodes.top();
@@ -3562,13 +3596,9 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         auto spanNode = DynamicCast<SpanNode>(current.node);
         auto tag = current.node->GetTag();
         if (spanNode && tag == V2::SYMBOL_SPAN_ETS_TAG && spanNode->GetSpanItem()->GetSymbolUnicode() != 0) {
-            spanNode->CleanSpanItemChildren();
-            spanNode->MountToParagraph();
-            textForDisplay_.append(u"    ");
-            dataDetectorAdapter_->textForAI_.append(SYMBOL_TRANS);
-            childNodes_.push_back(current.node);
+            CollectSymbolSpanNodes(spanNode, current.node);
         } else if (spanNode && tag != V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            CollectTextSpanNodes(spanNode, isSpanHasClick);
+            CollectTextSpanNodes(spanNode, isSpanHasClick, isSpanHasLongPress);
             childNodes_.push_back(current.node);
         } else if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
@@ -3578,16 +3608,18 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
             if (!imageNode) {
                 continue;
             }
-            auto focus_hub = imageNode->GetOrCreateFocusHub();
-            if (focus_hub && focus_hub->GetOnClickCallback()) {
-                isSpanHasClick = true;
-            }
+            SetSpanEventFlagValue(imageNode, isSpanHasClick, isSpanHasLongPress);
             childNodes_.push_back(current.node);
         } else if (tag == V2::CUSTOM_SPAN_NODE_ETS_TAG) {
             placeholderCount_++;
             AddChildSpanItem(current.node);
             dataDetectorAdapter_->textForAI_.append(u"\n");
             childNodes_.emplace_back(current.node);
+            auto customNode = DynamicCast<FrameNode>(current.node);
+            if (!customNode) {
+                continue;
+            }
+            SetSpanEventFlagValue(customNode, isSpanHasClick, isSpanHasLongPress);
         }
         if (tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
@@ -3603,7 +3635,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
     }
 }
 
-void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick)
+void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& isSpanHasClick, bool& isSpanHasLongPress)
 {
     spanNode->CleanSpanItemChildren();
     spanNode->MountToParagraph();
@@ -3611,6 +3643,9 @@ void TextPattern::CollectTextSpanNodes(const RefPtr<SpanNode>& spanNode, bool& i
     dataDetectorAdapter_->textForAI_.append(spanNode->GetSpanItem()->content);
     if (spanNode->GetSpanItem()->onClick) {
         isSpanHasClick = true;
+    }
+    if (spanNode->GetSpanItem()->onLongPress) {
+        isSpanHasLongPress = true;
     }
 }
 
@@ -3820,8 +3855,24 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         if (customSpanNode) {
             auto customSpan = customSpanNode->GetSpanItem();
             customSpan->placeholderSpanNodeId = customSpanNode->GetId();
+            auto focus_hub = chidNode->GetOrCreateFocusHub();
+            CHECK_NULL_VOID(focus_hub);
+            SetSpanItemEvent(customSpan, focus_hub);
             spans_.emplace_back(customSpan);
         }
+    }
+}
+
+void TextPattern::SetSpanItemEvent(const RefPtr<SpanItem>& spanItem, RefPtr<FocusHub>& focusHub)
+{
+    CHECK_NULL_VOID(focusHub);
+    auto clickCall = focusHub->GetOnClickCallback();
+    if (clickCall) {
+        spanItem->SetOnClickEvent(std::move(clickCall));
+    }
+    auto longPressCallback = focusHub->GetOnLongPressCallback();
+    if (longPressCallback) {
+        spanItem->SetLongPressEvent(std::move(longPressCallback));
     }
 }
 
@@ -3834,11 +3885,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
         auto imageSpanItem = imageSpanNode->GetSpanItem();
         if (host->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
             auto focus_hub = imageSpanNode->GetOrCreateFocusHub();
-            CHECK_NULL_VOID(focus_hub);
-            auto clickCall = focus_hub->GetOnClickCallback();
-            if (clickCall) {
-                imageSpanItem->SetOnClickEvent(std::move(clickCall));
-            }
+            SetSpanItemEvent(imageSpanItem, focus_hub);
             auto gesture = imageSpanNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
@@ -3854,11 +3901,7 @@ void TextPattern::AddImageToSpanItem(const RefPtr<UINode>& child)
         imageSpanItem->nodeId_ = imageNode->GetId();
         imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
         auto focus_hub = imageNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focus_hub);
-        auto clickCall = focus_hub->GetOnClickCallback();
-        if (clickCall) {
-            imageSpanItem->SetOnClickEvent(std::move(clickCall));
-        }
+        SetSpanItemEvent(imageSpanItem, focus_hub);
         spans_.emplace_back(imageSpanItem);
         auto gesture = imageNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gesture);

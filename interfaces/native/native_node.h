@@ -6670,6 +6670,15 @@ typedef enum {
      */
     NODE_TEXT_ON_DETECT_RESULT_UPDATE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
     /**
+     * @brief Defines the long press event for span
+     *
+     * The event is triggered when the span is long pressed.
+     * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+     * {@link ArkUI_UIInputEvent} object.\n
+     *@since 20
+     */
+    NODE_TEXT_SPAN_ON_LONG_PRESS = 1001,
+    /**
      * @brief Defines the image loading success event.
      *
      * This event is triggered when an image is successfully loaded or decoded. \n
