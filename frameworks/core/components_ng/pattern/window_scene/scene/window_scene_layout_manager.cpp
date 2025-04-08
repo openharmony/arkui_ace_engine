@@ -331,8 +331,16 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
     auto surfaceNode = session->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
     auto nodeId = GetWindowId(node);
-    if (surfaceNode->GetParent() ||
-        abnormalNodeDfxSet_.find(nodeId) != abnormalNodeDfxSet_.end()) {
+    auto it = abnormalNodeDfxSet_.find(nodeId);
+    if (surfaceNode->GetParent()) {
+        if (it != abnormalNodeDfxSet_.end()) {
+            abnormalNodeDfxSet_.erase(it);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s Abnormal Remove",
+                node->GetId(), GetWindowName(node).c_str());
+        }
+        return;
+    }
+    if (it != abnormalNodeDfxSet_.end()) {
         return;
     }
     abnormalNodeDfxSet_.insert(nodeId);
