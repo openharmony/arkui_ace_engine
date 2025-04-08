@@ -40,7 +40,7 @@ export function AppStorageLinkState<Value>(name: string, value: Value): MutableS
  * Defines the AppStorage interface.
  * @since 7
  */
-export class AppStorage {
+class AppStorage {
     /**
      * Called when a link is set.
      * @since 7
@@ -467,7 +467,7 @@ export class PersistentStorage {
  * Define LocalStorage.
  * @since 9
  */
-export class LocalStorage {
+class LocalStorage {
     private static shared?: LocalStorage
     /** @internal */ readonly map: StorageMap
 
