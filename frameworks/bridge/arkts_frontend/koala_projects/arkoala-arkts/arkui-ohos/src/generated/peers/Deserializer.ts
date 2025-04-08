@@ -97,7 +97,7 @@ import { CircleShape, CircleShapeInternal } from "./../ArkCircleShapeMaterialize
 import { EllipseShape, EllipseShapeInternal } from "./../ArkEllipseShapeMaterialized"
 import { PathShape, PathShapeInternal } from "./../ArkPathShapeMaterialized"
 import { RectShape, RectShapeInternal } from "./../ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../../handwritten"
+import { AttributeModifier } from "./../../component/common" 
 import { Callback_Number_Number_Void, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, GridDirection, GridItemAlignment, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, Callback_Number_Tuple_Number_Number, GridLayoutOptions } from "./../../component/grid"
 import { RRect, WindowAnimationTarget } from "./../../component/remoteWindow"
 import { ButtonIconOptions, ButtonStyle, SideBarPosition, SideBarContainerType } from "./../../component/sidebar"

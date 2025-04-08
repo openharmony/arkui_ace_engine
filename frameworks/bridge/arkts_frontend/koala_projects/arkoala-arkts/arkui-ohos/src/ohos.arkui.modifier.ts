@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-export { AttributeUpdater } from './handwritten/modifiers/ArkAttributeUpdater'
+export { AttributeUpdater } from './AttributeUpdater'
 
 export { ColumnModifier } from './handwritten/modifiers/ArkColumnModifier'
 
-export { CommonModifier } from './handwritten/modifiers/ArkCommonModifier'
+export { CommonModifier } from './CommonModifier'
 
 export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
