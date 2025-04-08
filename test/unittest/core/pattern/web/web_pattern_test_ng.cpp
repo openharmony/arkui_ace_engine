@@ -2330,11 +2330,11 @@ HWTEST_F(WebPatternTestNg, WindowDrag_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->dragWindowFlag_ = true;
-    webPattern->last_width_ = 0;
-    webPattern->last_height_ = 0;
+    webPattern->lastWidth_ = 0;
+    webPattern->lastHeight_ = 0;
     webPattern->WindowDrag(1, 2);
-    EXPECT_EQ(webPattern->last_width_, 1);
-    EXPECT_EQ(webPattern->last_height_, 2);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 2);
 #endif
 }
 
@@ -2357,11 +2357,11 @@ HWTEST_F(WebPatternTestNg, WindowDrag_002, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->dragWindowFlag_ = true;
-    webPattern->last_width_ = 0;
-    webPattern->last_height_ = 0;
+    webPattern->lastWidth_ = 0;
+    webPattern->lastHeight_ = 0;
     webPattern->WindowDrag(6, 7);
-    EXPECT_EQ(webPattern->last_width_, 6);
-    EXPECT_EQ(webPattern->last_height_, 7);
+    EXPECT_EQ(webPattern->lastWidth_, 6);
+    EXPECT_EQ(webPattern->lastHeight_, 7);
 #endif
 }
 
@@ -2384,11 +2384,11 @@ HWTEST_F(WebPatternTestNg, WindowDrag_003, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->dragWindowFlag_ = true;
-    webPattern->last_width_ = 1;
-    webPattern->last_height_ = 2;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 2;
     webPattern->WindowDrag(7, 8);
-    EXPECT_EQ(webPattern->last_width_, 7);
-    EXPECT_EQ(webPattern->last_height_, 8);
+    EXPECT_EQ(webPattern->lastWidth_, 7);
+    EXPECT_EQ(webPattern->lastHeight_, 8);
 #endif
 }
 
@@ -2409,11 +2409,11 @@ HWTEST_F(WebPatternTestNg, WindowDrag_004, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     ASSERT_NE(webPattern, nullptr);
     webPattern->delegate_ = nullptr;
-    webPattern->last_width_ = 1;
-    webPattern->last_height_ = 2;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 2;
     webPattern->WindowDrag(3, 4);
-    EXPECT_EQ(webPattern->last_width_, 1);
-    EXPECT_EQ(webPattern->last_height_, 2);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 2);
 #endif
 }
 
@@ -2436,11 +2436,11 @@ HWTEST_F(WebPatternTestNg, WindowDrag_005, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->dragWindowFlag_ = false;
-    webPattern->last_width_ = 1;
-    webPattern->last_height_ = 0;
+    webPattern->lastWidth_ = 1;
+    webPattern->lastHeight_ = 0;
     webPattern->WindowDrag(3, 4);
-    EXPECT_EQ(webPattern->last_width_, 1);
-    EXPECT_EQ(webPattern->last_height_, 0);
+    EXPECT_EQ(webPattern->lastWidth_, 1);
+    EXPECT_EQ(webPattern->lastHeight_, 0);
 #endif
 }
 
