@@ -457,7 +457,7 @@ std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& 
             TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "init toast service conf failed");
         }
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
-        Platform::DialogContainer::ShowToast(childContainerId, toastInfo.message, toastInfo.duration, toastInfo.bottom,
+        Platform::DialogContainer::ShowToast(childContainerId, toastInfo,
             std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
     };
 }
