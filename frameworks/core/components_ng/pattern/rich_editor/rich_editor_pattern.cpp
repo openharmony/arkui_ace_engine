@@ -604,6 +604,7 @@ void RichEditorPattern::HandleUndoInStyledString(const UndoRedoRecord& record)
         HandleSelectionChange(undoRecord.selectionBefore.start, undoRecord.selectionBefore.end);
     }
     SetCaretPosition(undoRecord.selectionBefore.end);
+    caretAffinityPolicy_ = undoRecord.caretAffinityBefore;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }
