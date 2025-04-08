@@ -29,9 +29,9 @@ enum class RSUINodeType : uint32_t;
 
 namespace OHOS::Ace::NG {
 struct TraverseResult {
-    uint32_t zOrderCnt_ = 0;
+    uint32_t zOrderCnt = 0;
     std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
-    uint64_t screenId_ = -1;
+    uint64_t screenId = -1;
 };
 
 struct TraverseInfo {
@@ -64,6 +64,9 @@ private:
     std::shared_ptr<Rosen::RSNode> GetRSNode(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
+    bool SetGeometry(const bool isAncestorRecent, const RefPtr<FrameNode>& node,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& globalGeometry,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& localGeometry);
     void UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
         bool isParentTransformScene);
     int32_t GetNodeZIndex(const RefPtr<FrameNode>& node);
