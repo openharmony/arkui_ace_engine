@@ -667,10 +667,11 @@ HWTEST_F(FrameNodeAccessorTest, GetOpacityInvalidTest, TestSize.Level1)
 HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformDefaultTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
-    auto position =
-        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(peer_));
-    EXPECT_EQ(std::get<0>(position).Value(), 0.00);
-    EXPECT_EQ(std::get<1>(position).Value(), 0.00);
+    Ark_GraphicsPosition result = accessor_->getPositionToWindowWithTransform(peer_);
+    auto x = Converter::Convert<float>(result.x);
+    auto y = Converter::Convert<float>(result.y);
+    EXPECT_EQ(x, 0.00);
+    EXPECT_EQ(y, 0.00);
 }
 
 /**
@@ -683,10 +684,11 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformTest, TestSize.L
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
     auto renderCtx = peer_->node->GetRenderContext();
     renderCtx->UpdatePaintRect(RectF(11.f, 22.f, 33.f, 44.f));
-    auto position =
-        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(peer_));
-    EXPECT_EQ(std::get<0>(position).Value(), 11.00);
-    EXPECT_EQ(std::get<1>(position).Value(), 22.00);
+    Ark_GraphicsPosition result = accessor_->getPositionToWindowWithTransform(peer_);
+    auto x = Converter::Convert<float>(result.x);
+    auto y = Converter::Convert<float>(result.y);
+    EXPECT_EQ(x, 11.00);
+    EXPECT_EQ(y, 22.00);
 }
 
 /**
@@ -697,9 +699,10 @@ HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformTest, TestSize.L
 HWTEST_F(FrameNodeAccessorTest, GetPositionToWindowWithTransformInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPositionToWindowWithTransform, nullptr);
-    auto position =
-        Converter::Convert<std::pair<Dimension, Dimension>>(accessor_->getPositionToWindowWithTransform(nullptr));
-    EXPECT_EQ(std::get<0>(position).Value(), 0.00);
-    EXPECT_EQ(std::get<1>(position).Value(), 0.00);
+    Ark_GraphicsPosition result = accessor_->getPositionToWindowWithTransform(peer_);
+    auto x = Converter::Convert<float>(result.x);
+    auto y = Converter::Convert<float>(result.y);
+    EXPECT_EQ(x, 0.00);
+    EXPECT_EQ(y, 0.00);
 }
 } // namespace OHOS::Ace::NG

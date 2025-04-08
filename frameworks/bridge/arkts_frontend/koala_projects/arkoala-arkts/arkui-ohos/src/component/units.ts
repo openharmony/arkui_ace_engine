@@ -25,7 +25,7 @@ import { Deserializer } from "./../generated/peers/Deserializer"
 import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource";
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { BorderStyle, Color, FontWeight, FontStyle } from "./enums"
 import { OutlineStyle } from "./common"
 export class ColorFilterInternal {
@@ -156,9 +156,6 @@ export interface LengthConstrain {
     maxLength: Length;
 }
 export type VoidCallback = () => void;
-export interface LengthMetricsUnit {
-    _LengthMetricsUnitStub: string;
-}
 export interface Font {
     size?: Length;
     weight?: FontWeight | number | string;

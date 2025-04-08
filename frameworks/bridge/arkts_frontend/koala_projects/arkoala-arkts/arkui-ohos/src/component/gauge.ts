@@ -24,7 +24,7 @@ import { Resource } from "global/resource";
 import { ResourceStr, Dimension, ResourceColor, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { ResizableOptions } from "./image"
 import { Callback_Void } from "./abilityComponent"
 import { FocusBoxStyle, FocusPriority } from "./focus"

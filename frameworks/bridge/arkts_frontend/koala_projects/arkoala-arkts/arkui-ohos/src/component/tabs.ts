@@ -27,7 +27,7 @@ import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Length, ResourceColor, Dimension, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, EdgeEffect } from "./enums"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { ResizableOptions } from "./image"
 import { Resource } from "global/resource";
 import { Callback_Void } from "./abilityComponent"
