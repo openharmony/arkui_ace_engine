@@ -101,7 +101,7 @@ ohos_shared_library("ui_service_mgr") {
   part_name = ace_engine_part
 }
 
-ohos_source_set("uiservice_manager_interface_set") {
+ohos_shared_library("uiservice_manager_interface_set") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -120,8 +120,6 @@ ohos_source_set("uiservice_manager_interface_set") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "window_manager:libwm",
   ]
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
