@@ -146,7 +146,7 @@ void MouseStyleOhos::SetCustomCursor(
     cursor.focusY = focusY;
 
     MMI::CursorOptions options;
-    TAG_LOGE(AceLogTag::ACE_WEB, "set custom cursor start");
+    TAG_LOGI(AceLogTag::ACE_WEB, "set custom cursor start");
     int32_t status = inputManager->SetCustomCursor(windowId, cursor, options);
     if (status != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "set custom cursor failed %{public}u", status);
