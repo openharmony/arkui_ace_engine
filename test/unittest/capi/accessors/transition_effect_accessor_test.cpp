@@ -244,4 +244,79 @@ HWTEST_F(TransitionEffectAccessorTest, getCombineTest, TestSize.Level1)
     ASSERT_EQ(effect2->GetEffect(), opacity2);
 }
 
+/**
+ * @tc.name: getIdentityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransitionEffectAccessorTest, getIdentityTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getIDENTITY, nullptr);
+    auto peer = accessor_->getIDENTITY();
+    ASSERT_NE(peer, nullptr);
+    auto effect = AceType::DynamicCast<ChainedIdentityEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+}
+
+/**
+ * @tc.name: getSlideSwitchTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransitionEffectAccessorTest, getSlideSwitchTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSLIDE_SWITCH, nullptr);
+    auto peer = accessor_->getSLIDE_SWITCH();
+    ASSERT_NE(peer, nullptr);
+    auto effect = AceType::DynamicCast<ChainedSlideSwitchEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+}
+
+/**
+ * @tc.name: getZeroOpacityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransitionEffectAccessorTest, getZeroOpacityTest, TestSize.Level1)
+{
+    const int testValue = 0;
+    ASSERT_NE(accessor_->getOPACITY, nullptr);
+    auto peer = accessor_->getOPACITY();
+    ASSERT_NE(peer, nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedOpacityEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    ASSERT_EQ(effect->GetEffect(), testValue);
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    peer = accessor_->opacity(nullptr);
+    ASSERT_EQ(peer, nullptr);
+}
+
+/**
+ * @tc.name: getSlideTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransitionEffectAccessorTest, getSlideTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getSLIDE, nullptr);
+    auto peer = accessor_->getSLIDE();
+    ASSERT_NE(peer, nullptr);
+
+    auto effect = AceType::DynamicCast<ChainedAsymmetricEffect>(peer->handler);
+    ASSERT_NE(effect, nullptr);
+    GeneratedModifier::GetTransitionEffectAccessor()->destroyPeer(peer);
+
+    auto appearEffect = AceType::DynamicCast<ChainedMoveEffect>(effect->GetAppearEffect());
+    ASSERT_NE(appearEffect, nullptr);
+    auto disappearEffect = AceType::DynamicCast<ChainedMoveEffect>(effect->GetDisappearEffect());
+    ASSERT_NE(disappearEffect, nullptr);
+
+    auto appearType = appearEffect->GetEffect();
+    auto disappearType = disappearEffect->GetEffect();
+    ASSERT_EQ(appearType, TransitionEdge::START);
+    ASSERT_EQ(disappearType, TransitionEdge::END);
+}
+
 } // namespace OHOS::Ace::NG

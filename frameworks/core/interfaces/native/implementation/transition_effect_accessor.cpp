@@ -22,6 +22,8 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TransitionEffectAccessor {
 
+const auto IDENTITY_TOKEN = "identity";
+const auto SLIDE_SWITCH_TOKEN = "slideswitch";
 const auto TRANSLATE_TOKEN = "translate";
 const auto ROTATE_TOKEN = "rotate";
 const auto SCALE_TOKEN = "scale";
@@ -48,6 +50,10 @@ Ark_TransitionEffect CtorImpl(const Ark_String* type,
         auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
         TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
         peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
+    } else if (valueText == IDENTITY_TOKEN) {
+        peer->handler = AceType::MakeRefPtr<ChainedIdentityEffect>();
+    } else if (valueText == SLIDE_SWITCH_TOKEN) {
+        peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
     } else if (valueText == ROTATE_TOKEN) {
         auto x = Converter::Convert<float>(effect->rotate.x.value);
         auto y = Converter::Convert<float>(effect->rotate.y.value);
@@ -174,19 +180,26 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
 }
 Ark_TransitionEffect GetIDENTITYImpl()
 {
-    return {};
+    Ark_String type = Converter::ArkValue<Ark_String>(IDENTITY_TOKEN);
+    Ark_TransitionEffects effects {};
+    return CtorImpl(&type, &effects);
 }
 Ark_TransitionEffect GetOPACITYImpl()
 {
-    return {};
+    Ark_Number value = Converter::ArkValue<Ark_Number>(0);
+    return OpacityImpl(&value);
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
-    return {};
+    auto effect1 = MoveImpl(ARK_TRANSITION_EDGE_START);
+    auto effect2 = MoveImpl(ARK_TRANSITION_EDGE_END);
+    return AsymmetricImpl(effect1, effect2);
 }
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
-    return {};
+    Ark_String type = Converter::ArkValue<Ark_String>(SLIDE_SWITCH_TOKEN);
+    Ark_TransitionEffects effects {};
+    return CtorImpl(&type, &effects);
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
