@@ -37,6 +37,32 @@ void DestroyPeerImpl(Ark_TransitionEffect peer)
     peer->handler = nullptr;
     delete peer;
 }
+RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_TransitionEffects* effect) {
+    auto emptyDimension = Dimension();
+    auto x = Converter::Convert<float>(effect->rotate.x.value);
+    auto y = Converter::Convert<float>(effect->rotate.y.value);
+    auto z = Converter::Convert<float>(effect->rotate.z.value);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
+    auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
+    auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
+    auto angle = Converter::OptConvert<float>(effect->rotate.angle);
+    RotateOptions rotate(x, y, z, angle.value_or(0),
+        centerX.value_or(emptyDimension),
+        centerY.value_or(emptyDimension),
+        centerZ.value_or(emptyDimension), perspective);
+    return AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
+}
+RefPtr<OHOS::Ace::NG::ChainedScaleEffect> HandleScale(const Ark_TransitionEffects* effect) {
+    auto emptyDimension = Dimension();
+    auto x = Converter::Convert<float>(effect->scale.x.value);
+    auto y = Converter::Convert<float>(effect->scale.y.value);
+    auto z = Converter::Convert<float>(effect->scale.z.value);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
+    ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
+    return AceType::MakeRefPtr<ChainedScaleEffect>(scale);
+}
 Ark_TransitionEffect CtorImpl(const Ark_String* type,
                               const Ark_TransitionEffects* effect)
 {
@@ -55,27 +81,9 @@ Ark_TransitionEffect CtorImpl(const Ark_String* type,
     } else if (valueText == SLIDE_SWITCH_TOKEN) {
         peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
     } else if (valueText == ROTATE_TOKEN) {
-        auto x = Converter::Convert<float>(effect->rotate.x.value);
-        auto y = Converter::Convert<float>(effect->rotate.y.value);
-        auto z = Converter::Convert<float>(effect->rotate.z.value);
-        auto centerX = Converter::OptConvert<CalcDimension>(effect->rotate.centerX.value);
-        auto centerY = Converter::OptConvert<CalcDimension>(effect->rotate.centerY.value);
-        auto centerZ = Converter::OptConvert<CalcDimension>(effect->rotate.centerZ.value);
-        auto perspective = Converter::Convert<float>(effect->rotate.perspective.value);
-        auto angle = Converter::OptConvert<float>(effect->rotate.angle);
-        RotateOptions rotate(x, y, z, angle.value_or(0),
-            centerX.value_or(emptyDimension),
-            centerY.value_or(emptyDimension),
-            centerZ.value_or(emptyDimension), perspective);
-        peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotate);
+        peer->handler = HandleRotate(effect);
     } else if (valueText == SCALE_TOKEN) {
-        auto x = Converter::Convert<float>(effect->scale.x.value);
-        auto y = Converter::Convert<float>(effect->scale.y.value);
-        auto z = Converter::Convert<float>(effect->scale.z.value);
-        auto centerX = Converter::OptConvert<CalcDimension>(effect->scale.centerX.value);
-        auto centerY = Converter::OptConvert<CalcDimension>(effect->scale.centerY.value);
-        ScaleOptions scale(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
-        peer->handler = AceType::MakeRefPtr<ChainedScaleEffect>(scale);
+        peer->handler = HandleScale(effect);
     } else if (valueText == OPACITY_TOKEN) {
         auto opacity = Converter::Convert<float>(effect->opacity);
         peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
