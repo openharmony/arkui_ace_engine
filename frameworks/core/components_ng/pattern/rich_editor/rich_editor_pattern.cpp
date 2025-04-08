@@ -5618,9 +5618,9 @@ void RichEditorPattern::InsertValueToSpanNode(
     CHECK_NULL_VOID(spanItem);
     auto textTemp = spanItem->content;
     auto textTempSize = static_cast<int32_t>(textTemp.size());
-    if (textTempSize < info.GetOffsetInSpan()) {
-        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "InsertValue error, offsetInSpan is greater than the size of spanItem, "
-            "spanItemSize = %{public}d, offsetInSpan = %{public}d", textTempSize, info.GetOffsetInSpan());
+    if (textTempSize < info.GetOffsetInSpan() || info.GetOffsetInSpan() < 0) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "InsertValueToSpanNode error, spanSize=%{public}d, offsetInSpan=%{public}d",
+            textTempSize, info.GetOffsetInSpan());
         RichEditorInfo errorInfo { RichEditorErrorType::INSERT_VALUE, textTempSize,
             static_cast<int32_t>(insertValue.length()), info.GetOffsetInSpan() };
         RichEditorErrorReport(errorInfo);
