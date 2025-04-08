@@ -21,11 +21,31 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace {
+    static const auto ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE = 0;
+}
+
+namespace Converter {
+template<>
+void AssignArkValue(Opt_PageFlipMode& dst, const PageFlipMode& src, ConvContext *ctx)
+{
+    switch (src) {
+        case PageFlipMode::CONTINUOUS:
+            dst = Converter::ArkValue<Opt_PageFlipMode>(Ark_PageFlipMode::ARK_PAGE_FLIP_MODE_CONTINUOUS); break;
+        case PageFlipMode::SINGLE:
+            dst = Converter::ArkValue<Opt_PageFlipMode>(Ark_PageFlipMode::ARK_PAGE_FLIP_MODE_SINGLE); break;
+        default:
+            dst = {}; break;
+    }
+}
+}
 
 class SwiperModifierTest2 : public ModifierTestBase<GENERATED_ArkUISwiperModifier,
     &GENERATED_ArkUINodeModifiers::getSwiperModifier, GENERATED_ARKUI_SWIPER> {
@@ -68,5 +88,68 @@ HWTEST_F(SwiperModifierTest2, setSwiperOptionsTest, TestSize.Level1)
 
     // check the expected state of invoke checker
     EXPECT_TRUE(checkInvoke);
+}
+
+/**
+ * @tc.name: setPageFlipModeTestDefaultValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setPageFlipModeTestDefaultValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetPageFlipMode(), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setPageFlipModeTestValidValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setPageFlipModeTestValidValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    using OneTestStep = std::tuple<Opt_PageFlipMode, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_PageFlipMode>(PageFlipMode::CONTINUOUS), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_PageFlipMode>(PageFlipMode::SINGLE), static_cast<int32_t>(PageFlipMode::SINGLE)},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setPageFlipMode(node_, &inputValue);
+        EXPECT_EQ(pattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setPageFlipModeTestInvalidValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModifierTest2, setPageFlipModeTestInvalidValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    using OneTestStep = std::tuple<Opt_PageFlipMode, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Opt_PageFlipMode{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_PageFlipMode>(static_cast<PageFlipMode>(-1)), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setPageFlipMode(node_, &inputValue);
+        EXPECT_EQ(pattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
+    }
 }
 } // namespace OHOS::Ace::NG

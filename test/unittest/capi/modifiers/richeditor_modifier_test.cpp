@@ -79,6 +79,10 @@ static const auto ATTRIBUTE_BAR_STATE_VALUE = "BarState.On";
 static const auto ATTRIBUTE_CUSTOM_KB_NAME = "keyboardAvoidance";
 static const auto ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE = "false";
 static const auto ATTRIBUTE_CUSTOM_KB_VALUE = "true";
+static const auto ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE = INT_MAX;
+static const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
+static const auto ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE = "4294967295";
+static const auto ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE = UINT_MAX;
 
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
@@ -578,4 +582,136 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     uiNode = std::nullopt;
 }
 
+/**
+ * @tc.name: setMaxLengthTestDefaultValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLengthTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLength, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_EQ(pattern->GetMaxLength(), ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setMaxLengthTestValidValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLengthTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLength, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_Number>(123321), 123321},
+        {Converter::ArkValue<Opt_Number>(321123), 321123},
+    };
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLength(node_, &inputValue);
+        resultValue = pattern->GetMaxLength();
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setMaxLengthTestInvalidValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLengthTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLength, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Opt_Number{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-1), ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLength(node_, &inputValue);
+        resultValue = pattern->GetMaxLength();
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setMaxLinesTestDefaultValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLinesTestDefaultValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto jsonValue = GetJsonValue(node_);
+    auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_STR_VALUE);
+}
+
+/**
+ * @tc.name: setMaxLinesTestValidValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLinesTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, uint32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_Number>(123321), 123321},
+        {Converter::ArkValue<Opt_Number>(321123), 321123},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLines(node_, &inputValue);
+        resultValue = pattern->GetMaxLines();
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setMaxLinesTestInvalidValues
+ * @tc.desc: Check the functionality of setMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setMaxLines, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t resultValue;
+
+    using OneTestStep = std::tuple<Opt_Number, uint32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Opt_Number{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
+        {Converter::ArkValue<Opt_Number>(-1), ATTRIBUTE_MAX_LINES_DEFAULT_UINT_VALUE},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setMaxLines(node_, &inputValue);
+        resultValue = pattern->GetMaxLines();
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
 } // namespace OHOS::Ace::NG

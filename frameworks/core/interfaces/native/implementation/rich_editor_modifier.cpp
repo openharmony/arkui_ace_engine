@@ -674,16 +674,17 @@ void MaxLengthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RichEditorModelNG::SetMaxLength(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto validValue = convValue && convValue.value() >= 0 ? convValue : std::nullopt;
+    RichEditorModelNG::SetMaxLength(frameNode, validValue);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RichEditorModelNG::SetMaxLines(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<uint32_t>(*value) : std::nullopt;
+    RichEditorModelNG::SetMaxLines(frameNode, convValue.value_or(UINT_MAX));
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
                             const Opt_KeyboardAppearance* value)
@@ -691,7 +692,7 @@ void KeyboardAppearanceImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
+    // RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
 }
 void StopBackPressImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)

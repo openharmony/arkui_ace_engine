@@ -2120,4 +2120,15 @@ void AssignCast(std::optional<std::string>& dst, const Ark_UniformDataType& src)
             LOGE("Unexpected enum value in Ark_UniformDataType: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
+{
+    dst = std::nullopt;
+    switch (src) {
+        case ARK_PAGE_FLIP_MODE_CONTINUOUS: dst = 0; break;
+        case ARK_PAGE_FLIP_MODE_SINGLE: dst = 1; break;
+        default: LOGE("Unexpected enum value in Ark_PageFlipMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
