@@ -23,7 +23,6 @@
 namespace OHOS::Ace::NG {
 void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
-#ifndef ARKUI_WEARABLE
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
 
@@ -77,7 +76,6 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
         CHECK_NULL_VOID(dialog);
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
-#endif
 }
 
 void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)
