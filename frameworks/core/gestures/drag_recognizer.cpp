@@ -181,7 +181,7 @@ void DragRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
             endInfo.SetTimeStamp(event.time);
             onDragEndNotifyCall_(event.GetOffset().GetX(), event.GetOffset().GetY(), endInfo);
-            if (onDragEnd_) {
+            if (!upSuccess && onDragEnd_) {
                 AsyncCallback(onDragEnd_, endInfo);
             }
         }
