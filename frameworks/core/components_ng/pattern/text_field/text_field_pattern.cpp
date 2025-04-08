@@ -9666,22 +9666,25 @@ void TextFieldPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locati
     if (IsContentRectNonPositive()) {
         return;
     }
-    if (!isScrolling) {
-        auto localLocation = locationInfo.GetLocalLocation();
-        if (LessNotEqual(localLocation.GetX(), contentRect_.Left()) ||
-            LessNotEqual(localLocation.GetY(), contentRect_.Top())) {
-            selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
-        } else if (GreatNotEqual(localLocation.GetX(), contentRect_.Right()) ||
-                   GreatNotEqual(localLocation.GetY(), contentRect_.Bottom())) {
-            selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
+    do {
+        if (!isScrolling) {
+            auto localLocation = locationInfo.GetLocalLocation();
+            if (LessNotEqual(localLocation.GetX(), contentRect_.Left()) ||
+                LessNotEqual(localLocation.GetY(), contentRect_.Top())) {
+                selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
+                break;
+            } else if (GreatNotEqual(localLocation.GetX(), contentRect_.Right()) ||
+                       GreatNotEqual(localLocation.GetY(), contentRect_.Bottom())) {
+                selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
+                break;
+            }
         }
-    } else {
         if (Positive(contentScroller_.stepOffset)) {
             selectController_->MoveFirstHandleToContentRect(selectController_->GetFirstHandleIndex(), false);
         } else if (Negative(contentScroller_.stepOffset)) {
             selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
         }
-    }
+    } while (false);
     if (HasFocus()) {
         ProcessOverlay({ .animation = true });
     }

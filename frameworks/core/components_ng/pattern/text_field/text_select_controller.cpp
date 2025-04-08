@@ -234,8 +234,8 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     int32_t end = range.second;
     UpdateHandleIndex(start, end);
     if (IsSelected()) {
-        MoveFirstHandleToContentRect(GetFirstHandleIndex());
-        MoveSecondHandleToContentRect(GetSecondHandleIndex());
+        MoveFirstHandleToContentRect(GetFirstHandleIndex(), false);
+        MoveSecondHandleToContentRect(GetSecondHandleIndex(), false);
     } else {
         MoveCaretToContentRect(GetCaretIndex());
     }
