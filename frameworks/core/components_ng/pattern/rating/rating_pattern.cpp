@@ -449,7 +449,9 @@ void RatingPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->HandleDragEnd();
         },
         [weak = WeakClaim(this)]() {});
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)

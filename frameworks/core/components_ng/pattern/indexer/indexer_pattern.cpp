@@ -446,7 +446,9 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnHover(bool isHover)
@@ -541,7 +543,9 @@ void IndexerPattern::InitPopupPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)

@@ -105,6 +105,7 @@ public:
 
     static void Create(const JSCallbackInfo& args);
     static napi_value ParsePanDistanceMap(JSRef<JSVal> jsDistanceMap, PanDistanceMap& distanceMap);
+    static void ParsePanDistance(const JSRef<JSObject>& obj, PanDistanceMap& distanceMap);
 };
 
 class JSSwipeGesture : public JSGesture {

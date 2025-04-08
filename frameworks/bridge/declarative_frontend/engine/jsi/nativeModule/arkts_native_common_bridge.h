@@ -300,7 +300,7 @@ public:
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
         bool& limitFingerCount, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
-        double& distance, bool& limitFingerCount, uint32_t argNumber);
+        PanDistanceMap& distanceMap, bool& limitFingerCount, uint32_t argNumber);
     static void GetSwipeGestureValue(
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed,
         bool& limitFingerCount, uint32_t argNumber);

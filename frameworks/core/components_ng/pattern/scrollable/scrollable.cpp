@@ -170,11 +170,13 @@ void Scrollable::InitPanRecognizerNG()
     PanDirection panDirection;
     panDirection.type = axis_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
     double distance = SystemProperties::GetScrollableDistance();
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, distance } };
     if (LessOrEqual(distance, 0.0)) {
-        distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     }
     panRecognizerNG_ =
-        AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distance);
+        AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
     panRecognizerNG_->SetIsAllowMouse(false);
     SetOnActionStart();
     SetOnActionUpdate();

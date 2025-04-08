@@ -86,6 +86,7 @@ constexpr double DEFAULT_PINCH_DISTANCE = 5.0;
 constexpr int32_t DEFAULT_PAN_FINGER = 1;
 constexpr int32_t DEFAULT_MAX_FINGERS = 10;
 constexpr OHOS::Ace::Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
+constexpr OHOS::Ace::Dimension DEFAULT_PEN_PAN_DISTANCE = 8.0_vp;
 constexpr int32_t DEFAULT_SLIDE_FINGER = DEFAULT_PAN_FINGER;
 constexpr double DEFAULT_SLIDE_SPEED = 100.0;
 constexpr int32_t DEFAULT_ROTATION_FINGER = 2;
@@ -7076,7 +7077,7 @@ void CommonBridge::GetLongPressGestureValue(
 }
 
 void CommonBridge::GetPanGestureValue(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& distance,
+    ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, PanDistanceMap& distanceMap,
     bool& limitFingerCount, uint32_t argNumber)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -7094,7 +7095,13 @@ void CommonBridge::GetPanGestureValue(
     Local<JSValueRef> distanceArg = runtimeCallInfo->GetCallArgRef(argNumber + 2);
     if (!distanceArg.IsNull() && !distanceArg->IsUndefined()) {
         auto distanceValue = static_cast<double>(distanceArg->ToNumber(vm)->Value());
-        distance = distanceValue < 0.0f ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceValue;
+        if (distanceValue >= 0.0f) {
+            distanceMap[SourceTool::UNKNOWN] = distanceValue;
+        } else {
+            distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+        }
+    } else {
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
     }
     Local<JSValueRef> limitFingerCountArg = runtimeCallInfo->GetCallArgRef(argNumber + 3); // 3: get the fourth arg
     if (!limitFingerCountArg.IsNull() && !limitFingerCountArg->IsUndefined()) {
@@ -8401,11 +8408,11 @@ ArkUINativeModuleValue CommonBridge::AddPanGesture(ArkUIRuntimeCallInfo* runtime
     GetGestureCommonValue(runtimeCallInfo, priority, mask);
     int32_t fingers = DEFAULT_PAN_FINGER;
     int32_t direction = PanDirection::ALL;
-    double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     bool limitFingerCount = false;
-    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_5);
+    GetPanGestureValue(runtimeCallInfo, fingers, direction, distanceMap, limitFingerCount, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, limitFingerCount, nullptr);
+        fingers, direction, distanceMap[SourceTool::UNKNOWN], limitFingerCount, nullptr);
     SetGestureDistanceMap(runtimeCallInfo, NUM_9, gesture);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
@@ -8559,11 +8566,11 @@ ArkUINativeModuleValue CommonBridge::AddPanGestureToGroup(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_PAN_FINGER;
     int32_t direction = PanDirection::ALL;
-    double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     bool limitFingerCount = false;
-    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_3);
+    GetPanGestureValue(runtimeCallInfo, fingers, direction, distanceMap, limitFingerCount, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, limitFingerCount, nullptr);
+        fingers, direction, distanceMap[SourceTool::UNKNOWN], limitFingerCount, nullptr);
     SetGestureDistanceMap(runtimeCallInfo, NUM_7, gesture);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);

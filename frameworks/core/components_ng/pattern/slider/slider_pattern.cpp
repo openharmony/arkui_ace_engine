@@ -1243,8 +1243,10 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    gestureHub->AddPanEvent(
-        panEvent_, panDirection, 1, pipeline->IsFormRender() ? FORM_PAN_DISTANCE : DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, pipeline->IsFormRender() ? FORM_PAN_DISTANCE.ConvertToPx() :
+        DEFAULT_PAN_DISTANCE.ConvertToPx() }, { SourceTool::PEN, pipeline->IsFormRender() ?
+        FORM_PAN_DISTANCE.ConvertToPx() : DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 RefPtr<PanEvent> SliderPattern::CreatePanEvent()

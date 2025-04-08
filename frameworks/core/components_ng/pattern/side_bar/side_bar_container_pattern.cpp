@@ -698,7 +698,9 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
     CHECK_NULL_VOID(dividerNode);
     auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dividerGestureHub);
-    dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    dividerGestureHub->AddPanEvent(dragEvent_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
 }
 
 void SideBarContainerPattern::CreateAnimation()
