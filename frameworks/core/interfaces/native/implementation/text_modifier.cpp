@@ -27,52 +27,6 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
-namespace {
-constexpr int32_t DEFAULT_MULTIPLE = 100;
-int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
-{
-    OHOS::Ace::FontWeight convertValue;
-    switch (fontWeight) {
-        case OHOS::Ace::FontWeight::W100:
-        case OHOS::Ace::FontWeight::LIGHTER:
-            convertValue = OHOS::Ace::FontWeight::W100;
-            break;
-        case OHOS::Ace::FontWeight::W200:
-            convertValue = OHOS::Ace::FontWeight::W200;
-            break;
-        case OHOS::Ace::FontWeight::W300:
-            convertValue = OHOS::Ace::FontWeight::W300;
-            break;
-        case OHOS::Ace::FontWeight::W400:
-        case OHOS::Ace::FontWeight::NORMAL:
-        case OHOS::Ace::FontWeight::REGULAR:
-            convertValue = OHOS::Ace::FontWeight::W400;
-            break;
-        case OHOS::Ace::FontWeight::W500:
-        case OHOS::Ace::FontWeight::MEDIUM:
-            convertValue = OHOS::Ace::FontWeight::W500;
-            break;
-        case OHOS::Ace::FontWeight::W600:
-            convertValue = OHOS::Ace::FontWeight::W600;
-            break;
-        case OHOS::Ace::FontWeight::W700:
-        case OHOS::Ace::FontWeight::BOLD:
-            convertValue = OHOS::Ace::FontWeight::W700;
-            break;
-        case OHOS::Ace::FontWeight::W800:
-            convertValue = OHOS::Ace::FontWeight::W800;
-            break;
-        case OHOS::Ace::FontWeight::W900:
-        case OHOS::Ace::FontWeight::BOLDER:
-            convertValue = OHOS::Ace::FontWeight::W900;
-            break;
-        default:
-            convertValue = OHOS::Ace::FontWeight::W400;
-            break;
-    }
-    return (static_cast<int32_t>(convertValue) + 1) * DEFAULT_MULTIPLE;
-}
-}
 namespace OHOS::Ace::NG::Converter {
 struct FontSettingOptions {
     std::optional<bool> enableVariableFontWeight;
@@ -307,13 +261,10 @@ void FontWeight0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto weight = Converter::OptConvert<FontWeight>(*value);
-    TextModelNG::SetFontWeight(frameNode, weight);
-    std::optional<int32_t> variableWeight = std::nullopt;
-    if (weight.has_value()) {
-        variableWeight = ConvertToVariableFontWeight(weight.value());
-    }
-    TextModelNG::SetVariableFontWeight(frameNode, variableWeight);
+    Converter::FontWeightInt defaultWeight = {};
+    auto weight = Converter::OptConvert<Converter::FontWeightInt>(*value).value_or(defaultWeight);
+    TextModelNG::SetFontWeight(frameNode, weight.fixed);
+    TextModelNG::SetVariableFontWeight(frameNode, weight.variable);
 }
 void FontWeight1Impl(Ark_NativePointer node,
                      const Ark_Union_Number_FontWeight_String* weight,

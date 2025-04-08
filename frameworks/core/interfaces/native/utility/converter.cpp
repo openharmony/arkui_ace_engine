@@ -27,7 +27,7 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
-
+#include <cerrno>
 namespace {
     constexpr int32_t NUM_0 = 0;
     constexpr int32_t NUM_1 = 1;
@@ -41,6 +41,53 @@ namespace {
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
     const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
+
+    constexpr int32_t DEFAULT_MULTIPLE = 100;
+    int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
+    {
+        OHOS::Ace::FontWeight convertValue;
+        switch (fontWeight) {
+            case OHOS::Ace::FontWeight::W100:
+            case OHOS::Ace::FontWeight::LIGHTER:
+                convertValue = OHOS::Ace::FontWeight::W100;
+                break;
+            case OHOS::Ace::FontWeight::W200:
+                convertValue = OHOS::Ace::FontWeight::W200;
+                break;
+            case OHOS::Ace::FontWeight::W300:
+                convertValue = OHOS::Ace::FontWeight::W300;
+                break;
+            case OHOS::Ace::FontWeight::W400:
+            case OHOS::Ace::FontWeight::NORMAL:
+            case OHOS::Ace::FontWeight::REGULAR:
+                convertValue = OHOS::Ace::FontWeight::W400;
+                break;
+            case OHOS::Ace::FontWeight::W500:
+            case OHOS::Ace::FontWeight::MEDIUM:
+                convertValue = OHOS::Ace::FontWeight::W500;
+                break;
+            case OHOS::Ace::FontWeight::W600:
+                convertValue = OHOS::Ace::FontWeight::W600;
+                break;
+            case OHOS::Ace::FontWeight::W700:
+            case OHOS::Ace::FontWeight::BOLD:
+                convertValue = OHOS::Ace::FontWeight::W700;
+                break;
+            case OHOS::Ace::FontWeight::W800:
+                convertValue = OHOS::Ace::FontWeight::W800;
+                break;
+            case OHOS::Ace::FontWeight::W900:
+            case OHOS::Ace::FontWeight::BOLDER:
+                convertValue = OHOS::Ace::FontWeight::W900;
+                break;
+            default:
+                convertValue = OHOS::Ace::FontWeight::W400;
+                break;
+        }
+        return (static_cast<int32_t>(convertValue) + 1) * DEFAULT_MULTIPLE;
+    }
+    static const int32_t MIN_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W100);
+    static const int32_t MAX_FONT_WEIGHT = ConvertToVariableFontWeight(OHOS::Ace::FontWeight::W900);
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -611,21 +658,6 @@ Ark_CharPtr Convert(const Ark_CustomObject& src)
 }
 
 template<>
-int Convert(const Ark_String& src)
-{
-    float value = std::atoi(src.chars);
-    return value;
-}
-
-template<>
-float Convert(const Ark_String& src)
-{
-    char *end = nullptr;
-    float value = std::strtof(src.chars, &end);
-    return value;
-}
-
-template<>
 float Convert(const Ark_Float32& src)
 {
     return src;
@@ -794,6 +826,52 @@ FontInfo Convert(const Ark_FontInfo& src)
         .monoSpace = Convert<bool>(src.monoSpace),
         .symbolic = Convert<bool>(src.symbolic),
     };
+}
+
+template<>
+FontWeightInt Convert(const Ark_FontWeight& src)
+{
+    FontWeightInt dst = {};
+    dst.fixed = OptConvert<FontWeight>(src);
+    if (dst.fixed.has_value()) {
+        dst.variable = ConvertToVariableFontWeight(dst.fixed.value());
+    }
+    return dst;
+}
+    
+template<>
+FontWeightInt Convert(const Ark_Number& src)
+{
+    FontWeightInt dst = {};
+    dst.fixed = OptConvert<FontWeight>(src);
+    int32_t weigth = Convert<int32_t>(src);
+    if (weigth >= MIN_FONT_WEIGHT && weigth <= MAX_FONT_WEIGHT) {
+        dst.variable = weigth;
+    }
+    return dst;
+}
+
+template<>
+FontWeightInt Convert(const Ark_String& src)
+{
+    FontWeightInt dst = {};
+    dst.fixed = OptConvert<FontWeight>(src);
+
+    char *endptr;
+    errno = 0;
+    long value = std::strtol(src.chars, &endptr, 10);
+    if ((errno == ERANGE && (value == LONG_MAX || value == LONG_MIN)) ||
+        (errno != 0 && value == 0) || (endptr == src.chars) || (*endptr != '\0')) {
+        if (dst.fixed.has_value()) {
+            dst.variable = ConvertToVariableFontWeight(dst.fixed.value());
+        }
+    } else {
+        int32_t intWeight = static_cast<int32_t>(value);
+        if (intWeight >= MIN_FONT_WEIGHT && intWeight <= MAX_FONT_WEIGHT) {
+            dst.variable = intWeight;
+        }
+    }
+    return dst;
 }
 
 template<>
