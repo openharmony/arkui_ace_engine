@@ -71,6 +71,7 @@ public:
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
     static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
     static void SetPadding(FrameNode* node, NG::PaddingProperty& padding, bool isSubTabStyle);
+    static void SetPadding(FrameNode* node, const std::optional<NG::PaddingProperty>& padding);
     static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
     static void SetVerticalAlign(FrameNode* node, const std::optional<FlexAlign>& verticalAlign);
     static void SetSymmetricExtensible(FrameNode* node, const std::optional<bool>& isExtensible);

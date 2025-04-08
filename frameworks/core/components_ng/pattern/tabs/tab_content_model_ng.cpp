@@ -769,6 +769,14 @@ void TabContentModelNG::SetPadding(FrameNode* node, PaddingProperty& padding, bo
     frameNodePattern->SetPadding(padding);
 }
 
+void TabContentModelNG::SetPadding(FrameNode* node, const std::optional<PaddingProperty>& padding)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPadding(padding.value_or(PaddingProperty()));
+}
+
 void TabContentModelNG::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)
 {
     CHECK_NULL_VOID(node);
