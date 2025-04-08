@@ -172,6 +172,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
@@ -284,6 +285,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "googletest:gmock_main",
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
