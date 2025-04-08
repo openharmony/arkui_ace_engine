@@ -5155,12 +5155,12 @@ void TextPattern::UpdateFontColor(const Color& value)
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
     if (children.empty() && spans_.empty() && !NeedShowAIDetect()) {
+        if (textStyle_.has_value()) {
+            textStyle_->SetTextColor(value);
+        }
         if (contentMod_) {
             contentMod_->TextColorModifier(value);
         } else if (pManager_) {
-            if (textStyle_.has_value()) {
-                textStyle_->SetTextColor(value);
-            }
             for (auto&& info : pManager_->GetParagraphs()) {
                 auto paragraph = info.paragraph;
                 CHECK_NULL_VOID(paragraph);
@@ -5171,9 +5171,6 @@ void TextPattern::UpdateFontColor(const Color& value)
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextPattern::MarkDirtyNodeRender()

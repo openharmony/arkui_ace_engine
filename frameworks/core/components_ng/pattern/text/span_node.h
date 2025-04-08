@@ -285,7 +285,7 @@ public:
     virtual bool UpdateSpanTextStyle(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
-        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol, bool isRichEditor);
+        TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);

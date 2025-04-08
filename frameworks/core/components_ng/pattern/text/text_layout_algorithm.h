@@ -50,7 +50,7 @@ class ACE_EXPORT TextLayoutAlgorithm : public MultipleParagraphLayoutAlgorithm, 
 public:
     TextLayoutAlgorithm();
     explicit TextLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans, RefPtr<ParagraphManager> paragraphManager_,
-        bool isSpanStringMode, bool isMarquee = false);
+        bool isSpanStringMode, const TextStyle& textStyle, const bool isMarquee = false);
     ~TextLayoutAlgorithm() override = default;
 
     void OnReset() override;
@@ -68,7 +68,7 @@ public:
 
     size_t GetLineCount() const;
 
-    std::optional<TextStyle> GetTextStyle() const;
+    const TextStyle& GetTextStyle() const;
 
     RefPtr<Paragraph> GetParagraph() const override
     {

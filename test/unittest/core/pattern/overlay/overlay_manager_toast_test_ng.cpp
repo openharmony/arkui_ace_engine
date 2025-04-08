@@ -326,7 +326,7 @@ HWTEST_F(OverlayManagerToastTestNg, ToastTest005, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
 
     auto fontSize = Dimension(10.0);
-    theme->textStyle_.fontSize_ = fontSize;
+    theme->textStyle_.fontSize_.value = fontSize;
     /**
      * @tc.steps: step1. update TextProperty in Toast alignment to property.
      * @tc.expected: call the UpdateTextSizeConstraint function expected true and don't set MaxLine.

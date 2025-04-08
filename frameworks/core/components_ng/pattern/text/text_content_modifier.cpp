@@ -412,9 +412,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
-        auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->OnPropertyChangeMeasure();
     }
     if (!ifPaintObscuration_) {
         auto& canvas = drawingContext.canvas;
@@ -581,11 +578,11 @@ void TextContentModifier::ModifyFontWeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextColorInTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextColorInTextStyle(Color& textColor)
 {
     if (textColor_.has_value() && animatableTextColor_) {
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
-        textStyle.SetTextColor(Color(animatableTextColor_->Get().GetValue()));
+        textColor = Color(animatableTextColor_->Get().GetValue());
     }
 }
 
@@ -658,13 +655,13 @@ void TextContentModifier::ModifyLineHeightInTextStyle(TextStyle& textStyle)
     }
 }
 
-void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
+void TextContentModifier::ModifyTextStyle(TextStyle& textStyle, Color& textColor)
 {
     ModifyFontSizeInTextStyle(textStyle);
     ModifyAdaptMinFontSizeInTextStyle(textStyle);
     ModifyAdaptMaxFontSizeInTextStyle(textStyle);
     ModifyFontWeightInTextStyle(textStyle);
-    ModifyTextColorInTextStyle(textStyle);
+    ModifyTextColorInTextStyle(textColor);
     ModifySymbolColorInTextStyle(textStyle);
     ModifyTextShadowsInTextStyle(textStyle);
     ModifyDecorationInTextStyle(textStyle);
@@ -794,14 +791,6 @@ void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
         CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
-    }
-}
-
-void TextContentModifier::AnimationMeasureUpdate(const RefPtr<FrameNode>& host)
-{
-    PropertyChangeFlag flag = 0;
-    if (NeedMeasureUpdate(flag)) {
-        host->MarkDirtyNode(flag);
     }
 }
 
