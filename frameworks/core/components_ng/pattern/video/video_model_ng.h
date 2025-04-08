@@ -63,7 +63,7 @@ public:
     static void SetObjectFit(FrameNode* frameNode, std::optional<ImageFit> objectFit);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetMuted(FrameNode* frameNode, bool muted);
-    static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
+    static void SetSurfaceBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void SetOnStart(FrameNode* frameNode, VideoEventFunc&& onStart);

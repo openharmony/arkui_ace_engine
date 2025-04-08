@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -50,6 +51,17 @@ namespace  {
     const auto ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE = "ImageFit.Cover";
     const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_NAME = "enableAnalyzer";
     const auto ATTRIBUTE_ENABLE_ANALYZER_ENABLE_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME = "enableShortcutKey";
+    const auto ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME = "surfaceBackgroundColor";
+    const auto ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE = "#FF000000";
+
+    const std::string TEST_COLOR_RED = "#FFFF0000";
+    const std::string TEST_COLOR_BLACK = "#FF000000";
+    const std::string TEST_COLOR_BLUE = "#FF0000FF";
+    const auto TEST_COLOR_RED_NUM = 0xFFFF0000;
+    const auto TEST_COLOR_BLACK_NUM = 0xFF000000;
+    const auto TEST_COLOR_BLUE_NUM = 0xFF0000FF;
 } // namespace
 
 class VideoModifierTest : public ModifierTestBase<GENERATED_ArkUIVideoModifier,
@@ -1064,5 +1076,64 @@ HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestValidValues, TestSize.
 HWTEST_F(VideoModifierTest, DISABLED_setAnalyzerConfigTestInvalidValues, TestSize.Level1)
 {
     // analyzerConfig attribute is not implemented
+}
+
+static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> enableShortcutKeyTesdtPlan = {
+    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+};
+
+/*
+ * @tc.name: setEnableShortcutKey
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoModifierTest, setEnableShortcutKey, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_SHORTCUT_KEY_DEFAULT_VALUE);
+
+    std::string expectedStr;
+    Ark_Boolean inputValueEnableShortcutKey;
+
+    for (auto&& value: enableShortcutKeyTesdtPlan) {
+        inputValueEnableShortcutKey = std::get<1>(value);
+        modifier_->setEnableShortcutKey(node_, inputValueEnableShortcutKey);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_SHORTCUT_KEY_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
+}
+
+static std::vector<std::tuple<std::string, uint32_t, std::string>> setSurfaceBackgroundColorPlan = {
+    {"BLACK", TEST_COLOR_BLACK_NUM , TEST_COLOR_BLACK},
+    {"BLUE", TEST_COLOR_BLUE_NUM , TEST_COLOR_BLUE},
+    {"RED", TEST_COLOR_RED_NUM , TEST_COLOR_RED},
+};
+
+/*
+ * @tc.name: setSurfaceBackgroundColor
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoModifierTest, setSurfaceBackgroundColor, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_DEFAULT_VALUE);
+    std::string expectedStr;
+
+    for (auto&& value: setSurfaceBackgroundColorPlan) {
+        ColorMetricsPeer metrix;
+        metrix.colorValue.value = std::get<1>(value);
+        Ark_ColorMetrics backgroundColor = &metrix;
+        modifier_->setSurfaceBackgroundColor(node_, backgroundColor);
+        jsonValue = GetJsonValue(node_);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SURFACE_BACKGROUND_COLOR_NAME);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
 }
 } // namespace OHOS::Ace::NG
