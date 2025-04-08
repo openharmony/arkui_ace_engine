@@ -228,7 +228,8 @@ bool ContainerModalViewEnhance::GetContainerModalComponentRect(
 }
 
 void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
-    uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode)
+    uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode, uint32_t buttonIconSize,
+    uint32_t buttonBackgroundCornerRadius)
 {
     CHECK_NULL_VOID(pipeline);
     if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
@@ -250,6 +251,9 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     }
     controlButtonsNode->FireCustomCallback(
         EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(closeButtonRightMargin));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_ICON_SIZE_CHANGE, std::to_string(buttonIconSize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE,
+        std::to_string(buttonBackgroundCornerRadius));
     containerPattern->CallButtonsRectChange();
 }
 
