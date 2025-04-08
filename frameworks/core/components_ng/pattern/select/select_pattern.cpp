@@ -106,6 +106,15 @@ void RecordChange(RefPtr<FrameNode> host, int32_t index, const std::string& valu
         }
     }
 }
+
+static std::string ConvertVectorToString(std::vector<std::string> vec)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        oss << ((i == 0) ? "" : ",") << vec[i];
+    }
+    return oss.str();
+}
 } // namespace
 
 void SelectPattern::OnAttachToFrameNode()
@@ -2070,5 +2079,31 @@ void SelectPattern::UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPat
     } else if (optionFont_.FontWeight.has_value()) {
         optionPattern->SetFontWeight(optionFont_.FontWeight.value());
     }
+}
+
+void SelectPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc("Selected: " + std::to_string(selected_));
+    DumpLog::GetInstance().AddDesc("FontColor: " + fontColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "SelectedOptionFontSize: " + selectedFont_.FontSize.value_or(Dimension()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "SelectedOptionFontStyle: " + StringUtils::ToString(selectedFont_.FontStyle.value_or(Ace::FontStyle::NORMAL)));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontWeight: " +
+        StringUtils::FontWeightToString(selectedFont_.FontWeight.value_or(FontWeight::NORMAL)));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontFamily: " +
+        ConvertVectorToString(selectedFont_.FontFamily.value_or(std::vector<std::string>())));
+    DumpLog::GetInstance().AddDesc("SelectedOptionFontColor: " + selectedFont_.FontColor.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("SelectedBgColor: " + selectedBgColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("OptionFontSize: " + optionFont_.FontSize.value_or(Dimension()).ToString());
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontStyle: " + StringUtils::ToString(optionFont_.FontStyle.value_or(Ace::FontStyle::NORMAL)));
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontWeight: " + StringUtils::FontWeightToString(optionFont_.FontWeight.value_or(FontWeight::NORMAL)));
+    DumpLog::GetInstance().AddDesc(
+        "OptionFontFamily: " + ConvertVectorToString(optionFont_.FontFamily.value_or(std::vector<std::string>())));
+    DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
+    DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
 }
 } // namespace OHOS::Ace::NG

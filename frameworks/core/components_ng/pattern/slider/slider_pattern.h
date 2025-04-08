@@ -160,6 +160,7 @@ public:
     }
     void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void DumpInfo() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
@@ -376,6 +377,7 @@ private:
     {
         return skipGestureEvents_;
     }
+    void DumpSubInfo(RefPtr<SliderPaintProperty> paintProperty);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };

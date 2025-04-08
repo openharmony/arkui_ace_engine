@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -1056,6 +1057,41 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         result = true;
     }
     return result;
+}
+
+void CheckBoxPattern::DumpInfo()
+{
+    auto eventHub = GetEventHub<CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("Name: " + eventHub->GetName());
+    DumpLog::GetInstance().AddDesc("GroupName: " + eventHub->GetGroupName());
+
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        DumpLog::GetInstance().AddDesc(
+            "Shape: " + CheckBoxModel::ToString(paintProperty->GetCheckBoxSelectedStyleValue()));
+    }
+    if (paintProperty->HasCheckBoxSelect()) {
+        DumpLog::GetInstance().AddDesc(
+            "IsSelected: " + std::string(paintProperty->GetCheckBoxSelectValue() ? "true" : "false"));
+    }
+    if (paintProperty->HasCheckBoxSelectedColor()) {
+        DumpLog::GetInstance().AddDesc("SelectedColor: " + paintProperty->GetCheckBoxSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxUnSelectedColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "UnSelectedColor: " + paintProperty->GetCheckBoxUnSelectedColorValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkSize()) {
+        DumpLog::GetInstance().AddDesc("MarkSize: " + paintProperty->GetCheckBoxCheckMarkSizeValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkWidth()) {
+        DumpLog::GetInstance().AddDesc("MarkWidth: " + paintProperty->GetCheckBoxCheckMarkWidthValue().ToString());
+    }
+    if (paintProperty->HasCheckBoxCheckMarkColor()) {
+        DumpLog::GetInstance().AddDesc("MarkColor: " + paintProperty->GetCheckBoxCheckMarkColorValue().ToString());
+    }
 }
 
 void CheckBoxPattern::SetPrePageIdToLastPageId()

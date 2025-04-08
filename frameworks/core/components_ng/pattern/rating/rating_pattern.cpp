@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <sstream>
 
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/recorder/event_recorder.h"
@@ -1066,6 +1067,41 @@ void RatingPattern::SetRedrawCallback(const RefPtr<CanvasImage>& image)
         CHECK_NULL_VOID(ratingNode);
         ratingNode->MarkNeedRenderOnly();
     });
+}
+
+void RatingPattern::DumpInfo()
+{
+    auto renderProperty = GetPaintProperty<RatingRenderProperty>();
+    CHECK_NULL_VOID(renderProperty);
+
+    if (renderProperty->HasRatingScore()) {
+        DumpLog::GetInstance().AddDesc("RatingScore: " + std::to_string(renderProperty->GetRatingScoreValue()));
+    }
+    if (renderProperty->HasStepSize()) {
+        DumpLog::GetInstance().AddDesc("StepSize: " + std::to_string(renderProperty->GetStepSizeValue()));
+    }
+
+    auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasIndicator()) {
+        DumpLog::GetInstance().AddDesc(
+            "Indicator: " + std::string(layoutProperty->GetIndicator().value() ? "true" : "false"));
+    }
+    if (layoutProperty->HasStars()) {
+        DumpLog::GetInstance().AddDesc("Stars: " + std::to_string(layoutProperty->GetStars().value()));
+    }
+    if (layoutProperty->HasForegroundImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "ForegroundImageSourceInfo: " + layoutProperty->GetForegroundImageSourceInfo().value().ToString());
+    }
+    if (layoutProperty->HasSecondaryImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "SecondaryImageSourceInfo: " + layoutProperty->GetSecondaryImageSourceInfo().value().ToString());
+    }
+    if (layoutProperty->HasBackgroundImageSourceInfo()) {
+        DumpLog::GetInstance().AddDesc(
+            "BackgroundImageSourceInfo: " + layoutProperty->GetBackgroundImageSourceInfo().value().ToString());
+    }
 }
 
 void RatingPattern::FireBuilder()

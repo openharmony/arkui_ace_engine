@@ -41,6 +41,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1636,7 +1637,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
 #ifdef OHOS_PLATFORM
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     if (params[index].value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
@@ -1660,7 +1661,7 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
 #ifdef OHOS_PLATFORM
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<NG::MenuTheme>();
+    auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
     if (value.value == theme->GetPasteText()) {
         CreatePasteButton(optionsHasIcon, option, row, onClickFunc, icon);

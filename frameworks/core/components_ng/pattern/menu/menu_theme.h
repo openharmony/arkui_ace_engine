@@ -139,8 +139,6 @@ public:
             theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
             theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
             theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
-            theme->pasteText_ = pattern->GetAttr<std::string>("textoverlay_paste", "");
-            theme->cancelText_ = pattern->GetAttr<std::string>("common_cancel_text", "");
         }
     };
 
@@ -406,16 +404,6 @@ public:
         return menuHapticFeedback_;
     }
 
-    const std::string& GetPasteText() const
-    {
-        return pasteText_;
-    }
-
-    const std::string& GetCancelText() const
-    {
-        return cancelText_;
-    }
-
 protected:
     MenuTheme() = default;
 
@@ -472,8 +460,6 @@ private:
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     std::string menuHapticFeedback_;
-    std::string pasteText_;
-    std::string cancelText_;
 };
 
 } // namespace OHOS::Ace::NG

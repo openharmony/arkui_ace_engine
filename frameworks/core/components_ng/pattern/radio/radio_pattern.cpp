@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -978,6 +979,35 @@ void RadioPattern::SetRadioChecked(bool check)
     paintProperty->UpdateRadioCheck(check);
     UpdateState();
     OnModifyDone();
+}
+
+void RadioPattern::DumpInfo ()
+{
+    auto eventHub = GetEventHub<RadioEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    DumpLog::GetInstance().AddDesc("Value: " + eventHub->GetValue());
+    DumpLog::GetInstance().AddDesc("Group: " + eventHub->GetGroup());
+
+    auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasRadioIndicator()) {
+        DumpLog::GetInstance().AddDesc("IndicatorType: " + std::to_string(paintProperty->GetRadioIndicatorValue()));
+    }
+    if (paintProperty->HasRadioCheck()) {
+        DumpLog::GetInstance().AddDesc(
+            "IsChecked: " + std::string(paintProperty->GetRadioCheckValue() ? "true" : "false"));
+    }
+    if (paintProperty->HasRadioCheckedBackgroundColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "CheckedBackgroundColor: " + paintProperty->GetRadioCheckedBackgroundColorValue().ToString());
+    }
+    if (paintProperty->HasRadioUncheckedBorderColor()) {
+        DumpLog::GetInstance().AddDesc(
+            "UncheckedBorderColor: " + paintProperty->GetRadioUncheckedBorderColorValue().ToString());
+    }
+    if (paintProperty->HasRadioIndicatorColor()) {
+        DumpLog::GetInstance().AddDesc("IndicatorColor: " + paintProperty->GetRadioIndicatorColorValue().ToString());
+    }
 }
 
 void RadioPattern::FireBuilder()
