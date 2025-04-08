@@ -1108,9 +1108,9 @@ HWTEST_F(VideoModifierTest, setEnableShortcutKey, TestSize.Level1)
 }
 
 static std::vector<std::tuple<std::string, uint32_t, std::string>> setSurfaceBackgroundColorPlan = {
-    {"BLACK", TEST_COLOR_BLACK_NUM , TEST_COLOR_BLACK},
-    {"BLUE", TEST_COLOR_BLUE_NUM , TEST_COLOR_BLUE},
-    {"RED", TEST_COLOR_RED_NUM , TEST_COLOR_RED},
+    {"BLACK", TEST_COLOR_BLACK_NUM, TEST_COLOR_BLACK},
+    {"BLUE", TEST_COLOR_BLUE_NUM, TEST_COLOR_BLUE},
+    {"RED", TEST_COLOR_RED_NUM, TEST_COLOR_RED},
 };
 
 /*
