@@ -5601,6 +5601,10 @@ void ArkUINativeModule::RegisterSwiperAttributes(Local<panda::ObjectRef> object,
 void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto listItem = panda::ObjectRef::New(vm);
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListItemInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetListItemInitialize));
+    listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemInitialize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::ResetListItemInitialize));
     listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setListItemSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemBridge::SetListItemSelected));
     listItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetListItemSelected"),

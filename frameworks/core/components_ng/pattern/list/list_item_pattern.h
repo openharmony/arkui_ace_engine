@@ -209,6 +209,8 @@ public:
         return listItemStyle_;
     }
 
+    void SetListItemStyle(V2::ListItemStyle style);
+
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
