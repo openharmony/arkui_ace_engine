@@ -69,6 +69,7 @@ public:
     void ResetTranslate(int32_t nodeId) override;
     void GetPixelMap() override;
     void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) override;
+    bool IsHasReportObject() override;
 };
 
 } // namespace OHOS::Ace

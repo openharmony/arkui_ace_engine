@@ -136,7 +136,10 @@ public:
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
 #endif
-
+    virtual bool IsHasReportObject()
+    {
+        return false;
+    };
 protected:
     static std::mutex mutex_;
     static std::shared_mutex reportObjectMutex_;

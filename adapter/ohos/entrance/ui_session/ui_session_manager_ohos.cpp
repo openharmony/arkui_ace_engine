@@ -446,4 +446,9 @@ void UiSessionManagerOhos::SendPixelMap(std::vector<std::pair<int32_t, std::shar
         LOGW("send pixel maps failed,process id:%{public}d", processMap_["pixel"]);
     }
 }
+
+bool UiSessionManagerOhos::IsHasReportObject()
+{
+    return !reportObjectMap_.empty();
+}
 } // namespace OHOS::Ace

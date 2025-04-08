@@ -88,6 +88,11 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
+enum {
+    RET_FAILED = 11,
+    RET_SUCCESS = 10,
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -436,11 +441,6 @@ public:
     void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
-
-    int32_t OnRecvCommand(const std::string& command) override
-    {
-        return 0;
-    }
 
     void MarkNeedSyncRenderTree(bool needRebuild = false) override;
 
@@ -1158,7 +1158,7 @@ public:
     void SetDeleteRsNode(bool isDelete) {
         isDeleteRsNode_ = isDelete;
     }
- 
+
     bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
@@ -1166,7 +1166,7 @@ public:
     void SetPositionZ(bool hasPositionZ) {
         hasPositionZ_ = hasPositionZ;
     }
- 
+
     bool HasPositionZ() const {
         return hasPositionZ_;
     }
@@ -1342,6 +1342,8 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
+
+    int32_t OnRecvCommand(const std::string& command) override;
 
 protected:
     void DumpInfo() override;
