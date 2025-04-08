@@ -256,6 +256,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
     webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
     webPattern->OnOptimizeParserBudgetEnabledUpdate(true);
+    webPattern->OnWebMediaAVSessionEnabledUpdate(true);
 #endif
 }
 
