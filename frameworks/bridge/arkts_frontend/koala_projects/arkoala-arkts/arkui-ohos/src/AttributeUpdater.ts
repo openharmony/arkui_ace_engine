@@ -13,37 +13,36 @@
  * limitations under the License.
  */
 
-import { AttributeModifier } from "../..";
+import { AttributeModifier } from "./";
+import { InteropNativeModule } from "@koalaui/interop"
 export type Initializer<T> = () => T;
 
 export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifier<T> {
 
+    /** @memo */
     applyNormalAttribute(instance: T): void {
-      
     }
+    /** @memo */
     applyPressedAttribute(instance: T): void {
-
     }
+    /** @memo */
     applyFocusedAttribute(instance: T): void {
-     
     }
+    /** @memo */
     applyDisabledAttribute(instance: T): void {
-      
     }
-    applySelectedAttribute(instance: T): void {
-       
+    /** @memo */
+    applySelectedAttribute(instance: T): void {  
     }
-
+    /** @memo */
     initializeModifier(instance: T): void {
     }
-
     private value: T | undefined = undefined;
     public updateConstructorParams: C | undefined = undefined;
-
+    
     public set attribute(value: T) {
         this.value = value
     }
-
     public get attribute(): T {
         return this.value!
     }

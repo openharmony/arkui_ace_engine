@@ -42,7 +42,6 @@ import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
 import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
 import { PathShape } from "./../generated/ArkPathShapeMaterialized"
 import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../handwritten"
 import { ArkCommonComponent } from "./../generated/ArkCommon"
 import { ArkCommonPeer } from "./../generated/peers/ArkCommonPeer"
 import { Callback_Number_Number_Void } from "./grid"
@@ -50,6 +49,7 @@ import { ScrollOnWillScrollCallback, ScrollOnScrollCallback } from "./scroll"
 import { ScrollState } from "./list"
 import { GlobalScope } from "./../generated/peers/GlobalScope"
 import { _animateTo } from "../handwritten"
+export  { CommonModifier } from "../ohos.arkui.modifier"
 
 export interface ICurve {
     interpolate(fraction: number): number
@@ -3403,6 +3403,7 @@ export interface Literal_Alignment_align {
 export type CustomBuilder = 
 /** @memo */
 () => void;
+export type CommonInteface = ()=>CommonAttribute
 export interface OverlayOptions {
     align?: Alignment;
     offset?: OverlayOffset;
@@ -3625,6 +3626,7 @@ export namespace focusControl {
         return GlobalScope.focusControl_requestFocus(value)
     }
 }
+
 /** @memo:stable */
 export interface CommonMethod {
     /** @memo */
@@ -3971,6 +3973,8 @@ export interface CommonMethod {
     onVisibleAreaChange(ratios: Array<number>, event: VisibleAreaChangeCallback): this
     /** @memo */
     keyboardShortcut(value: string | FunctionKey, keys: Array<ModifierKey>, action?: (() => void)): this
+    /** @memo */
+    attributeModifier<T>(modifier:AttributeModifier<T>): this
 }
 /** @memo:stable */
 export interface CommonShapeMethod extends CommonMethod {
@@ -4001,6 +4005,20 @@ export interface CommonShapeMethod extends CommonMethod {
 export interface CommonAttribute extends CommonMethod {
     /** @memo */
     setCommonOptions(): this
+}
+
+export interface AttributeModifier<T> {
+
+    /** @memo */
+    applyNormalAttribute(instance: T) : void;
+    /** @memo */
+    applyPressedAttribute(instance: T) : void;
+   /** @memo */
+    applyFocusedAttribute(instance: T) : void;
+    /** @memo */
+    applyDisabledAttribute(instance: T) : void;
+   /** @memo */
+    applySelectedAttribute(instance: T) : void;
 }
 /** @memo:stable */
 export interface ScrollableCommonMethod extends CommonMethod {
