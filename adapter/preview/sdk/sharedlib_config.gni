@@ -322,6 +322,16 @@ napi_modules = [
         ]
       },
     ]
+    if (use_linux) {
+      shard_libs += [
+        {
+          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"
+          subsystem_name = "arkui"
+          part_name = "ace_engine"
+          lib_names = [ "ArkoalaNative_ark" ]
+        },
+      ]
+    }
   },
   {
     prefix = "util"
