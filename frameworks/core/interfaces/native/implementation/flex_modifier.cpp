@@ -116,11 +116,10 @@ namespace FlexModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // auto frameNode = FlexModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = FlexModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // FlexModifier
 namespace FlexInterfaceModifier {
@@ -133,36 +132,36 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
     auto options = Converter::OptConvert<FlexOptions>(*value);
     CHECK_NULL_VOID(options);
 
-    // if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
-    //     FlexModelNG::SetFlexRow(frameNode);
-    //     FlexModelNG::SetFlexDirection(frameNode, options->direction);
-    //     FlexModelNG::SetMainAxisAlign(frameNode, options->align);
-    //     FlexModelNG::SetCrossAxisAlign(frameNode, options->alignItems);
-    // } else if (options->wrap.value() == FlexWrap::WRAP || options->wrap.value() == FlexWrap::WRAP_REVERSE) {
-    //     FlexModelNG::SetFlexWrap(frameNode);
-    //     int32_t wrap = static_cast<int32_t>(options->wrap.value());
-    //     if (options->direction.has_value()) {
-    //         int32_t direction = static_cast<int32_t>(options->direction.value());
-    //         FlexModelNG::SetFlexDirection(frameNode, options->direction);
-    //         // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
-    //         direction <= 1 ? direction += NUM_2 * (wrap - NUM_1) : direction -= NUM_2 * (wrap - NUM_1);
-    //         FlexModelNG::SetFlexWrapDirection(frameNode, static_cast<WrapDirection>(direction));
-    //     } else {
-    //         // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
-    //         WrapDirection wrapDirection = wrap == NUM_2 ?
-    //          WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
-    //         FlexModelNG::SetFlexWrapDirection(frameNode, wrapDirection);
-    //     }
-    //     FlexModelNG::SetWrapMainAlignment(frameNode, options->wrapAlignment);
-    //     FlexModelNG::SetWrapCrossAlignment(frameNode, options->wrapAlignItems);
-    //     FlexModelNG::SetFlexAlignContent(frameNode, options->alignContent);
-    //     if (options->crossSpace) {
-    //         FlexModelNG::SetCrossSpace(frameNode, options->crossSpace);
-    //     }
-    // }
-    // if (options->mainSpace) {
-    //     FlexModelNG::SetMainSpace(frameNode, options->mainSpace);
-    // }
+    if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
+        FlexModelNG::SetFlexRow(frameNode);
+        FlexModelNG::SetFlexDirection(frameNode, options->direction);
+        FlexModelNG::SetMainAxisAlign(frameNode, options->align);
+        FlexModelNG::SetCrossAxisAlign(frameNode, options->alignItems);
+    } else if (options->wrap.value() == FlexWrap::WRAP || options->wrap.value() == FlexWrap::WRAP_REVERSE) {
+        FlexModelNG::SetFlexWrap(frameNode);
+        int32_t wrap = static_cast<int32_t>(options->wrap.value());
+        if (options->direction.has_value()) {
+            int32_t direction = static_cast<int32_t>(options->direction.value());
+            FlexModelNG::SetFlexDirection(frameNode, options->direction);
+            // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
+            direction <= 1 ? direction += NUM_2 * (wrap - NUM_1) : direction -= NUM_2 * (wrap - NUM_1);
+            FlexModelNG::SetFlexWrapDirection(frameNode, static_cast<WrapDirection>(direction));
+        } else {
+            // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
+            WrapDirection wrapDirection = wrap == NUM_2 ?
+             WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;
+            FlexModelNG::SetFlexWrapDirection(frameNode, wrapDirection);
+        }
+        FlexModelNG::SetWrapMainAlignment(frameNode, options->wrapAlignment);
+        FlexModelNG::SetWrapCrossAlignment(frameNode, options->wrapAlignItems);
+        FlexModelNG::SetFlexAlignContent(frameNode, options->alignContent);
+        if (options->crossSpace) {
+            FlexModelNG::SetCrossSpace(frameNode, options->crossSpace);
+        }
+    }
+    if (options->mainSpace) {
+        FlexModelNG::SetMainSpace(frameNode, options->mainSpace);
+    }
 }
 } // FlexInterfaceModifier
 namespace FlexAttributeModifier {

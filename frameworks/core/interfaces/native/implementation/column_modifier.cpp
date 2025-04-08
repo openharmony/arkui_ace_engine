@@ -80,14 +80,14 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ColumnModelNG::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(value));
+    ColumnModelNG::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(value));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(value));
+    ColumnModelNG::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
@@ -96,34 +96,34 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
-    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
-    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
-    CHECK_NULL_VOID(themeConstants);
-    if (pointLightStyle) {
-        if (pointLightStyle->lightSource) {
-            // ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
-            //     pointLightStyle->lightSource->y,
-            //     pointLightStyle->lightSource->z);
-            // ViewAbstractModelNG::SetLightIntensity(frameNode,
-            //     pointLightStyle->lightSource->intensity);
-            // ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
-        } else {
-            // ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-            // ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-            // ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-        }
-        // illuminated
-        // ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
-        // bloom
-        // ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
-    } else {
-        // ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
-        // ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
-        // ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
-        // ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
-        // ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
-    }
+    // auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    // auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    // auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    // CHECK_NULL_VOID(themeConstants);
+    // if (pointLightStyle) {
+    //     if (pointLightStyle->lightSource) {
+    //         ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+    //             pointLightStyle->lightSource->y,
+    //             pointLightStyle->lightSource->z);
+    //         ViewAbstractModelNG::SetLightIntensity(frameNode,
+    //             pointLightStyle->lightSource->intensity);
+    //         ViewAbstractModelNG::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+    //     } else {
+    //         ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+    //         ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+    //         ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+    //     }
+    //     // illuminated
+    //     ViewAbstractModelNG::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+    //     // bloom
+    //     ViewAbstractModelNG::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    // } else {
+    //     ViewAbstractModelNG::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+    //     ViewAbstractModelNG::SetLightIntensity(frameNode, std::nullopt);
+    //     ViewAbstractModelNG::SetLightColor(frameNode, std::nullopt);
+    //     ViewAbstractModelNG::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+    //     ViewAbstractModelNG::SetBloom(frameNode, std::nullopt, themeConstants);
+    // }
 #endif
 }
 void ReverseImpl(Ark_NativePointer node,

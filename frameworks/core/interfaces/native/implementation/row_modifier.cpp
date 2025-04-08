@@ -69,7 +69,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(value);
-    // RowModelNG::SetAlignItems(frameNode, flexAlign);
+    RowModelNG::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         Ark_FlexAlign value)
@@ -77,7 +77,7 @@ void JustifyContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(value);
-    // RowModelNG::SetJustifyContent(frameNode, flexAlign);
+    RowModelNG::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Ark_PointLightStyle* value)
@@ -86,10 +86,10 @@ void PointLightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
-    auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
-    auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
-    CHECK_NULL_VOID(themeConstants);
+    // auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    // auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
+    // auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
+    // CHECK_NULL_VOID(themeConstants);
     // if (pointLightStyle) {
     //     if (pointLightStyle->lightSource) {
     //         ViewAbstractModelNG::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
