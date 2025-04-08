@@ -341,11 +341,7 @@ bool GestureReferee::QueryAllDone()
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
     if (!isAxis && lastIsAxis_) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            return (type == SourceType::TOUCH || type == SourceType::MOUSE);
-        } else {
-            return (type == SourceType::TOUCH);
-        }
+        return (type == SourceType::TOUCH || type == SourceType::MOUSE);
     }
     return false;
 }
