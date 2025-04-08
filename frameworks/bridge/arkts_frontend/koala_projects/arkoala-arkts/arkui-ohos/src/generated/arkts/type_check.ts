@@ -168,6 +168,7 @@ import { RestrictedWorker, IsolatedOptions, IsolatedComponentAttribute } from ".
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle, LinearIndicatorAttribute, OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
 import { RawFileDescriptor } from "./../ArkRawFileDescriptorInterfaces"
 import { AttributeModifier } from "./../../component/common"
+import { IObservedObject, IWatchTrigger } from "../../stateManagement"
 export class TypeChecker {
     static typeInstanceOf<T>(value: Object, prop: string): boolean {
         return value instanceof T
@@ -5649,5 +5650,11 @@ export class TypeChecker {
     }
     static isArray_SpanStyle(value: object|string|number|undefined|null): boolean {
         return value instanceof Array<SpanStyle>
+    }
+    static isIObservedObject<T>(value: T): boolean {
+        return value instanceof IObservedObject;
+    }
+    static isIWatchTrigger<T>(value: T): boolean {
+        return value instanceof IWatchTrigger;
     }
 }
