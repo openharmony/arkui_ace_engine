@@ -327,6 +327,7 @@ public:
     float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
     void OnSurfaceDestroyed();
     void SetRenderFit(RenderFit renderFit);
+    void SetScreenId(uint64_t screenId);
     void HandleSurfaceCreated();
     void HandleSurfaceDestroyed();
     void ChangeSurfaceCallbackMode(SurfaceCallbackMode mode)
@@ -449,6 +450,7 @@ private:
     std::optional<std::string> libraryname_;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
     std::optional<std::string> soPath_;
+    std::optional<uint64_t> screenId_;
 
     RefPtr<RenderContext> handlingSurfaceRenderContext_;
     WeakPtr<XComponentPattern> extPattern_;

@@ -42,6 +42,7 @@ struct XComponentOptions {
     XComponentType xcomponentType = XComponentType::SURFACE;
     std::optional<std::string> libraryName = std::nullopt;
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    std::optional<std::uint64_t> screenId = std::nullopt;
 };
 
 class XComponentClient {
