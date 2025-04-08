@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
+import { i18n } from '@kit.LocalizationKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -436,6 +437,7 @@ export struct SelectDialog {
                       .fontWeight(FontWeight.Medium)
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
+                      .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
