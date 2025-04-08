@@ -169,10 +169,10 @@ public:
 
     void DumpAdvanceInfo() override;
     void DumpInfo() override;
+    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetTextStyleDumpInfo(std::unique_ptr<JsonValue>& json);
-    void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpTextStyleInfo();
     void DumpTextStyleInfo2();
     void DumpTextStyleInfo3();
@@ -735,6 +735,10 @@ public:
     void OnTextOverflowChanged();
 
     void MarkDirtyNodeRender();
+    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
+    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
+    virtual void CalculateDefaultHandleHeight(float& height);
 
     uint64_t GetSystemTimestamp()
     {
@@ -743,26 +747,21 @@ public:
                 .count());
     }
 
-    void ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode);
-    void ChangeFirstHandleHeight(const Offset& touchOffset, RectF& handleRect);
-    void ChangeSecondHandleHeight(const Offset& touchOffset, RectF& handleRect);
-    virtual void CalculateDefaultHandleHeight(float& height);
-
     void SetEnableHapticFeedback(bool isEnabled)
     {
         isEnableHapticFeedback_ = isEnabled;
     }
 
     bool HasContent();
-    void SetupMagnifier();
 
     virtual bool IsEnabledObscured() const
     {
         return true;
     }
+    void SetupMagnifier();
+    void DoTextSelectionTouchCancel() override;
 
     virtual Color GetUrlSpanColor();
-    void DoTextSelectionTouchCancel() override;
     void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     void RegisterAfterLayoutCallback(std::function<void()> callback)
