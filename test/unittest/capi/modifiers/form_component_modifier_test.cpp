@@ -85,36 +85,32 @@ std::vector<std::tuple<std::string, Ark_Visibility>> testFixtureEnumFormVisibili
     { "INT_MAX", static_cast<Ark_Visibility>(INT_MAX) },
 };
 
-std::vector<std::tuple<int64_t, uint32_t, std::string>> testFixtureFormOnAcquiredCallbackTestValues = {
+std::vector<std::tuple<int64_t, int64_t, std::string>> testFixtureFormOnAcquiredCallbackTestValues = {
     { 1, 1, "1" },
     { -1, -1, "-1" },
     { 151, 151, "151" },
-    { -1050, -1, "-1050" },
+    { -1050, -1050, "-1050" },
     { 2147483647, 2147483647, "2147483647" },
-    { 4294967295, -1, "4294967295" },
-    { 141733920767, -1, "141733920767" },
-    { 9007199254740992, -1, "9007199254740992" },
-    { 19007199254740992, -1, "19007199254740992" },
-    { 9223372036854775807, -1, "9223372036854775807" },
+    { -2147483647, -2147483647, "-2147483647" },
+    { 4294967295, 4294967295, "4294967295" },
+    { -4294967295, -4294967295, "-4294967295" },
+    { 141733920767, 141733920767, "141733920767" },
+    { -141733920767, -141733920767, "-141733920767" },
+    { 9007199254740992, 9007199254740992, "9007199254740992" },
+    { -9007199254740992, -9007199254740992, "-9007199254740992" },
+    { 19007199254740992, 19007199254740992, "19007199254740992" },
+    { -19007199254740992, -19007199254740992, "-19007199254740992" },
+    { 9223372036854775807, 9223372036854775807, "9223372036854775807" },
+    { -9223372036854775807, -9223372036854775807, "-9223372036854775807" },
 };
 
-std::vector<std::tuple<std::int64_t, std::string, std::int32_t>> testFixtureFormOnErrorCallbackTestValues = {
+std::vector<std::tuple<std::int32_t, std::string, std::int32_t>> testFixtureFormOnErrorCallbackTestValues = {
     { 1, "error message 1", 1 },
     { -1, "error another -1", -1 },
     { 151, "error message 151", 151 },
     { -1050, "error invalid code -1050", -1050 },
     { 2147483647, "error message 2147483647", 2147483647 },
     { -2147483648, "error message -2147483647", -2147483648 },
-    { 4294967295, "error message  4294967295", -1 },
-    { -4294967295, "error message  -4294967295", -1 },
-    { 141733920767, "error message 141733920767", -1 },
-    { -141733920767, "error message -141733920767", -1 },
-    { 9007199254740992, "error message 9007199254740992", -1 },
-    { -9007199254740992, "error message -9007199254740992", -1 },
-    { 19007199254740992, "error message 19007199254740992", -1 },
-    { -19007199254740992, "error message -19007199254740992", -1 },
-    { 9223372036854775807, "error message 9223372036854775807", -1 },
-    { -9223372036854775807, "error message -9223372036854775807", -1 },
 };
 
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFormNameValidValues = {
@@ -453,7 +449,7 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnAcquired, nullptr);
 
@@ -462,9 +458,9 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    static std::optional<std::pair<uint32_t, std::string>> formInfo = std::nullopt;
+    static std::optional<std::pair<int64_t, std::string>> formInfo = std::nullopt;
     auto onAcquired = [](const Ark_Int32 resourceId, const Ark_FormCallbackInfo parameter) {
-        std::pair<uint32_t, std::string> info;
+        std::pair<int64_t, std::string> info;
         info.first = Converter::Convert<int64_t>(parameter.id);
         info.second = Converter::Convert<std::string>(parameter.idString);
         formInfo = info;
@@ -493,7 +489,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnError, nullptr);
 
@@ -533,7 +529,7 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setOnErrorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnUninstall, nullptr);
 
@@ -601,6 +597,16 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     eventHub->FireOnLoad(FORM_EMPTY_STRING);
     EXPECT_TRUE(formInfo.has_value());
     EXPECT_TRUE(*formInfo);
+}
+
+/*
+ * @tc.name: setOnRouterTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnRouterTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnRouter, nullptr);
 }
 
 /*

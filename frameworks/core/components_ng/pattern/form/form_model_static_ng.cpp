@@ -111,4 +111,11 @@ void FormModelNG::SetOnLoad(FrameNode* frameNode, std::function<void(const std::
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
+void FormModelNG::SetOnRouter(FrameNode* frameNode, std::function<void(const std::string&)>&& onRouter)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnRouter(std::move(onRouter));
+}
 } // namespace OHOS::Ace::NG

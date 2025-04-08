@@ -56,6 +56,7 @@ public:
     static void SetOnError(FrameNode* frameNode, std::function<void(const std::string&)>&& onError);
     static void SetOnUninstall(FrameNode* frameNode, std::function<void(const std::string&)>&& onUninstall);
     static void SetOnLoad(FrameNode* frameNode, std::function<void(const std::string&)>&& onLoad);
+    static void SetOnRouter(FrameNode* frameNode, std::function<void(const std::string&)>&& onRouter);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
