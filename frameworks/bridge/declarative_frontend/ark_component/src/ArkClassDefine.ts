@@ -874,32 +874,24 @@ class ArkShadowInfoToArray {
     if (!value || !stageValue || !value.radius || !stageValue.radius) {
       return true;
     }
-    if (!((isResource(stageValue.radius) && isResource(value.radius) &&
-      isResourceEqual(stageValue.radius, value.radius)) ||
-      (isNumber(stageValue.radius) && isNumber(value.radius) &&
-        stageValue.radius === value.radius))) {
+    if (!(isNumber(stageValue.radius) && isNumber(value.radius) &&
+      stageValue.radius === value.radius)) {
       return true;
     }
     if (!(isNumber(stageValue.type) && isNumber(value.type) &&
       stageValue.type === value.type)) {
       return true;
     }
-    if (!((isResource(stageValue.color) && isResource(value.color) &&
-      isResourceEqual(stageValue.color, value.color)) ||
-      (!isResource(stageValue.color) && !isResource(value.color) &&
-        stageValue.color === value.color))) {
+    if (!(!isResource(stageValue.color) && !isResource(value.color) &&
+      stageValue.color === value.color)) {
       return true;
     }
-    if (!((isResource(stageValue.offsetX) && isResource(value.offsetX) &&
-      isResourceEqual(stageValue.offsetX, value.offsetX)) ||
-      (isNumber(stageValue.offsetX) && isNumber(value.offsetX) &&
-        stageValue.offsetX === value.offsetX))) {
+    if (!(isNumber(stageValue.offsetX) && isNumber(value.offsetX) &&
+      stageValue.offsetX === value.offsetX)) {
       return true;
     }
-    if (!((isResource(stageValue.offsetY) && isResource(value.offsetY) &&
-      isResourceEqual(stageValue.offsetY, value.offsetY)) ||
-      (isNumber(stageValue.offsetY) && isNumber(value.offsetY) &&
-        stageValue.offsetY === value.offsetY))) {
+    if (!(isNumber(stageValue.offsetY) && isNumber(value.offsetY) &&
+      stageValue.offsetY === value.offsetY)) {
       return true;
     }
     if (!(isBoolean(stageValue.fill) && isBoolean(value.fill) &&

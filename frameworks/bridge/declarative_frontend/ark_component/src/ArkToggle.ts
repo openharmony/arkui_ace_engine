@@ -252,9 +252,7 @@ class TogglePaddingModifier extends ModifierWithKey<Padding | Length> {
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
         return !((this.stageValue as Padding).left === (this.value as Padding).left &&
         (this.stageValue as Padding).right === (this.value as Padding).right &&
@@ -317,11 +315,6 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
         this.stageValue.unselectedColor === this.value.unselectedColor &&
         this.stageValue.pointColor === this.value.pointColor &&
         this.stageValue.trackBorderRadius === this.value.trackBorderRadius);
-    } else if (isResource(this.stageValue) && isResource(this.value)) {
-      return !(isResourceEqual(this.stageValue.pointRadius, this.value.pointRadius) && 
-      isResourceEqual(this.stageValue.unselectedColor, this.value.unselectedColor) && 
-      isResourceEqual(this.stageValue.pointColor, this.value.pointColor) &&
-      isResourceEqual(this.stageValue.trackBorderRadius, this.value.trackBorderRadius));
     } else {
       return true;
     }

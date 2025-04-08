@@ -80,9 +80,7 @@ class TextInputDecorationModifier extends ModifierWithKey<{ type: TextDecoration
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
@@ -401,14 +399,10 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
       this.stageValue.style === this.value.style)) {
       return true;
     } else {
-      if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-        isResourceEqual(this.stageValue.size, this.value.size)) ||
-        (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-          this.stageValue.size === this.value.size)) &&
-        ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-          isResourceEqual(this.stageValue.family, this.value.family)) ||
-          (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-            this.stageValue.family === this.value.family))) {
+      if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+          this.stageValue.size === this.value.size) &&
+        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+          this.stageValue.family === this.value.family)) {
         return false;
       } else {
         return true;
@@ -1094,9 +1088,7 @@ class TextInputBorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> 
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
@@ -1149,9 +1141,7 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
@@ -1242,9 +1232,7 @@ class TextInputBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiu
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||

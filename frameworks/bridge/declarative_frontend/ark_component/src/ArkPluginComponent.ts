@@ -51,14 +51,6 @@ class PluginWidthModifier extends ModifierWithKey<Length> {
       getUINativeModule().plugin.setWidth(node, this.value);
     }
   }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
 }
 
 class PluginHeightModifier extends ModifierWithKey<Length> {
@@ -71,14 +63,6 @@ class PluginHeightModifier extends ModifierWithKey<Length> {
       getUINativeModule().plugin.resetHeight(node);
     } else {
       getUINativeModule().plugin.setHeight(node, this.value);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
     }
   }
 }

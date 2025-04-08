@@ -375,9 +375,7 @@ class TabBarModeModifier extends ModifierWithKey<ArkBarMode> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.barMode === this.stageValue.barMode &&
         this.value.options?.margin === this.stageValue.options?.margin &&
         this.value.options?.nonScrollableLayoutStyle === this.stageValue.options?.nonScrollableLayoutStyle);

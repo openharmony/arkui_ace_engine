@@ -48,9 +48,7 @@ class TextAreaDecorationModifier extends ModifierWithKey<{ type: TextDecorationT
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
@@ -899,9 +897,7 @@ class TextAreaBorderWidthModifier extends ModifierWithKey<Length | EdgeWidths> {
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeWidths).start === (this.value as LocalizedEdgeWidths).start &&
@@ -954,9 +950,7 @@ class TextAreaBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeCo
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('start') >= 0) ||
           (Object.keys(this.value).indexOf('end') >= 0)) {
         return !((this.stageValue as LocalizedEdgeColors).start === (this.value as LocalizedEdgeColors).start &&
@@ -1047,9 +1041,7 @@ class TextAreaBorderRadiusModifier extends ModifierWithKey<Length | BorderRadius
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
           (Object.keys(this.value).indexOf('topEnd') >= 0) ||
           (Object.keys(this.value).indexOf('bottomStart') >= 0) ||

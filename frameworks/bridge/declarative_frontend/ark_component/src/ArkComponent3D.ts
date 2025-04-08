@@ -27,13 +27,6 @@ class ShaderInputBufferModifier extends ModifierWithKey<object> {
       getUINativeModule().component3D.setShaderInputBuffer(node, this.value);
     }
   }
-  checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
-  }
 }
 
 class ArkComponent3DComponent extends ArkComponent implements Component3DAttribute {

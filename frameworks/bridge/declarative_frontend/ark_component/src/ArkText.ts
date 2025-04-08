@@ -556,9 +556,7 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
     if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (isResource(this.stageValue.color) && isResource(this.value.color)) {
-      return !isResourceEqual(this.stageValue.color, this.value.color);
-    } else if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
+    if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
       return !(this.stageValue.color === this.value.color);
     } else {
       return true;
@@ -583,14 +581,10 @@ class TextFontModifier extends ModifierWithKey<Font> {
     if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
       return true;
     }
-    if (((isResource(this.stageValue.size) && isResource(this.value.size) &&
-      isResourceEqual(this.stageValue.size, this.value.size)) ||
-      (!isResource(this.stageValue.size) && !isResource(this.value.size) &&
-        this.stageValue.size === this.value.size)) &&
-      ((isResource(this.stageValue.family) && isResource(this.value.family) &&
-        isResourceEqual(this.stageValue.family, this.value.family)) ||
-        (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
-          this.stageValue.family === this.value.family))) {
+    if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
+      this.stageValue.size === this.value.size) &&
+      (!isResource(this.stageValue.family) && !isResource(this.value.family) &&
+        this.stageValue.family === this.value.family)) {
       return false;
     } else {
       return true;

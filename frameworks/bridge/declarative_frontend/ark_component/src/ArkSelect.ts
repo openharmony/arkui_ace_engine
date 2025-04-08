@@ -349,7 +349,7 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
   private isEqual(stageValue: Length, value: Length): boolean {
     if ((!isUndefined(stageValue) && isResource(stageValue)) &&
       (!isUndefined(value) && isResource(value))) {
-      return !isResourceEqual(stageValue, value);
+      return true;
     } else {
       return stageValue !== value;
     }
@@ -623,9 +623,7 @@ class SelectDividerStyleModifier extends ModifierWithKey<Optional<DividerStyleOp
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
