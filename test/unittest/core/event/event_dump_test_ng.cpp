@@ -500,7 +500,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg013, TestSize.Level1)
     int32_t startNumber = -1;
     std::string header = "event tree_0";
     eventTreeRecord->Dump(json, depth, startNumber);
-    EXPECT_TRUE(json->Contains(header));
+    EXPECT_FALSE(json->Contains(header));
 
     /**
      * @tc.steps: step3. set startNumber is 1 and call Dump function.

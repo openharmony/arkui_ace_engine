@@ -2835,6 +2835,13 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (!isActive_) {
         TAG_LOGW(AceLogTag::ACE_UIEVENT, "%{public}s is inActive, need't do touch test. Rect is %{public}s",
             GetTag().c_str(), paintRect.ToString().c_str());
+        int32_t parentId = -1;
+        auto parent = GetAncestorNodeOfFrame(true);
+        if (parent) {
+            parentId = parent->GetId();
+        }
+        AddFrameNodeSnapshot(true, parentId, std::vector<RectF>(), EventTreeType::TOUCH);
+
         return HitTestResult::OUT_OF_REGION;
     }
     if (eventHub_ && !eventHub_->IsEnabled()) {
@@ -5162,7 +5169,8 @@ void FrameNode::AddFrameNodeSnapshot(
         .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
         .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
-        .responseRegionList = responseRegionList };
+        .responseRegionList = responseRegionList,
+        .active = isActive_ };
     eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
 }
 

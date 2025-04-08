@@ -235,6 +235,8 @@ public:
 
     void DumpEvent(NG::EventTreeType type, bool hasJson = false);
 
+    void DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson = false);
+
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
 
