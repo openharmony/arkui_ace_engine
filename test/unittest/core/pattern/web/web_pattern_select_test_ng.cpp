@@ -847,7 +847,11 @@ HWTEST_F(WebPatternSelectTestNg, GetVisibleRectToWeb_001, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    webPattern->GetVisibleRectToWeb(0, 0, 100, 100);
+    int visibleX = 0;
+    int visibleY = 0;
+    int visibleWidth = 100;
+    int visibleHeight = 100;
+    webPattern->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 #endif
 }
 
