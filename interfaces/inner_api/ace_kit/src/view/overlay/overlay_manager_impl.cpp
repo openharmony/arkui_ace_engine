@@ -56,7 +56,7 @@ void OverlayManagerImpl::ShowMenu(const int32_t targetId, const NG::OffsetF& off
     CHECK_NULL_VOID(menu);
     auto menuNodeImpl = AceType::DynamicCast<FrameNodeImpl>(menu);
     CHECK_NULL_VOID(menuNodeImpl);
-    auto aceMenuNode = menuNodeImpl->GetAceNode();
+    auto aceMenuNode = menuNodeImpl->MoveOwnershipAndGetAceNode();
     CHECK_NULL_VOID(aceMenuNode);
     overlayManager_->ShowMenu(targetId, offset, aceMenuNode);
 }

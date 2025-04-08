@@ -21,6 +21,16 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components/theme/resource_adapter.h"
+#ifdef PREVIEW
+#include "native_engine/native_engine.h"
+#ifdef WINDOWS_PLATFORM
+#undef TRANSPARENT
+#undef ERROR
+#undef ALTERNATE
+#endif
+#endif
+#include "bridge/declarative_frontend/jsview/js_scroller.h"
+#include "interfaces/inner_api/ace_kit/src/view/scroller_impl.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -704,6 +714,22 @@ bool ACE_FORCE_EXPORT ParseDimension(
         return true;
     }
     return false;
+}
+
+RefPtr<Scroller> ACE_FORCE_EXPORT ParseScroller(napi_env env, napi_value value)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType != napi_object) {
+        return nullptr;
+    }
+    auto vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
+    panda::Local<panda::ObjectRef> scrollerObject((uintptr_t)value);
+    if (scrollerObject->GetNativePointerFieldCount(vm) == 0) {
+        return nullptr;
+    }
+    Framework::JSScroller* scroller = (Framework::JSScroller*)scrollerObject->GetNativePointerField(vm, 0);
+    return AceType::MakeRefPtr<ScrollerImpl>(AceType::Claim(scroller));
 }
 
 } // namespace OHOS::Ace::Kit

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
+#include "ui/view/components/tabs/tabs_constants.h"
 
 namespace OHOS::Ace {
 
@@ -847,11 +848,6 @@ inline std::string ToString(const VerticalAlign& verticalAlign)
     return iter != -1 ? table[iter].value : "";
 }
 } // namespace StringUtils
-
-enum class BarPosition {
-    START,
-    END,
-};
 
 enum class CalendarType {
     NORMAL = 0,

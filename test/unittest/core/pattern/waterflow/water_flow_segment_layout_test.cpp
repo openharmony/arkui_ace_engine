@@ -586,7 +586,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 27);
     EXPECT_EQ(info->currentOffset_, 0.0f);
-    EXPECT_EQ(info->jumpIndex_, EMPTY_JUMP_INDEX);
+    EXPECT_EQ(info->jumpIndex_, WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX);
 }
 
 /**
