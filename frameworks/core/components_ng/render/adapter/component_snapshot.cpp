@@ -147,7 +147,12 @@ bool IsSnapshotRegionInRange(LocalizedSnapshotRegion& snapshotRegion, float& nod
 bool SetCaptureReigon(const RefPtr<FrameNode>& node, const SnapshotOptions& options,
     Rosen::Drawing::Rect& specifiedAreaRect)
 {
-    RectF nodeRect = node->GetGeometryNode()->GetFrameRect();
+    auto context = node->GetRenderContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get the render context of target node.");
+        return false;
+    }
+    RectF nodeRect = context->GetPaintRectWithoutTransform();
     float nodeWidth = nodeRect.Width();
     float nodeHeight = nodeRect.Height();
 
@@ -569,7 +574,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     return GetSync(node, options);
 }
 
-std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureWhenGetSync(const RefPtr<FrameNode>& node,
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> TakeCaptureBySync(const RefPtr<FrameNode>& node,
     std::shared_ptr<Rosen::RSNode> rsNode, const SnapshotOptions& options)
 {
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> regionResult(ERROR_CODE_PARAM_INVALID, nullptr);
@@ -633,7 +638,7 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
         " Depth=%{public}d Tag=%{public}s RsNodeId=%{public}" PRIu64 "",
         options.ToString().c_str(), SEC_PARAM(node->GetId()), node->GetDepth(), node->GetTag().c_str(),
         rsNode->GetId());
-    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> captureResult = TakeCaptureWhenGetSync(node, rsNode, options);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> captureResult = TakeCaptureBySync(node, rsNode, options);
     return captureResult;
 }
 
