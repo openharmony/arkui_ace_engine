@@ -63,6 +63,25 @@ public:
         return false;
     }
 
+    void DeleteInstanceNodeAll(const RefPtr<FrameNode>& frameNode)
+    {
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto containerId = pipeline->GetInstanceId();
+        auto it = controller_.find(containerId);
+        if (it != controller_.end()) {
+            auto& controllerMap = it->second;
+            for (auto mapIt = controllerMap.begin(); mapIt != controllerMap.end();) {
+                if (WeakPtr(frameNode) == mapIt->first) {
+                    mapIt = controllerMap.erase(mapIt);
+                } else {
+                    ++mapIt;
+                }
+            }
+        }
+    }
+
     void Update()
     {
         for (auto it = controller_.begin(); it != controller_.end(); ++it) {
