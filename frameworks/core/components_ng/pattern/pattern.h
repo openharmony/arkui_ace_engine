@@ -587,6 +587,19 @@ public:
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
 
+    virtual RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index)
+    {
+        return nullptr;
+    }
+
+    /**
+     * @brief To override FrameNode::GetTotalChildCount in Arkoala
+     */
+    virtual int32_t GetTotalChildCount() const
+    {
+        return -1;
+    }
+
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -650,6 +663,15 @@ public:
 
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
+
+    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
+    {
+        return nullptr;
+    }
+    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
+    {
+        return nullptr;
+    }
 
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 
