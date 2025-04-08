@@ -2611,48 +2611,9 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
-    if (!SystemProperties::GetFocusCanBeActive() && isFocusActive) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
-        return false;
-    }
-    auto containerId = Container::CurrentId();
-    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
-    if (subWindowContainerId >= 0) {
-        auto subPipeline = GetContextByContainerId(subWindowContainerId);
-        CHECK_NULL_RETURN(subPipeline, false);
-        ContainerScope scope(subWindowContainerId);
-        subPipeline->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
-    }
-    if (reason == FocusActiveReason::USE_API) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
-        autoFocusInactive_ = autoFocusInactive;
-    }
-    if (!isFocusActive && reason == FocusActiveReason::POINTER_EVENT && !autoFocusInactive_) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "focus cannot be deactived automaticly by pointer event");
-        return false;
-    }
-
-    if (isFocusActive_ == isFocusActive) {
-        return false;
-    }
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
-    isFocusActive_ = isFocusActive;
     auto focusManager = GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, false);
-    focusManager->TriggerFocusActiveChangeCallback(isFocusActive);
-    for (auto& pair : isFocusActiveUpdateEvents_) {
-        if (pair.second) {
-            pair.second(isFocusActive_);
-        }
-    }
-    CHECK_NULL_RETURN(rootNode_, false);
-    auto rootFocusHub = rootNode_->GetFocusHub();
-    CHECK_NULL_RETURN(rootFocusHub, false);
-    if (isFocusActive_) {
-        return rootFocusHub->PaintAllFocusState();
-    }
-    rootFocusHub->ClearAllFocusState();
-    return true;
+    return focusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
 }
 
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
@@ -4818,9 +4779,8 @@ void PipelineContext::OnIdle(int64_t deadline)
     ACE_SCOPED_TRACE_COMMERCIAL("OnIdle, targettime:%" PRId64 "", deadline);
     taskScheduler_->FlushPredictTask(deadline - TIME_THRESHOLD, canUseLongPredictTask_);
     canUseLongPredictTask_ = false;
-    currentTime = GetSysTimestamp();
     if (currentTime < deadline) {
-        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc(deadline - currentTime);
+        ElementRegister::GetInstance()->CallJSCleanUpIdleTaskFunc();
     }
     TriggerIdleCallback(deadline);
 }
@@ -5050,16 +5010,17 @@ void PipelineContext::AddIsFocusActiveUpdateEvent(
     const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback)
 {
     CHECK_NULL_VOID(node);
-    isFocusActiveUpdateEvents_.insert_or_assign(node->GetId(), eventCallback);
+    auto focusManager = GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsFocusActiveUpdateEvent(node->GetId(), eventCallback);
 }
 
 void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    auto iter = isFocusActiveUpdateEvents_.find(node->GetId());
-    if (iter != isFocusActiveUpdateEvents_.end()) {
-        isFocusActiveUpdateEvents_.erase(iter);
-    }
+    auto focusManager = GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->RemoveIsFocusActiveUpdateEvent(node->GetId());
 }
 
 std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
@@ -5545,7 +5506,7 @@ void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& p
 
 void PipelineContext::RegisterFocusCallback()
 {
-    focusManager_->AddFocusListener([](const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current,
+    focusManager_->AddFocusChangeCallback([](const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current,
         FocusReason focusReason) {
         CHECK_NULL_VOID(current);
         auto node = current->GetFrameNode();

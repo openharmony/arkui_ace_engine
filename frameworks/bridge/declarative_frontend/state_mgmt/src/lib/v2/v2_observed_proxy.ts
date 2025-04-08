@@ -126,7 +126,7 @@ class ArrayProxyHandler {
 
     // return the set of elmtIds that are eligible and scheduled for fast re-layout,
     // or undefined if none
-    private static tryFastRelayout(target: Array<unknown>, key: string, args?: Array<unknown>): Set<number> | undefined {
+    public static tryFastRelayout(target: Array<unknown>, key: string, args?: Array<unknown>): Set<number> | undefined {
         if (target[__RepeatVirtualScroll2Impl.REF_META] === undefined) {
             return undefined;
         }
@@ -191,14 +191,14 @@ class ArrayProxyHandler {
             };
         } else if (ArrayProxyHandler.arrayLengthChangingFunctions.has(key)) {
             return function (...args): any {
-                const originalLength = target.length;
-                const result = ret.call(target, ...args);
                 // To detect actual changed range, Repeat needs original length before changes
-                if (key === 'splice') {
-                    args.unshift(originalLength);
-                }
-                
-                let excludeSet = ArrayProxyHandler.tryFastRelayout(conditionalTarget, key, args);
+                // Also copy the args in case they are changed in 'ret' execution
+                const repeatArgs = (key === 'splice') ? [target.length, ...args] : [...args];
+
+                const result = ret.call(target, ...args);
+
+                const excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(conditionalTarget,
+                    key, repeatArgs);
                 ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH, excludeSet);
                 return result;
             };
@@ -239,7 +239,7 @@ class ArrayProxyHandler {
         target[key] = value;
         const arrayLenChanged = target.length !== originalLength;
 
-        let excludeSet = ArrayProxyHandler.tryFastRelayout(target, 'set', [key]);
+        let excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(target, 'set', [key]);
         ObserveV2.getObserve().fireChange(this.getTarget(target), 
                 arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString(), excludeSet);
         return true;

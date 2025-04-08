@@ -386,7 +386,7 @@ void TimePickerRowPattern::InitDisabled()
         renderContext->UpdateOpacity(opacity);
     }
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         for (const auto& child : host->GetChildren()) {
             auto stackNode = DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(stackNode);

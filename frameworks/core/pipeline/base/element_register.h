@@ -16,13 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_ELEMENT_REGISTER_H
 
-#include <functional>
-#include <inttypes.h>
-#include <list>
 #include <mutex>
 #include <unordered_map>
 #include <unordered_set>
-
+#include <list>
+#include <functional>
 #include "base/memory/referenced.h"
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/core/components_ng/animation/geometry_transition.h"
@@ -116,14 +114,13 @@ public:
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();
 
-    void RegisterJSCleanUpIdleTaskFunc(const std::function<void(int64_t)>& jsCallback) {
+    void RegisterJSCleanUpIdleTaskFunc(const std::function<void(void)>& jsCallback) {
         jsCleanUpIdleTaskCallback_ = std::move(jsCallback);
     }
 
-    void CallJSCleanUpIdleTaskFunc(int64_t maxTimeInNs) {
+    void CallJSCleanUpIdleTaskFunc() {
         if (jsCleanUpIdleTaskCallback_) {
-            ACE_SCOPED_TRACE_COMMERCIAL("OnIdle CallJSCleanUpIdleTaskFunc:%" PRId64 "", maxTimeInNs);
-            jsCleanUpIdleTaskCallback_(maxTimeInNs);
+            jsCleanUpIdleTaskCallback_();
         }
     }
 
@@ -171,7 +168,7 @@ private:
 
     std::list<RefPtr<NG::UINode>> pendingRemoveNodes_;
 
-    std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;
+    std::function<void(void)> jsCleanUpIdleTaskCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
 };

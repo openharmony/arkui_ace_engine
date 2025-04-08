@@ -140,10 +140,10 @@ void TextPickerColumnPattern::OnModifyDone()
 
 void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
-    CHECK_NULL_VOID(host);
     auto blendNode = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(blendNode);
     auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
@@ -2196,7 +2196,7 @@ void TextPickerColumnPattern::UpdateAnimationColor(const RefPtr<PickerTheme>& pi
             pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
 
-    int32_t middleIndex = GetShowOptionCount() / PICKER_SELECT_AVERAGE;
+    uint32_t middleIndex = GetShowOptionCount() / PICKER_SELECT_AVERAGE;
     if (middleIndex - NEXT_COLOUM_DIFF >= 0 && animationProperties_.size() > middleIndex) {
         animationProperties_[middleIndex - NEXT_COLOUM_DIFF].downColor = color;
         animationProperties_[middleIndex + NEXT_COLOUM_DIFF].upColor = color;

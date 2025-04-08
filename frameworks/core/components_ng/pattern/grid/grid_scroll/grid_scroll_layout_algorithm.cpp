@@ -204,10 +204,17 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(Layout
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->IsScrollableSpringMotionRunning()) {
-        if (info_.reachStart_ || info_.GetContentHeight(mainGap_) < mainSize) {
+        if (info_.reachStart_) {
             return;
         }
-        info_.currentOffset_ += (mainSize - info_.lastMainSize_);
+        float totalHeight = info_.GetContentHeight(mainGap_);
+        if (info_.lastMainSize_ < totalHeight) {
+            info_.currentOffset_ += (mainSize - info_.lastMainSize_);
+            return;
+        }
+        if (info_.lastMainSize_ >= totalHeight && mainSize < info_.lastMainSize_ && mainSize <= totalHeight) {
+            info_.currentOffset_ += mainSize - totalHeight;
+        }
     }
 }
 

@@ -91,11 +91,16 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 {
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify router event failed, current UI instance invalid");
+        return;
+    }
     napi_value context = GetUIContextValue();
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
@@ -108,10 +113,15 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 void UIObserverHandler::NotifyDensityChange(double density)
 {
     CHECK_NULL_VOID(densityHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify density event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     densityHandleFunc_(info, density);
 }
@@ -319,10 +329,15 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     std::optional<NavDestinationInfo>&& to, NavigationOperation operation)
 {
     CHECK_NULL_VOID(navDestinationSwitchHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify destination event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
         std::forward<std::optional<NavDestinationInfo>>(to), operation);

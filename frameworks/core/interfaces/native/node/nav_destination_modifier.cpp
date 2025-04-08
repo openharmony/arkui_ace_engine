@@ -286,6 +286,9 @@ void SetNavDestinationTitlebarOptions(ArkUINodeHandle node, ArkUINavigationTitle
     if (opts.barStyle.isSet) {
         finalOptions.brOptions.barStyle = static_cast<NG::BarStyle>(opts.barStyle.value);
     }
+    if (opts.enableHoverMode.isSet) {
+        finalOptions.enableHoverMode = opts.enableHoverMode.value;
+    }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
 }
 

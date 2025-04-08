@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -34,10 +35,10 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
 const std::string NAVIGATION01 = "Navigation01";
 const std::string PAGE01 = "Page01";
 const std::string PAGE02 = "Page02";
-namespace {
 } // namespace
 
 class NavigationPatternTestFourNg : public testing::Test {
@@ -45,6 +46,8 @@ public:
     static RefPtr<NavigationBarTheme> navigationBarTheme_;
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetIsPageLevelConfigEnabled(bool value, RefPtr<NavigationPattern> navigationPattern,
+        RefPtr<NavigationGroupNode> navigationNode, RefPtr<FrameNode> pageNode);
 };
 
 RefPtr<NavigationBarTheme> NavigationPatternTestFourNg::navigationBarTheme_ = nullptr;
@@ -71,6 +74,37 @@ void NavigationPatternTestFourNg::TearDownTestSuite()
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
+
+void NavigationPatternTestFourNg::SetIsPageLevelConfigEnabled(bool value, RefPtr<NavigationPattern> navigationPattern,
+    RefPtr<NavigationGroupNode> navigationNode, RefPtr<FrameNode> pageNode)
+{
+    if (value) {
+        auto container = Container::Current();
+        ASSERT_NE(container, nullptr);
+        container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+        ASSERT_NE(navigationNode, nullptr);
+        auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+        navigationLayoutProperty->propUsrNavigationMode_ = NavigationMode::STACK;
+        ASSERT_NE(navigationPattern, nullptr);
+        navigationPattern->isFullPageNavigation_ = true;
+        navigationPattern->pageNode_ = pageNode;
+        auto mockContainer = MockContainer::Current();
+        EXPECT_CALL(*mockContainer, IsPcOrPadFreeMultiWindowMode()).WillRepeatedly(Return(false));
+        mockContainer->SetIsUIExtensionWindow(false);
+        EXPECT_CALL(*mockContainer, IsMainWindow()).WillRepeatedly(Return(true));
+        EXPECT_CALL(*mockContainer, IsFullScreenWindow()).WillRepeatedly(Return(true));
+    } else {
+        auto container = Container::Current();
+        ASSERT_NE(container, nullptr);
+        container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    }
+}
+
+class MockPageViewportConfig : public PageViewportConfig {
+    DECLARE_ACE_TYPE(MockPageViewportConfig, PageViewportConfig)
+public:
+    MOCK_METHOD(RefPtr<PageViewportConfig>, Clone, (), (const, override));
+};
 
 /**
  * @tc.name: GenerateUINodeByIndex001
@@ -935,6 +969,962 @@ HWTEST_F(NavigationPatternTestFourNg, IsPageLevelConfigEnabled007, TestSize.Leve
 
     bool isPageLevelConfigEnabled = navigationPattern->IsPageLevelConfigEnabled(false);
     EXPECT_TRUE(isPageLevelConfigEnabled);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded001
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    SetIsPageLevelConfigEnabled(false, navigationPattern, navigationNode, nullptr);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded002
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = true
+ *           Condition: preVisibleNodes_.empty() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded003
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = true
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationPattern->preVisibleNodes_.emplace_back(nullptr);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded004
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = true
+ *           Condition: !preFirstVisibleNode = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded004, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationPattern->preVisibleNodes_.emplace_back(nullptr);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination01Node);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded005
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = true
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded005, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination01Node);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded006
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded006, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded007
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = true
+ *           Condition: !currConfig = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded007, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded008
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = true
+ *           Condition: !currConfig = false, !config = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded008, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+    auto mockContainer = MockContainer::Current();
+    EXPECT_CALL(*mockContainer, GetCurrentViewportConfig())
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded009
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = false
+ *           Condition: !currConfig = false, !config = false
+ *           Branch: if (!angle.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded009, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+    auto mockContainer = MockContainer::Current();
+    EXPECT_CALL(*mockContainer, GetCurrentViewportConfig())
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+    EXPECT_CALL(*mockContainer, GetTargetViewportConfig(_, _, _, _))
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded010
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = false
+ *           Condition: !currConfig = false, !config = false
+ *           Branch: if (!angle.has_value()) = false
+ *           Branch: if (pageNode) = true
+ *           Branch: if (!pageConfig) = true
+ *           Branch: if (!viewportConfig_) = true
+ *           Branch: if (!preConfig) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded010, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+    auto mockContainer = MockContainer::Current();
+    auto currentConfig = AceType::MakeRefPtr<MockPageViewportConfig>();
+    EXPECT_CALL(*currentConfig, Clone()).WillRepeatedly([&currentConfig]() { return currentConfig; });
+    EXPECT_CALL(*mockContainer, GetCurrentViewportConfig())
+        .WillRepeatedly([&currentConfig]() { return currentConfig; });
+    EXPECT_CALL(*mockContainer, GetTargetViewportConfig(_, _, _, _))
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+    mockContainer->SetCurrentDisplayOrientation(DisplayOrientation::LANDSCAPE);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(pageNode->GetPageViewportConfig(), currentConfig);
+    EXPECT_EQ(navigationPattern->viewportConfig_, currentConfig);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), currentConfig);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded011
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = false
+ *           Condition: !currConfig = false, !config = false
+ *           Branch: if (!angle.has_value()) = false
+ *           Branch: if (pageNode) = true
+ *           Branch: if (!pageConfig) = false
+ *           Branch: if (!viewportConfig_) = false
+ *           Branch: if (!preConfig) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded011, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+    auto mockContainer = MockContainer::Current();
+    auto currentConfig = AceType::MakeRefPtr<PageViewportConfig>();
+    EXPECT_CALL(*mockContainer, GetCurrentViewportConfig())
+        .WillRepeatedly([&currentConfig]() { return currentConfig; });
+    EXPECT_CALL(*mockContainer, GetTargetViewportConfig(_, _, _, _))
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+    mockContainer->SetCurrentDisplayOrientation(DisplayOrientation::LANDSCAPE);
+    pageNode->SetPageViewportConfig(AceType::MakeRefPtr<PageViewportConfig>());
+    navigationPattern->SetPageViewportConfig(AceType::MakeRefPtr<PageViewportConfig>());
+    navDestination01Node->SetPageViewportConfig(AceType::MakeRefPtr<PageViewportConfig>());
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_NE(pageNode->GetPageViewportConfig(), currentConfig);
+    EXPECT_NE(navigationPattern->viewportConfig_, currentConfig);
+    EXPECT_NE(navDestination01Node->GetPageViewportConfig(), currentConfig);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageViewportConfigIfNeeded012
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (preVisibleNodes_.empty() || newVisibleNodes.empty()) = false
+ *           Condition: preVisibleNodes_.empty() = false, newVisibleNodes.empty() = false
+ *           Branch: if (!preFirstVisibleNode || !curFirstVisibleNode ||
+ *               preFirstVisibleNode == curFirstVisibleNode) = false
+ *           Condition: !preFirstVisibleNode = false, !curFirstVisibleNode = false,
+ *               preFirstVisibleNode == curFirstVisibleNode = false
+ *           Branch: if (curNodeOri == preNodeOri) = false
+ *           Branch: if (!curNodeOri.has_value()) = false
+ *           Branch: if (!currConfig || !config) = false
+ *           Condition: !currConfig = false, !config = false
+ *           Branch: if (!angle.has_value()) = false
+ *           Branch: if (pageNode) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageViewportConfigIfNeeded012, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    navigationPattern->preVisibleNodes_.emplace_back(navDestination01Node);
+    auto navDestination02Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->navPathList_.emplace_back(PAGE01, navDestination02Node);
+    auto mockContainer = MockContainer::Current();
+    EXPECT_CALL(*mockContainer, GetCurrentViewportConfig())
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+    EXPECT_CALL(*mockContainer, GetTargetViewportConfig(_, _, _, _))
+        .WillRepeatedly(Return(AceType::MakeRefPtr<PageViewportConfig>()));
+    mockContainer->SetCurrentDisplayOrientation(DisplayOrientation::LANDSCAPE);
+
+    RefPtr<NavDestinationGroupNode> preTopDestination = nullptr;
+    RefPtr<NavDestinationGroupNode> topDestination = nullptr;
+    navigationPattern->UpdatePageViewportConfigIfNeeded(preTopDestination, topDestination);
+    EXPECT_EQ(navigationPattern->viewportConfig_, nullptr);
+    EXPECT_EQ(navDestination01Node->GetPageViewportConfig(), nullptr);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetAllNodes001
+ * @tc.desc: Branch: if (navBar) = false
+ *           Branch:if (!node) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, GetAllNodes001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto text01Node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    navigationStack->Add(PAGE01, text01Node);
+
+    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
+    EXPECT_EQ(invisibleNodes.size(), 0);
+    EXPECT_EQ(visibleNodes.size(), 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetAllNodes002
+ * @tc.desc: Branch: if (navBar) = true
+ *           Branch: if (lastStandardIndex < 0) = true
+ *           Branch: if (!node) = false
+ *           Branch: if (idx < lastStandardIndex) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, GetAllNodes002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    navigationNode->lastStandardIndex_ = -1;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add(PAGE01, navDestination01Node);
+
+    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
+    EXPECT_EQ(invisibleNodes.size(), 0);
+    EXPECT_EQ(visibleNodes.size(), 2);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetAllNodes003
+ * @tc.desc: Branch: if (navBar) = true
+ *           Branch: if (lastStandardIndex < 0) = false
+ *           Branch: if (!node) = false
+ *           Branch: if (idx < lastStandardIndex) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, GetAllNodes003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    navigationNode->lastStandardIndex_ = 1;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add(PAGE01, navDestination01Node);
+
+    std::vector<RefPtr<NavDestinationNodeBase>> invisibleNodes;
+    std::vector<RefPtr<NavDestinationNodeBase>> visibleNodes;
+    navigationPattern->GetAllNodes(invisibleNodes, visibleNodes);
+    EXPECT_EQ(invisibleNodes.size(), 2);
+    EXPECT_EQ(visibleNodes.size(), 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish001
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    SetIsPageLevelConfigEnabled(false, navigationPattern, navigationNode, nullptr);
+
+    navigationPattern->OnAllTransitionAnimationFinish();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    EXPECT_EQ(navigationManager->beforeOrientationChangeTasks_.size(), 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish002
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (visibleNodes.empty()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+
+    navigationPattern->OnAllTransitionAnimationFinish();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    EXPECT_EQ(navigationManager->beforeOrientationChangeTasks_.size(), 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish003
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (visibleNodes.empty()) = false
+ *           Branch: if (!targetOrientation.has_value()) = false
+ *           Branch: if (curOrientation == targetOrientation.value()) = true
+ *           Branch: if (needMarkDirtyNode) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationNode->lastStandardIndex_ = -1;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination01Node->layoutProperty_, nullptr);
+    navDestination01Node->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    navigationStack->Add(PAGE01, navDestination01Node);
+
+    navigationPattern->OnAllTransitionAnimationFinish();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    EXPECT_EQ(navigationManager->beforeOrientationChangeTasks_.size(), 0);
+    EXPECT_EQ(navDestination01Node->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish004
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (visibleNodes.empty()) = false
+ *           Branch: if (!targetOrientation.has_value()) = false
+ *           Branch: if (curOrientation == targetOrientation.value()) = false
+ *           Branch: if (needMarkDirtyNode) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish004, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationNode->lastStandardIndex_ = -1;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navDestination01Node->SetOrientation(Orientation::LOCKED);
+    ASSERT_NE(navDestination01Node->layoutProperty_, nullptr);
+    navDestination01Node->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    navigationStack->Add(PAGE01, navDestination01Node);
+
+    navigationPattern->OnAllTransitionAnimationFinish();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_NE(navigationManager, nullptr);
+    EXPECT_EQ(navigationManager->beforeOrientationChangeTasks_.size(), 1);
+    navigationManager->OnOrientationChanged();
+    EXPECT_EQ(navDestination01Node->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged001
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged001, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    SetIsPageLevelConfigEnabled(false, navigationPattern, navigationNode, nullptr);
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination01Node->layoutProperty_, nullptr);
+    navDestination01Node->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    navigationStack->Add(PAGE01, navDestination01Node);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(navDestination01Node->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    EXPECT_EQ(setSystemBarEnabledCalled, 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged002
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = false
+ *           Branch: if (runningTransitionCount_ > 0) = true
+ *           Branch: if (isFullPageNavigation_) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged002, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationPattern->runningTransitionCount_ = 1;
+    navigationPattern->isFullPageNavigation_ = true;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination01Node->layoutProperty_, nullptr);
+    navDestination01Node->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    navigationStack->Add(PAGE01, navDestination01Node);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(navDestination01Node->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    EXPECT_EQ(setSystemBarEnabledCalled, 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged003
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = false
+ *           Branch: if (runningTransitionCount_ > 0) = true
+ *           Branch: if (isFullPageNavigation_) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged003, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navigationPattern->runningTransitionCount_ = 1;
+    navigationPattern->isFullPageNavigation_ = false;
+    auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination01Node->layoutProperty_, nullptr);
+    navDestination01Node->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+    navigationStack->Add(PAGE01, navDestination01Node);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(navDestination01Node->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(setSystemBarEnabledCalled, 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged004
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = false
+ *           Branch: if (runningTransitionCount_ > 0) = false
+ *           Branch: if (!lastNode) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged004, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(setSystemBarEnabledCalled, 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged005
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = false
+ *           Branch: if (runningTransitionCount_ > 0) = false
+ *           Branch: if (!lastNode) = false
+ *           Branch: if (statusBarConfig.has_value()) = false
+ *           Branch: if (navIndicatorConfig.has_value()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged005, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(setSystemBarEnabledCalled, 0);
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: UpdatePageLevelConfigForSizeChanged006
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled(false)) = false
+ *           Branch: if (runningTransitionCount_ > 0) = false
+ *           Branch: if (!lastNode) = false
+ *           Branch: if (statusBarConfig.has_value()) = true
+ *           Branch: if (navIndicatorConfig.has_value()) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, UpdatePageLevelConfigForSizeChanged006, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    navBarNode->SetStatusBarConfig(std::make_pair(true, true));
+    navBarNode->SetNavigationIndicatorConfig(true);
+    auto mockContainer = MockContainer::Current();
+    int32_t setSystemBarEnabledCalled = 0;
+    EXPECT_CALL(*mockContainer, SetSystemBarEnabled(_, _, _))
+        .WillRepeatedly([&setSystemBarEnabledCalled](SystemBarType type, bool enable, bool animation) {
+        setSystemBarEnabledCalled++;
+        return true;
+    });
+
+    navigationPattern->UpdatePageLevelConfigForSizeChanged();
+    EXPECT_EQ(setSystemBarEnabledCalled, 2);
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

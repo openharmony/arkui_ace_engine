@@ -20,11 +20,8 @@
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
-
-#ifdef ARKUI_CIRCLE_FEATURE
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
-#endif // ARKUI_CIRCLE_FEATURE
 
 namespace OHOS::Ace::NG {
 

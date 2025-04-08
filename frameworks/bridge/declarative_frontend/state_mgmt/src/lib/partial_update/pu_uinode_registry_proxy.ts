@@ -46,13 +46,11 @@ Flow B:
 
 type RemovedElementInfo = { elmtId : number, tag : string };
 // defined a globle function to clean up the removeItems when idle
-function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
-    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask(${maxTimeInMs}):`);
-    const deadline = Date.now() + maxTimeInMs;
+function uiNodeCleanUpIdleTask(): void {
+    stateMgmtConsole.debug(`UINodeRegisterProxy. static uiNodeCleanUpIdleTask:`);
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
-    ObserveV2.getObserve().runIdleTasks(deadline);
-    ObserveV2.getObserve().runIdleCleanup(deadline);
+    UINodeRegisterProxy.cleanUpDeadReferences();
 }
 
 class UINodeRegisterProxy {
@@ -119,10 +117,14 @@ class UINodeRegisterProxy {
             }
 
             ObserveV2.getObserve().clearBinding(elmtId);
-            delete ObserveV2.getObserve().id2cmp_[elmtId];
         })
 
         this.removeElementsInfo_.length = 0;
+    }
+
+    public static cleanUpDeadReferences(): void {
+        stateMgmtConsole.debug('UINodeRegisterProxy.cleanUpDeadReferences');
+        ObserveV2.getObserve().cleanUpDeadReferences();
     }
 
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();

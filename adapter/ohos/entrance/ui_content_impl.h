@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include <list>
+#include <shared_mutex>
 
 #include "ability_info.h"
 #include "display_manager.h"
@@ -368,11 +369,13 @@ public:
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {
+        std::unique_lock<std::shared_mutex> lock(destructMutex_);
         destructCallbacks_.emplace(key, callback);
     }
 
     void RemoveDestructCallback(void* key)
     {
+        std::unique_lock<std::shared_mutex> lock(destructMutex_);
         destructCallbacks_.erase(key);
     }
 
@@ -452,6 +455,10 @@ private:
     bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
         OHOS::Rosen::WindowSizeChangeReason reason);
     void ChangeDisplayAvailableAreaListener(uint64_t displayId);
+    void SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context> &context);
+    void SetDeviceProperties();
+    RefPtr<Platform::AceContainer> CreateContainer(
+        std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -514,6 +521,7 @@ private:
     OHOS::Rosen::WindowSizeChangeReason cachedReason_;
     std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
+    std::shared_mutex destructMutex_;
 };
 
 } // namespace OHOS::Ace

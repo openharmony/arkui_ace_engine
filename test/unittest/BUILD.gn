@@ -466,6 +466,7 @@ ohos_source_set("ace_base") {
   sources = [
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
     "$ace_root/frameworks/base/geometry/animatable_matrix4.cpp",
+    "$ace_root/frameworks/base/geometry/arc_round.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
     "$ace_root/frameworks/base/geometry/matrix3.cpp",
@@ -491,10 +492,6 @@ ohos_source_set("ace_base") {
     "$ace_root/frameworks/base/utils/utf_helper.cpp",
     "$ace_root/frameworks/base/utils/utils.cpp",
   ]
-
-  if (ace_engine_enable_circle_feature) {
-    sources += [ "$ace_root/frameworks/base/geometry/arc_round.cpp" ]
-  }
 
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -745,6 +742,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_property.cpp",
@@ -1365,16 +1367,6 @@ ohos_source_set("ace_components_pattern") {
           vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources)) {
     sources +=
         vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources
-  }
-
-  if (ace_engine_enable_circle_feature) {
-    sources += [
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.cpp",
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
-      "$ace_root/frameworks/core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.cpp",
-    ]
   }
 
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]

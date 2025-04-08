@@ -940,6 +940,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto preNode = weakPreNode.Upgrade();
             while (preNode) {
                 preNode->SetNodeFreeze(false);
+                preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
                 if (!navigation->CheckAnimationIdValid(preNode, preAnimationId)) {
                     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "pre node is doing another animation, skip handling.");
                     break;

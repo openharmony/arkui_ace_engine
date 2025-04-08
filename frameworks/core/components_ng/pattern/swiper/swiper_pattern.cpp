@@ -2097,6 +2097,7 @@ void SwiperPattern::FastAnimation(int32_t targetIndex)
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITaskWithSingleDirtyNode(host);
         pipeline->FlushSyncGeometryNodeTasks();
+        SetIndicatorIsInFast(true);
     }
 }
 
@@ -6936,6 +6937,22 @@ void SwiperPattern::SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex)
     CHECK_NULL_VOID(indicatorPattern);
 
     indicatorPattern->SetJumpIndex(jumpIndex);
+}
+
+void SwiperPattern::SetIndicatorIsInFast(std::optional<bool> isInFast)
+{
+    if (GetMaxDisplayCount() <= 0) {
+        return;
+    }
+    auto indicatorNode = GetCommonIndicatorNode();
+    if (!indicatorNode || !IsIndicator(indicatorNode->GetTag())) {
+        return;
+    }
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+
+    indicatorPattern->SetIsInFast(isInFast);
 }
 
 void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

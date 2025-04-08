@@ -54,7 +54,6 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-#ifdef ARKUI_CIRCLE_FEATURE
     auto shapeMode = scrollBar->GetShapeMode();
     if (shapeMode == ShapeMode::ROUND) {
         auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
@@ -71,11 +70,6 @@ void ScrollPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
             scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
     }
-#else
-    scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
-    scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
-        scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
-#endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }

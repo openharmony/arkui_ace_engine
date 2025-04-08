@@ -532,11 +532,11 @@ public:
 
     bool GetIsFocusActive() const
     {
-        return isFocusActive_;
+        return focusManager_ ? focusManager_->GetIsFocusActive() : false;
     }
 
     bool SetIsFocusActive(bool isFocusActive,
-        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
+        FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -1398,7 +1398,6 @@ private:
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
-    bool isFocusActive_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     MockFlushEventType isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
@@ -1436,7 +1435,6 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
 
-    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
@@ -1482,7 +1480,6 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
-    bool autoFocusInactive_ = true;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;

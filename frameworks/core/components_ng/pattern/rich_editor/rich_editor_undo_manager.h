@@ -25,14 +25,17 @@ struct UndoRedoRecord {
     RefPtr<SpanString> styledStringBefore;
     RefPtr<SpanString> styledStringAfter;
     TextRange selectionBefore;
+    CaretAffinityPolicy caretAffinityBefore = CaretAffinityPolicy::DEFAULT;
     bool isOnlyStyleChange = false;
     std::unordered_set<SpanType> updateSpanTypes;
 
-    void SetOperationBefore(TextRange range, const RefPtr<SpanString>& styledString, TextRange selection)
+    void SetOperationBefore(TextRange range, const RefPtr<SpanString>& styledString, TextRange selection,
+        CaretAffinityPolicy caretAffinity)
     {
         rangeBefore = range;
         styledStringBefore = styledString;
         selectionBefore = selection;
+        caretAffinityBefore = caretAffinity;
     }
 
     void SetOperationAfter(TextRange range, const RefPtr<SpanString>& styledString)
@@ -53,6 +56,7 @@ struct UndoRedoRecord {
         styledStringBefore = nullptr;
         styledStringAfter = nullptr;
         selectionBefore.Reset();
+        caretAffinityBefore = CaretAffinityPolicy::DEFAULT;
         isOnlyStyleChange = false;
         updateSpanTypes.clear();
     }
@@ -84,6 +88,7 @@ struct UndoRedoRecord {
         JSON_STRING_PUT_STRINGABLE(jsonValue, rangeBefore);
         JSON_STRING_PUT_STRINGABLE(jsonValue, rangeAfter);
         JSON_STRING_PUT_STRINGABLE(jsonValue, selectionBefore);
+        JSON_STRING_PUT_INT(jsonValue, caretAffinityBefore);
         JSON_STRING_PUT_BOOL(jsonValue, isOnlyStyleChange);
         return jsonValue->ToString();
     }
@@ -98,6 +103,7 @@ public:
         UndoRedoRecord& record);
     void ApplyOperationToRecord(int32_t start, int32_t length, const RefPtr<SpanString>& styledString,
         UndoRedoRecord& record);
+    void RecordSelectionBefore();
     void UpdateRecordBeforeChange(
         int32_t start, int32_t length, UndoRedoRecord& record, bool isOnlyStyleChange = false);
     void UpdateRecordAfterChange(int32_t start, int32_t length, UndoRedoRecord& record);
@@ -105,11 +111,22 @@ public:
     void RecordPreviewInputtingStart(int32_t start, int32_t length);
     bool RecordPreviewInputtingEnd(const UndoRedoRecord& record);
     void RecordInsertOperation(const UndoRedoRecord& record);
+    void ClearSelectionBefore()
+    {
+        selectionBefore_.Reset();
+    }
+
+    void ClearPreviewInputRecord()
+    {
+        previewInputRecord_.Reset();
+    }
+
     void ClearUndoRedoRecords()
     {
         undoRecords_.clear();
         redoRecords_.clear();
-        previewInputRecord_.Reset();
+        ClearPreviewInputRecord();
+        ClearSelectionBefore();
     }
 
 private:
@@ -144,6 +161,8 @@ private:
     std::deque<UndoRedoRecord> undoRecords_;
     std::deque<UndoRedoRecord> redoRecords_;
     UndoRedoRecord previewInputRecord_;
+    // used to record selection at the start of a multi-step operation
+    TextRange selectionBefore_;
     size_t recordCount_ = 0;
     bool isCountingRecord_ = false;
 };

@@ -1016,7 +1016,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnNonPointerEvent(event));
+    EXPECT_TRUE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and

@@ -36,657 +36,355 @@ export default function RadioTest5() {
     beforeAll(async (done: Function) => {
       await RadioTest(done)
     })
-    it('ArkUI_Radio_Comp_0364', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
+    // linearGradient
+    // linearGradient.angle
+    it('ArkUI_Radio_Comp_0327', 0, async (done: Function) => {
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.angle', '通用属性3')
 
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0365', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.mask.color'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.maskType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.mask.color', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      await titleSearch('基础属性', 'bindPopup.maskType', '通用属性3')
-
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.mask.boolean
-    it('ArkUI_Radio_Comp_0366', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0367', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.mask.boolean', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.textColor
-    it('ArkUI_Radio_Comp_0368', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0369', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0370', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0371', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0372', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0373', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.textColor', '通用属性3')
-
-      //取不到bindPopup属性值
-      await buttonClick({
-        buttonClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.messageOptions.font.size
-    it('ArkUI_Radio_Comp_0374', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.size', '通用属性3')
-
-      //取不到bindPopup属性值
       await sliderDrag({
         slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('angle', JsonType.value),
+        ],
+        assertEqual: '360.00px'
       })
 
       await sliderDrag({
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('angle', JsonType.value),
+        ],
+        assertEqual: '0.00px'
       })
 
-      done()
+      done();
     })
 
-    // bindPopup.messageOptions.font.weight
-    it('ArkUI_Radio_Comp_0375', 0, async (done: Function) => {
+    // linearGradient.direction
+    it('ArkUI_Radio_Comp_0328', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.Left'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0376', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0329', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 1,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.Top'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0377', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0330', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 2,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.Right'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0378', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0331', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 3,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.Bottom'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0379', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0332', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 4,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.LeftTop'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0380', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0333', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.weight', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.LeftBottom'
       })
 
-      done()
+      done();
+
     })
 
-    // bindPopup.messageOptions.font.style
-    it('ArkUI_Radio_Comp_0381', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0334', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0382', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.messageOptions.font.style', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.targetSpace
-    it('ArkUI_Radio_Comp_0383', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.targetSpace', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.placement
-    it('ArkUI_Radio_Comp_0384', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0385', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0386', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0387', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0388', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0389', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 5,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0390', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 6,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.RightTop'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0391', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0335', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 7,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.RightBottom'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0392', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0336', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.direction', '通用属性3')
 
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 8,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0393', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.placement', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 9,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('direction', JsonType.value),
+        ],
+        assertEqual: 'GradientDirection.None'
       })
 
-      done()
+      done();
+
     })
 
-    // bindPopup.offsetX
-    it('ArkUI_Radio_Comp_0394', 0, async (done: Function) => {
+    //linearGradient.color1
+    it('ArkUI_Radio_Comp_0337', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.offsetX', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.offsetY
-    it('ArkUI_Radio_Comp_0395', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.offsetY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    //bindPopup.enableArrow
-    it('ArkUI_Radio_Comp_0396', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.enableArrow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0397', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.enableArrow', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    //bindPopup.popupColor
-    it('ArkUI_Radio_Comp_0398', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
-
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF0A59F7'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0399', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0338', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 1,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF646AFD'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0400', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0339', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 2,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFFE7062'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0401', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0340', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 3,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFE9E8ED'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0402', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0341', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 4,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF1C1C1C'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0403', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0342', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.popupColor', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color1', '通用属性3')
 
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFFFFFFF'
       })
 
-      done()
-    })
-
-    // bindPopup.autoCancel
-    it('ArkUI_Radio_Comp_0404', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.autoCancel', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0405', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.autoCancel', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
+      done();
 
     })
 
-    // bindPopup.width
-    it('ArkUI_Radio_Comp_0406', 0, async (done: Function) => {
+    // linearGradient.number1
+    it('ArkUI_Radio_Comp_0343', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.width', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.number1', '通用属性3')
 
-      //取不到bindPopup属性值
+      //取不到值需要，设置颜色获取
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
@@ -701,358 +399,146 @@ export default function RadioTest5() {
         }
       })
 
-      done()
+      done();
     })
 
-    // bindPopup.arrowPointPosition
-    it('ArkUI_Radio_Comp_0407', 0, async (done: Function) => {
+    // linearGradient.color2
+    it('ArkUI_Radio_Comp_0344', 0, async (done: Function) => {
 
-      await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0408', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0409', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.arrowPointPosition', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType
-    it('ArkUI_Radio_Comp_0410', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType
-    it('ArkUI_Radio_Comp_0411', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType.shadowOptions.radius
-    it('ArkUI_Radio_Comp_0412', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.radius'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.radius', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType.shadowOptions.type
-    it('ArkUI_Radio_Comp_0413', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.type', '通用属性3')
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0414', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.type', '通用属性3')
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType.shadowOptions.color
-    it('ArkUI_Radio_Comp_0415', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF0A59F7'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0416', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0345', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 1,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF646AFD'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0417', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0346', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 2,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFFE7062'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0418', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0347', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 3,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFE9E8ED'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0419', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0348', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 4,
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FF1C1C1C'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0420', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0349', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.type'))
+      await titleSearch('基础属性', 'linearGradient.color2', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.color', '通用属性3')
-
-      //取不到bindPopup属性值
       await buttonClick({
         buttonClickObj: 5,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('colors', JsonType.array),
+          new KeyStruct('0', JsonType.array),
+          new KeyStruct('0', JsonType.value),
+        ],
+        assertEqual: '#FFFFFFFF'
       })
 
-      done()
+      done();
+
     })
 
-    // bindPopup.shadowType.shadowOptions.offsetX
-    it('ArkUI_Radio_Comp_0421', 0, async (done: Function) => {
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.offsetX'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.offsetX', '通用属性3')
-      //取不到bindPopup属性值
+    // linearGradient.number2
+    it('ArkUI_Radio_Comp_0350', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'linearGradient.number2', '通用属性3')
+      //取不到值需要，设置颜色获取
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
@@ -1067,720 +553,53 @@ export default function RadioTest5() {
         }
       })
 
-      done()
+      done();
     })
 
-    // bindPopup.shadowType.shadowOptions.offsetY
-    it('ArkUI_Radio_Comp_0422', 0, async (done: Function) => {
+    // linearGradient.repeating
+    it('ArkUI_Radio_Comp_0351', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.offsetY'))
+      await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.offsetY', '通用属性3')
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.shadowType.shadowOptions.fill
-    it('ArkUI_Radio_Comp_0423', 0, async (done: Function) => {
-
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.fill'))
-
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.fill', '通用属性3')
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('repeating', JsonType.value),
+        ],
+        assertEqual: 'true'
       })
 
-      done()
+      done();
+
     })
 
-    it('ArkUI_Radio_Comp_0424', 0, async (done: Function) => {
+    it('ArkUI_Radio_Comp_0352', 0, async (done: Function) => {
 
-      let title = await driver.findComponent(ON.text('bindPopup.shadowType.shadowOptions.fill'))
+      await titleSearch('基础属性', 'linearGradient.repeating', '通用属性3')
 
-      if (!title) {
-        await Search('基础属性', 'bindPopup.shadowType', '通用属性3')
-
-        await radioClick({
-          radioClickObj: 1,
-          toggleClick: {
-            toggleClickType: ToggleClick.Open,
-          }
-        })
-
-      }
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowOptions.fill', '通用属性3')
-
-      //取不到bindPopup属性值
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-        }
+        },
+        id: 'Radio',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('linearGradient', JsonType.obj),
+          new KeyStruct('repeating', JsonType.value),
+        ],
+        assertEqual: 'false'
       })
 
-      await titleSearch('基础属性', 'bindPopup.shadowType', '通用属性3')
+      done();
 
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-
-      done()
     })
-
-    // bindPopup.shadowType.shadowStyle
-    it('ArkUI_Radio_Comp_0425', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0426', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0427', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0428', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0429', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0430', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.shadowType.shadowStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 5,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.BackgroundBlurStyle
-    it('ArkUI_Radio_Comp_0431', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0432', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0433', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0434', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0435', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 4,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0436', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 5,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0437', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 6,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0438', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 7,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0439', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 8,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0440', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 9,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0441', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 10,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0442', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.BackgroundBlurStyle', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 11,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.opacity
-    it('ArkUI_Radio_Comp_0443', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.opacity', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.translateX
-    it('ArkUI_Radio_Comp_0444', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.translateX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.translateY
-    it('ArkUI_Radio_Comp_0445', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.translateY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.translateZ
-    it('ArkUI_Radio_Comp_0446', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.translateZ', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.scaleX
-    it('ArkUI_Radio_Comp_0447', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.scaleX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.scaleY
-    it('ArkUI_Radio_Comp_0448', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.scaleY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.scaleZ
-    it('ArkUI_Radio_Comp_0449', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.scaleZ', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.scale.centerX
-    it('ArkUI_Radio_Comp_0450', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.scale.centerX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.scale.centerY
-    it('ArkUI_Radio_Comp_0451', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.scale.centerY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.RotateX
-    it('ArkUI_Radio_Comp_0452', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.RotateX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.RotateY
-    it('ArkUI_Radio_Comp_0453', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.RotateY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.RotateZ
-    it('ArkUI_Radio_Comp_0454', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.RotateZ', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.Rotate.CenterX
-    it('ArkUI_Radio_Comp_0455', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.Rotate.CenterX', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.Rotate.CenterY
-    it('ArkUI_Radio_Comp_0456', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', ' bindPopup.transition.Rotate.CenterY', '通用属性3')
-
-      //取不到bindPopup属性值
-      await sliderDrag({
-        slideStar: Slide.start,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      await sliderDrag({
-        slideStar: Slide.end,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
-    // bindPopup.transition.move
-    it('ArkUI_Radio_Comp_0457', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.move', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        }
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0458', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.move', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 1,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0459', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.move', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 2,
-      })
-
-      done()
-    })
-
-    it('ArkUI_Radio_Comp_0460', 0, async (done: Function) => {
-
-      await titleSearch('基础属性', 'bindPopup.transition.move', '通用属性3')
-
-      //取不到bindPopup属性值
-      await radioClick({
-        radioClickObj: 3,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        }
-      })
-
-      done()
-    })
-
     //focusable
     it('ArkUI_Radio_Comp_0461', 0, async (done: Function) => {
 

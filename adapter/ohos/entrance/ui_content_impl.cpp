@@ -1783,6 +1783,109 @@ void UIContentImpl::SetFontScaleAndWeightScale(const RefPtr<Platform::AceContain
     container->SetFontWeightScale(instanceId, fontWeightScale);
 }
 
+void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
+{
+    SetHwIcuDirectory();
+    Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    if (abilityContext) {
+        int32_t missionId = -1;
+        abilityContext->GetMissionId(missionId);
+        AceApplicationInfo::GetInstance().SetMissionId(missionId);
+    }
+    AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+    AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+    AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
+    AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
+    AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+    AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
+    AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
+    CapabilityRegistry::Register();
+    ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
+    ImageFileCache::GetInstance().SetCacheFileInfo();
+    XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+
+    auto task = [] {
+        std::unordered_map<std::string, std::string> payload;
+        std::unordered_map<std::string, std::string> reply;
+        payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
+        payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
+        g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
+        ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
+        OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
+    };
+    BackgroundTaskExecutor::GetInstance().PostTask(task);
+}
+
+void UIContentImpl::SetDeviceProperties()
+{
+    int32_t deviceWidth = 0;
+    int32_t deviceHeight = 0;
+    float density = 1.0f;
+    float defaultDensity = 1.0f;
+    int32_t devicePhysicalWidth = 0;
+    int32_t devicePhysicalHeight = 0;
+
+    bool isSceneBoardWindow = window_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+    if (isSceneBoardWindow) {
+        auto screenProperties = Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
+        if (!screenProperties.empty()) {
+            auto iter = screenProperties.begin();
+            defaultDensity = iter->second.GetDefaultDensity();
+        }
+    }
+
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
+    if (!defaultDisplay) {
+        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    }
+    sptr<Rosen::DisplayInfo> displayInfo;
+    if (defaultDisplay) {
+        displayInfo = defaultDisplay->GetDisplayInfoWithCache();
+    }
+    if (displayInfo) {
+        density = displayInfo->GetVirtualPixelRatio();
+        if (isSceneBoardWindow && !NearEqual(defaultDensity, 1.0f)) {
+            density = defaultDensity;
+        }
+        deviceWidth = displayInfo->GetWidth();
+        deviceHeight = displayInfo->GetHeight();
+        devicePhysicalWidth = displayInfo->GetPhysicalWidth();
+        devicePhysicalHeight = displayInfo->GetPhysicalHeight();
+    }
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
+    SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
+}
+
+RefPtr<Platform::AceContainer> UIContentImpl::CreateContainer(
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& info, FrontendType frontendType, bool useNewPipe)
+{
+    auto container = AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
+        std::make_unique<ContentEventCallback>(
+            [window = window_] {
+                CHECK_NULL_VOID(window);
+                TAG_LOGI(AceLogTag::ACE_ROUTER, "router back to window");
+                window->PerformBack();
+            },
+            [context = context_](const std::string& address) {
+                auto sharedContext = context.lock();
+                CHECK_NULL_VOID(sharedContext);
+                auto abilityContext =
+                    OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+                CHECK_NULL_VOID(abilityContext);
+                LOGI("startAbility: %{private}s", address.c_str());
+                AAFwk::Want want;
+                want.AddEntity(Want::ENTITY_BROWSER);
+                want.SetUri(address);
+                want.SetAction(ACTION_VIEWDATA);
+                abilityContext->StartAbility(want, REQUEST_CODE);
+            }),
+        false, false, useNewPipe);
+    return container;
+}
+
 UIContentErrorCode UIContentImpl::CommonInitialize(
     OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, uint32_t focusWindowId)
 {
@@ -1803,39 +1906,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto context = context_.lock();
     CHECK_NULL_RETURN(context, UIContentErrorCode::NULL_POINTER);
     static std::once_flag onceFlag;
-    std::call_once(onceFlag, [&context]() {
-        SetHwIcuDirectory();
-        Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
-        auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
-        if (abilityContext) {
-            int32_t missionId = -1;
-            abilityContext->GetMissionId(missionId);
-            AceApplicationInfo::GetInstance().SetMissionId(missionId);
-        }
-        AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
-        AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
-        AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
-        AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
-        AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
-        AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
-        AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
-        CapabilityRegistry::Register();
-        ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
-        ImageFileCache::GetInstance().SetCacheFileInfo();
-        XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
-
-        auto task = [] {
-            std::unordered_map<std::string, std::string> payload;
-            std::unordered_map<std::string, std::string> reply;
-            payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
-            payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-            g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
-            ACE_SCOPED_TRACE_COMMERCIAL("SetVsyncPolicy(%d)", g_isDynamicVsync.load());
-            OHOS::AppExecFwk::EventHandler::SetVsyncPolicy(g_isDynamicVsync);
-        };
-        BackgroundTaskExecutor::GetInstance().PostTask(task);
-    });
+    std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
@@ -1878,43 +1949,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
 #endif
 #endif
-    int32_t deviceWidth = 0;
-    int32_t deviceHeight = 0;
-    float density = 1.0f;
-    float defaultDensity = 1.0f;
-    int32_t devicePhysicalWidth = 0;
-    int32_t devicePhysicalHeight = 0;
-
-    bool isSceneBoardWindow = window_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
-    if (isSceneBoardWindow) {
-        auto screenProperties = Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
-        if (!screenProperties.empty()) {
-            auto iter = screenProperties.begin();
-            defaultDensity = iter->second.GetDefaultDensity();
-        }
-    }
-
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window->GetDisplayId());
-    if (!defaultDisplay) {
-        defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    }
-    sptr<Rosen::DisplayInfo> displayInfo;
-    if (defaultDisplay) {
-        displayInfo = defaultDisplay->GetDisplayInfoWithCache();
-    }
-    if (displayInfo) {
-        density = displayInfo->GetVirtualPixelRatio();
-        if (isSceneBoardWindow && !NearEqual(defaultDensity, 1.0f)) {
-            density = defaultDensity;
-        }
-        deviceWidth = displayInfo->GetWidth();
-        deviceHeight = displayInfo->GetHeight();
-        devicePhysicalWidth = displayInfo->GetPhysicalWidth();
-        devicePhysicalHeight = displayInfo->GetPhysicalHeight();
-    }
-    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
-    SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
-    SystemProperties::SetDevicePhysicalHeight(devicePhysicalHeight);
+    SetDeviceProperties();
     // Initialize performance check parameters
     AceChecker::InitPerformanceParameters();
     AcePerformanceCheck::Start();
@@ -2072,28 +2107,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(apsMonitor);
 #endif
     auto frontendType =  isCJFrontend? FrontendType::DECLARATIVE_CJ : FrontendType::DECLARATIVE_JS;
-    auto container =
-        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
-            std::make_unique<ContentEventCallback>(
-                [window = window_] {
-                    CHECK_NULL_VOID(window);
-                    TAG_LOGI(AceLogTag::ACE_ROUTER, "router back to window");
-                    window->PerformBack();
-                },
-                [context = context_](const std::string& address) {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID(abilityContext);
-                    LOGI("startAbility: %{private}s", address.c_str());
-                    AAFwk::Want want;
-                    want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetUri(address);
-                    want.SetAction(ACTION_VIEWDATA);
-                    abilityContext->StartAbility(want, REQUEST_CODE);
-                }),
-            false, false, useNewPipe);
+    auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     auto appContext = AbilityRuntime::ApplicationContext::GetInstance();
     container->SetAppRunningUniqueId(appContext->GetAppRunningUniqueId());
@@ -2122,6 +2136,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     container->SetPageProfile(pageProfile);
     container->Initialize();
+     // wjh create and init container end
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
@@ -2187,6 +2202,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->InitFoldStatusFromListener();
+       // wjh set container rest info end
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
@@ -2202,6 +2218,9 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     auto aceView =
         Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
     Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+    int32_t deviceWidth = SystemProperties::GetDeviceWidth();
+    int32_t deviceHeight = SystemProperties::GetDeviceHeight();
+    double density = SystemProperties::GetResolution();
 #ifndef NG_BUILD
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
@@ -2422,6 +2441,9 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
         displayId = window->GetDisplayId();
         listenedDisplayId_ = displayId;
+    } else if (window) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
+            window->GetWindowName().c_str());
     }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
     DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);
@@ -3566,7 +3588,7 @@ int32_t UIContentImpl::AddFocusActiveChangeCallback(const std::function<void(boo
     CHECK_NULL_RETURN(pipelineContext, 0);
     auto focusManager = pipelineContext->GetOrCreateFocusManager();
     CHECK_NULL_RETURN(focusManager, 0);
-    return focusManager->AddFocusActiveChangeListener(callback);
+    return focusManager->AddFocusActiveChangeCallback(callback);
 }
 
 void UIContentImpl::RemoveFocusActiveChangeCallback(int32_t handler)
@@ -3577,7 +3599,7 @@ void UIContentImpl::RemoveFocusActiveChangeCallback(int32_t handler)
     CHECK_NULL_VOID(pipelineContext);
     auto focusManager = pipelineContext->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
-    focusManager->RemoveFocusActiveChangeListener(handler);
+    focusManager->RemoveFocusActiveChangeCallback(handler);
 }
 
 void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
@@ -3700,6 +3722,9 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     uint64_t displayId = 0;
     if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
         displayId = window->GetDisplayId();
+    } else if (window) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "initialize subWindow display invalid. window name is %{public}s",
+            window->GetWindowName().c_str());
     }
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
     if (defaultDisplay) {
@@ -4860,6 +4885,7 @@ void UIContentImpl::SetForceSplitEnable(bool isForceSplit, const std::string& ho
 
 void UIContentImpl::ProcessDestructCallbacks()
 {
+    std::shared_lock<std::shared_mutex> reportLock(destructMutex_);
     for (auto& [_, callback] : destructCallbacks_) {
         callback();
     }
@@ -4996,6 +5022,18 @@ bool UIContentImpl::GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReaso
     }
     if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG &&
             reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG_START &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::SPLIT_DRAG_END) {
         reasonDragFlag = false;
     }
     return reasonDragFlag;

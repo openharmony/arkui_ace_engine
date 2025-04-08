@@ -82,9 +82,7 @@ private:
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#ifndef ARKUI_WEARABLE
     static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#endif
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

@@ -67,6 +67,13 @@ public:
 
     virtual int32_t Deserialize(const char* buff) override;
 
+    void SetDistanceMap(const PanDistanceMap& distanceMap);
+
+    PanDistanceMap GetDistanceMap() const
+    {
+        return distanceMap_;
+    }
+
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 

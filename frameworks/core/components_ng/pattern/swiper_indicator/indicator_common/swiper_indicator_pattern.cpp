@@ -1258,32 +1258,26 @@ void SwiperIndicatorPattern::CheckDragAndUpdate(
 void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
 {
-    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex(true));
+    auto animationStartIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex());
     auto animationEndIndex = swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex());
 
     auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
-    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
-        animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-    }
-
-    if (jumpIndex_) {
-        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
-
-        if (!changeIndexWithAnimation_) {
-            overlongDotIndicatorModifier_->StopAnimation(true);
-            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+    bool keepStatus = false;
+    bool isSwiperTouchDown = false;
+    if (isInFast_ && isInFast_.value()) {
+        UpdateOverlongPaintMethodWhenFast(paintMethodTemp, animationStartIndex, animationEndIndex);
+    } else {
+        if (keepGestureState_) {
+            paintMethodTemp->SetGestureState(keepGestureState_.value());
         }
-    }
-
-    auto isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
-    auto isSwiperAnimationRunning =
-        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
-    auto keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
-                      !changeIndexWithAnimation_;
-
-    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
-        keepStatus = true;
+        UpdateOverlongPaintMethodWhenNormal(paintMethodTemp, animationStartIndex, animationEndIndex);
+        GetStatusForOverlongPaintMethodWhenNormal(swiperPattern, animationStartIndex, animationEndIndex,
+            keepStatus, isSwiperTouchDown);
+        if (keepGestureState_) {
+            keepStatus = false;
+            isSwiperTouchDown = false;
+        }
+        keepGestureState_.reset();
     }
 
     CheckDragAndUpdate(swiperPattern, animationStartIndex, animationEndIndex);
@@ -1304,6 +1298,52 @@ void SwiperIndicatorPattern::UpdateOverlongPaintMethod(
     changeIndexWithAnimation_.reset();
     jumpIndex_.reset();
     startIndex_.reset();
+    isInFast_.reset();
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethodWhenFast(
+    const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+    int32_t& animationStartIndex, int32_t& animationEndIndex)
+{
+    animationEndIndex = animationStartIndex;
+    animationStartIndex = startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+    keepGestureState_ = paintMethodTemp->GetGestureState();
+    paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    overlongDotIndicatorModifier_->StopAnimation(true);
+}
+
+void SwiperIndicatorPattern::UpdateOverlongPaintMethodWhenNormal(
+    const RefPtr<DotIndicatorPaintMethod>& paintMethodTemp,
+    int32_t& animationStartIndex, int32_t& animationEndIndex)
+{
+    if (changeIndexWithAnimation_ && !changeIndexWithAnimation_.value()) {
+        animationStartIndex =
+            startIndex_ ? startIndex_.value() : overlongDotIndicatorModifier_->GetAnimationEndIndex();
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+    }
+
+    if (jumpIndex_) {
+        paintMethodTemp->SetGestureState(GestureState::GESTURE_STATE_NONE);
+
+        if (!changeIndexWithAnimation_) {
+            overlongDotIndicatorModifier_->StopAnimation(true);
+            overlongDotIndicatorModifier_->SetCurrentOverlongType(OverlongType::NONE);
+        }
+    }
+}
+
+void SwiperIndicatorPattern::GetStatusForOverlongPaintMethodWhenNormal(const RefPtr<SwiperPattern>& swiperPattern,
+    const int32_t& animationStartIndex, const int32_t& animationEndIndex,
+    bool& keepStatus, bool& isSwiperTouchDown) const
+{
+    isSwiperTouchDown = swiperPattern->IsTouchDownOnOverlong();
+    auto isSwiperAnimationRunning =
+        swiperPattern->IsPropertyAnimationRunning() || swiperPattern->IsTranslateAnimationRunning();
+    keepStatus = !isSwiperTouchDown && !isSwiperAnimationRunning && animationStartIndex != animationEndIndex &&
+                 !changeIndexWithAnimation_;
+    if (!changeIndexWithAnimation_ && gestureState_ == GestureState::GESTURE_STATE_NONE) {
+        keepStatus = true;
+    }
 }
 
 void SwiperIndicatorPattern::ShowPrevious()
@@ -1408,7 +1448,7 @@ void SwiperIndicatorPattern::GetTextContentSub(std::string& firstContent, std::s
     auto currentIndex = GetDisplayCurrentIndex();
     bool isRtl = swiperPattern->GetNonAutoLayoutDirection() == TextDirection::RTL;
     firstContent = isRtl ? std::to_string(swiperPattern->RealTotalCount()) : std::to_string(currentIndex);
-    lastContent = isRtl ? std::to_string(currentIndex) + "\\" : "/" + std::to_string(swiperPattern->RealTotalCount());
+    lastContent = isRtl ? std::to_string(currentIndex) + "/" : "/" + std::to_string(swiperPattern->RealTotalCount());
 }
 
 void SwiperIndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)

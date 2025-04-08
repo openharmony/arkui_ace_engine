@@ -7647,18 +7647,6 @@ RefPtr<FrameNode> OverlayManager::GetDragPixelMapContentNode() const
     return framNodeFirstChild;
 }
 
-RefPtr<FrameNode> OverlayManager::GetRelativeContainerNode() const
-{
-    auto column = dragPixmapColumnNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(column, nullptr);
-    auto relativeContainerNode = AceType::DynamicCast<FrameNode>(column->GetFirstChild());
-    CHECK_NULL_RETURN(relativeContainerNode, nullptr);
-    if (relativeContainerNode->GetTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
-        return nullptr;
-    }
-    return relativeContainerNode;
-}
-
 RefPtr<FrameNode> OverlayManager::GetPixelMapBadgeNode() const
 {
     auto column = pixmapColumnNodeWeak_.Upgrade();

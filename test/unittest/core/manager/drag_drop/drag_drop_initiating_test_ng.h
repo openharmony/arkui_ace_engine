@@ -83,7 +83,7 @@ struct DragDropInitiatingStateTestCase {
     {}
 };
 
-constexpr int32_t DRAG_ACTION_NONE_ARGS = 1024;
+constexpr int32_t DRAG_ACTION_NONE_ARGS = 984064; //0b11110000010000000000
 constexpr int32_t DRAG_ACTION_DRAG_POINTER_EVENT_ARGS = 16384;
 constexpr int32_t DRAG_ACTION_TOUCH_EVENT_ARGS = 12288;
 constexpr int32_t DRAG_ACTION_GESTURE_EVENT_ARGS = 35839;

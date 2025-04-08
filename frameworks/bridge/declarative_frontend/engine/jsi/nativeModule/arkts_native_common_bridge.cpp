@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
+#include "bridge/declarative_frontend/jsview/js_gesture.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
@@ -6979,6 +6980,26 @@ void CommonBridge::SetGestureTag(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t
     }
 }
 
+void CommonBridge::SetGestureDistanceMap(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber,
+    ArkUIGesture* gesture)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> gestureDistanceMap = runtimeCallInfo->GetCallArgRef(argNumber);
+    if (!gestureDistanceMap.IsNull() && !gestureDistanceMap->IsUndefined() && gestureDistanceMap->IsMap(vm)) {
+        Local<panda::MapRef> distanceMapRef(gestureDistanceMap);
+        int32_t distanceMapSize = distanceMapRef->GetSize(vm);
+        PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
+        for (int32_t i = 0; i < distanceMapSize; i++) {
+            SourceTool sourceTool = static_cast<SourceTool>(distanceMapRef->GetKey(vm, i)->ToNumber(vm)->Value());
+            double distance = static_cast<double>(distanceMapRef->GetValue(vm, i)->ToNumber(vm)->Value());
+            distanceMap[sourceTool] = distance;
+        }
+        auto gesturePtr = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
+        gesturePtr->SetDistanceMap(distanceMap);
+    }
+}
+
 void CommonBridge::SetGestureAllowedTypes(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber,
     ArkUIGesture* gesture)
 {
@@ -8033,6 +8054,8 @@ ArkUINativeModuleValue CommonBridge::SetOnHoverMove(ArkUIRuntimeCallInfo* runtim
         ContainerScope scope(containerId);
         PipelineContext::SetCallBackNode(node);
         auto obj = CreateHoverInfo(vm, hoverInfo);
+        obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
+            panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(&hoverInfo));
         panda::Local<panda::JSValueRef> params[] = { obj };
@@ -8383,12 +8406,13 @@ ArkUINativeModuleValue CommonBridge::AddPanGesture(ArkUIRuntimeCallInfo* runtime
     GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_5);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, direction, distance, limitFingerCount, nullptr);
+    SetGestureDistanceMap(runtimeCallInfo, NUM_9, gesture);
     SetGestureTag(runtimeCallInfo, NUM_3, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_10, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_11, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_12, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_11, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_12, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_13, gesture);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
         nativeNode, gesture, priority, mask);
     return panda::JSValueRef::Undefined(vm);
@@ -8540,13 +8564,14 @@ ArkUINativeModuleValue CommonBridge::AddPanGestureToGroup(ArkUIRuntimeCallInfo* 
     GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, limitFingerCount, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, direction, distance, limitFingerCount, nullptr);
+    SetGestureDistanceMap(runtimeCallInfo, NUM_7, gesture);
     SetGestureTag(runtimeCallInfo, NUM_1, gesture);
     SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_8, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_9, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_10, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_11);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_9, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_10, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_11, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_12);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }

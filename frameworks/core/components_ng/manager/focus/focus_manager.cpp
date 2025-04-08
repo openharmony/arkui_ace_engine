@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 
 #include "base/log/dump_log.h"
+#include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -328,39 +329,16 @@ RefPtr<FocusHub> FocusManager::GetCurrentFocus()
     return currentFocus_.Upgrade();
 }
 
-int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
+void FocusManager::TriggerAllFocusActiveChangeCallback(bool isFocusActive)
 {
-    // max callbacks count: INT32_MAX - 1
-    if (listeners_.size() == static_cast<size_t>(std::numeric_limits<int32_t>::max() - 1)) {
-        return -1;
+    auto focusActiveChangeCallbackManager = GetFocusActiveChangeCallbackManager();
+    if (focusActiveChangeCallbackManager) {
+        focusActiveChangeCallbackManager->NotifyListener(isFocusActive);
     }
-    int32_t handler = nextListenerHdl_;
-    listeners_.emplace(handler, std::move(callback));
-
-    do {
-        nextListenerHdl_ = (nextListenerHdl_ == std::numeric_limits<int32_t>::max()) ? 0 : ++nextListenerHdl_;
-    } while (listeners_.count(nextListenerHdl_) != 0);
-    return handler;
-}
-
-void FocusManager::RemoveFocusListener(int32_t handler)
-{
-    listeners_.erase(handler);
-}
-
-int32_t FocusManager::AddFocusActiveChangeListener(const FocusActiveChangeCallback& callback)
-{
-    return focusActiveChangeCallback_.AddListener(callback);
-}
-
-void FocusManager::RemoveFocusActiveChangeListener(int32_t handler)
-{
-    focusActiveChangeCallback_.RemoveListener(handler);
-}
-
-void FocusManager::TriggerFocusActiveChangeCallback(bool isFocusActive)
-{
-    focusActiveChangeCallback_.NotifyListener(isFocusActive);
+    auto isFocusActiveUpdateEventManager = GetIsFocusActiveUpdateEventManager();
+    if (isFocusActiveUpdateEventManager) {
+        isFocusActiveUpdateEventManager->NotifyListener(isFocusActive);
+    }
 }
 
 RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)
@@ -382,8 +360,9 @@ void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub,
 
 void FocusManager::ReportFocusSwitching(FocusReason focusReason)
 {
-    for (auto& [_, cb] : listeners_) {
-        cb(currentFocus_, switchingFocus_, focusReason);
+    auto callbacksManager = GetFocusChangeCallbackManager();
+    if (callbacksManager) {
+        callbacksManager->NotifyListener(currentFocus_, switchingFocus_, focusReason);
     }
     currentFocus_ = switchingFocus_;
     isSwitchingFocus_.reset();
@@ -534,5 +513,92 @@ void FocusManager::WindowFocus(bool isFocus)
         rootFocusHub->SetFocusDependence(focusDepend);
     }
     pipeline->RequestFrame();
+}
+
+bool FocusManager::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
+{
+    if (!NeedChangeFocusAvtive(isFocusActive, reason, autoFocusInactive)) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "focusActive turns:%{public}d, reson:%{public}d", isFocusActive, reason);
+    isFocusActive_ = isFocusActive;
+
+    auto pipeline = pipeline_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto containerId = Container::CurrentId();
+    auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
+    if (subWindowContainerId >= 0) {
+        auto subPipeline = pipeline->GetContextByContainerId(subWindowContainerId);
+        CHECK_NULL_RETURN(subPipeline, false);
+        ContainerScope scope(subWindowContainerId);
+        auto subFocusManager = subPipeline->GetOrCreateFocusManager();
+        CHECK_NULL_RETURN(subFocusManager, false);
+        subFocusManager->SetIsFocusActive(isFocusActive, reason, autoFocusInactive);
+    }
+
+    TriggerAllFocusActiveChangeCallback(isFocusActive);
+
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto rootFocusHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(rootFocusHub, false);
+    if (isFocusActive_) {
+        return rootFocusHub->PaintAllFocusState();
+    }
+    rootFocusHub->ClearAllFocusState();
+    return true;
+}
+
+bool FocusManager::NeedChangeFocusAvtive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
+{
+    if (reason == FocusActiveReason::USE_API) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "autoFocusInactive turns to %{public}d", autoFocusInactive);
+        autoFocusInactive_ = autoFocusInactive;
+    }
+    if (isFocusActive_ == isFocusActive) {
+        return false;
+    }
+    if (isFocusActive) {
+        if (!SystemProperties::GetFocusCanBeActive()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
+            return false;
+        }
+        auto pipeline = pipeline_.Upgrade();
+        auto appTheme = pipeline ? pipeline->GetTheme<AppTheme>() : nullptr;
+        if (reason == FocusActiveReason::KEY_TAB && appTheme && !appTheme->NeedFocusActiveByTab()) {
+            return false;
+        }
+    }
+    if (!isFocusActive && reason == FocusActiveReason::POINTER_EVENT && !autoFocusInactive_) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "focus cannot be deactived automaticly by pointer event");
+        return false;
+    }
+    return true;
+}
+
+bool FocusManager::HandleKeyForExtendOrActivateFocus(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
+{
+    if (event.action == KeyAction::DOWN) {
+        if (event.IsKey({ KeyCode::KEY_TAB })) {
+            return ExtendOrActivateFocus(curFocusView, FocusActiveReason::KEY_TAB);
+        }
+        auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
+        auto curEntryFocusHub = curEntryFocusView ? curFocusView->GetFocusHub() : nullptr;
+        if (event.IsDirectionalKey() && curEntryFocusHub && curEntryFocusHub->GetDirectionalKeyFocus()) {
+            return ExtendOrActivateFocus(curFocusView);
+        }
+    }
+    return false;
+}
+
+bool FocusManager::ExtendOrActivateFocus(const RefPtr<FocusView>& curFocusView, FocusActiveReason reason)
+{
+    auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
+    auto isExtend = false;
+    if (curFocusView && isViewRootScopeFocused) {
+        isExtend = curFocusView->TriggerFocusMove();
+    }
+    auto isActive = SetIsFocusActive(true, reason);
+    return isExtend || isActive;
 }
 } // namespace OHOS::Ace::NG

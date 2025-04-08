@@ -1396,6 +1396,12 @@ void WebPattern::UpdateImagePreviewParam()
     // cross platform is not support now;
 }
 
+bool WebPattern::RunJavascriptAsync(const std::string& jsCode, std::function<void(const std::string&)>&& callback)
+{
+    // cross platform is not support now;
+    return false;
+}
+
 void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     // cross platform is not support now;

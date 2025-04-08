@@ -18,7 +18,9 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "ui/base/utils/utils.h"
 
+#include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::Kit {
 
@@ -43,6 +45,32 @@ RefPtr<FrameNode> ViewStackProcessor::GetTopNode()
         kitNode = Referenced::MakeRefPtr<FrameNodeImpl>(AceType::Claim(mainNode));
     }
     return kitNode;
+}
+
+void ViewStackProcessor::NewScope()
+{
+    Ace::ViewStackModel::GetInstance()->NewScope();
+}
+
+RefPtr<FrameNode> ViewStackProcessor::Finish()
+{
+    auto node = Ace::ViewStackModel::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+
+    if (frameNode) {
+        auto kitNode = frameNode->GetKitNode();
+        if (!kitNode) {
+            kitNode = AceType::MakeRefPtr<FrameNodeImpl>(frameNode);
+        }
+        return kitNode;
+    }
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
+        "BuilderProxyNode", nodeId, []() { return AceType::MakeRefPtr<NG::StackPattern>(); });
+    proxyNode->AddChild(AceType::DynamicCast<NG::UINode>(node));
+
+    return AceType::MakeRefPtr<FrameNodeImpl>(proxyNode);
 }
 
 } // namespace OHOS::Ace::Kit

@@ -148,7 +148,7 @@ void FFICJVectorRangeContentSetElement(VectorRangeContentHandle vec, int64_t ind
     (*actualVec)[index] = rangeContentOptions;
 }
 
-VectorTextCascadePickerOptionsHandle FFICJVectorTextCascadePickerOptions(int64_t size)
+VectorTextCascadePickerOptionsHandle FFICJCreateVectorTextCascadePickerOptions(int64_t size)
 {
     return new std::vector<CJTextCascadePickerOptions>(size);
 }

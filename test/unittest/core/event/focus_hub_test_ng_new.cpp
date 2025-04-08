@@ -71,7 +71,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0046, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->isFocusUnit_ = true;
     auto parentNode = FrameNodeOnTree::CreateFrameNode(V2::ROW_ETS_TAG, 1,
         AceType::MakeRefPtr<Pattern>());
@@ -150,7 +152,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0048, TestSize.Level1)
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
     RoundRect focusRectInner;
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     EXPECT_FALSE(focusHub->PaintInnerFocusState(focusRectInner));
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
@@ -192,7 +196,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0049, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     std::list<RefPtr<FocusHub>> focusNodes;
     auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
@@ -353,8 +359,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0055, TestSize.Level1)
     EXPECT_EQ(itNewFocusNode, focusNodes.end());
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
     focusHub->currentFocus_ = false;
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
@@ -903,7 +912,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0074, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     auto context = PipelineContext::GetCurrentContext();
-    context->isFocusActive_ = true;
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     auto res = focusHub->PaintAllFocusState();
@@ -927,9 +939,11 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0075, TestSize.Level1)
         AceType::MakeRefPtr<ButtonPattern>());
     frameNode->GetOrCreateFocusHub();
     auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
     auto context = PipelineContext::GetCurrentContext();
-    context->isFocusActive_ = true;
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     auto func = [](RoundRect& rect) { rect.rect_ = RectF(); };
     focusHub->getInnerFocusRectFunc_ = func;
@@ -1181,7 +1195,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0084, TestSize.Level1)
     focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
     auto pipeline = PipelineContext::GetCurrentContext();
     focusHub->currentFocus_ = false;
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
@@ -1717,7 +1733,10 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0107, TestSize.Level1)
     EXPECT_TRUE(child2FocusHub->IsCurrentFocus());
 
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;

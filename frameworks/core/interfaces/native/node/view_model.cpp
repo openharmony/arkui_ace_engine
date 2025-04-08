@@ -654,13 +654,8 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createGridItemNode,
     createCustomNode,
-#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
-#else
-    nullptr, // createWaterFlowNode
-    nullptr, // createFlowItemNode
-#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,

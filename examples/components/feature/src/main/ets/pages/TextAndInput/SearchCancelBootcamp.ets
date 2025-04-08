@@ -35,6 +35,9 @@ export struct SearchCancelBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        parameters: () => {
+          this.Parameters()
         }
       })
     }
@@ -52,6 +55,10 @@ export struct SearchCancelBootcamp {
         })
         .searchButton('搜索')
     }.width('100%').height('100%')
+  }
+
+  @Builder
+  Parameters() {
   }
 }
 

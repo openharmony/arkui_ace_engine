@@ -62,7 +62,6 @@ void ScrollBar::InitTheme()
     SetForegroundPressedColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
-#ifdef ARKUI_CIRCLE_FEATURE
     SetNormalBackgroundWidth(theme->GetNormalBackgroundWidth());
     SetActiveBackgroundWidth(theme->GetActiveBackgroundWidth());
     SetNormalStartAngle(theme->GetNormalStartAngle());
@@ -73,7 +72,6 @@ void ScrollBar::InitTheme()
     SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
     SetArcForegroundColor(theme->GetArcForegroundColor());
     SetArcBackgroundColor(theme->GetArcBackgroundColor());
-#endif // ARKUI_CIRCLE_FEATURE
 }
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
