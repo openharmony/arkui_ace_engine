@@ -16,8 +16,10 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "generated/type_helpers.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_event_hub.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 
 using namespace testing;
@@ -37,6 +39,7 @@ void AssignArkValue(Ark_SideBarContainerType& dst, const SideBarContainerType& s
 }
 
 namespace OHOS::Ace::NG {
+using namespace TypeHelper;
 namespace  {
 const Ark_Int32 AINT32_NEG(-1234);
 const Ark_Int32 AINT32_ZERO(0);
@@ -62,6 +65,7 @@ const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
 const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
 const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>("2147483648.00px");
 
+const std::string EXPECTED_NUM_DEF("32.000000");
 const std::string EXPECTED_NUM_NEG("-1234.000000");
 const std::string EXPECTED_NUM_VILID("1234.000000");
 const std::string EXPECTED_NUM_MAX("2147483648.000000");
@@ -72,6 +76,10 @@ const std::string EXPECTED_NUM_NEG_PX("-1234.00px");
 const std::string EXPECTED_NUM_VILID_PX("1234.00px");
 const std::string EXPECTED_NUM_MAX_PX("2147483648.00px");
 const std::string EXPECTED_NUM_ZERO_PX("0.00px");
+
+const std::string ICON_STRING("icon.png");
+const std::string ICON_STRING_DEF("");
+const auto ARK_STR_ICON_VALID = Converter::ArkValue<Ark_String>(ICON_STRING);
 
 const auto CUSTOM_COLOR_STRING("#FF123456");
 const int CUSTOM_COLOR_INT(0xFF123456);
@@ -87,6 +95,8 @@ const Opt_ResourceColor OPT_COLOR_INT = Converter::ArkValue<Opt_ResourceColor>(C
 const Opt_ResourceColor OPT_COLOR_FLOAT = Converter::ArkValue<Opt_ResourceColor>(COLOR_FLOAT);
 const Opt_ResourceColor OPT_COLOR_STRING = Converter::ArkValue<Opt_ResourceColor>(COLOR_STRING);
 
+const auto RES_SRC_TEST = "test_src";
+
 const auto ATTRIBUTE_CONTAINER_TYPE = "type";
 const auto ATTRIBUTE_CONTROL_BUTTON_NAME = "controlButton";
 const auto ATTRIBUTE_SHOW_SIDE_BAR_NAME = "showSideBar";
@@ -96,11 +106,17 @@ const auto ATTRIBUTE_CONTROL_BUTTON_LEFT_DEFAULT_VALUE = "16.00vp";
 const auto ATTRIBUTE_CONTROL_BUTTON_TOP_NAME = "top";
 const auto ATTRIBUTE_CONTROL_BUTTON_TOP_DEFAULT_VALUE = "48.00vp";
 const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME = "width";
-const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE = "24.00vp";
+const auto ATTRIBUTE_CONTROL_BUTTON_WIDTH_DEFAULT_VALUE = EXPECTED_NUM_DEF;
 const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME = "height";
-const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE = "24.00vp";
-const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME = "icons";
+const auto ATTRIBUTE_CONTROL_BUTTON_HEIGHT_DEFAULT_VALUE = EXPECTED_NUM_DEF;
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME = "icon";
 const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_NAME = "shown";
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_DEFAULT_VALUE = ICON_STRING_DEF;
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_NAME = "hidden";
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_DEFAULT_VALUE = ICON_STRING_DEF;
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_NAME = "switching";
+const auto ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_DEFAULT_VALUE = ICON_STRING_DEF;
 const auto ATTRIBUTE_SHOW_CONTROL_BUTTON_NAME = "showControlButton";
 const auto ATTRIBUTE_SHOW_CONTROL_BUTTON_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_SIDE_BAR_WIDTH_NAME = "sideBarWidth";
@@ -133,6 +149,7 @@ public:
     {
         ModifierTestBase::SetUpTestCase();
         SetupTheme<SideBarTheme>();
+        AddResource(RES_SRC_TEST, ICON_STRING);
     }
 
     void checkControlButtonAttr(std::vector<std::tuple<std::string, Opt_Number, std::string>> styleArray,
@@ -323,7 +340,7 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButt
 
 // Valid values for attribute 'width' of method 'controlButton'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonWidthValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_NEG},
+    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_DEF},
     {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
     {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
     {EXPECTED_NUM_MAX, OPT_NUM_MAX, EXPECTED_NUM_MAX},
@@ -331,7 +348,7 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButt
 
 // Valid values for attribute 'height' of method 'controlButton'
 static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButtonHeightValidValues = {
-    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_NEG},
+    {EXPECTED_NUM_NEG, OPT_NUM_NEG, EXPECTED_NUM_DEF},
     {EXPECTED_NUM_ZERO, OPT_NUM_ZERO, EXPECTED_NUM_ZERO},
     {EXPECTED_NUM_VILID, OPT_NUM_VALID, EXPECTED_NUM_VILID},
     {EXPECTED_NUM_MAX, OPT_NUM_MAX, EXPECTED_NUM_MAX},
@@ -342,12 +359,114 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> controlButt
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestValidValues, TestSize.Level1)
+HWTEST_F(SideBarContainerModifierTest, setControlButtonTestValidValues, TestSize.Level1)
 {
     checkControlButtonAttr(controlButtonLeftValidValues, ATTRIBUTE_CONTROL_BUTTON_LEFT_NAME);
     checkControlButtonAttr(controlButtonTopValidValues, ATTRIBUTE_CONTROL_BUTTON_TOP_NAME);
     checkControlButtonAttr(controlButtonWidthValidValues, ATTRIBUTE_CONTROL_BUTTON_WIDTH_NAME);
     checkControlButtonAttr(controlButtonHeightValidValues, ATTRIBUTE_CONTROL_BUTTON_HEIGHT_NAME);
+}
+
+
+// Valid values for attribute 'left' of method 'controlButton'
+static std::vector<std::tuple<std::string, Ark_String, std::string>> controlButtonIconStringValues = {
+    {ICON_STRING, ARK_STR_ICON_VALID, ICON_STRING},
+    {ICON_STRING_DEF, Converter::ArkValue<Ark_String>(""), ICON_STRING_DEF},
+};
+
+Ark_ButtonStyle GetButtonStyle()
+{
+    Ark_ButtonStyle style;
+    style.left = OPT_NUM_VALID;
+    style.top = OPT_NUM_VALID;
+    style.width = OPT_NUM_VALID;
+    style.height = OPT_NUM_VALID;
+    WriteTo(style.icons).shown = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
+        ICON_STRING_DEF);
+    WriteTo(style.icons).hidden = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(
+        ICON_STRING_DEF);
+    WriteTo(style.icons).switching = Converter::ArkUnion<Opt_Union_String_PixelMap_Resource, Ark_String>(
+        ICON_STRING_DEF);
+    return style;
+}
+
+/*
+ * @tc.name: setControlButtonTestIconsStringValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarContainerModifierTest, setControlButtonTestIconsStringValidValues, TestSize.Level1)
+{
+    auto style = GetButtonStyle();
+    auto checkValue = [this, &style](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_String_PixelMap_Resource& value) {
+        Ark_ButtonStyle inputStyle = style;
+        WriteTo(inputStyle.icons).shown = value;
+        WriteTo(inputStyle.icons).hidden = value;
+        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
+        modifier_->setControlButton(node_, &inputStyle);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultControlButton = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONTROL_BUTTON_NAME);
+        auto resultIcons =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultControlButton, ATTRIBUTE_CONTROL_BUTTON_ICONS_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_SHOWN_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
+        resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_HIDDEN_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
+        resultStr = GetAttrValue<std::string>(resultIcons, ATTRIBUTE_CONTROL_BUTTON_ICONS_SWITCH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setControlButton, attribute: controlButton.icons.shown";
+    };
+
+    for (auto& [input, value, expected] : controlButtonIconStringValues) {
+        checkValue(input, expected, Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_String>(value));
+    }
+    auto res = CreateResource(RES_SRC_TEST, Converter::ResourceType::STRING);
+    auto valueRes = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_Resource>(res);
+    checkValue(ICON_STRING, ICON_STRING, valueRes);
+}
+
+/*
+ * @tc.name: setControlButtonTestIconsPixelMapValidValues
+ * @tc.desc: DISABLED due to Pixelmap case is under #if defined(PIXEL_MAP_SUPPORTED)
+ * in CreateSourceInfo() SideBarContainerModelNG
+ * Test is PASS if PIXEL_MAP_SUPPORTED
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarContainerModifierTest, DISABLED_setControlButtonTestIconsPixelMapValidValues, TestSize.Level1)
+{
+    auto style = GetButtonStyle();
+    void* ptr = reinterpret_cast<void*>(const_cast<char*>(ICON_STRING.data()));
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(ptr);
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = pixelMap;
+    auto checkValue = [this, &style, pixelMap](const std::string& input, const std::string& expectedStr,
+        const Ark_Union_String_PixelMap_Resource& value) {
+        Ark_ButtonStyle inputStyle = style;
+        WriteTo(inputStyle.icons).shown = value;
+        WriteTo(inputStyle.icons).hidden = value;
+        WriteTo(inputStyle.icons).switching = Converter::ArkValue<Opt_Union_String_PixelMap_Resource>(value);
+        modifier_->setControlButton(node_, &inputStyle);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        auto layoutProperty = frameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+        ASSERT_NE(layoutProperty, nullptr);
+        auto info = layoutProperty->GetControlButtonShowIconInfo();
+        ASSERT_NE(info, std::nullopt);
+        EXPECT_TRUE(info->IsPixmap());
+        EXPECT_EQ(info->GetPixmap(), pixelMap);
+        info = layoutProperty->GetControlButtonHiddenIconInfo();
+        ASSERT_NE(info, std::nullopt);
+        EXPECT_TRUE(info->IsPixmap());
+        EXPECT_EQ(info->GetPixmap(), pixelMap);
+        info = layoutProperty->GetControlButtonSwitchingIconInfo();
+        ASSERT_NE(info, std::nullopt);
+        EXPECT_TRUE(info->IsPixmap());
+        EXPECT_EQ(info->GetPixmap(), pixelMap);
+    };
+    auto valuePx = Converter::ArkUnion<Ark_Union_String_PixelMap_Resource, Ark_PixelMap>(&pixelMapPeer);
+    checkValue(ICON_STRING, ICON_STRING, valuePx);
 }
 
 /*

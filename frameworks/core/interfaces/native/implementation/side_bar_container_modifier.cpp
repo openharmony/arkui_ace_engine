@@ -28,16 +28,14 @@ struct ControlButtonStyleIcon {
     bool isPxMap;
     RefPtr<PixelMap> iconPxMap;
 };
-struct ControlButtonStyleIcons {
-    ControlButtonStyleIcon showIcon;
-    ControlButtonStyleIcon hiddenIcon;
-    ControlButtonStyleIcon switchIcon;
-};
 struct LocalControlButtonStyle {
     std::optional<Dimension> left;
     std::optional<Dimension> top;
     std::optional<Dimension> width;
     std::optional<Dimension> height;
+    ControlButtonStyleIcon showIcon;
+    ControlButtonStyleIcon hiddenIcon;
+    std::optional<ControlButtonStyleIcon> switchIcon;
 };
 struct DividerOptions {
     std::optional<Dimension> strokeWidth;
@@ -72,17 +70,47 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
     }
 }
 
+ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& src)
+{
+    ControlButtonStyleIcon ret = {};
+    Converter::VisitUnion(src,
+        [&ret](const Ark_String& value) {
+            ret.iconStr = Converter::Convert<std::string>(value);
+            ret.isPxMap = false;
+        },
+        [&ret](const Ark_PixelMap& value) {
+            ret.isPxMap = true;
+            ret.iconPxMap = Convert<RefPtr<PixelMap>>(value);
+        },
+        [&ret](const Ark_Resource& value) {
+            auto srcStr = Converter::OptConvert<std::string>(value);
+            if (srcStr) {
+                ret.iconStr = srcStr.value();
+                ret.isPxMap = false;
+            }
+        },
+        []() {});
+    return ret;
+}
+
 template<>
 LocalControlButtonStyle Convert(const Ark_ButtonStyle& src)
 {
-    LocalControlButtonStyle style;
+    LocalControlButtonStyle style = {};
     style.left = OptConvert<Dimension>(src.left);
     style.top = OptConvert<Dimension>(src.top);
     style.width = OptConvert<Dimension>(src.width);
     style.height = OptConvert<Dimension>(src.height);
-    LOGE("SideBarContainerInterfaceModifier::converter "
-        "Ark_ButtonStyle -> LocalControlButtonStyle  is not fully "
-        "implemented. Need get style.icons");
+    auto arkIcons = GetOpt(src.icons);
+    if (arkIcons.has_value()) {
+        auto arkIconsV = arkIcons.value();
+        style.showIcon = GetIconStyle(arkIconsV.shown);
+        style.hiddenIcon = GetIconStyle(arkIconsV.hidden);
+        auto arkIconSwitch = GetOpt(arkIconsV.switching);
+        if (arkIconSwitch.has_value()) {
+            style.switchIcon = GetIconStyle(arkIconSwitch.value());
+        }
+    }
     return style;
 }
 
@@ -136,7 +164,7 @@ void ControlButtonImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LocalControlButtonStyle style = Converter::Convert<LocalControlButtonStyle>(*value);
+    auto style = Converter::Convert<LocalControlButtonStyle>(*value);
     if (style.left.has_value()) {
         SideBarContainerModelNG::SetControlButtonLeft(frameNode, style.left.value());
     }
@@ -147,8 +175,15 @@ void ControlButtonImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(style.height);
     SideBarContainerModelNG::SetControlButtonWidth(frameNode, style.width);
     SideBarContainerModelNG::SetControlButtonHeight(frameNode, style.height);
-    LOGE("SideBarContainerInterfaceModifier::ControlButtonImpl -> Method is not fully"
-            "implemented. Need get style.icons");
+    SideBarContainerModelNG::SetControlButtonShowIconInfo(frameNode, style.showIcon.iconStr,
+        style.showIcon.isPxMap, style.showIcon.iconPxMap);
+    SideBarContainerModelNG::SetControlButtonHiddenIconInfo(frameNode, style.hiddenIcon.iconStr,
+        style.hiddenIcon.isPxMap, style.hiddenIcon.iconPxMap);
+    if (style.switchIcon) {
+        auto icon = style.switchIcon.value();
+        SideBarContainerModelNG::SetControlButtonSwitchingIconInfo(frameNode, icon.iconStr,
+            icon.isPxMap, icon.iconPxMap);
+    }
 }
 void ShowControlButtonImpl(Ark_NativePointer node,
                            Ark_Boolean value)
