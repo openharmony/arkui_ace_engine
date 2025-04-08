@@ -17,17 +17,19 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
-static const std::string ENTRY_PREFIX = "entry/src/main/ets/";
+static const std::string ENTRY_PREFIX = "/src/main/ets/";
 static const std::string ENTRY_SUFFIX = "/__EntryWrapper";
 
 ani_object EntryLoader::GetPageEntryObj()
 {
+    const std::string moduleName = Container::Current()->GetModuleName();
     std::string entryPointName;
-    entryPointName.reserve(ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
-    entryPointName.append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
+    entryPointName.reserve(moduleName.size() + ENTRY_PREFIX.size() + url_.size() + ENTRY_SUFFIX.size());
+    entryPointName.append(moduleName).append(ENTRY_PREFIX).append(url_).append(ENTRY_SUFFIX);
     ani_string entryStr;
     env_->String_NewUTF8(entryPointName.c_str(), entryPointName.length(), &entryStr);
     ani_class entryClass = nullptr;
