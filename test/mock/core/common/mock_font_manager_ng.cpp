@@ -68,4 +68,10 @@ const std::string& FontManager::GetAppCustomFont() const
 void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node) {}
 
 void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node) {}
+
+bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
+{
+    fontInfo.fullName = fontName;
+    return false;
+}
 } // namespace OHOS::Ace
