@@ -1386,7 +1386,8 @@ void SetSwiperOnChange(ArkUINodeHandle node, void* callback)
         auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
         SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
     } else {
-        SwiperModelNG::SetOnChange(frameNode, nullptr);
+        std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
+        SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
     }
 }
 
@@ -1394,7 +1395,8 @@ void ResetSwiperOnChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SwiperModelNG::SetOnChange(frameNode, nullptr);
+    std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
+    SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
 
 void SetSwiperOnSelected(ArkUINodeHandle node, void* callback)
