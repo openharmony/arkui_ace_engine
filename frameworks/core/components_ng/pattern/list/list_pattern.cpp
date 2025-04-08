@@ -2244,9 +2244,8 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     auto& groupInfo = itemPos.begin()->second.groupInfo;
     bool groupAtStart = (!groupInfo || groupInfo.value().atStart);
     if (startIndex == 0 && groupAtStart) {
-        float tmpOffset = currentOffset_ + delta;
         // startPos has a small accuracy error.
-        currentOffset_ = NearEqual(tmpOffset, -startPos) ? tmpOffset : -startPos;
+        currentOffset_ = NearZero(startPos) ? 0.0f : -startPos;
         UpdatePosMap(itemPos);
         return;
     }
