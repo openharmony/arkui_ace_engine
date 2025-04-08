@@ -1485,7 +1485,7 @@ public:
     {
         ViewAbstract::DisableOnAxisEvent();
     }
-    
+
     void DisableOnAppear() override
     {
         ViewAbstract::DisableOnAppear();
@@ -1541,6 +1541,8 @@ public:
         ViewAbstract::SetLightPosition(positionX, positionY, positionZ);
     }
 
+    static void SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text);
+    
     void SetLightIntensity(const float value) override
     {
         ViewAbstract::SetLightIntensity(value);
@@ -1643,6 +1645,7 @@ public:
     static std::string GetAccessibilityDescription(FrameNode* frameNode);
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
     static bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
+    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

@@ -1095,6 +1095,14 @@ void ViewAbstract::DisableOnHoverMove(FrameNode* frameNode)
     eventHub->ClearUserOnHoverMove();
 }
 
+void ViewAbstract::DisableOnAccessibilityHover(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearUserOnAccessibilityHover();
+}
+
 void ViewAbstract::DisableOnMouse(FrameNode* frameNode)
 {
     auto eventHub = frameNode->GetOrCreateInputEventHub();
@@ -4619,6 +4627,15 @@ void ViewAbstract::SetOnHoverMove(FrameNode* frameNode, OnHoverMoveFunc &&onHove
     auto eventHub = frameNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetHoverMoveEvent(std::move(onHoverMoveEventFunc));
+}
+
+void ViewAbstract::SetOnAccessibilityHover(FrameNode* frameNode,
+    OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetAccessibilityHoverEvent(std::move(onAccessibilityHoverEventFunc));
 }
 
 void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback)
