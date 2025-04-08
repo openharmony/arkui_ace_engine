@@ -794,15 +794,19 @@ void ContainerModalPattern::OnColorConfigurationUpdate()
 void ContainerModalPattern::InitLayoutProperty()
 {
     auto containerModal = GetHost();
+    CHECK_NULL_VOID(containerModal);
     auto column = GetColumnNode();
+    CHECK_NULL_VOID(column);
     auto stack = GetStackNode();
+    CHECK_NULL_VOID(stack);
     auto content = GetContentNode();
     CHECK_NULL_VOID(content);
     auto buttonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(buttonsRow);
     auto contentProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentProperty);
     auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
-
+    CHECK_NULL_VOID(buttonsRowProperty);
     containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
