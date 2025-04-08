@@ -161,8 +161,6 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
     if (formInfo.dimension) {
         FormModelNG::SetDimension(frameNode, *formInfo.dimension);
     }
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-         "for implementation of int64_t functionality.");
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
          "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
 #endif // FORM_SUPPORTED
@@ -240,7 +238,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
+            if (*endptr == '\0') {
                 id = result;
             }
         }
@@ -249,8 +247,6 @@ void OnAcquiredImpl(Ark_NativePointer node,
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
     FormModelNG::SetOnAcquired(frameNode, onAcquired);
 #endif // FORM_SUPPORTED
 }
@@ -270,9 +266,9 @@ void OnErrorImpl(Ark_NativePointer node,
             char* endptr;
             auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
             msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
-            int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
+            int32_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
             if (*endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK) {
-                code = static_cast<int32_t>(result);
+                code =result;
             }
         }
         Ark_Literal_Number_errcode_String_msg parameter = {
@@ -281,8 +277,6 @@ void OnErrorImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnErrorImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
     FormModelNG::SetOnError(frameNode, onError);
 #endif // FORM_SUPPORTED
 }
@@ -293,8 +287,8 @@ void OnRouterImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - CustomObject is not supported "
-        "the type Callback_Any_Void includes Ark_CustomObject.");
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - Callback_Any_Void  is not supported "
+        "the type Callback_Any_Void should be replaced by Callback_String_Void.");
 #endif // FORM_SUPPORTED
 }
 void OnUninstallImpl(Ark_NativePointer node,
@@ -314,7 +308,7 @@ void OnUninstallImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
+            if (*endptr == '\0') {
                 id = result;
             }
         }
@@ -324,8 +318,6 @@ void OnUninstallImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
     FormModelNG::SetOnUninstall(frameNode, onUninstall);
 #endif // FORM_SUPPORTED
 }
