@@ -261,7 +261,7 @@ class TextFieldPattern : public ScrollablePattern,
                          public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
         Magnifier, TextGestureSelector);
-
+    UNITEST_FRIEND_CLASS;
 public:
     TextFieldPattern();
     ~TextFieldPattern() override;

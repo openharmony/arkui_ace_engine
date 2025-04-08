@@ -118,6 +118,17 @@ public:
     OnControllerAttachedCallback GetOnControllerAttachedCallback();
     void SetSetWebIdCallback(std::function<void(int32_t)>&& SetIdCallback) {}
     void SetSetHapPathCallback(std::function<void(const std::string&)>&& callback) {}
+    void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    {
+        onCreateMenuCallback_ = std::move(onCreateMenuCallback);
+        onMenuItemClick_ = std::move(onMenuItemClick);
+    }
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+    {
+        selectInfo.onCreateCallback.onCreateMenuCallback = onCreateMenuCallback_;
+        selectInfo.onCreateCallback.onMenuItemClick = onMenuItemClick_;
+    }
 
 private:
     std::string GetMixedModeAsString() const;
@@ -206,6 +217,8 @@ private:
     std::optional<std::string> webData_;
     bool isNewDragStyle_ = false;
     OnControllerAttachedCallback onControllerAttachedCallback_ = nullptr;
+    OnCreateMenuCallback onCreateMenuCallback_ = nullptr;
+    OnMenuItemClickCallback onMenuItemClick_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_H

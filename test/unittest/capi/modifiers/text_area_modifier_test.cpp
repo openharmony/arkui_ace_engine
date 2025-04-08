@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "test/unittest/capi/stubs/friend_class_accessor.h"
+
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "generated/test_fixtures.h"
@@ -52,6 +54,8 @@ const auto COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::C
 const auto COLOR_ID = IntResourceId(1234, Converter::ResourceType::COLOR);
 const auto WRONG_COLOR_NAME = NamedResourceId("color_name", Converter::ResourceType::STRING);
 const auto ATTRIBUTE_CUSTOM_KEYBOARD_AVOIDANCE_DEFAULT_VALUE = false;
+const std::string TEST_CONTENT_ONE = "ContentTestOne";
+const std::string TEST_CONTENT_TWO = "ContentTestTwo";
 typedef std::tuple<Ark_ResourceColor, std::string> ColorTestStep;
 const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
     { Converter::ArkUnion<Ark_ResourceColor, enum Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
@@ -305,6 +309,24 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
+    }
+
+    std::vector<MenuItemParam> GetMenuItemParams()
+    {
+        std::vector<MenuItemParam> params;
+        MenuOptionsParam menuOptionItemOne;
+        menuOptionItemOne.content = TEST_CONTENT_ONE;
+        menuOptionItemOne.action = [](const std::string&) {};
+        MenuOptionsParam menuOptionItemTwo;
+        menuOptionItemTwo.content = TEST_CONTENT_TWO;
+        menuOptionItemTwo.action = [](const std::string&) {};
+        MenuItemParam param1;
+        param1.menuOptionsParam = menuOptionItemOne;
+        MenuItemParam param2;
+        param2.menuOptionsParam = menuOptionItemTwo;
+        params.push_back(param1);
+        params.push_back(param2);
+        return params;
     }
 };
 
@@ -1938,5 +1960,63 @@ HWTEST_F(TextAreaModifierTest, setOnChangeEventTextImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     ASSERT_EQ(checkEvent->value.has_value(), true);
     EXPECT_EQ(checkEvent->value.value(), "test_2");
+}
+
+/**
+ * @tc.name: setEditMenuOptionsTest
+ * @tc.desc: setEditMenuOptions test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setEditMenuOptionsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setEditMenuOptions, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    int32_t testID = 323;
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testOnCreateMenuCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Array_TextMenuItem menuItems, const Callback_Array_TextMenuItem_Void continuation) {
+        checkEvent = {
+            .resourceId = Converter::Convert<int32_t>(resourceId),
+        };
+        CallbackHelper(continuation).Invoke(menuItems);
+    };
+    auto arkCreateCallback = Converter::ArkValue<
+        AsyncCallback_Array_TextMenuItem_Array_TextMenuItem>(testOnCreateMenuCallback, testID);
+
+    auto testOnMenuItemClickCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation) {
+        auto item = Converter::OptConvert<MenuOptionsParam>(menuItem);
+        ASSERT_TRUE(item.has_value());
+        ASSERT_TRUE(item->content.has_value());
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(*item->content == TEST_CONTENT_ONE));
+    };
+    auto arkClickCallback = Converter::ArkValue<
+        AsyncCallback_TextMenuItem_TextRange_Boolean>(testOnMenuItemClickCallback, testID);
+
+    Ark_EditMenuOptions options {
+        .onCreateMenu = arkCreateCallback,
+        .onMenuItemClick = arkClickCallback
+    };
+
+    SelectOverlayInfo selectOverlayInfo;
+    auto params = GetMenuItemParams();
+    FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
+    EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback == nullptr);
+    modifier_->setEditMenuOptions(node_, &options);
+    FriendClassAccessor::OnUpdateOnCreateMenuCallback(selectOverlayInfo, pattern);
+    ASSERT_NE(selectOverlayInfo.onCreateCallback.onCreateMenuCallback, nullptr);
+    selectOverlayInfo.onCreateCallback.onCreateMenuCallback(params);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->resourceId, testID);
+
+    ASSERT_NE(selectOverlayInfo.onCreateCallback.onMenuItemClick, nullptr);
+    EXPECT_TRUE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[0]));
+    EXPECT_FALSE(selectOverlayInfo.onCreateCallback.onMenuItemClick(params[1]));
 }
 } // namespace OHOS::Ace::NG

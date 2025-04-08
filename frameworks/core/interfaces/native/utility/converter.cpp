@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
 #include "core/interfaces/native/implementation/linear_gradient_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/interfaces/native/implementation/text_menu_item_id_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -1224,6 +1225,17 @@ template<>
 ShapePoint Convert(const Ark_Point& src)
 {
     return ShapePoint(Converter::Convert<Dimension>(src.x), Converter::Convert<Dimension>(src.y));
+}
+
+template<>
+MenuOptionsParam Convert(const Ark_TextMenuItem& src)
+{
+    MenuOptionsParam param;
+    param.content = OptConvert<std::string>(src.content);
+    param.icon = OptConvert<std::string>(src.icon);
+    param.labelInfo = OptConvert<std::string>(src.labelInfo);
+    param.id = src.id->id.value_or(param.id);
+    return param;
 }
 
 template<>
