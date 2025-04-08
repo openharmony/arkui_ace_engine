@@ -1391,6 +1391,7 @@ void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const std::opti
 {
     if (colorOpt) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, colorOpt.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
     } else {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
@@ -1398,8 +1399,8 @@ void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const std::opti
         CHECK_NULL_VOID(theme);
         auto defaultColor = theme->GetPlaceholderColor();
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, defaultColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, frameNode);
     }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
 }
 
 void TextFieldModelNG::ResetPlaceholderColor(FrameNode* frameNode)
@@ -1541,10 +1542,11 @@ void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const std::optional<C
 {
     if (colorOpt) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, colorOpt.value(), frameNode);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, frameNode);
+        ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, frameNode);
     }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true, frameNode);
 }
 
 void TextFieldModelNG::ResetCaretColor(FrameNode* frameNode)
