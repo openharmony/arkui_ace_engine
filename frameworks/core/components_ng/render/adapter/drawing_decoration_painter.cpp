@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/rosen/drawing_decoration_painter.h"
+#include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 
 #include "core/components_ng/property/measure_utils.h"
 

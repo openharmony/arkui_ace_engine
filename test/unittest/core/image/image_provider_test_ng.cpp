@@ -35,7 +35,7 @@
 #include "base/image/pixel_map.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -46,7 +46,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/image/image_source_info.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 
 using namespace testing;
 using namespace testing::ext;

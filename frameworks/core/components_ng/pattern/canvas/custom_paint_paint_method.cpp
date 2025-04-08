@@ -32,7 +32,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/image/image_provider.h"
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #endif
 
 namespace OHOS::Ace::NG {

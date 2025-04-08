@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
+#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
 
 #include "include/codec/SkCodec.h"
 
 #include "base/image/image_source.h"
-#include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 #include "core/components_ng/svg/svg_dom.h"
 
 namespace OHOS::Ace::NG {
@@ -89,9 +88,6 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
             "svgStream in MakeSvgDom is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
             static_cast<int32_t>(rsData_->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return nullptr;
-    }
-    if (SystemProperties::GetSvgMode() <= 0) {
-        return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, src.GetFillColor());
     }
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
