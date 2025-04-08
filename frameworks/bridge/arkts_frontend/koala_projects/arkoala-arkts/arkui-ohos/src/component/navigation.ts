@@ -31,7 +31,7 @@ import { Length, ResourceStr, ResourceColor, Dimension } from "./units"
 import { Callback_Void } from "./abilityComponent"
 import { NavDestinationContext, NavDestinationMode } from "./navDestination"
 import { NavigationAttribute } from "./../handwritten"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { TextModifier } from "./../generated/ArkArkuiExternalInterfaces"
 import { Callback_Boolean_Void } from "./checkbox"
 export class NavPathInfoInternal {

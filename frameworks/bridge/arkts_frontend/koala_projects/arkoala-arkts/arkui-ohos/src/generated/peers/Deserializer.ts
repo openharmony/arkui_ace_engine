@@ -29,7 +29,7 @@ import { Callback_RangeUpdate, PointerStyle } from "./../ArkArkuiCustomInterface
 import { ContentDidScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, IndicatorStyle, DigitIndicator, Indicator, DotIndicator, SwiperAttribute, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, ArrowStyle, SwiperAutoFill, Callback_SwiperContentTransitionProxy_Void, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperAnimationEvent, SwiperController, SwiperControllerInternal } from "./../../component/swiper"
 import { CustomNodeBuilder } from "./../ArkCustomBuilderInterfaces"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, DecorationStyleResult, MenuType, TextMenuItemId, TextMenuItemIdInternal, Affinity, TextRange, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, EditMenuOptions, EditMenuOptionsInternal, CaretStyle, InsertValue, DeleteValue, TextMenuItem, LineMetrics, PositionWithAffinity, PreviewText, LayoutManager, LayoutManagerInternal, TextBox, TextDataDetectorConfig, FontSettingOptions, TextDeleteDirection, TextEditControllerEx, TextEditControllerExInternal, TextBaseController, TextBaseControllerInternal, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, TextDataDetectorType } from "./../../component/textCommon"
-import { ErrorCallback, LengthUnit, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
+import { ErrorCallback, WebHeader, TextModifier, Want, RectHeightStyle, RectWidthStyle, SymbolEffect, EffectDirection, EffectScope, RectShapeOptions, RoundRectShapeOptions, PathShapeOptions, ShapeSize, PerfMonitorSourceType, PerfMonitorActionType, SnapshotOptions, NodeController } from "./../ArkArkuiExternalInterfaces"
 import { FontOptions, FontInfo } from "@ohos.font.font"
 import { MeasureOptions } from "@ohos.measure"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../../component/waterFlow"
@@ -55,12 +55,12 @@ import { PluginErrorCallback, PluginComponentTemplate, PluginErrorData, PluginCo
 import { SearchSubmitCallback, CancelButtonStyle, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, SearchAttribute, SearchType, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../../component/search"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SliderConfiguration, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../../component/slider"
 import { TextAreaSubmitCallback, ContentType, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../../component/textArea"
-import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthMetricsUnit, LengthConstrain, ColorFilter, ColorFilterInternal, DirectionalEdgesT, Bias, MarkStyle } from "./../../component/units"
+import { VoidCallback, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor, BorderRadiuses, Margin, Padding, SizeOptions, Length, Position, Area, Font, LocalizedPadding, LocalizedEdgeColors, LocalizedEdgeWidths, ResourceStr, LocalizedBorderRadiuses, ConstraintSizeOptions, ChainWeightOptions, LocalizedMargin, BorderOptions, EdgeStyles, EdgeWidths, EdgeColors, OutlineOptions, EdgeOutlineStyles, EdgeOutlineWidths, OutlineRadiuses, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions, Offset, DividerStyleOptions, LengthConstrain, ColorFilter, ColorFilterInternal, DirectionalEdgesT, Bias, MarkStyle } from "./../../component/units"
 import { WithThemeInterface, CustomTheme, WithThemeOptions, WithThemeAttribute } from "./../../component/withTheme"
 import { Resource } from "global/resource";
 import { Color, ColoringStrategy, FontWeight, Curve, WordBreak, TextOverflow, TextAlign, ImageFit, ImageSpanAlignment, TextDecorationStyle, TextDecorationType, FontStyle, BorderStyle, TextHeightAdaptivePolicy, LineBreakStrategy, TitleHeight, GradientDirection, DialogButtonStyle, TextCase, TouchType, NestedScrollMode, VerticalAlign, Axis, PlayMode, Placement, ArrowPointPosition, Alignment, SharedTransitionEffectType, ClickEffectLevel, HorizontalAlign, TransitionType, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, ImageRepeat, ResponseType, FunctionKey, ModifierKey, BarState, EdgeEffect, FlexDirection, Edge, XComponentType, CopyOptions, TextContentStyle, EllipsisMode, TextSelectableMode, LineCapStyle, LineJoinStyle, OptionWidthMode, ScrollSource, AppRotation, FoldStatus, FlexAlign, FlexWrap, PixelRoundCalcPolicy, KeySource, KeyType, AccessibilityHoverType, MouseAction, MouseButton, IlluminatedType, HeightBreakpoint, WidthBreakpoint, MarqueeUpdateStrategy, RelateType, Week, EmbeddedType, CheckBoxShape, FillMode, AnimationStatus } from "./../../component/enums"
 import { PixelMap, PixelMapInternal } from "./../ArkPixelMapMaterialized"
-import { LengthMetrics, LengthMetricsInternal } from "./../ArkLengthMetricsMaterialized"
+import { LengthMetrics, LengthMetricsInternal, LengthUnit, LengthMetricsUnit, Position as GraphicsPosition } from "../../Graphics"
 import { TextBackgroundStyle } from "./../../component/span"
 import { ImageAttachmentLayoutStyle, BackgroundColorStyle, BackgroundColorStyleInternal, UserDataSpan, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, UrlStyle, UrlStyleInternal, LineHeightStyle, LineHeightStyleInternal, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, ImageAttachment, ImageAttachmentInternal, ImageAttachmentInterface, GestureStyle, GestureStyleInternal, GestureStyleInterface, TextShadowStyle, TextShadowStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, DecorationStyle, DecorationStyleInternal, DecorationStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, StyledStringKey, StyledString, StyledStringInternal, StyleOptions, SpanStyle, StyledStringValue, MutableStyledString, MutableStyledStringInternal } from "./../../component/styledString"
 import { GridRowSizeOption, Callback_String_Void, BreakpointsReference, GridRowColumnOption, GutterOption, GridRowDirection, BreakPoints, GridRowOptions } from "./../../component/gridRow"
@@ -473,6 +473,13 @@ export class Deserializer extends DeserializerBase {
         }
         const y_result : Length | undefined = y_buf
         let value : Position = ({x: x_result, y: y_result} as Position)
+        return value
+    }
+    readGraphicsPosition(): GraphicsPosition {
+        let valueDeserializer : Deserializer = this
+        const x_result : number = (valueDeserializer.readNumber() as number)
+        const y_result : number = (valueDeserializer.readNumber() as number)
+        let value : GraphicsPosition = ({x: x_result, y: y_result} as GraphicsPosition)
         return value
     }
     readSymbolGlyphModifier(): SymbolGlyphModifier {
@@ -22771,8 +22778,9 @@ export class Deserializer extends DeserializerBase {
     }
     readLengthMetricsUnit(): LengthMetricsUnit {
         let valueDeserializer : Deserializer = this
-        const _LengthMetricsUnitStub_result : string = (valueDeserializer.readString() as string)
-        let value : LengthMetricsUnit = ({_LengthMetricsUnitStub: _LengthMetricsUnitStub_result} as LengthMetricsUnit)
+        // const _LengthMetricsUnitStub_result : string = (valueDeserializer.readString() as string)
+        // let value : LengthMetricsUnit = ({_LengthMetricsUnitStub: _LengthMetricsUnitStub_result} as LengthMetricsUnit)
+        let value : LengthMetricsUnit = LengthMetricsUnit.DEFAULT
         return value
     }
     readCanvasPath(): CanvasPath {

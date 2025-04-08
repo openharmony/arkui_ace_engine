@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { UIContext } from "./component/common"
-import { Position } from "./component/units"
+import { UIContext } from "@ohos.arkui.UIContext"
+import { Position as Position } from "./Graphics"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
@@ -39,7 +39,7 @@ export class FrameNode implements MaterializedBase {
     }
     static ctor_framenode(uiContext: UIContext): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeUIContext(uiContext)
+        // thisSerializer.writeUIContext(uiContext)
         const retval  = ArkUIGeneratedNativeModule._FrameNode_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -165,7 +165,7 @@ export class FrameNode implements MaterializedBase {
     private getPositionToWindowWithTransform_serialize(): Position {
         const retval  = ArkUIGeneratedNativeModule._FrameNode_getPositionToWindowWithTransform(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const returnResult : Position = retvalDeserializer.readPosition()
+        const returnResult : Position = retvalDeserializer.readGraphicsPosition()
         return returnResult
     }
     private static getFrameNodeByKey_serialize(name: string): FrameNode {

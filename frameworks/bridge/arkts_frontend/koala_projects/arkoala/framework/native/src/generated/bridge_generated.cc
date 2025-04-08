@@ -18135,7 +18135,7 @@ KInteropReturnBuffer impl_FrameNode_getPositionToWindowWithTransform(Ark_NativeP
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
         const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindowWithTransform(self);
         Serializer _retSerializer {};
-        _retSerializer.writePosition(retValue);
+        _retSerializer.writeGraphicsPosition(retValue);
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNode_getPositionToWindowWithTransform, KInteropReturnBuffer, Ark_NativePointer)
