@@ -215,6 +215,10 @@ class ObserveV2 {
           symRefs[key]?.delete(id);
         };
       }
+
+      if (target) {
+        WeakRefPool.unregister(target, id);
+      }
     });
 
     delete this.id2targets_[id];
@@ -417,7 +421,7 @@ class ObserveV2 {
 
     this.id2targets_[id] ??= new Set<WeakRef<Object>>();
     this.id2targets_[id].add(weakRef);
-    WeakRefPool.onGC(target, () => this.id2targets_?.[id]?.delete(weakRef) )
+    WeakRefPool.register(target, id, () => this.id2targets_?.[id]?.delete(weakRef) )
   }
 
   /**

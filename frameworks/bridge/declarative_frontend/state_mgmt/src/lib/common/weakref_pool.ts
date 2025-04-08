@@ -17,18 +17,18 @@
 class WeakRefPool {
   // map objects -> weakrefs
   private static wmap_ = new WeakMap();
-  // map weakref -> gc callbacks (list of functions)
+  // map weakref -> Map<tag, gc-callback>
   private static fmap_ = new Map();
   //
-  private static freg_ = new FinalizationRegistry(weakRef => {
-    WeakRefPool.fmap_.get(weakRef)?.forEach(fn => fn());
+  private static freg_ = new FinalizationRegistry((weakRef: WeakRef<object>) => {
+    WeakRefPool.getTaggedCallbacks(weakRef).forEach(fn => fn());
     WeakRefPool.fmap_.delete(weakRef);
   });
 
   // Create a WeakRef for the given object and put it into the pool, or get
   // existing WeakRef from the pool if the object is already there. WeakRefs
   // for the same object are always identical.
-  public static get<T extends Object | Symbol>(obj: T): WeakRef<T>
+  public static get<T extends object>(obj: T): WeakRef<T>
   {
     let weakRef = WeakRefPool.wmap_.get(obj);
     if (weakRef === undefined) {
@@ -37,17 +37,35 @@ class WeakRefPool {
     return weakRef;
   }
 
-  // Add handler to track when the given object is GC'ed
-  public static onGC<T extends Object | Symbol>(obj: T, onGarbageCollect: () => void): void {
-    // list of functions is faster alternative to multiple FinalizationRegistry.register calls
+  // Add handler to track when the given object is GC'ed.
+  // Tag is used by unregister() only. Pair <obj, tag> should be unique per callback
+  public static register<T extends object>(obj: T, tag: unknown, callback: () => void) {
     const weakRef = WeakRefPool.get(obj);
-    const fnList = WeakRefPool.fmap_.get(weakRef);
+    const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
+    tagMap.size || WeakRefPool.freg_.register(obj, weakRef);
+    tagMap.set(tag, callback);
+  }
 
-    if (fnList === undefined) {
-      WeakRefPool.fmap_.set(weakRef, [onGarbageCollect]);
-      WeakRefPool.freg_.register(obj, weakRef);
-    } else {
-      fnList.push(onGarbageCollect);
+  public static unregister<T extends object>(obj: T, tag: unknown) {
+    const weakRef = WeakRefPool.get(obj);
+    const tagMap = WeakRefPool.getTaggedCallbacks(weakRef);
+    tagMap.delete(tag);
+    tagMap.size || WeakRefPool.freg_.unregister(weakRef);
+    tagMap.size || WeakRefPool.fmap_.delete(weakRef);
+  }
+
+  private static getTaggedCallbacks<T extends object>(weakRef: WeakRef<T>): Map<unknown, () => void> {
+    let tagMap = WeakRefPool.fmap_.get(weakRef);
+    if (tagMap === undefined) {
+      WeakRefPool.fmap_.set(weakRef, tagMap = new Map());
     }
+    return tagMap;
+  }
+
+  // debug only
+  private static getTaggedCallbacksSize(): number {
+    let size = 0;
+    WeakRefPool.fmap_.forEach(tagMap => size += tagMap.size);
+    return size;
   }
 }
