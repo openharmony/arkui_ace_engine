@@ -4021,8 +4021,6 @@ export interface ScrollableCommonMethod extends CommonMethod {
     /** @memo */
     onWillScroll(value?: ScrollOnWillScrollCallback): this
     /** @memo */
-    onDidScroll(value: ScrollOnScrollCallback): this
-    /** @memo */
     onReachStart(value: (() => void)): this
     /** @memo */
     onReachEnd(value: (() => void)): this

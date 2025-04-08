@@ -6063,32 +6063,11 @@ void impl_GridAttribute_onScroll(Ark_NativePointer thisPtr, KSerializerBuffer th
         GetNodeModifiers()->getGridModifier()->setOnScroll(self, (const Callback_Number_Number_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(GridAttribute_onScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_GridAttribute_onWillScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnWillScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnWillScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnWillScrollCallback))))};
-        }
-        Opt_OnWillScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getGridModifier()->setOnWillScroll(self, (const Opt_OnWillScrollCallback*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(GridAttribute_onWillScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridAttribute_onDidScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
-        }
-        Opt_OnScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getGridModifier()->setOnDidScroll(self, (const Opt_OnScrollCallback*)&value_value);
+        OnScrollCallback value_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
+        GetNodeModifiers()->getGridModifier()->setOnDidScroll(self, static_cast<const OnScrollCallback*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(GridAttribute_onDidScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridAttribute_onReachStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -7130,32 +7109,11 @@ void impl_ListAttribute_onScrollVisibleContentChange(Ark_NativePointer thisPtr, 
         GetNodeModifiers()->getListModifier()->setOnScrollVisibleContentChange(self, (const OnScrollVisibleContentChangeCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(ListAttribute_onScrollVisibleContentChange, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_ListAttribute_onWillScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnWillScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnWillScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnWillScrollCallback))))};
-        }
-        Opt_OnWillScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getListModifier()->setOnWillScroll(self, (const Opt_OnWillScrollCallback*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(ListAttribute_onWillScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ListAttribute_onDidScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
-        }
-        Opt_OnScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getListModifier()->setOnDidScroll(self, (const Opt_OnScrollCallback*)&value_value);
+        OnScrollCallback value_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
+        GetNodeModifiers()->getListModifier()->setOnDidScroll(self, static_cast<const OnScrollCallback*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(ListAttribute_onDidScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ListAttribute_onReachStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -16887,32 +16845,11 @@ void impl_WaterFlowAttribute_cachedCount1(Ark_NativePointer thisPtr, KInteropNum
         GetNodeModifiers()->getWaterFlowModifier()->setCachedCount1(self, (const Ark_Number*) (&count), show);
 }
 KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_cachedCount1, Ark_NativePointer, KInteropNumber, Ark_Boolean)
-void impl_WaterFlowAttribute_onWillScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnWillScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnWillScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState, Ark_ScrollSource scrollSource, const Callback_ScrollResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnWillScrollCallback))))};
-        }
-        Opt_OnWillScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getWaterFlowModifier()->setOnWillScroll(self, (const Opt_OnWillScrollCallback*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_onWillScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WaterFlowAttribute_onDidScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_OnScrollCallback value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
-        }
-        Opt_OnScrollCallback value_value = value_value_buf;;
-        GetNodeModifiers()->getWaterFlowModifier()->setOnDidScroll(self, (const Opt_OnScrollCallback*)&value_value);
+        OnScrollCallback value_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number scrollOffset, Ark_ScrollState scrollState)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollCallback))))};
+        GetNodeModifiers()->getWaterFlowModifier()->setOnDidScroll(self, static_cast<const OnScrollCallback*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_onDidScroll, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WaterFlowAttribute_onReachStart(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
