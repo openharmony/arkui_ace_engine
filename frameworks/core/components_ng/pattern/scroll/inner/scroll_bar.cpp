@@ -58,8 +58,8 @@ void ScrollBar::InitTheme()
     SetMinDynamicHeight(theme->GetMinDynamicHeight());
     SetBackgroundColor(theme->GetBackgroundColor());
     SetForegroundColor(theme->GetForegroundColor());
-    SetForegroundHoverColor(theme->GetForegroundHoverBlendColor());
-    SetForegroundPressedColor(theme->GetForegroundPressedBlendColor());
+    SetForegroundHoverBlendColor(theme->GetForegroundHoverBlendColor());
+    SetForegroundPressedBlendColor(theme->GetForegroundPressedBlendColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
     SetNormalBackgroundWidth(theme->GetNormalBackgroundWidth());
@@ -976,10 +976,10 @@ void ScrollBar::DumpAdvanceInfo()
 Color ScrollBar::GetForegroundColor() const
 {
     if (IsPressed()) {
-        return foregroundPressedColor_;
+        return foregroundColor_.BlendColor(foregroundPressedBlendColor_);
     }
     if (IsHover()) {
-        return foregroundHoverColor_;
+        return foregroundColor_.BlendColor(foregroundHoverBlendColor_);
     }
     return foregroundColor_;
 }
