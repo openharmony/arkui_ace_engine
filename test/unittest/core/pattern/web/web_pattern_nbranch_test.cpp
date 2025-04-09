@@ -310,7 +310,8 @@ HWTEST_F(WebPatternBranchTestUT, DumpViewDataPageNode007, TestSize.Level1)
 
     auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWeb::NWebValue::Type::NONE);
     webMsg->SetType(NWeb::NWebValue::Type::STRING);
-    webMsg->SetString("{\"node\":{\"id\":1,\"name\":\"root\",\"children\":[{\"id\":2,\"name\":\"child1\",\"123\":\"test\"},{\"id\":3,\"name\":\"child2\"}],\"obj\":null}}");
+    webMsg->SetString("{\"node\":{\"id\":1,\"name\":\"root\",\"children\":" +
+        "[{\"id\":2,\"name\":\"child1\",\"123\":\"test\"},{\"id\":3,\"name\":\"child2\"}],\"obj\":null}}");
     webPattern->HandleAutoFillEvent(webMsg);
     bool needsRecordData = true;
 
