@@ -57,10 +57,5 @@ public:
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<Scrollable> scrollable_;
 };
-
-class ScrollBarOverlayTestNg : public TestNG {
-    void SetUp() override;
-    void TearDown() override;
-};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
