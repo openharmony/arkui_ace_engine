@@ -27,6 +27,8 @@ constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
 constexpr float NORMAL_SCALE = 1.0f;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
 
 inline std::string ToString(const ButtonType& type)
 {
@@ -205,6 +207,10 @@ void ButtonPattern::ToJsonValueAttribute(std::unique_ptr<JsonValue>& json, const
         ConvertControlSizeToString(layoutProperty->GetControlSize().value_or(ControlSize::NORMAL)).c_str(), filter);
     json->PutExtAttr("role",
         ConvertButtonRoleToString(layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL)).c_str(), filter);
+    json->PutExtAttr(
+        "minFontScale", std::to_string(layoutProperty->GetMinFontScaleValue(MINFONTSCALE)).c_str(), filter);
+    json->PutExtAttr(
+        "maxFontScale", std::to_string(layoutProperty->GetMaxFontScaleValue(MAXFONTSCALE)).c_str(), filter);
 }
 
 std::string ButtonPattern::ConvertButtonRoleToString(ButtonRole buttonRole)
