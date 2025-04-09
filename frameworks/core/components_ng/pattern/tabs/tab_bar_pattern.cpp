@@ -2128,6 +2128,7 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentDelta_ = offset;
+    ACE_SCOPED_TRACE("scrollType:tab_bar, offset:%f id:%d, tag:%s",currentDelta_, static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     UpdateSubTabBoard(indicator_);
     UpdateIndicator(indicator_);
     UpdatePaintIndicator(indicator_, true);
