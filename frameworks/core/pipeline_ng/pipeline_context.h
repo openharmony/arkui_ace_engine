@@ -264,9 +264,6 @@ public:
     void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
 
-    void HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
-        const RefPtr<NG::FrameNode>& node = nullptr);
-
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
 
