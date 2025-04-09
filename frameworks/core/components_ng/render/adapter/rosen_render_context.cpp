@@ -6561,6 +6561,11 @@ void RosenRenderContext::SavePaintRect(bool isRound, uint16_t flag)
 
 void RosenRenderContext::UpdatePaintRect(const RectF& paintRect)
 {
+    auto host = GetHost();
+    if (host && SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE("UpdatePaintRect[%s][self:%d] from %s to %s", host->GetTag().c_str(), host->GetId(),
+            paintRect_.ToString().c_str(), paintRect.ToString().c_str());
+    }
     paintRect_ = paintRect;
 }
 
