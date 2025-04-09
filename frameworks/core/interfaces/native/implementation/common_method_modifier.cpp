@@ -2449,21 +2449,21 @@ void OnHoverImpl(Ark_NativePointer node,
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const AccessibilityCallback* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // if (!value) {
-    //     ViewAbstract::DisableOnAccessibilityHover(frameNode);
-    //     return;
-    // }
-    // auto weakNode = AceType::WeakClaim(frameNode);
-    // auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakNode](
-    //     bool isHover, AccessibilityHoverInfo& hoverInfo) {
-    //     PipelineContext::SetCallBackNode(node);
-    //     Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-    //     auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
-    //     arkCallback.InvokeSync(arkIsHover, event.ArkValue());
-    // };
-    // ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!value) {
+        ViewAbstract::DisableOnAccessibilityHover(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakNode](
+        bool isHover, AccessibilityHoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
+    };
+    ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      Ark_HoverEffect value)
@@ -2699,7 +2699,7 @@ void Transition1Impl(Ark_NativePointer node,
     //     ViewAbstract::CleanTransition(frameNode);
     // }
 }
-    
+
 void MotionBlurImpl(Ark_NativePointer node,
                     const Ark_MotionBlurOptions* value)
 {
@@ -3647,60 +3647,60 @@ void PixelStretchEffectImpl(Ark_NativePointer node,
 void AccessibilityGroup0Impl(Ark_NativePointer node,
                              Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto accessible = Converter::Convert<bool>(value);
-    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, accessible);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessible = Converter::Convert<bool>(value);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, accessible);
 }
 void AccessibilityGroup1Impl(Ark_NativePointer node,
                              Ark_Boolean isGroup,
                              const Ark_AccessibilityOptions* accessibilityOptions)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto isGroupValue = Converter::Convert<bool>(isGroup);
-    // auto accessibilityPreferred = accessibilityOptions
-    //     ? Converter::OptConvert<bool>(accessibilityOptions->accessibilityPreferred) : std::nullopt;
-    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupValue);
-    // ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto isGroupValue = Converter::Convert<bool>(isGroup);
+    auto accessibilityPreferred = accessibilityOptions
+        ? Converter::OptConvert<bool>(accessibilityOptions->accessibilityPreferred) : std::nullopt;
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupValue);
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
 }
 void AccessibilityText0Impl(Ark_NativePointer node,
                             const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<std::string>(*value);
-    // ViewAbstractModelNG::SetAccessibilityText(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, convValue);
 }
 void AccessibilityText1Impl(Ark_NativePointer node,
                             const Ark_Resource* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto optValue = Converter::OptConvert<std::string>(*value);
-    // if (optValue.has_value()) {
-    //     ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto optValue = Converter::OptConvert<std::string>(*value);
+    if (optValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
+    }
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<std::string>(*value);
-    // ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, convValue);
 }
 void AccessibilityDescription0Impl(Ark_NativePointer node,
                                    const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<std::string>(*value);
-    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, convValue);
 }
 void AccessibilityDescription1Impl(Ark_NativePointer node,
                                    const Ark_Resource* value)
@@ -3710,46 +3710,50 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     // auto optValue = Converter::OptConvert<std::string>(*value);
     // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, convValue);
+    auto optValue = Converter::OptConvert<std::string>(*value);
+    if (optValue.has_value()) {
+        ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
+    }
     LOGE("SetAccessibilityDescription for Ark_Resource is not implemented");
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
                             const Ark_String* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto convValue = Converter::Convert<std::string>(*value);
-    // // ViewAbstractModelNG::SetAccessibilityLevel(frameNode, convValue);
-    // ViewAbstractModelNG::SetAccessibilityImportance(frameNode, convValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::Convert<std::string>(*value);
+    // ViewAbstractModelNG::SetAccessibilityLevel(frameNode, convValue);
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
                                   const CustomNodeBuilder* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
-    //     return callback.BuildSync(node);
-    // };
-    // ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
+        return callback.BuildSync(node);
+    };
+    ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
                               Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // auto resetValue = false;
-    // ViewAbstractModelNG::SetAccessibilityChecked(frameNode, convValue, resetValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    auto resetValue = false;
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, convValue, resetValue);
 }
 void AccessibilitySelectedImpl(Ark_NativePointer node,
                                Ark_Boolean value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = Converter::Convert<bool>(value);
-    // bool resetValue = false;
-    // ViewAbstractModelNG::SetAccessibilitySelected(frameNode, convValue, resetValue);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    bool resetValue = false;
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, convValue, resetValue);
 }
 void ObscuredImpl(Ark_NativePointer node,
                   const Array_ObscuredReasons* value)

@@ -657,7 +657,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
     // delete Sheet when target node destroy
     SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
-    
+
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowBindSheetNG(isShow, std::move(callback), std::move(buildNodeFunc),
@@ -921,6 +921,14 @@ void ViewAbstractModelNG::ResetOnAccessibilityFocus()
     accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
 }
 
+void ViewAbstractModelNG::SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityTextHint(text);
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1011,6 +1019,22 @@ std::string ViewAbstractModelNG::GetAccessibilityImportance(FrameNode* frameNode
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(accessibilityProperty, "");
     return accessibilityProperty->GetAccessibilityLevel();
+}
+
+void ViewAbstractModelNG::SetAccessibilityVirtualNode(FrameNode* frameNode,
+                                                      std::function<RefPtr<NG::UINode>()>&& buildFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto virtualNode = buildFunc();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+    CHECK_NULL_VOID(virtualFrameNode);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
+    frameNode->HasAccessibilityVirtualNode(true);
+    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
 void ViewAbstractModelNG::SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue)
