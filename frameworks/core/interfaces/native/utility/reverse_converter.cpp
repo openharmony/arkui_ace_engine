@@ -488,6 +488,12 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
 
+void AssignArkValue(Ark_GraphicsPosition& dst, const OffsetF& src)
+{
+    dst.x = Converter::ArkValue<Ark_Number>(src.GetX());
+    dst.y = Converter::ArkValue<Ark_Number>(src.GetY());
+}
+
 void AssignArkValue(Ark_FontInfo& dst, const FontInfo& src)
 {
     dst.path = ArkValue<Ark_String>(src.path);

@@ -16,76 +16,122 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { LengthUnit } from "./ArkArkuiExternalInterfaces"
+// import { LengthUnit } from "./generated/ArkArkuiExternalInterfaces"
 import { Resource } from "global/resource";
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./peers/Serializer"
-import { CallbackKind } from "./peers/CallbackKind"
-import { Deserializer } from "./peers/Deserializer"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { Serializer } from "./generated/peers/Serializer"
+import { CallbackKind } from "./generated/peers/CallbackKind"
+import { Deserializer } from "./generated/peers/Deserializer"
+import { CallbackTransformer } from "./generated/peers/CallbackTransformer"
+export interface Size {
+    width: number;
+    height: number;
+}
+export type Position = Vector2;
+export interface Vector2 {
+    x: number;
+    y: number;
+}
+export enum LengthMetricsUnit {
+    DEFAULT = 0,
+    PX = 1
+}
+export enum LengthUnit {
+    PX = 0,
+    VP = 1,
+    FP = 2,
+    PERCENT = 3,
+    LPX = 4
+}
 export class LengthMetricsInternal {
     public static fromPtr(ptr: KPointer): LengthMetrics {
-        const obj : LengthMetrics = new LengthMetrics()
+        const obj : LengthMetrics = new LengthMetrics(0)
         obj.peer = new Finalizable(ptr, LengthMetrics.getFinalizer())
         return obj
     }
 }
 export class LengthMetrics implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    public unit: LengthUnit;
+    public value: number;
     public getPeer(): Finalizable | undefined {
         return this.peer
-    }
-    get unit(): LengthUnit {
-        return this.getUnit()
-    }
-    set unit(unit: LengthUnit) {
-        this.setUnit(unit)
-    }
-    get value(): number {
-        return this.getValue()
-    }
-    set value(value: number) {
-        this.setValue(value)
     }
     static ctor_lengthmetrics(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
         return retval
     }
-    constructor() {
+    constructor(value: number, unit?: LengthUnit) {
         // Constructor does not have parameters.
         // It means that the static method call invokes ctor method as well
         // when all arguments are undefined.
         const ctorPtr : KPointer = LengthMetrics.ctor_lengthmetrics()
         this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
+        if (unit === undefined) {
+            this.setUnit(LengthUnit.VP);
+            this.setValue(value);
+            this.unit = LengthUnit.VP;
+            this.value = value;
+        } else {
+            if (unit >= LengthUnit.PX && unit <= LengthUnit.LPX) {
+                this.setUnit(unit);
+                this.setValue(value);
+                this.unit = unit;
+                this.value = value;
+            } else {
+                this.setUnit(LengthUnit.VP);
+                this.setValue(0);
+                this.unit = LengthUnit.VP;
+                this.value = 0;
+            }
+        }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._LengthMetrics_getFinalizer()
     }
     public static px(value: number): LengthMetrics {
         const value_casted = value as (number)
-        return LengthMetrics.px_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.px_serialize(value_casted)
+        obj.unit = LengthUnit.PX
+        obj.value = value
+        return obj
     }
     public static vp(value: number): LengthMetrics {
         const value_casted = value as (number)
-        return LengthMetrics.vp_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.vp_serialize(value_casted)
+        obj.unit = LengthUnit.VP
+        obj.value = value
+        return obj
     }
     public static fp(value: number): LengthMetrics {
         const value_casted = value as (number)
-        return LengthMetrics.fp_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.fp_serialize(value_casted)
+        obj.unit = LengthUnit.FP
+        obj.value = value
+        return obj
     }
     public static percent(value: number): LengthMetrics {
         const value_casted = value as (number)
-        return LengthMetrics.percent_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.percent_serialize(value_casted)
+        obj.unit = LengthUnit.PERCENT
+        obj.value = value
+        return obj
     }
     public static lpx(value: number): LengthMetrics {
         const value_casted = value as (number)
-        return LengthMetrics.lpx_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.lpx_serialize(value_casted)
+        obj.unit = LengthUnit.LPX
+        obj.value = value
+        return obj
     }
     public static resource(value: Resource): LengthMetrics {
         const value_casted = value as (Resource)
-        return LengthMetrics.resource_serialize(value_casted)
+        const obj : LengthMetrics = LengthMetrics.resource_serialize(value_casted)
+        obj.unit = obj.getUnit()
+        obj.value = obj.getValue()
+        return obj
     }
     private getUnit(): LengthUnit {
         return this.getUnit_serialize()
