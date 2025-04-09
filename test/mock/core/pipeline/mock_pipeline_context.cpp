@@ -1155,7 +1155,8 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    return AceType::MakeRefPtr<MockAccessibilityManager>();
+    static RefPtr<AccessibilityManager> testAccessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    return testAccessibilityManager;
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED

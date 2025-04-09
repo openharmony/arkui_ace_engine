@@ -63,6 +63,134 @@ constexpr int NUM_3 = 3;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
+
+static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_INDEXER_COMPONENT, "alphabetindexer" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_BADGE_COMPONENT, "badge" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_BLANK, "blank" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_BUTTON, "button" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_BACK_BUTTON, "backbutton" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SHEET_DRAG_BAR, "sheetdragbar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CALENDAR_PICKER, "calendarpicker" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CALENDAR, "calendar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS, "canvas" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_GRADIENT, "canvasgradient" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_PATTERN, "canvaspattern" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CHECKBOX, "checkbox" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CHECKBOX_GROUP, "checkboxgroup" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CIRCLE, "circle" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_COLUMN_SPLIT, "columnsplit" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_COLUMN, "column" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CANVAS_RENDERING_CONTEXT_2D, "canvasrenderingcontext2d" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CHART, "chart" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_COUNTER, "counter" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_CONTAINER_MODAL, "containermodal" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_DATA_PANEL, "datapanel" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_DATE_PICKER, "datepicker" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_DIALOG, "dialog" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_DIVIDER, "divider" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_DRAG_BAR, "dragbar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_EFFECT_COMPONENT, "effectcomponent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ELLIPSE, "ellipse" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_FLEX, "flex" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_FLOW_ITEM, "flowitem" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_FORM_COMPONENT, "formcomponent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_FORM_LINK, "formlink" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GAUGE, "gauge" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GRID, "grid" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_COL, "gridcol" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_CONTAINER, "gridcontainer" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_ITEM, "griditem" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_GRID_ROW, "grid-row" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_HYPERLINK, "hyperlink" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE, "image" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_ANIMATOR, "imageanimator" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_BITMAP, "imagebitmap" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_DATA, "imagedata" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_IMAGE_SPAN, "imagespan" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LABEL, "label" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LINE, "line" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LIST, "list" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LIST_ITEM, "listitem" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LIST_ITEM_GROUP, "listitemgroup" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_LOADING_PROGRESS, "loadingprogress" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_MARQUEE, "marquee" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_MATRIX2D, "matrix2d" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_MENU, "menu" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_MENU_ITEM, "menuitem" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_MENU_ITEM_GROUP, "menuitemgroup" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAV_DESTINATION, "navdestination" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAV_ROUTER, "navrouter" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION, "navigation" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION_BAR, "navigation-bar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATION_MENU, "navigation-menu" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_NAVIGATOR, "navigator" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_OFFSCREEN_CANVAS, "offscreencanvas" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_OFFSCREEN_CANVAS_RENDERING_CONTEXT2D, "offscreencanvasrenderingcontext2d" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_OPTION, "option" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PANEL, "panel" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PAPER_PAGE, "paperpage" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PATH, "path" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PATH2D, "path2d" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PATTERN_LOCK, "patternlock" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PICKER, "picker" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PICKER_VIEW, "picker-view" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PLUGIN_COMPONENT, "plugincomponent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_POLYGON, "polygon" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_POLYLINE, "polyline" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_POPUP, "popup" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_PROGRESS, "progress" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_QRCODE, "qrcode" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RADIO, "radio" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RATING, "rating" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RECT, "rect" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_REFRESH, "refresh" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RELATIVE_CONTAINER, "relativecontainer" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_REMOTE_WINDOW, "remotewindow" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RICH_EDITOR, "richeditor" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_RICH_TEXT, "richtext" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ROLE_PAGER, "rolepager" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ROW, "row" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ROW_SPLIT, "rowsplit" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SCROLL, "scroll" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SCROLL_BAR, "scrollbar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SEARCH, "search" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SEARCH_FIELD, "searchfield" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SELECT, "select" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SHAPE, "shape" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SIDEBAR_CONTAINER, "sidebarcontainer" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SLIDER, "slider" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SPAN, "span" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_STACK, "stack" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_STEPPER, "stepper" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_STEPPER_ITEM, "stepperitem" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SWIPER, "swiper" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SWIPER_INDICATOR, "swiperindicator" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SWITCH, "switch" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_SYMBOL_GLYPH, "symbolglyph" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TAB_CONTENT, "tabcontent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TAB_BAR, "tab-bar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TABS, "tabs" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT, "text" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_CLOCK, "textclock" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_ENTRY, "textentry" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_INPUT, "textinput" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_PICKER, "textpicker" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_TIMER, "texttimer" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_AREA, "textarea" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TEXT_FIELD, "textfield" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TIME_PICKER, "timepicker" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TITLE_BAR, "titlebar" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_TOGGLER, "toggler" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_UI_EXTENSION_COMPONENT, "uiextensioncomponent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_VIDEO, "video" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_WATER_FLOW, "waterflow" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_WEB, "web" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_XCOMPONENT, "xcomponent" },
+    { ARK_ACCESSIBILITY_ROLE_TYPE_ROLE_NONE, "NULL" }
+};
 }
 
 namespace OHOS::Ace::NG {
@@ -1690,6 +1818,35 @@ ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& da
         return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
     });
 }
+
+template<>
+void AssignCast(std::optional<AccessibilitySamePageMode> &dst, const Ark_AccessibilitySamePageMode& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT: dst = AccessibilitySamePageMode::SEMI_SILENT; break;
+        case ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT: dst = AccessibilitySamePageMode::FULL_SILENT; break;
+        default:  LOGE("Unexpected enum value in Ark_AccessibilitySamePageMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::string> &dst, const Ark_AccessibilitySamePageMode& src)
+{
+    switch (src) {
+        case ARK_ACCESSIBILITY_SAME_PAGE_MODE_SEMI_SILENT: dst = "semisilent"; break;
+        case ARK_ACCESSIBILITY_SAME_PAGE_MODE_FULL_SILENT: dst = "fullsilent"; break;
+        default:  LOGE("Unexpected enum value in Ark_AccessibilitySamePageMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<std::string>& dst, const Ark_AccessibilityRoleType& src)
+{
+    dst = std::nullopt;
+    if (const auto it = ACCESSIBILITY_ROLE_MAP.find(src); it != ACCESSIBILITY_ROLE_MAP.end()) {
+        dst = it->second;
+    }
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2720,9 +2877,18 @@ void OnKeyEventDispatchImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyEventDispatch(frameNode, convValue);
+    if (!value) {
+        ViewAbstract::DisableOnKeyEventDispatch(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+        PipelineContext::SetCallBackNode(node);
+        const auto event = Converter::ArkKeyEventSync(info);
+        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event.ArkValue());
+        return Converter::Convert<bool>(arkResult);
+    };
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, std::move(onKeyEvent));
 }
 void OnFocusAxisEventImpl(Ark_NativePointer node,
                           const Callback_FocusAxisEvent_Void* value)
@@ -2767,8 +2933,8 @@ void TabStopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetTabStop(frameNode, convValue);
+    auto tabStop = Converter::Convert<bool>(value);
+    ViewAbstract::SetTabStop(frameNode, tabStop);
 }
 void OnFocusImpl(Ark_NativePointer node,
                  const Callback_Void* value)
@@ -4187,25 +4353,24 @@ void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    //CommonMethodModelNG::SetAccessibilityNextFocusId(frameNode, convValue);
+    auto nextFocusId = Converter::Convert<std::string>(*value);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, nextFocusId);
 }
 void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
                                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetAccessibilityDefaultFocus(frameNode, convValue);
+    auto isFocus = Converter::Convert<bool>(value);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
 }
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   Ark_AccessibilitySamePageMode value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetAccessibilityUseSamePage(frameNode, convValue);
+    auto pageMode = Converter::OptConvert<std::string>(value);
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode.value_or(""));
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         Ark_Boolean value)
@@ -4220,9 +4385,9 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetAccessibilityRole(frameNode, convValue);
+    auto role = Converter::OptConvert<std::string>(value);
+    bool resetValue = (!role.has_value() || role.value().empty());
+    ViewAbstractModelNG::SetAccessibilityRole(frameNode, role.value_or(""), resetValue);
 }
 void OnAccessibilityFocusImpl(Ark_NativePointer node,
                               const AccessibilityFocusCallback* value)
