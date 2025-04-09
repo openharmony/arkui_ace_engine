@@ -193,7 +193,7 @@ const GENERATED_ArkUITextTimerModifier* GetTextTimerModifier();
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier();
 const GENERATED_ArkUIToggleModifier* GetToggleModifier();
 const GENERATED_ArkUIVideoModifier* GetVideoModifier();
-const GENERATED_ArkUIWebModifier* GetWebModifier() { return nullptr; };
+const GENERATED_ArkUIWebModifier* GetWebModifier();
 const GENERATED_ArkUIWindowSceneModifier* GetWindowSceneModifier();
 const GENERATED_ArkUIXComponentModifier* GetXComponentModifier();
 const GENERATED_ArkUISideBarContainerModifier* GetSideBarContainerModifier() { return nullptr; };

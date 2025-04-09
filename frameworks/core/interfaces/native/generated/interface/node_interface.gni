@@ -307,7 +307,7 @@ generated_sources = [
   "implementation/web_cookie_accessor.cpp",
   "implementation/web_keyboard_controller_accessor.cpp",
 
-  #"implementation/web_modifier.cpp",
+  "implementation/web_modifier.cpp",
   "implementation/web_resource_error_accessor.cpp",
   "implementation/web_resource_request_accessor.cpp",
   "implementation/web_resource_response_accessor.cpp",
