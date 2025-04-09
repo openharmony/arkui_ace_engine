@@ -36,5 +36,23 @@ public:
 private:
     WeakPtr<NG::Pattern> pattern_;
 };
+
+
+class RotationEventListener : public IRotationEventCallback {
+public:
+    RotationEventListener();
+    ~RotationEventListener() override;
+
+    void SetPatternToListener(WeakPtr<NG::Pattern> pattern)
+    {
+        pattern_ = pattern;
+    }
+
+    WeakPtr<NG::Pattern> GetPatternFromListener() override;
+
+    void OnRotationEnd() override;
+private:
+    WeakPtr<NG::Pattern> pattern_;
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_TOUCH_EVENT_LISTENER_H

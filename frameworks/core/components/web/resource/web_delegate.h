@@ -1201,6 +1201,8 @@ public:
     
     void OnDragAttach();
 
+    bool IsNWebEx();
+
     void SetNativeInnerWeb(bool isInnerWeb);
 
 private:

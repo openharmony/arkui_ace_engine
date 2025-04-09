@@ -26,5 +26,13 @@ public:
     virtual void OnTouchEvent() = 0;
     virtual WeakPtr<NG::Pattern> GetPatternFromListener() = 0;
 };
+
+class IRotationEventCallback {
+public:
+    IRotationEventCallback() {};
+    virtual ~IRotationEventCallback() {};
+    virtual void OnRotationEnd() = 0;
+    virtual WeakPtr<NG::Pattern> GetPatternFromListener() = 0;
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_I_TOUCH_EVENT_CALLBACK_H

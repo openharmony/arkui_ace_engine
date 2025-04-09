@@ -1313,5 +1313,8 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 {
     windowSizeChangeReason_ = reason;
 }
+
+void NG::PipelineContext::RegisterRotationEndListener(const std::shared_ptr<NG::IRotationEventCallback>& listener) {}
+void NG::PipelineContext::UnregisterRotationEndListener(const WeakPtr<NG::Pattern>& pattern) {}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

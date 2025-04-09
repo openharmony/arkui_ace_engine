@@ -1440,4 +1440,74 @@ HWTEST_F(WebPatternSelectTestNg, ShowDateTimeDialog_001, TestSize.Level1)
     webPattern->ShowDateTimeDialog(chooser, suggestions, callback);
 #endif
 }
+
+/**
+ * @tc.name: InitRotationEventListener_001
+ * @tc.desc: InitRotationEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->rotationEventListener_ = nullptr;
+    ASSERT_EQ(webPattern->rotationEventListener_, nullptr);
+    webPattern->InitRotationEventListener();
+#endif
+}
+
+/**
+ * @tc.name: InitRotationEventListener_002
+ * @tc.desc: InitRotationEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, InitRotationEventListener_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->rotationEventListener_ = std::make_shared<RotationEventListener>();
+    ASSERT_NE(webPattern->rotationEventListener_, nullptr);
+    webPattern->InitRotationEventListener();
+#endif
+}
+
+/**
+ * @tc.name: UninitRotationEventListener_001
+ * @tc.desc: UninitRotationEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternSelectTestNg, UninitRotationEventListener_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->UninitRotationEventListener();
+#endif
+}
 } // namespace OHOS::Ace::NG

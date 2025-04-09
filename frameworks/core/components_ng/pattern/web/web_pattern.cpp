@@ -103,6 +103,7 @@ constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
+constexpr int32_t MAXIMUM_ROTATION_DELAY_TIME = 800;
 constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
 constexpr int32_t RESERVED_DEVICEID2 = 0xAAAAAAFE;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
@@ -490,6 +491,7 @@ WebPattern::~WebPattern()
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
+    UninitRotationEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
         delegate_->SetAudioMuted(true);
@@ -3566,6 +3568,7 @@ void WebPattern::InitInOfflineMode()
     }
     delegate_->HideWebView();
     CloseContextSelectionMenu();
+    UninitRotationEventListener();
 }
 
 bool WebPattern::IsNeedResizeVisibleViewport()
@@ -4729,7 +4732,11 @@ void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleW
 
 void WebPattern::RestoreRenderFit()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit, webId: %{public}d", GetWebId());
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit, webId: %{public}d, isRotation: %{public}d",
+        GetWebId(), isRotating_);
+    if (isRotating_) {
+        return;
+    }
     if (renderContextForSurface_) {
         renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
     }
@@ -5283,11 +5290,7 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         WindowMaximize();
         return;
     }
-    if (type == WindowSizeChangeReason::ROTATION) {
-        if (delegate_) {
-            delegate_->MaximizeResize();
-        }
-    }
+    AdjustRotationRenderFit(type);
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     if (!isSmoothDragResizeEnabled) {
                 return;
@@ -5488,6 +5491,7 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         if (isVisibleActiveEnable_ && (!isDialogNested || !isFocus_)) {
             OnInActive();
         }
+        UninitRotationEventListener();
     } else {
         if (isVisibleActiveEnable_) {
             OnActive();
@@ -7246,6 +7250,87 @@ void WebPattern::RegisterSurfaceDensityCallback()
             CHECK_NULL_VOID(webPattern);
             webPattern->SetSurfaceDensity(density);
         });
+    }
+}
+
+void WebPattern::InitRotationEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitRotationEventListener");
+    if (rotationEventListener_) {
+        return;
+    }
+    rotationEventListener_ = std::make_shared<RotationEventListener>();
+    rotationEventListener_->SetPatternToListener(AceType::WeakClaim(this));
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+
+    context->RegisterRotationEndListener(rotationEventListener_);
+}
+
+void WebPattern::UninitRotationEventListener()
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UninitRotationEventListener");
+    if (!rotationEventListener_) {
+        return;
+    }
+    rotationEventListener_ = nullptr;
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->UnregisterRotationEndListener(AceType::WeakClaim(this));
+}
+
+void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
+{
+    if (type != WindowSizeChangeReason::ROTATION) {
+        return;
+    }
+
+    if (delegate_) {
+        delegate_->MaximizeResize();
+    }
+    bool isNwebEx = delegate_->IsNWebEx();
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, isNwebEx: %{public}d", isNwebEx);
+    if (isNwebEx && SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE &&
+        isVisible_ && type == WindowSizeChangeReason::ROTATION) {
+        isRotating_ = true;
+        InitRotationEventListener();
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, webId: %{public}d", GetWebId());
+        if (renderContextForSurface_) {
+            renderContextForSurface_->SetRenderFit(RenderFit::RESIZE_FILL);
+        }
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+
+        std::string taskName = "ArkUIWebRotationDelayTask_" + std::to_string(GetWebId());
+        taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, taskName);
+        taskExecutor->PostDelayedTask(
+            [weak = WeakClaim(this),
+            taskName]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RestoreRenderFit DelayedTask, task: %{public}s",
+                taskName.c_str());
+            webPattern->isRotating_ = false;
+            if (webPattern->renderContextForSurface_) {
+                webPattern->renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
+            }
+            }, TaskExecutor::TaskType::UI, MAXIMUM_ROTATION_DELAY_TIME, taskName);
+    }
+}
+
+void WebPattern::RecoverToTopLeft()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::RecoverToTopLeft, webId: %{public}d", GetWebId());
+    isRotating_ = false;
+    if (renderContextForSurface_) {
+        renderContextForSurface_->SetRenderFit(RenderFit::TOP_LEFT);
     }
 }
 } // namespace OHOS::Ace::NG

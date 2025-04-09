@@ -1177,6 +1177,9 @@ public:
         return aiWriteAdapter_;
     }
 
+    void RegisterRotationEndListener(const std::shared_ptr<IRotationEventCallback>& listener);
+    void UnregisterRotationEndListener(const WeakPtr<NG::Pattern>& pattern);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1493,6 +1496,7 @@ private:
 
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
+    std::vector<std::shared_ptr<IRotationEventCallback>> ratationEndListener_;
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;

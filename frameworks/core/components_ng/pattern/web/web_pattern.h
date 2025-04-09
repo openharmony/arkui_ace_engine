@@ -753,12 +753,15 @@ public:
     void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void PushOverlayInfo(float x, float y, int32_t id);
     void WebOverlayRequestFocus();
-    
+
     std::string GetCurrentLanguage() override;
 
     void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
 
+    void InitRotationEventListener();
+    void UninitRotationEventListener();
+    void RecoverToTopLeft() override;
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -1034,6 +1037,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
+    void AdjustRotationRenderFit(WindowSizeChangeReason type);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1219,6 +1223,8 @@ private:
     bool keyboardGetready_ = false;
 
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
+    bool isRotating_ {false};
+    std::shared_ptr<RotationEventListener> rotationEventListener_ {nullptr};
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

@@ -1237,4 +1237,5 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
 {
     return false;
 }
+bool WebDelegate::IsNWebEx() { return false; }
 } // namespace OHOS::Ace
