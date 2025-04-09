@@ -24,7 +24,7 @@ import {
   titleSearch,
   ToggleClick,
   Search
-} from '../../utils';
+} from '../../../utils';
 import { FoldSplitContainerStart } from './FoldSplitContainer';
 import { Driver, ON } from '@kit.TestKit';
 
