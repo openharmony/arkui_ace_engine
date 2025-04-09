@@ -78,7 +78,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
-    const bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
+    const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
     const bool overScroll = CanOverScroll(GetScrollSource()) || forceOverScroll_;
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(gridLayoutInfo_, overScroll);

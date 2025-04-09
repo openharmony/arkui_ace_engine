@@ -824,6 +824,11 @@ protected:
 
     void CheckScrollBarOff();
 
+    bool IsBackToTopRunning() const
+    {
+        return isBackToTopRunning_;
+    }
+
 private:
     virtual void OnScrollEndCallback() {};
 
@@ -987,7 +992,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
-    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
+    bool isBackToTopRunning_ = false;
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
