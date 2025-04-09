@@ -11,33 +11,55 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-ohos_source_set("arkts_frontend") {
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-  configs = [ "$ace_root:ace_config" ]
-  deps = [
-    ":ArkoalaNative_ark",
-    "arkoala:arkoala_prebuild",
-  ]
+template("arkts_frontend") {
+  forward_variables_from(invoker, "*")
 
-  if (build_ohos_sdk) {
-    deps -= [
+  ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+    defines += invoker.defines
+    configs = [ "$ace_root:ace_config" ]
+    deps = [
       ":ArkoalaNative_ark",
       "arkoala:arkoala_prebuild",
     ]
+  
+    if (build_ohos_sdk) {
+      deps -= [
+        ":ArkoalaNative_ark",
+        "arkoala:arkoala_prebuild",
+      ]
+    }
+  
+    sources = [
+      "arkts_ani_utils.cpp",
+      "arkts_frontend.cpp",
+      "entry/arkts_entry_loader.cpp",
+    ]
+    external_deps = [
+      "hilog:libhilog",
+      "runtime_core:ani",
+    ]
   }
+}
 
-  sources = [
-    "arkts_ani_utils.cpp",
-    "arkts_frontend.cpp",
-    "entry/arkts_entry_loader.cpp",
-  ]
-  external_deps = [
-    "hilog:libhilog",
-    "runtime_core:ani",
-  ]
+foreach(item, ace_platforms) {
+  arkts_frontend("arkts_frontend_" + item.name) {
+    defines = []
+    config = {
+    }
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+  }
 }
 
 ohos_shared_library("ArkoalaNative_ark") {

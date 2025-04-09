@@ -222,6 +222,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
 void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
 {
     pipeline_ = DynamicCast<NG::PipelineContext>(context);
+    if (accessibilityManager_) {
+        accessibilityManager_->SetPipelineContext(context);
+        accessibilityManager_->InitializeCallback();
+    }
 }
 
 void* ArktsFrontend::GetShared(int32_t id)
