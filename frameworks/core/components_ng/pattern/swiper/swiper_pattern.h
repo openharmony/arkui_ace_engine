@@ -1245,6 +1245,8 @@ private:
     void ReportComponentChangeEvent(
         const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
     void ReportTraceOnDragEnd() const;
+    void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
+    void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
