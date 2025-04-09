@@ -34,6 +34,7 @@ template("ace_core_interfaces_native_node") {
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
+      "node/calendar_picker_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
@@ -174,7 +175,6 @@ template("ace_core_interfaces_native_node") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "node/calendar_picker_modifier.cpp",
         "node/column_split_modifier.cpp",
         "node/node_folder_stack_modifier.cpp",
         "node/row_split_modifier.cpp",

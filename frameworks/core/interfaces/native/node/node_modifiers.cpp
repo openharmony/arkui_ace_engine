@@ -131,7 +131,7 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 12
+#define MODIFIER_COUNTS 11
 #define BLANK_LINES 6
 
 extern "C" {
@@ -201,11 +201,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
-    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
-    #else
-        .getCalendarPickerModifier = nullptr,
-    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
     #ifndef ARKUI_WEARABLE
@@ -368,11 +364,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
-    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
-    #else
-        .getCalendarPickerModifier = nullptr,
-    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
     #ifndef ARKUI_WEARABLE

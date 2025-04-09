@@ -503,11 +503,9 @@ const ComponentAsyncEventHandler TEXT_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetTextPickerOnScrollStop,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCalendarPickerOnChange,
 };
-#endif
 
 const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
@@ -931,13 +929,11 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
-#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
-#endif
             break;
         }
         case ARKUI_CHECKBOX: {
