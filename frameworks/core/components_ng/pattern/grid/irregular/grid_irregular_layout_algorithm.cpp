@@ -186,7 +186,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
     }
 
     if ((wrapper_->GetLayoutProperty()->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST) &&
-        scrollSource_ != SCROLL_FROM_ANIMATION_SPRING) {
+        scrollSource_ == SCROLL_FROM_NONE) {
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
         PrepareJumpOnReset(info_);
