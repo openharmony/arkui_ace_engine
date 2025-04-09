@@ -31923,6 +31923,11 @@ class ArkTabsComponent extends ArkComponent {
     } else {
       modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, undefined);
     }
+    if (options[0].barModifier !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, options);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsBarModifierModifier.identity, TabsOptionsBarModifierModifier, undefined);
+    }
     return this;
   }
   onAnimationStart(value) {
@@ -32336,6 +32341,19 @@ class TabsOptionsControllerModifier extends ModifierWithKey {
   }
 }
 TabsOptionsControllerModifier.identity = Symbol('tabsOptionsController');
+class TabsOptionsBarModifierModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsBarModifier(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsBarModifier(node, this.value);
+    }
+  }
+}
+TabsOptionsBarModifierModifier.identity = Symbol('tabsOptionsBarModifier');
 class TabsOnAnimationStartModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

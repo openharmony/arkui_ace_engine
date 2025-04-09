@@ -1066,6 +1066,17 @@ void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperCon
     InitTabsNode(tabsNode, tabsController);
 }
 
+void TabsModelNG::SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+{
+    CHECK_NULL_VOID(onApply);
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    onApply(tabBarNode);
+}
+
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

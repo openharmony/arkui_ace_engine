@@ -3472,6 +3472,7 @@ struct ArkUITabsModifier {
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
     void (*setTabsOptionsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
     void (*setTabsOptionsController)(ArkUINodeHandle node, ArkUINodeHandle tabsController);
+    void (*setTabsOptionsBarModifier)(ArkUINodeHandle node, void* callback);
     void (*setScrollable)(ArkUINodeHandle node, ArkUI_Bool scrollable);
     void (*setTabBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setTabBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -3489,6 +3490,7 @@ struct ArkUITabsModifier {
     void (*resetIsVertical)(ArkUINodeHandle node);
     void (*resetTabBarPosition)(ArkUINodeHandle node);
     void (*resetTabsOptionsIndex)(ArkUINodeHandle node);
+    void (*resetTabsOptionsBarModifier)(ArkUINodeHandle node);
     void (*resetScrollable)(ArkUINodeHandle node);
     void (*resetTabBarWidth)(ArkUINodeHandle node);
     void (*resetTabBarHeight)(ArkUINodeHandle node);
