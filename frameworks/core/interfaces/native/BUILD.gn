@@ -128,6 +128,7 @@ template("ace_core_interfaces_native_node") {
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
+      "node/water_flow_modifier.cpp",
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -179,7 +180,6 @@ template("ace_core_interfaces_native_node") {
         "node/row_split_modifier.cpp",
         "node/select_modifier.cpp",
         "node/stepper_item_modifier.cpp",
-        "node/water_flow_modifier.cpp",
       ]
     }
 
