@@ -977,4 +977,12 @@ void ViewAbstractModelNG::SetLightColor(FrameNode* frameNode, const std::optiona
     }
 }
 
+void ViewAbstractModelNG::BindBackground(FrameNode* frameNode,
+    std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetBackgroundFunction(std::move(buildFunc));
+    ViewAbstract::SetBackgroundAlign(frameNode, align);
+}
+
 } // namespace OHOS::Ace::NG

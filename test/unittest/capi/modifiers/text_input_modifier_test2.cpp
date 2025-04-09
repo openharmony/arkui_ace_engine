@@ -134,7 +134,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
     EXPECT_TRUE(textFieldPattern->RequestCustomKeyboard());
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 /*
@@ -159,7 +159,7 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
     EXPECT_TRUE(textFieldPattern->RequestCustomKeyboard());
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
 }
 
 /**

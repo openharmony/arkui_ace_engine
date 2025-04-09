@@ -101,7 +101,6 @@ public:
         checkBuilderEvent.reset();
         static std::optional<RefPtr<UINode>> uiNode = node;
         auto checkCallback = [](
-            Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
@@ -113,7 +112,7 @@ public:
                 CallbackHelper(continuation).InvokeSync(AceType::RawPtr(uiNode.value()));
             }
         };
-        return Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, EXPECTED_CONTEXT_ID);
+        return Converter::ArkValue<CustomNodeBuilder>(checkCallback, EXPECTED_CONTEXT_ID);
     }
     template<typename OptCallback, typename ArkCallback>
     OptCallback CreateOnAppearCallback(FrameNode* frameNode)
@@ -238,7 +237,7 @@ HWTEST_F(CommonMethodModifierTest15, setBindSheetIsShowTest, TestSize.Level1)
     EXPECT_FALSE(checkBuilderEvent.has_value());
     modifier_->setBindSheet(node_, &optShow, &customBuilder, &optOptions);
     pipeline->FlushAnimationClosure();
-    EXPECT_FALSE(checkBuilderEvent.has_value());
+    EXPECT_TRUE(checkBuilderEvent.has_value());
 }
 
 /*

@@ -240,8 +240,9 @@ void DescriptionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto builderNode = CallbackHelper(*value).BuildSync(node);
-    GaugeModelNG::SetDescription(frameNode, builderNode);
+    CallbackHelper(*value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        GaugeModelNG::SetDescription(frameNode, uiNode);
+        }, node);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_GaugeShadowOptions* value)

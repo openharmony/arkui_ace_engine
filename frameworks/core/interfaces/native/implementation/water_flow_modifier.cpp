@@ -69,10 +69,9 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
     if (convValue) {
         auto optFooter = Converter::OptConvert<CustomNodeBuilder>(convValue.value().footer);
         if (optFooter) {
-            auto builder = [callback = CallbackHelper(optFooter.value()), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
-            WaterFlowModelNG::SetFooter(frameNode, std::move(builder));
+            CallbackHelper(optFooter.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                WaterFlowModelNG::SetFooter(frameNode, uiNode);
+                }, node);
         }
         auto optScroller = Converter::OptConvert<Ark_Scroller>(convValue.value().scroller);
         if (optScroller) {
