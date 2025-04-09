@@ -468,6 +468,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     DialogEvent changeEvent = GetChangeEvent(settingData, calendarDialogNode, dialogEvent); // do not check nullptr
     for (int32_t i = 0; i < SWIPER_MONTHS_COUNT; i++) {
         auto monthFrameNode = CreateCalendarMonthNode(calendarNodeId, settingData, changeEvent);
+        CHECK_NULL_RETURN(monthFrameNode, nullptr);
         auto monthLayoutProperty = monthFrameNode->GetLayoutProperty();
         CHECK_NULL_RETURN(monthLayoutProperty, nullptr);
         if (i == CURRENT_MONTH_INDEX) {
@@ -629,8 +630,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     CHECK_NULL_RETURN(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(
-        Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+    textLayoutProperty->UpdateContent(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
 
     auto fontSizeScale = pipeline->GetFontScale();
     auto fontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
@@ -679,11 +679,10 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             buttonInfos[index].fontSize.has_value() || buttonInfos[index].fontColor.has_value() ||
             buttonInfos[index].fontWeight.has_value() || buttonInfos[index].fontStyle.has_value() ||
             buttonInfos[index].fontFamily.has_value())) {
-        buttonLayoutProperty->UpdateLabel(
-            Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
+        buttonLayoutProperty->UpdateLabel(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);

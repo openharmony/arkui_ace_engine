@@ -17,8 +17,6 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_actuator.h"
-#include "test/unittest/core/syntax/mock_lazy_for_each_builder.h"
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -71,7 +69,10 @@ void ListCommonTestNg::CreateFocusableListItems(int32_t itemNumber)
         CreateListItem();
         {
             ButtonModelNG buttonModelNG;
-            buttonModelNG.CreateWithLabel("label");
+            CreateWithPara para;
+            para.label = "label";
+            std::list<RefPtr<Component>> buttonChildren;
+            buttonModelNG.CreateWithLabel(para, buttonChildren);
             ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
             ViewStackProcessor::GetInstance()->Pop();
         }

@@ -40,6 +40,9 @@ class PointerEvent;
 namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
+class DrawDelegate;
+struct SerializedGesture;
+struct AccessibilityParentRectInfo;
 
 namespace NG {
 enum class FormChildNodeType : int32_t {

@@ -76,7 +76,7 @@ void DumpLog::Print(int32_t depth, const std::string& content)
     for (int32_t i = 0; i < depth; ++i) {
         ostream_->write(space.c_str(), space.length());
     }
-    std::string data = content + separator_;
+    std::string data = content + (isUIExt_ ? ";" : "\n");
     ostream_->write(data.c_str(), data.length());
 }
 
@@ -125,7 +125,7 @@ bool DumpLog::OutPutBySize()
         return false;
     }
     // if current result size > max size, dump will output as file
-    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH) {
+    if (result_.size() + 1 > DumpLog::MAX_DUMP_LENGTH || isUIExt_) {
         auto dumpFilePath = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/arkui.dump";
         std::unique_ptr<std::ostream> ostream = std::make_unique<std::ofstream>(dumpFilePath);
         if (!ostream) {

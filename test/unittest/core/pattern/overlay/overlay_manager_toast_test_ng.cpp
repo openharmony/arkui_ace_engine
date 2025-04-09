@@ -17,9 +17,11 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "ui/base/ace_type.h"
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_subwindow.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -34,6 +36,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -50,6 +53,8 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -63,6 +68,7 @@ const OffsetF MENU_OFFSET(10.0, 10.0);
 const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
+constexpr double DOUBLEONE = 1.0f;
 } // namespace
 class OverlayManagerToastTestNg : public testing::Test {
 public:
@@ -87,6 +93,10 @@ void OverlayManagerToastTestNg::SetUpTestCase()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_ELEVEN);
+    EXPECT_CALL(*AceType::DynamicCast<MockPipelineContext>(MockPipelineContext::GetCurrentContext()),
+        GetSafeAreaWithoutProcess())
+        .WillRepeatedly(Return(SafeAreaInsets {}));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(nullptr));
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == DragBarTheme::TypeId()) {
             return AceType::MakeRefPtr<DragBarTheme>();
@@ -545,6 +555,27 @@ HWTEST_F(OverlayManagerToastTestNg, ToastDumpInfoTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastThemeGetTopTest001
+ * @tc.desc: Test ToastTheme::GetTop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastThemeGetTopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ToastTheme and set top value.
+     */
+    auto toastTheme = AceType::MakeRefPtr<ToastTheme>();
+    Dimension topValue = 10.0_vp;
+    toastTheme->top_ = topValue;
+    /**
+     * @tc.steps: step2. call GetTop function and check the returned value.
+     * @tc.expected: the returned value should be equal to the set top value.
+     */
+    const Dimension& result = toastTheme->GetTop();
+    EXPECT_EQ(result, topValue);
+}
+
+/**
  * @tc.name: FoldStatusChangedAnimation
  * @tc.desc: Test FoldStatusChangedAnimation
  * @tc.type: FUNC
@@ -659,5 +690,640 @@ HWTEST_F(OverlayManagerToastTestNg, DumpInfo, TestSize.Level1)
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     toastPattern->DumpInfo(json);
     EXPECT_FALSE(toastPattern->IsDefaultToast());
+}
+
+/**
+ * @tc.name: ToastLayoutAlgorithmLayout001
+ * @tc.desc: Test Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready ToastLayoutAlgorithm.
+     */
+    ToastLayoutAlgorithm toastLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    toastInfo.offset = DimensionOffset(Dimension(DOUBLEONE), Dimension(DOUBLEONE));
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapperNode = toastNode->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto frameNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    EXPECT_TRUE(AceApplicationInfo::GetInstance().IsRightToLeft());
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::TOP_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::CENTER_START);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::CENTER_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_START);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::DEFAULT);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+}
+
+/**
+ * @tc.name: ToastLayoutAlgorithmLayout002
+ * @tc.desc: Test Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmLayout002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready ToastLayoutAlgorithm.
+     */
+    ToastLayoutAlgorithm toastLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    toastInfo.offset = DimensionOffset(Dimension(DOUBLEONE), Dimension(DOUBLEONE));
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapperNode = toastNode->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto frameNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    EXPECT_FALSE(AceApplicationInfo::GetInstance().IsRightToLeft());
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::TOP_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::CENTER_START);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::CENTER_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_START);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::BOTTOM_END);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+
+    toastPattern->GetToastInfo().alignment = static_cast<int32_t>(ToastAlignment::DEFAULT);
+    toastLayoutAlgorithm.Layout(layoutWrapper);
+}
+
+/**
+ * @tc.name: ToastLayoutAlgorithmGetTextLayoutConstraint001
+ * @tc.desc: Test GetTextLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmGetTextLayoutConstraint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready ToastLayoutAlgorithm.
+     */
+    ToastLayoutAlgorithm toastLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    toastInfo.offset = DimensionOffset(Dimension(DOUBLEONE), Dimension(DOUBLEONE));
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapperNode = toastNode->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto frameNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    auto context = toastPattern->GetToastContext();
+    ASSERT_NE(context, nullptr);
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    EXPECT_FALSE(container->IsSubContainer());
+    container->isUIExtensionWindow_ = true;
+    EXPECT_TRUE(toastPattern->IsAlignedWithHostWindow());
+
+    context->safeAreaManager_ = nullptr;
+    auto safeAreaManager = context->GetSafeAreaManager();
+    ASSERT_EQ(safeAreaManager, nullptr);
+    container->SetApiTargetVersion(19);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN));
+    toastLayoutAlgorithm.GetTextLayoutConstraint(layoutWrapper);
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: ToastLayoutAlgorithmGetTextLayoutConstraint002
+ * @tc.desc: Test GetTextLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmGetTextLayoutConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready ToastLayoutAlgorithm.
+     */
+    ToastLayoutAlgorithm toastLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    toastInfo.offset = DimensionOffset(Dimension(DOUBLEONE), Dimension(DOUBLEONE));
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapperNode = toastNode->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto frameNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    auto context = toastPattern->GetToastContext();
+    ASSERT_NE(context, nullptr);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->isUIExtensionWindow_ = true;
+    EXPECT_TRUE(toastPattern->IsAlignedWithHostWindow());
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    auto safeAreaManager = context->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->keyboardInset_ = { .end = 10.0f, .start = 0.0f };
+    auto inset = safeAreaManager->GetKeyboardInset().Length();
+    auto keyboardInset = NearEqual(inset, 0.0f) ? safeAreaManager->GetRawKeyboardHeight() : inset;
+    EXPECT_TRUE(GreatNotEqual(keyboardInset, 0));
+    container->SetApiTargetVersion(19);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN));
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+    AceEngine::Get().AddContainer(Container::CurrentId(), AceType::MakeRefPtr<MockContainer>());
+    SubwindowManager::GetInstance()->AddParentContainerId(Container::CurrentId(), Container::CurrentId());
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    auto parentContainer = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(currentId));
+    ASSERT_NE(parentContainer, nullptr);
+    parentContainer->isUIExtensionWindow_ = true;
+    toastLayoutAlgorithm.GetTextLayoutConstraint(layoutWrapper);
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: ToastLayoutAlgorithmGetTextLayoutConstraint003
+ * @tc.desc: Test GetTextLayoutConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastLayoutAlgorithmGetTextLayoutConstraint003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready ToastLayoutAlgorithm.
+     */
+    ToastLayoutAlgorithm toastLayoutAlgorithm;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::SYSTEM_TOP_MOST;
+    toastInfo.offset = DimensionOffset(Dimension(DOUBLEONE), Dimension(DOUBLEONE));
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto layoutWrapperNode = toastNode->CreateLayoutWrapper(true, true);
+    auto layoutWrapper = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapperNode));
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto frameNode = layoutWrapper->GetHostNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto toastPattern = frameNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto toastProperty = frameNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProperty, nullptr);
+    auto context = toastPattern->GetToastContext();
+    ASSERT_NE(context, nullptr);
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    EXPECT_FALSE(container->IsSubContainer());
+    container->isUIExtensionWindow_ = true;
+    EXPECT_FALSE(toastPattern->IsAlignedWithHostWindow());
+
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    auto safeAreaManager = context->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->keyboardInset_ = { .end = 10.0f, .start = 0.0f };
+    auto inset = safeAreaManager->GetKeyboardInset().Length();
+    auto keyboardInset = NearEqual(inset, 0.0f) ? safeAreaManager->GetRawKeyboardHeight() : inset;
+    EXPECT_TRUE(GreatNotEqual(keyboardInset, 0));
+    container->SetApiTargetVersion(19);
+    EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN));
+    toastLayoutAlgorithm.GetTextLayoutConstraint(layoutWrapper);
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: ToastPatternDumpInfo001
+ * @tc.desc: Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternDumpInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto host = toastPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+
+    toastProp->propToastAlignment_ = std::nullopt;
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    toastPattern->DumpInfo(json);
+    EXPECT_FALSE((toastProp->HasToastAlignment()));
+
+    toastProp->propToastAlignment_ = Alignment();
+    json.reset();
+    json = std::make_unique<JsonValue>();
+    toastPattern->DumpInfo(json);
+    EXPECT_TRUE((toastProp->HasToastAlignment()));
+}
+
+/**
+ * @tc.name: ToastPatternDumpInfo002
+ * @tc.desc: Test DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternDumpInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto host = toastPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+
+    toastProp->propToastAlignment_ = std::nullopt;
+    toastPattern->DumpInfo();
+    EXPECT_FALSE((toastProp->HasToastAlignment()));
+
+    toastProp->propToastAlignment_ = Alignment();
+    toastPattern->DumpInfo();
+    EXPECT_TRUE((toastProp->HasToastAlignment()));
+}
+
+/**
+ * @tc.name: ToastPatternUpdateToastSize
+ * @tc.desc: Test UpdateToastSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateToastSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto host = toastPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(host->GetLayoutProperty());
+    CHECK_NULL_VOID(toastProp);
+
+    auto container = Container::Current();
+    container->SetApiTargetVersion(11);
+    EXPECT_FALSE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE));
+    toastPattern->UpdateToastSize(host);
+}
+
+/**
+ * @tc.name: ToastPatternGetBottomValue
+ * @tc.desc: Test GetBottomValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternGetBottomValue, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::DEFAULT;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    auto host = toastPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto toastTheme = pipeline->GetTheme<ToastTheme>();
+    ASSERT_NE(toastTheme, nullptr);
+    toastTheme->bottom_ = Dimension(DOUBLEONE, DimensionUnit::PERCENT);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+    toastProp->propBottom_ = Dimension(DOUBLEONE, DimensionUnit::PERCENT);
+    auto toastBottom = toastProp->GetBottomValue(toastTheme->GetBottom());
+    EXPECT_TRUE(toastBottom.Unit() == DimensionUnit::PERCENT);
+
+    EXPECT_EQ(toastPattern->GetBottomValue(layoutWrapper), 1.0);
+}
+
+/**
+ * @tc.name: ToastPatternInitWrapperRect001
+ * @tc.desc: Test InitWrapperRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternInitWrapperRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::SYSTEM_TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProp = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProp, nullptr);
+    auto layoutWrapperPtr = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutWrapperPtr, nullptr);
+
+    auto containerId = MockContainer::CurrentId();
+    EXPECT_FALSE(containerId >= MIN_SUBCONTAINER_ID);
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(context, nullptr);
+    toastPattern->InitWrapperRect(layoutWrapperPtr, toastProp);
+
+    MockContainer::UpdateCurrent(MIN_SUBCONTAINER_ID);
+    containerId = MockContainer::CurrentId();
+    EXPECT_TRUE(containerId >= MIN_SUBCONTAINER_ID);
+    toastPattern->InitWrapperRect(layoutWrapperPtr, toastProp);
+    MockContainer::UpdateCurrent(0);
+}
+
+/**
+ * @tc.name: ToastPatternInitWrapperRect002
+ * @tc.desc: Test InitWrapperRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternInitWrapperRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProps = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapperPtr = reinterpret_cast<LayoutWrapper*>(Referenced::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutWrapperPtr, nullptr);
+
+    auto containerId = MockContainer::CurrentId();
+    EXPECT_FALSE(containerId >= MIN_SUBCONTAINER_ID);
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(context, nullptr);
+    toastProps->propToastAlignment_ = Alignment::TOP_CENTER;
+    Alignment alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    EXPECT_TRUE(alignment == Alignment::TOP_CENTER);
+    toastPattern->InitWrapperRect(layoutWrapperPtr, toastProps);
+
+    toastProps->propToastAlignment_ = Alignment::TOP_RIGHT;
+    alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    EXPECT_TRUE(alignment == Alignment::TOP_RIGHT);
+    toastPattern->InitWrapperRect(layoutWrapperPtr, toastProps);
+
+    toastProps->propToastAlignment_ = Alignment::BOTTOM_LEFT;
+    alignment = toastProps->GetToastAlignmentValue(Alignment::BOTTOM_CENTER);
+    EXPECT_TRUE(alignment == Alignment::BOTTOM_LEFT);
+    toastPattern->InitWrapperRect(layoutWrapperPtr, toastProps);
+}
+
+/**
+ * @tc.name: ToastPatternInitUIExtensionHostWindowRect001
+ * @tc.desc: Test InitUIExtensionHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternInitUIExtensionHostWindowRect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    EXPECT_FALSE(container->IsSubContainer());
+    container->isUIExtensionWindow_ = true;
+    EXPECT_TRUE(toastPattern->IsAlignedWithHostWindow());
+
+    toastPattern->InitUIExtensionHostWindowRect();
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: ToastPatternInitUIExtensionHostWindowRect002
+ * @tc.desc: Test InitUIExtensionHostWindowRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternInitUIExtensionHostWindowRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->isSubContainer_ = true;
+    EXPECT_TRUE(container->IsSubContainer());
+
+    AceEngine::Get().AddContainer(Container::CurrentId() + 1, AceType::MakeRefPtr<MockContainer>());
+    SubwindowManager::GetInstance()->AddParentContainerId(Container::CurrentId(), Container::CurrentId() + 1);
+    auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+    auto containerParent = AceEngine::Get().GetContainer(currentId);
+    ASSERT_NE(container, nullptr);
+
+    toastPattern->InitUIExtensionHostWindowRect();
+    container->ResetContainer();
+}
+
+/**
+ * @tc.name: ToastPatternGetSystemTopMostSubwindowSize
+ * @tc.desc: Test GetSystemTopMostSubwindowSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternGetSystemTopMostSubwindowSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->UpdateCurrent(-1);
+    auto subwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(Container::CurrentId());
+    ASSERT_EQ(subwindow, nullptr);
+    toastPattern->GetSystemTopMostSubwindowSize();
+
+    container->UpdateCurrent(10);
+    auto mockSubwindow = AceType::MakeRefPtr<MockSubwindow>();
+    EXPECT_CALL(*mockSubwindow, GetChildContainerId()).Times(1).WillOnce(Return(0));
+    SubwindowManager::GetInstance()->AddSystemToastWindow(Container::CurrentId(), mockSubwindow);
+    ASSERT_NE(SubwindowManager::GetInstance()->GetSystemToastWindow(Container::CurrentId()), nullptr);
+    EXPECT_CALL(*mockSubwindow, GetWindowRect())
+        .Times(1)
+        .WillOnce(Return(RectF(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE)));
+    toastPattern->GetSystemTopMostSubwindowSize();
+    EXPECT_CALL(*mockSubwindow, GetWindowRect()).Times(1).WillOnce(Return(RectF()));
+    toastPattern->GetSystemTopMostSubwindowSize();
+    EXPECT_CALL(*mockSubwindow, GetWindowRect())
+        .Times(1)
+        .WillOnce(Return(RectF(DOUBLEONE, DOUBLEONE, DOUBLEONE, 0.0f)));
+    toastPattern->GetSystemTopMostSubwindowSize();
+
+    container->ResetContainer();
+    mockSubwindow = nullptr;
+    SubwindowManager::GetInstance()->subwindowMap_.clear();
+    SubwindowManager::GetInstance()->instanceSubwindowMap_.clear();
+}
+
+/**
+ * @tc.name: ToastPatternOnDetachFromFrameNode
+ * @tc.desc: Test OnDetachFromFrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternOnDetachFromFrameNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto containerId = Container::CurrentId();
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    toastPattern->foldDisplayModeChangedCallbackId_ = std::nullopt;
+    toastPattern->halfFoldHoverChangedCallbackId_ = std::nullopt;
+    toastPattern->OnDetachFromFrameNode(nullptr);
 }
 } // namespace OHOS::Ace::NG

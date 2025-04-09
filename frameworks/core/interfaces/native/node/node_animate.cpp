@@ -73,7 +73,7 @@ void PrintNodeAnimationInfo(const AnimationOption& option,
                 option.GetDuration());
         } else {
             TAG_LOGI(AceLogTag::ACE_ANIMATION,
-                "nodeAnimate:%{public}s iteration is infinite, remember to stop it."
+                "nodeAnimate:%{public}s iteration is infinite."
                 "duration:%{public}d, curve:%{public}s",
                 animationInterfaceName,
                 option.GetDuration(), option.GetCurve()->ToString().c_str());

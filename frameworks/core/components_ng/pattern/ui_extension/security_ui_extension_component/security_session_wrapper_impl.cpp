@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "extension/extension_business_info.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "transaction/rs_sync_transaction_controller.h"
@@ -394,6 +395,23 @@ void SecuritySessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wan
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
+}
+
+void SecuritySessionWrapperImpl::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(session_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    AAFwk::WantParams configParam;
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_VOID(container);
+    container->GetExtensionConfig(configParam);
+    AAFwk::WantParams wantParam(customWant_->GetParams());
+    wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
+    AAFwk::Want dataToSend;
+    dataToSend.SetParams(wantParam);
+    dataHandler->SendDataAsync(Rosen::SubSystemId::WM_UIEXT,
+        static_cast<uint32_t>(OHOS::Rosen::Extension::Businesscode::SYNC_WANT_PARAMS), dataToSend);
 }
 
 bool SecuritySessionWrapperImpl::IsSessionValid()
@@ -831,18 +849,18 @@ bool SecuritySessionWrapperImpl::SendBusinessData(
     if (type == BusinessDataSendType::ASYNC) {
         dataHandler->SendDataAsync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
             static_cast<uint32_t>(code), data);
-        PLATFORM_LOGW("SendBusinessData ASYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+        PLATFORM_LOGD("SendBusinessData ASYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
             code, subSystemId);
         return true;
     }
     auto result = dataHandler->SendDataSync(static_cast<OHOS::Rosen::SubSystemId>(subSystemId),
         static_cast<uint32_t>(code), data);
     if (result != Rosen::DataHandlerErr::OK) {
-        PLATFORM_LOGW("SendBusinessData SYNC Fail, businessCode=%{public}u, "
+        PLATFORM_LOGD("SendBusinessData SYNC Fail, businessCode=%{public}u, "
             "result=%{public}u, subSystemId=%{public}hhu.", code, result, subSystemId);
         return false;
     }
-    PLATFORM_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
+    PLATFORM_LOGD("SendBusinessData SYNC Success, businessCode=%{public}u, subSystemId=%{public}hhu.",
         code, subSystemId);
     return true;
 }

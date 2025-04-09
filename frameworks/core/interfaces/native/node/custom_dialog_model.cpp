@@ -110,6 +110,8 @@ ArkUIDialogHandle CreateDialog()
         .heightValue = std::optional<ArkUI_Float32>(),
         .heightUnit = DimensionUnit::VP,
         .blurStyle = ARKUI_BLUR_STYLE_COMPONENT_ULTRA_THICK,
+        .blurStyleOption = std::nullopt,
+        .effectOption = std::nullopt,
         .keyboardAvoidMode = OHOS::Ace::KeyboardAvoidMode::DEFAULT,
         .enableHoverMode = false,
         .hoverModeAreaType = OHOS::Ace::HoverModeAreaType::TOP_SCREEN,
@@ -358,6 +360,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.dialogLevelUniqueId = controllerHandler->levelUniqueId;
     dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
     dialogProperties.backgroundBlurStyle = controllerHandler->blurStyle;
+    dialogProperties.blurStyleOption = controllerHandler->blurStyleOption;
+    dialogProperties.effectOption = controllerHandler->effectOption;
     dialogProperties.keyboardAvoidMode = controllerHandler->keyboardAvoidMode;
     dialogProperties.enableHoverMode = controllerHandler->enableHoverMode;
     dialogProperties.hoverModeArea = controllerHandler->hoverModeAreaType;
@@ -431,31 +435,8 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     ParseDialogHeight(dialogProperties, controllerHandler);
 }
 
-PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogProps)
+void ParsePartialDialogPropertiesFromProps(const DialogProperties& dialogProps, PromptDialogAttr& dialogAttr)
 {
-    PromptDialogAttr dialogAttr = {
-        .autoCancel = dialogProps.autoCancel, .customStyle = dialogProps.customStyle,
-        .customOnWillDismiss = dialogProps.onWillDismiss, .maskColor = dialogProps.maskColor,
-        .backgroundColor = dialogProps.backgroundColor, .borderRadius = dialogProps.borderRadius,
-        .showInSubWindow = dialogProps.isShowInSubWindow, .isModal = dialogProps.isModal,
-        .enableHoverMode = dialogProps.enableHoverMode, .customBuilder = dialogProps.customBuilder,
-        .customBuilderWithId = dialogProps.customBuilderWithId, .borderWidth = dialogProps.borderWidth,
-        .borderColor = dialogProps.borderColor, .borderStyle = dialogProps.borderStyle, .shadow = dialogProps.shadow,
-        .width = dialogProps.width, .height = dialogProps.height, .maskRect = dialogProps.maskRect,
-        .transitionEffect = dialogProps.transitionEffect, .contentNode = dialogProps.contentNode,
-        .onDidAppear = dialogProps.onDidAppear, .onDidDisappear = dialogProps.onDidDisappear,
-        .onWillAppear = dialogProps.onWillAppear, .onWillDisappear = dialogProps.onWillDisappear,
-        .keyboardAvoidMode = dialogProps.keyboardAvoidMode, .dialogCallback = dialogProps.dialogCallback,
-        .keyboardAvoidDistance = dialogProps.keyboardAvoidDistance,
-        .levelOrder = dialogProps.levelOrder,
-        .dialogLevelMode = dialogProps.dialogLevelMode,
-        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
-        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
-        .blurStyleOption = dialogProps.blurStyleOption,
-        .effectOption = dialogProps.effectOption,
-        .customCNode = dialogProps.customCNode
-    };
 #if defined(PREVIEW)
     if (dialogAttr.showInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -473,6 +454,45 @@ PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties &dialogPr
             dialogAttr.backgroundBlurStyle = dialogProps.backgroundBlurStyle;
         }
     }
+}
+
+PromptDialogAttr ParseDialogPropertiesFromProps(const DialogProperties& dialogProps)
+{
+    PromptDialogAttr dialogAttr = { .autoCancel = dialogProps.autoCancel,
+        .showInSubWindow = dialogProps.isShowInSubWindow,
+        .isModal = dialogProps.isModal,
+        .enableHoverMode = dialogProps.enableHoverMode,
+        .isUserCreatedDialog = dialogProps.isUserCreatedDialog,
+        .customBuilder = dialogProps.customBuilder,
+        .customBuilderWithId = dialogProps.customBuilderWithId,
+        .customOnWillDismiss = dialogProps.onWillDismiss,
+        .maskRect = dialogProps.maskRect,
+        .backgroundColor = dialogProps.backgroundColor,
+        .blurStyleOption = dialogProps.blurStyleOption,
+        .effectOption = dialogProps.effectOption,
+        .borderWidth = dialogProps.borderWidth,
+        .borderColor = dialogProps.borderColor,
+        .borderStyle = dialogProps.borderStyle,
+        .borderRadius = dialogProps.borderRadius,
+        .shadow = dialogProps.shadow,
+        .width = dialogProps.width,
+        .height = dialogProps.height,
+        .contentNode = dialogProps.contentNode,
+        .customStyle = dialogProps.customStyle,
+        .maskColor = dialogProps.maskColor,
+        .transitionEffect = dialogProps.transitionEffect,
+        .onDidAppear = dialogProps.onDidAppear,
+        .onDidDisappear = dialogProps.onDidDisappear,
+        .onWillAppear = dialogProps.onWillAppear,
+        .onWillDisappear = dialogProps.onWillDisappear,
+        .keyboardAvoidMode = dialogProps.keyboardAvoidMode,
+        .dialogCallback = dialogProps.dialogCallback,
+        .levelOrder = dialogProps.levelOrder,
+        .dialogLevelMode = dialogProps.dialogLevelMode,
+        .dialogLevelUniqueId = dialogProps.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogProps.dialogImmersiveMode,
+        .customCNode = dialogProps.customCNode };
+    ParsePartialDialogPropertiesFromProps(dialogProps, dialogAttr);
     return dialogAttr;
 }
 
@@ -983,6 +1003,49 @@ ArkUI_Int32 SetFocusable(ArkUIDialogHandle controllerHandler, bool focusable)
 {
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->focusable = focusable;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle controllerHandler, ArkUI_Int32 (*intArray)[3],
+    ArkUI_Float32 scale, ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.colorMode = static_cast<ThemeColorMode>((*intArray)[NUM_0]);
+    blurStyleOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_1]);
+    blurStyleOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_2]);
+    blurStyleOption.scale = scale;
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
+    blurStyleOption.blurOption.grayscale = greyVec;
+    blurStyleOption.inactiveColor = Color((*uintArray)[NUM_2]);
+    blurStyleOption.isValidColor = isValidColor;
+    if (!controllerHandler->blurStyleOption.has_value()) {
+        controllerHandler->blurStyleOption.emplace();
+    }
+    controllerHandler->blurStyleOption.value() = blurStyleOption;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle controllerHandler, ArkUI_Float32 (*floatArray)[3],
+    ArkUI_Int32 (*intArray)[2], ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    CalcDimension radius((*floatArray)[NUM_0], DimensionUnit::VP);
+    EffectOption effectOption;
+    effectOption.radius = radius;
+    effectOption.saturation = (*floatArray)[NUM_1];
+    effectOption.brightness = (*floatArray)[NUM_2];
+    effectOption.adaptiveColor = static_cast<AdaptiveColor>((*intArray)[NUM_0]);
+    effectOption.policy = static_cast<BlurStyleActivePolicy>((*intArray)[NUM_1]);
+    effectOption.color = Color((*uintArray)[NUM_0]);
+    std::vector<float> greyVec = { (*uintArray)[NUM_0], (*uintArray)[NUM_1] };
+    effectOption.blurOption.grayscale = greyVec;
+    effectOption.inactiveColor = Color((*uintArray)[NUM_3]);
+    effectOption.isValidColor = isValidColor;
+    if (!controllerHandler->effectOption.has_value()) {
+        controllerHandler->effectOption.emplace();
+    }
+    controllerHandler->effectOption.value() = effectOption;
     return ERROR_CODE_NO_ERROR;
 }
 

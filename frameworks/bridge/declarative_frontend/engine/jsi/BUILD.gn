@@ -308,6 +308,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
+      "nativeModule/arkts_native_water_flow_bridge.cpp",
       "nativeModule/arkts_native_web_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
@@ -320,7 +321,6 @@ template("declarative_js_engine_ark") {
         "nativeModule/arkts_native_row_split_bridge.cpp",
         "nativeModule/arkts_native_select_bridge.cpp",
         "nativeModule/arkts_native_stepper_item_bridge.cpp",
-        "nativeModule/arkts_native_water_flow_bridge.cpp",
       ]
     }
 

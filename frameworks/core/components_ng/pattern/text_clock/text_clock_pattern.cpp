@@ -161,11 +161,13 @@ bool TextClockPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void TextClockPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        Pattern::OnModifyDone();
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        Pattern::OnModifyDone();
+    }
+
     auto textNode = GetTextNode();
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -261,8 +263,7 @@ void TextClockPattern::InitUpdateTimeTextCallBack()
     auto context = host->GetContext();
     if (context) {
         auto container = Container::Current();
-        bool isDynamicComponent = container && container->IsDynamicRender() &&
-                                  container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+        bool isDynamicComponent = container && container->IsDynamicRender();
         isForm_ = context->IsFormRender() && !isDynamicComponent;
     }
     RegistVisibleAreaChangeCallback();
@@ -489,7 +490,9 @@ void TextClockPattern::ParseInputFormat()
             formatElementMap_[j] = tempFormatElement;
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is12h) {
         is24H_ = false;
     }
 }

@@ -78,6 +78,10 @@ export struct promptActionCustomDialogBootcamp {
   @State shadowOptionsOffsetY: number = 0;
   @State enableShadowOptionsFill: boolean = false;
   @State shadowOptionsFill: boolean = false;
+  scroller: Scroller = new Scroller();
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   build() {
     NavDestination() {
@@ -86,6 +90,9 @@ export struct promptActionCustomDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -171,7 +178,7 @@ export struct promptActionCustomDialogBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
 
         ColorBlock({
@@ -432,15 +439,21 @@ export struct promptActionCustomDialogBootcamp {
       }.width('100%')
     }
     .height('52%')
+    .id('scroll')
+  }
+
+  @Builder
+  Generic() {
+
   }
 }
 
 @Preview
 @Component
-struct CustomDialogBootcampPreviewer {
+struct promptActionCustomDialogBootcampPreviewer {
   build() {
     promptActionCustomDialogBootcamp({
-      title: '打开自定义弹窗/CustomDialog'
+      title: '打开自定义弹窗/promptActionCustomDialog'
     })
   }
 }

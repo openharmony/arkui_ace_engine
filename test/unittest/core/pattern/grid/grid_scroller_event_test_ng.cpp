@@ -469,6 +469,44 @@ HWTEST_F(GridScrollerEventTestNg, GridEventTestNg007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridOnReachEnd001
+ * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerEventTestNg, GridOnReachEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the OnReachEnd event.
+     */
+    bool isTrigger = false;
+    auto event = [&isTrigger]() { isTrigger = true; };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetOnReachEnd(event);
+    CreateFixedItems(10);
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    auto info = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info.repeatDifference_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll down to end
+     * @tc.expected: the OnReachEnd event can be triggered.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(isTrigger);
+
+    isTrigger = false;
+
+    /**
+     * @tc.steps: step3. Modify the repeatDifference_ of Grid.
+     * @tc.expected: the OnReachEnd event can not be triggered.
+     */
+    pattern_->FireOnReachEnd(event, nullptr);
+    EXPECT_FALSE(isTrigger);
+}
+
+/**
  * @tc.name: VerticalGridWithoutScrollBar001
  * @tc.desc: Test Grid(Axis::VERTICAL) Scroll Without Scroll Bar Without Animation
  * @tc.type: FUNC

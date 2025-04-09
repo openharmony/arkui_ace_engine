@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SWIPER_H
 
-#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -78,10 +77,8 @@ protected:
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void ResetSwiperNode();
 
     private:
-        static WeakPtr<JSIndicatorController> jSIndicatorController_;
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);
 };
 

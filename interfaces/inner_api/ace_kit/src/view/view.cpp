@@ -25,6 +25,8 @@ namespace OHOS::Ace::Kit {
 
 View::View() = default;
 
+View::View(const RefPtr<FrameNode>& node) : node_(node) {}
+
 View::~View() = default;
 
 const RefPtr<FrameNode>& View::GetNode() const

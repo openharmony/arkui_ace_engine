@@ -81,6 +81,7 @@ public:
 protected:
     std::vector<MenuOptionsParam> GetMenuOptionItems();
     DrawingContext GetDrawingContext(Testing::MockCanvas& canvas);
+    void InitTextOverlayTheme(const RefPtr<TextOverlayTheme>& textOverlayTheme);
 };
 
 void SelectOverlayTestNg::SetUpTestCase()
@@ -128,6 +129,20 @@ DrawingContext SelectOverlayTestNg::GetDrawingContext(Testing::MockCanvas& canva
     EXPECT_CALL(canvas, Restore()).Times(AnyNumber());
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     return context;
+}
+
+void SelectOverlayTestNg::InitTextOverlayTheme(const RefPtr<TextOverlayTheme>& textOverlayTheme)
+{
+    CHECK_NULL_VOID(textOverlayTheme);
+    textOverlayTheme->cutLabel_ = "剪切";
+    textOverlayTheme->copyLabel_ = "复制";
+    textOverlayTheme->pasteLabel_ = "粘贴";
+    textOverlayTheme->selectAllLabel_ = "全选";
+    textOverlayTheme->translateLabel_ = "翻译";
+    textOverlayTheme->shareLabel_ = "分享";
+    textOverlayTheme->searchLabel_ = "搜索";
+    textOverlayTheme->cameraInput_ = "拍摄输入";
+    textOverlayTheme->aiWrite_ = "小艺帮写";
 }
 
 /**
@@ -3679,9 +3694,20 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions001, TestSize.Level1)
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(result);
 }
 
@@ -3704,9 +3730,20 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions002, TestSize.Level1)
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(result);
 }
 
@@ -3729,9 +3766,20 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions003, TestSize.Level1)
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(result);
 }
 
@@ -3754,9 +3802,20 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions004, TestSize.Level1)
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(result);
 }
 
@@ -3779,9 +3838,20 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions005, TestSize.Level1)
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(result);
 }
 
@@ -3807,6 +3877,16 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions006, TestSize.Level1)
     float maxWidth = 3.0f;
     float allocatedSize = 2.0f;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -3817,6 +3897,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions006, TestSize.Level1)
      */
     pipeline->SetFontScale(1.85f);
     bool result = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_FALSE(result);
 }
 
@@ -3843,6 +3924,16 @@ HWTEST_F(SelectOverlayTestNg, BuildButton001, TestSize.Level1)
         callBackFlag = 1;
         return ;
     };
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     EXPECT_NE(selectOverlayNode->selectMenuInner_, nullptr);
@@ -3867,6 +3958,7 @@ HWTEST_F(SelectOverlayTestNg, BuildButton001, TestSize.Level1)
         GestureEvent gestureEvent = GestureEvent();
         playClickCallback(gestureEvent);
     }
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_NE(selectOverlayNode->isShowInDefaultMenu_[0], false);
 }
 
@@ -4336,12 +4428,23 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions007, TestSize.Level1)
     SelectOverlayInfo selectInfo;
     selectInfo.menuInfo.showCopy = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
 
     float maxWidth = 8.0f;
     float allocatedSize = 11.0f;
     auto ret = selectOverlayNode->AddSystemDefaultOptions(maxWidth, allocatedSize);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     EXPECT_TRUE(ret);
 }
 
@@ -4396,7 +4499,8 @@ HWTEST_F(SelectOverlayTestNg, ShowShare002, TestSize.Level1)
 
     float maxWidth = 8.0f;
     float allocatedSize = 14.0f;
-    selectOverlayNode->ShowShare(maxWidth, allocatedSize, infoPtr);
+    std::string shareLabel = "分享";
+    selectOverlayNode->ShowShare(maxWidth, allocatedSize, infoPtr, shareLabel);
     EXPECT_TRUE(selectOverlayNode->isDefaultBtnOverMaxWidth_);
 }
 
@@ -4420,7 +4524,8 @@ HWTEST_F(SelectOverlayTestNg, ShowShare003, TestSize.Level1)
 
     float maxWidth = 8.0f;
     float allocatedSize = 13.0f;
-    selectOverlayNode->ShowShare(maxWidth, allocatedSize, infoPtr);
+    std::string shareLabel = "分享";
+    selectOverlayNode->ShowShare(maxWidth, allocatedSize, infoPtr, shareLabel);
     EXPECT_TRUE(selectOverlayNode->isDefaultBtnOverMaxWidth_);
 }
 
@@ -4451,7 +4556,8 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
 
     float maxWidth = 8.0f;
     float allocatedSize = 14.0f;
-    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
+    std::string cameraInputLabel = "拍摄输入";
+    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr, cameraInputLabel);
     EXPECT_TRUE(selectOverlayNode->isDefaultBtnOverMaxWidth_);
 }
 
@@ -4482,7 +4588,8 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
 
     float maxWidth = 8.0f;
     float allocatedSize = 11.0f;
-    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
+    std::string cameraInputLabel = "拍摄输入";
+    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr, cameraInputLabel);
     EXPECT_TRUE(selectOverlayNode->isDefaultBtnOverMaxWidth_);
 }
 
@@ -4513,7 +4620,8 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera003, TestSize.Level1)
 
     float maxWidth = 8.0f;
     float allocatedSize = 80.0f;
-    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr);
+    std::string cameraInputLabel = "拍摄输入";
+    selectOverlayNode->ShowCamera(maxWidth, allocatedSize, infoPtr, cameraInputLabel);
     EXPECT_TRUE(selectOverlayNode->isDefaultBtnOverMaxWidth_);
 }
 
@@ -5456,7 +5564,20 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems002, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
+
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
@@ -5508,7 +5629,18 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems003, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
 
@@ -5557,7 +5689,18 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems004, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
 
@@ -5591,7 +5734,18 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems005, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
 
@@ -5634,7 +5788,18 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems006, TestSize.Level1)
      */
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto themeManagerBase = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManagerBase, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    InitTextOverlayTheme(textOverlayTheme);
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(textOverlayTheme));
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     ASSERT_NE(selectOverlayNode, nullptr);
 
@@ -5644,14 +5809,13 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems006, TestSize.Level1)
     menuItem1.id = "item1";
     menuOptionItems.emplace_back(menuItem1);
 
-    std::shared_ptr<SelectOverlayInfo> info = nullptr; // 设置 info 为空指针
     float maxWidth = 1040.0f;
 
     /**
      * @tc.steps: step2. Call AddCreateMenuItems and verify the return value.
      * @tc.expected: The function returns -1.
      */
-    int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, info, maxWidth);
+    int32_t index = selectOverlayNode->AddCreateMenuItems(menuOptionItems, infoPtr, maxWidth);
     EXPECT_EQ(index, -1);
 
     /**

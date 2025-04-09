@@ -575,7 +575,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0014, TestSize.Level1)
     focusHub->currentFocus_ = true;
     bool flagCbk1 = false;
     bool flagCbk2 = false;
-    focusHub->onFocusInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onFocusInternal_ = [&flagCbk1](FocusReason reason) { flagCbk1 = !flagCbk1; };
     focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
     focusHub->SetOnFocusCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
     focusHub->OnFocus();
@@ -1300,7 +1300,10 @@ HWTEST_F(FocusHubTestNg, FocusHubOnKeyEvent004, TestSize.Level1)
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::UP;
     auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->isFocusActive_ = true;
+    ASSERT_NE(pipeline, nullptr);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
 
     /**
      * @tc.steps5: test keyEvent with keyEvent.code == KeyCode::TV_CONTROL_UP.
@@ -1690,7 +1693,9 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0032, TestSize.Level1)
     auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
-    context->isFocusActive_ = true;
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     focusHub->focusType_ = FocusType::NODE;
     focusHub->focusStyleType_ = FocusStyleType::OUTER_BORDER;
     std::list<RefPtr<FocusHub>> focusNodes;

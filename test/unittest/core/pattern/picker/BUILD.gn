@@ -23,6 +23,7 @@ ace_unittest("date_picker_test_ng") {
     "date_picker_test_ng_add.cpp",
     "date_picker_test_one.cpp",
     "date_picker_test_three.cpp",
+    "date_picker_test_toss.cpp",
     "date_picker_test_two.cpp",
     "date_picker_test_update.cpp",
   ]

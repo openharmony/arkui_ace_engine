@@ -70,12 +70,17 @@ public:
     static RefPtr<FrameNode> CreateSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& symbol,
         const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child = nullptr,
         const std::optional<Dimension>& symbolUserDefinedIdealFontSize = std::nullopt);
+    static void UpdateMenuNodePosition(const PreparedInfoForDrag& data);
+    static void ExcuteMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void SetHasCustomOutline(
+        const RefPtr<FrameNode>& menuWrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(
         const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam, const MenuType& isContextMenu);
     static void UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode);
-    static void UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode);
+    static void UpdateMenuBorderEffect(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
@@ -93,6 +98,19 @@ private:
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, RefPtr<FrameNode> column);
     static void UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
+    static void UpdateMenuNodeByAnimation(const RefPtr<FrameNode>& menuNode, const PreparedInfoForDrag& data);
+    static void UpdateMenuPositionTop(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuTop,
+        float biasMenuBottom);
+    static void UpdateMenuPositionLeft(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, AlignRule& alignMap, float biasMenuLeft,
+        float biasMenuRight);
+    static void UpdateMenuNodePositionTop(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
+        std::map<std::string, AlignRule>& alignMap);
+    static void UpdateMenuNodePositionLeft(MarginProperty& menuNodeMargin,
+        std::map<AlignDirection, AlignRule>& menuNodeAlignRules, const PreparedInfoForDrag& data, float biasMenuLeft,
+        std::map<std::string, AlignRule>& alignMap);
 };
 } // namespace OHOS::Ace::NG
 

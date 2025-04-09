@@ -973,6 +973,45 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ReachEnd002
+ * @tc.desc: Test the OnReachEnd event when the repeatDifference is different.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowScrollerTestNg, ReachEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the OnReachEnd event.
+     */
+    bool isTrigger = false;
+    auto event = [&isTrigger]() { isTrigger = true; };
+    auto model = CreateWaterFlow();
+    model.SetOnReachEnd(event);
+    CreateWaterFlowItems(20);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+    EXPECT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->layoutInfo_->repeatDifference_, 0);
+
+    /**
+     * @tc.steps: step2. Scroll down to end
+     * @tc.expected: the OnReachEnd event can be triggered.
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_TRUE(isTrigger);
+
+    isTrigger = false;
+
+    /**
+     * @tc.steps: step3. Modify the repeatDifference_ of WaterFlow.
+     * @tc.expected: the OnReachEnd event can not be triggered.
+     */
+    pattern_->layoutInfo_->repeatDifference_ = 1;
+    pattern_->FireOnReachEnd(event, nullptr);
+    EXPECT_FALSE(pattern_->layoutInfo_->repeatDifference_ == 0);
+    EXPECT_FALSE(isTrigger);
+}
+
+/**
  * @tc.name: ScrollAnimation001
  * @tc.desc: Test ScrollToIndex with animation.
  * @tc.type: FUNC

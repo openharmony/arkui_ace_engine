@@ -24,6 +24,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/property/layout_constraint.h"
+#include "ui/properties/scrollable_properties.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -208,6 +209,7 @@ constexpr int32_t SCROLL_FROM_AXIS = 11;
 constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
 constexpr int32_t SCROLL_FROM_CROWN = 14;
+constexpr int32_t SCROLL_FROM_STATUSBAR = 15;
 
 inline std::string GetSourceStr(int32_t scrollSource)
 {
@@ -446,17 +448,6 @@ struct OuterScrollBarLayoutInfo {
     }
 };
 
-enum class ScrollSource {
-    DRAG = 0,           // constexpr int32_t SCROLL_FROM_UPDATE = 1;
-    FLING,              // constexpr int32_t SCROLL_FROM_ANIMATION = 2;
-    EDGE_EFFECT,        // constexpr int32_t SCROLL_FROM_ANIMATION_SPRING = 4;
-    OTHER_USER_INPUT,   // constexpr int32_t SCROLL_FROM_AXIS = 11;
-    SCROLL_BAR,         // constexpr int32_t SCROLL_FROM_BAR = 6;
-    SCROLL_BAR_FLING,   // constexpr int32_t SCROLL_FROM_BAR_FLING = 13;
-    SCROLLER,           // constexpr int32_t SCROLL_FROM_JUMP = 3;
-    SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
-};
-
 struct SnapAnimationOptions {
     float snapDelta = 0.f;
     float animationVelocity = 0.f;
@@ -483,6 +474,7 @@ using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
+using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;

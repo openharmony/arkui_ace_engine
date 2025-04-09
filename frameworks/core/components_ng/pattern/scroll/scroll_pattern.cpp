@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -120,10 +121,14 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     PrintOffsetLog(AceLogTag::ACE_SCROLL, host->GetId(), prevOffset_ - currentOffset_);
     FireOnDidScroll(prevOffset_ - currentOffset_);
     auto onReachStart = eventHub->GetOnReachStart();
-    FireOnReachStart(onReachStart);
+    auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
+    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    FireOnReachEnd(onReachEnd);
-    OnScrollStop(eventHub->GetOnScrollStop());
+    auto onJSFrameNodeReachEnd = eventHub->GetJSFrameNodeOnReachEnd();
+    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
+    auto onScrollStop = eventHub->GetOnScrollStop();
+    auto onJSFrameNodeScrollStop = eventHub->GetJSFrameNodeOnScrollStop();
+    OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
     ScrollSnapTrigger();
     CheckScrollable();
     prevOffset_ = currentOffset_;
@@ -256,7 +261,7 @@ bool ScrollPattern::IsAtTop() const
     return GreatOrEqual(currentOffset_, 0.0);
 }
 
-bool ScrollPattern::IsAtBottom() const
+bool ScrollPattern::IsAtBottom(bool considerRepeat) const
 {
     if (LessNotEqual(scrollableDistance_, 0.0f)) {
         return LessOrEqual(currentOffset_, 0.0f);
@@ -401,7 +406,8 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_RETURN(eventHub, scroll);
     auto onScroll = eventHub->GetOnWillScrollEvent();
-    CHECK_NULL_RETURN(onScroll, scroll);
+    auto onJsFrameNodeScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
+    CHECK_NULL_RETURN(onScroll || onJsFrameNodeScroll, scroll);
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
@@ -411,8 +417,15 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     } else {
         scrollY.SetValue(scrollVpValue);
     }
-    auto scrollRes =
-        onScroll(scrollX, scrollY, GetScrollState(), ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    TwoDimensionScrollResult scrollRes { .xOffset = scrollX, .yOffset = scrollY };
+    if (onScroll) {
+        scrollRes = onScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
+            ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    }
+    if (onJsFrameNodeScroll) {
+        scrollRes = onJsFrameNodeScroll(scrollRes.xOffset, scrollRes.yOffset, GetScrollState(),
+            ScrollablePattern::ConvertScrollSource(GetScrollSource()));
+    }
     auto context = GetContext();
     CHECK_NULL_RETURN(context, scroll);
     if (GetAxis() == Axis::HORIZONTAL) {
@@ -428,7 +441,8 @@ void ScrollPattern::FireOnDidScroll(float scroll)
     auto eventHub = GetEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
-    CHECK_NULL_VOID(onScroll);
+    auto onJSFrameNodeDidScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    CHECK_NULL_VOID(onScroll || onJSFrameNodeDidScroll);
     Dimension scrollX(0, DimensionUnit::VP);
     Dimension scrollY(0, DimensionUnit::VP);
     Dimension scrollPx(scroll, DimensionUnit::PX);
@@ -441,38 +455,58 @@ void ScrollPattern::FireOnDidScroll(float scroll)
     auto scrollState = GetScrollState();
     bool isTriggered = false;
     if (!NearZero(scroll)) {
-        onScroll(scrollX, scrollY, scrollState);
+        if (onScroll) {
+            onScroll(scrollX, scrollY, scrollState);
+        }
+        if (onJSFrameNodeDidScroll) {
+            onJSFrameNodeDidScroll(scrollX, scrollY, scrollState);
+        }
         isTriggered = true;
     }
     if (scrollStop_ && !GetScrollAbort()) {
         if (scrollState != ScrollState::IDLE || !isTriggered) {
-            onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
+            if (onScroll) {
+                onScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
+            }
+            if (onJSFrameNodeDidScroll) {
+                onJSFrameNodeDidScroll(0.0_vp, 0.0_vp, ScrollState::IDLE);
+            }
         }
     }
 }
 
-void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachStart(!isInitialized_)) {
         FireObserverOnReachStart();
-        CHECK_NULL_VOID(onReachStart);
+        CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
-        onReachStart();
+        if (onReachStart) {
+            onReachStart();
+        }
+        if (onJSFrameNodeReachStart) {
+            onJSFrameNodeReachStart();
+        }
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
     }
 }
 
-void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (ReachEnd(false)) {
         FireObserverOnReachEnd();
-        CHECK_NULL_VOID(onReachEnd);
+        CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
-        onReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+        if (onJSFrameNodeReachEnd) {
+            onJSFrameNodeReachEnd();
+        }
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
     } else if (!isInitialized_ && ReachEnd(true)) {
         FireObserverOnReachEnd();
@@ -566,7 +600,7 @@ void ScrollPattern::StartVibrateFeedback()
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    if (source == SCROLL_FROM_CROWN) {
+    if (source == SCROLL_FROM_CROWN && !ReachStart(true) && !ReachEnd(true)) {
         StartVibrateFeedback();
     }
 #endif

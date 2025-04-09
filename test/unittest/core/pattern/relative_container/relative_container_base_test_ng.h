@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,7 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+using namespace std;
 
 class RelativeContainerBaseTestNG : public TestNG {
 public:
@@ -38,6 +39,14 @@ public:
     static void AddAlignRule(std::map<AlignDirection, AlignRule>& alignRules, const AlignDirection& direction,
         const std::string& id, const VerticalAlign& verticalRule);
     RefPtr<FrameNode> CreateRelativeContainer(const std::function<void(RelativeContainerModelNG)>& callback);
+    static void PrepareMeasureChild(LayoutWrapper* layoutWrapper, RelativeContainerLayoutAlgorithm& layoutAlgorithm);
+    static void AddGuidelineStart(std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction,
+        std::optional<Dimension> start);
+    static void AddGuidelineEnd(std::vector<GuidelineInfo>& guidelineInfos, std::string id, LineDirection direction,
+        std::optional<Dimension> end);
+    /* Help test reliedOnMap. If not find, print "Doesn't exist". Since std::set is ordered, output has lexicographic
+     * order*/
+    static string PrintReliedOnMap(unordered_map<string, set<string>>& reliedOnMap, const string& anchor);
 };
 } // namespace OHOS::Ace::NG
 

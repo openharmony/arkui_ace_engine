@@ -1120,6 +1120,12 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest021, TestSize.Level1)
     ASSERT_NE(sliderPattern->CreateNodePaintMethod(), nullptr);
     ASSERT_NE(sliderPattern->sliderContentModifier_, nullptr);
 
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    Gradient themeGradient = SliderModelNG::CreateSolidGradient(sliderTheme->GetTrackBgColor());
+    sliderPaintProperty->UpdateTrackBackgroundColor(themeGradient);
+    sliderPattern->sliderContentModifier_->trackBackgroundColor_ =
+        AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(themeGradient));
     Gradient gradient = sliderPattern->sliderContentModifier_->trackBackgroundColor_->Get().GetGradient();
     std::vector<GradientColor> gradientColors = gradient.GetColors();
 

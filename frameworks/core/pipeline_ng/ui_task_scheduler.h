@@ -173,9 +173,6 @@ private:
             if (nodeLeft->GetPageId() != nodeRight->GetPageId()) {
                 return nodeLeft->GetPageId() < nodeRight->GetPageId();
             }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
-                return nodeLeft->IsOnMainTree();
-            }
             if (nodeLeft->GetDepth() != nodeRight->GetDepth()) {
                 return nodeLeft->GetDepth() < nodeRight->GetDepth();
             }

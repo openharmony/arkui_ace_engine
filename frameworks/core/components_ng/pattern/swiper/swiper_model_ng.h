@@ -83,6 +83,7 @@ public:
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) override;
     void SetBindIndicator(bool bind) override;
+    void SetJSIndicatorController(std::function<void()> resetFunc) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) override;

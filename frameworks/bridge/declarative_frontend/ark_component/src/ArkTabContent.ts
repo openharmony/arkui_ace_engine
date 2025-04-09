@@ -34,6 +34,14 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
     modifierWithKey(this._modifiersWithKeys, TabContentHeightModifier.identity, TabContentHeightModifier, value);
     return this;
   }
+  onWillShow(event: VoidCallback): TabContent {
+    modifierWithKey(this._modifiersWithKeys, TabContentOnWillShowModifier.identity, TabContentOnWillShowModifier, event);
+    return this;
+  }
+  onWillHide(event: VoidCallback): TabContent {
+    modifierWithKey(this._modifiersWithKeys, TabContentOnWillHideModifier.identity, TabContentOnWillHideModifier, event);
+    return this;
+  }
 }
 
 class TabContentTabBarModifier extends ModifierWithKey<SubTabBarStyle | BottomTabBarStyle> {
@@ -106,6 +114,42 @@ class TabContentSizeModifier extends ModifierWithKey<SizeOptions> {
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
       !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+
+class TabContentOnWillShowModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentonwillshow');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabContent.resetTabContentOnWillShow(node);
+    } else {
+      getUINativeModule().tabContent.setTabContentOnWillShow(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
+class TabContentOnWillHideModifier extends ModifierWithKey<VoidCallback> {
+  constructor(value: VoidCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentonwillhide');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabContent.resetContentOnWillHide(node);
+    } else {
+      getUINativeModule().tabContent.setContentOnWillHide(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
   }
 }
 

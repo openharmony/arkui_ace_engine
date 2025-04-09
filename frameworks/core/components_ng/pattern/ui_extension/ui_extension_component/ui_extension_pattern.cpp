@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -63,6 +64,9 @@ constexpr char ATOMIC_SERVICE_PREFIX[] = "com.atomicservice.";
 constexpr char PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting_SecurityUIExtensionComponent";
 constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting uIExtensionExtensionComponent in securityUIAbility";
+constexpr char UEC_ERROR_NAME_PROHIBIT_NESTING_FAIL_NAME[] = "Prohibit_Nesting";
+constexpr char UEC_ERROR_MAG_PROHIBIT_NESTING_FAIL_MESSAGE[] =
+    "Prohibit nesting uiExtensionComponent";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
 constexpr double SHOW_START = 0.0;
@@ -416,6 +420,32 @@ void UIExtensionPattern::RemovePlaceholderNode()
     SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
+bool UIExtensionPattern::CheckHostUiContentConstraint()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto containerHandler = container->GetContainerHandler();
+    CHECK_NULL_RETURN(containerHandler, true);
+    auto uIExtensionContainerHandler =
+        AceType::DynamicCast<UIExtensionContainerHandler>(containerHandler);
+    CHECK_NULL_RETURN(uIExtensionContainerHandler, true);
+    UIContentType hostUIContentType = uIExtensionContainerHandler->GetHostUIContentType();
+    static std::set<UIContentType> dcNotSupportHostUIContentType = {
+        UIContentType::ISOLATED_COMPONENT,
+        UIContentType::DYNAMIC_COMPONENT
+    };
+
+    if (dcNotSupportHostUIContentType.find(hostUIContentType) != dcNotSupportHostUIContentType.end()) {
+        UIEXT_LOGE("Not support uec in hostUIContentType: %{public}d.",
+            static_cast<int32_t>(hostUIContentType));
+        FireOnErrorCallback(ERROR_CODE_UIEXTENSION_FORBID_CASCADE,
+            UEC_ERROR_NAME_PROHIBIT_NESTING_FAIL_NAME, UEC_ERROR_MAG_PROHIBIT_NESTING_FAIL_MESSAGE);
+        return false;
+    }
+
+    return true;
+}
+
 bool UIExtensionPattern::CheckConstraint()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -427,7 +457,7 @@ bool UIExtensionPattern::CheckConstraint()
         return false;
     }
 
-    return true;
+    return CheckHostUiContentConstraint();
 }
 
 void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
@@ -478,7 +508,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     }
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    if (container->IsScenceBoardWindow() && !isModal_ && !hasMountToParent_) {
+    if (container->IsSceneBoardWindow() && !isModal_ && !hasMountToParent_) {
         needReNotifyForeground_ = true;
         UIEXT_LOGI("Should NotifyForeground after MountToParent.");
         return;
@@ -514,6 +544,12 @@ UIExtensionUsage UIExtensionPattern::GetUIExtensionUsage(const AAFwk::Want& want
     }
 
     return UIExtensionUsage::EMBEDDED;
+}
+
+void UIExtensionPattern::ReDispatchWantParams()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    sessionWrapper_->ReDispatchWantParams();
 }
 
 void UIExtensionPattern::OnConnect()
@@ -563,10 +599,10 @@ void UIExtensionPattern::OnConnect()
     if (isFocused || (usage_ == UIExtensionUsage::MODAL)) {
         uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
+    ReDispatchWantParams();
     InitializeAccessibility();
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
-    RegisterReplyPageModeCallback();
     NotifyHostWindowMode();
 }
 
@@ -574,6 +610,7 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
+    RegisterReplyPageModeCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -967,7 +1004,7 @@ void UIExtensionPattern::OnModifyDone()
 
 void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
 {
-    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
             TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
@@ -1835,16 +1872,22 @@ void UIExtensionPattern::DumpInfo()
     // Use -nouie to choose not dump extra uie info
     if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
         UIEXT_LOGI("Not Support Dump Extra UIE Info");
-    } else {
-        if (!container->IsUIExtensionWindow()) {
-            params.push_back(PID_FLAG);
-        }
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        sessionWrapper_->NotifyUieDump(params, dumpInfo);
-        for (std::string info : dumpInfo) {
-            DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
-        }
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
     }
 }
 
@@ -1871,16 +1914,22 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     // Use -nouie to choose not dump extra uie info
     if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
         UIEXT_LOGI("Not Support Dump Extra UIE Info");
-    } else {
-        if (!container->IsUIExtensionWindow()) {
-            params.push_back(PID_FLAG);
-        }
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        sessionWrapper_->NotifyUieDump(params, dumpInfo);
-        for (std::string info : dumpInfo) {
-            json->Put("UI Extension info: ", info.c_str());
-        }
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto dumpNodeIter = std::find(params.begin(), params.end(), std::to_string(host->GetId()));
+    if (dumpNodeIter != params.end()) {
+        params.erase(dumpNodeIter);
+    }
+    if (!container->IsUIExtensionWindow()) {
+        params.push_back(PID_FLAG);
+    }
+    params.push_back(std::to_string(getpid()));
+    std::vector<std::string> dumpInfo;
+    sessionWrapper_->NotifyUieDump(params, dumpInfo);
+    for (std::string info : dumpInfo) {
+        json->Put("UI Extension info: ", info.c_str());
     }
 }
 
@@ -1995,7 +2044,7 @@ bool UIExtensionPattern::SendBusinessData(
     UIContentBusinessCode code, const AAFwk::Want& data, BusinessDataSendType type, RSSubsystemId subSystemId)
 {
     CHECK_NULL_RETURN(sessionWrapper_, false);
-    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    UIEXT_LOGD("SendBusinessData businessCode=%{public}u.", code);
     return sessionWrapper_->SendBusinessData(code, data, type, subSystemId);
 }
 

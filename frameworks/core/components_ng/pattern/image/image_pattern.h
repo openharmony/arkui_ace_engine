@@ -26,8 +26,8 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/animation/picture_animation.h"
-#include "core/components/common/layout/constants.h"
 #include "core/common/clipboard/clipboard.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
@@ -37,8 +37,9 @@
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/image/image_paint_method.h"
 #include "core/components_ng/pattern/image/image_properties.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
@@ -269,12 +270,12 @@ public:
 
     void StartAnimation()
     {
-        status_ = Animator::Status::RUNNING;
+        status_ = AnimatorStatus::RUNNING;
     }
 
     void StopAnimation()
     {
-        status_ = Animator::Status::STOPPED;
+        status_ = AnimatorStatus::STOPPED;
         OnAnimatedModifyDone();
     }
 
@@ -300,12 +301,7 @@ public:
 
     bool AllowVisibleAreaCheck() const override;
 
-    void OnInActive() override
-    {
-        if (status_ == Animator::Status::RUNNING) {
-            animator_->Pause();
-        }
-    }
+    void OnInActive() override;
 
     void OnActive() override;
 
@@ -520,6 +516,7 @@ private:
     RefPtr<CanvasImage> image_;
     RectF dstRect_;
     RectF srcRect_;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ = nullptr;
 
     RefPtr<CanvasImage> obscuredImage_;
 
@@ -572,7 +569,7 @@ private:
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     std::list<CacheImageStruct> cacheImages_;
-    Animator::Status status_ = Animator::Status::IDLE;
+    AnimatorStatus status_ = AnimatorStatus::IDLE;
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;

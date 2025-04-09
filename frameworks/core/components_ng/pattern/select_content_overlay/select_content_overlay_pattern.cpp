@@ -36,6 +36,7 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
     }
     info_->menuInfo.menuIsShow = menuIsShow;
     selectOverlayNode->UpdateToolBar(false, noAnimation);
+    UpdateMenuAccessibility(menuIsShow);
 }
 
 void SelectContentOverlayPattern::UpdateMenuInfo(const SelectMenuInfo& info)
@@ -86,7 +87,9 @@ void SelectContentOverlayPattern::CancelHiddenHandleTask()
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->SetHitTestMode(info_->hitTestMode);
     gestureEventHub->AddClickEvent(clickEvent_);
-    gestureEventHub->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureEventHub->AddPanEvent(panEvent_, { PanDirection::ALL }, 1, distanceMap);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -260,6 +263,32 @@ void SelectContentOverlayPattern::SetIsHandleLineShow(bool isShow)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void SelectContentOverlayPattern::UpdateMenuAccessibility(bool menuIsShow)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto containerId = GetContainerId();
+    RefPtr<PipelineContext> context = nullptr;
+    if (GetIsMenuShowInSubWindow() && containerId != -1) {
+        auto container = Container::GetContainer(containerId);
+        CHECK_NULL_VOID(container);
+        context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        CHECK_NULL_VOID(context);
+    } else {
+        context = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(context);
+    }
+    auto selectOverlayManager = context->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto contentOverlayManager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(contentOverlayManager);
+    if (menuIsShow) {
+        contentOverlayManager->FocusFirstFocusableChildInMenu();
+    } else {
+        contentOverlayManager->NotifyAccessibilityOwner();
     }
 }
 } // namespace OHOS::Ace::NG

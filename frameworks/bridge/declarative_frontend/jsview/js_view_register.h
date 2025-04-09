@@ -29,8 +29,7 @@ namespace OHOS::Ace::Framework {
 void JsRegisterViews(BindingTarget globalObj, void* nativeEngine = nullptr);
 void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList,
     bool isReload = false, void* nativeEngine = nullptr);
-void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine,
-    const shared_ptr<JsValue> globalPtr);
+void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine);
 
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_REGISTER_H

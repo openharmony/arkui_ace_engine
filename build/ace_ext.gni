@@ -40,5 +40,3 @@ if (exec_script(check_file_script, check_advance_ace_file_args, "string") ==
         "//vendor/${product_company}/foundation/ace/ace_engine_ext/ace_engine_ext.gni")
   }
 }
-
-print(vendor_configs)

@@ -100,6 +100,8 @@ RefPtr<ResourceWrapper> CreateResourceWrapper();
 using PopupOnWillDismiss = std::function<void(int32_t)>;
 class JSViewAbstract {
 public:
+    static void SetPixelRoundMode(const JSCallbackInfo& info);
+    static uint8_t GetPixelRoundMode();
     static void GetAngle(
         const std::string& key, const std::unique_ptr<JsonValue>& jsonValue, std::optional<float>& angle);
     static void GetJsAngle(
@@ -145,6 +147,7 @@ public:
     static RefPtr<NG::ChainedTransitionEffect> ParseJsTransitionEffect(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
+    static void JsToolbar(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsBackgroundImage(const JSCallbackInfo& info);
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
@@ -673,8 +676,9 @@ public:
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
-    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
-    static void ParseCommonBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
+    static bool ParseBorderRadius(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius, bool notNegative = true);
+    static void ParseCommonBorderRadiusProps(
+        const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius, bool notNegative = true);
     static void ParseBorderRadiusProps(const JSRef<JSObject>& object, NG::BorderRadiusProperty& radius);
     static bool ParseEditMenuOptions(const JSCallbackInfo& info, NG::OnCreateMenuCallback& onCreateMenuCallback,
         NG::OnMenuItemClickCallback& onMenuItemClick);

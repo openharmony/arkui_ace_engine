@@ -1059,7 +1059,7 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     formLinkInfoMap_.clear();
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
-        "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",
+        "Pipeline destroyed, %{public}zu finish callbacks unexecuted, count: %{public}s",
         finishFunctions_.size(), GetUnexecutedFinishCount().c_str());
     finishFunctions_.clear();
     finishCount_.clear();

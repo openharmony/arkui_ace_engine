@@ -297,9 +297,7 @@ class JSBuilderNode extends BaseNode {
         const _popFunc = classObject && 'pop' in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
-            if (Utils.isApiVersionEQAbove(18)) {
-                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
-            }
+            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateEnter(_componentName, elmtId, isFirstRender, this);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
             // if V2 @Observed/@Track used anywhere in the app (there is no more fine grained criteria),
             // enable V2 object deep observation
@@ -322,9 +320,7 @@ class JSBuilderNode extends BaseNode {
                 ObserveV2.getObserve().stopRecordDependencies();
             }
             ViewStackProcessor.StopGetAccessRecording();
-            if (Utils.isApiVersionEQAbove(18)) {
-                ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
-            }
+            ViewBuildNodeBase.arkThemeScopeManager?.onComponentCreateExit(elmtId);
             __JSScopeUtil__.restoreInstanceId();
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -1242,6 +1238,24 @@ class FrameNode {
     checkIfCanCrossLanguageAttributeSetting() {
         return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
     }
+    getInteractionEventBindingInfo(eventType) {
+        if (eventType === undefined || eventType === null) {
+            return undefined;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const eventBindingInfo = getUINativeModule().frameNode.getInteractionEventBindingInfo(this.getNodePtr(), eventType);
+        __JSScopeUtil__.restoreInstanceId();
+        if (!eventBindingInfo || (!eventBindingInfo.baseEventRegistered && !eventBindingInfo.nodeEventRegistered &&
+            !eventBindingInfo.nativeEventRegistered && !eventBindingInfo.builtInEventRegistered)) {
+            return undefined;
+        }
+        return {
+            baseEventRegistered: eventBindingInfo.baseEventRegistered,
+            nodeEventRegistered: eventBindingInfo.nodeEventRegistered,
+            nativeEventRegistered: eventBindingInfo.nativeEventRegistered,
+            builtInEventRegistered: eventBindingInfo.builtInEventRegistered,
+        };
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -1638,6 +1652,58 @@ const __attributeMap__ = new Map([
             return node._componentAttribute;
         }],
 ]);
+const __eventMap__ = new Map(
+    [
+      ['List', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIListEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['Scroll', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIScrollEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['Grid', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIGridEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }],
+      ['WaterFlow', (node) => {
+        if (node._scrollableEvent) {
+          return node._scrollableEvent;
+        }
+        if (!node.getNodePtr()) {
+           return undefined;
+        }
+        node._scrollableEvent = new UIWaterFlowEvent(node.getNodePtr());
+        node._scrollableEvent.setNodePtr(node.getNodePtr());
+        node._scrollableEvent.setInstanceId((node.uiContext_ === undefined || node.uiContext_ === null) ? -1 : node.uiContext_.instanceId_);
+        return node._scrollableEvent;
+      }]
+    ]
+  )
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1659,6 +1725,16 @@ class typeNode {
         }
         return attribute(node);
     }
+    static getEvent(node, nodeType) {
+        if (node === undefined || node === null || node.getNodeType() !== nodeType) {
+          return undefined;
+        }
+        let event = __eventMap__.get(nodeType);
+        if (event === undefined || event === null) {
+          return undefined;
+        }
+        return event(node);
+      } 
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {

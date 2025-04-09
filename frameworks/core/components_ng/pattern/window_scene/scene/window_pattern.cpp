@@ -58,6 +58,7 @@ const Rosen::RSAnimationTimingCurve NODE_ANIMATION_TIMING_CURVE =
 constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
 constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
+constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -253,18 +254,19 @@ void WindowPattern::CreateAppWindow()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("CreateAppWindow[id:%d][self:%d]", session_->GetPersistentId(), host->GetId());
-    appWindow_ = FrameNode::CreateFrameNode(
+    RefPtr<FrameNode> tempWindow = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
-    appWindow_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    appWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    tempWindow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    tempWindow->SetHitTestMode(HitTestMode::HTMNONE);
     CHECK_NULL_VOID(session_);
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
-        auto context = AceType::DynamicCast<NG::RosenRenderContext>(appWindow_->GetRenderContext());
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(tempWindow->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
         surfaceNode->SetVisible(true);
     }
+    (!appWindow_) ? appWindow_ = std::move(tempWindow) : (newAppWindow_ = std::move(tempWindow));
 }
 
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
@@ -561,7 +563,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
-    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
 
     if (snapshot) {
@@ -569,6 +571,10 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
         snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
     } else {
+        auto context = GetContext();
+        CHECK_NULL_VOID(context);
+        auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
+        snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
@@ -597,6 +603,23 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "load snapshot failed: %{public}s", info.GetErrorMessage().c_str());
             auto backgroundColor = context->GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
             self->snapshotWindow_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
+            self->snapshotWindow_->MarkNeedRenderOnly();
+        });
+        eventHub->SetOnComplete([weakThis = WeakClaim(this)](const LoadImageSuccessEvent& info) {
+            if (info.GetLoadingStatus() != SNAPSHOT_LOAD_COMPLETE) {
+                return;
+            }
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            if (self->session_->IsExitSplitOnBackground()) {
+                return;
+            }
+            CHECK_NULL_VOID(self->snapshotWindow_);
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "load snapshot complete id: %{public}d",
+                self->session_->GetPersistentId());
+            auto context = self->snapshotWindow_->GetRenderContext();
+            CHECK_NULL_VOID(context);
+            context->UpdateBackgroundColor(Color::TRANSPARENT);
             self->snapshotWindow_->MarkNeedRenderOnly();
         });
     }
@@ -660,6 +683,12 @@ void WindowPattern::DisPatchFocusActiveEvent(bool isFocusActive)
 sptr<Rosen::Session> WindowPattern::GetSession()
 {
     return session_;
+}
+
+bool WindowPattern::BorderUnoccupied() const
+{
+    CHECK_NULL_RETURN(session_, false);
+    return session_->GetBorderUnoccupied();
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

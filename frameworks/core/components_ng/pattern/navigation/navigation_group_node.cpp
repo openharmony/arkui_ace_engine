@@ -881,6 +881,9 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
             pushAnimations_.emplace_back(backButtonAnimation);
         }
     }
+    if (preNode) {
+        preNode->SetNodeFreeze(true);
+    }
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
 
@@ -936,6 +939,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             CHECK_NULL_VOID(navigation);
             auto preNode = weakPreNode.Upgrade();
             while (preNode) {
+                preNode->SetNodeFreeze(false);
+                preNode->GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
                 if (!navigation->CheckAnimationIdValid(preNode, preAnimationId)) {
                     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "pre node is doing another animation, skip handling.");
                     break;
@@ -1472,7 +1477,7 @@ void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)
     }
 }
 
-void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
+void NavigationGroupNode::RemoveDialogDestination(bool isReplace, bool isTriggerByInteractiveCancel)
 {
     for (auto iter = hideNodes_.begin(); iter != hideNodes_.end(); iter++) {
         auto navDestination = iter->first;
@@ -1481,7 +1486,9 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
         }
         if (!iter->second) {
             auto type = navDestination->GetTransitionType();
-            if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+            bool isEnterPage = (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP);
+            if (!isTriggerByInteractiveCancel && isEnterPage) {
+                // if tigger by interactive animation, The transition type is incorrect, ignore this case.
                 continue;
             }
             // navDestination node don't need to remove, update visibility invisible
@@ -1598,7 +1605,9 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             navigation->CleanPopAnimations();
             for (auto iter = preNavList.rbegin(); iter != preNavList.rend(); ++iter) {
                 auto preNode = (*iter).Upgrade();
-                CHECK_NULL_VOID(preNode);
+                if (!preNode) {
+                    continue;
+                }
                 auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
                 CHECK_NULL_VOID(preNavDesNode);
                 auto pattern = navigation->GetPattern<NavigationPattern>();
@@ -1729,12 +1738,16 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             CHECK_NULL_VOID(navigation);
             for (auto iter : prevNavList) {
                 auto preNode = iter.Upgrade();
-                CHECK_NULL_VOID(preNode);
+                if (!preNode) {
+                    continue;
+                }
                 navigation->PreNodeFinishCallback(preNode);
             }
             for (auto iter : curNavList) {
                 auto curNode = iter.Upgrade();
-                CHECK_NULL_VOID(curNode);
+                if (!curNode) {
+                    continue;
+                }
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
                 curNavDestination->SystemTransitionPushCallback(true, curNavDestination->GetAnimationId());
@@ -1820,6 +1833,10 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
         auto navigation = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigation);
+        auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(weakPreNode.Upgrade());
+        if (preNavDestination && preNavDestination->NeedRemoveInPush()) {
+            navigation->hideNodes_.emplace_back(std::make_pair(preNavDestination, true));
+        }
         navigation->RemoveDialogDestination();
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
@@ -2172,15 +2189,5 @@ void NavigationGroupNode::ResetSystemAnimationProperties(const RefPtr<FrameNode>
     CHECK_NULL_VOID(titleBarRenderContext);
     // update titleBar's translateXY
     titleBarRenderContext->UpdateTranslateInXY({ 0.0f, 0.0f });
-}
-
-void NavigationGroupNode::SetPageViewportConfig(const RefPtr<PageViewportConfig>& config)
-{
-    viewportConfig_ = config;
-    if (config) {
-        safeAreaInsets_ = config->GetSafeArea();
-    } else {
-        safeAreaInsets_ = SafeAreaInsets();
-    }
 }
 } // namespace OHOS::Ace::NG

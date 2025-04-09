@@ -309,9 +309,18 @@ void ListItemModelNG::SetDeleteAreaWithFrameNode(const RefPtr<NG::UINode>& build
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
     }
 }
+
 void ListItemModelNG::SetAutoScale(FrameNode* frameNode, bool autoScale)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale, frameNode);
+}
+
+void ListItemModelNG::SetStyle(FrameNode* frameNode, V2::ListItemStyle style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetListItemStyle(style);
 }
 } // namespace OHOS::Ace::NG

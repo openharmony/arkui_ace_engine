@@ -58,7 +58,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         return;
     }
     // api 16 trigger onActive and onInactive observer
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && (
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SEVENTEEN) && (
         state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
         return;
     }
@@ -91,11 +91,16 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 {
     CHECK_NULL_VOID(pageInfo);
     CHECK_NULL_VOID(routerPageHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify router event failed, current UI instance invalid");
+        return;
+    }
     napi_value context = GetUIContextValue();
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     int32_t index = pageInfo->GetPageIndex();
     std::string name = pageInfo->GetPageUrl();
@@ -108,10 +113,15 @@ void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& page
 void UIObserverHandler::NotifyDensityChange(double density)
 {
     CHECK_NULL_VOID(densityHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify density event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     densityHandleFunc_(info, density);
 }
@@ -121,11 +131,12 @@ void UIObserverHandler::NotifyWillClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(willClickHandleFunc_);
-    CHECK_NULL_VOID(Container::Current());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     willClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
@@ -135,10 +146,12 @@ void UIObserverHandler::NotifyDidClick(
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(didClickHandleFunc_);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     didClickHandleFunc_(info, gestureEventInfo, clickInfo, frameNode);
 }
@@ -316,10 +329,15 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
     std::optional<NavDestinationInfo>&& to, NavigationOperation operation)
 {
     CHECK_NULL_VOID(navDestinationSwitchHandleFunc_);
+    auto container = Container::Current();
+    if (!container) {
+        LOGW("notify destination event failed, current UI instance invalid");
+        return;
+    }
     AbilityContextInfo info = {
         AceApplicationInfo::GetInstance().GetAbilityName(),
         AceApplicationInfo::GetInstance().GetProcessName(),
-        Container::Current()->GetModuleName()
+        container->GetModuleName()
     };
     NavDestinationSwitchInfo switchInfo(GetUIContextValue(), std::forward<std::optional<NavDestinationInfo>>(from),
         std::forward<std::optional<NavDestinationInfo>>(to), operation);

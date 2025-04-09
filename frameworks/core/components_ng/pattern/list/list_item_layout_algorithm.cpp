@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/property/position_property.h"
+#include "core/components_ng/property/measure_utils.h"
 namespace OHOS::Ace::NG {
 
 bool ListItemLayoutAlgorithm::IsRTLAndVertical(LayoutWrapper* layoutWrapper) const

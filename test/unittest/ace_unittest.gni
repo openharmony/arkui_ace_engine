@@ -15,16 +15,16 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-pattern_test_output_path = "ace_engine/components"
-event_test_output_path = "ace_engine/events"
-base_test_output_path = "ace_engine/base"
-image_test_output_path = "ace_engine/image"
-basic_test_output_path = "ace_engine/basic"
-interface_test_output_path = "ace_engine/interfaces"
-adapter_test_output_path = "ace_engine/adapter"
-svg_test_output_path = "ace_engine/svg"
-bridge_test_output_path = "ace_engine/bridge"
-frameworks_test_output_path = "ace_engine/frameworks"
+pattern_test_output_path = "ace_engine/ace_engine/components"
+event_test_output_path = "ace_engine/ace_engine/events"
+base_test_output_path = "ace_engine/ace_engine/base"
+image_test_output_path = "ace_engine/ace_engine/image"
+basic_test_output_path = "ace_engine/ace_engine/basic"
+interface_test_output_path = "ace_engine/ace_engine/interfaces"
+adapter_test_output_path = "ace_engine/ace_engine/adapter"
+svg_test_output_path = "ace_engine/ace_engine/svg"
+bridge_test_output_path = "ace_engine/ace_engine/bridge"
+frameworks_test_output_path = "ace_engine/ace_engine/frameworks"
 
 template("ace_unittest") {
   forward_variables_from(invoker, "*")
@@ -81,7 +81,7 @@ template("ace_unittest") {
 
   if (type == "components") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/${module_output}"
+      module_out_path = "ace_engine/ace_engine/${module_output}"
 
       sources = []
       sources += invoker.sources
@@ -112,7 +112,7 @@ template("ace_unittest") {
     }
   } else if (type == "new") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/${module_output}"
+      module_out_path = "ace_engine/ace_engine/${module_output}"
       sources = []
       sources += invoker.sources
       sources += flutter_sources
@@ -153,7 +153,7 @@ template("ace_unittest") {
     }
   } else if (type == "pipeline") {
     ohos_unittest(ace_unittest_name) {
-      module_out_path = "ace_engine/${module_output}"
+      module_out_path = "ace_engine/ace_engine/${module_output}"
       sources = []
       sources += invoker.sources
       sources += flutter_sources

@@ -20,6 +20,7 @@
 #include "base/thread/frame_trace_adapter.h"
 #include "core/common/container.h"
 #include "core/common/xcollie/xcollieInterface.h"
+#include "core/components_ng/gestures/recognizers/gestures_extra_handler.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
@@ -165,7 +166,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
 #endif
         resultInfo.append(", depth: ").append(std::to_string(item.second.depth)).append(" };");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "InputTracking id:%{public}d, touch test hitted node info: %{public}s",
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
@@ -179,7 +180,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
                     "EventTreeDumpInfo size is over limit, the following info is dropped!");
                 break;
             }
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
                 SEC_PARAM(item.second.c_str()));
         }
         RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
@@ -200,7 +201,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {
-            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
                 SEC_PARAM(item.second.c_str()));
         }
 #endif
@@ -313,7 +314,7 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             if (!SystemProperties::GetAceCommercialLogEnabled()) {
-                TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+                TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
             }
         }
     }
@@ -727,6 +728,9 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+    if (event.sourceType == SourceType::TOUCH) {
+        NG::GestureExtraHandler::NotifiyTouchEvent(event);
+    }
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     UpdateDragInfo(point);
@@ -795,6 +799,9 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
     if (!point.isFalsified) {
         lastSourceTool_ = point.sourceTool;
     }
+    if (refereeNG_->IsScopesEmpty()) {
+        responseCtrl_->Reset();
+    }
 }
 
 void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
@@ -838,7 +845,7 @@ void EventManager::LogTouchTestRecognizerStates(int32_t touchEventId)
         gestureLog += "}";
         log += gestureLog;
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
+    TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "id: %{public}d, log: %{public}s", touchEventId, log.c_str());
 }
 
 void EventManager::DispatchTouchEventAndCheck(const TouchEvent& event, bool sendOnTouch)
@@ -972,11 +979,16 @@ void EventManager::DispatchTouchCancelToRecognizer(
     TouchEventTarget* touchEventTarget, const std::vector<std::pair<int32_t, TouchTestResult::iterator>>& items)
 {
     TouchEvent touchEvent;
-    touchEvent.type = TouchType::CANCEL;
-    touchEvent.isFalsified = true;
     for (auto& item : items) {
-        touchEvent.originalId = item.first;
-        touchEvent.id = item.first;
+        if (idToTouchPoints_.find(item.first) == idToTouchPoints_.end()) {
+            touchEvent.originalId = item.first;
+            touchEvent.id = item.first;
+        } else {
+            touchEvent = idToTouchPoints_[item.first];
+            touchEvent.history.clear();
+        }
+        touchEvent.type = TouchType::CANCEL;
+        touchEvent.isFalsified = true;
         touchEventTarget->HandleMultiContainerEvent(touchEvent);
         eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(touchEventTarget), "",
             std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
@@ -1557,8 +1569,7 @@ bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
             currHoverEndNode++;
         }
         if (std::find(lastHoverTestResults_.begin(), lastHoverEndNode, hoverResult) == lastHoverEndNode) {
-            if (!(event.action == MouseAction::WINDOW_LEAVE && event.mockFlushEvent) &&
-                !hoverResult->HandleHoverEvent(true, event)) {
+            if (!hoverResult->HandleHoverEvent(true, event)) {
                 lastHoverDispatchLength_ = iterCountCurr;
                 break;
             }

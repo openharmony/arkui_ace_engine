@@ -45,6 +45,24 @@ const std::vector<DragDropInitiatingStateMovingTestCase> DRAG_DROP_INITIATING_ST
         DragDropInitiatingReceivedInput::HandlePanOnActionStart, DragDropInitiatingStatus::MOVING, SourceType::TOUCH),
     DragDropInitiatingStateMovingTestCase(
         DragDropInitiatingReceivedInput::HandlePanOnActionStart, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandlePanOnActionEnd, DragDropInitiatingStatus::IDLE, SourceType::TOUCH),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandlePanOnActionEnd, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandleTouchEvent, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandlePullEvent, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandleReStartDrag, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandleDragStart, DragDropInitiatingStatus::MOVING, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::HandleDragEnd, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::TransDragWindowToFwk, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
+    DragDropInitiatingStateMovingTestCase(
+        DragDropInitiatingReceivedInput::TransMenuShow, DragDropInitiatingStatus::IDLE, SourceType::MOUSE),
 };
 
 void DragDropInitiatingStateMovingTestNG::SetUpTestCase()

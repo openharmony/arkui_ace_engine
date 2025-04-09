@@ -6592,7 +6592,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      * 
-     * @since 18
+     * @since 17
      */
     NODE_ON_AXIS = 25,
 
@@ -6613,7 +6613,7 @@ typedef enum {
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
      *
-     *@since 18
+     *@since 17
      */
     NODE_ON_HOVER_EVENT = 27,
 
@@ -6632,7 +6632,7 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: ratio of the component's visible area to its total area
      * when this callback is invoked. \n
      *
-     * @since 18
+     * @since 17
      */
     NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT = 28,
 

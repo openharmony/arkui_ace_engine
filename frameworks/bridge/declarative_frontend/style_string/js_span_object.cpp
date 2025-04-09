@@ -705,10 +705,9 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
 {
     ImageSpanOptions options;
     auto container = Container::CurrentSafely();
-    CHECK_NULL_RETURN(container, options);
-    auto context = PipelineBase::GetCurrentContextSafely();
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, options);
-    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
+    bool isCard = context->IsFormRender() && container && !container->IsDynamicRender();
 
     std::string imageSrc;
     std::string bundleName;

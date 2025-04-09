@@ -67,6 +67,14 @@ public:
     {
         return layoutInfo_->adjustOffset_;
     }
+
+    AdjustOffset GetAndResetAdjustOffset() override
+    {
+        AdjustOffset ret = layoutInfo_->adjustOffset_;
+        layoutInfo_->adjustOffset_ = AdjustOffset();
+        return ret;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 

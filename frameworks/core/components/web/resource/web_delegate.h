@@ -795,6 +795,7 @@ public:
     void HideWebView();
     void OnRenderToBackground();
     void OnRenderToForeground();
+    void SetSurfaceDensity(const double& density);
     void Resize(const double& width, const double& height, bool isKeyboard = false);
     int32_t GetRosenWindowId()
     {
@@ -850,6 +851,7 @@ public:
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
     void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
+    void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -1198,6 +1200,8 @@ public:
     void UnRegisterWebWindowFocusChangedListener();
     
     void OnDragAttach();
+
+    void SetNativeInnerWeb(bool isInnerWeb);
 
 private:
     void InitWebEvent();

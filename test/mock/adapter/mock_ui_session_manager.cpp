@@ -23,4 +23,6 @@ UiSessionManager* UiSessionManager::GetInstance()
     return &instance;
 }
 
+void ReportInspectorTreeValue(const std::string& value) {};
+void AddValueForTree(int32_t id, const std::string& value) {};
 } // namespace OHOS::Ace

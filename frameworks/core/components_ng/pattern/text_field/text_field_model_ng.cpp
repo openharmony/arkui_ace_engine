@@ -1022,9 +1022,12 @@ void TextFieldModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(renderContext->GetBorderRadius());
 
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto radius = renderContext->GetBorderRadius().value();
+    auto optRadius = renderContext->GetBorderRadius();
+    CHECK_NULL_VOID(optRadius);
+    auto radius = optRadius.value();
 
     radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
         (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);

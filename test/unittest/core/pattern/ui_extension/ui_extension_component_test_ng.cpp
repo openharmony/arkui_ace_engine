@@ -576,7 +576,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
      */
     auto focusHub = uiExtensionNode->GetFocusHub();
     pattern->InitKeyEvent(focusHub);
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     focusHub->onPaintFocusStateCallback_();
@@ -596,7 +596,7 @@ HWTEST_F(UIExtensionComponentTestNg, AccessibilityTest001, TestSize.Level1)
 
     pattern = nullptr;
     uiExtensionNode->pattern_ = nullptr;
-    focusHub->onFocusInternal_();
+    focusHub->onFocusInternal_(focusHub->focusReason_);
     focusHub->onBlurInternal_();
     focusHub->onClearFocusStateCallback_();
     focusHub->onPaintFocusStateCallback_();
@@ -750,7 +750,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     pattern->HandleBlurEvent();
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
-    pipeline->isFocusActive_ = true;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
     ASSERT_TRUE(pipeline->GetIsFocusActive());
     pattern->HandleFocusEvent();
     pattern->isKeyAsync_ = true;

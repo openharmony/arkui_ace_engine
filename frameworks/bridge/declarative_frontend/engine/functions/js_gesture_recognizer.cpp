@@ -82,7 +82,6 @@ void JSGestureRecognizer::GetType(const JSCallbackInfo& args)
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(type))));
 }
 
-
 void JSGestureRecognizer::GetFingers(const JSCallbackInfo& args)
 {
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(fingers_)));
@@ -178,6 +177,39 @@ void JSGestureRecognizer::IsValid(const JSCallbackInfo& args)
         isValid = true;
     }
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isValid)));
+}
+
+void JSPanRecognizer::GetDirection(const JSCallbackInfo& args)
+{
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(direction_.type)));
+}
+
+void JSPanRecognizer::GetPanDistance(const JSCallbackInfo& args)
+{
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(distance_)));
+}
+
+void JSPanRecognizer::GetPanDistanceMap(const JSCallbackInfo& args)
+{
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto distanceMap = panda::MapRef::New(vm);
+    auto recognizer = JSGestureRecognizer::GetRecognizer().Upgrade();
+    if (!recognizer) {
+        args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+        return;
+    }
+    auto panRecognizer = AceType::DynamicCast<NG::PanRecognizer>(recognizer);
+    if (!panRecognizer) {
+        args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
+        return;
+    }
+    auto panDistanceMap = panRecognizer->GetDistanceMap();
+    for (const auto& item : panDistanceMap) {
+        distanceMap->Set(vm, panda::NumberRef::New(vm, static_cast<int32_t>(item.first)),
+            panda::NumberRef::New(vm, item.second));
+    }
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(distanceMap)));
 }
 
 void JSPinchRecognizer::GetDistance(const JSCallbackInfo& args)
@@ -295,6 +327,9 @@ void JSPanRecognizer::JSBind(BindingTarget globalObj)
     JSClass<JSPanRecognizer>::CustomMethod("getState", &JSGestureRecognizer::GetRefereeState);
     JSClass<JSPanRecognizer>::CustomMethod("getPanGestureOptions", &JSPanRecognizer::GetPanGestureOptions);
     JSClass<JSPanRecognizer>::CustomMethod("isValid", &JSGestureRecognizer::IsValid);
+    JSClass<JSPanRecognizer>::CustomMethod("getDirection", &JSPanRecognizer::GetDirection);
+    JSClass<JSPanRecognizer>::CustomMethod("getDistance", &JSPanRecognizer::GetPanDistance);
+    JSClass<JSPanRecognizer>::CustomMethod("getDistanceMap", &JSPanRecognizer::GetPanDistanceMap);
     JSClass<JSPanRecognizer>::Inherit<JSGestureRecognizer>();
     JSClass<JSPanRecognizer>::Bind(globalObj, &JSPanRecognizer::Constructor, &JSPanRecognizer::Destructor);
 }

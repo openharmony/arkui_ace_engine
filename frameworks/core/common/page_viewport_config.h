@@ -31,12 +31,16 @@ public:
     PageViewportConfig() = default;
     ~PageViewportConfig() = default;
 
-    virtual RefPtr<PageViewportConfig> Clone()
+    virtual RefPtr<PageViewportConfig> Clone() const
     {
         return nullptr;
     }
 
-    virtual DisplayOrientation GetOrientation()
+    virtual int32_t GetWidth() const
+    {
+        return -1;
+    }
+    virtual DisplayOrientation GetOrientation() const
     {
         return DisplayOrientation::PORTRAIT;
     }

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_PAGE_VIEWPORT_CONFIG_OHOS_H
 
 #include <map>
+#include <stack>
 
 #include "core/common/page_viewport_config.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
@@ -35,7 +36,7 @@ public:
     PageViewportConfigOhos() = default;
     ~PageViewportConfigOhos() = default;
 
-    RefPtr<PageViewportConfig> Clone() override;
+    RefPtr<PageViewportConfig> Clone() const override;
 
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipeline)
     {
@@ -53,7 +54,11 @@ public:
         avoidAreas_ = info;
     }
 
-    DisplayOrientation GetOrientation() override
+    int32_t GetWidth() const override
+    {
+        return config_.Width();
+    }
+    DisplayOrientation GetOrientation() const override
     {
         return static_cast<DisplayOrientation>(config_.Orientation());
     }
@@ -61,7 +66,12 @@ public:
     void RestoreSafeArea() override;
 
 private:
-    std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> backupSafeAreas_;
+    struct BackupInfo {
+        int32_t rootWidth = -1;
+        int32_t rootHeight = -1;
+        std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> safeAreas;
+    };
+    std::stack<BackupInfo> backupInfos_;
     ViewportConfig config_;
     AvoidAreaInfo avoidAreas_;
     WeakPtr<NG::PipelineContext> pipeline_;

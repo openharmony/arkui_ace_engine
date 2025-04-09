@@ -114,7 +114,7 @@ void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std:
     ExecuteJS(1, &jsVal);
 }
 
-JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -133,7 +133,7 @@ JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     return result;
 }
 
-JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[], bool isAnimation)
 {
     int32_t id = -1;
     if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
@@ -144,7 +144,7 @@ JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
     ACE_FUNCTION_TRACE();
 
     JSRef<JSVal> jsObject = jsThis_.Lock();
-    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv);
+    JSRef<JSVal> result = jsFunction_->Call(jsObject, argc, argv, isAnimation);
     return result;
 }
 

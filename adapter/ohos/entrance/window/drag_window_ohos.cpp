@@ -29,7 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

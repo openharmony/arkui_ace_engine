@@ -97,6 +97,14 @@ public:
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
     void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
     void SetOnNewParam(NG::NavDestinationOnNewParamCallback&& onNewParamCallback) override;
+    void SetPreferredOrientation(const std::optional<Orientation>& ori) override;
+    static void SetPreferredOrientation(FrameNode* frameNode, const std::optional<Orientation>& ori);
+    void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) override;
+    static void SetEnableStatusBar(
+        FrameNode* frameNode, const std::optional<std::pair<bool, bool>>& statusBar);
+    void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
+    static void SetEnableNavigationIndicator(
+        FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

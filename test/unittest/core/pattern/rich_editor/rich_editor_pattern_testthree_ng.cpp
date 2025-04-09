@@ -29,11 +29,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string TEST_INSERT_LINE_SPACE = u" ";
-constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
-constexpr int32_t PLACEHOLDER_LENGTH = 6;
 constexpr int32_t CALCLINEEND_POSITION = 0;
 constexpr int32_t PERFORM_ACTION = 1;
-constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 } // namespace
 
 class RichEditorPatternTestThreeNg : public RichEditorCommonTestNg {
@@ -172,21 +169,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRightWordPosition001, TestSize.Level2)
 }
 
 /**
- * @tc.name: HandleSelect001
- * @tc.desc: test HandleSelect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect001, TestSize.Level2)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    EXPECT_EQ(richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_), 0);
-    AddSpan(INIT_VALUE_1 + TEST_INSERT_LINE_SPACE);
-    richEditorPattern->HandleSelect(CaretMoveIntent::Home);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), richEditorPattern->textSelector_.GetStart());
-}
-
-/**
  * @tc.name: HandleOnEscape001
  * @tc.desc: test HandleOnEscape
  * @tc.type: FUNC
@@ -196,29 +178,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleOnEscape001, TestSize.Level1)
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_FALSE(richEditorPattern->HandleOnEscape());
-}
-
-/**
- * @tc.name: CalcDeleteValueObj001
- * @tc.desc: test CalcDeleteValueObj delete builder span
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CalcDeleteValueObj001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto spans = richEditorPattern->GetSpanItemChildren();
-    ASSERT_FALSE(spans.empty());
-    auto spanItem = spans.back();
-    ASSERT_NE(spanItem, nullptr);
-    int32_t currentPosition = INIT_VALUE_1.size() - 2;
-    spanItem->placeholderIndex = currentPosition;
-
-    RichEditorDeleteValue info;
-    int32_t length = 2;
-    richEditorPattern->CalcDeleteValueObj(currentPosition, length, info);
-    EXPECT_EQ(info.GetRichEditorDeleteSpans().size(), 1);
 }
 
 /**
@@ -232,37 +191,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetSpanNodeBySpanItem001, TestSize.Level2
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
     ASSERT_EQ(richEditorPattern->GetSpanNodeBySpanItem(nullptr), nullptr);
-}
-
-/**
- * @tc.name: DeleteValueSetImageSpan001
- * @tc.desc: test DeleteValueSetImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetImageSpan001, TestSize.Level1)
-{
-    AddImageSpan();
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto imageNode = AceType::DynamicCast<FrameNode>(richEditorNode_->GetLastChild());
-    ASSERT_NE(imageNode, nullptr);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
-    imageLayoutProperty->UpdateVerticalAlign(VerticalAlign::CENTER);
-
-    RichEditorAbstractSpanResult spanResult;
-    spanResult.SetSpanIndex(richEditorNode_->GetChildIndexById(imageNode->GetId()));
-
-    auto spans = richEditorPattern->GetSpanItemChildren();
-    ASSERT_FALSE(spans.empty());
-    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spans.back());
-    ASSERT_NE(imageSpanItem, nullptr);
-    richEditorPattern->DeleteValueSetImageSpan(imageSpanItem, spanResult);
-    EXPECT_EQ(spanResult.GetObjectFit(), ImageFit::FILL);
-    EXPECT_EQ(spanResult.GetVerticalAlign(), VerticalAlign::CENTER);
 }
 
 /**
@@ -375,86 +303,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleUserGestureEvent001, TestSize.Level
     richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
     auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
     EXPECT_TRUE(richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc)));
-}
-
-/**
- * @tc.name: HandleTouchEvent001
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::DOWN;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    auto touchInfo = touchEventInfo.GetTouches().front();
-    auto touchType = touchInfo.GetTouchType();
-    EXPECT_EQ(touchType, TouchType::DOWN);
-}
-
-/**
- * @tc.name: HandleTouchEvent002
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::UP;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    auto touchInfo = touchEventInfo.GetTouches().front();
-    auto touchType = touchInfo.GetTouchType();
-    EXPECT_EQ(touchType, TouchType::UP);
-}
-
-/**
- * @tc.name: HandleTouchEvent003
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::MOVE;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    auto touchInfo = touchEventInfo.GetTouches().front();
-    auto touchType = touchInfo.GetTouchType();
-    EXPECT_EQ(touchType, TouchType::MOVE);
-}
-
-/**
- * @tc.name: HandleTouchEvent004
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent004, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::UNKNOWN;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    auto touchInfo = touchEventInfo.GetTouches().front();
-    auto touchType = touchInfo.GetTouchType();
-    EXPECT_EQ(touchType, TouchType::UNKNOWN);
 }
 
 /**
@@ -623,61 +471,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleDragStart001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InitPlaceholderSpansMap001
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
- * @tc.name: InitPlaceholderSpansMap002
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
- * @tc.name: InitPlaceholderSpansMap003
- * @tc.desc: test InitPlaceholderSpansMap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto newSpanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    auto spanItem = AceType::MakeRefPtr<OHOS::Ace::NG::SpanItem>();
-    size_t index = 0;
-    size_t placeholderGains = 0;
-    spanItem->spanItemType = SpanItemType::IMAGE;
-    richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
-    EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
  * @tc.name: CursorMoveEnd002
  * @tc.desc: test CursorMoveEnd
  * @tc.type: FUNC
@@ -706,47 +499,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleTouchEvent005
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent005, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::DOWN;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->hasUrlSpan_ = true;
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_EQ(richEditorPattern->moveCaretState_.touchDownOffset, touchLocationInfo.localLocation_);
-}
-
-/**
- * @tc.name: HandleTouchEvent006
- * @tc.desc: test HandleTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleTouchEvent006, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo touchEventInfo("");
-    TouchLocationInfo touchLocationInfo(0);
-    touchLocationInfo.touchType_ = TouchType::UP;
-    touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
-    richEditorPattern->hasUrlSpan_ = true;
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_FALSE(richEditorPattern->previewLongPress_);
-}
-
-/**
  * @tc.name: OnColorConfigurationUpdate
  * @tc.desc: test OnColorConfigurationUpdate
  * @tc.type: FUNC
@@ -764,158 +516,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, OnColorConfigurationUpdate, TestSize.Leve
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
     richEditorPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(richEditorPattern->scrollBar_, nullptr);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan001
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan002
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = false;
-    spanItem->spanItemType = SpanItemType::CustomSpan;
-    auto builderId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    spanItem->SetCustomNode(builderNode);
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithCustomSpan003
- * @tc.desc: test ReplacePlaceholderWithCustomSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithCustomSpan003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<CustomSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    spanItem->GetSameStyleSpanItem();
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    spanItem->onMeasure.emplace();
-    spanItem->onDraw.emplace();
-    richEditorPattern->ReplacePlaceholderWithCustomSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithImageSpan001
- * @tc.desc: test ReplacePlaceholderWithImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithImageSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
-    EXPECT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: ReplacePlaceholderWithImageSpan002
- * @tc.desc: test ReplacePlaceholderWithImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, ReplacePlaceholderWithImageSpan002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<ImageSpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    size_t index = 1;
-    size_t textIndex = 1;
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->ReplacePlaceholderWithImageSpan(spanItem, index, textIndex);
-    EXPECT_EQ(textIndex, PLACEHOLDER_LENGTH + index);
-}
-
-/**
- * @tc.name: InsertOrDeleteSpace001
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = -1;
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_FALSE(tag);
-}
-
-/**
- * @tc.name: InsertOrDeleteSpace002
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = 0;
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = u"test";
-    spanItem->rangeStart = 0;
-    spanItem->position = 4;
-    richEditorPattern->spans_.push_back(spanItem);
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_TRUE(tag);
-}
-
-/**
- * @tc.name: InsertOrDeleteSpace003
- * @tc.desc: test InsertOrDeleteSpace
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, InsertOrDeleteSpace003, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    size_t index = 0;
-    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = u" test";
-    spanItem->rangeStart = 0;
-    spanItem->position = 5;
-    richEditorPattern->spans_.push_back(spanItem);
-    bool tag = richEditorPattern->InsertOrDeleteSpace(index);
-    EXPECT_TRUE(tag);
 }
 
 /**
@@ -1319,25 +919,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, FireOnSelectionChange003, TestSize.Level0
 }
 
 /**
- * @tc.name: SetTypingStyle001
- * @tc.desc: test SetTypingStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, SetTypingStyle001, TestSize.Level0)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    UpdateSpanStyle typingStyle;
-    TextStyle textStyle;
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    richEditorPattern->spans_.emplace_back(spanItem);
-    richEditorPattern->previewTextRecord_.previewContent = u"";
-    auto layout = richEditorNode_->layoutProperty_;
-    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    EXPECT_TRUE(layout == richEditorNode_->layoutProperty_);
-}
-
-/**
  * @tc.name: SetResultObjectText001
  * @tc.desc: test SetResultObjectText
  * @tc.type: FUNC
@@ -1472,26 +1053,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleFocusEvent, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleSelect002
- * @tc.desc: test HandleSelect
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    int32_t selectStart = 0;
-    int32_t selectEnd = 2;
-    SelectOverlayInfo selectInfo;
-    auto pipeline = richEditorNode_->GetContext();
-    auto selectOverlayManager = pipeline->GetSelectOverlayManager();
-    selectOverlayManager->selectOverlayInfo_.isUsingMouse = true;
-    richEditorPattern->HandleSelect(info, selectStart, selectEnd);
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-}
-
-/**
  * @tc.name: HandleDraggableFlag
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC
@@ -1505,19 +1066,4 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleDraggableFlag, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->JudgeContentDraggable(), false);
 }
 
-/**
- * @tc.name: DeleteValueSetSymbolSpan001
- * @tc.desc: test DeleteValueSetSymbolSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, DeleteValueSetSymbolSpan001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    EXPECT_NE(spanItem, nullptr);
-    RichEditorAbstractSpanResult spanResult;
-    auto result = richEditorPattern->DeleteValueSetSymbolSpan(spanItem, spanResult);
-    EXPECT_TRUE(result == SYMBOL_SPAN_LENGTH);
-}
 } // namespace OHOS::Ace::NG

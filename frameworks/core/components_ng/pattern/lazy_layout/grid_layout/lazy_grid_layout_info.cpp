@@ -101,6 +101,22 @@ void LazyGridLayoutInfo::UpdatePosMapEnd(int32_t updatedEnd)
     }
 }
 
+void LazyGridLayoutInfo::UpdateTotalMainSize()
+{
+    if (posMap_.empty()) {
+        return;
+    }
+    auto last = posMap_.rbegin();
+    float prevPos = last->second.endPos + spaceWidth_;
+    int32_t prevIndex = last->first;
+    if (prevIndex >= totalItemCount_ - 1) {
+        totalMainSize_ = prevPos - spaceWidth_;
+    } else {
+        float estSize = LineCount(prevIndex, totalItemCount_ - 1) * (estimateItemSize_ + spaceWidth_);
+        totalMainSize_ = prevPos + estSize - spaceWidth_;
+    }
+}
+
 float LazyGridLayoutInfo::UpdatePosWithIter(
     std::map<int, GridItemMainPos>::iterator &it, int32_t& prevIndex, float& prevPos) const
 {
@@ -128,10 +144,6 @@ void LazyGridLayoutInfo::UpdatePosMap()
     if (!Positive(estimateItemSize_)) {
         EstimateItemSize();
     }
-    if (updatedStart_ == INT_MAX && cachedUpdatedStart_ < INT_MAX) {
-        updatedStart_ = cachedUpdatedStart_;
-        updatedEnd_ = cachedUpdatedEnd_;
-    }
     if (updatedStart_ < INT_MAX) {
         if (cachedUpdatedStart_ < updatedStart_) {
             UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), updatedStart_ - 1);
@@ -143,15 +155,22 @@ void LazyGridLayoutInfo::UpdatePosMap()
         } else {
             UpdatePosMapEnd(updatedEnd_);
         }
-        adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
-        updatedStart_ = INT_MAX;
-        updatedEnd_ = -1;
-        cachedUpdatedStart_ = INT_MAX;
-        cachedUpdatedEnd_ = -1;
+    } else if (cachedUpdatedStart_ < INT_MAX) {
+        UpdatePosMapStart(LanesFloor(cachedUpdatedStart_), LanesCeil(cachedUpdatedEnd_));
+        UpdatePosMapEnd(LanesCeil(cachedUpdatedEnd_));
+        adjustOffset_.start = endIndex_ < 0 ? 0.0f : totalMainSize_ - prevTotalMainSize_;
+    } else if (spaceUpdated_) {
+        UpdateTotalMainSize();
+        adjustOffset_.start = endIndex_ < 0 ? 0.0f : totalMainSize_ - prevTotalMainSize_;
     } else {
         adjustOffset_.start = 0.0f;
-        adjustOffset_.end = 0.0f;
     }
+    adjustOffset_.end = totalMainSize_ - prevTotalMainSize_ - adjustOffset_.start;
+    updatedStart_ = INT_MAX;
+    updatedEnd_ = -1;
+    cachedUpdatedStart_ = INT_MAX;
+    cachedUpdatedEnd_ = -1;
+    spaceUpdated_ = false;
 }
 
 void LazyGridLayoutInfo::SetSpace(float space)
@@ -167,6 +186,7 @@ void LazyGridLayoutInfo::SetSpace(float space)
         updatedEnd_ = -1;
         cachedUpdatedStart_ = INT_MAX;
         cachedUpdatedEnd_ = -1;
+        spaceUpdated_ = true;
     }
 }
 

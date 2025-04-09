@@ -147,7 +147,7 @@ public:
     ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
-    bool IsAtBottom() const override;
+    bool IsAtBottom(bool considerRepeat = false) const override;
     bool IsOutOfBoundary(bool useCurrentDelta = true) override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
 
@@ -406,8 +406,8 @@ private:
     void HandleScrollPosition(float scroll);
     float FireTwoDimensionOnWillScroll(float scroll);
     void FireOnDidScroll(float scroll);
-    void FireOnReachStart(const OnReachEvent& onReachStart) override;
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction() override;

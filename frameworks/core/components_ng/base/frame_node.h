@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -88,6 +88,11 @@ struct CacheMatrixInfo {
     RectF paintRectWithTransform;
 };
 
+enum {
+    RET_FAILED = 11,
+    RET_SUCCESS = 10,
+};
+
 // FrameNode will display rendering region in the screen.
 class ACE_FORCE_EXPORT FrameNode : public UINode, public LayoutWrapper {
     DECLARE_ACE_TYPE(FrameNode, UINode, LayoutWrapper);
@@ -115,6 +120,8 @@ public:
 
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
+
+    static RefPtr<FrameNode> GetFrameNodeOnly(const std::string& tag, int32_t nodeId);
 
     static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
@@ -286,6 +293,8 @@ public:
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
+    void SetNodeFreeze(bool isFreeze);
+
     const RefPtr<RenderContext>& GetRenderContext() const
     {
         return renderContext_;
@@ -296,6 +305,12 @@ public:
     template<typename T>
     T* GetPatternPtr() const
     {
+        if (ACE_UNLIKELY(pattern_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(pattern_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPatternTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(pattern_));
     }
 
@@ -314,6 +329,12 @@ public:
     template<typename T>
     T* GetLayoutPropertyPtr() const
     {
+        if (ACE_UNLIKELY(layoutProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(layoutProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetLayoutPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(layoutProperty_));
     }
 
@@ -326,6 +347,12 @@ public:
     template<typename T>
     T* GetPaintPropertyPtr() const
     {
+        if (ACE_UNLIKELY(paintProperty_ &&
+            SystemProperties::DetectAceObjTypeConvertion() &&
+            !DynamicCast<T>(paintProperty_))) {
+            LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
+                GetPaintPropertyTypeName(), T::TypeName());
+        }
         return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
@@ -447,6 +474,8 @@ public:
     }
 
     void ChangeSensitiveStyle(bool isSensitive);
+
+    bool IsJsCustomPropertyUpdated() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
@@ -570,6 +599,12 @@ public:
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, std::string tag)
     {
         destroyCallbacksMap_[tag] = callback;
+    }
+
+    void SetConfigurationModeUpdateCallback(
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+    {
+        configurationUpdateCallback_ = callback;
     }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
@@ -790,6 +825,8 @@ public:
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
     void AddFRCSceneInfo(const std::string& scene, float speed, SceneStatus status);
+
+    void TryPrintDebugLog(const std::string& scene, float speed, SceneStatus status);
 
     OffsetF GetParentGlobalOffsetDuringLayout() const;
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override {};
@@ -1129,7 +1166,7 @@ public:
     void SetDeleteRsNode(bool isDelete) {
         isDeleteRsNode_ = isDelete;
     }
- 
+
     bool GetIsDelete() const {
         return isDeleteRsNode_;
     }
@@ -1137,7 +1174,7 @@ public:
     void SetPositionZ(bool hasPositionZ) {
         hasPositionZ_ = hasPositionZ;
     }
- 
+
     bool HasPositionZ() const {
         return hasPositionZ_;
     }
@@ -1186,7 +1223,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
+    void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc,
+        std::function<std::string()>&& getCustomPropertyMapFunc = nullptr);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
@@ -1310,6 +1348,16 @@ public:
         layoutProperty_->SetNeedLazyLayout(value);
     }
 
+    void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
+
+    std::string PrintVisibilityDumpInfo() const;
+    void SetDetachRelatedNodeCallback(std::function<void()>&& callback)
+    {
+        detachRelatedNodeCallback_ = std::move(callback);
+    }
+
+    int32_t OnRecvCommand(const std::string& command) override;
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1375,6 +1423,8 @@ private:
     void BuildLayoutInfo(std::unique_ptr<JsonValue>& json);
 
     void DumpSafeAreaInfo();
+    // add flexLayout && direction && align && aspectRatio dumpInfo
+    void DumpLayoutInfo();
     void DumpAlignRulesInfo();
     void DumpExtensionHandlerInfo();
     void DumpAdvanceInfo() override;
@@ -1450,11 +1500,16 @@ private:
 
     void ResetPredictNodes();
 
+    const char* GetPatternTypeName() const;
+    const char* GetLayoutPropertyTypeName() const;
+    const char* GetPaintPropertyTypeName() const;
+
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
 
+    std::function<void(const ConfigurationChange& configurationChange)> configurationUpdateCallback_;
     std::function<void()> colorModeUpdateCallback_;
     std::function<void(int32_t)> ndkColorModeUpdateCallback_;
     std::function<void(float, float)> ndkFontUpdateCallback_;
@@ -1478,6 +1533,7 @@ private:
     std::set<std::string> allowDrop_;
     std::function<void()> removeCustomProperties_;
     std::function<std::string(const std::string& key)> getCustomProperty_;
+    std::function<std::string()> getCustomPropertyMapFunc_;
     std::optional<RectF> viewPort_;
     NG::DragDropInfo dragPreviewInfo_;
 
@@ -1596,9 +1652,12 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
+    std::deque<std::pair<uint64_t, std::pair<VisibleType, bool>>> visibilityDumpInfos_;
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    std::function<void()> detachRelatedNodeCallback_;
 };
 } // namespace OHOS::Ace::NG
 

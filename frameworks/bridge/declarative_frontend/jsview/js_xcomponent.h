@@ -42,6 +42,7 @@ struct XComponentOptions {
     XComponentType xcomponentType = XComponentType::SURFACE;
     std::optional<std::string> libraryName = std::nullopt;
     std::shared_ptr<InnerXComponentController> xcomponentController = nullptr;
+    std::optional<std::uint64_t> screenId = std::nullopt;
 };
 
 class XComponentClient {
@@ -211,7 +212,8 @@ public:
 private:
     static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
     static void ExtractInfoToXComponentOptions(
-        XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info);
+        XComponentOptions& options, JSRef<JSObject>& controllerObj,
+        const JSRef<JSObject>& paramObject, const JSCallbackInfo& info);
 
     RefPtr<AceType> frameNode_;
 };

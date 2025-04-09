@@ -156,14 +156,14 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(confirmNode);
     auto confirmNodeLayout = confirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(confirmNodeLayout);
-    confirmNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     auto pipeline = confirmNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
+    confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    buttonConfirmLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
     UpdateConfirmButtonMargin(buttonConfirmNode, dialogTheme);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -173,11 +173,11 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNode);
     auto cancelNodeLayout = cancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(cancelNodeLayout);
-    cancelNodeLayout->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
     UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
-    buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
+    buttonCancelLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -266,7 +266,7 @@ void TextPickerPattern::InitFocusEvent()
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleFocusEvent();
@@ -443,7 +443,9 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
 
 void TextPickerPattern::ColumnPatternInitHapticController()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
     if (!isHapticChanged_) {
@@ -821,11 +823,11 @@ void TextPickerPattern::InitDisabled()
     if (!enabled_) {
         opacity *= DISABLE_ALPHA;
         renderContext->UpdateOpacity(opacity);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    } else if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         renderContext->UpdateOpacity(opacity);
     }
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         for (const auto& child : host->GetChildren()) {
             auto stackNode = DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(stackNode);

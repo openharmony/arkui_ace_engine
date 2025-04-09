@@ -51,9 +51,9 @@
 #ifndef USE_ROSEN_DRAWING
 #include "core/components_ng/render/adapter/skia_image.h"
 #else
-#include "core/components_ng/render/adapter/rosen/drawing_image.h"
+#include "core/components_ng/render/adapter/drawing_image.h"
 #endif
-#include "core/image/sk_image_cache.h"
+#include "core/image/image_cache.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {

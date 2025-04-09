@@ -370,6 +370,10 @@ const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
 const char SLIDER_ETS_TAG[] = "Slider";
 
+// sliderTip
+const char SLIDER_TIP_NODE_COMPONENT_TAG[] = "sliderTipFrameNodeComponent";
+const char SLIDER_TIP_NODE_ETS_TAG[] = "sliderTipFrameNode";
+
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
 const char RATING_ETS_TAG[] = "Rating";
@@ -403,6 +407,12 @@ const char STEPPER_ETS_TAG[] = "Stepper";
 // stepperItem
 const char STEPPER_ITEM_COMPONENT_TAG[] = "StepperItemComponentV2";
 const char STEPPER_ITEM_ETS_TAG[] = "StepperItem";
+
+// toolbar
+const char TOOLBAR_ETS_TAG[] = "Tool_Bar";
+
+// toolbaritem
+const char TOOLBARITEM_ETS_TAG[] = "ToolBarItem";
 
 // scrollbar
 const char SCROLL_BAR_COMPONENT_TAG[] = "ScrollBarComponent";

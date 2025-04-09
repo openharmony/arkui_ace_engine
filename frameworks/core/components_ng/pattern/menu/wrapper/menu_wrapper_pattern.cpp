@@ -241,7 +241,7 @@ void MenuWrapperPattern::GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenu
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
     expandingMode = menuProperty->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
-    menuItemPattern->SetIsSubMenuShowed (false);
+    menuItemPattern->SetIsSubMenuShowed(false);
 }
 
 void MenuWrapperPattern::HideSubMenu()
@@ -695,6 +695,7 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 
 void MenuWrapperPattern::StartShowAnimation()
 {
+    TAG_LOGI(AceLogTag::ACE_MENU, "start show menu animation");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -777,7 +778,7 @@ bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& 
 
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
+    TAG_LOGD(AceLogTag::ACE_MENU, "register menu enter");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -790,7 +791,7 @@ void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapp
 
 void MenuWrapperPattern::SetMenuTransitionEffect(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "set menu transition effect");
+    TAG_LOGD(AceLogTag::ACE_MENU, "set menu transition effect");
     CHECK_NULL_VOID(menuWrapperNode);
     auto pattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -909,9 +910,9 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("MenuPreviewMode", std::to_string(dumpInfo_.menuPreviewMode).c_str());
     json->Put("MenuType", std::to_string(dumpInfo_.menuType).c_str());
     json->Put("EnableArrow", std::to_string(dumpInfo_.enableArrow).c_str());
+    json->Put("Offset", dumpInfo_.offset.ToString().c_str());
     json->Put("TargetNode", dumpInfo_.targetNode.c_str());
     json->Put("TargetOffset", dumpInfo_.targetOffset.ToString().c_str());
-
     json->Put("TargetSize", dumpInfo_.targetSize.ToString().c_str());
     json->Put("MenuWindowRect", dumpInfo_.menuWindowRect.ToString().c_str());
     json->Put("WrapperRect", dumpInfo_.wrapperRect.ToString().c_str());

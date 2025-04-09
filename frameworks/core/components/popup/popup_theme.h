@@ -96,17 +96,30 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
+                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            ParseAdditionalStylePattern(pattern, theme);
+            ParseTipsPattern(pattern, theme);
+        }
+        void ParseTipsPattern(const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
+        {
             auto tipsDoubleBorderEnable = pattern->GetAttr<std::string>("tips_double_border_enable", "1");
             theme->tipsDoubleBorderEnable_ = StringUtils::StringToInt(tipsDoubleBorderEnable);
             theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
             theme->tipsOuterBorderColor_ = pattern->GetAttr<Color>("tips_outer_border_color", Color::TRANSPARENT);
             theme->tipsInnerBorderWidth_ = pattern->GetAttr<Dimension>("tips_inner_border_width", 1.0_vp);
             theme->tipsInnerBorderColor_ = pattern->GetAttr<Color>("tips_inner_border_color", Color::TRANSPARENT);
-            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
-                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
-            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
-                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
-            ParseAdditionalStylePattern(pattern, theme);
+            if (Container::CurrentColorMode() == ColorMode::DARK) {
+                theme->tipsOuterBorderWidth_ = pattern->GetAttr<Dimension>("tips_outer_border_width", 1.0_vp);
+                theme->tipsOuterBorderColor_ =
+                    pattern->GetAttr<Color>("tips_outer_border_color_dark", Color::TRANSPARENT);
+            }
+            theme->tipsPadding_ = Edge(pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_horizontal_padding", 8.0_vp),
+                pattern->GetAttr<Dimension>("tips_vertical_padding", 8.0_vp));
         }
         void ParseAdditionalStylePattern(
             const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
@@ -120,6 +133,41 @@ public:
             theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
             theme->bubbleMiniMumHeight_ =
                 pattern->GetAttr<Dimension>("bubble_min_mum_height", theme->bubbleMiniMumHeight_);
+            theme->buttonHeight_ = pattern->GetAttr<Dimension>("popup_button_height", 40.0_vp);
+            theme->popupButtonFlexGrow_ = pattern->GetAttr<int>("popup_button_flex_grow", 0);
+            theme->buttonType_ = pattern->GetAttr<int>("popup_button_type", static_cast<int>(ButtonType::CAPSULE));
+            theme->buttonTextFontWeight_ = pattern->GetAttr<int>(
+                "popup_button_text_font_weight", static_cast<int>(FontWeight::REGULAR));
+            theme->primaryButtonBackgroundColor_ =
+                pattern->GetAttr<Color>("popup_primary_button_background_color", Color::TRANSPARENT);
+            theme->secondaryButtonBackgroundColor_ =
+                pattern->GetAttr<Color>("popup_secondary_button_background_color", Color::TRANSPARENT);
+            theme->primaryButtonFontColor_ = pattern->GetAttr<Color>("popup_primary_button_font_color", Color::WHITE);
+            theme->secondaryButtonFontColor_ =
+                pattern->GetAttr<Color>("popup_secondary_button_font_color", Color::WHITE);
+            theme->secondaryButtonShadowColor_ =
+                pattern->GetAttr<Color>("popup_secondary_button_shadow_color", Color::TRANSPARENT);
+            theme->secondaryButtonShadowRadius_ =
+                pattern->GetAttr<double>("popup_secondary_button_shadow_radius", 0.0f);
+            theme->secondaryButtonShadowOffsetX_ =
+                pattern->GetAttr<double>("popup_secondary_button_shadow_offset_X", 0.0f);
+            theme->secondaryButtonShadowOffsetY_ =
+                pattern->GetAttr<double>("popup_secondary_button_shadow_offset_Y", 0.0f);
+            theme->buttonBorderWidth_ = pattern->GetAttr<Dimension>("popup_button_border_width", 0.0_vp);
+            theme->buttonSpacingNewVersion_ = pattern->GetAttr<Dimension>("popup_button_space", 0.0_vp);
+            theme->secondaryButtonBeginGredientColor_ =
+                pattern->GetAttr<Color>("popup_secondary_button_begin_gredient_color", Color::TRANSPARENT);
+            theme->secondaryButtonEndGredientColor_ =
+                pattern->GetAttr<Color>("popup_secondary_button_end_gredient_color", Color::TRANSPARENT);
+            theme->buttonLeftMargin_ = pattern->GetAttr<Dimension>("popup_button_left_margin", 0.0_vp);
+            theme->buttonRightMargin_ = pattern->GetAttr<Dimension>("popup_button_right_margin", 4.0_vp);
+            theme->buttonTopMargin_ = pattern->GetAttr<Dimension>("popup_button_top_margin", 0.0_vp);
+            theme->buttonBottomMargin_ = pattern->GetAttr<Dimension>("popup_button_bottom_margin", 4.0_vp);
+            theme->innerBorderBeginGredientColor_ =
+                pattern->GetAttr<Color>("popup_inner_border_begin_gredient_color", Color::TRANSPARENT);
+            theme->innerBorderEndGredientColor_ =
+                pattern->GetAttr<Color>("popup_inner_border_end_gredient_color", Color::TRANSPARENT);
+            theme->popupDoubleButtonIsSameStyle_ = pattern->GetAttr<int>("popup_double_button_is_same_style", 1);
         }
     };
 
@@ -128,6 +176,11 @@ public:
     const Edge& GetPadding() const
     {
         return padding_;
+    }
+
+    const Edge& GetTipsPadding() const
+    {
+        return tipsPadding_;
     }
 
     const Color& GetMaskColor() const
@@ -418,11 +471,97 @@ public:
         return bgThemeColorMode_;
     }
 
+    int GetPopupButtonType() const
+    {
+        return buttonType_;
+    }
+    const Color& GetPrimaryButtonBackgroundColor() const
+    {
+        return primaryButtonBackgroundColor_;
+    }
+    const Color& GetSecondaryButtonBackgroundColor() const
+    {
+        return secondaryButtonBackgroundColor_;
+    }
+    const Color& GetPrimaryButtonFontColor() const
+    {
+        return primaryButtonFontColor_;
+    }
+    const Color& GetSecondaryButtonFontColor() const
+    {
+        return secondaryButtonFontColor_;
+    }
+    Shadow GetSecondaryButtonShadow()
+    {
+        secondaryButtonShadow_.SetColor(secondaryButtonShadowColor_);
+        secondaryButtonShadow_.SetBlurRadius(secondaryButtonShadowRadius_);
+        secondaryButtonShadow_.SetOffsetX(secondaryButtonShadowOffsetX_);
+        secondaryButtonShadow_.SetOffsetY(secondaryButtonShadowOffsetY_);
+        return secondaryButtonShadow_;
+    }
+    const Dimension& GetButtonBorderWidth() const
+    {
+        return buttonBorderWidth_;
+    }
+    const Color& GetSecondaryButtonBeginGredientColor() const
+    {
+        return secondaryButtonBeginGredientColor_;
+    }
+    const Color& GetSecondaryButtonEndGredientColor() const
+    {
+        return secondaryButtonEndGredientColor_;
+    }
+    const Dimension& GetButtonLeftMargin() const
+    {
+        return buttonLeftMargin_;
+    }
+    const Dimension& GetButtonRightMargin() const
+    {
+        return buttonRightMargin_;
+    }
+    const Dimension& GetButtonTopMargin() const
+    {
+        return buttonTopMargin_;
+    }
+    const Dimension& GetButtonBottomMargin() const
+    {
+        return buttonBottomMargin_;
+    }
+    const Dimension& GetButtonHeight() const
+    {
+        return buttonHeight_;
+    }
+    int GetButtonTextFontWeight() const
+    {
+        return buttonTextFontWeight_;
+    }
+    const Color& GetInnerBorderBeginGredientColor() const
+    {
+        return innerBorderBeginGredientColor_;
+    }
+    const Color& GetInnerBorderEndGredientColor() const
+    {
+        return innerBorderEndGredientColor_;
+    }
+    int GetPopupButtonFlexGrow() const
+    {
+        return popupButtonFlexGrow_;
+    }
+    const Dimension& GetButtonSpacingNewVersion() const
+    {
+        return buttonSpacingNewVersion_;
+    }
+    int GetPopupDoubleButtonIsSameStyle() const
+    {
+        return popupDoubleButtonIsSameStyle_;
+    }
+
 protected:
     PopupTheme() = default;
 
 private:
     Edge padding_;
+    Edge tipsPadding_;
     Color maskColor_;
     Color backgroundColor_;
     Color buttonHoverColor_ = Color(0x0cffffff);
@@ -482,6 +621,30 @@ private:
     Dimension minHeight_ = 0.0_vp;
     uint32_t popupMaxColumns_ = 0;
     uint32_t bgThemeColorMode_ = 0;
+    int buttonType_ = static_cast<int>(ButtonType::CAPSULE);
+    Color primaryButtonBackgroundColor_ = Color::TRANSPARENT;
+    Color secondaryButtonBackgroundColor_ = Color::TRANSPARENT;
+    Color primaryButtonFontColor_ = Color::WHITE;
+    Color secondaryButtonFontColor_ = Color::WHITE;
+    Shadow secondaryButtonShadow_;
+    Color secondaryButtonShadowColor_ = Color::TRANSPARENT;
+    double secondaryButtonShadowRadius_ = 0.0f;
+    double secondaryButtonShadowOffsetX_ = 0.0f;
+    double secondaryButtonShadowOffsetY_ = 0.0f;
+    Dimension buttonBorderWidth_ = 0.0_vp;
+    Color secondaryButtonBeginGredientColor_ = Color::TRANSPARENT;
+    Color secondaryButtonEndGredientColor_ = Color::TRANSPARENT;
+    Dimension buttonLeftMargin_ = 0.0_vp;
+    Dimension buttonRightMargin_ = 4.0_vp;
+    Dimension buttonTopMargin_ = 0.0_vp;
+    Dimension buttonBottomMargin_ = 4.0_vp;
+    Dimension buttonHeight_ = 40.0_vp;
+    int buttonTextFontWeight_ = static_cast<int>(FontWeight::REGULAR);
+    Color innerBorderBeginGredientColor_ = Color::TRANSPARENT;
+    Color innerBorderEndGredientColor_ = Color::TRANSPARENT;
+    int popupButtonFlexGrow_ = 0;
+    Dimension buttonSpacingNewVersion_ = 0.0_vp;
+    int popupDoubleButtonIsSameStyle_ = 1;
 };
 
 } // namespace OHOS::Ace

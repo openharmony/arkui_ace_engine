@@ -204,6 +204,7 @@ private:
     void OnSensitiveStyleChange(bool isSensitive) override;
     void ObscureText(bool isSensitive);
     void FireBuilder();
+    void ReportProgressEvent();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

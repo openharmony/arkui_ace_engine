@@ -295,7 +295,8 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
 int32_t ScrollModelNG::GetScrollBar(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
-    return static_cast<int32_t>(frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value());
+    return static_cast<int32_t>(
+        frameNode->GetPaintProperty<ScrollablePaintProperty>()->GetScrollBarMode().value_or(DisplayMode::AUTO));
 }
 
 void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)

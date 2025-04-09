@@ -59,14 +59,31 @@ const MAX_FONT_SCALE = 2;
 const FADEOUT_GRADIENT_WIDTH = 32;
 const FADEOUT_ENABLE = 'true';
 const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
-const BUTTON_HORIZONTAL_MARGIN = getNumberByResourceId(125831054, 16);
 const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
-const BUTTON_HORIZONTAL_SPACE = getNumberByResourceId(125831051, 8);
 const BODY_L = getNumberByResourceId(125830970, 16);
 const BODY_M = getNumberByResourceId(125830971, 14);
 const BODY_S = getNumberByResourceId(125830972, 12);
 const TITLE_S = getNumberByResourceId(125830966, 20);
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
+
+const BUTTON_HORIZONTAL_MARGIN = lazyInit(() => {
+    return getLengthMetricsByResource({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.alert_right_padding_horizontal'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    }, 16);
+});
+const BUTTON_HORIZONTAL_SPACE = lazyInit(() => {
+    return getLengthMetricsByResource({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.alert_button_horizontal_space'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    }, 8);
+});
 const BUTTON_MIN_FONT_SIZE = lazyInit(() => {
     return getLengthMetricsByResource({
         'id': -1,
@@ -2784,7 +2801,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.constraintSize({ maxHeight: this.contentMaxHeight });
-            Column.backgroundBlurStyle(this.customStyle ? BlurStyle.Thick : BlurStyle.NONE);
+            Column.backgroundBlurStyle(this.customStyle ?
+                BlurStyle.Thick : BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Column.borderRadius(this.customStyle ? {
                 'id': -1,
                 'type': 10002,
@@ -2866,14 +2884,7 @@ class CustomDialogContentComponent extends ViewPU {
                                             });
                                         } else {
                                             this.ifElseBranchUpdateFunction(2, () => {
-                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                    WithTheme.create({
-                                                        theme: this.theme,
-                                                        colorMode: this.themeColorMode
-                                                    });
-                                                }, WithTheme);
-                                                this.ButtonBuilder.bind(this)();
-                                                WithTheme.pop();
+                                                this.buildButton.bind(this)();
                                             });
                                         }
                                     }, If);
@@ -2928,14 +2939,7 @@ class CustomDialogContentComponent extends ViewPU {
                                                 });
                                             } else {
                                                 this.ifElseBranchUpdateFunction(2, () => {
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        WithTheme.create({
-                                                            theme: this.theme,
-                                                            colorMode: this.themeColorMode
-                                                        });
-                                                    }, WithTheme);
-                                                    this.ButtonBuilder.bind(this)();
-                                                    WithTheme.pop();
+                                                    this.buildButton.bind(this)();
                                                 });
                                             }
                                         }, If);
@@ -2964,7 +2968,7 @@ class CustomDialogContentComponent extends ViewPU {
         let maxHeight = Number(constraint.maxHeight);
         this.fontSizeScale = this.updateFontScale();
         this.updateFontSize();
-        this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
+        this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN() * 2);
         this.titleMinHeight = this.getTitleAreaMinHeight();
         let height = 0;
         children.forEach((child) => {
@@ -2981,9 +2985,16 @@ class CustomDialogContentComponent extends ViewPU {
         return sizeResult;
     }
     aboutToAppear() {
-        let uiContext = this.getUIContext();
-        this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
-        this.appMaxFontScale = uiContext.getMaxFontScale();
+        try {
+            let uiContext = this.getUIContext();
+            this.isFollowingSystemFontScale = uiContext?.isFollowingSystemFontScale();
+            this.appMaxFontScale = uiContext?.getMaxFontScale();
+        }
+        catch (err) {
+            let code = err?.code;
+            let message = err?.message;
+            hilog.error(0x3900, 'Ace', `Faild to dialog getUIContext, code: ${code}, message: ${message}`);
+        }
         this.fontSizeScale = this.updateFontScale();
         if (this.controller && this.customStyle === undefined) {
             let customController = this.controller;
@@ -3354,6 +3365,43 @@ class CustomDialogContentComponent extends ViewPU {
         If.pop();
         Column.pop();
     }
+
+    isSetCustomButtonTheme() {
+        // is set fadeout style: now only on TV
+        if (IS_FADEOUT_ENABLE()) {
+            // has set button background color prop
+            if (this.theme?.colors?.compBackgroundTertiary || this.theme?.colors?.backgroundEmphasize) {
+                return true;
+            }
+            // has set button font color prop
+            if (this.theme?.colors?.fontEmphasize || this.theme?.colors?.fontOnPrimary || this.theme?.colors?.warning) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    buildButton(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.isSetCustomButtonTheme()) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        WithTheme.create({ theme: this.theme, colorMode: this.themeColorMode });
+                    }, WithTheme);
+                    this.ButtonBuilder.bind(this)();
+                    WithTheme.pop();
+                });
+            } else {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.ButtonBuilder.bind(this)();
+                });
+            }
+        }, If);
+        If.pop();
+    }
+
     getOperationAreaPadding() {
         if (this.isButtonVertical) {
             return {
@@ -3509,7 +3557,7 @@ class CustomDialogContentComponent extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
-                                    Row.width(BUTTON_HORIZONTAL_SPACE * 2);
+                                    Row.width(BUTTON_HORIZONTAL_SPACE() * 2);
                                     Row.justifyContent(FlexAlign.Center);
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3658,15 +3706,22 @@ class CustomDialogContentComponent extends ViewPU {
                 return true;
             }
             let isVertical = false;
-            let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN -
-                BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
+            let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
+                BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
             this.buttons.forEach((button) => {
-                let contentSize = measure.measureTextSize({
-                    textContent: button.value,
-                    fontSize: this.buttonMaxFontSize
-                });
-                if (Number(contentSize.width) > maxButtonTextSize) {
-                    isVertical = true;
+                try {
+                    let contentSize = measure.measureTextSize({
+                        textContent: button.value,
+                        fontSize: this.buttonMaxFontSize
+                    });
+                    if (Number(contentSize?.width) > maxButtonTextSize) {
+                        isVertical = true;
+                    }
+                } catch (err) {
+                    let code = (exception).code;
+                    let message = (exception).message;
+                    hilog.error(0x3900, 'Ace', `Faild to dialog isVerticalAlignButton measureTextSize,cause,
+                    code: ${code}, message: ${message}`);
                 }
             });
             return isVertical;
@@ -4098,7 +4153,7 @@ export class PopoverDialog extends ViewPU {
                 try {
                     let screenSize = display.getDefaultDisplaySync();
                     let screenWidth = px2vp(screenSize.width);
-                    if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+                    if (screenWidth - BUTTON_HORIZONTAL_MARGIN() - BUTTON_HORIZONTAL_MARGIN() > MAX_DIALOG_WIDTH) {
                         this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
                     } else {
                         this.popover.width = this.dialogWidth;

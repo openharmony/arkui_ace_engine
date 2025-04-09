@@ -300,9 +300,7 @@ void MovingPhotoPattern::UpdateImageNode()
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
-    DynamicRangeModeConvert(dynamicRangeMode_);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
-    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    UpdateImageHdrMode(image);
     auto imagePattern = image->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(imagePattern);
     imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
@@ -336,6 +334,18 @@ void MovingPhotoPattern::UpdateImageNode()
         image->MarkModifyDone();
     }
     RegisterImageEvent();
+}
+
+void MovingPhotoPattern::UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode)
+{
+    if (dynamicRangeMode_ == DynamicRangeMode::STANDARD) {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, imageNode);
+        ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, DynamicRangeMode, imageNode);
+    } else {
+        DynamicRangeModeConvert(dynamicRangeMode_);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, imageNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, imageNode);
+    }
 }
 
 void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
@@ -926,10 +936,11 @@ void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 void MovingPhotoPattern::OnMediaPlayerInitialized()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer OnMediaPlayerInitialized.");
-    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO) {
+    if (!isSetAutoPlayPeriod_ && autoAndRepeatLevel_ == PlaybackMode::AUTO && !isAutoChangePlayMode_) {
         isSetAutoPlayPeriod_ = true;
         SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
     }
+    isAutoChangePlayMode_ = false;
     PrepareSurface();
     if (mediaPlayer_->PrepareAsync() != PREPARE_RETURN) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "prepare MediaPlayer failed.");
@@ -998,6 +1009,12 @@ void MovingPhotoPattern::VisiblePlayback()
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto VisiblePlayback.");
     if (!isVisible_) {
         return;
+    }
+    if (isRepeatChangePlayMode_ && historyAutoAndRepeatLevel_ == PlaybackMode::NONE &&
+        autoAndRepeatLevel_ == PlaybackMode::NONE) {
+        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        isRepeatChangePlayMode_ = false;
     }
     if (historyAutoAndRepeatLevel_ != PlaybackMode::NONE &&
         autoAndRepeatLevel_ == PlaybackMode::NONE) {
@@ -1163,10 +1180,14 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        autoAndRepeatLevel_ = PlaybackMode::NONE;
+        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
+        isRepeatChangePlayMode_ = true;
         Pause();
+    } else if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
+        autoAndRepeatLevel_ = PlaybackMode::AUTO;
+        isAutoChangePlayMode_ = true;
     }
-    autoAndRepeatLevel_ = PlaybackMode::NONE;
-    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     ResetMediaPlayer();
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();

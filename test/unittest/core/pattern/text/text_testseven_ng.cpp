@@ -13,12 +13,15 @@
  * limitations under the License.
  */
 
-#include "text_base.h"
-
 #include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/common/clipboard/mock_clip_board.h"
+#include "text_base.h"
+
+#include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -429,7 +432,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
-    span0->imageNodeId = 1;
+    span0->nodeId_ = 1;
     auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
@@ -479,7 +482,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
-    span0->imageNodeId = 1;
+    span0->nodeId_ = 1;
     auto span1 = span0->GetSameStyleSpanItem(true);
     span1->content = u" ";
     span1->interval.first = 0;
@@ -520,17 +523,36 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
     /**
      * @tc.steps: step1. Construct a minimal version 10.
      */
+    /**
+     * @tc.steps: step1. init
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    LayoutConstraintF contentConstraint;
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
-    TextStyle textStyleBase;
-    textStyleBase.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    layoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
     auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    multipleAlgorithm->textStyle_ = textStyleBase;
+    /**
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    TextStyle textStyle;
+    multipleAlgorithm->ConstructTextStyles(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper), textStyle);
 
     /**
      * @tc.steps: step2. Construct MultipleParagraphLayoutAlgorithm and test inheritTextStyle_.
      */
-    TextStyle textStyle;
     textStyle.SetFontSize(FONT_SIZE_VALUE);
     multipleAlgorithm->InheritParentTextStyle(textStyle);
     EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), ADAPT_FONT_SIZE_VALUE);

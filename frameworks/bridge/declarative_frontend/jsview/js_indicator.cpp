@@ -56,8 +56,7 @@ void JSIndicator::Create(const JSCallbackInfo& info)
         auto* jsController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
         if (jsController) {
             jsController->SetInstanceId(Container::CurrentId());
-            WeakPtr<NG::UINode> indicatorNode =
-                AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            auto indicatorNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
             jsController->SetController(indicatorController, indicatorNode);
         }
     }
@@ -372,9 +371,9 @@ void JSIndicatorController::Destructor(JSIndicatorController* scroller)
 
 void JSIndicatorController::ChangeIndex(const JSCallbackInfo& args)
 {
-    if (!controller_) {
-        return;
-    }
+    auto controller = controller_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    ContainerScope scope(instanceId_);
     if (!args[0]->IsNumber()) {
         return;
     }
@@ -383,7 +382,7 @@ void JSIndicatorController::ChangeIndex(const JSCallbackInfo& args)
         useAnimation = args[1]->ToBoolean();
     }
     auto index = args[0]->ToNumber<int32_t>();
-    controller_->ChangeIndex(index, useAnimation);
+    controller->ChangeIndex(index, useAnimation);
 }
 
 } // namespace OHOS::Ace::Framework

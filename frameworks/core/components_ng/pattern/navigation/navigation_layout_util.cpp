@@ -24,6 +24,23 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+double GetRootWidth(const RefPtr<NavDestinationNodeBase>& nodeBase)
+{
+    double fallbackWidth = ScreenSystemManager::GetInstance().GetScreenWidth();
+    CHECK_NULL_RETURN(nodeBase, fallbackWidth);
+    auto context = nodeBase->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, fallbackWidth);
+    auto rotateAngle = nodeBase->GetPageRotateAngle();
+    auto config = nodeBase->GetPageViewportConfig();
+    if (!config || !rotateAngle.has_value() ||
+        rotateAngle.value() == ROTATION_0 || rotateAngle.value() == ROTATION_180) {
+        return GridSystemManager::GetInstance().GetScreenWidth(context);
+    }
+    return config->GetWidth();
+}
+}
+
 bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
     const RefPtr<NavDestinationNodeBase>& nodeBase, const SizeF& navigationSize)
 {
@@ -53,7 +70,7 @@ bool NavigationLayoutUtil::CheckWhetherNeedToHideToolbar(
     CHECK_NULL_RETURN(columnInfo, false);
     auto columnInfoParent = columnInfo->GetParent();
     CHECK_NULL_RETURN(columnInfoParent, false);
-    columnInfoParent->BuildColumnWidth();
+    columnInfoParent->BuildColumnWidth(GetRootWidth(nodeBase));
 
     auto currentColumns = columnInfoParent->GetColumns();
     float gridWidth = static_cast<float>(columnInfo->GetWidth(rotationLimitCount));

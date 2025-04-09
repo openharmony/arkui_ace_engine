@@ -25,6 +25,7 @@ const std::string GAME_INFO_TO_GAME_RESAMPLE = "touch.events.game.resample";
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through event");
+    std::lock_guard<std::mutex> lock(mutex_);
     if (eventPassThroughReceiver_ == nullptr) {
         // create subscribe info
         MatchingSkills matchingSkills;
@@ -49,6 +50,7 @@ void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
 
 void EventPassThroughSubscribeProxy::UnSubscribeEvent()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (eventReceiver_ != nullptr) {
         CommonEventManager::UnSubscribeCommonEvent(eventReceiver_);
         eventReceiver_ = nullptr;
@@ -58,6 +60,7 @@ void EventPassThroughSubscribeProxy::UnSubscribeEvent()
 
 void EventPassThroughSubscribeProxy::UnSubscribeEvent(int32_t instanceId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (eventReceiver_ != nullptr) {
         if (eventPassThroughReceiver_->EraseContainerAddCheckUnSubscribe(instanceId)) {
             CommonEventManager::UnSubscribeCommonEvent(eventReceiver_);
@@ -77,14 +80,17 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
         return;
     }
     bool needPassThrough = false;
-    for (const auto& instanceId : instanceMap_) {
-        auto container = Platform::AceContainer::GetContainer(instanceId);
-        if (!container) {
-            continue;
-        }
-        if (container->GetBundleName() == bundleName) {
-            needPassThrough = true;
-            break;
+    {
+        std::lock_guard<std::mutex> lock(instanceMapMutex_);
+        for (const auto& instanceId : instanceMap_) {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                continue;
+            }
+            if (container->GetBundleName() == bundleName) {
+                needPassThrough = true;
+                break;
+            }
         }
     }
     if (!needPassThrough) {
@@ -99,38 +105,43 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
     TouchPassMode mode =
         (action == TOUCH_EVENTS_PASS_THROUGH) ? TouchPassMode::PASS_THROUGH : TouchPassMode::ACCELERATE;
     AceApplicationInfo::GetInstance().SetTouchEventPassMode(mode);
-    for (const auto& instanceId : instanceMap_) {
-        auto container = Platform::AceContainer::GetContainer(instanceId);
-        if (!container) {
-            continue;
+    {
+        std::lock_guard<std::mutex> lock(instanceMapMutex_);
+        for (const auto& instanceId : instanceMap_) {
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            if (!container) {
+                continue;
+            }
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [mode, instanceId]() {
+                    auto container = Platform::AceContainer::GetContainer(instanceId);
+                    CHECK_NULL_VOID(container);
+                    auto pipeline = container->GetPipelineContext();
+                    CHECK_NULL_VOID(pipeline);
+                    if (mode == TouchPassMode::PASS_THROUGH) {
+                        pipeline->SetTouchPassThrough(true);
+                        pipeline->SetTouchAccelarate(false);
+                    } else {
+                        pipeline->SetTouchAccelarate(true);
+                        pipeline->SetTouchPassThrough(false);
+                    }
+                },
+                TaskExecutor::TaskType::UI, "ArkUIReceiveEventsPassThroughAsync");
         }
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [mode, instanceId]() {
-                auto container = Platform::AceContainer::GetContainer(instanceId);
-                CHECK_NULL_VOID(container);
-                auto pipeline = container->GetPipelineContext();
-                CHECK_NULL_VOID(pipeline);
-                if (mode == TouchPassMode::PASS_THROUGH) {
-                    pipeline->SetTouchPassThrough(true);
-                    pipeline->SetTouchAccelarate(false);
-                } else {
-                    pipeline->SetTouchAccelarate(true);
-                    pipeline->SetTouchPassThrough(false);
-                }
-            },
-            TaskExecutor::TaskType::UI, "ArkUIReceiveEventsPassThroughAsync");
     }
 }
 
 void EventPassThroughSubscriber::AddInstanceId(int32_t instanceId)
 {
+    std::lock_guard<std::mutex> lock(instanceMapMutex_);
     instanceMap_.emplace(instanceId);
 }
 
 bool EventPassThroughSubscriber::EraseContainerAddCheckUnSubscribe(int32_t instanceId)
 {
+    std::lock_guard<std::mutex> lock(instanceMapMutex_);
     instanceMap_.erase(instanceId);
     return instanceMap_.empty();
 }

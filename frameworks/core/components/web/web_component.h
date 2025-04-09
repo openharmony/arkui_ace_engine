@@ -643,6 +643,11 @@ public:
         isNativeEmbedMode_ = isEnabled;
     }
 
+    void SetIntrinsicSizeEnabled(bool isEnabled)
+    {
+        isIntrinsicSize_ = isEnabled;
+    }
+
     const std::tuple<bool, bool>& GetNativeVideoPlayerConfig() const
     {
         return native_video_player_config_;
@@ -1190,6 +1195,7 @@ private:
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
     bool isNativeEmbedMode_ = false;
+    bool isIntrinsicSize_ = false;
     std::string tag_;
     std::string tag_type_;
     OnDragFunc onDragStartId_;

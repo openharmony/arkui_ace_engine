@@ -707,7 +707,7 @@ void RenderTextField::OnTouchTestHit(
             auto textField = weak.Upgrade();
             if (textField) {
                 textField->StartPressAnimation(false);
-                textField->OnTapCallback();
+                textField->OnTapCallback(info);
             }
         });
 
@@ -854,7 +854,7 @@ void RenderTextField::OnClick(const ClickInfo& clickInfo)
     }
 }
 
-void RenderTextField::OnTapCallback()
+void RenderTextField::OnTapCallback(const TouchEventInfo& info)
 {
     auto context = GetContext().Upgrade();
     if (context) {
@@ -866,6 +866,11 @@ void RenderTextField::OnTapCallback()
             isLongPressStatus_ = false;
         } else {
             onTapCallbackResult_ = tapCallback_(true);
+        }
+        if (!isLongPressStatus_ && onTapCallbackResult_ && !info.GetTouches().empty()) {
+            auto globalPosition = info.GetTouches().front().GetGlobalLocation();
+            auto position = GetCursorPositionForClick(globalPosition);
+            UpdateSelection(position);
         }
     }
 }
@@ -2945,7 +2950,7 @@ void RenderTextField::Delete(int32_t start, int32_t end)
 
 std::u16string RenderTextField::GetLeftTextOfCursor(int32_t number)
 {
-    auto start = cursorPositionForShow_;
+    auto start = GetEditingValue().selection.GetEnd();
     if (IsSelected()) {
         start = std::min(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
     }
@@ -2955,7 +2960,7 @@ std::u16string RenderTextField::GetLeftTextOfCursor(int32_t number)
 
 std::u16string RenderTextField::GetRightTextOfCursor(int32_t number)
 {
-    auto end = cursorPositionForShow_;
+    auto end = GetEditingValue().selection.GetEnd();
     if (IsSelected()) {
         end = std::max(GetEditingValue().selection.GetStart(), GetEditingValue().selection.GetEnd());
     }

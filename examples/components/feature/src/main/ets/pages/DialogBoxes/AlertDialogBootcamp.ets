@@ -14,6 +14,8 @@
  */
 
 import { ColorBlock, Drawer, RadioBlock, SliderBlock, useEnabled } from 'common'
+import { componentUtils, curves } from '@kit.ArkUI';
+
 
 @Entry
 @Component
@@ -119,6 +121,12 @@ export struct AlertDialogBootcamp {
   @State enableAlertDialogParamButtonsBackgroundColor: boolean = false;
   @State alertDialogParamButtonDirection: DialogButtonDirection = DialogButtonDirection.AUTO;
   @State enableAlertDialogParamButtonDirection: boolean = false;
+  @State scrollShow: number = 0
+  scroller: Scroller = new Scroller()
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   build() {
     NavDestination() {
@@ -127,6 +135,9 @@ export struct AlertDialogBootcamp {
         showParameters: $showParameters,
         content: () => {
           this.Content()
+        },
+        generic: () => {
+          this.Generic()
         },
         parameters: () => {
           this.Parameters()
@@ -427,8 +438,16 @@ export struct AlertDialogBootcamp {
   }
 
   @Builder
+  Generic() {
+    Scroll(this.scroller) {
+
+    }.height('52%')
+    .id('scroll')
+  }
+
+  @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'autoCancel',
@@ -869,6 +888,8 @@ export struct AlertDialogBootcamp {
         })
       }.width('100%')
     }
+    .id('scroll')
     .height('52%')
+
   }
 }

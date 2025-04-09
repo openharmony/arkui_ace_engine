@@ -798,11 +798,28 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
-    MockContainer::Current()->SetIsScenceBoardWindow(true);
+    MockContainer::Current()->SetIsSceneBoardWindow(true);
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
     context_->SetIsDragging(false);
     EXPECT_FALSE(context_->IsDragging());
     context_->ResetDragging();
+
+    /**
+     * @tc.steps5: Call the function OnDragEvent with DRAG_EVENT_PULL_CANCEL.
+     * @tc.expected: The dragDropState_ is changed to DragDropMgrState::IDLE.
+     */
+    manager->dragDropState_ = DragDropMgrState::DRAGGING;
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_CANCEL);
+    EXPECT_EQ(manager->dragDropState_, DragDropMgrState::IDLE);
+
+    /**
+     * @tc.steps6: Call the function OnDragEvent with DRAG_EVENT_PULL_THROW.
+     * @tc.expected: The isWindowConsumed_ is changed to false.
+     */
+    manager->isWindowConsumed_ = true;
+    MockContainer::Current()->SetIsSceneBoardWindow(false);
+    context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_PULL_THROW);
+    EXPECT_EQ(manager->isWindowConsumed_, false);
 }
 
 /**
@@ -999,7 +1016,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_TAB;
     event.pressedCodes = { KeyCode::KEY_TAB };
-    EXPECT_FALSE(context_->OnNonPointerEvent(event));
+    EXPECT_TRUE(context_->OnNonPointerEvent(event));
 
     /**
      * @tc.steps3: Call the function OnKeyEvent with isFocusActive_ = false, action = KeyAction::DOWN and

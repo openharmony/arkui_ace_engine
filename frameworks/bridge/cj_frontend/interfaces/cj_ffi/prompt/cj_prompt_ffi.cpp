@@ -17,11 +17,11 @@
 
 #include "cj_lambda.h"
 
-#include "base/i18n/localization.h"
 #include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/dialog/dialog_theme.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
@@ -134,7 +134,11 @@ void ShowDialogInner(DialogProperties& dialogProperties, std::function<void(int3
 void ShowActionMenuInner(DialogProperties& dialogProperties, const std::vector<ButtonInfo>& button,
     std::function<void(int32_t, int32_t)>&& callback)
 {
-    ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"), .textColor = "" };
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(theme);
+    ButtonInfo buttonInfo = { .text = theme->GetCancelText(), .textColor = "" };
     dialogProperties.buttons.emplace_back(buttonInfo);
     auto context = NG::PipelineContext::GetCurrentContext();
     auto curExecutor = context->GetTaskExecutor();

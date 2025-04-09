@@ -2683,7 +2683,7 @@ HWTEST_F(OverlayTestNg, DialogDumpInfoTest001, TestSize.Level1)
         .buttonDirection = DialogButtonDirection::HORIZONTAL,
         .isMask = true,
         .isModal = false,
-        .isScenceBoardDialog = true,
+        .isSceneBoardDialog = true,
         .isSysBlurStyle = false,
         .backgroundBlurStyle = 1,
         .shadow = std::make_optional<Shadow>(),

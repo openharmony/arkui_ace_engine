@@ -21,10 +21,10 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 #include "core/gestures/drag_event.h"
-#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace::NG {
 
@@ -312,9 +312,22 @@ public:
 
     void GetThumbnailPixelMap(bool isSync);
 
+    void RecordTouchDownPoint(const TouchEvent& downTouchEvent)
+    {
+        touchDownPoint_ = downTouchEvent;
+    }
+
+    const TouchEvent& GetTouchDownPoint()
+    {
+        return touchDownPoint_;
+    }
+
     virtual void NotifyTransDragWindowToFwk() {}
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
+
+protected:
+    DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub);
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -325,15 +338,17 @@ private:
     void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
 
+protected:
+    RefPtr<PanRecognizer> panRecognizer_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
+    RefPtr<SequencedRecognizer> SequencedRecognizer_;
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     WeakPtr<FrameNode> itemParentNode_;
     RefPtr<DragEvent> userCallback_;
     RefPtr<DragEvent> customCallback_;
-    RefPtr<PanRecognizer> panRecognizer_;
-    RefPtr<LongPressRecognizer> longPressRecognizer_;
-    RefPtr<LongPressRecognizer> previewLongPressRecognizer_;
-    RefPtr<SequencedRecognizer> SequencedRecognizer_;
     RefPtr<FrameNode> gatherNode_;
     RefPtr<TouchEventImpl> touchListener_;
 
@@ -344,6 +359,7 @@ private:
     std::function<void(GestureEvent&)> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
+    TouchEvent touchDownPoint_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;

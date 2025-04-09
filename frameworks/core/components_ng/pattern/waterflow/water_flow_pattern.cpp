@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -84,9 +84,9 @@ bool WaterFlowPattern::IsAtTop() const
 {
     return layoutInfo_->itemStart_;
 };
-bool WaterFlowPattern::IsAtBottom() const
+bool WaterFlowPattern::IsAtBottom(bool considerRepeat) const
 {
-    return layoutInfo_->offsetEnd_;
+    return considerRepeat ? (layoutInfo_->offsetEnd_ && layoutInfo_->repeatDifference_ == 0) : layoutInfo_->offsetEnd_;
 };
 bool WaterFlowPattern::IsAtTopWithDelta() const
 {
@@ -169,7 +169,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     RefPtr<WaterFlowLayoutBase> algorithm;
     if (layoutInfo_->Mode() == LayoutMode::SLIDING_WINDOW) {
         auto sw = MakeRefPtr<WaterFlowLayoutSW>(DynamicCast<WaterFlowLayoutInfoSW>(layoutInfo_));
-        sw->EnableSkip(AnimateStoped() && !IsOutOfBoundary(true));
+        sw->EnableSkip((AnimateStoped() && !IsOutOfBoundary(true)) || IsBackToTopRunning());
         algorithm = sw;
     } else if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         algorithm = MakeRefPtr<WaterFlowSegmentedLayout>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
@@ -177,7 +177,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
     algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
-    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && (layoutInfo_->repeatDifference_ == 0));
     return algorithm;
 }
 
@@ -265,40 +265,58 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     if (onDidScroll) {
         FireOnScroll(delta, onDidScroll);
     }
+    auto onJSFrameNodeDidScroll = eventHub->GetJSFrameNodeOnDidScroll();
+    if (onJSFrameNodeDidScroll) {
+        FireOnScroll(delta, onJSFrameNodeDidScroll);
+    }
     bool indexChanged = itemRange_.first != layoutInfo_->FirstIdx() || itemRange_.second != layoutInfo_->endIndex_;
     auto onScrollIndex = eventHub->GetOnScrollIndex();
+    auto onJsFrameNodeScrollIndex = eventHub->GetJSFrameNodeOnWaterFlowScrollIndex();
     FireOnScrollIndex(indexChanged, onScrollIndex);
+    FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
         host->OnAccessibilityEvent(
             AccessibilityEventType::SCROLLING_EVENT, layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
     }
     auto onReachStart = eventHub->GetOnReachStart();
-    FireOnReachStart(onReachStart);
+    auto onJSFrameNodeReachStart = eventHub->GetJSFrameNodeOnReachStart();
+    FireOnReachStart(onReachStart, onJSFrameNodeReachStart);
     auto onReachEnd = eventHub->GetOnReachEnd();
-    FireOnReachEnd(onReachEnd);
-    OnScrollStop(eventHub->GetOnScrollStop());
+    auto onJSFrameNodeReachEnd = eventHub->GetJSFrameNodeOnReachEnd();
+    FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
+    OnScrollStop(eventHub->GetOnScrollStop(), eventHub->GetJSFrameNodeOnScrollStop());
 }
 
-void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart)
+void WaterFlowPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host && layoutInfo_->ReachStart(prevOffset_, !isInitialized_));
     FireObserverOnReachStart();
-    CHECK_NULL_VOID(onReachStart);
+    CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
     ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-    onReachStart();
+    if (onReachStart) {
+        onReachStart();
+    }
+    if (onJSFrameNodeReachStart) {
+        onJSFrameNodeReachStart();
+    }
     AddEventsFiredInfo(ScrollableEventType::ON_REACH_START);
 }
 
-void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd)
+void WaterFlowPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (layoutInfo_->ReachEnd(prevOffset_, false)) {
+    if (layoutInfo_->ReachEnd(prevOffset_, false) && layoutInfo_->repeatDifference_ == 0) {
         FireObserverOnReachEnd();
-        CHECK_NULL_VOID(onReachEnd);
+        CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:WaterFlow", static_cast<int32_t>(host->GetAccessibilityId()));
-        onReachEnd();
+        if (onReachEnd) {
+            onReachEnd();
+        }
+        if (onJSFrameNodeReachEnd) {
+            onJSFrameNodeReachEnd();
+        }
         AddEventsFiredInfo(ScrollableEventType::ON_REACH_END);
     } else if (!isInitialized_ && layoutInfo_->ReachEnd(prevOffset_, true)) {
         FireObserverOnReachEnd();
@@ -327,7 +345,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_->UpdateStartIndex();
     prevOffset_ = layoutInfo_->Offset();
-    layoutInfo_->jumpIndex_ = EMPTY_JUMP_INDEX;
+    layoutInfo_->jumpIndex_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
+    layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
@@ -383,11 +402,20 @@ bool WaterFlowPattern::UpdateStartIndex(int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto childCount = host->GetTotalChildCount();
+    layoutInfo_->repeatDifference_ = 0;
+    layoutInfo_->firstRepeatCount_ = 0;
+    layoutInfo_->childrenCount_ = 0;
+    GetRepeatCountInfo(
+        host, layoutInfo_->repeatDifference_, layoutInfo_->firstRepeatCount_, layoutInfo_->childrenCount_);
+    auto childCount = layoutInfo_->GetChildrenCount();
     layoutInfo_->jumpIndex_ = (index == LAST_ITEM ? childCount - 1 : index);
     // if target index is footer, fix align because it will jump after fillViewport.
     if (layoutInfo_->footerIndex_ == 0 && layoutInfo_->jumpIndex_ == childCount - 1) {
         SetScrollAlign(ScrollAlign::END);
+    }
+    if (layoutInfo_->Mode() == LayoutMode::TOP_DOWN) {
+        // distinguish scrollToLastIndex and scrollToEdge in top-down mode.
+        layoutInfo_->jumpIndex_ = index;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
@@ -537,17 +565,19 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
     StopAnimate();
     auto footer = footer_.Upgrade();
     const int32_t itemCnt = footer ? GetChildrenCount() - footer->FrameCount() : GetChildrenCount();
-    if (index > EMPTY_JUMP_INDEX && index < itemCnt) {
+    if (index > WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX && index < itemCnt) {
         if (smooth) {
             SetExtraOffset(extraOffset);
             if (!ScrollToTargetIndex(index)) {
                 targetIndex_ = index;
+                layoutInfo_->duringPositionCalc_ = true;
                 auto host = GetHost();
                 CHECK_NULL_VOID(host);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
         } else {
             UpdateStartIndex(index);
+            layoutInfo_->duringPositionCalc_ = true;
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }
@@ -837,6 +867,34 @@ void WaterFlowPattern::DumpAdvanceInfo()
     if (sections_) {
         DumpInfoAddSections();
     }
+}
+
+void WaterFlowPattern::GetEventDumpInfo()
+{
+    ScrollablePattern::GetEventDumpInfo();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
+                  : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+}
+
+void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    ScrollablePattern::GetEventDumpInfo(json);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<WaterFlowEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollIndex = hub->GetOnScrollIndex();
+    json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
+    auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
+    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 void WaterFlowPattern::DumpInfoAddSections()

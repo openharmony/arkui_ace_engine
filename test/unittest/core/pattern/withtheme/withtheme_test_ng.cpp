@@ -339,4 +339,81 @@ HWTEST_F(WithThemeTestNg, WithThemeTest008, TestSize.Level1)
     EXPECT_EQ(colors->InteractiveSelect(), Color(gColors[TokenColors::INTERACTIVE_SELECT]));
     EXPECT_EQ(colors->InteractiveClick(), Color(gColors[TokenColors::INTERACTIVE_CLICK]));
 }
+
+/**
+ * @tc.name: WithThemeTestNg009
+ * @tc.desc: Obtain System Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters and call the function SetIsThemeColorAvailable.
+     * @tc.expected: The value of idx is valid, isColorAvailable is false.
+     */
+    bool isDark = false;
+    int32_t idx = 1;
+    bool isColorAvailable = false;
+    TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, idx, isColorAvailable);
+    EXPECT_FALSE(isColorAvailable);
+}
+
+/**
+ * @tc.name: WithThemeTestNg010
+ * @tc.desc: Obtain System Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    bool isDark = false;
+    int32_t idx = -1;
+    bool isColorAvailable = false;
+
+    /**
+     * @tc.steps2: call the function SetIsThemeColorAvailable.
+     * @tc.expected: The value of idx is not valid, isColorAvailable is false.
+     */
+    TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, idx, isColorAvailable);
+
+    idx = 100;
+    TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, idx, isColorAvailable);
+    EXPECT_FALSE(isColorAvailable);
+}
+
+/**
+ * @tc.name: WithThemeTestNg011
+ * @tc.desc: Obtain System Theme
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto theme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
+    EXPECT_NE(theme, nullptr);
+    ColorMode colorMode = ColorMode::LIGHT;
+
+    /**
+     * @tc.steps2: call the function UpdateDefaultThemeBySystemTheme.
+     * @tc.expected: The value of theme is valid and systheme is not null.
+     */
+    TokenThemeStorage::GetInstance()->UpdateDefaultThemeBySystemTheme(colorMode);
+
+    /**
+     * @tc.steps3: call the function UpdateDefaultThemeBySystemTheme again.
+     * @tc.expected: The value of theme is not valid.
+     */
+    colorMode = ColorMode::DARK;
+    TokenThemeStorage::GetInstance()->defaultDarkTheme_ = nullptr;
+    TokenThemeStorage::GetInstance()->UpdateDefaultThemeBySystemTheme(colorMode);
+
+    /**
+     * @tc.steps4: The function is called and the value of defaultDarkTheme_ is not nullptr.
+     */
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->defaultDarkTheme_, nullptr);
+}
 } //namespace OHOS::Ace::NG

@@ -40,8 +40,8 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
     CHECK_NULL_RETURN(targetNode, nullptr);
 
     auto container = Container::Current();
-    if (!container || !container->IsScenceBoardWindow() || !container->IsSceneBoardEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not ScenceBoardWindow.");
+    if (!container || !container->IsSceneBoardWindow() || !container->IsSceneBoardEnabled()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not SceneBoardWindow.");
         return nullptr;
     }
 

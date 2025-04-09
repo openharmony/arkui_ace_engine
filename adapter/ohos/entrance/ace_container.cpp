@@ -50,6 +50,7 @@
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/image_provider/adapter/image_decoder.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -89,7 +90,7 @@ const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
 const std::string ASSET_LIBARCH_PATH = "/lib/arm";
 #endif
-const std::string THEME_JSON = "theme_config.json";
+constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
@@ -98,6 +99,17 @@ const char* GetEngineSharedLibrary()
     return ARK_ENGINE_SHARED_LIB;
 }
 #endif
+
+std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    std::string res = "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&res](const auto& avoidArea) {
+        res =
+            res + "(" + std::to_string(static_cast<int32_t>(avoidArea.first)) + "," + avoidArea.second.ToString() + ")";
+    });
+    res = res + "]";
+    return res;
+}
 
 class FrontendOrientationListener : public OHOS::Rosen::IPreferredOrientationChangeListener  {
 public:
@@ -172,27 +184,59 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext)
+void LoadSystemThemeFromJson(const RefPtr<AssetManager>& assetManager, const RefPtr<PipelineBase>& pipelineContext,
+    const std::shared_ptr<OHOS::AbilityRuntime::Context>& context)
 {
+    CHECK_NULL_VOID(assetManager);
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    std::string themeConfigFilePath = hapModuleInfo->systemTheme;
+    if (themeConfigFilePath.empty()) {
+        LOGW("not found systemTheme in HapModuleInfo, loading default OHOS_THEME");
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    constexpr char profilePrefix[] = "$profile:";
+    constexpr char themeConfigDefaultName[] = "theme_config";
+    constexpr char jsonSubfix[] = ".json";
+    constexpr char themePrefix[] = "$theme:";
+    if (!StringUtils::StartWith(themeConfigFilePath,
+        std::string(profilePrefix) + std::string(themeConfigDefaultName))) { // start with: "$profile:theme_config"
+        LOGW("path: %{public}s doesn't start with %{public}s%{public}s, loading default OHOS_THEME",
+            themeConfigFilePath.c_str(), profilePrefix, themeConfigDefaultName);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        themeManager->SetSystemThemeId(OHOS_THEME_ID);
+        return;
+    }
+    themeConfigFilePath = themeConfigFilePath.substr(sizeof(profilePrefix) - 1) + jsonSubfix; // e.g. theme_config.json
     std::string themeJsonContent;
-    bool loadThemeJsonFlag = OHOS::Ace::Framework::GetAssetContentImpl(assetManager, THEME_JSON, themeJsonContent);
+    bool loadThemeJsonFlag =
+        OHOS::Ace::Framework::GetAssetContentImpl(assetManager, themeConfigFilePath, themeJsonContent);
     if (loadThemeJsonFlag) {
         auto themeRootJson = JsonUtil::ParseJsonString(themeJsonContent);
         if (themeRootJson) {
-            auto systemThemeId = themeRootJson->GetInt("systemTheme", -1);
-            if (systemThemeId != -1) {
+            std::string systemThemeValue = themeRootJson->GetString("systemTheme", ""); // e.g. $theme:125829872
+            if (!systemThemeValue.empty() && StringUtils::StartWith(systemThemeValue, themePrefix) &&
+                systemThemeValue.size() > sizeof(themePrefix) - 1) {
+                auto systemThemeId = std::stoi(systemThemeValue.substr(sizeof(themePrefix) - 1));
                 auto themeManager = pipelineContext->GetThemeManager();
-                themeManager->LoadSystemTheme(systemThemeId);
+                CHECK_NULL_VOID(themeManager);
+                themeManager->SetSystemThemeId(systemThemeId);
                 auto checkTheme = themeManager->GetSystemTheme();
-                LOGI("get systemTheme id from json success, systemTheme id = %{public}d", checkTheme);
+                LOGI("get systemThemeId from json success, systemTheme id = %{public}d", checkTheme);
             } else {
-                LOGW("get systemTheme id from json failed, not a number");
+                LOGW("get systemThemeId from json failed, not a valid id");
             }
         } else {
-            LOGW("get systemTheme id from json failed, parse theme json file failed");
+            LOGW("get systemThemeId from json failed, parse theme json file failed");
         }
     } else {
-        LOGW("get systemTheme id from json failed, %{public}s not found", THEME_JSON.c_str());
+        LOGW("get systemTheme id from json failed, %{public}s not found", themeConfigFilePath.c_str());
     }
 }
 
@@ -226,7 +270,7 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
-    LoadSystemThemeFromJson(assetManager, pipelineContext);
+    LoadSystemThemeFromJson(assetManager, pipelineContext, context);
     themeManager->SetColorScheme(colorScheme);
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
@@ -456,6 +500,7 @@ void AceContainer::Destroy()
     }
     DestroyToastSubwindow(instanceId_);
     DestroySelectOverlaySubwindow(instanceId_);
+    RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -873,7 +918,7 @@ void AceContainer::OnInactive(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowFocus(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -952,7 +997,7 @@ void AceContainer::UnActiveWindow(int32_t instanceId)
             ContainerScope scope(container->GetInstanceId());
             pipelineContext->WindowActivate(false);
             pipelineContext->ChangeDarkModeBrightness();
-            if (container->IsScenceBoardWindow()) {
+            if (container->IsSceneBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -2051,7 +2096,7 @@ bool AceContainer::DumpCommon(const std::vector<std::string>& params, std::vecto
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
     if (IsUIExtensionWindow()) {
-        DumpLog::GetInstance().SetSeparator(";");
+        DumpLog::GetInstance().SetUIExtFlag(true);
     }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + context->GetHapModuleInfo()->bundleName);
@@ -2072,6 +2117,10 @@ bool AceContainer::DumpDynamicUiContent(const std::vector<std::string>& params, 
 {
     LOGI("DumpDynamicUiContent");
     ContainerScope scope(instanceId_);
+    paramUie_.assign(params.begin(), params.end());
+    if (std::find(params.begin(), params.end(), "-simplify") != params.end()) {
+        paramUie_.push_back("-nouie");
+    }
     return DumpInfo(params);
 }
 
@@ -2354,6 +2403,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
 #endif
     RegisterOrientationUpdateListener();
     RegisterOrientationChangeListener();
+    InitSystemBarConfig();
     RegisterUIExtDataConsumer();
     RegisterUIExtDataSendToHost();
     RegisterAvoidInfoCallback();
@@ -2773,7 +2823,7 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(
     }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
-        TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
+        TAG_LOGD(ACE_LAYOUT, "SafeArea get success, type :%{public}d, insets :%{public}s",
             static_cast<int32_t>(type), safeAreaInsets.ToString().c_str());
         return safeAreaInsets;
     }
@@ -3039,13 +3089,14 @@ void AceContainer::UpdateConfiguration(
     }
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (configurationChange.IsNeedUpdate()) {
-        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig, taskExecutor_);
+        OHOS::Ace::PluginManager::GetInstance().UpdateConfigurationInPlugin(resConfig);
     }
 #endif
     NotifyConfigurationChange(!parsedConfig.deviceAccess.empty(), configurationChange);
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
+    NG::ImageDecoder::ClearPixelMapCache();
 }
 
 void AceContainer::UpdateConfigurationSyncForAll(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -3200,6 +3251,8 @@ void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExe
             picNameArray.push_back(imageData.first);
             fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
             byteLenArray.push_back(imageData.second->GetAshmemSize());
+            TAG_LOGI(ACE_FORM, "picName:%{public}s, fd:%{public}d, size:%{public}d", imageData.first.c_str(),
+                imageData.second->GetAshmemFd(), imageData.second->GetAshmemSize());
         }
         GetNamesOfSharedImage(picNameArray);
         UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
@@ -3323,7 +3376,7 @@ void AceContainer::GetImageDataFromAshmem(
     }
 }
 
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
@@ -4163,13 +4216,84 @@ void AceContainer::RegisterAvoidInfoDataProcessCallback()
 
 RefPtr<PageViewportConfig> AceContainer::GetCurrentViewportConfig() const
 {
-    return nullptr;
+    CHECK_NULL_RETURN(uiWindow_, nullptr);
+    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(config, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(context, nullptr);
+    auto mgr = context->GetSafeAreaManager();
+    CHECK_NULL_RETURN(mgr, nullptr);
+    config->SetPipelineContext(WeakPtr(context));
+
+    ViewportConfig viewportConfig;
+    // the position is not needed, set it to (0, 0)
+    viewportConfig.SetPosition(0, 0);
+    int32_t width = static_cast<int32_t>(context->GetRootWidth());
+    int32_t height = static_cast<int32_t>(context->GetRootHeight());
+    auto displayOri = static_cast<int32_t>(GetCurrentDisplayOrientation());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current displayOri:%{public}d, width:%{public}d, height:%{public}d",
+        displayOri, width, height);
+    viewportConfig.SetSize(width, height);
+    viewportConfig.SetOrientation(displayOri);
+    config->SetViewportConfig(viewportConfig);
+
+    AvoidAreaInfo avoidAreas;
+    auto insets = mgr->GetSystemSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_SYSTEM safeArea:%{public}s", insets.ToString().c_str());
+    auto systemAvoidArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_SYSTEM, systemAvoidArea);
+    insets = mgr->GetCutoutSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_CUTOUT safeArea:%{public}s", insets.ToString().c_str());
+    auto cutoutArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_CUTOUT, cutoutArea);
+    insets = mgr->GetNavSafeArea();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TYPE_NAVIGATION_INDICATOR safeArea:%{public}s", insets.ToString().c_str());
+    auto navArea = ConvertAvoidArea(insets, width, height);
+    avoidAreas.emplace(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, navArea);
+    config->SetAvoidAreas(avoidAreas);
+
+    return config;
 }
 
 RefPtr<PageViewportConfig> AceContainer::GetTargetViewportConfig(Orientation orientation,
     bool enableStatusBar, bool statusBarAnimated, bool enableNavigationIndicator)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(uiWindow_, nullptr);
+    auto config = AceType::MakeRefPtr<PageViewportConfigOhos>();
+    CHECK_NULL_RETURN(config, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_RETURN(context, nullptr);
+    config->SetPipelineContext(WeakPtr(context));
+
+    std::map<Rosen::WindowType, Rosen::SystemBarProperty> properties;
+    auto statusBarProperty = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    statusBarProperty.enable_ = enableStatusBar;
+    statusBarProperty.enableAnimation_ = statusBarAnimated;
+    properties.emplace(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR, statusBarProperty);
+    auto navigationIndicatorProperty =
+        uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    navigationIndicatorProperty.enable_ = enableNavigationIndicator;
+    properties.emplace(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR, navigationIndicatorProperty);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "enableStatusBar:%{public}d, statusBarAnimated:%{public}d, enableNavIndicator:%{public}d",
+        enableStatusBar, statusBarAnimated, enableNavigationIndicator);
+
+    ViewportConfig viewportConfig;
+    AvoidAreaInfo avoidAreas;
+    auto ret = uiWindow_->GetTargetOrientationConfigInfo(
+        static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation)), properties, viewportConfig, avoidAreas);
+    if (Rosen::WMError::WM_OK != ret) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to get targetOrientationInfo from window, error:%{public}d",
+            static_cast<int32_t>(ret));
+        return nullptr;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ViewportConfig: %{public}s, SafeAreas:%{public}s",
+        viewportConfig.ToString().c_str(), StringifyAvoidAreas(avoidAreas).c_str());
+    config->SetViewportConfig(viewportConfig);
+    config->SetAvoidAreas(avoidAreas);
+
+    return config;
 }
 
 void AceContainer::SetRequestedOrientation(Orientation orientation, bool needAnimation)
@@ -4216,6 +4340,22 @@ void AceContainer::RegisterOrientationChangeListener()
     if (uiWindow_->RegisterOrientationChangeListener(listener) != Rosen::WMError::WM_OK) {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to register Orientation change listener");
     }
+}
+
+void AceContainer::InitSystemBarConfig()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(context);
+    auto navigationMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationMgr);
+    auto property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial statusBar, enabled:%{public}d, animated:%{public}d",
+        property.enable_, property.enableAnimation_);
+    navigationMgr->SetStatusBarConfigByWindowApi(std::make_pair(property.enable_, property.enableAnimation_));
+    property = uiWindow_->GetSystemBarPropertyByType(Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set initial navigationIndicator, enabled:%{public}d", property.enable_);
+    navigationMgr->SetNavigationIndicatorConfigByWindowApi(property.enable_);
 }
 
 bool AceContainer::IsPcOrPadFreeMultiWindowMode() const

@@ -21,6 +21,7 @@
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/base/mock_task_executor.h"
 
 using namespace testing::ext;
@@ -83,20 +84,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnMenuItemAction
- * @tc.desc: test OnMenuItemAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnMenuItemAction, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->selectOverlay_->OnMenuItemAction(OptionMenuActionId::AI_WRITE, OptionMenuType::MOUSE_MENU);
-    EXPECT_NE(richEditorPattern->aiWriteAdapter_, nullptr);
-}
-
-/**
  * @tc.name: OnHandleMoveStart001
  * @tc.desc: test OnHandleMoveStart
  * @tc.type: FUNC
@@ -133,38 +120,6 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveStart002, TestSize.Level1)
     richEditorPattern->selectOverlay_->isSingleHandle_ = true;
     richEditorPattern->selectOverlay_->OnHandleMoveStart(info, true);
     EXPECT_TRUE(richEditorPattern->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: OnOverlayTouchDown001
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
-}
-
-/**
- * @tc.name: OnOverlayTouchDown002
- * @tc.desc: test OnOverlayTouchDown
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDown002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TouchEventInfo info("text");
-    info.SetSourceTool(SourceTool::MOUSE);
-    richEditorPattern->selectOverlay_->OnOverlayTouchDown(info);
-    EXPECT_EQ(info.GetSourceTool(), SourceTool::MOUSE);
-    EXPECT_FALSE(richEditorPattern->isOnlyRequestFocus_);
 }
 
 /**
@@ -371,5 +326,94 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMoveDone002, TestSize.Level1)
     richEditorPattern->selectOverlay_->isSingleHandle_ = false;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->originalMenuIsShow_);
+}
+
+/**
+ * @tc.name: GetSelectOverlayInfo
+ * @tc.desc: test GetSelectOverlayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectOverlayInfo, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
+    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
+    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 20, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 40, 20, 20);
+    auto firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    auto secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_TRUE(firstHandleInfo.value().isShow);
+    EXPECT_TRUE(firstHandleInfo.value().isTouchable);
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_TRUE(secondHandleInfo.value().isShow);
+    EXPECT_TRUE(secondHandleInfo.value().isTouchable);
+
+    richEditorPattern->textSelector_.firstHandle = RectF(20, 200, 20, 20);
+    richEditorPattern->textSelector_.secondHandle = RectF(60, 200, 20, 20);
+    firstHandleInfo = selectOverlay->GetFirstHandleInfo();
+    secondHandleInfo = selectOverlay->GetSecondHandleInfo();
+    ASSERT_TRUE(firstHandleInfo.has_value());
+    EXPECT_FALSE(firstHandleInfo.value().isShow);
+    EXPECT_FALSE(firstHandleInfo.value().isTouchable);
+    ASSERT_TRUE(secondHandleInfo.has_value());
+    EXPECT_FALSE(secondHandleInfo.value().isShow);
+    EXPECT_FALSE(secondHandleInfo.value().isTouchable);
+}
+
+/**
+ * @tc.name: RefreshSelectOverlay001
+ * @tc.desc: test RefreshSelectOverlay and more.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    int32_t posx = 1;
+    int32_t posy = 3;
+    richEditorPattern->HandleSurfacePositionChanged(posx, posy);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    pipeline->themeManager_ = theme;
+
+    richEditorPattern->customKeyboardBuilder_ = []() {};
+    richEditorPattern->DumpInfo();
+    richEditorPattern->isTextChange_ = false;
+    EXPECT_EQ(richEditorPattern->IsShowHandle(), true);
+
+    richEditorPattern->selectOverlay_->SetUsingMouse(false);
+    richEditorPattern->UpdateSelectionInfo(posx, posy);
+    EXPECT_EQ(richEditorPattern->sourceType_, SourceType::TOUCH);
+
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
+    richEditorPattern->InitScrollablePattern();
+    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
+
+    Offset Offset = {1, 4};
+    richEditorPattern->isTextChange_ = true;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
+
+    richEditorPattern->isTextChange_ = false;
+    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
+    EXPECT_EQ(richEditorPattern->HasFocus(), false);
 }
 } // namespace OHOS::Ace::NG

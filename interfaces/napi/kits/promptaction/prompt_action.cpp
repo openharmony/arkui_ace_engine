@@ -17,12 +17,12 @@
 #include "prompt_controller.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
-#include "base/i18n/localization.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -68,14 +68,14 @@ bool ContainerIsService()
     return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
 }
 
-bool ContainerIsScenceBoard()
+bool ContainerIsSceneBoard()
 {
     auto container = Container::CurrentSafely();
     if (!container) {
         container = Container::GetActive();
     }
 
-    return container && container->IsScenceBoardWindow();
+    return container && container->IsSceneBoardWindow();
 }
 #endif
 } // namespace
@@ -478,7 +478,7 @@ bool GetToastParams(napi_env env, napi_value argv, NG::ToastInfo& toastInfo)
 bool ShowToast(napi_env env, NG::ToastInfo& toastInfo, std::function<void(int32_t)>& toastCallback)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         toastInfo.showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (!delegate) {
@@ -579,7 +579,7 @@ void CloseToast(napi_env env, int32_t toastId, NG::ToastShowMode showMode)
         }
     };
 #ifdef OHOS_STANDARD_SYSTEM
-    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+    if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsSceneBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
         auto delegate = EngineHelper::GetCurrentDelegateSafely();
         if (delegate) {
@@ -810,7 +810,11 @@ bool ParseButtonsPara(napi_env env, std::shared_ptr<PromptAsyncContext>& context
         return false;
     }
     if (isShowActionMenu) {
-        ButtonInfo buttonInfo = { .text = Localization::GetInstance()->GetEntryLetters("common.cancel"),
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto theme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(theme, false);
+        ButtonInfo buttonInfo = { .text = theme->GetCancelText(),
             .textColor = "", .isPrimary = primaryButtonNum == 0 ? true : false};
         context->buttons.emplace_back(buttonInfo);
     }
@@ -2298,10 +2302,10 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
         .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext),
         .levelOrder = GetLevelOrderParam(env, asyncContext),
+        .focusable = GetFocusableParam(env, asyncContext),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
-        .focusable = GetFocusableParam(env, asyncContext),
     };
     return promptDialogAttr;
 }

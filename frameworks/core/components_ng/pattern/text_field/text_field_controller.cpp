@@ -182,17 +182,19 @@ void TextFieldController::ClearPreviewText()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    PreviewRange range = {
-        textFieldPattern->GetPreviewTextStart(),
-        textFieldPattern->GetPreviewTextEnd(),
-    };
-    PreviewTextInfo info = {
-        .text = u"",
-        .range = range,
-        .isIme = false
-    };
-    textFieldPattern->SetPreviewTextOperation(info);
-    textFieldPattern->FinishTextPreviewOperation();
+    if (textFieldPattern->GetIsPreviewText()) {
+        PreviewRange range = {
+            textFieldPattern->GetPreviewTextStart(),
+            textFieldPattern->GetPreviewTextEnd(),
+        };
+        PreviewTextInfo info = {
+            .text = u"",
+            .range = range,
+            .isIme = false
+        };
+        textFieldPattern->SetPreviewTextOperation(info);
+        textFieldPattern->FinishTextPreviewOperation(false);
+    }
     textFieldPattern->NotifyImfFinishTextPreview();
 }
 

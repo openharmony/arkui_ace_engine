@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -360,6 +360,11 @@ struct GridLayoutInfo {
 
     bool CheckGridMatrix(int32_t cachedCount);
 
+    int32_t GetChildrenCount() const
+    {
+        return firstRepeatCount_ > 0 ? firstRepeatCount_ : childrenCount_;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]
@@ -387,6 +392,8 @@ struct GridLayoutInfo {
     std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
+    int32_t firstRepeatCount_ = 0;
+    int32_t repeatDifference_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
 
     // Map structure: [mainIndex, [crossIndex, index]],

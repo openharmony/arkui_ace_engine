@@ -28,6 +28,7 @@ public:
 
 void ArcScrollBarTestNg::CreateArcScrollBar(DisplayMode displayMode)
 {
+    SystemProperties::SetDeviceType(DeviceType::WATCH);
     auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
     ScrollBarModelNG scrollBarModel;
     int32_t directionValue = static_cast<int>(Axis::VERTICAL);

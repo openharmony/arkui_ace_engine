@@ -31,6 +31,7 @@
 #include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/ai/ai_write_adapter.h"
 #include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -50,6 +51,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -261,9 +263,6 @@ public:
 
     void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
         const RefPtr<NG::FrameNode>& node = nullptr) override;
-    
-    void HandleOnDragEventMove(const DragPointerEvent& pointerEvent, DragEventAction action,
-        const RefPtr<NG::FrameNode>& node = nullptr);
 
     // Called by view when idle event.
     void OnIdle(int64_t deadline) override;
@@ -531,11 +530,11 @@ public:
 
     bool GetIsFocusActive() const
     {
-        return isFocusActive_;
+        return focusManager_ ? focusManager_->GetIsFocusActive() : false;
     }
 
     bool SetIsFocusActive(bool isFocusActive,
-        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
+        FocusActiveReason reason = FocusActiveReason::DEFAULT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -929,6 +928,11 @@ public:
         return privacySensitiveManager_;
     }
 
+    const RefPtr<ToolbarManager>& GetToolbarManager() const
+    {
+        return toolbarManager_;
+    }
+
     void ChangeSensitiveNodes(bool flag) override
     {
         privacySensitiveManager_->TriggerFrameNodesSensitive(flag);
@@ -1031,7 +1035,7 @@ public:
         return isDensityChanged_;
     }
 
-    void GetInspectorTree();
+    void GetInspectorTree(bool onlyNeedVisible);
     void NotifyAllWebPattern(bool isRegister);
     void AddFrameNodeChangeListener(const WeakPtr<FrameNode>& node);
     void RemoveFrameNodeChangeListener(int32_t nodeId);
@@ -1105,7 +1109,7 @@ public:
     {
         uiTranslateManager_ = uiTranslateManager;
     }
-    
+
     void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
     {
         uiTranslateManager_->AddTranslateListener(node);
@@ -1163,6 +1167,14 @@ public:
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+    }
+
+    WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter()
+    {
+        if (!aiWriteAdapter_) {
+            aiWriteAdapter_ = MakeRefPtr<AIWriteAdapter>();
+        }
+        return aiWriteAdapter_;
     }
 
 protected:
@@ -1283,15 +1295,13 @@ private:
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
+    void OnDumpInjection(const std::vector<std::string>& params) const;
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (!nodeLeft || !nodeRight) {
                 return false;
-            }
-            if (nodeLeft->IsOnMainTree() != nodeRight->IsOnMainTree()) {
-                return nodeLeft->IsOnMainTree();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;
@@ -1308,7 +1318,7 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
-    
+
     void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
@@ -1380,6 +1390,7 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
+    RefPtr<ToolbarManager> toolbarManager_ = MakeRefPtr<ToolbarManager>();
     Rect displayAvailableRect_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
@@ -1393,7 +1404,6 @@ private:
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
-    bool isFocusActive_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
     MockFlushEventType isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
@@ -1431,7 +1441,6 @@ private:
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
 
-    std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
@@ -1477,7 +1486,6 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
-    bool autoFocusInactive_ = true;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
@@ -1487,6 +1495,7 @@ private:
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
     friend class ScopedLayout;
     friend class FormGestureManager;
+    RefPtr<AIWriteAdapter> aiWriteAdapter_ = nullptr;
 };
 
 /**

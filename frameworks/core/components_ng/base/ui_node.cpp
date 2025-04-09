@@ -35,6 +35,7 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
     }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -442,7 +443,7 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_ = -1;
     UpdateThemeScopeId(0);
 }
 
@@ -1061,13 +1062,20 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
 
 void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current)
 {
-    current->Put("ID", nodeId_);
-    current->Put("Type", tag_.c_str());
+    current->Put("$type", tag_.c_str());
+    current->Put("$ID", nodeId_);
+    if (InstanceOf<CustomNode>(this)) {
+        current->Put("type", "custom");
+    } else {
+        current->Put("type", "build-in");
+    }
     auto nodeChildren = GetChildren();
     DumpSimplifyInfo(current);
+    if (!CheckVisibleOrActive()) {
+        return;
+    }
     bool hasChildren = !nodeChildren.empty() || !disappearingChildren_.empty();
     if (hasChildren) {
-        current->Put("ChildrenSize", static_cast<int32_t>(nodeChildren.size()));
         auto array = JsonUtil::CreateArray();
         if (!nodeChildren.empty()) {
             for (const auto& item : nodeChildren) {
@@ -1083,13 +1091,7 @@ void UINode::DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current
                 array->PutRef(std::move(child));
             }
         }
-        current->PutRef("Children", std::move(array));
-    }
-    auto frameNode = AceType::DynamicCast<FrameNode>(this);
-    if (frameNode && frameNode->GetOverlayNode()) {
-        auto overlay = JsonUtil::Create();
-        frameNode->GetOverlayNode()->DumpSimplifyTree(depth + 1, overlay);
-        current->PutRef("Overlay", std::move(overlay));
+        current->PutRef("$children", std::move(array));
     }
 }
 
@@ -1445,14 +1447,14 @@ void UINode::UpdateChildrenVisible(VisibleType preVisibility, VisibleType curren
 
 void UINode::OnRecycle()
 {
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : GetChildren(true)) {
         child->OnRecycle();
     }
 }
 
 void UINode::OnReuse()
 {
-    for (const auto& child : GetChildren()) {
+    for (const auto& child : GetChildren(true)) {
         child->OnReuse();
     }
 }
@@ -2058,7 +2060,7 @@ bool UINode::HasSkipNode()
 
 void UINode::ProcessIsInDestroyingForReuseableNode(const RefPtr<UINode>& child)
 {
-    if (LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) || !child || !child->IsReusableNode()) {
+    if (!child || !child->IsReusableNode()) {
         return;
     }
     if (!IsInDestroying() && child->IsInDestroying()) {

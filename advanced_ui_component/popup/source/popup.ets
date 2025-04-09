@@ -66,7 +66,7 @@ interface CloseButtonTheme {
   hoverColor: ResourceColor;
   backgroundColor: ResourceColor;
   symbolStyle: SymbolGlyphModifier;
-  symbolSize: number;
+  symbolSize: string;
   accessibilityMessage: Resource;
 }
 
@@ -365,7 +365,7 @@ export struct PopupComponent {
     return this.theme.closeButton.padding
   }
 
-  private getCloseButtonSymbolSize(): Length | undefined {
+  private getCloseButtonSymbolSize(): string | undefined {
     return this.theme.closeButton.symbolSize
   }
 
@@ -431,6 +431,7 @@ export struct PopupComponent {
       textMaxWeight -= (this.theme.windows.padding.start.value - (this.theme.button.margin.end.value / 2))
       textMaxWeight -= this.theme.windows.padding.end.value
       textMaxWeight -= this.theme.button.margin.start.value / 2
+      textMaxWeight -= this.theme.closeButton.margin.end.value
       textMaxWeight -= this.getCloseButtonWidth() as number
     }
     return textMaxWeight

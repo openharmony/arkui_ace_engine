@@ -248,7 +248,7 @@ struct DialogProperties {
     bool isMask = false;
     bool isModal = true;
     bool enableHoverMode = false;
-    bool isScenceBoardDialog = false;
+    bool isSceneBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
     std::function<void(const int32_t dialogId)> customBuilderWithId;

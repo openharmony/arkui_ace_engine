@@ -52,6 +52,10 @@ template("uiservice_static") {
       ":uiservicems_config",
       "$ace_root:ace_config",
     ]
+    if (ace_engine_enable_uiservice_idl) {
+      sources += [ "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/src/ui_mgr_service_idl.cpp" ]
+      public_deps = [ "$ace_root/interfaces/inner_api/ui_service_manager:uiservice_manager_interface_set" ]
+    }
     external_deps = [
       "ability_base:want",
       "access_token:libtokenid_sdk",

@@ -41,7 +41,7 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
-    HalfLeading = 8,
+    HalfLeading,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -418,8 +418,7 @@ public:
     bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
     SpanType GetSpanType() const override;
     std::string ToString() const override;
-    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem,
-        SpanOperation operation) const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 private:
     void AddUrlStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveUrlStyle(const RefPtr<NG::SpanItem>& spanItem);

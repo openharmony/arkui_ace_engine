@@ -760,6 +760,20 @@ class ArkSafeAreaExpandOpts {
   }
 }
 
+class ArkEnableStatusBar {
+  enable: boolean | undefined = undefined;
+  animated?: boolean | undefined = undefined;
+
+  constructor() {
+    this.enable = undefined;
+    this.animated = undefined;
+  }
+
+  isEqual(another: ArkEnableStatusBar): boolean {
+    return (this.enable === another.enable) && (this.animated === another.animated);
+  }
+}
+
 class ArkButtonStyle {
   left?: number;
   top?: number;

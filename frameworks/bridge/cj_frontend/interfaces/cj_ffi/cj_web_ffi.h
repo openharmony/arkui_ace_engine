@@ -147,7 +147,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkWebForceDarkAccess(bool access);
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnAlert(bool (*callback)(FfiWebEvent event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageStart(void (*callback)(const char* url));
 CJ_EXPORT void FfiOHOSAceFrameworkWebOnPageFinish(void (*callback)(const char* url));
-CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(void* event));
+CJ_EXPORT void FfiOHOSAceFrameworkWebOnLoadIntercept(bool (*callback)(FfiWebResourceRequest event));
 CJ_EXPORT void FfiOHOSAceFrameworkWebJavaScriptProxy(
     VectorInt64Handle funcList, const char* name, VectorStringHandle methodList, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkWebSetCallback(RequestResultCallback cb);
@@ -208,7 +208,7 @@ CJ_EXPORT int32_t FfiWebConsoleGetMessageLevel(void* msg);
 CJ_EXPORT ExternalString FfiWebConsoleGetSourceId(void* msg);
 CJ_EXPORT void FfiWebFreeConsoleMessage(void* msg);
 CJ_EXPORT void FfiWebOnDownloadStart(void (*callback)(FfiOnDownloadStartEvent event));
-CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(void* request, void* error));
+CJ_EXPORT void FfiWebOnErrorReceive(void (*callback)(FfiWebResourceRequest request, void* error));
 CJ_EXPORT ExternalString FfiWebGetErrorInfo(void* error);
 CJ_EXPORT int32_t FfiWebGetErrorCode(void* error);
 CJ_EXPORT void FfiWebFreeResourceError(void* error);

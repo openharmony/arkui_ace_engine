@@ -930,15 +930,14 @@ HWTEST_F(GestureEventHubTestNg, UpdateNodePositionBeforeStartAnimation_001, Test
      * @tc.steps: step3. call UpdateNodePositionBeforeStartAnimation.
      */
     PreparedInfoForDrag data;
-    OffsetF subWindowOffset;
-    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data, subWindowOffset);
+    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data);
     EXPECT_EQ(data.dragPreviewOffsetToScreen.GetX(), 0.0f);
 
     data.isMenuShow = true;
     DragPreviewOption previewOption;
     previewOption.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
     frameNode->SetDragPreviewOptions(previewOption);
-    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data, subWindowOffset);
+    guestureEventHub->UpdateNodePositionBeforeStartAnimation(frameNode, data);
     EXPECT_EQ(data.dragPreviewOffsetToScreen.GetX(), 0.0f);
 }
 

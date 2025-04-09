@@ -86,6 +86,10 @@ public:
                     theme->buttonPressedHeight_ = pattern->GetAttr<Dimension>("button_pressed_height", 40.0_vp);
                     theme->controlHeight_ = pattern->GetAttr<Dimension>("control_height", 48.0_vp);
                     theme->controlPadding_ = pattern->GetAttr<Dimension>("control_padding", 8.0_vp);
+                    theme->stepperBack_ = pattern->GetAttr<std::string>("stepper_back", "");
+                    theme->stepperSkip_ = pattern->GetAttr<std::string>("stepper_skip", "");
+                    theme->stepperStart_ = pattern->GetAttr<std::string>("stepper_start", "");
+                    theme->stepperNext_ = pattern->GetAttr<std::string>("stepper_next", "");
                 }
             }
             return theme;
@@ -203,7 +207,26 @@ public:
     {
         return defaultAlpha_;
     }
-
+    
+    const std::string& GetStepperBack() const
+    {
+        return stepperBack_;
+    }
+    
+    const std::string& GetStepperSkip() const
+    {
+        return stepperSkip_;
+    }
+    
+    const std::string& GetStepperStart() const
+    {
+        return stepperStart_;
+    }
+    
+    const std::string& GetStepperNext() const
+    {
+        return stepperNext_;
+    }
 protected:
     StepperTheme() = default;
 
@@ -230,6 +253,10 @@ private:
     Color mouseHoverColor_;
     double disabledAlpha_ = 0.4;
     double defaultAlpha_ = 0.9;
+    std::string stepperBack_ = "";
+    std::string stepperSkip_ = "";
+    std::string stepperStart_ = "";
+    std::string stepperNext_ = "";
 };
 
 } // namespace OHOS::Ace

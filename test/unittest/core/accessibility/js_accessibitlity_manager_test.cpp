@@ -90,6 +90,20 @@ public:
     }
 };
 
+class MockStageManager : public StageManager {
+public:
+    explicit MockStageManager(const RefPtr<FrameNode>& stage)
+        : StageManager(stage)
+    {}
+
+    ~MockStageManager() override = default;
+
+    MOCK_METHOD(bool, IsSplitMode, (), (const));
+    MOCK_METHOD(std::vector<RefPtr<FrameNode>>, GetTopPagesWithTransition, (), (const));
+    MOCK_METHOD(std::vector<std::string>, GetTopPagePaths, (), (const));
+    MOCK_METHOD(RefPtr<FrameNode>, GetLastPageWithTransition, (), (const));
+};
+
 class JsAccessibilityManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -120,6 +134,7 @@ public:
     MOCK_METHOD3(SendEventToAccessibilityWithNode,
         void(const AccessibilityEvent& accessibilityEvent,
             const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context));
+    MOCK_METHOD0(GenerateAccessibilityWorkMode, AccessibilityWorkMode());
 };
 
 /**
@@ -885,7 +900,20 @@ HWTEST_F(JsAccessibilityManagerTest, GenerateWindowInfo001, TestSize.Level1)
     EXPECT_EQ(windowInfo.scaleY, 1.0f);
 
     /**
-     * @tc.steps: step4. mock SingleHandTransform, and then test GenerateWindowInfo method again
+     * @tc.steps: step4. mock IsReentrantLimit, and then test GenerateWindowInfo method again
+     */
+    jsAccessibilityManager->RegisterGetParentRectHandler();
+    EXPECT_NE(jsAccessibilityManager->getParentRectHandlerNew_, nullptr);
+    jsAccessibilityManager->SetReentrantLimit(true);
+    windowInfo = jsAccessibilityManager->GenerateWindowInfo(frameNode, context);
+ 
+    EXPECT_EQ(windowInfo.left, 0);
+    EXPECT_EQ(windowInfo.top, 0);
+    EXPECT_EQ(windowInfo.scaleX, 1.0f);
+    EXPECT_EQ(windowInfo.scaleY, 1.0f);
+
+    /**
+     * @tc.steps: step5. mock SingleHandTransform, and then test GenerateWindowInfo method again
      */
     container->SetSingleHandTransform(Platform::SingleHandTransform(100.0f, 200.0f, 0.7f, 0.7f));
 
@@ -1018,14 +1046,20 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager0201, TestSize.Level1
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager021, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+    root->AddChild(frameNode);
+
 
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
 
-    int64_t nodeId = 1;
+    int64_t nodeId = frameNode->GetAccessibilityId();
     int32_t eventId = 2;
     // 1. check parameter fail
     std::vector<std::string> params;
@@ -1054,8 +1088,13 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager021, TestSize.Level1)
  */
 HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
 {
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    CHECK_NULL_VOID(frameNode);
+    auto root = context->GetRootElement();
+    CHECK_NULL_VOID(root);
+    root->AddChild(frameNode);
     MockJsAccessibilityManager mockJsManger;
     mockJsManger.SetPipelineContext(context);
     mockJsManger.Register(true);
@@ -1065,7 +1104,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager022, TestSize.Level1)
     // 1.  dump event
     params.push_back("-inspector");
     params.push_back("--event-test");
-    params.push_back("1");
+    params.push_back(std::to_string(frameNode->GetAccessibilityId()).c_str());
     params.push_back("2");
 
     EXPECT_CALL(mockJsManger, SendEventToAccessibilityWithNode(_, _, _))
@@ -1270,5 +1309,154 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager027, TestSize.Level1)
     EXPECT_EQ(result.top, 0);
     EXPECT_EQ(result.scaleX, 1.0f);
     EXPECT_EQ(result.scaleY, 1.0f);
+}
+
+/**
+* @tc.name: JsAccessibilityManager028
+* @tc.desc: GetPagePathInPageNodes
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create jsAccessibilityManager and create test data.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto frameNode1 = FrameNode::CreateFrameNode(
+        "frameNode1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode1->SetHostPageId(1);
+    auto frameNode2 = FrameNode::CreateFrameNode(
+        "frameNode2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode2->SetHostPageId(2);
+    std::vector<RefPtr<NG::FrameNode>> pageNodes = {frameNode1, frameNode2};
+    /**
+     * @tc.steps: step2. test Empty pagePaths
+     */
+    std::vector<std::string> pagePaths = {};
+    EXPECT_EQ(jsAccessibilityManager->GetPagePathInPageNodes(1, pageNodes, pagePaths),
+    jsAccessibilityManager->GetPagePath());
+    /**
+     * @tc.steps: step3. test Mismatched sizes of pageNodes and pagePaths
+     */
+    pagePaths = {"path1"};
+    EXPECT_EQ(jsAccessibilityManager->GetPagePathInPageNodes(1, pageNodes, pagePaths),
+        jsAccessibilityManager->GetPagePath());
+    /**
+     * @tc.steps: step4. test PageId not found in pageNodes
+     */
+    pagePaths = {"path1", "path2"};
+    EXPECT_EQ(jsAccessibilityManager->GetPagePathInPageNodes(3, pageNodes, pagePaths),
+        jsAccessibilityManager->GetPagePath());
+    /**
+     * @tc.steps: step5. test PageId found in pageNodes
+     */
+    pagePaths = {"path1", "path2"};
+    EXPECT_EQ(jsAccessibilityManager->GetPagePathInPageNodes(2, pageNodes, pagePaths), "path2");
+}
+
+/**
+* @tc.name: JsAccessibilityManager029
+* @tc.desc: GetCurrentWindowPages
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create jsAccessibilityManager and create test data.
+     */
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    std::vector<RefPtr<FrameNode>> pageNodes;
+    std::vector<std::string> pagePaths;
+    auto context = MockPipelineContext::GetCurrentContext();
+    RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    context->stageManager_ = stageManager;
+    ASSERT_NE(context->stageManager_, nullptr);
+
+    auto frameNode1 = FrameNode::CreateFrameNode(
+        "frameNode1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode1->SetHostPageId(1);
+    auto frameNode2 = FrameNode::CreateFrameNode(
+        "frameNode2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode2->SetHostPageId(2);
+    auto frameNode3 = FrameNode::CreateFrameNode(
+        "frameNode3", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode3->SetHostPageId(3);
+    /**
+     * @tc.steps: step2. test GetCurrentWindowPages get data empty
+     */
+    EXPECT_CALL(*stageManager, IsSplitMode()).Times(2).WillRepeatedly(Return(true));
+    EXPECT_CALL(*stageManager, GetTopPagesWithTransition()).Times(2)
+        .WillRepeatedly(Return(std::vector<RefPtr<FrameNode>>{}));
+    EXPECT_CALL(*stageManager, GetTopPagePaths()).Times(2)
+        .WillRepeatedly(Return(std::vector<std::string>{"path1", "path2"}));
+    
+    jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
+    ASSERT_EQ(pageNodes.size(), 0);
+    ASSERT_EQ(pagePaths.size(), 0);
+
+    /**
+     * @tc.steps: step3. test GetCurrentWindowPages get data size 2
+     */
+    EXPECT_CALL(*stageManager, GetTopPagesWithTransition()).Times(2)
+        .WillRepeatedly(Return(std::vector<RefPtr<FrameNode>>{frameNode1, frameNode2}));
+    jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
+    ASSERT_EQ(pageNodes.size(), 2);
+    ASSERT_EQ(pagePaths.size(), 2);
+
+    /**
+     * @tc.steps: step4. test GetCurrentWindowPages with IsSplitMode false
+     */
+    EXPECT_CALL(*stageManager, IsSplitMode()).WillOnce(Return(false));
+    EXPECT_CALL(*stageManager, GetLastPageWithTransition()).Times(1)
+        .WillOnce(Return(frameNode3));
+    jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
+    ASSERT_EQ(pageNodes.size(), 3);
+}
+
+/**
+* @tc.name: JsAccessibilityManager030
+* @tc.desc: IsEventIgnoredByWorkMode
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create jsAccessibilityManager and create test data.
+     */
+    auto context = NG::PipelineContext::GetCurrentContext();
+    MockJsAccessibilityManager mockJsManger;
+    mockJsManger.SetPipelineContext(context);
+    mockJsManger.Register(true);
+
+    AccessibilityEvent event;
+    event.nodeId = 1;
+    AccessibilityWorkMode accessibilityWorkMode;
+    accessibilityWorkMode.isTouchExplorationEnabled = false;
+    /**
+     * @tc.steps: step2. test IsEventIgnoredByWorkMode return true
+     */
+    event.type = AccessibilityEventType::FOCUS;
+    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
+        .WillRepeatedly(Return(accessibilityWorkMode));
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+    
+    event.type = AccessibilityEventType::ELEMENT_INFO_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+
+    event.type = AccessibilityEventType::TEXT_CHANGE;
+    EXPECT_TRUE(mockJsManger.IsEventIgnoredByWorkMode(event));
+
+    /**
+     * @tc.steps: step3. test IsEventIgnoredByWorkMode return false
+     */
+    event.type = AccessibilityEventType::CLICK;
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
+
+    accessibilityWorkMode.isTouchExplorationEnabled = true;
+    EXPECT_CALL(mockJsManger, GenerateAccessibilityWorkMode())
+        .WillOnce(Return(accessibilityWorkMode));
+    EXPECT_FALSE(mockJsManger.IsEventIgnoredByWorkMode(event));
 }
 } // namespace OHOS::Ace::NG

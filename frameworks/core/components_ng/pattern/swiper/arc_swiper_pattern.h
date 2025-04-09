@@ -85,8 +85,8 @@ private:
     void ResetAnimationParam() override;
     void InitialFrameNodePropertyAnimation(const OffsetF& offset, const RefPtr<FrameNode>& frameNode);
     void UsePropertyAnimation(const OffsetF& offset);
-    void PlayPropertyTranslateAnimation(
-        float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false) override;
+    void PlayPropertyTranslateAnimation(float translate, int32_t nextIndex, float velocity = 0.0f,
+        bool stopAutoPlay = false, std::optional<float> pixelRoundTargetPos = std::nullopt) override;
     void PlayScrollAnimation(float currentDelta, float currentIndexOffset) override;
     void ResetCurrentFrameNodeAnimation() override;
     void ResetParentNodeColor() override;

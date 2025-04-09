@@ -72,6 +72,7 @@ void IndexerPattern::OnModifyDone()
     bool autoCollapseModeChanged = true;
     bool itemCountChanged = false;
     InitArrayValue(autoCollapseModeChanged, itemCountChanged);
+    ReportSelectEvent();
     BuildArrayValueItems();
     bool removeBubble = false;
     auto usePopup = layoutProperty->GetUsingPopup().value_or(false);
@@ -445,7 +446,9 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(onActionStart), std::move(onActionUpdate), std::move(onActionEnd), std::move(onActionCancel));
-    gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnHover(bool isHover)
@@ -540,7 +543,9 @@ void IndexerPattern::InitPopupPanEvent()
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panEvent = MakeRefPtr<PanEvent>(nullptr, nullptr, nullptr, nullptr);
-    gestureHub->AddPanEvent(panEvent, panDirection, 1, DEFAULT_PAN_DISTANCE);
+    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    gestureHub->AddPanEvent(panEvent, panDirection, 1, distanceMap);
 }
 
 void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
@@ -1555,19 +1560,17 @@ void IndexerPattern::UpdateBubbleListItemContext(
     CHECK_NULL_VOID(listItemNode);
     auto listItemContext = listItemNode->GetRenderContext();
     CHECK_NULL_VOID(listItemContext);
+    auto popupItemBackground =
+            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto popupItemRadius = paintProperty->GetPopupItemBorderRadius().has_value()
                                     ? paintProperty->GetPopupItemBorderRadiusValue()
                                     : Dimension(BUBBLE_ITEM_RADIUS, DimensionUnit::VP);
         listItemContext->UpdateBorderRadius({ popupItemRadius, popupItemRadius, popupItemRadius, popupItemRadius });
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
         listItemContext->UpdateBackgroundColor(static_cast<int32_t>(pos) == popupClickedIndex_
                                                    ? (indexerTheme->GetPopupClickedBgAreaColor())
                                                    : popupItemBackground);
     } else {
-        auto popupItemBackground =
-            paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
         listItemContext->UpdateBackgroundColor(
             static_cast<int32_t>(pos) == popupClickedIndex_ ? Color(POPUP_LISTITEM_CLICKED_BG) : popupItemBackground);
     }
@@ -1597,9 +1600,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupUnselectedTextColor());
     auto popupItemBackground =
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
-            ? paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor())
-            : paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
+        paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupUnclickedBgAreaColor());
     auto listNode = popupNode_->GetLastChild()->GetFirstChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {
@@ -1685,6 +1686,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(indexerEventHub);
     auto onPopupSelected = indexerEventHub->GetOnPopupSelected();
+    ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
@@ -2005,9 +2007,14 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
             onCreatChangeEvent(actualIndex);
         }
         auto onSelected = indexerEventHub->GetOnSelected();
-        if (onSelected && (selectIndex >= 0) && (selectIndex < itemCount_)) {
-            TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
-            onSelected(actualIndex); // fire onSelected with an item's index from original array
+        if ((selectIndex >= 0) && (selectIndex < itemCount_)) {
+            if (onSelected) {
+                TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
+                onSelected(actualIndex); // fire onSelected with an item's index from original array
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+            TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
+                "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
     }
     selectedChangedForHaptic_ = lastFireSelectIndex_ != selected_;
@@ -2166,5 +2173,21 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("ActualItemCount", itemCount_);
     json->Put("FullItemCount", static_cast<int32_t>(fullArrayValue_.size()));
     json->Put("MaxContentHeight", maxContentHeight_);
+}
+
+void IndexerPattern::ReportSelectEvent()
+{
+    if (initialized_ && selectChanged_) {
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+        TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
+            GetHost()->GetId());
+    }
+}
+
+void IndexerPattern::ReportPoupSelectEvent()
+{
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect");
+    TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
+        GetHost()->GetId());
 }
 } // namespace OHOS::Ace::NG

@@ -20,12 +20,14 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -68,6 +70,15 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::string TEXT_TAG = "text";
 constexpr int32_t TARGET_ID = 100;
+constexpr int32_t NODE_ID = 1;
+constexpr float ZERO = 0.0f;
+constexpr float ONE = 1.0f;
+constexpr float TWO = 2.0f;
+constexpr float FIVE = 5.0f;
+constexpr float TEN = 10.0f;
+constexpr float TWENTY = 20.0f;
+constexpr float ONE_HUNDRED = 100.0f;
+constexpr float TWO_HUNDRED = 200.0f;
 
 } // namespace
 class MenuViewTestNg : public testing::Test {
@@ -77,6 +88,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void InitMenuTestNg();
+    void InitMenuWrapperNode();
     void MockPipelineContextGetTheme();
     int32_t GetNodeId();
     RefPtr<FrameNode> menuFrameNode_;
@@ -84,6 +96,7 @@ public:
     RefPtr<FrameNode> menuItemFrameNode_;
     RefPtr<FrameNode> subMenuParent_;
     RefPtr<FrameNode> subMenu_;
+    RefPtr<FrameNode> menuWrapperNode_;
     RefPtr<MenuItemPattern> menuItemPattern_;
     int32_t nodeId_ = 1;
     bool isSubMenuBuilded_ = false;
@@ -181,6 +194,13 @@ void MenuViewTestNg::InitMenuTestNg()
     auto subMenuPattern = subMenu_->GetPattern<MenuPattern>();
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetParentMenuItem(subMenuParent_);
+}
+
+void MenuViewTestNg::InitMenuWrapperNode()
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.push_back({ "MenuItem1", "Icon1" });
+    menuWrapperNode_ = MenuView::Create(std::move(selectParams), NODE_ID, "");
 }
 
 /**
@@ -291,5 +311,699 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     overlayManger->ResumeMenuShow(TARGET_ID);
     ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
     EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+}
+
+/**
+ * @tc.name: UpdateEmbeddedPercentReference001
+ * @tc.desc: Verify UpdateEmbeddedPercentReference.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateEmbeddedPercentReference001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    ASSERT_EQ(frameNode->GetParent(), wrapperNode);
+    auto wrapperLayoutProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF wrapperLayoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    wrapperLayoutProperty->UpdateLayoutConstraint(wrapperLayoutConstraint);
+    wrapperNode->SetLayoutProperty(wrapperLayoutProperty);
+    auto menuItemProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    menuItemProperty->UpdateLayoutConstraint(layoutConstraintF);
+    frameNode->SetLayoutProperty(menuItemProperty);
+    menuItemProperty->UpdateContent("test1");
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
+    EXPECT_EQ(childConstraint.percentReference.height_, FIVE);
+}
+
+/**
+ * @tc.name: UpdateEmbeddedPercentReference002
+ * @tc.desc: Verify UpdateEmbeddedPercentReference.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateEmbeddedPercentReference002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    ASSERT_EQ(frameNode->GetParent(), wrapperNode);
+    auto wrapperLayoutProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF wrapperLayoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    wrapperLayoutProperty->UpdateLayoutConstraint(wrapperLayoutConstraint);
+    wrapperNode->SetLayoutProperty(wrapperLayoutProperty);
+    auto menuItemProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    menuItemProperty->UpdateLayoutConstraint(layoutConstraintF);
+    frameNode->SetLayoutProperty(menuItemProperty);
+    menuItemProperty->UpdateContent("test1");
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(CalcLength(TEN), CalcLength(TWENTY));
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
+    EXPECT_EQ(childConstraint.percentReference.height_, TWENTY);
+}
+
+/**
+ * @tc.name: UpdateEmbeddedPercentReference003
+ * @tc.desc: Verify UpdateEmbeddedPercentReference.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateEmbeddedPercentReference003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    ASSERT_EQ(frameNode->GetParent(), wrapperNode);
+    auto wrapperLayoutProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF wrapperLayoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    wrapperLayoutProperty->UpdateLayoutConstraint(wrapperLayoutConstraint);
+    wrapperNode->SetLayoutProperty(wrapperLayoutProperty);
+    auto menuItemProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    menuItemProperty->UpdateLayoutConstraint(layoutConstraintF);
+    frameNode->SetLayoutProperty(menuItemProperty);
+    menuItemProperty->UpdateContent("test1");
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
+    EXPECT_EQ(childConstraint.percentReference.height_, FIVE);
+}
+
+/**
+ * @tc.name: UpdateEmbeddedPercentReference004
+ * @tc.desc: Verify UpdateEmbeddedPercentReference.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateEmbeddedPercentReference004, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto wrapperLayoutProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF wrapperLayoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    wrapperLayoutProperty->UpdateLayoutConstraint(wrapperLayoutConstraint);
+    wrapperNode->SetLayoutProperty(wrapperLayoutProperty);
+    auto menuItemProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    menuItemProperty->UpdateLayoutConstraint(layoutConstraintF);
+    frameNode->SetLayoutProperty(menuItemProperty);
+    menuItemProperty->UpdateContent("test1");
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(CalcLength(TEN), CalcLength(TWENTY));
+    layoutWrapper->GetGeometryNode()->parentLayoutConstraint_ = std::make_optional<LayoutConstraintF>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
+    EXPECT_EQ(childConstraint.percentReference.height_, TWENTY);
+}
+
+/**
+ * @tc.name: UpdateEmbeddedPercentReference005
+ * @tc.desc: Verify UpdateEmbeddedPercentReference.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateEmbeddedPercentReference005, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    ASSERT_EQ(frameNode->GetParent(), wrapperNode);
+    auto wrapperLayoutProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF wrapperLayoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    wrapperLayoutProperty->UpdateLayoutConstraint(wrapperLayoutConstraint);
+    wrapperNode->SetLayoutProperty(wrapperLayoutProperty);
+    auto menuItemProperty = AceType::MakeRefPtr<MenuItemLayoutProperty>();
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    menuItemProperty->UpdateLayoutConstraint(layoutConstraintF);
+    frameNode->SetLayoutProperty(menuItemProperty);
+    menuItemProperty->UpdateContent("test1");
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(CalcLength(TEN), std::nullopt);
+    layoutWrapper->GetGeometryNode()->parentLayoutConstraint_ = std::make_optional<LayoutConstraintF>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+    };
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
+    EXPECT_EQ(childConstraint.percentReference.height_, FIVE);
+}
+
+/**
+ * @tc.name: UpdateSelfSize001
+ * @tc.desc: Verify UpdateSelfSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateSelfSize001, TestSize.Level1)
+{
+    auto menuNodeTwo =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuNodeNew =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    menuNodeNew->MountToParent(menuNodeTwo);
+    ASSERT_NE(menuNodeNew, nullptr);
+    menuNode->MountToParent(menuNodeNew);
+    ASSERT_NE(menuNode, nullptr);
+    frameNode->MountToParent(menuNode);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto firstFrameNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
+    ASSERT_NE(childWrapper, nullptr);
+    auto iter = layoutWrapper->childrenMap_.find(0);
+    if (iter == layoutWrapper->childrenMap_.end()) {
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateSelfSize(AccessibilityManager::RawPtr(layoutWrapper), childConstraint, layoutConstraint);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.width_, TEN);
+}
+
+/**
+ * @tc.name: UpdateSelfSize002
+ * @tc.desc: Verify UpdateSelfSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateSelfSize002, TestSize.Level1)
+{
+    auto menuNodeTwo =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuNodeNew =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNodeNew, nullptr);
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    menuNodeNew->MountToParent(menuNodeTwo);
+    menuNode->MountToParent(menuNodeNew);
+    frameNode->MountToParent(menuNode);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto firstFrameNode = FrameNode::CreateFrameNode("one", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> childLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(firstFrameNode, firstGeometryNode, firstFrameNode->GetLayoutProperty());
+    layoutWrapper->AppendChild(childLayoutWrapper);
+    auto pattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    pattern->isStackSubmenu_ = true;
+    pattern->isEmbedded_ = true;
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto childWrapper = AceType::DynamicCast<LayoutWrapperNode>(layoutWrapper->GetOrCreateChildByIndex(0));
+    ASSERT_NE(childWrapper, nullptr);
+    auto iter = layoutWrapper->childrenMap_.find(0);
+    if (iter == layoutWrapper->childrenMap_.end()) {
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateSelfSize(AccessibilityManager::RawPtr(layoutWrapper), childConstraint, layoutConstraint);
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->frame_.rect_.width_, ONE_HUNDRED);
+}
+
+/**
+ * @tc.name: ResetLayoutConstraintMinWidth001
+ * @tc.desc: Verify ResetLayoutConstraintMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth001, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    LayoutConstraintF layoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_EQ(algorithm->ResetLayoutConstraintMinWidth(layoutWrapper, layoutConstraint).selfIdealSize.width_, ONE);
+}
+
+/**
+ * @tc.name: ResetLayoutConstraintMinWidth002
+ * @tc.desc: Verify ResetLayoutConstraintMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth002, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(CalcLength(TEN), CalcLength(TWENTY));
+    LayoutConstraintF layoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_EQ(algorithm->ResetLayoutConstraintMinWidth(layoutWrapper, layoutConstraint).selfIdealSize.width_, ONE);
+}
+
+/**
+ * @tc.name: ResetLayoutConstraintMinWidth003
+ * @tc.desc: Verify ResetLayoutConstraintMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, ResetLayoutConstraintMinWidth003, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    RefPtr<LayoutWrapper> layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->selfIdealSize =
+        std::make_optional<CalcSize>(std::nullopt, CalcLength(TWENTY));
+    LayoutConstraintF layoutConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_EQ(algorithm->ResetLayoutConstraintMinWidth(layoutWrapper, layoutConstraint).selfIdealSize.width_, ONE);
+}
+
+/**
+ * @tc.name: UpdateSelectOverlayMenuMinWidth001
+ * @tc.desc: Verify UpdateSelectOverlayMenuMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateSelectOverlayMenuMinWidth001, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.push_back({ "MenuItem1", "Icon1" });
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1, "");
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto multiPattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(multiPattern, nullptr);
+    multiPattern->GetMainMenuPattern()->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
+    multiPattern->GetMenuWrapper()->GetPattern<MenuWrapperPattern>()->isSelectOverlaySubWindowWrapper_ = true;
+    multiPattern->GetMenuWrapper()->GetPattern<MenuWrapperPattern>()->containerId_ = 1;
+    MockContainer::SetUp();
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    mockContainer->pipelineContext_ = pipelineContext;
+    pipelineContext->SetContainerModalButtonsRect(false);
+    AceEngine::Get().containerMap_.emplace(1, mockContainer);
+    AceEngine::Get().containerMap_.emplace(2, MockContainer::Current());
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_FALSE(algorithm->UpdateSelectOverlayMenuMinWidth(multiPattern, columnInfo));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: UpdateSelectOverlayMenuMinWidth002
+ * @tc.desc: Verify UpdateSelectOverlayMenuMinWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateSelectOverlayMenuMinWidth002, TestSize.Level1)
+{
+    std::vector<SelectParam> selectParams;
+    selectParams.push_back({ "MenuItem1", "Icon1" });
+    auto menuWrapperNode = MenuView::Create(std::move(selectParams), 1, "");
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto multiPattern = frameNode->GetPattern<MenuPattern>();
+    ASSERT_NE(multiPattern, nullptr);
+    multiPattern->GetMainMenuPattern()->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
+    multiPattern->GetMenuWrapper()->GetPattern<MenuWrapperPattern>()->isSelectOverlaySubWindowWrapper_ = true;
+    multiPattern->GetMenuWrapper()->GetPattern<MenuWrapperPattern>()->containerId_ = 1;
+    MockContainer::SetUp();
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    pipelineContext->displayWindowRectInfo_.width_ = TWENTY;
+    mockContainer->pipelineContext_ = pipelineContext;
+    pipelineContext->SetContainerModalButtonsRect(false);
+    AceEngine::Get().containerMap_.emplace(1, mockContainer);
+    AceEngine::Get().containerMap_.emplace(2, MockContainer::Current());
+    auto columnInfo = AceType::MakeRefPtr<GridColumnInfo>();
+    columnInfo->parent_ = AceType::MakeRefPtr<GridContainerInfo>();
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    EXPECT_TRUE(algorithm->UpdateSelectOverlayMenuMinWidth(multiPattern, columnInfo));
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice001
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice001, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, ZERO);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice002
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice002, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = false;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::CONTEXT_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, TEN);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice003
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice003, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::SELECT_OVERLAY_RIGHT_CLICK_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, ZERO);
+}
+
+/**
+ * @tc.name: UpdateMenuDefaultConstraintByDevice004
+ * @tc.desc: Verify UpdateMenuDefaultConstraintByDevice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuDefaultConstraintByDevice004, TestSize.Level1)
+{
+    InitMenuWrapperNode();
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode_->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(NODE_ID, TEXT_TAG, MenuType::MENU));
+    frameNode->MountToParent(menuNode);
+    auto menuPattern = frameNode->GetPattern<MenuPattern>();
+    LayoutConstraintF childConstraint = {
+        .minSize = { ONE, ONE },
+        .maxSize = { TEN, TEN },
+        .percentReference = { FIVE, FIVE },
+        .parentIdealSize = { TWO, TWO },
+        .selfIdealSize = { ONE, FIVE },
+    };
+    float paddingWidth = FIVE;
+    std::optional<LayoutConstraintF> layoutConstraint = std::make_optional<LayoutConstraintF>();
+    layoutConstraint->minSize = SizeF { ONE, TWO };
+    layoutConstraint->maxSize = SizeF { ONE_HUNDRED, TWO_HUNDRED };
+    layoutConstraint->percentReference = SizeF { TEN, TWENTY };
+    layoutConstraint->parentIdealSize = OptionalSize<float> { TEN, TWENTY };
+    layoutConstraint->selfIdealSize = OptionalSize<float> { TEN, TWENTY };
+    bool idealSizeHasVal = true;
+    menuPattern->GetMainMenuPattern()->type_ = MenuType::SUB_MENU;
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    algorithm->UpdateMenuDefaultConstraintByDevice(
+        menuPattern, childConstraint, paddingWidth, layoutConstraint, idealSizeHasVal);
+    EXPECT_EQ(layoutConstraint->selfIdealSize.width_, TEN);
 }
 } // namespace OHOS::Ace::NG

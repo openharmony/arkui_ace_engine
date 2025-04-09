@@ -1013,6 +1013,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest017, TestSize.Level1)
     const std::string countryOrRegion = "US";
     const std::string script = "Latn";
     const std::string keywordsAndValues = "";
+    auto dialogTheme = MockPipelineContext::GetCurrent()->GetTheme<DialogTheme>();
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
@@ -1038,7 +1039,7 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest017, TestSize.Level1)
     textPickerPattern->OnLanguageConfigurationUpdate();
     AceApplicationInfo::GetInstance().SetLocale(language, countryOrRegion, script, keywordsAndValues);
     std::string nodeInfo = "";
-    auto cancel = Localization::GetInstance()->GetEntryLetters("common.cancel");
+    auto cancel = dialogTheme->GetCancelText();
     EXPECT_EQ(cancel, nodeInfo);
 }
 

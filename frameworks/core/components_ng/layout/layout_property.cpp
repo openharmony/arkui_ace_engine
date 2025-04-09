@@ -18,6 +18,7 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/property/grid_property.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -900,7 +901,7 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition)
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransition, bool isUserSet)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -909,6 +910,13 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
+    auto pipeline = host->GetContext();
+    uint64_t vsyncTime = 0;
+    if (pipeline) {
+        vsyncTime = pipeline->GetVsyncTime();
+    }
+    host->AddVisibilityDumpInfo({ vsyncTime, { visible, isUserSet } });
+
     host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
         if (preVisibility.value() == VisibleType::VISIBLE && visible != VisibleType::VISIBLE) {
@@ -1396,14 +1404,14 @@ void LayoutProperty::UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layout
         (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
 }
 
-void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition)
+void LayoutProperty::UpdateVisibility(const VisibleType& value, bool allowTransition, bool isUserSet)
 {
     if (propVisibility_.has_value()) {
         if (NearEqual(propVisibility_.value(), value)) {
             return;
         }
     }
-    OnVisibilityUpdate(value, allowTransition);
+    OnVisibilityUpdate(value, allowTransition, isUserSet);
 }
 
 void LayoutProperty::SetOverlayOffset(
@@ -2080,6 +2088,23 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
+std::string LayoutProperty::LayoutInfoToString()
+{
+    std::stringstream ss;
+    if (HasAspectRatio()) {
+        ss << "aspectRatio: " << magicItemProperty_.GetAspectRatioValue() << ",";
+    }
+    if (magicItemProperty_.GetLayoutWeight().has_value()) {
+        ss << "layoutWeight: " << magicItemProperty_.GetLayoutWeight().value() << ",";
+    }
+    if (GetPositionProperty() && GetPositionProperty()->GetAlignment().has_value()) {
+        ss << GetPositionProperty()->GetAlignment().value().ToString() << ",";
+    }
+    if (GetLayoutDirection() != TextDirection::AUTO) {
+        ss << "layoutDirection: " << static_cast<int32_t>(GetLayoutDirection());
+    }
+    return ss.str();
+}
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();

@@ -350,12 +350,19 @@ public:
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo, const RefPtr<PipelineBase>& context) {}
     virtual void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) {}
     virtual void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) {}
+    virtual int32_t GetTransformDegreeRelativeToWindow(const RefPtr<NG::FrameNode>& node, bool excludeSelf = false)
+    {
+        return 0;
+    }
 
     virtual AccessibilityWorkMode GenerateAccessibilityWorkMode()
     {
         return AccessibilityWorkMode();
     }
 
+    virtual void ReleasePageEvent(const RefPtr<NG::FrameNode>& node, bool deleteController) {}
+    virtual void AddToPageEventController(const RefPtr<NG::FrameNode>& node) {}
+    virtual bool CheckAccessibilityVisible(const RefPtr<NG::FrameNode>& node) {return true;}
 protected:
     int32_t treeId_ = 0;
 

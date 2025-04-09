@@ -32,6 +32,11 @@
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,8 +49,21 @@ public:
 };
 class AccessibilityPropertyTestThreeNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+        MockContainer::SetUp();
+        MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrent();
+        MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+        MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+        auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+        PipelineBase::GetCurrentContext()->SetThemeManager(themeManager);
+    }
+    static void TearDownTestSuite()
+    {
+        NG::MockPipelineContext::TearDown();
+        MockContainer::TearDown();
+    }
 };
 
 /**
@@ -282,5 +300,125 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree011, Te
     node->isActive_ = true;
     ret = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree012
+ * @tc.desc: NotifyComponentChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree012, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    AccessibilityEventType eventType = AccessibilityEventType::CLICK;
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+    accessibilityProperty.NotifyComponentChangeEvent(eventType);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    auto node = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, 0, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    accessibilityProperty.host_ = AceType::WeakClaim(AceType::RawPtr(node));
+
+    accessibilityProperty.NotifyComponentChangeEvent(eventType);
+    auto frameNode = accessibilityProperty.host_.Upgrade();
+    EXPECT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto pipeline = frameNode->GetContext();
+    EXPECT_NE(pipeline, nullptr);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree013
+ * @tc.desc: HoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree013, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    NG::PointF parentPoint(1, 1);
+    auto node = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    AccessibilityHoverTestPath path;
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    bool ancestorGroupFlag = false;
+
+    node->isAccessibilityVirtualNode_ = true;
+    bool result = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
+    EXPECT_FALSE(result);
+
+    node->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_FALSE(node->IsVisible());
+    auto renderContext = node->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
+    result = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree014
+ * @tc.desc: HoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    NG::PointF parentPoint(150, 160);
+    auto node = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    AccessibilityHoverTestPath path;
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    bool ancestorGroupFlag = false;
+    node->isAccessibilityVirtualNode_ = true;
+    
+    auto eventHub = node->GetEventHub<EventHub>();
+    eventHub->enabled_ = false;
+
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    node->renderContext_ = mockRenderContext;
+    RectF rect1(100, 100, 100, 100);
+    mockRenderContext->SetPaintRectWithTransform(rect1);
+
+    PointF selfPoint = parentPoint;
+    mockRenderContext->GetPointWithRevert(selfPoint);
+    
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    property->accessibilityLevel_ = AccessibilityProperty::Level::YES_STR;
+    property->accessibilityHoverPriority_ = true;
+
+    auto result = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTestThree015
+ * @tc.desc: ProcessHoverTestRecursive
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    AccessibilityHoverTestPath path;
+    auto node = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 13, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    NG::PointF hoverPoint(1, 1);
+    auto debugInfo = std::make_unique<AccessibilityProperty::HoverTestDebugTraceInfo>();
+    AccessibilityProperty::RecursiveParam recursiveParam;
+    recursiveParam.hitTarget = true;
+    recursiveParam.ancestorGroupFlag = true;
+
+    auto property = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    property->accessibilityVirtualNode_ = node;
+    auto virtualNode = property->GetAccessibilityVirtualNode();
+    EXPECT_NE(virtualNode, nullptr);
+    auto frameNode = AceType::DynamicCast<FrameNode>(virtualNode);
+    EXPECT_NE(frameNode, nullptr);
+
+    bool ret = AccessibilityProperty::HoverTestRecursive(hoverPoint, frameNode, path, debugInfo,
+            recursiveParam.ancestorGroupFlag);
+    EXPECT_FALSE(ret);
+    
+    auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, node, path, debugInfo, recursiveParam);
+    EXPECT_EQ(result, true);
 }
 } // namespace OHOS::Ace::NG

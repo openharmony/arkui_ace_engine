@@ -51,7 +51,7 @@ template("napi_dragcontroller_static") {
         "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
         "$ace_graphic/rosen/modules/render_service_base/include",
         "$ace_graphic/rosen/modules/render_service_client/core",
-        "$ace_graphic/rosen/modules/2d_engine/rosen_text/export/rosen_text",
+        "$ace_graphic/frameworks/text/interface/export/rosen_text",
         "$ace_graphic/interfaces/inner_api/composer",
         "$ace_graphic/rosen/modules/composer/vsync/include",
         "$ace_graphic/rosen/modules/platform",

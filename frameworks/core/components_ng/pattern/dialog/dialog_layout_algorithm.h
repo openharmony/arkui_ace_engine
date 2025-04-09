@@ -55,6 +55,8 @@ public:
     }
 
 private:
+    void ClipCustomMaskNode(const RefPtr<FrameNode>& dialog, const RectF& rect);
+    void UpdateCustomMaskNodeLayout(const RefPtr<FrameNode>& dialog);
     LayoutConstraintF CreateDialogChildConstraint(LayoutWrapper* layoutWrapper, float height, float width);
     void Distribute(float& scrollHeight, float& listHeight, float restHeight);
     void AnalysisHeightOfChild(LayoutWrapper* layoutWrapper);
@@ -102,12 +104,14 @@ private:
 
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
+    float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
     bool customSize_ = false;
     SafeAreaInsets safeAreaInsets_;
     bool isModal_ = true;
+    bool hasAddMaskNode_ = false;
     bool isShowInSubWindow_ = false;
     bool isSuitableForElderly_ = false;
     bool isSuitOldMeasure_ = false;
@@ -137,6 +141,7 @@ private:
     bool isShowInFloatingWindow_ = false;
 
     float embeddedDialogOffsetY_ = 0.0f;
+    float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);

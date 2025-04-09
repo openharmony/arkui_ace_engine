@@ -479,4 +479,20 @@ HWTEST_F(DistributedUiTestNg, DistributedUiTestNg011, TestSize.Level1)
     distributedUI.ApplyOneUpdate();
     EXPECT_EQ(distributedUI.pendingUpdates_.size() == 0, true);
 }
+
+/**
+ * @tc.name: DistributedUiTestNg012
+ * @tc.desc: RestoreUITreeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedUiTestNg, DistributedUiTestNg012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    SerializeableObjectArray array;
+    DistributedUI distributedUI;
+    distributedUI.RestoreUITreeInner(array);
+    EXPECT_EQ(distributedUI.sinkPageChildren_.empty(), true);
+}
 } // namespace OHOS::Ace::NG

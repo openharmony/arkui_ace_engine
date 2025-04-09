@@ -553,7 +553,6 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -564,7 +563,6 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowScrollIndex,
     NodeModifier::SetOnWaterFlowReachStart,
 };
-#endif
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -769,7 +767,6 @@ const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetListItemOnSelect,
 };
 
-#ifndef ARKUI_WEARABLE
 const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnWillScroll,
     NodeModifier::ResetOnWaterFlowReachEnd,
@@ -780,7 +777,6 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnWaterFlowScrollIndex,
     NodeModifier::ResetOnWaterFlowReachStart,
 };
-#endif
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -997,7 +993,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1007,7 +1002,6 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1274,7 +1268,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >=
@@ -1286,7 +1279,6 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -2075,6 +2067,18 @@ ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSu
     return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
 }
 
+ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
+    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
+}
+
+ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
+    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool isValidColor)
+{
+    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, isValidColor);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -2121,7 +2125,9 @@ const ArkUIDialogAPI* GetDialogAPI()
         .openCustomDialog = OpenCustomDialog,
         .updateCustomDialog = UpdateCustomDialog,
         .closeCustomDialog = CloseCustomDialog,
-        .setSubwindowMode = SetDialogSubwindowMode
+        .setSubwindowMode = SetDialogSubwindowMode,
+        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
+        .setBackgroundEffect = SetBackgroundEffect
     };
     CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
     return &dialogImpl;

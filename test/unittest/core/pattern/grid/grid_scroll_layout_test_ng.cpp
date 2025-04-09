@@ -20,6 +20,7 @@
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
@@ -671,11 +672,11 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridSCroll001
+ * @tc.name: GridScroll001
  * @tc.desc: Test SetSelected Function.
  * @tc.type: FUNC
  */
-HWTEST_F(GridScrollLayoutTestNg, GridSCroll001, TestSize.Level1)
+HWTEST_F(GridScrollLayoutTestNg, GridScroll001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create GridItemModelNG object
@@ -1372,7 +1373,8 @@ HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge002, TestSize.Level1)
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 
     UpdateCurrentOffset(-200);
-    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+    
+    EXPECT_LE(GetChildY(frameNode_, 0), 0);
 }
 
 /**
@@ -1407,7 +1409,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1417,7 +1419,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1460,7 +1462,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -34.397873);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1469,7 +1471,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -67.198936);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1512,7 +1514,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1521,7 +1523,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1564,7 +1566,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 193.94336);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1573,7 +1575,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 96.97168);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -2157,11 +2159,11 @@ HWTEST_F(GridScrollLayoutTestNg, FadingEdge002, TestSize.Level1)
 }
 
 /*
- * @tc.name: Test IsPredictOutOfRange
+ * @tc.name: Test IsPredictOutOfCacheRange
  * @tc.desc: Test Normal range with valid cache
  * @tc.type: FUNC
  */
-HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfRange001, TestSize.Level1)
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange001, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr");
@@ -2179,18 +2181,18 @@ HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfRange001, TestSize.Level1)
     pattern_->info_.crossCount_ = 3; // cacheCount = 2*3=6 → range [4,26]
 
     // Boundary checks
-    EXPECT_FALSE(pattern_->IsPredictOutOfRange(4));  // start - cacheCount
-    EXPECT_FALSE(pattern_->IsPredictOutOfRange(26)); // end + cacheCount
-    EXPECT_TRUE(pattern_->IsPredictOutOfRange(3));   // below extended range
-    EXPECT_TRUE(pattern_->IsPredictOutOfRange(27));  // above extended range
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(4));  // start - cacheCount
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(26)); // end + cacheCount
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(3));   // below extended range
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(27));  // above extended range
 }
 
 /**
- * @tc.name: Test IsPredictOutOfRange
+ * @tc.name: Test IsPredictOutOfCacheRange
  * @tc.desc: Test Zero cache count (only check original range)
  * @tc.type: FUNC
  */
-HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfRange002, TestSize.Level1)
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange002, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr");
@@ -2207,8 +2209,173 @@ HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfRange002, TestSize.Level1)
     pattern_->info_.defCachedCount_ = 0; // cacheCount = 0 → range [5,5]
     pattern_->info_.crossCount_ = 1;
 
-    EXPECT_TRUE(pattern_->IsPredictOutOfRange(4));  // below
-    EXPECT_FALSE(pattern_->IsPredictOutOfRange(5)); // exact
-    EXPECT_TRUE(pattern_->IsPredictOutOfRange(6));  // above
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(4)); // below
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(5)); // exact
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(6)); // above
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Normal range with valid cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange003, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = 10;
+    pattern_->info_.endIndex_ = 20;
+    pattern_->info_.defCachedCount_ = 1;
+    pattern_->info_.crossCount_ = 3; // cacheCount = 2*3=6 → range [7-9,21-23]
+
+    // Boundary checks
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(10));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(20));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(9));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(21));
+
+    pattern_->info_.startIndex_ = INT32_MIN;
+    pattern_->info_.endIndex_ = INT32_MAX;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MIN)); // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));         // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MAX)); // Upper bound
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test Normal range with valid cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+
+    pattern_->info_.startIndex_ = INT32_MIN;
+    pattern_->info_.endIndex_ = INT32_MAX - 1;
+    pattern_->info_.childrenCount_ = INT32_MAX;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MIN));     // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));             // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(INT32_MAX - 1)); // Upper bound
+
+    pattern_->info_.startIndex_ = -2;
+    pattern_->info_.endIndex_ = 2;
+    // cacheCount = 1*3=3 → range is [-5, -3] and [3, 5]
+    pattern_->info_.defCachedCount_ = 1;
+    pattern_->info_.crossCount_ = 3;
+
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-2));  // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(0));   // Mid value (zero)
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(2));   // Upper bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(-3)); // Below lower bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(3));  // Above upper bound
+
+    pattern_->info_.startIndex_ = -5;
+    pattern_->info_.endIndex_ = -1;
+    // cacheCount = 1*3=3 → range is [-11, -6] and [0, 5]
+    pattern_->info_.defCachedCount_ = 2;
+    pattern_->info_.crossCount_ = 3;
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-5));  // Lower bound
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-3));  // Mid value
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(-1));  // Upper bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(-6)); // Below lower bound
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(0));  // Above upper bound
+}
+
+/*
+ * @tc.name: Test IsPredictOutOfCacheRange
+ * @tc.desc: Test cache range when the firstRepeatCount is less than childrenCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, IsPredictOutOfCacheRange005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    CreateFixedItems(50);
+    CreateDone();
+    EXPECT_EQ(pattern_->info_.GetChildrenCount(), 50);
+
+    pattern_->info_.startIndex_ = 10;
+    pattern_->info_.endIndex_ = 20;
+    pattern_->info_.defCachedCount_ = 1;
+
+    // cacheCount = 1*3=3 → range is [7, 9] and [21, 23]
+    pattern_->info_.crossCount_ = 3;
+    pattern_->info_.firstRepeatCount_ = 22;
+
+    EXPECT_EQ(pattern_->info_.GetChildrenCount(), 22);
+    // Boundary checks
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(20));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(21));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(22));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(23));
+    EXPECT_FALSE(pattern_->IsPredictOutOfCacheRange(9));
+    EXPECT_TRUE(pattern_->IsPredictOutOfCacheRange(10));
+}
+
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr");
+    model.SetCachedCount(0, false);
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    model.SetLayoutOptions(option);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(1);
+    CreateDone();
+
+    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10.f);
+    FlushUITasks();
+
+    pattern_->UpdateCurrentOffset(10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
+}
+
+/**
+ * @tc.name: Test GetTotalOffset
+ * @tc.desc: Test GetTotalOffset when updating an item's height in the viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GetTotalOffsetTest001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return ITEM_MAIN_SIZE; });
+    CreateDone();
+
+    pattern_->ScrollToIndex(30, false, ScrollAlign::START);
+    FlushUITasks();
+    auto offset = pattern_->GetTotalOffset();
+    auto gridItemProp = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 29);
+    EXPECT_NE(gridItemProp, nullptr);
+    gridItemProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(ITEM_MAIN_SIZE + 50))));
+    FlushUITasks();
+    EXPECT_EQ(offset, pattern_->GetTotalOffset());
 }
 } // namespace OHOS::Ace::NG

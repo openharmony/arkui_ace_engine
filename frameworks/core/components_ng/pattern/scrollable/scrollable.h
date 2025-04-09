@@ -586,6 +586,7 @@ private:
         float final, float position, float signum, float friction, float threshold = DEFAULT_MULTIPLIER);
     void InitFriction(double friction);
     void CalcOverScrollVelocity();
+    double CalcNextStep(double position, double mainDelta);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownEvent(const CrownEvent& event, const OffsetF& center);
@@ -708,6 +709,7 @@ private:
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
     bool isSlow_ = false;
+    std::optional<float> nextStep_;
 
     RefPtr<AxisAnimator> axisAnimator_;
 #ifdef SUPPORT_DIGITAL_CROWN

@@ -117,6 +117,39 @@ void ResetSelectable(ArkUINodeHandle node)
     ListItemModelNG::SetSelectable(frameNode, true);
 }
 
+void SetListItemOnSelectCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onSelectEvent = reinterpret_cast<std::function<void(bool)>*>(callback);
+        ListItemModelNG::SetSelectCallback(frameNode, std::move(*onSelectEvent));
+    } else {
+        ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+    }
+}
+
+void ResetListItemOnSelectCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetSelectCallback(frameNode, nullptr);
+}
+
+void SetListItemStyle(ArkUINodeHandle node, ArkUI_Uint32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetStyle(frameNode, static_cast<V2::ListItemStyle>(style));
+}
+
+void ResetListItemStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListItemModelNG::SetStyle(frameNode, V2::ListItemStyle::NONE);
+}
+
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
@@ -128,6 +161,10 @@ const ArkUIListItemModifier* GetListItemModifier()
         .resetSelectable = ResetSelectable,
         .setListItemSwipeAction = SetListItemSwiperAction,
         .resetListItemSwipeAction = ResetListItemSwiperAction,
+        .setListItemOnSelectCallback = SetListItemOnSelectCallback,
+        .resetListItemOnSelectCallback = ResetListItemOnSelectCallback,
+        .setListItemStyle = SetListItemStyle,
+        .resetListItemStyle = ResetListItemStyle,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

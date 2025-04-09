@@ -224,7 +224,7 @@ class SubscribableHandler {
       let propertyStr: string = String(property);
       if (this.readCbFunc_ && typeof result !== 'function' && this.obSelf_ !== undefined) {
         let isTracked = this.isPropertyTracked(target, propertyStr);
-        stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? '@Track ' : ''}${propertyStr}' notifying read.`);
+        stateMgmtConsole.propertyAccess(`SubscribableHandler: get ObservedObject property '${isTracked ? '@Track ' : ''}${propertyStr}' notifying read.`);
         this.readCbFunc_.call(this.obSelf_, receiver, propertyStr, isTracked);
 
         // If the property is tracked and V2 compatibility is enabled,
@@ -240,7 +240,7 @@ class SubscribableHandler {
         }
       } else {
         // result is function or in compatibility mode (in compat mode cbFunc will never be set)
-        stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${propertyStr}' not notifying read.`);
+        stateMgmtConsole.propertyAccess(`SubscribableHandler: get ObservedObject property '${propertyStr}' not notifying read.`);
 
         // add dependency view model object for V1V2 compatibility
         if (this.enableV2Compatible_ && typeof result !== 'function') {
@@ -727,8 +727,16 @@ class SubscribableArrayHandler extends SubscribableHandler {
         // get above 'get' uses bind(receiver) which causes array changes made by the
         // function to be noticed by the proxy. Is this causing compat issue with 
         // pure V1?
+
+        // To detect actual changed range, Repeat needs original length before changes
+        // Also copy the args in case they are changed in 'ret' execution
+        const repeatArgs = (key === 'splice') ? [target.length, ...args] : [...args];
+
         const result = ret.call(target, ...args);
-        ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+
+        const excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(conditionalTarget, key,
+          repeatArgs);
+        ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH, excludeSet);
 
         // apply enableV2CompatibleNoWarn on newly added V1 observed objects.
         args.forEach(arg => {
@@ -798,7 +806,8 @@ class SubscribableArrayHandler extends SubscribableHandler {
 
     if (this.enableV2Compatible_) {
       const arrayLenChanged = target.length !== oldArrayLength;
-      ObserveV2.getObserve().fireChange(target, arrayLenChanged ? ObserveV2.OB_LENGTH : propString);
+      let excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(target, 'set', [property]);
+      ObserveV2.getObserve().fireChange(target, arrayLenChanged ? ObserveV2.OB_LENGTH : propString, excludeSet);
       ObservedObject.enableV2CompatibleNoWarn(newValue);
     }
     //

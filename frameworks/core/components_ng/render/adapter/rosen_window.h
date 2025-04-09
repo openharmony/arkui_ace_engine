@@ -109,6 +109,7 @@ public:
     float GetRefreshRate() const override;
 
     void SetKeepScreenOn(bool keepScreenOn) override;
+    void SetViewKeepScreenOn(bool keepScreenOn) override;
 
     int64_t GetVSyncPeriod() const override;
 

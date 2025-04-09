@@ -64,6 +64,8 @@ public:
     static void SetCustomTabBar(FrameNode* node, FrameNode* tabBar);
     static void UpdateDefaultSymbol(RefPtr<TabTheme>& tabTheme, RefPtr<TextLayoutProperty> symbolProperty);
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
+    static void SetOnWillShow(FrameNode* node,  std::function<void()>&& onWillShow);
+    static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);

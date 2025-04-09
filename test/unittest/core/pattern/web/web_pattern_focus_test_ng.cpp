@@ -229,7 +229,7 @@ public:
     {
         return false;
     }
-    bool IsAtBottom() const override
+    bool IsAtBottom(bool considerRepeat = false) const override
     {
         return false;
     }
@@ -251,8 +251,8 @@ public:
     }
     void OnScrollStartCallback() override {}
     void FireOnScrollStart() override {}
-    void FireOnReachStart(const OnReachEvent& onReachStart) override {}
-    void FireOnReachEnd(const OnReachEvent& onReachEnd) override {}
+    void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override {}
+    void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override {}
 
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override {}
 
@@ -370,7 +370,8 @@ protected:
 
     void FireOnScroll(float finalOffset, OnScrollEvent& onScroll) const override {}
 
-    void OnScrollStop(const OnScrollStopEvent& onScrollStop) override {}
+    void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop) override
+    {}
 
 private:
     void OnScrollEndCallback() override {};

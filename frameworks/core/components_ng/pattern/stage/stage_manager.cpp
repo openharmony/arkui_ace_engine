@@ -93,6 +93,12 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     if (type == RouteType::NONE) {
         return;
     }
+    if (srcPage) {
+        srcPage->SetNodeFreeze(true);
+    }
+    if (destPage) {
+        destPage->SetNodeFreeze(false);
+    }
     animationId_++;
     if (type == RouteType::PUSH) {
         pushAnimations_.clear();
@@ -121,8 +127,8 @@ void StageManager::PageChangeCloseKeyboard()
         if (!container) {
             return;
         }
-        if (!container->IsScenceBoardWindow()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
+        if (!container->IsSceneBoardWindow()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
             InputMethodManager::GetInstance()->CloseKeyboard();
         }
     }

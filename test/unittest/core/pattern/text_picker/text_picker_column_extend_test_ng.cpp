@@ -19,7 +19,6 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
-#include "adapter/ohos/entrance/picker/picker_haptic_stub.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
@@ -55,6 +54,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/pattern/mock_picker_haptic_impl.h"
 
 
 using namespace testing;
@@ -1107,19 +1107,19 @@ HWTEST_F(TextPickerColumnExtendTestNg, UpdateColumnChildPositionTest001, TestSiz
     EXPECT_EQ(textPickerColumnPattern->yLast_, 50.0f);
     textPickerColumnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
     textPickerColumnPattern->isShow_ = false;
-    auto pickerAudioHapticStub =
-        std::static_pointer_cast<PickerAudioHapticStub>(textPickerColumnPattern->hapticController_);
-    ASSERT_NE(pickerAudioHapticStub, nullptr);
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    auto pickerAudioHapticController =
+        std::static_pointer_cast<MockPickerAudioHapticImpl>(textPickerColumnPattern->hapticController_);
+    ASSERT_NE(pickerAudioHapticController, nullptr);
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     textPickerColumnPattern->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     textPickerColumnPattern->isShow_ = true;
     textPickerColumnPattern->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::HANDLE_DELTA);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::HANDLE_DELTA);
     textPickerColumnPattern->isEnableHaptic_ = false;
-    pickerAudioHapticStub->playThreadStatus_ = PickerAudioHapticStub::ThreadStatus::NONE;
+    pickerAudioHapticController->playThreadStatus_ = MockPickerAudioHapticImpl::ThreadStatus::NONE;
     textPickerColumnPattern->UpdateColumnChildPosition(offset);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
 }
 
 /**
@@ -1218,13 +1218,14 @@ HWTEST_F(TextPickerColumnExtendTestNg, InnerHandleScrollTest001, TestSize.Level1
     bool result = columnPattern->InnerHandleScroll(true);
     EXPECT_TRUE(result);
     columnPattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
-    auto pickerAudioHapticStub = std::static_pointer_cast<PickerAudioHapticStub>(columnPattern->hapticController_);
-    ASSERT_NE(pickerAudioHapticStub, nullptr);
+    auto pickerAudioHapticController =
+        std::static_pointer_cast<MockPickerAudioHapticImpl>(columnPattern->hapticController_);
+    ASSERT_NE(pickerAudioHapticController, nullptr);
     columnPattern->InnerHandleScroll(true);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::NONE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::NONE);
     columnPattern->isEnableHaptic_ = true;
     columnPattern->InnerHandleScroll(true);
-    EXPECT_EQ(pickerAudioHapticStub->playThreadStatus_, PickerAudioHapticStub::ThreadStatus::PLAY_ONCE);
+    EXPECT_EQ(pickerAudioHapticController->playThreadStatus_, MockPickerAudioHapticImpl::ThreadStatus::PLAY_ONCE);
 }
 
 /**

@@ -296,8 +296,8 @@ void NativeCustomDialogController::OpenDialog()
     });
 
     auto currentObj = Container::Current();
-    if (currentObj && currentObj->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
-        dialogProperties_.isScenceBoardDialog = true;
+    if (currentObj && currentObj->IsSceneBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
+        dialogProperties_.isSceneBoardDialog = true;
         auto viewNode = ownerView_->GetViewNode();
         CHECK_NULL_VOID(viewNode);
         auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);

@@ -186,6 +186,16 @@ declare class UICommonEvent {
   setNodePtr(nodePtr: NodePtr): void;
 }
 
+declare class UIScrollableCommonEvent extends UICommonEvent {}
+
+declare class UIListEvent extends UIScrollableCommonEvent {}
+
+declare class UIScrollEvent extends UIScrollableCommonEvent {}
+
+declare class UIGridEvent extends UIScrollableCommonEvent {}
+
+declare class UIWaterFlowEvent extends UIScrollableCommonEvent {}
+
 declare class UIGestureEvent {
   private _nodePtr: NodePtr;
   private _weakPtr: WeakRef<FrameNode>;

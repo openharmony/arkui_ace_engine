@@ -19,7 +19,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -544,9 +543,6 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto dragDropMgr = GetDragDropManager(GetInstanceId());
         if (dragDropMgr && dragDropMgr->IsMSDPDragging()) {
-            dragDropMgr->SetIsDragCancel(true);
-            dragDropMgr->OnDragEnd(dragDropMgr->GetPreDragPointerEvent(), "", nullptr, true);
-            dragDropMgr->SetIsDragCancel(false);
             return true;
         }
     }
@@ -632,33 +628,11 @@ bool KeyEventManager::IsSkipShortcutAndFocusMove()
 
 bool KeyEventManager::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusView>& curFocusView)
 {
+    auto focusManager = GetFocusManager(GetInstanceId());
+    CHECK_NULL_RETURN(focusManager, false);
+    isTabJustTriggerOnKeyEvent_ = focusManager->HandleKeyForExtendOrActivateFocus(event, curFocusView);
     auto curEntryFocusView = curFocusView ? curFocusView->GetEntryFocusView() : nullptr;
     auto curEntryFocusViewFrame = curEntryFocusView ? curEntryFocusView->GetFrameNode() : nullptr;
-    auto isKeyTabDown = event.action == KeyAction::DOWN && event.IsKey({ KeyCode::KEY_TAB });
-    bool isDPADDown = false;
-    if (event.action == KeyAction::DOWN && event.IsDirectionalKey() &&
-        curEntryFocusViewFrame && curEntryFocusViewFrame->GetFocusHub() &&
-        curEntryFocusViewFrame->GetFocusHub()->GetDirectionalKeyFocus()) {
-        isDPADDown = true;
-    }
-    auto isViewRootScopeFocused = curFocusView ? curFocusView->GetIsViewRootScopeFocused() : true;
-    bool isTabJustTriggerOnKeyEvent = false;
-
-    if ((isKeyTabDown || isDPADDown) && isViewRootScopeFocused && curFocusView) {
-        // Current focused on the view root scope. Tab key used to extend focus.
-        // If return true. This tab key will just trigger onKeyEvent process.
-        isTabJustTriggerOnKeyEvent = curFocusView->TriggerFocusMove();
-    }
-
-    auto pipeline = GetPipelineContext(GetInstanceId());
-    CHECK_NULL_RETURN(pipeline, false);
-    // Tab key set focus state from inactive to active.
-    // If return true. This tab key will just trigger onKeyEvent process.
-    auto appTheme = pipeline->GetTheme<AppTheme>();
-    CHECK_NULL_RETURN(appTheme, false);
-    bool isHandleFocusActive =
-        (isKeyTabDown || isDPADDown) && appTheme->NeedFocusActiveByTab() && pipeline->SetIsFocusActive(true);
-    isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent || isHandleFocusActive;
     if (DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
     }

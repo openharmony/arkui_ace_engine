@@ -19,6 +19,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,6 +92,9 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (dividerSpace.has_value()) {
             spaceWidth_ = std::max(spaceWidth_, dividerSpace.value());
         }
+    }
+    if (IsRoundingMode(layoutWrapper)) {
+        spaceWidth_ = Round(spaceWidth_);
     }
     MeasureHeaderFooter(layoutWrapper);
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
@@ -1330,7 +1334,7 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
         if (layoutProperty->GetLaneGutter().has_value()) {
             auto laneGutter = ConvertToPx(
                 layoutProperty->GetLaneGutter().value(), layoutConstraint.scaleProperty, crossSizeOptional.value());
-            laneGutter_ = laneGutter.value();
+            laneGutter_ = laneGutter.value_or(0.0f);
         }
     }
     lanes_ = ListLanesLayoutAlgorithm::CalculateLanesParam(
@@ -1597,5 +1601,14 @@ void ListItemGroupLayoutAlgorithm::ReportGetChildError(const std::string& funcNa
     }
     std::string subErrorType = funcName + " get item: " + std::to_string(index) + " failed.";
     EventReport::ReportScrollableErrorEvent("ListItemGroup", ScrollableErrorType::GET_CHILD_FAILED, subErrorType);
+}
+
+bool ListItemGroupLayoutAlgorithm::IsRoundingMode(LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetPixelRoundMode() == PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE;
 }
 } // namespace OHOS::Ace::NG

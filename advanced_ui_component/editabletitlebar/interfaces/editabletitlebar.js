@@ -254,7 +254,8 @@ export class EditableTitleBar extends ViewPU {
                 alignItems: ItemAlign.Stretch,
             });
             Flex.backgroundColor(this.options.backgroundColor ?? EditableTitleBar.noneColor);
-            Flex.backgroundBlurStyle(this.options.backgroundBlurStyle ?? BlurStyle.NONE);
+            Flex.backgroundBlurStyle(
+                this.options.backgroundBlurStyle ?? BlurStyle.NONE, undefined, { disableSystemAdaptation: true });
             Flex.expandSafeArea(this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM], this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP]);
         }, Flex);
         this.observeComponentCreation2((q66, r66) => {
@@ -1398,7 +1399,7 @@ class EditableTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                     }, Column);
@@ -1489,7 +1490,7 @@ class EditableTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
                         Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }));
                         Column.justifyContent(FlexAlign.Center);

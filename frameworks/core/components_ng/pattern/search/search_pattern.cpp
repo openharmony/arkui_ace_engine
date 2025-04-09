@@ -846,6 +846,7 @@ void SearchPattern::OnClickButtonAndImage()
         textFieldPattern->StopEditing();
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 
 void SearchPattern::OnClickCancelButton()
@@ -1555,7 +1556,7 @@ void SearchPattern::OnTouchDownOrUp(bool isDown)
 
 void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-    auto focusTask = [weak = WeakClaim(this)]() {
+    auto focusTask = [weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (!pattern) {
             return;
@@ -1774,6 +1775,8 @@ std::string SearchPattern::SearchTypeToString() const
             return "SearchType.PHONE_NUMBER";
         case TextInputType::URL:
             return "SearchType.URL";
+        case TextInputType::NUMBER_DECIMAL:
+            return "SearchType.NUMBER_DECIMAL";
         default:
             return "SearchType.NORMAL";
     }
@@ -2401,6 +2404,7 @@ void SearchPattern::SetSearchIconColor(const Color& color)
         imageIconOptions.UpdateColor(Color(color));
         auto imageLayoutProperty = iconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
+        CHECK_NULL_VOID(imageLayoutProperty->GetImageSourceInfo());
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
         if (imageSourceInfo.IsSvg()) {
             imageSourceInfo.SetFillColor(color);

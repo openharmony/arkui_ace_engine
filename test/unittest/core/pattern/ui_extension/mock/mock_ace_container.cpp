@@ -154,7 +154,7 @@ bool AceContainer::IsLauncherContainer()
 {
     return true;
 }
-bool AceContainer::IsScenceBoardWindow()
+bool AceContainer::IsSceneBoardWindow()
 {
     return instanceId_ % INSTANCEID_THREE == 0 ? true : false;
 }

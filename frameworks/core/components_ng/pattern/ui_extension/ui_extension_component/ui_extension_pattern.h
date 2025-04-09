@@ -68,6 +68,9 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 class ModalUIExtensionProxy;
+class AccessibilityChildTreeCallback;
+class AccessibilitySAObserverCallback;
+struct AccessibilityParentRectInfo;
 } // namespace OHOS::Ace
 
 namespace OHOS::Rosen {
@@ -292,6 +295,7 @@ private:
     void OnColorConfigurationUpdate() override;
     void OnModifyDone() override;
     bool CheckConstraint();
+    bool CheckHostUiContentConstraint();
 
     void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
@@ -370,6 +374,7 @@ private:
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
     AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
+    void ReDispatchWantParams();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

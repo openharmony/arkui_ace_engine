@@ -47,6 +47,14 @@ public:
 
     // overlay manager
     virtual RefPtr<OverlayManager> GetOverlayManager() = 0;
+
+    // pipeline tasks
+    virtual void AddAfterLayoutTask(Task&& task, bool isFlushInImplicitAnimationTask = false) = 0;
+    virtual void RequestFrame() = 0;
+
+    // API version
+    virtual int32_t GetApiTargetVersion() = 0;
+    virtual bool GreatOrEqualTargetAPIVersion(int32_t version) = 0;
 };
 
 }

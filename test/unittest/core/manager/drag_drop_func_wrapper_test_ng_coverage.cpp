@@ -18,6 +18,8 @@
 #include "gtest/gtest.h"
 #define private public
 
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
@@ -43,6 +45,8 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "ui/base/geometry/ng/offset_t.h"
+#include "core/components/select/select_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1112,5 +1116,259 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, HandleOnDragEvent, TestSize.Level1)
     dragAction->dragState = DragAdapterState::SENDING;
     DragDropFuncWrapper::HandleOnDragEvent(dragAction);
     EXPECT_EQ(dragAction->dragState, DragAdapterState::SUCCESS);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage029
+ * @tc.desc: Test GetPaintRectCenter Func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage029, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->parent_ = nullptr;
+    auto actualResults = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    auto expectResult = OffsetF(pointNode.GetX(), pointNode.GetY());
+    EXPECT_EQ(expectResult, actualResults);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage030
+ * @tc.desc: Test GetPaintRectCenter Func When checkWindowBoundary Is False IsWindowBoundary() Is True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage030, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameNodeCopy = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNodeCopy, nullptr);
+    frameNodeCopy->SetWindowBoundary(true);
+    frameNode->parent_ = frameNodeCopy;
+    DragDropFuncWrapper::GetPaintRectCenter(frameNode, true);
+    auto actualResults = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    auto expectResult = OffsetF(pointNode.GetX(), pointNode.GetY());
+    EXPECT_EQ(expectResult, actualResults);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage031
+ * @tc.desc: Test GetPaintRectCenter Func When checkWindowBoundary Is True IsWindowBoundary() Is False
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage031, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameNodeCopy = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNodeCopy, nullptr);
+    frameNodeCopy->SetWindowBoundary(false);
+    frameNode->parent_ = frameNodeCopy;
+    DragDropFuncWrapper::GetPaintRectCenter(frameNode, true);
+    auto actualResults = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    auto expectResult = OffsetF(pointNode.GetX(), pointNode.GetY());
+    EXPECT_EQ(expectResult, actualResults);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage032
+ * @tc.desc: Test GetPaintRectCenter Func When checkWindowBoundary Is True IsWindowBoundary() Is True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage032, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameNodeCopy = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNodeCopy, nullptr);
+    frameNodeCopy->SetWindowBoundary(true);
+    frameNode->parent_ = frameNodeCopy;
+    DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto actualResults = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    auto expectResult = OffsetF(pointNode.GetX(), pointNode.GetY());
+    EXPECT_EQ(expectResult, actualResults);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage033
+ * @tc.desc: Test GetPaintRectCenter Func When checkWindowBoundary Is True IsWindowBoundary() Is True
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage033, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameNodeCopy = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNodeCopy, nullptr);
+    frameNodeCopy->SetWindowBoundary(false);
+    frameNode->parent_ = frameNodeCopy;
+    DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto actualResults = DragDropFuncWrapper::GetPaintRectCenter(frameNode, false);
+    auto context = frameNode->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    auto paintRect = context->GetPaintRectWithoutTransform();
+    auto offset = paintRect.GetOffset();
+    PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
+    auto expectResult = OffsetF(pointNode.GetX(), pointNode.GetY());
+    EXPECT_EQ(expectResult, actualResults);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage034
+ * @tc.desc: Test IsExpandDisplay func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage034, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto result = DragDropFuncWrapper::IsExpandDisplay(MockPipelineContext::GetCurrent());
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage035
+ * @tc.desc: Test GetPaintRectCenter func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage035, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = false;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto result = DragDropFuncWrapper::IsExpandDisplay(MockPipelineContext::GetCurrent());
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage036
+ * @tc.desc: Test GetCurrentWindowOffset Func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage036, TestSize.Level1)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto expectResult = DragDropFuncWrapper::GetCurrentWindowOffset(context);
+    EXPECT_EQ(OffsetF(), expectResult);
+}
+
+/**
+ * @tc.name: DragDropFuncWrapperTestNgCoverage037
+ * @tc.desc: Test GetCurrentWindowOffset func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage037, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(pipeline, nullptr);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+    auto expectResult = DragDropFuncWrapper::GetCurrentWindowOffset(pipeline);
+    EXPECT_EQ(expectResult, OffsetF());
+}
+
+/**
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage038
+ * @tc.desc: Test UpdateNodePositionToWindow func parentNode is  nullptr
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage038, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto offset = OffsetF(1.0f, 1.0f);
+    RefPtr<FrameNode> parentNode = frameNode->GetAncestorNodeOfFrame(true);
+    EXPECT_EQ(parentNode, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(frameNode->renderContext_, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    frameNode->renderContext_->UpdatePaintRect(RectT(1.0f, 1.0f, 1.0f, 1.0f));
+    DragDropFuncWrapper::UpdateNodePositionToWindow(frameNode, offset);
+    EXPECT_EQ(renderContext->GetPosition(), OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+}
+
+/**
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage039
+ * @tc.desc: Test UpdateNodePositionToWindow func parentNode is not nullptr
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage039, TestSize.Level1)
+{
+    auto offset = OffsetF(5.0f, 5.0f);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto frameNodeCopy = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNodeCopy, nullptr);
+    frameNode->parent_ = frameNodeCopy;
+    ASSERT_NE(frameNode->parent_.Upgrade(), nullptr);
+    frameNode->isWindowBoundary_ = false;
+    RefPtr<FrameNode> parentNode = frameNode->GetAncestorNodeOfFrame(true);
+    ASSERT_NE(parentNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(frameNode->renderContext_, nullptr);
+    frameNode->renderContext_->UpdatePaintRect(RectT(3.0f, 2.0f, 3.0f, 4.0f));
+    DragDropFuncWrapper::UpdateNodePositionToWindow(frameNode, offset);
+    EXPECT_NE(renderContext->GetPosition(), OffsetT<Dimension>(Dimension(5.0f), Dimension(5.0f)));
 }
 } // namespace OHOS::Ace::NG

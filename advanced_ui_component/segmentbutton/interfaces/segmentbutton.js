@@ -31,6 +31,11 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {});
 }
 
+const curves = globalThis.requireNativeModule('ohos.curves');
+const KeyCode = globalThis.requireNapi('multimodalInput.keyCode').KeyCode;
+const util = globalThis.requireNapi('util');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const I18n = requireNapi('i18n');
 const MIN_ITEM_COUNT = 2;
 const MAX_ITEM_COUNT = 5;
 const DEFAULT_MAX_FONT_SCALE = 1;
@@ -473,7 +478,7 @@ class MultiSelectBackground extends ViewPU {
                                 Stack.height(this.buttonItemsSize[index].height);
                                 Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
                                 Stack.borderRadius(this.buttonBorderRadius[index]);
-                                Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
+                                Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
                             }, Stack);
                             Stack.pop();
                         });
@@ -2743,7 +2748,7 @@ export class SegmentButton extends ViewPU {
                                     Stack.size(ObservedObject.GetRawObject(this.componentSize));
                                     Stack.backgroundColor(this.options.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR);
                                     Stack.borderRadius(this.options.iconTextBackgroundRadius ?? this.componentSize.height / 2);
-                                    Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
+                                    Stack.backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true });
                                 }, Stack);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();

@@ -19,6 +19,7 @@ import { NavigationBootcamp } from './NavigationBootcamp';
 import { StepperBootcamp } from './StepperBootcamp';
 import { TabContentBootcamp } from './TabContentBootcamp';
 import { TabsBootcamp } from './TabsBootcamp';
+import { StepperItemBootcamp } from './StepperItemBootcamp';
 
 
 export const navigationAndSwitchingRoute: RouteGroup = {
@@ -28,6 +29,7 @@ export const navigationAndSwitchingRoute: RouteGroup = {
     { name: 'Navigation', label: '导航/Navigation' },
     { name: 'NavDestination', label: '导航/NavDestination' },
     { name: 'Stepper', label: '步骤导航/Stepper' },
+    { name: 'StepperItem', label: '步骤导航项/StepperItem' },
     { name: 'TabContent', label: '页签内容/TabContent' },
     { name: 'Tabs', label: '页签容器/Tabs' }
   ]
@@ -45,6 +47,8 @@ export function navigationAndSwitchingDestination(name: string, route: Route) {
     TabContentBootcamp({title: route.label})
   }else if (name === 'NavigationAndSwitching/Tabs'){
     TabsBootcamp({title: route.label})
+  }else if (name == 'NavigationAndSwitching/StepperItem') {
+    StepperItemBootcamp({ title: route.label })
   }
 
 }

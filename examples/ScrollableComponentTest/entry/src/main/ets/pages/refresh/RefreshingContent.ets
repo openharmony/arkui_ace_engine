@@ -1,0 +1,118 @@
+// xxx.ets
+import { ComponentContent } from '@ohos.arkui.node';
+
+class Params {
+  public refreshStatus: RefreshStatus = RefreshStatus.Inactive
+
+  constructor(refreshStatus: RefreshStatus) {
+    this.refreshStatus = refreshStatus;
+  }
+}
+
+@Builder
+function customRefreshingContent(params: Params) {
+  Stack() {
+    Row() {
+      LoadingProgress().height(32)
+      Text('refreshStatus: ' + params.refreshStatus).fontSize(16).margin({ left: 20 })
+    }
+    .alignItems(VerticalAlign.Center)
+  }
+  .align(Alignment.Center)
+  .clip(true)
+  // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
+  .constraintSize({ minHeight: 32 })
+  .width('100%')
+}
+
+@Entry
+@Component
+struct RefreshingContentSample {
+  @State isRefreshing: boolean = false
+  @State arr: String[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+  @State refreshStatus: RefreshStatus = RefreshStatus.Inactive
+  @State customComponentContent: ComponentContent<Object> | undefined = undefined
+  private contentNode?: ComponentContent<Object> = undefined
+  private params: Params = new Params(RefreshStatus.Inactive)
+
+  aboutToAppear(): void {
+    let uiContext = this.getUIContext()
+    this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshingContent), this.params)
+  }
+
+  @Builder
+  customRefreshBuilder() {
+    Stack() {
+      Row() {
+        LoadingProgress().height(32)
+        Text('Refreshing...').fontSize(16).margin({ left: 20 })
+      }
+      .alignItems(VerticalAlign.Center)
+    }
+    .align(Alignment.Center)
+    .clip(true)
+    // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
+    .constraintSize({ minHeight: 32 })
+    .width('100%')
+  }
+
+  build() {
+    Column() {
+      Column() {
+        // 设置refreshingContent
+        Button('refreshingContent: customRefreshComponentContent')
+          .margin('5vp')
+          .onClick(() => {
+            this.customComponentContent = this.contentNode
+          })
+
+        // 重置refreshingContent
+        Button('refreshingContent: undefined')
+          .margin('5vp')
+          .onClick(() => {
+            this.customComponentContent = undefined
+          })
+      }
+
+      Refresh({ refreshing: $$this.isRefreshing, refreshingContent: this.customComponentContent }) {
+        List() {
+          ForEach(this.arr, (item: string) => {
+            ListItem() {
+              Text('' + item)
+                .width('70%')
+                .height(80)
+                .fontSize(16)
+                .margin(10)
+                .textAlign(TextAlign.Center)
+                .borderRadius(10)
+                .backgroundColor(0xFFFFFF)
+            }
+          }, (item: string) => item)
+        }
+        .onScrollIndex((first: number) => {
+          console.info(first.toString())
+        })
+        .width('100%')
+        .height('100%')
+        .alignListItem(ListItemAlign.Center)
+        .scrollBar(BarState.Off)
+      }
+      .backgroundColor(0x89CFF0)
+      .pullToRefresh(true)
+      .refreshOffset(96)
+      .onStateChange((refreshStatus: RefreshStatus) => {
+        this.refreshStatus = refreshStatus
+        this.params.refreshStatus = refreshStatus
+        // 更新自定义组件内容
+        this.contentNode?.update(this.params)
+        console.info('Refresh onStatueChange state is ' + refreshStatus)
+      })
+      .onRefreshing(() => {
+        setTimeout(() => {
+          this.isRefreshing = false
+        }, 2000)
+        console.log('onRefreshing test')
+      })
+    }
+  }
+}

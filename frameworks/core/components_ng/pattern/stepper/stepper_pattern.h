@@ -73,14 +73,9 @@ public:
 
     static RefPtr<StepperTheme> GetTheme()
     {
-        static RefPtr<StepperTheme> stepperTheme;
-        if (!stepperTheme) {
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_RETURN(pipeline, nullptr);
-            stepperTheme = pipeline->GetTheme<StepperTheme>();
-            CHECK_NULL_RETURN(stepperTheme, nullptr);
-        }
-        return stepperTheme;
+        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        return pipeline->GetTheme<StepperTheme>();
     }
 
     bool GetIsLoadingButton() const

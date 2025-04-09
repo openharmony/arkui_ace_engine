@@ -2300,7 +2300,7 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest034, TestSize.Level1)
     ChangeValueInfo changeValueInfo;
     auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
         changeValueInfo = info;
-        return false;
+        return true;
     };
     eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
     std::u16string content = u"openharmony";
@@ -2325,5 +2325,224 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest034, TestSize.Level1)
     EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"");
     EXPECT_EQ(changeValueInfo.previewText.offset, 11);
     EXPECT_EQ(changeValueInfo.previewText.value, u"hhh");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest035
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+
+    const std::u16string previewTextStr = u"hhh";
+    PreviewRange range = { -1, -1 };
+    pattern_->SetPreviewText(previewTextStr, range);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(changeValueInfo.oldContent, u"");
+    EXPECT_EQ(changeValueInfo.value, u"");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 0);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 0);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.offset, -1);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"");
+    EXPECT_EQ(changeValueInfo.previewText.offset, 0);
+    EXPECT_EQ(changeValueInfo.previewText.value, u"hhh");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest036
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return true;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+
+    const std::u16string oldPreviewTextStr = u"hhh";
+    const std::u16string newPreviewTextStr = u"hh";
+    PreviewRange range = { -1, -1 };
+    pattern_->SetPreviewText(oldPreviewTextStr, range);
+    pattern_->SetPreviewText(newPreviewTextStr, range);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"openharmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"hhh");
+    EXPECT_EQ(changeValueInfo.previewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.previewText.value, u"hh");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest037
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+
+    const std::u16string oldPreviewTextStr = u"hhh";
+    const std::u16string newPreviewTextStr = u"hh";
+    PreviewRange range = { -1, -1 };
+    pattern_->SetPreviewText(oldPreviewTextStr, range);
+    pattern_->SetPreviewText(newPreviewTextStr, range);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"openharmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"hhh");
+    EXPECT_EQ(changeValueInfo.previewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.previewText.value, u"hh");
+    EXPECT_EQ(pattern_->GetPreviewTextValue(), u"hh");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest038
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+
+    const std::u16string oldPreviewTextStr = u"hhh";
+    const std::u16string newPreviewTextStr = u"hh";
+    PreviewRange range = { -1, -1 };
+    pattern_->SetPreviewText(oldPreviewTextStr, range);
+    pattern_->SetPreviewText(newPreviewTextStr, range);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"openharmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"hhh");
+    EXPECT_EQ(changeValueInfo.previewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.previewText.value, u"hh");
+    EXPECT_EQ(pattern_->GetPreviewTextValue(), u"hh");
+}
+
+/**
+ * @tc.name: ChangeTextCallbackTest039
+ * @tc.desc: test for callback SetOnWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and focusHub
+     */
+    CreateTextField();
+    GetFocus();
+    ChangeValueInfo changeValueInfo;
+    auto onWillChange = [&changeValueInfo](const ChangeValueInfo& info) {
+        changeValueInfo = info;
+        return false;
+    };
+    eventHub_->SetOnWillChangeEvent(std::move(onWillChange));
+    std::u16string content = u"openharmony";
+    pattern_->InitEditingValueText(content);
+
+    /**
+     * @tc.steps: step2. change text with ExecuteInsertValueCommand
+     * @tc.expected: return value is valid
+     */
+
+    const std::u16string oldPreviewTextStr = u"hhh";
+    const std::u16string newPreviewTextStr = u"a";
+    PreviewRange rangeBefore = { -1, -1 };
+    PreviewRange rangeAfter = { 11, 13 };
+    pattern_->SetPreviewText(oldPreviewTextStr, rangeBefore);
+    pattern_->SetPreviewText(newPreviewTextStr, rangeAfter);
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(changeValueInfo.oldContent, u"openharmony");
+    EXPECT_EQ(changeValueInfo.value, u"openharmony");
+    EXPECT_EQ(changeValueInfo.rangeBefore.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeBefore.end, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.start, 11);
+    EXPECT_EQ(changeValueInfo.rangeAfter.end, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.oldPreviewText.value, u"hhh");
+    EXPECT_EQ(changeValueInfo.previewText.offset, 11);
+    EXPECT_EQ(changeValueInfo.previewText.value, u"ah");
 }
 } // namespace OHOS::Ace::NG

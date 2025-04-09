@@ -82,6 +82,11 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
 
+    bool HasDynamicRenderer() const
+    {
+        return dynamicComponentRenderer_ != nullptr;
+    }
+
 private:
     void InitializeRender(void* runtime);
     DCResultCode CheckConstraint();
@@ -97,6 +102,9 @@ private:
     void OnAttachToFrameNode() override;
     void RegisterPipelineEvent(int32_t instanceId);
     void UnRegisterPipelineEvent(int32_t instanceId);
+
+    void AddToPageEventController();
+    void ReleasePageEvent() const;
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;

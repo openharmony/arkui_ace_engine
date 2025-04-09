@@ -129,18 +129,16 @@ struct Index {
       normal: CardNormalStyle,
       disabled: CardDisabledStyle,
     })
-    .onTouch((event) => {
-      if (event.type === TouchType.Up) {
-        animateTo(
-          { curve: curves.interpolatingSpring(0, 1, 228, 25) },
-          () => {
-            if (this.selection === route.name) {
-              this.selection = null;
-            } else {
-              this.selection = route.name;
-            }
-          });
-      }
+    .onClick(() => {
+      animateTo(
+        { curve: curves.interpolatingSpring(0, 1, 228, 25) },
+        () => {
+          if (this.selection === route.name) {
+            this.selection = null;
+          } else {
+            this.selection = route.name;
+          }
+        });
     })
   }
 

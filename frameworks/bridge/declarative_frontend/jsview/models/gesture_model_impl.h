@@ -45,6 +45,8 @@ class PanGestureModelImpl : public OHOS::Ace::PanGestureModel {
 public:
     void Create(
         int32_t fingersNum, const PanDirection& panDirection, double distanceNum, bool isLimitFingerCount) override;
+    void Create(int32_t fingersNum, const PanDirection& panDirection, const PanDistanceMap& distanceMap,
+        bool isLimitFingerCount) override;
     void SetPanGestureOption(const RefPtr<PanGestureOption>& panGestureOption) override;
 };
 
