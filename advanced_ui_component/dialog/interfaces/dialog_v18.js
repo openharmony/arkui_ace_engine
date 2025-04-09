@@ -3709,12 +3709,19 @@ class CustomDialogContentComponent extends ViewPU {
             let maxButtonTextSize = vp2px(width / HORIZON_BUTTON_MAX_COUNT - BUTTON_HORIZONTAL_MARGIN() -
                 BUTTON_HORIZONTAL_SPACE() - 2 * BUTTON_HORIZONTAL_PADDING);
             this.buttons.forEach((button) => {
-                let contentSize = measure.measureTextSize({
-                    textContent: button.value,
-                    fontSize: this.buttonMaxFontSize
-                });
-                if (Number(contentSize.width) > maxButtonTextSize) {
-                    isVertical = true;
+                try {
+                    let contentSize = measure.measureTextSize({
+                        textContent: button.value,
+                        fontSize: this.buttonMaxFontSize
+                    });
+                    if (Number(contentSize?.width) > maxButtonTextSize) {
+                        isVertical = true;
+                    }
+                } catch (err) {
+                    let code = (exception).code;
+                    let message = (exception).message;
+                    hilog.error(0x3900, 'Ace', `Faild to dialog isVerticalAlignButton measureTextSize,cause,
+                    code: ${code}, message: ${message}`);
                 }
             });
             return isVertical;
