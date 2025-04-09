@@ -772,6 +772,11 @@ void PipelineContext::FlushMouseEventVoluntarily()
 void PipelineContext::FlushWindowPatternInfo()
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    OTHER_DURATION(id);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     if (!container->IsScenceBoardWindow()) {
@@ -833,6 +838,11 @@ void PipelineContext::ProcessDelayTasks()
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 {
+    int32_t currentId = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        currentId = Container::CurrentId();
+    }
+    OTHER_DURATION(currentId);
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
 
@@ -865,6 +875,11 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
 {
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    OTHER_DURATION(id);
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     if (scheduleTasks_.empty()) {
@@ -917,6 +932,11 @@ void PipelineContext::HandleSpecialContainerNode()
 
 void PipelineContext::FlushMessages()
 {
+    int32_t id = -1;
+    if (SystemProperties::GetAcePerformanceMonitorEnabled()) {
+        id = Container::CurrentId();
+    }
+    OTHER_DURATION(id);
     ACE_FUNCTION_TRACE_COMMERCIAL();
     if (IsFreezeFlushMessage()) {
         SetIsFreezeFlushMessage(false);
