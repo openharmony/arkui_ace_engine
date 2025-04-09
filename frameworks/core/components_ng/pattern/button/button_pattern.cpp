@@ -566,6 +566,8 @@ void ButtonPattern::InitTouchEvent()
         }
     };
     eventHub->AddSupportedUIStateWithCallback(UI_STATE_PRESSED | UI_STATE_NORMAL, touchListener_, true);
+    auto isSetStateStyle = eventHub->GetUserSetStateStyle();
+    eventHub->SetScrollingFeatureForbidden(isSetStateStyle);
 }
 
 void ButtonPattern::OnAfterModifyDone()
