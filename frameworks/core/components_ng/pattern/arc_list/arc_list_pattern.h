@@ -70,6 +70,14 @@ public:
 
     void FixScrollParam(float mainPos, float& correctVelocity, float& finalPos);
 
+    bool IsNeedAddContentOffset(bool isContentLessThanSize) override
+    {
+        if (isContentLessThanSize) {
+            return true;
+        }
+        return ListPattern::IsNeedAddContentOffset(isContentLessThanSize);
+    }
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     {
