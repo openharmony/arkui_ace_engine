@@ -2399,34 +2399,34 @@ void ForegroundColorImpl(Ark_NativePointer node,
 void OnClick0Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
-    //     const auto event = Converter::ArkClickEventSync(info);
-    //     callback.InvokeSync(event.ArkValue());
-    // };
-    // NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
+        const auto event = Converter::ArkClickEventSync(info);
+        callback.InvokeSync(event.ArkValue());
+    };
+    NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
 void OnClick1Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* event,
                   const Ark_Number* distanceThreshold)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(event);
-    // CHECK_NULL_VOID(distanceThreshold);
-    // auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
-    //     const auto event = Converter::ArkClickEventSync(info);
-    //     callback.InvokeSync(event.ArkValue());
-    // };
-    // auto convValue = Converter::Convert<float>(*distanceThreshold);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(event);
+    CHECK_NULL_VOID(distanceThreshold);
+    auto onEvent = [callback = CallbackHelper(*event)](GestureEvent& info) {
+        const auto event = Converter::ArkClickEventSync(info);
+        callback.InvokeSync(event.ArkValue());
+    };
+    auto convValue = Converter::Convert<float>(*distanceThreshold);
 
-    // if (frameNode->GetTag() == "Span") {
-    //     SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
-    // } else {
-    //     ViewAbstract::SetOnClick(frameNode, std::move(onEvent), convValue);
-    // }
+    if (frameNode->GetTag() == "Span") {
+        SpanModelNG::SetOnClick(reinterpret_cast<UINode *>(node), std::move(onEvent));
+    } else {
+        ViewAbstract::SetOnClick(frameNode, std::move(onEvent), convValue);
+    }
 }
 void OnHoverImpl(Ark_NativePointer node,
                  const Callback_Boolean_HoverEvent_Void* value)
