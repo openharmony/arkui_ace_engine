@@ -149,11 +149,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  return (stageValue.bundleName === value.bundleName) &&
-    (stageValue.moduleName === value.moduleName) &&
-    (stageValue.id === value.id) &&
-    (stageValue.params === value.params) &&
-    (stageValue.type === value.type);
+  return false;
 }
 function isBaseOrResourceEqual(stageValue: any, value: any): boolean {
   if (isResource(stageValue) && isResource(value)) {
