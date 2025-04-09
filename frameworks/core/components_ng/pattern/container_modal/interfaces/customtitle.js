@@ -757,10 +757,10 @@ class c3 extends ViewPU {
     set buttonIconSize(newValue) {
         this.n4.set(newValue);
     }
-    get buttonRadius() {
+    get buttonBackgroundCornerRadius() {
         return this.o4.set();
     }
-    set buttonRadius(newValue) {
+    set buttonBackgroundCornerRadius(newValue) {
         this.o4.set(newValue);
     }
     onWindowFocused() {
