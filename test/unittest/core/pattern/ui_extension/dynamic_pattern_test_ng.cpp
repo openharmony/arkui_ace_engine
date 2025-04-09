@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "accessibility_element_info.h"
+#include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -823,6 +824,32 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest022, TestSize.Level1)
     dirtySwapConfig.skipLayout = true;
     reuslt = dynamicPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(reuslt, false);
+#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest023
+ * @tc.desc: Test CopyAnimationOption
+ * @tc.type: FUNC
+*/
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest023, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. Create AnimationOption and set value.
+     */
+    AnimationOption animationOption;
+    animationOption.SetDuration(100);
+    animationOption.SetCurve(Curves::FRICTION);
+    animationOption.SetOnFinishEvent([]() {
+    });
+    auto option = DynamicComponentRendererImpl::CopyAnimationOption(animationOption);
+
+    /**
+     * @tc.expected: set nullptr after copy.
+     */
+    EXPECT_NE(animationOption.GetOnFinishEvent(), nullptr);
+    EXPECT_EQ(option->GetOnFinishEvent(), nullptr);
 #endif
 }
 } // namespace OHOS::Ace::NG

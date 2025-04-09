@@ -82,6 +82,22 @@ public:
     void NotifyForeground() override;
     void NotifyBackground() override;
 
+    static std::shared_ptr<AnimationOption> CopyAnimationOption(AnimationOption animationOpt)
+    {
+        // CustomCurve and FinishCallback cannot be passed to child thread
+        std::shared_ptr<AnimationOption> animationOption;
+        if (animationOpt.GetCurve() && AceType::TypeId(animationOpt.GetCurve()) == Ace::CustomCurve::TypeId()) {
+            animationOption = std::make_shared<AnimationOption>();
+        } else {
+            animationOption = std::make_shared<AnimationOption>(animationOpt);
+        }
+        if (animationOption) {
+            animationOption->SetOnFinishEvent(nullptr);
+        }
+
+        return animationOption;
+    }
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
