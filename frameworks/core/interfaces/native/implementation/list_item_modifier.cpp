@@ -77,14 +77,13 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
             if (builder.has_value()) {
                 CallbackHelper(builder.value()).BuildAsync([
                     frameNode, length, isStartArea,
-                    onAction = std::cref(onActionCallback),
-                    onEnterActionArea = std::cref(onEnterActionAreaCallback),
-                    onExitActionArea = std::cref(onExitActionAreaCallback),
-                    onStateChange = std::cref(onStateChangeCallback)
-                ](const RefPtr<UINode>& uiNode) {
-                    ListItemModelNG::SetDeleteArea(frameNode, Referenced::RawPtr(uiNode),
-                        OnDeleteEvent(onAction.get()), OnEnterDeleteAreaEvent(onEnterActionArea.get()),
-                        OnExitDeleteAreaEvent(onExitActionArea.get()), OnStateChangedEvent(onStateChange.get()),
+                    onAction = std::move(onActionCallback),
+                    onEnterActionArea = std::move(onEnterActionAreaCallback),
+                    onExitActionArea = std::move(onExitActionAreaCallback),
+                    onStateChange = std::move(onStateChangeCallback)
+                ](const RefPtr<UINode>& uiNode) mutable {
+                    ListItemModelNG::SetDeleteArea(frameNode, Referenced::RawPtr(uiNode), std::move(onAction),
+                        std::move(onEnterActionArea), std::move(onExitActionArea), std::move(onStateChange),
                         length, isStartArea);
                     }, node);
             } else {

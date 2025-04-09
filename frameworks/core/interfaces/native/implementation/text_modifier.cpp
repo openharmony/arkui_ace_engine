@@ -637,14 +637,11 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
     CHECK_NULL_VOID(convMenuParam);
     CallbackHelper(*content).BuildAsync([frameNode, spanType = optSpanType.value(), convResponseType,
-        menuParam = convMenuParam.value()](
-        const RefPtr<UINode>& uiNode) {
+        menuParam = convMenuParam.value()](const RefPtr<UINode>& uiNode) mutable {
         auto builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        TextModelNG::BindSelectionMenu(frameNode, const_cast<TextSpanType&>(spanType),
-            const_cast<TextResponseType&>(convResponseType), std::move(builder),
-            const_cast<SelectMenuParam&>(menuParam));
+        TextModelNG::BindSelectionMenu(frameNode, spanType, convResponseType, std::move(builder), menuParam);
         }, node);
 }
 } // TextAttributeModifier
