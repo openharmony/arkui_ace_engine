@@ -454,12 +454,16 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();
     auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (currentState < static_cast<int32_t>(DragDropInitiatingStatus::PRESS) && !gestureHub->GetTextDraggable()) {
+        UpdateDragPreviewOptionFromModifier();
+    }
     if (!CheckDoShowPreview(frameNode)) {
         ResetNodeInMultiDrag();
         return;
     }
-    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
     if (gestureHub->GetTextDraggable()) {
         if (gestureHub->GetIsTextDraggable()) {
             SetTextAnimation();
