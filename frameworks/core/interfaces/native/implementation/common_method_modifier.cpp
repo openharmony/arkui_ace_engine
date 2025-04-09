@@ -3717,8 +3717,9 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto optValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
-    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value_or(""));
+    auto optValue = Converter::OptConvert<std::string>(*value);
+    CHECK_EQUAL_VOID(optValue.has_value(), false);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
                             const Ark_String* value)
