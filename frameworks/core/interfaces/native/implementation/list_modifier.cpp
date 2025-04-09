@@ -22,6 +22,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "frameworks/core/components_v2/list/list_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -108,12 +109,14 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<>
-    ListLanesType Convert(const Ark_Number& src) {
+    ListLanesType Convert(const Ark_Number& src)
+    {
         return Converter::Convert<int>(src);
     }
 
     template<>
-    ListLanesType Convert(const Ark_LengthConstrain& src) {
+    ListLanesType Convert(const Ark_LengthConstrain& src)
+    {
         return Converter::Convert<std::pair<Dimension, Dimension>>(src);
     }
 
@@ -374,6 +377,20 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
     };
     ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
 }
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const OnScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDidScroll = [arkCallback = CallbackHelper(*value)](
+        Dimension oIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
+            arkCallback.Invoke(scrollOffset, state);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
 {
@@ -611,6 +628,7 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::OnScrollImpl,
         ListAttributeModifier::OnScrollIndexImpl,
         ListAttributeModifier::OnScrollVisibleContentChangeImpl,
+        ListAttributeModifier::OnDidScrollImpl,
         ListAttributeModifier::OnReachStartImpl,
         ListAttributeModifier::OnReachEndImpl,
         ListAttributeModifier::OnScrollStartImpl,
