@@ -40,6 +40,7 @@ void DestroyPeerImpl(Ark_TransitionEffect peer)
 RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_TransitionEffects* effect)
 {
     auto emptyDimension = Dimension();
+    CHECK_NULL_RETURN(effect, nullptr);
     auto x = Converter::Convert<float>(effect->rotate.x.value);
     auto y = Converter::Convert<float>(effect->rotate.y.value);
     auto z = Converter::Convert<float>(effect->rotate.z.value);
@@ -57,6 +58,7 @@ RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_TransitionEffe
 RefPtr<OHOS::Ace::NG::ChainedScaleEffect> HandleScale(const Ark_TransitionEffects* effect)
 {
     auto emptyDimension = Dimension();
+    CHECK_NULL_RETURN(effect, nullptr);
     auto x = Converter::Convert<float>(effect->scale.x.value);
     auto y = Converter::Convert<float>(effect->scale.y.value);
     auto z = Converter::Convert<float>(effect->scale.z.value);
