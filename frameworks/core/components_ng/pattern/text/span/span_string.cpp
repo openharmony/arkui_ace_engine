@@ -1055,7 +1055,8 @@ RefPtr<DecorationSpan> SpanString::ToDecorationSpan(
     TextDecoration type = spanItem->fontStyle->GetTextDecoration().value_or(TextDecoration::NONE);
     std::optional<Color> color = spanItem->fontStyle->GetTextDecorationColor();
     std::optional<TextDecorationStyle> style = spanItem->fontStyle->GetTextDecorationStyle();
-    return AceType::MakeRefPtr<DecorationSpan>(type, color, style, start, end);
+    std::optional<float> lineThicknessScale = spanItem->fontStyle->GetLineThicknessScale();
+    return AceType::MakeRefPtr<DecorationSpan>(type, color, style, lineThicknessScale, start, end);
 }
 
 RefPtr<BaselineOffsetSpan> SpanString::ToBaselineOffsetSpan(

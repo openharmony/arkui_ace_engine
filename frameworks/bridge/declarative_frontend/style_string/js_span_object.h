@@ -122,6 +122,8 @@ public:
     void SetTextDecorationColor(const JSCallbackInfo& info);
     void GetTextDecorationStyle(const JSCallbackInfo& info);
     void SetTextDecorationStyle(const JSCallbackInfo& info);
+    void GetLineThicknessScale(const JSCallbackInfo& info);
+    void SetLineThicknessScale(const JSCallbackInfo& info);
 
     RefPtr<DecorationSpan>& GetDecorationSpan();
     void SetDecorationSpan(const RefPtr<DecorationSpan>& decorationSpan);

@@ -373,6 +373,16 @@ void TextModelNG::SetTextDecorationStyle(FrameNode* frameNode, TextDecorationSty
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextDecorationStyle, value, frameNode);
 }
 
+void TextModelNG::SetLineThicknessScale(float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, LineThicknessScale, value);
+}
+
+void TextModelNG::SetLineThicknessScale(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LineThicknessScale, value, frameNode);
+}
+
 void TextModelNG::SetBaselineOffset(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, BaselineOffset, value);

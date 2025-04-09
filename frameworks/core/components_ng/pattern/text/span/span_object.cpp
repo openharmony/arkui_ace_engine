@@ -176,6 +176,17 @@ DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
     : SpanBase(start, end), type_(type), color_(color), style_(style)
 {}
 
+DecorationSpan::DecorationSpan(
+    TextDecoration type, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale)
+    : SpanBase(0, 0), type_(type), color_(color), style_(style), lineThicknessScale_(lineThicknessScale)
+{}
+
+DecorationSpan::DecorationSpan(TextDecoration type, std::optional<Color> color,
+    std::optional<TextDecorationStyle> style, std::optional<float> lineThicknessScale, int32_t start, int32_t end)
+    : SpanBase(start, end), type_(type), color_(color), style_(style), lineThicknessScale_(lineThicknessScale)
+{}
+
 TextDecoration DecorationSpan::GetTextDecorationType() const
 {
     return type_;
@@ -202,9 +213,14 @@ void DecorationSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanO
     }
 }
 
+std::optional<float> DecorationSpan::GetLineThicknessScale() const
+{
+    return lineThicknessScale_;
+}
+
 RefPtr<SpanBase> DecorationSpan::GetSubSpan(int32_t start, int32_t end)
 {
-    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, style_, start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<DecorationSpan>(type_, color_, style_, lineThicknessScale_, start, end);
     return spanBase;
 }
 
@@ -217,6 +233,9 @@ void DecorationSpan::AddDecorationStyle(const RefPtr<NG::SpanItem>& spanItem) co
     if (style_.has_value()) {
         spanItem->fontStyle->UpdateTextDecorationStyle(style_.value());
     }
+    if (lineThicknessScale_.has_value()) {
+        spanItem->fontStyle->UpdateLineThicknessScale(lineThicknessScale_.value());
+    }
 }
 
 void DecorationSpan::RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem)
@@ -224,6 +243,7 @@ void DecorationSpan::RemoveDecorationStyle(const RefPtr<NG::SpanItem>& spanItem)
     spanItem->fontStyle->ResetTextDecoration();
     spanItem->fontStyle->ResetTextDecorationColor();
     spanItem->fontStyle->ResetTextDecorationStyle();
+    spanItem->fontStyle->ResetLineThicknessScale();
 }
 
 SpanType DecorationSpan::GetSpanType() const

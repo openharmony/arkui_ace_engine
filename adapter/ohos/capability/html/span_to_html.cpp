@@ -154,7 +154,7 @@ std::string SpanToHtml::ToHtml(const std::string& key, const std::optional<Dimen
     return ToHtmlStyleFormat(key, DimensionToString(value));
 }
 
-std::string SpanToHtml::DeclarationToHtml(const NG::FontStyle& fontStyle)
+std::string SpanToHtml::DecorationToHtml(const NG::FontStyle& fontStyle)
 {
     auto type = fontStyle.GetTextDecoration().value_or(TextDecoration::NONE);
     if (type == TextDecoration::NONE) {
@@ -444,7 +444,7 @@ std::string SpanToHtml::NormalStyleToHtml(
     style += FontWeightToHtml(fontStyle.GetFontWeight());
     style += ColorToHtml(fontStyle.GetTextColor());
     style += FontFamilyToHtml(fontStyle.GetFontFamily());
-    style += DeclarationToHtml(fontStyle);
+    style += DecorationToHtml(fontStyle);
     style += ToHtml("vertical-align", textLineStyle.GetBaselineOffset());
     style += ToHtml("line-height", textLineStyle.GetLineHeight());
     style += ToHtml("letter-spacing", fontStyle.GetLetterSpacing());

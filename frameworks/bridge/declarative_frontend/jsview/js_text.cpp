@@ -631,6 +631,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     TextDecoration textDecoration;
     if (typeValue->IsNumber()) {
@@ -650,17 +651,19 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
             result = theme->GetTextStyle().GetTextDecorationColor();
         }
     }
-    std::optional<TextDecorationStyle> textDecorationStyle;
+    std::optional<TextDecorationStyle> textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     if (styleValue->IsNumber()) {
         textDecorationStyle = static_cast<TextDecorationStyle>(styleValue->ToNumber<int32_t>());
-    } else {
-        textDecorationStyle = DEFAULT_TEXT_DECORATION_STYLE;
     }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     TextModel::GetInstance()->SetTextDecoration(textDecoration);
     TextModel::GetInstance()->SetTextDecorationColor(result);
-    if (textDecorationStyle) {
-        TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-    }
+    TextModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    TextModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
     info.ReturnSelf();
 }
 

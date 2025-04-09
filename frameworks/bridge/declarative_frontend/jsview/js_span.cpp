@@ -206,6 +206,7 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     JSRef<JSVal> typeValue = obj->GetProperty("type");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> styleValue = obj->GetProperty("style");
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
 
     std::optional<TextDecoration> textDecoration;
     if (typeValue->IsNumber()) {
@@ -234,11 +235,15 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
             colorVal = Color::BLACK;
         }
     }
+    float lineThicknessScale = 1.0f;
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    lineThicknessScale = lineThicknessScale < 0 ? 1.0f : lineThicknessScale;
     SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());
     SpanModel::GetInstance()->SetTextDecorationColor(colorVal.value());
-    if (textDecorationStyle) {
-        SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
-    }
+    SpanModel::GetInstance()->SetTextDecorationStyle(textDecorationStyle.value());
+    SpanModel::GetInstance()->SetLineThicknessScale(lineThicknessScale);
 }
 
 void JSSpan::JsOnClick(const JSCallbackInfo& info)

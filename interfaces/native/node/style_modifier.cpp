@@ -10716,11 +10716,11 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
-                node->uiNodeHandle, decoration, decorationColor, decorationStyle);
+                node->uiNodeHandle, decoration, decorationColor, decorationStyle, 1.0f);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
-                node->uiNodeHandle, decoration, decorationColor, decorationStyle);
+                node->uiNodeHandle, decoration, decorationColor, decorationStyle, 1.0f);
             break;
         default:
             break;

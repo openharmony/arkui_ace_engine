@@ -294,6 +294,8 @@ void JSDecorationSpan::JSBind(BindingTarget globalObj)
         "color", &JSDecorationSpan::GetTextDecorationColor, &JSDecorationSpan::SetTextDecorationColor);
     JSClass<JSDecorationSpan>::CustomProperty(
         "style", &JSDecorationSpan::GetTextDecorationStyle, &JSDecorationSpan::SetTextDecorationStyle);
+    JSClass<JSDecorationSpan>::CustomProperty(
+        "thicknessScale", &JSDecorationSpan::GetLineThicknessScale, &JSDecorationSpan::SetLineThicknessScale);
     JSClass<JSDecorationSpan>::Bind(globalObj, JSDecorationSpan::Constructor, JSDecorationSpan::Destructor);
 }
 
@@ -337,7 +339,12 @@ RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSRef<JSObj
     if (!typeObj->IsNull() && typeObj->IsNumber()) {
         type = static_cast<TextDecoration>(typeObj->ToNumber<int32_t>());
     }
-    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption);
+    float lineThicknessScale = 1.0f;
+    JSRef<JSVal> thicknessScaleValue = obj->GetProperty("thicknessScale");
+    if (thicknessScaleValue->IsNumber()) {
+        lineThicknessScale = thicknessScaleValue->ToNumber<float>();
+    }
+    return AceType::MakeRefPtr<DecorationSpan>(type, colorOption, styleOption, lineThicknessScale);
 }
 
 void JSDecorationSpan::GetTextDecorationType(const JSCallbackInfo& info)
@@ -373,6 +380,19 @@ void JSDecorationSpan::GetTextDecorationStyle(const JSCallbackInfo& info)
 }
 
 void JSDecorationSpan::SetTextDecorationStyle(const JSCallbackInfo& info) {}
+
+void JSDecorationSpan::GetLineThicknessScale(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(decorationSpan_);
+    if (!decorationSpan_->GetLineThicknessScale().has_value()) {
+        return;
+    }
+    auto ret =
+        JSRef<JSVal>::Make(JSVal(ToJSValue(decorationSpan_->GetLineThicknessScale().value())));
+    info.SetReturnValue(ret);
+}
+
+void JSDecorationSpan::SetLineThicknessScale(const JSCallbackInfo& info) {}
 
 RefPtr<DecorationSpan>& JSDecorationSpan::GetDecorationSpan()
 {
