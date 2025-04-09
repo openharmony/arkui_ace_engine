@@ -24,7 +24,7 @@ import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding
 import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "./../generated/ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { ResizableOptions } from "./image"
 import { Resource } from "global/resource";
 import { FocusBoxStyle, FocusPriority } from "./focus"

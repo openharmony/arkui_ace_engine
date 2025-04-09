@@ -1,6 +1,6 @@
 import { KBoolean, KStringPtr } from "@koalaui/interop"
 import { Length } from "./../component/units"
-import { LengthMetrics } from "./ArkLengthMetricsMaterialized"
+import { LengthMetrics } from "../Graphics"
 import { DotIndicator, DigitIndicator } from "./../component/swiper"
 export class Indicator<T> {
     _left?: Length | undefined

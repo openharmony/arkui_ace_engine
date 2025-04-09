@@ -48,13 +48,6 @@ export interface Want {
     entities?: Array<string>;
     moduleName?: string;
 }
-export enum LengthUnit {
-    PX = 0,
-    VP = 1,
-    FP = 2,
-    PERCENT = 3,
-    LPX = 4
-}
 export interface WebHeader {
     headerKey: string;
     headerValue: string;

@@ -11201,7 +11201,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    Ark_GraphicsPosition GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         return {};
     }

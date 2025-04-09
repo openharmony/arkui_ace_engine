@@ -21908,7 +21908,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
+    Ark_GraphicsPosition GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     {
         if (!needGroupedLog(1))
             return {};
