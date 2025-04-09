@@ -237,7 +237,10 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
         constraint.parentIdealSize = OptionalSizeF(std::nullopt, crossLen);
     }
 
-    node->Measure(constraint);
+    if (constraint != node->GetGeometryNode()->GetParentLayoutConstraint() ||
+        CheckNeedMeasure(node->GetLayoutProperty()->GetPropertyChangeFlag())) {
+        node->Measure(constraint);
+    }
     SetItemInfo(node, itemIdx, row, col, itemSize);
 
     float childHeight = node->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
