@@ -436,13 +436,13 @@ uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
 {
     CHECK_NULL_RETURN(pixmap_, Media::ERR_IMAGE_WRITE_PIXELMAP_FAILED);
     Media::Rect rect { opts.region.Left(), opts.region.Top(), opts.region.Width(), opts.region.Height() };
-    Media::WritePixelsOptions options;
-    options.source = opts.source;
+    Media::RWPixelsOptions options;
+    options.pixels = opts.source;
     options.bufferSize = opts.bufferSize;
     options.offset = opts.offset;
     options.stride = opts.stride;
     options.region = rect;
-    options.srcPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(opts.srcPixelFormat);
+    options.pixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(opts.srcPixelFormat);
     return pixmap_->WritePixels(options);
 }
 
