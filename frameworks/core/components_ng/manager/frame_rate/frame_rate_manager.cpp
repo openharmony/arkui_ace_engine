@@ -102,6 +102,4 @@ void FrameRateManager::SetDragScene(int32_t status)
 {
     dragScene_ = status;
 }
-
-
 } // namespace OHOS::Ace::NG
