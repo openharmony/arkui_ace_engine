@@ -99,8 +99,7 @@ void IconSizeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
-    // need check
-    // SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
+    SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
                          Ark_SecurityComponentLayoutDirection value)
@@ -108,8 +107,7 @@ void LayoutDirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutDirection = Converter::OptConvert<SecurityComponentLayoutDirection>(value);
-    // need check
-    // SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
+    SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
 }
 void PositionImpl(Ark_NativePointer node,
                   const Ark_Position* value)
@@ -130,7 +128,7 @@ void MarkAnchorImpl(Ark_NativePointer node,
 void OffsetImpl(Ark_NativePointer node,
                 const Ark_Union_Position_Edges_LocalizedEdges* value)
 {
-    // CommonMethodModifier::OffsetImpl(node, value);
+    CommonMethodModifier::OffsetImpl(node, value);
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -141,16 +139,14 @@ void FontSizeImpl(Ark_NativePointer node,
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
-    // need check
-    // SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
+    SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
+    SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(value));
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -158,8 +154,7 @@ void FontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    // need check
-    // SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvert<FontWeight>(*value));
+    SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvert<FontWeight>(*value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_Union_String_Resource* value)
@@ -171,8 +166,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    // need check
-    // SecurityComponentModelNG::SetFontFamily(frameNode, families);
+    SecurityComponentModelNG::SetFontFamily(frameNode, families);
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -181,8 +175,7 @@ void FontColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto fontColor = Converter::OptConvert<Color>(*value);
-    // need check
-    // SecurityComponentModelNG::SetFontColor(frameNode, fontColor);
+    SecurityComponentModelNG::SetFontColor(frameNode, fontColor);
 }
 void IconColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -191,8 +184,7 @@ void IconColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto iconColor = Converter::OptConvert<Color>(*value);
-    // need check
-    // SecurityComponentModelNG::SetIconColor(frameNode, iconColor);
+    SecurityComponentModelNG::SetIconColor(frameNode, iconColor);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
                          const Ark_ResourceColor* value)
@@ -201,8 +193,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto сolor = Converter::OptConvert<Color>(*value);
-    // need check
-    // SecurityComponentModelNG::SetBackgroundColor(frameNode, сolor);
+    SecurityComponentModelNG::SetBackgroundColor(frameNode, сolor);
 }
 void BorderStyleImpl(Ark_NativePointer node,
                      Ark_BorderStyle value)
@@ -210,8 +201,7 @@ void BorderStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<BorderStyle>(value);
-    // need check
-    // SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
+    SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
 }
 void BorderWidthImpl(Ark_NativePointer node,
                      const Ark_Length* value)
@@ -221,8 +211,7 @@ void BorderWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    // need check
-    // SecurityComponentModelNG::SetBackgroundBorderWidth(frameNode, convValue);
+    SecurityComponentModelNG::SetBackgroundBorderWidth(frameNode, convValue);
 }
 void BorderColorImpl(Ark_NativePointer node,
                      const Ark_ResourceColor* value)
@@ -231,8 +220,7 @@ void BorderColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
-    // need check
-    // SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
+    SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
 }
 void BorderRadiusImpl(Ark_NativePointer node,
                       const Ark_Length* value)
@@ -242,8 +230,7 @@ void BorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(convValue);
-    // need check
-    // SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
+    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Dimension* value)
@@ -252,14 +239,13 @@ void PaddingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto padding = Converter::OptConvert<PaddingPropertyT<Dimension>>(*value);
-    // need check
-    // if (padding) {
-    //     SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding->left, padding->right, padding->top,
-    //         padding->bottom);
-    // } else {
-    //     SecurityComponentModelNG::SetBackgroundPadding(frameNode, std::nullopt, std::nullopt, std::nullopt,
-    //         std::nullopt);
-    // }
+    if (padding) {
+        SecurityComponentModelNG::SetBackgroundPadding(frameNode, padding->left, padding->right, padding->top,
+            padding->bottom);
+    } else {
+        SecurityComponentModelNG::SetBackgroundPadding(frameNode, std::nullopt, std::nullopt, std::nullopt,
+            std::nullopt);
+    }
 }
 void TextIconSpaceImpl(Ark_NativePointer node,
                        const Ark_Length* value)
@@ -269,8 +255,7 @@ void TextIconSpaceImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto valueOpt = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(valueOpt);
-    // need check
-    // SecurityComponentModelNG::SetTextIconSpace(frameNode, valueOpt);
+    SecurityComponentModelNG::SetTextIconSpace(frameNode, valueOpt);
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
@@ -284,22 +269,22 @@ void KeyImpl(Ark_NativePointer node,
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
-    // CommonMethodModifier::WidthImpl(node, value);
+    CommonMethodModifier::WidthImpl(node, value);
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
-    // CommonMethodModifier::HeightImpl(node, value);
+    CommonMethodModifier::HeightImpl(node, value);
 }
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
 {
-    // CommonMethodModifier::SizeImpl(node, value);
+    CommonMethodModifier::SizeImpl(node, value);
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value)
 {
-    // CommonMethodModifier::ConstraintSizeImpl(node, value);
+    CommonMethodModifier::ConstraintSizeImpl(node, value);
 }
 } // SecurityComponentMethodModifier
 const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()

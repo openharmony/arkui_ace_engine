@@ -40,28 +40,25 @@ void AssignCast(std::optional<PasteButtonPasteDescription>& dst, const Ark_Paste
         default: LOGE("Unexpected enum value in Ark_PasteDescription: %{public}d", src);
     }
 }
-// need check
-// template<>
-// PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
-// {
-//     PasteButtonStyle style;
-//     style.text = OptConvert<PasteButtonPasteDescription>(src.text);
-//     style.icon = OptConvert<PasteButtonIconStyle>(src.icon);
-//     style.backgroundType = OptConvert<ButtonType>(src.buttonType);
-//     return style;
-// }
+template<>
+PasteButtonStyle Convert(const Ark_PasteButtonOptions& src)
+{
+    PasteButtonStyle style;
+    style.text = OptConvert<PasteButtonPasteDescription>(src.text);
+    style.icon = OptConvert<PasteButtonIconStyle>(src.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PasteButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = PasteButtonModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = PasteButtonModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // PasteButtonModifier
 namespace PasteButtonInterfaceModifier {
@@ -69,8 +66,7 @@ void SetPasteButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // PasteButtonModelNG::InitPasteButton(frameNode, PasteButtonStyle(), false);
+    PasteButtonModelNG::InitPasteButton(frameNode, PasteButtonStyle(), false);
 }
 void SetPasteButtonOptions1Impl(Ark_NativePointer node,
                                 const Ark_PasteButtonOptions* options)
@@ -78,9 +74,8 @@ void SetPasteButtonOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    // auto style = Converter::Convert<PasteButtonStyle>(*options);
-    // need check
-    // PasteButtonModelNG::InitPasteButton(frameNode, style, false);
+    auto style = Converter::Convert<PasteButtonStyle>(*options);
+    PasteButtonModelNG::InitPasteButton(frameNode, style, false);
 }
 } // PasteButtonInterfaceModifier
 namespace PasteButtonAttributeModifier {
