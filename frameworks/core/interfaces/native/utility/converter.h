@@ -484,6 +484,9 @@ namespace Converter {
     template<> FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_FontInfo& src);
     template<> FontMetaData Convert(const Ark_Font& src);
+    template<> FontWeightInt Convert(const Ark_FontWeight& src);
+    template<> FontWeightInt Convert(const Ark_Number& src);
+    template<> FontWeightInt Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
     template<> Gradient Convert(const Ark_LinearGradient_common& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
@@ -549,8 +552,6 @@ namespace Converter {
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> float Convert(const Ark_Float32& src);
-    template<> float Convert(const Ark_String& src);
-    template<> int Convert(const Ark_String& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
