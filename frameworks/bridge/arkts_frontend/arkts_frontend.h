@@ -29,7 +29,8 @@
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
-typedef class __ani_ref *ani_ref;
+typedef class __ani_ref* ani_ref;
+typedef class __ani_object* ani_object;
 
 namespace OHOS::Ace {
 using InspectorFunc = std::function<void()>;
@@ -268,6 +269,8 @@ public:
     {
         drawCallbacks_.erase(componentId);
     }
+
+    ani_object CallGetUIContextFunc();
 
 private:
     RefPtr<TaskExecutor> taskExecutor_;
