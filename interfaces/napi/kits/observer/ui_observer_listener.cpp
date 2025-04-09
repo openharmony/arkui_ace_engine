@@ -529,9 +529,15 @@ void UIObserverListener::OnWillClick(
     napi_create_object(env_, &objValueFrameNode);
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    if (container == nullptr) {
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     auto frontEnd = container->GetFrontend();
-    CHECK_NULL_VOID(frontEnd);
+    if (frontEnd == nullptr) {
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     auto nodeId = frameNode->GetId();
     objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
 
@@ -571,9 +577,15 @@ void UIObserverListener::OnDidClick(
     napi_create_object(env_, &objValueFrameNode);
 
     auto container = Container::Current();
-    CHECK_NULL_VOID(container);
+    if (container == nullptr) {
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     auto frontEnd = container->GetFrontend();
-    CHECK_NULL_VOID(frontEnd);
+    if (frontEnd == nullptr) {
+        napi_close_handle_scope(env_, scope);
+        return;
+    }
     auto nodeId = frameNode->GetId();
     objValueFrameNode = frontEnd->GetFrameNodeValueByNodeId(nodeId);
 
@@ -879,6 +891,7 @@ void UIObserverListener::AddFingerListInfo(napi_value objValueClickEvent, const 
     napi_create_array(env_, &napiFingerList);
     bool isArray = false;
     if (napi_is_array(env_, napiFingerList, &isArray) != napi_ok || !isArray) {
+        napi_close_handle_scope(env_, scope);
         return;
     }
     double scale = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
