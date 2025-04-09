@@ -1718,42 +1718,42 @@ int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext
 void WidthImpl(Ark_NativePointer node,
                const Ark_Length* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto result = Converter::Convert<CalcLength>(*value);
-    // if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-    //     if (result.GetDimensionContainsNegative().IsNegative()) {
-    //         return;
-    //     }
-    //     CounterModelNG::SetWidth(frameNode, result);
-    // } else {
-    //     if (result.GetDimensionContainsNegative().IsNegative()) {
-    //         ViewAbstract::ClearWidthOrHeight(frameNode, true);
-    //         return;
-    //     }
-    //     ViewAbstract::SetWidth(frameNode, result);
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto result = Converter::Convert<CalcLength>(*value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        // if (result.GetDimensionContainsNegative().IsNegative()) {
+        //     return;
+        // }
+        // CounterModelNG::SetWidth(frameNode, result);
+    } else {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, true);
+            return;
+        }
+        ViewAbstract::SetWidth(frameNode, result);
+    }
 }
 void HeightImpl(Ark_NativePointer node,
                 const Ark_Length* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto result = Converter::Convert<CalcLength>(*value);
-    // if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
-    //     if (result.GetDimensionContainsNegative().IsNegative()) {
-    //         return;
-    //     }
-    //     CounterModelNG::SetHeight(frameNode, result);
-    // } else {
-    //     if (result.GetDimensionContainsNegative().IsNegative()) {
-    //         ViewAbstract::ClearWidthOrHeight(frameNode, false);
-    //         return;
-    //     }
-    //     ViewAbstract::SetHeight(frameNode, result);
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto result = Converter::Convert<CalcLength>(*value);
+    if (AceType::TypeId(frameNode) == CounterNode::TypeId()) {
+        // if (result.GetDimensionContainsNegative().IsNegative()) {
+        //     return;
+        // }
+        // CounterModelNG::SetHeight(frameNode, result);
+    } else {
+        if (result.GetDimensionContainsNegative().IsNegative()) {
+            ViewAbstract::ClearWidthOrHeight(frameNode, false);
+            return;
+        }
+        ViewAbstract::SetHeight(frameNode, result);
+    }
 }
 void DrawModifierImpl(Ark_NativePointer node,
                       const Opt_DrawModifier* value)
@@ -1802,17 +1802,17 @@ void MouseResponseRegionImpl(Ark_NativePointer node,
 void SizeImpl(Ark_NativePointer node,
               const Ark_SizeOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto width = Converter::OptConvert<Ark_Length>(value->width);
-    // if (width) {
-    //     WidthImpl(node, &width.value());
-    // }
-    // auto height = Converter::OptConvert<Ark_Length>(value->height);
-    // if (height) {
-    //     HeightImpl(node, &height.value());
-    // }
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto width = Converter::OptConvert<Ark_Length>(value->width);
+    if (width) {
+        WidthImpl(node, &width.value());
+    }
+    auto height = Converter::OptConvert<Ark_Length>(value->height);
+    if (height) {
+        HeightImpl(node, &height.value());
+    }
 }
 void ConstraintSizeImpl(Ark_NativePointer node,
                         const Ark_ConstraintSizeOptions* value)
