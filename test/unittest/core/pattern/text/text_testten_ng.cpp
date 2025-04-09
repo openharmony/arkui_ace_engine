@@ -1152,4 +1152,391 @@ HWTEST_F(TextFieldTenPatternNg, ToTreeJson001, TestSize.Level1)
     stringValue->GetString(TreeKey::CONTENT, defaultVal);
     EXPECT_FALSE(pattern->textForDisplay_.empty());
 }
+
+/**
+ * @tc.name: HandleMouseLeftReleaseAction002
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, HandleMouseLeftReleaseAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textForDisplay_ = u"test";
+    pattern->textSelector_.Update(0, 3);
+    pattern->copyOption_ = CopyOptions::InApp;
+
+    /**
+     * @tc.steps: step2. Set blockPress_ to false and isDoubleClick_ to true.
+     * @tc.expect: blockPress_ value will not be changed.
+     */
+    MouseInfo info;
+    Offset offset = Offset(1, 1);
+    pattern->blockPress_ = false;
+    pattern->isDoubleClick_ = true;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+    EXPECT_FALSE(pattern->isDoubleClick_);
+
+    /**
+     * @tc.steps: step3. Set mouseStatus_  and hasClickedAISpan_ is true.
+     * @tc.expect: blockPress_ value will be changed.
+     */
+    pattern->blockPress_ = true;
+    pattern->status_ = Status::FLOATING;
+    pattern->mouseStatus_ = MouseStatus::PRESSED;
+    pattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+    EXPECT_FALSE(pattern->blockPress_);
+
+    pattern->mouseStatus_ = MouseStatus::MOVE;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+
+    pattern->shiftFlag_ = true;
+    pattern->HandleMouseLeftReleaseAction(info, offset);
+    EXPECT_FALSE(pattern->blockPress_);
+}
+
+/**
+ * @tc.name: OnDragMove001
+ * @tc.desc: test DeleteRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnDragMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"TestChild");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = host->GetPattern<TextPattern>();
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+
+    /**
+     * @tc.steps: step2. Set status_ is DRAGGING
+     * @tc.expect: The initial value of showSelect_ is true `OnDragMove` will set showSelect_ to false.
+     */
+    pattern->status_ = Status::DRAGGING;
+    pattern->OnDragMove(event);
+    EXPECT_EQ(pattern->showSelect_, false);
+
+    /**
+     * @tc.steps: step3. Set status_ not DRAGGING
+     * @tc.expect: pattern->showSelect_ has not been changed.
+     */
+    pattern->status_ = Status::NONE;
+    pattern->showSelect_ = true;
+    pattern->OnDragMove(event);
+    EXPECT_EQ(pattern->showSelect_, true);
+}
+
+/**
+ * @tc.name: GetThumbnailCallback001
+ * @tc.desc: test GetThumbnailCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetThumbnailCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    EXPECT_NE(textPattern, nullptr);
+
+    auto func = textPattern->GetThumbnailCallback();
+    EXPECT_NE(func, nullptr);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+
+    textFrameNode->draggable_ = true;
+    textFrameNode->GetEventHub<EventHub>()->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    textPattern->copyOption_ = CopyOptions::InApp;
+    textPattern->textSelector_.Update(0, 3);
+    textPattern->textForDisplay_ = TEXT_U16CONTENT;
+
+    textPattern->dragNode_ = nullptr;
+    func(Offset(0, 1));
+    EXPECT_NE(textPattern->dragNode_, nullptr);
+
+    auto childFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(childFrameNode, nullptr);
+    textPattern->childNodes_.emplace_back(childFrameNode);
+    func = textPattern->GetThumbnailCallback();
+    
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1,
+            AceType::MakeRefPtr<ImagePattern>());
+    textFrameNode->AddChild(imageNode);
+    func = textPattern->GetThumbnailCallback();
+    auto children = textPattern->GetChildNodes();
+    EXPECT_EQ(children.size(), 1);
+
+    textPattern->dragNode_ = nullptr;
+    func(Offset(0, 1));
+    EXPECT_NE(textPattern->dragNode_, nullptr);
+}
+
+/**
+ * @tc.name: GetSubComponentInfos001
+ * @tc.desc: test GetSubComponentInfos
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetSubComponentInfos001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    auto spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    spanItem1->spanItemType = SpanItemType::CustomSpan;
+    spanItem2->placeholderSpanNodeId = 0;
+    pattern->spans_.push_back(spanItem1);
+    pattern->spans_.push_back(spanItem2);
+    pattern->spans_.push_back(nullptr);
+
+    std::vector<SubComponentInfo> subComponentInfos;
+    size_t result = pattern->GetSubComponentInfos(subComponentInfos);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: InitSpanItem001
+ * @tc.desc: test InitSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, InitSpanItem001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 0, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    std::stack<SpanNodeInfo> nodes;
+    pattern->InitSpanItem(nodes);
+    EXPECT_EQ(pattern->textForDisplay_, u"");
+}
+
+/**
+ * @tc.name: GetSubComponentInfosForSpans001
+ * @tc.desc: test GetSubComponentInfosForSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetSubComponentInfosForSpans001, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    RefPtr<SpanItem> span = nullptr;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->nodeId_ = 1;
+    span1->unicode = 1;
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->nodeId_ = -1;
+    span2->unicode = 1;
+    RefPtr<SpanItem> span3 = AceType::MakeRefPtr<SpanItem>();
+    span3->nodeId_ = 1;
+    span3->unicode = 0;
+    RefPtr<SpanItem> span4 = AceType::MakeRefPtr<SpanItem>();
+    span4->nodeId_ = -1;
+    span4->unicode = 0;
+    span4->spanItemType = SpanItemType::CustomSpan;
+    RefPtr<SpanItem> span5 = AceType::MakeRefPtr<SpanItem>();
+    span5->nodeId_ = -1;
+    span5->unicode = 0;
+    GestureEventFunc onClick = [](GestureEvent& info) {
+        return;
+    };
+    span5->content = u"test";
+    span5->onClick = onClick;
+    span5->spanItemType = SpanItemType::NORMAL;
+    pattern->spans_.push_back(span);
+    pattern->spans_.push_back(span1);
+    pattern->spans_.push_back(span2);
+    pattern->spans_.push_back(span3);
+    pattern->spans_.push_back(span4);
+    pattern->spans_.push_back(span5);
+    pattern->GetSubComponentInfosForSpans(subComponentInfos);
+    EXPECT_NE(subComponentInfos.size(), 0);
+}
+
+/**
+ * @tc.name: GetSymbolSpanResultObject001
+ * @tc.desc: test GetSymbolSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetSymbolSpanResultObject001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    int32_t index = 1;
+    int32_t start = 1;
+    int32_t end = 1;
+    EXPECT_FALSE(pattern->GetSymbolSpanResultObject(nullptr, index, start, end).isDraggable);
+}
+
+/**
+ * @tc.name: UpdateSelectOverlayOrCreate001
+ * @tc.desc: test UpdateSelectOverlayOrCreate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, UpdateSelectOverlayOrCreate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    RefPtr<SelectOverlayProxy> selectOverlayProxy = AceType::MakeRefPtr<SelectOverlayProxy>(1);
+    SelectOverlayInfo selectInfo;
+    selectInfo.isNewAvoid = true;
+    selectInfo.isUsingMouse = false;
+    selectOverlayProxy->selectOverlayId_ = 1;
+    pattern->selectOverlayProxy_ = selectOverlayProxy;
+    bool animation = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto manager = pipeline->GetSelectOverlayManager();
+    auto node3 = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    WeakPtr<FrameNode> selectOverlayItem = AceType::WeakClaim(AceType::RawPtr(node3));
+    manager->selectOverlayItem_ = selectOverlayItem;
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, animation);
+    EXPECT_FALSE(pattern->selectOverlayProxy_->IsClosed());
+
+    pattern->selectOverlayProxy_.Reset();
+    pattern->UpdateSelectOverlayOrCreate(selectInfo, animation);
+    EXPECT_FALSE(pattern->selectOverlayProxy_);
+}
+
+/**
+ * @tc.name: OnVisibleChange001
+ * @tc.desc: test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, OnVisibleChange001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    bool isVisible = false;
+    pattern->textDetectEnable_ = true;
+    pattern->OnVisibleChange(isVisible);
+    EXPECT_FALSE(pattern->dataDetectorAdapter_->aiDetectDelayTask_);
+}
+
+/**
+ * @tc.name: GetTextResultObject001
+ * @tc.desc: test TextPattern GetTextResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetTextResultObject001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<UINode> uinode = nullptr;
+    int32_t index = 10;
+    int32_t start = 1;
+    int32_t end = 100;
+
+    pattern->GetTextResultObject(uinode, index, start, end);
+    auto node = AceType::DynamicCast<SpanNode>(uinode);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: GetImageResultObject001
+ * @tc.desc: test TextPattern GetImageResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, GetImageResultObject001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<UINode> uinode = nullptr;
+    int32_t index = -10;
+    int32_t start = 1;
+    int32_t end = 100;
+
+    pattern->GetImageResultObject(uinode, index, start, end);
+    auto ret = pattern->GetSpanItemByIndex(index);
+    EXPECT_EQ(ret, nullptr);
+
+    index = 10;
+    pattern->GetImageResultObject(uinode, index, start, end);
+    auto node = AceType::DynamicCast<FrameNode>(uinode);
+    EXPECT_EQ(node, nullptr);
+}
+
+/**
+ * @tc.name: MountImageNode001
+ * @tc.desc: test TextPattern MountImageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, MountImageNode001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    auto imageItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
+    imageItem->options.imageAttribute = ImageSpanAttribute();
+    imageItem->options.imageAttribute->colorFilterMatrix = std::vector<float>{0.5f, 1.0f, 0.2f, 1.0f};
+
+    pattern->MountImageNode(imageItem);
+
+    auto imageNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        imageItem->nodeId_, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    EXPECT_EQ(imageLayoutProperty->HasImageFit(), false);
+}
+
+/**
+ * @tc.name: ProcessSpanString001
+ * @tc.desc: test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, ProcessSpanString001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->textDetectEnable_ = true;
+    EXPECT_TRUE(pattern->CanStartAITask());
+    EXPECT_FALSE(pattern->dataDetectorAdapter_->aiDetectInitialized_);
+
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    pattern->ProcessSpanString();
+    EXPECT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: SetExternalSpanItem001
+ * @tc.desc: test TextPattern SetExternalSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldTenPatternNg, SetExternalSpanItem001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    std::list<RefPtr<SpanItem>> spans;
+    spans.emplace_back(spanItem);
+    
+    pattern->SetExternalSpanItem(spans);
+    EXPECT_NE(pattern->styledString_, nullptr);
+}
 } // namespace OHOS::Ace::NG
