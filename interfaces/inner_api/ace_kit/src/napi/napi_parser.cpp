@@ -194,9 +194,6 @@ RefPtr<ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
-    if (resourceWrapper == nullptr) {
-        return false;
-    }
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));
@@ -228,9 +225,6 @@ std::string DimensionToString(Dimension dimension)
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
-    if (resourceWrapper == nullptr) {
-        return false;
-    }
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
@@ -238,14 +232,16 @@ bool ParseString(const ResourceInfo& info, std::string& result)
             pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
             ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
-            pluralResults = resourceWrapper->GetPluralString(info.resId, StringUtils::StringToInt(info.params[0]));
+            auto count = StringUtils::StringToInt(info.params[0]);
+            pluralResults = resourceWrapper->GetPluralString(info.resId, count);
             ReplaceHolder(pluralResults, info.params, 1);
         }
         result = pluralResults;
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
-        result = resourceWrapper->GetRawfile(info.params[0]);
+        auto fileName = info.params[0];
+        result = resourceWrapper->GetRawfile(fileName);
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::FLOAT)) {

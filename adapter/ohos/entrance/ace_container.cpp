@@ -2287,15 +2287,9 @@ void AceContainer::SetLocalStorage(
             if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<NativeReference>()) {
                 jsEngine->SetContext(id, contextRef->GetBindingObject()->Get<NativeReference>());
             }
-#ifdef USE_ARK_ENGINE
-            if (storage && AceType::InstanceOf<Framework::JsiDeclarativeEngine>(jsEngine)) {
+            if (storage) {
                 jsEngine->SetLocalStorage(id, storage);
-            } else {
-                ReleaseStorageReference(sharedRuntime, storage);
             }
-#else
-            ReleaseStorageReference(sharedRuntime, storage);
-#endif
         },
         TaskExecutor::TaskType::JS, "ArkUISetLocalStorage");
 }

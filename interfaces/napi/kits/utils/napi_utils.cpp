@@ -626,7 +626,6 @@ bool ParseColor(napi_env env, napi_value value, Color& result)
         std::optional<std::string> colorString = GetStringFromValueUtf8(env, value);
         if (!colorString.has_value()) {
             LOGE("Parse color from string failed");
-            return false;
         }
         return Color::ParseColorString(colorString.value(), result);
     }

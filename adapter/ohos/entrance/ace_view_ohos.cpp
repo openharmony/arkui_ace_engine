@@ -234,13 +234,8 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
         inputType = LAST_DOWN;
     }
     PerfSourceType sourceType = PERF_KEY_EVENT;
-    auto keyItem = keyEvent->GetKeyItem();
-    if (keyItem.has_value()) {
-        int64_t inputTime = keyItem->GetDownTime() * US_TO_MS;
-        pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
-    } else {
-        TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchEventToPerf keyItem is invalid.");
-    }
+    int64_t inputTime = (keyEvent->GetKeyItem())->GetDownTime() * US_TO_MS;
+    pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
 }
 
 bool AceViewOhos::DispatchKeyEvent(const RefPtr<AceViewOhos>& view,
