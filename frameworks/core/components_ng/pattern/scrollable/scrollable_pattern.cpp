@@ -2667,7 +2667,7 @@ void ScrollablePattern::OnStatusBarClick()
         return;
     }
 
-    auto pipeline = GetContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
