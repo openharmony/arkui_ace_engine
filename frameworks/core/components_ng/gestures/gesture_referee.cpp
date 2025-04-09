@@ -313,11 +313,10 @@ bool GestureReferee::QueryAllDone()
 
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
-    bool ret = false;
-    if (!isAxis && lastIsAxis_ && type == SourceType::TOUCH) {
-        ret = true;
+    if (!isAxis && lastIsAxis_) {
+        return (type == SourceType::TOUCH || type == SourceType::MOUSE);
     }
-    return ret;
+    return false;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)
