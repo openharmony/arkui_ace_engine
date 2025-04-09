@@ -173,17 +173,11 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetAction(event.action);
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-        NG::PointF localPoint(event.x, event.y);
-        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
-        auto localX = static_cast<float>(localPoint.GetX());
-        auto localY = static_cast<float>(localPoint.GetY());
-        info.SetLocalLocation(Offset(localX, localY));
-    } else {
-        Offset localLocation = Offset(
-            event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
-        info.SetLocalLocation(localLocation);
-    }
+    NG::PointF localPoint(event.x, event.y);
+    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    auto localX = static_cast<float>(localPoint.GetX());
+    auto localY = static_cast<float>(localPoint.GetY());
+    info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(event.GetScreenOffset());
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
