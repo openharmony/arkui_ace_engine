@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_WINDOW_SCENE_LAYOUT_MANAGER_H
 
 #include <event_handler.h>
+#include <unordered_set>
 
 #include "core/components_ng/base/frame_node.h"
 
@@ -28,9 +29,9 @@ enum class RSUINodeType : uint32_t;
 
 namespace OHOS::Ace::NG {
 struct TraverseResult {
-    uint32_t zOrderCnt_ = 0;
-    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
-    uint64_t screenId_ = -1;
+    uint32_t zOrderCnt = 0;
+    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams;
+    uint64_t screenId = -1;
 };
 
 struct TraverseInfo {
@@ -63,6 +64,9 @@ private:
     std::shared_ptr<Rosen::RSNode> GetRSNode(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetGlobalGeometry(const RefPtr<FrameNode>& node);
     std::shared_ptr<Rosen::RSObjAbsGeometry> GetLocalGeometry(const RefPtr<FrameNode>& node);
+    bool SetGeometry(const bool isAncestorRecent, const RefPtr<FrameNode>& node,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& globalGeometry,
+        std::shared_ptr<Rosen::RSObjAbsGeometry>& localGeometry);
     void UpdateGeometry(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode,
         bool isParentTransformScene);
     int32_t GetNodeZIndex(const RefPtr<FrameNode>& node);
@@ -85,6 +89,9 @@ private:
     void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
         std::ostringstream& oss);
     void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
+    void RemoveAbnormalId();
+    std::unordered_set<uint64_t> abnormalNodeDfxSet_;
+    std::unordered_set<uint64_t> windowSceneOnTreeDfxSet_;
     std::unordered_map<uint64_t, WeakPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;
