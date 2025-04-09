@@ -613,7 +613,11 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
-    config.orientation_ = joinOrientation_;
+    if (GreatNotEqual(frameCount, 1)) {
+        config.orientation_ = ImageRotateOrientation::UP;
+    } else {
+        config.orientation_ = joinOrientation_;
+    }
     canvasImage->SetPaintConfig(config);
 }
 
