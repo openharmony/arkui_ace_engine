@@ -17,8 +17,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("plugin_component_test") {
   module_out_path = pattern_test_output_path
   testonly = true
+
+  include_dirs = [
+    "$ace_root/interfaces/inner_api/ace_kit/include",
+  ]
+
   deps = [
-    "$ace_root/interfaces/inner_api/ace_kit:ace_kit",
     "$ace_root/interfaces/inner_api/ui_service_manager:ui_service_mgr",
     "$ace_root/interfaces/inner_api/ui_service_manager:uiservice_manager_interface_set",
   ]
