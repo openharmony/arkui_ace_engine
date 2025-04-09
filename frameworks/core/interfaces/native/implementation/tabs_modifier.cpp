@@ -25,7 +25,6 @@
 #include "arkoala_api_generated.h"
 #include "frameworks/base/utils/utils.h"
 
-
 namespace OHOS::Ace::NG {
 struct TabsOptions {
     std::optional<BarPosition> barPosOpt;

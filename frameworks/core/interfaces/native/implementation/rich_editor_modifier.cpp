@@ -692,7 +692,7 @@ void KeyboardAppearanceImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
+    //RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
 }
 void StopBackPressImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
