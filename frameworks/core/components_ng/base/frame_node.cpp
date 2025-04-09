@@ -5644,6 +5644,11 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(true);
     auto rectToParent = GetPaintRectWithTransform();
     auto scale = GetTransformScale();
+    if (renderContext_) {
+        auto matrix4 = renderContext_->GetTransformMatrixValue(Matrix4());
+        scale = { scale.x * static_cast<float>(matrix4.GetScaleX()),
+            scale.y * static_cast<float>(matrix4.GetScaleY()) };
+    }
 
     if (!parentUi || IsWindowBoundary()) {
         cachedVisibleRectResult_ = {timestamp,
@@ -5676,10 +5681,8 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     auto parentRenderContext = parentUi->GetRenderContext();
     OffsetF windowOffset;
     auto offset = rectToParent.GetOffset();
-    if (parentRenderContext && parentRenderContext->GetTransformScale()) {
-        auto parentScale = parentRenderContext->GetTransformScale();
-        offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
-    }
+    offset = OffsetF(offset.GetX() * parentCacheVisibleRect.cumulativeScale.x,
+        offset.GetY() * parentCacheVisibleRect.cumulativeScale.y);
     windowOffset = parentCacheVisibleRect.windowOffset + offset;
 
     RectF rect;
