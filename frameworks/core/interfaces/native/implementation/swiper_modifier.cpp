@@ -24,6 +24,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 using IndicatorVariantType = std::variant<SwiperParameters, SwiperDigitalParameters, bool>;
@@ -584,8 +585,9 @@ void PageFlipModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetPageFlipMode(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    int32_t defaultValue = static_cast<int32_t>(PageFlipMode::CONTINUOUS);
+    SwiperModelNG::SetPageFlipMode(frameNode, convValue.value_or(defaultValue));
 }
 void OnContentWillScrollImpl(Ark_NativePointer node,
                              const ContentWillScrollCallback* value)

@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -465,8 +466,9 @@ void PageFlipModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TabsModelNG::SetPageFlipMode(frameNode, convValue);
+    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    int32_t defaultValue = static_cast<int32_t>(PageFlipMode::CONTINUOUS);
+    TabsModelNG::SetPageFlipMode(frameNode, convValue.value_or(defaultValue));
 }
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              const OnTabsContentWillChangeCallback* value)

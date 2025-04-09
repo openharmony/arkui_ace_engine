@@ -39,6 +39,7 @@ inline void AssignArkValue(Ark_TabContentAnimatedTransition& dst, const TabConte
 {
     dst.timeout.value = Converter::ArkValue<Ark_Number>(src.timeout);
 }
+template<> void AssignArkValue(Opt_PageFlipMode& dst, const PageFlipMode& src, ConvContext *ctx);
 } // Converter
 
 namespace {
@@ -106,6 +107,7 @@ constexpr double EFFECT_SATURATION = 0.123;
 constexpr double EFFECT_BRIGHTNESS = 100;
 constexpr double SCALE = 0.123;
 constexpr double DEFAULT_SCALE = 1.0;
+const auto ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE = 0;
 
 Ark_ScrollableBarModeOptions CreateScrollableMode(Opt_Length margin, Ark_LayoutStyle layoutStyle)
 {
@@ -1717,5 +1719,80 @@ HWTEST_F(TabsModifierTest, setOnChangeEventIndexImpl, TestSize.Level1)
     ASSERT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 2);
+}
+
+/**
+ * @tc.name: setPageFlipModeTestDefaultValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setPageFlipModeTestDefaultValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    EXPECT_EQ(swiperPattern->GetPageFlipMode(), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE);
+}
+
+/**
+ * @tc.name: setPageFlipModeTestValidValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setPageFlipModeTestValidValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    using OneTestStep = std::tuple<Opt_PageFlipMode, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Converter::ArkValue<Opt_PageFlipMode>(PageFlipMode::CONTINUOUS), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_PageFlipMode>(PageFlipMode::SINGLE), static_cast<int32_t>(PageFlipMode::SINGLE)},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setPageFlipMode(node_, &inputValue);
+        EXPECT_EQ(swiperPattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
+
+/**
+ * @tc.name: setPageFlipModeTestInvalidValue
+ * @tc.desc: Check the functionality of SwiperInterfaceModifier.PageFlipModeImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModifierTest, setPageFlipModeTestInvalidValue, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setPageFlipMode, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    using OneTestStep = std::tuple<Opt_PageFlipMode, int32_t>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Opt_PageFlipMode{.tag = Ark_Tag::INTEROP_TAG_UNDEFINED}, ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+        {Converter::ArkValue<Opt_PageFlipMode>(static_cast<PageFlipMode>(-1)), ATTRIBUTE_PAGE_FLIP_MODE_DEFAULT_VALUE},
+    };
+    for (auto [inputValue, expectedValue]: testPlan) {
+        modifier_->setPageFlipMode(node_, &inputValue);
+        EXPECT_EQ(swiperPattern->GetPageFlipMode(), expectedValue) << "Passed value is: " << expectedValue;
+    }
 }
 }

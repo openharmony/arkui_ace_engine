@@ -46,6 +46,8 @@ namespace {
     const auto ATTRIBUTE_TEXT_HINT_DEFAULT_VALUE_TEST = "";
     const auto ATTRIBUTE_DESCRIPTION_NAME_TEST = "accessibilityDescription";
     const auto ATTRIBUTE_DESCRIPTION_DEFAULT_VALUE_TEST = "";
+    const auto ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST = "accDescr";
+    const auto ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST = "description for accessibilityDescription";
     const auto ATTRIBUTE_LEVEL_NAME_TEST = "accessibilityLevel";
     const auto ATTRIBUTE_LEVEL_DEFAULT_VALUE_TEST = "auto";
     const auto ATTRIBUTE_CHECKED_NAME_TEST = "accessibilityChecked";
@@ -121,6 +123,16 @@ public:
     void *CreateNodeImpl() override
     {
         return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
+    }
+
+    void SetUp() override
+    {
+        ModifierTestBase::SetUp();
+        auto fnode = reinterpret_cast<FrameNode *>(node_);
+        ASSERT_NE(fnode, nullptr);
+        render_ = fnode->GetRenderContext();
+        ASSERT_NE(render_, nullptr);
+        AddResource(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST);
     }
 
     RefPtr<GestureEventHub> GetGestureEventHub()
@@ -295,21 +307,15 @@ HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription0TestValidValues,
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilityDescription1TestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, setAccessibilityDescription1TestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAccessibilityDescription1, nullptr);
-    using OneTestStep = std::tuple<Ark_Resource, std::string>;
-    std::string inputVal1 {"test string 1"}, inputVal2 {"test string 2"};
-    static const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Ark_Resource>(inputVal1, nullptr), inputVal1},
-        {Converter::ArkValue<Ark_Resource>(inputVal2, nullptr), inputVal2},
-    };
-    for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setAccessibilityDescription1(node_, &inputValue);
-        auto fullJson = GetJsonValue(node_);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_DESCRIPTION_NAME_TEST);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
+    auto resName = NamedResourceId(ATTRIBUTE_DESCRIPTION_RESOURCE_ID_TEST, Converter::ResourceType::STRING);
+    auto src = CreateResource(resName);
+
+    modifier_->setAccessibilityDescription1(node_, &src);
+    auto strResult = GetStringAttribute(node_, ATTRIBUTE_DESCRIPTION_NAME_TEST);
+    EXPECT_EQ(strResult, ATTRIBUTE_DESCRIPTION_RESOURCE_VALUE_TEST);
 }
 
 //////// AccessibilityLevel
