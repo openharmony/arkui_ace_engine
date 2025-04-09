@@ -2039,7 +2039,7 @@ float MenuPattern::GetSelectMenuWidth()
         finalWidth = defaultWidth;
     }
 
-    if (finalWidth < minSelectWidth) {
+    if (LessNotEqual(finalWidth, minSelectWidth)) {
         finalWidth = defaultWidth;
     }
 
@@ -2374,7 +2374,7 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, minSelectWidth);
     float finalWidth = (theme->GetMenuNormalWidth() + OPTION_MARGIN).ConvertToPx();
-    if (finalWidth < minSelectWidth) {
+    if (LessNotEqual(finalWidth, minSelectWidth)) {
         finalWidth = defaultWidth;
     }
     return finalWidth;
