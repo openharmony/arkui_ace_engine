@@ -16,6 +16,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -428,6 +429,20 @@ void OnScrollImpl(Ark_NativePointer node,
     };
     GridModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const OnScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDidScroll = [arkCallback = CallbackHelper(*value)](
+        Dimension oIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
+            arkCallback.Invoke(scrollOffset, state);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
 {
@@ -534,6 +549,7 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
         GridAttributeModifier::FrictionImpl,
         GridAttributeModifier::AlignItemsImpl,
         GridAttributeModifier::OnScrollImpl,
+        GridAttributeModifier::OnDidScrollImpl,
         GridAttributeModifier::OnReachStartImpl,
         GridAttributeModifier::OnReachEndImpl,
         GridAttributeModifier::OnScrollStartImpl,

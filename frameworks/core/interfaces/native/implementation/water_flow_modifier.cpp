@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "water_flow_scroller_peer_impl.h"
 #include "water_flow_sections_accessor_peer_impl.h"
@@ -225,6 +226,20 @@ void CachedCount1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(count); // for enums
     //WaterFlowModelNG::SetCachedCount1(frameNode, convValue);
 }
+void OnDidScrollImpl(Ark_NativePointer node,
+                     const OnScrollCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto onDidScroll = [arkCallback = CallbackHelper(*value)](
+        Dimension oIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto scrollOffset = Converter::ArkValue<Ark_Number>(oIn);
+            arkCallback.Invoke(scrollOffset, state);
+    };
+    ScrollableModelNG::SetOnDidScroll(frameNode, std::move(onDidScroll));
+}
 void OnReachStartImpl(Ark_NativePointer node,
                       const Callback_Void* value)
 {
@@ -295,6 +310,7 @@ const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier()
         WaterFlowAttributeModifier::FrictionImpl,
         WaterFlowAttributeModifier::CachedCount0Impl,
         WaterFlowAttributeModifier::CachedCount1Impl,
+        WaterFlowAttributeModifier::OnDidScrollImpl,
         WaterFlowAttributeModifier::OnReachStartImpl,
         WaterFlowAttributeModifier::OnReachEndImpl,
         WaterFlowAttributeModifier::OnScrollFrameBeginImpl,
