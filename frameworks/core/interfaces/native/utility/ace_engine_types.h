@@ -93,6 +93,11 @@ struct FontFamilies {
     std::vector<std::string> families;
 };
 
+struct FontWeightInt {
+    std::optional<FontWeight> fixed;
+    std::optional<int32_t> variable;
+};
+
 enum class MessageLevel {
     DEBUG = 1,
     INFO = 2,

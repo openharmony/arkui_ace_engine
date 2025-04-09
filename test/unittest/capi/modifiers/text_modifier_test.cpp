@@ -161,6 +161,57 @@ public:
     }
 };
 
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureVariableFontWeightNumbersValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100" },
+    { "200", Converter::ArkValue<Ark_Number>(200), "200" },
+    { "300", Converter::ArkValue<Ark_Number>(300), "300" },
+    { "400", Converter::ArkValue<Ark_Number>(400), "400" },
+    { "500", Converter::ArkValue<Ark_Number>(500), "500" },
+    { "600", Converter::ArkValue<Ark_Number>(600), "600" },
+    { "700", Converter::ArkValue<Ark_Number>(700), "700" },
+    { "800", Converter::ArkValue<Ark_Number>(800), "800" },
+    { "900", Converter::ArkValue<Ark_Number>(900), "900" },
+    { "840", Converter::ArkValue<Ark_Number>(840), "840" },
+    { "860", Converter::ArkValue<Ark_Number>(860), "860" },
+};
+
+
+std::vector<std::tuple<std::string, Ark_String>> testFixtureVariableFontWeightStringsInvalidValues = {
+    { "\"0\"", Converter::ArkValue<Ark_String>("0") },
+    { "\"1000\"", Converter::ArkValue<Ark_String>("1000") },
+    { "\"-100\"", Converter::ArkValue<Ark_String>("-100") },
+    { "xxx", Converter::ArkValue<Ark_String>("xxx") },
+    { "10x", Converter::ArkValue<Ark_String>("10x") },
+    { "x10", Converter::ArkValue<Ark_String>("x10") },
+    { "40000000000000", Converter::ArkValue<Ark_String>("40000000000000") },
+    { "Bold", Converter::ArkValue<Ark_String>("Bold") },
+    { "Bolder", Converter::ArkValue<Ark_String>("Bolder") },
+    { "Lighter", Converter::ArkValue<Ark_String>("Lighter") },
+    { "Normal", Converter::ArkValue<Ark_String>("Normal") },
+    { "Medium", Converter::ArkValue<Ark_String>("Medium") },
+    { "Regular", Converter::ArkValue<Ark_String>("Regular") },
+};
+
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureVariableFontWeightStringsValidValues = {
+    { "\"100\"", Converter::ArkValue<Ark_String>("100"), "100" },
+    { "\"200\"", Converter::ArkValue<Ark_String>("200"), "200" },
+    { "\"300\"", Converter::ArkValue<Ark_String>("300"), "300" },
+    { "\"400\"", Converter::ArkValue<Ark_String>("400"), "400" },
+    { "\"500\"", Converter::ArkValue<Ark_String>("500"), "500" },
+    { "\"600\"", Converter::ArkValue<Ark_String>("600"), "600" },
+    { "\"700\"", Converter::ArkValue<Ark_String>("700"), "700" },
+    { "\"800\"", Converter::ArkValue<Ark_String>("800"), "800" },
+    { "\"900\"", Converter::ArkValue<Ark_String>("900"), "900" },
+    { "\"840\"", Converter::ArkValue<Ark_String>("840"), "840" },
+    { "\"860\"", Converter::ArkValue<Ark_String>("860"), "860" },
+    { "bold", Converter::ArkValue<Ark_String>("bold"), "700" },
+    { "bolder", Converter::ArkValue<Ark_String>("bolder"), "900" },
+    { "lighter", Converter::ArkValue<Ark_String>("lighter"), "100" },
+    { "normal", Converter::ArkValue<Ark_String>("normal"), "400" },
+    { "medium", Converter::ArkValue<Ark_String>("medium"), "500" },
+    { "regular", Converter::ArkValue<Ark_String>("regular"), "400" },
+};
+
 HWTEST_F(TextModifierTest, setFontColor, TestSize.Level1)
 {
     const Ark_ResourceColor color1 = { .selector = 0, .value0 = ARK_COLOR_GREEN };
@@ -715,10 +766,10 @@ HWTEST_F(TextModifierTest, setFontWeight0TestVariableFontWeightValidValues, Test
     for (auto& [input, value, expected] : Fixtures::testFixtureVariableFontWeightEnumValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
+    for (auto& [input, value, expected] : testFixtureVariableFontWeightNumbersValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
+    for (auto& [input, value, expected] : testFixtureVariableFontWeightStringsValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value), expected);
     }
 }
@@ -756,7 +807,7 @@ HWTEST_F(TextModifierTest, setFontWeight0TestVariableFontWeightInvalidValues, Te
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+    for (auto& [input, value] : testFixtureVariableFontWeightStringsInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
     }
     // Check invalid union
@@ -942,10 +993,10 @@ HWTEST_F(TextModifierTest, setFontWeight1TestVariableFontWeightValidValues, Test
     for (auto& [input, value, expected] : Fixtures::testFixtureVariableFontWeightEnumValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_FontWeight>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
+    for (auto& [input, value, expected] : testFixtureVariableFontWeightNumbersValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value), expected);
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
+    for (auto& [input, value, expected] : testFixtureVariableFontWeightStringsValidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value), expected);
     }
 }
@@ -990,7 +1041,7 @@ HWTEST_F(TextModifierTest, setFontWeight1TestVariableFontWeightInvalidValues, Te
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_Number>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+    for (auto& [input, value] : testFixtureVariableFontWeightStringsInvalidValues) {
         checkValue(input, ArkUnion<Ark_Union_Number_FontWeight_String, Ark_String>(value));
     }
     // Check invalid union
