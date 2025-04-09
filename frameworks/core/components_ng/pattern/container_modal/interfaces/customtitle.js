@@ -827,13 +827,9 @@ class c3 extends ViewPU {
     }
     onMaximizeButtonClick() {
         this.onCancelMenuTimer();
-        this.onHoverMaximizeButton(false);
-        this.maximizeScale = 1.0;
         ContainerModal.callNative(l1);
     }
     onMinimizeButtonClick() {
-        this.onHoverMinimizeButton(false);
-        this.minimizeScale = 1.0;
         ContainerModal.callNative(m1);
     }
     onCloseButtonClick() {

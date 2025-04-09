@@ -312,13 +312,9 @@ struct custombutton {
 
   onMaximizeButtonClick() {
     this.onCancelMenuTimer()
-    this.onHoverMaximizeButton(false)
-    this.maximizeScale = 1.0
   }
 
   onMinimizeButtonClick() {
-    this.onHoverMinimizeButton(false)
-    this.minimizeScale = 1.0
   }
 
   onCloseButtonClick() {
