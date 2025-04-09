@@ -241,6 +241,30 @@ void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &
     }
 }
 
+void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src)
+{
+    switch (src) {
+        case KeyIntention::INTENTION_UNKNOWN: dst = ARK_INTENTION_CODE_INTENTION_UNKNOWN; break;
+        case KeyIntention::INTENTION_UP: dst = ARK_INTENTION_CODE_INTENTION_UP; break;
+        case KeyIntention::INTENTION_DOWN: dst = ARK_INTENTION_CODE_INTENTION_DOWN; break;
+        case KeyIntention::INTENTION_LEFT: dst = ARK_INTENTION_CODE_INTENTION_LEFT; break;
+        case KeyIntention::INTENTION_RIGHT: dst = ARK_INTENTION_CODE_INTENTION_RIGHT; break;
+        case KeyIntention::INTENTION_SELECT: dst = ARK_INTENTION_CODE_INTENTION_SELECT; break;
+        case KeyIntention::INTENTION_ESCAPE: dst = ARK_INTENTION_CODE_INTENTION_ESCAPE; break;
+        case KeyIntention::INTENTION_BACK: dst = ARK_INTENTION_CODE_INTENTION_BACK; break;
+        case KeyIntention::INTENTION_FORWARD: dst = ARK_INTENTION_CODE_INTENTION_FORWARD; break;
+        case KeyIntention::INTENTION_MENU: dst = ARK_INTENTION_CODE_INTENTION_MENU; break;
+        case KeyIntention::INTENTION_PAGE_UP: dst = ARK_INTENTION_CODE_INTENTION_PAGE_UP; break;
+        case KeyIntention::INTENTION_PAGE_DOWN: dst = ARK_INTENTION_CODE_INTENTION_PAGE_DOWN; break;
+        case KeyIntention::INTENTION_ZOOM_OUT: dst = ARK_INTENTION_CODE_INTENTION_ZOOM_OUT; break;
+        case KeyIntention::INTENTION_ZOOM_IN: dst = ARK_INTENTION_CODE_INTENTION_ZOOM_IN; break;
+        default:
+            LOGE("Unexpected enum value in KeyIntention: %{public}d", src);
+            dst = static_cast<Ark_IntentionCode>(-1);
+            break;
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {
