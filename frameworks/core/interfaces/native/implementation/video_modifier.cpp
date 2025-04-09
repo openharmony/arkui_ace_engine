@@ -300,6 +300,7 @@ void SurfaceBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
     Color backgroundColor = Color::BLACK;
     backgroundColor.SetValue(value->colorValue.value);
     VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
