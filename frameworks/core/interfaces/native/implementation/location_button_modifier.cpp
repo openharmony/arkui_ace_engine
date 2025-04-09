@@ -74,28 +74,25 @@ void AssignCast(std::optional<LocationButtonLocationDescription>& dst, const Ark
             LOGE("Unexpected enum value in Ark_LocationDescription: %{public}d", src);
     }
 }
-// need check
-// template<>
-// LocationButtonStyle Convert(const Ark_LocationButtonOptions& src)
-// {
-//     LocationButtonStyle style;
-//     style.text = OptConvert<LocationButtonLocationDescription>(src.text);
-//     style.icon = OptConvert<LocationButtonIconStyle>(src.icon);
-//     style.backgroundType = OptConvert<ButtonType>(src.buttonType);
-//     return style;
-// }
+template<>
+LocationButtonStyle Convert(const Ark_LocationButtonOptions& src)
+{
+    LocationButtonStyle style;
+    style.text = OptConvert<LocationButtonLocationDescription>(src.text);
+    style.icon = OptConvert<LocationButtonIconStyle>(src.icon);
+    style.backgroundType = OptConvert<ButtonType>(src.buttonType);
+    return style;
+}
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LocationButtonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    // need check
-    // auto frameNode = LocationButtonModelNG::CreateFrameNode(id);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = LocationButtonModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // LocationButtonModifier
 namespace LocationButtonInterfaceModifier {
@@ -103,8 +100,7 @@ void SetLocationButtonOptions0Impl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // LocationButtonModelNG::InitLocationButton(frameNode, LocationButtonStyle(), false);
+    LocationButtonModelNG::InitLocationButton(frameNode, LocationButtonStyle(), false);
 }
 void SetLocationButtonOptions1Impl(Ark_NativePointer node,
                                    const Ark_LocationButtonOptions* options)
@@ -112,9 +108,8 @@ void SetLocationButtonOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    // auto style = Converter::Convert<LocationButtonStyle>(*options);
-    // need check
-    // LocationButtonModelNG::InitLocationButton(frameNode, style, false);
+    auto style = Converter::Convert<LocationButtonStyle>(*options);
+    LocationButtonModelNG::InitLocationButton(frameNode, style, false);
 }
 } // LocationButtonInterfaceModifier
 namespace LocationButtonAttributeModifier {
