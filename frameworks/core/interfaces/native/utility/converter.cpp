@@ -2168,4 +2168,20 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
     dst.height = static_cast<double>(Converter::Convert<float>(src.height));
     return dst;
 }
+
+template<>
+std::set<std::string> Convert(const Array_UniformDataType& src)
+{
+    std::set<std::string> dst = {};
+    std::optional<std::string> convVal;
+    auto tmp = Converter::OptConvert<std::vector<Ark_UniformDataType>>(src);
+    if (!tmp.has_value()) return dst;
+    for (Ark_UniformDataType arkVal : tmp.value()) {
+        convVal = Converter::OptConvert<std::string>(arkVal);
+        if (convVal.has_value()) {
+            dst.insert(convVal.value());
+        }
+    }
+    return dst;
+}
 } // namespace OHOS::Ace::NG::Converter
