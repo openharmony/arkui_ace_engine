@@ -600,7 +600,7 @@ void ScrollPattern::StartVibrateFeedback()
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
-    if (source == SCROLL_FROM_CROWN) {
+    if (source == SCROLL_FROM_CROWN && !ReachStart(true) && !ReachEnd(true)) {
         StartVibrateFeedback();
     }
 #endif
