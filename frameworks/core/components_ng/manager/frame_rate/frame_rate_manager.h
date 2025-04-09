@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t UI_ANIMATION_FRAME_RATE_TYPE = 2;
 constexpr int32_t DISPLAY_SYNC_FRAME_RATE_TYPE = 3;
 constexpr int32_t ACE_COMPONENT_FRAME_RATE_TYPE = 4;
+constexpr int32_t DRAG_SCENE_FRAME_RATE_TYPE = 6;
 constexpr int32_t ANIMATION_STATE_FIRST_FRAME = 0x1000;
 
 class FrameRateManager : public virtual AceType {
@@ -54,8 +55,6 @@ public:
     std::pair<int32_t, int32_t> GetExpectedRate();
 
     void SetDragScene(int32_t status);
-
-    int32_t GetDragScene();
 
 private:
     std::unordered_map<int32_t, int32_t> nodeRateMap_;

@@ -43,8 +43,7 @@ public:
     void Destroy() override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
-    void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType,
-        int32_t dragScene = 0) override;
+    void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) override;
 
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
