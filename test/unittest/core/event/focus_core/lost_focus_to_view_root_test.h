@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef TEST_UNITTEST_CORE_EVENT_FOCUS_WINDOW_TEST_H
-#define TEST_UNITTEST_CORE_EVENT_FOCUS_WINDOW_TEST_H
+#ifndef TEST_UNITTEST_CORE_EVENT_REQUEST_FOCUS_TEST_H
+#define TEST_UNITTEST_CORE_EVENT_REQUEST_FOCUS_TEST_H
 #include <cstddef>
 #include <cstdint>
 
@@ -22,6 +22,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/focus_core/focus_test_base.h"
+#include "test/unittest/core/event/frame_node_on_tree.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
@@ -34,32 +35,17 @@
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-class FocusPassiveTestNG : public FocusTestBaseNg, public testing::Test {
+class LostFocusToViewRootTestNG : public FocusTestBaseNg, public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void SetFocusNode(RefPtr<FrameNode>& node, RefPtr<FocusHub>& focusHub);
-    void SetFocusAbleNode(const RefPtr<FocusHub>& focusHub1, const RefPtr<FocusHub>& focusHub2);
-    void SetFocusRemoveSelf(const RefPtr<FocusHub>& focusHub1, const RefPtr<FocusHub>& focusHub2,
-        const RefPtr<FocusHub>& focusHub, RefPtr<FrameNode>& node);
-    void InitFocusPassive();
 };
-enum class FocusPassiveCase {
-    BFOCUSNODEID = 0,
-    CFOCUSNODEID = 1,
-    DFOCUSNODEID = 2,
-    EFOCUSNODEID = 3,
-    FFOCUSNODEID = 4,
-    GFOCUSNODEID = 5,
-};
-
 } // namespace OHOS::Ace::NG
 
-#endif // TEST_UNITTEST_CORE_EVENT_FOCUS_WINDOW_TEST_H
+#endif
