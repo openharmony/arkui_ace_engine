@@ -30,7 +30,7 @@ enum class RSUINodeType : uint32_t;
 namespace OHOS::Ace::NG {
 struct TraverseResult {
     uint32_t zOrderCnt = 0;
-    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams_;
+    std::unordered_map<int32_t, OHOS::Rosen::SessionUIParam> uiParams;
     uint64_t screenId = -1;
 };
 

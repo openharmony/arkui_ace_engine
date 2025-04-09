@@ -230,7 +230,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         // default interactive is true
         uiParam.interactive_ = WindowSceneHelper::IsPanelScene(node->GetWindowPatternType());
     }
-    res.uiParams_[windowId] = std::move(uiParam);
+    res.uiParams[windowId] = std::move(uiParam);
     windowSceneOnTreeDfxSet_.insert(windowId);
 }
 
@@ -281,7 +281,7 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
     }
     RemoveAbnormalId();
     // cannot post ui task, since flush may not excute on next frame
-    Rosen::SceneSessionManager::GetInstance().FlushUIParams(screenId, std::move(res.uiParams_));
+    Rosen::SceneSessionManager::GetInstance().FlushUIParams(screenId, std::move(res.uiParams));
 }
 
 bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& node)
@@ -537,7 +537,7 @@ void WindowSceneLayoutManager::DumpFlushInfo(uint64_t screenId, TraverseResult& 
     if (!isCoreDebugEnable_) {
         return;
     }
-    for (auto& [winId, uiParam] : res.uiParams_) {
+    for (auto& [winId, uiParam] : res.uiParams) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64 " windowId:%{public}d "
             "name:%{public}s rect:%{public}s, scaleX:%{public}f, scaleY:%{public}f, transX:%{public}f "
             "transY:%{public}f pivotX:%{public}f, pivotY:%{public}f zOrder:%{public}u, interactive:%{public}d",
