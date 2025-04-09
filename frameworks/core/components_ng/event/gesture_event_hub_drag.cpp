@@ -1853,6 +1853,7 @@ void GestureEventHub::SetDragEvent(
     const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
     if (!dragEventActuator_ || dragEventActuator_->GetIsNewFwk()) {
+        isDragNewFwk_ = false;
         dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
     }
     dragEventActuator_->ReplaceDragEvent(dragEvent);
