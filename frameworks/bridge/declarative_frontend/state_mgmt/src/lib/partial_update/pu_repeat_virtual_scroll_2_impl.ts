@@ -425,6 +425,11 @@ class __RepeatVirtualScroll2Impl<T> {
         return (totalCount !== oldTotalCount);
     }
 
+    // Repeat can maintain correct totalCount only with totalCountFunc or default total count!
+    private canUpdateTotalCount(): boolean {
+        return (this.totalCountFunc_ !== undefined) || !this.totalCountSpecified_;
+    }
+
     // initial render
     // called from __Repeat.render
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
@@ -1518,6 +1523,13 @@ class __RepeatVirtualScroll2Impl<T> {
         this.adjustActiveRangeStart(nIndex, nDeleteCount, addCount);
 
         if (this.lazyLoadingIndex_ === -1 && this.needRerenderChange(nIndex, nDeleteCount, addCount)) {
+            return false;
+        }
+
+        // when we know that the total count has changed but we can't update the value, we need to rerender
+        if ((nDeleteCount !== addCount) && !this.canUpdateTotalCount()) {
+            stateMgmtConsole.debug(`${this.constructor.name}(${this.repeatElmtId_}) tryFastRelayoutForChange`,
+                `can't update total count, need to rerender! It's better to define onTotalCount!`);
             return false;
         }
         
