@@ -24,7 +24,6 @@
         "https://gitee.com/arkuievent": [
             "https://gitee.com/jiangtao92",
             "https://gitee.com/piggyguy",
-            "https://gitee.com/zhaojian2021",
             "https://gitee.com/benb365",
             "https://gitee.com/zhou-chaobo",
             "https://gitee.com/liukaii",
@@ -180,16 +179,12 @@
             "info": "[拖拽 liukai]",
             "group": "https://gitee.com/arkuievent"
         },
-        "https://gitee.com/zhaojian2021": {
-            "info": "[事件手势 zhaojian]",
-            "group": "https://gitee.com/arkuievent"
-        },
         "https://gitee.com/zhou-chaobo": {
             "info": "[事件手势 zhouchaobo]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/benb365": {
-            "info": "[焦点/根视图/通用属性 liuyongchang]",
+            "info": "[事件/焦点/根视图/通用属性 liuyongchang]",
             "group": "https://gitee.com/arkuievent"
         },
         "https://gitee.com/yihao-lin": {
