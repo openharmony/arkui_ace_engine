@@ -295,7 +295,6 @@ void WebModelNG::SetSmoothDragResizeEnabled(FrameNode* frameNode, bool isSmoothD
     CHECK_NULL_VOID(frameNode);
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
-    // webPattern->UpdateSmoothDragResizeEnabled(isSmoothDragResizeEnabled);
 }
 
 void WebModelNG::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled)

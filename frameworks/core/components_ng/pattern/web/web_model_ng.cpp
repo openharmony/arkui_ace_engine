@@ -239,7 +239,7 @@ void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
     };
@@ -328,7 +328,7 @@ void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); }, "ArkUIWebKeyEventCallback");
     };
@@ -629,7 +629,7 @@ void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallba
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); }, "ArkUIWebMouseEventCallback");
     };
@@ -911,7 +911,7 @@ void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContext();
+        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
         context->PostSyncEvent(
@@ -1082,7 +1082,7 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 
 void WebModelNG::AddDragFrameNodeToManager()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
