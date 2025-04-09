@@ -83,6 +83,7 @@ constexpr int32_t LENGTH_ONE = 1;
 constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
+constexpr uint32_t DEBUG_DURATION = 150;
 
 std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
@@ -731,13 +732,15 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     std::function<void()> onFinishEvent;
     std::optional<int32_t> count;
     auto traceStreamPtr = std::make_shared<std::stringstream>();
+    RefPtr<Curve> debugCurve = Curves::FAST_OUT_LINEAR_IN;
+    auto isDebugAnim = option.GetDuration() == DEBUG_DURATION && debugCurve->IsEqual(option.GetCurve());
     if (onFinish->IsFunction()) {
         count = GetAnimationFinshCount();
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count,
-                            iterations]() mutable {
+                            iterations, isDebugAnim]() mutable {
             RecordAnimationFinished(iterations);
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
@@ -747,7 +750,10 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->UpdateCurrentActiveNode(node);
             TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish, cnt:%{public}d", count.value());
-            func->Execute();
+            func->ExecuteJS(0, nullptr, isDebugAnim);
+            if (isDebugAnim) {
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "animateTo finish after ExecuteJS, cnt:%{public}d", count.value());
+            }
             func = nullptr;
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
