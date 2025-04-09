@@ -239,6 +239,10 @@ public:
     void CalculateCurrentOffset(float delta, const ListLayoutAlgorithm::PositionMap& recycledItemPosition);
     void UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos);
     void UpdateScrollBarOffset() override;
+    virtual bool IsNeedAddContentOffset(bool isContentLessThanSize)
+    {
+        return !IsScrollSnapAlignCenter() || childrenSize_;
+    }
     // chain animation
     void SetChainAnimation();
     void SetChainAnimationOptions(const ChainAnimationOptions& options);
