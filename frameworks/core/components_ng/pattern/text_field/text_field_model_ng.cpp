@@ -614,13 +614,6 @@ void TextFieldModelNG::SetOnPaste(std::function<void(const std::u16string&)>&& f
     eventHub->SetOnPaste(std::move(func));
 }
 
-void TextFieldModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
-{
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnPaste(std::move(func));
-}
-
 void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
@@ -879,13 +872,6 @@ void TextFieldModelNG::SetOnWillChangeEvent(std::function<bool(const ChangeValue
 }
 
 void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
-{
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeEvent(std::move(func));
-}
-
-void TextFieldModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1702,12 +1688,29 @@ void TextFieldModelNG::SetOnCut(FrameNode* frameNode, std::function<void(const s
     eventHub->SetOnCut(std::move(func));
 }
 
+void TextFieldModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
+
 void TextFieldModelNG::SetOnPasteWithEvent(
     FrameNode* frameNode, std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func)
 {
-    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPasteWithEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(func));
 }
 
 void TextFieldModelNG::SetCleanNodeStyle(FrameNode* frameNode, const std::optional<CleanNodeStyle>& cleanNodeStyle)
