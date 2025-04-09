@@ -3184,6 +3184,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
+    if (SystemProperties::GetSyncDebugTraceEnabled()) {
+        ACE_LAYOUT_SCOPED_TRACE(
+            "[%s][%s][%d]: UpdateViewportConfig %s, windowSizeChangeReason %d, is rsTransaction nullptr %d, %s",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
+            static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
+    }
     TAG_LOGD(ACE_LAYOUT,
         "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
         "rsTransaction nullptr %{public}d, %{public}s",
