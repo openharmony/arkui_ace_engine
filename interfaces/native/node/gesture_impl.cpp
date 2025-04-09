@@ -20,47 +20,6 @@
 #include "core/gestures/gesture_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct ArkUI_GestureRecognizer {
-    int32_t type = -1;
-    ArkUIGesture* gesture = nullptr;
-    void* extraData = nullptr;
-    void* attachNode = nullptr;
-    bool capi = true;
-    void* recognizer = nullptr;
-    ArkUIGestureEventTargetInfo targetInfo = {};
-};
-
-struct ArkUI_GestureEventTargetInfo {
-    void* uiNode = nullptr;
-};
-
-#ifdef __cplusplus
-};
-
-// the ArkUI_GestureEvent struct actually same as ArkUIAPIEventGestureAsyncEvent;
-struct ArkUI_GestureEvent {
-    ArkUIAPIEventGestureAsyncEvent eventData;
-    void* attachNode;
-};
-
-struct ArkUI_GestureInterruptInfo {
-    ArkUIGestureInterruptInfo interruptData;
-};
-
-struct ArkUI_ParallelInnerGestureEvent {
-    ArkUIGestureRecognizer* current = nullptr;
-    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
-    void* userData = nullptr;
-    int32_t count;
-};
-
-#endif
-
-
 ArkUI_GestureEventActionType OH_ArkUI_GestureEvent_GetActionType(const ArkUI_GestureEvent* event)
 {
     ArkUI_GestureEventActionType ret;

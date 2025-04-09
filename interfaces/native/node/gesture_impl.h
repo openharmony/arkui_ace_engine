@@ -12,14 +12,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef ARKUI_NATIVE_GESTTURE_IMPL_H
-#define ARKUI_NATIVE_GESTTURE_IMPL_H
+#ifndef INTERFACES_NATIVE_NODE_GESTURE_IMPL_H
+#define INTERFACES_NATIVE_NODE_GESTURE_IMPL_H
 
 #include <cstdint>
 
 #include "native_gesture.h"
 #include "native_node.h"
 #include "native_type.h"
+
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct ArkUI_GestureRecognizer {
+    int32_t type = -1;
+    ArkUIGesture* gesture = nullptr;
+    void* extraData = nullptr;
+    void* attachNode = nullptr;
+    bool capi = true;
+    void* recognizer = nullptr;
+    ArkUIGestureEventTargetInfo targetInfo = {};
+};
+
+struct ArkUI_GestureEventTargetInfo {
+    void* uiNode = nullptr;
+};
+
+#ifdef __cplusplus
+};
+
+// the ArkUI_GestureEvent struct actually same as ArkUIAPIEventGestureAsyncEvent;
+struct ArkUI_GestureEvent {
+    ArkUIAPIEventGestureAsyncEvent eventData;
+    void* attachNode;
+};
+
+struct ArkUI_GestureInterruptInfo {
+    ArkUIGestureInterruptInfo interruptData;
+};
+
+struct ArkUI_ParallelInnerGestureEvent {
+    ArkUIGestureRecognizer* current = nullptr;
+    ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
+    void* userData = nullptr;
+    int32_t count;
+};
+
+#endif
 
 namespace OHOS::Ace::GestureModel {
 
@@ -36,8 +78,7 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingersNum, double distanceN
 
 ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingersNum, double angleNum);
 
-ArkUI_GestureRecognizer* CreateSwipeGesture(
-    int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
+ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
 
 void DisposeGesture(ArkUI_GestureRecognizer* recognizer);
 
@@ -60,7 +101,7 @@ int32_t RemoveChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecogniz
 void HandleGestureEvent(ArkUINodeEvent* event);
 
 int32_t SetGestureInterrupterToNode(
-    ArkUI_NodeHandle node,  ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
+    ArkUI_NodeHandle node, ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
 
 int32_t SetGestureInterrupterToNodeWithUserData(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
@@ -69,4 +110,4 @@ int32_t SetInnerGestureParallelTo(ArkUI_NodeHandle node, void* userData,
     ArkUI_GestureRecognizer* (*parallelInnerGesture)(ArkUI_ParallelInnerGestureEvent* event));
 
 }; // namespace OHOS::Ace::GestureModel
-#endif
+#endif // INTERFACES_NATIVE_NODE_GESTURE_IMPL_H
