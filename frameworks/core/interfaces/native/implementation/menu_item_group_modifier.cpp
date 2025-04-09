@@ -44,10 +44,12 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetHeader(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
-            MenuItemGroupView::SetHeader(frameNode, std::move(builder));
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupView::SetHeader(frameNode, std::move(builder));
+                }, node);
         },
         []() {}
     );
@@ -57,10 +59,12 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
             MenuItemGroupView::SetFooter(frameNode, valueString);
         },
         [frameNode, node](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
-            MenuItemGroupView::SetFooter(frameNode, std::move(builder));
+            CallbackHelper(value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                MenuItemGroupView::SetFooter(frameNode, std::move(builder));
+                }, node);
         },
         []() {}
     );

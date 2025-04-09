@@ -3222,6 +3222,14 @@ void ViewAbstract::SetOverlayBuilder(std::function<void()>&& buildFunc,
     const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
     const std::optional<Dimension>& offsetY)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetOverlayBuilder(frameNode, std::move(buildFunc), align, offsetX, offsetY);
+}
+
+void ViewAbstract::SetOverlayBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc,
+    const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
+    const std::optional<Dimension>& offsetY)
+{
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }

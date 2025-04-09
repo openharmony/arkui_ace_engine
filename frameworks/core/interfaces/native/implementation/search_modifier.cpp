@@ -703,12 +703,13 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
-    auto customNodeBuilder = [callback = CallbackHelper(*value), node]() {
-        auto builderNode = callback.BuildSync(node);
-        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    };
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
-    SearchModelNG::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
+    CallbackHelper(*value).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+        auto customNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        SearchModelNG::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
+        }, node);
 }
 void _onChangeEvent_valueImpl(Ark_NativePointer node,
                               const Callback_String_Void* callback)

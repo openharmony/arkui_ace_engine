@@ -445,10 +445,12 @@ void ShowUnitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
-        return callback.BuildSync(node);
-    };
-    TextFieldModelNG::SetShowUnit(frameNode, std::move(builder));
+    CallbackHelper(*value).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        auto builder = [uiNode]() -> RefPtr<UINode> {
+            return uiNode;
+        };
+        TextFieldModelNG::SetShowUnit(frameNode, std::move(builder));
+        }, node);
 }
 void ShowUnderlineImpl(Ark_NativePointer node,
                        Ark_Boolean value)
@@ -850,10 +852,12 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
-    auto customNode = CallbackHelper(*value).BuildSync(node);
-    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
-    TextFieldModelNG::SetCustomKeyboard(frameNode, Referenced::RawPtr(customFrameNode), supportAvoidance);
+    CallbackHelper(*value).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+        auto customNode = AceType::DynamicCast<FrameNode>(uiNode);
+        auto customFrameNode = Referenced::RawPtr(customNode);
+        TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);
+        }, node);
 }
 void ShowCounterImpl(Ark_NativePointer node,
                      Ark_Boolean value,

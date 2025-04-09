@@ -197,14 +197,14 @@ Opt_Placement getPlacement(const Ark_Placement& placement = INVALID_ENUM_VAL<Ark
 
 CustomNodeBuilder getBuilderCb()
 {
-    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                              const Callback_Pointer_Void continuation) {
         checkEvent = { .resourceId = resourceId, .parentNode = parentNode };
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
     };
-    CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+    CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(checkCallback, nullptr, TEST_RESOURCE_ID);
     return customBuilder;
 }
 
@@ -237,14 +237,14 @@ Opt_ContextMenuAnimationOptions getContextMenuAnimationOptions()
 
 Opt_Union_MenuPreviewMode_CustomBuilder getPreviewCustomBuilder()
 {
-    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                              const Callback_Pointer_Void continuation) {
         checkEvent2 = { .resourceId = resourceId, .parentNode = parentNode };
         if (uiNode) {
             CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
         }
     };
-    CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID_2);
+    CustomNodeBuilder customBuilder = ArkValue<CustomNodeBuilder>(checkCallback, nullptr, TEST_RESOURCE_ID_2);
     auto builderUnion = ArkUnion<Ark_Union_MenuPreviewMode_CustomBuilder, CustomNodeBuilder>(customBuilder);
     return ArkValue<Opt_Union_MenuPreviewMode_CustomBuilder>(builderUnion);
 }
@@ -379,7 +379,7 @@ public:
         subwindowBind->InitContainer();
         SubwindowManager::GetInstance()->AddSubwindow(containerId, subwindowBind);
         SubwindowManager::GetInstance()->SetCurrentSubwindow(subwindowBind);
-        EXPECT_CALL(*subwindowBind, GetOverlayManager()).Times(1);
+        EXPECT_CALL(*subwindowBind, GetOverlayManager()).Times(AnyNumber());
     }
 };
 

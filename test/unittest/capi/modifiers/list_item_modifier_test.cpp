@@ -56,7 +56,6 @@ public:
     CustomNodeBuilder getBuilderCb(bool start)
     {
         auto checkCallback = [](
-            Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
@@ -80,7 +79,7 @@ public:
                 }
             }
         };
-        CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback,
+        CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(checkCallback,
             start ? TEST_RESOURCE_ID_1 : TEST_RESOURCE_ID_2);
         return customBuilder;
     }
@@ -424,6 +423,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
         };
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onAction = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
@@ -439,6 +439,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnActionCallbackTest, Tes
         };
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onAction = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
@@ -485,6 +486,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
         };
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onEnterActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
@@ -500,6 +502,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnEnterActionAreaCallback
         };
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onEnterActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
@@ -546,6 +549,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
         };
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onExitActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
@@ -561,6 +565,7 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnExitActionAreaCallbackT
         };
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .onExitActionArea = Converter::ArkValue<Opt_Callback_Void>(
             Converter::ArkValue<Callback_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
@@ -602,14 +607,14 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
     static std::optional<CheckEvent> checkEventStart = std::nullopt;
     void (*checkCallbackStart)(const Ark_Int32, const Ark_SwipeActionState) =
         [](const Ark_Int32 resourceId, const Ark_SwipeActionState state) {
-            checkEventStart = {
-                .resourceId = resourceId,
-                .state = Converter::OptConvert<SwipeActionState>(state)
-            };
+            checkEventStart = { .resourceId = resourceId,
+                .state = Converter::OptConvert<SwipeActionState>(state) };
         };
 
-    Ark_SwipeActionItem itemStart = {.onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
-        Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
+    Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
+        .onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
+            Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackStart, TEST_RESOURCE_ID_1))
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
@@ -617,14 +622,14 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemOnStateChangeCallbackTest
     static std::optional<CheckEvent> checkEventEnd = std::nullopt;
     void (*checkCallbackEnd)(const Ark_Int32, const Ark_SwipeActionState) =
         [](const Ark_Int32 resourceId, const Ark_SwipeActionState state) {
-            checkEventEnd = {
-                .resourceId = resourceId,
-                .state = Converter::OptConvert<SwipeActionState>(state)
-            };
+            checkEventEnd = { .resourceId = resourceId,
+                .state = Converter::OptConvert<SwipeActionState>(state) };
         };
 
-    Ark_SwipeActionItem itemEnd = {.onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
-        Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
+    Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
+        .onStateChange = Converter::ArkValue<Opt_Callback_SwipeActionState_Void>(
+            Converter::ArkValue<Callback_SwipeActionState_Void>(checkCallbackEnd, TEST_RESOURCE_ID_2))
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
@@ -669,12 +674,14 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceTest, T
     EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.7f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
@@ -708,12 +715,14 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceNegativ
     EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-55.5f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(-77.7f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
@@ -747,12 +756,14 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
     EXPECT_EQ(endDeleteAreaDistance, "0.00vp");
 
     Ark_SwipeActionItem itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionStart;
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
     Ark_SwipeActionItem itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
         .actionAreaDistance = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77.7f)),
     };
     Ark_Union_CustomBuilder_SwipeActionItem arkUnionEnd;
@@ -770,10 +781,16 @@ HWTEST_F(ListItemModifierTest, setSwipeActionActionItemActionAreaDistanceOptiona
     EXPECT_EQ(endDeleteAreaDistance, "77.70vp");
 
     // optional values
-    itemStart = { .actionAreaDistance = Converter::ArkValue<Opt_Length>(Ark_Empty()) };
+    itemStart = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
+        .actionAreaDistance = Converter::ArkValue<Opt_Length>(Ark_Empty())
+    };
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionStart) = itemStart;
 
-    itemEnd = { .actionAreaDistance = Converter::ArkValue<Opt_Length>(Ark_Empty()) };
+    itemEnd = {
+        .builder = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
+        .actionAreaDistance = Converter::ArkValue<Opt_Length>(Ark_Empty())
+    };
     TypeHelper::WriteToUnion<Ark_SwipeActionItem>(arkUnionEnd) = itemEnd;
 
     arkOptions = { .start = Converter::ArkValue<Opt_Union_CustomBuilder_SwipeActionItem>(arkUnionStart),

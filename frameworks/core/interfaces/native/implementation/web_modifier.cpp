@@ -1812,6 +1812,26 @@ void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callbac
         dst.onAppear = std::move(onAppear);
     }
 }
+#ifdef WEB_SUPPORTED
+std::function<void(const std::shared_ptr<WebPreviewSelectionMenuParam>&)> GetPreviewHandler(
+    Ark_NativePointer node, const CustomNodeBuilder& preview)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    std::function<void(const std::shared_ptr<WebPreviewSelectionMenuParam>&)> previewHandler =
+        [callback = CallbackHelper(preview), node, frameNode](
+            const std::shared_ptr<WebPreviewSelectionMenuParam>& param) {
+            callback.BuildAsync([param, frameNode](const RefPtr<UINode>& uiNode) {
+                std::function<void()> previewNodeBuilder = [uiNode]() {
+                    NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+                param->previewBuilder = previewNodeBuilder;
+                WebModelNG::SetPreviewSelectionMenu(frameNode, param);
+                }, node);
+        };
+    return previewHandler;
+}
+#endif // WEB_SUPPORTED
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebElementType elementType,
                            const CustomNodeBuilder* content,
@@ -1821,26 +1841,26 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(content);
     auto elType = Converter::OptConvert<WebElementType>(elementType);
     CHECK_EQUAL_VOID(elType.has_value(), false);
     MenuParam menuParam;
     auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
     auto menuType = arkOptions ? Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType) : std::nullopt;
-    std::function<void()> contentNodeBuilder = nullptr, previewNodeBuilder = nullptr;
+    std::function<void(const std::shared_ptr<WebPreviewSelectionMenuParam>&)> previewHandler = nullptr;
     if (arkOptions) {
         InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
     }
-    if (menuType) {
+    if (arkOptions && menuType && menuType.value() == SelectionMenuType::PREVIEW_MENU) {
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
         if (preview.has_value()) {
-            previewNodeBuilder = [callback = CallbackHelper(preview.value()), node]() {
-                NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
-            };
+            previewHandler = GetPreviewHandler(node, preview.value());
         }
     }
     auto resType = Converter::OptConvert<ResponseType>(responseType);
-    if (!resType.has_value() || resType.value() != ResponseType::LONG_PRESS) {
+    CHECK_EQUAL_VOID(resType.has_value(), false);
+    if (resType.value() != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
@@ -1848,14 +1868,19 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     menuParam.isShow = true;
     WebModelNG::SetNewDragStyle(frameNode, true);
-    if (content) {
-        contentNodeBuilder = [callback = CallbackHelper(*content), node]() {
-            NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
+    CallbackHelper(*content).BuildAsync([frameNode, elType = elType.value(), menuParam,
+        resType = resType.value(), previewHandler = std::move(previewHandler)](const RefPtr<UINode>& uiNode) {
+        std::function<void()> contentNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-    }
-    auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
-        elType.value(), resType.value(), contentNodeBuilder, previewNodeBuilder, menuParam);
-    WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
+        auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
+            elType, resType, contentNodeBuilder, nullptr, menuParam);
+        if (previewHandler) {
+            previewHandler(previewSelectionMenuParam);
+        } else {
+            WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
+        }
+        }, node);
 #endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier

@@ -120,17 +120,17 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundCustomNodeBuilderTest, TestSiz
 
     // Testing builderHelper3
     modifier_->setBackground(node_, &builder3, nullptr);
-    EXPECT_EQ(builderHelper3.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper3.GetCallsCountAsync(), ++callsCount);
 
     // Testing builderHelper2
     modifier_->setBackground(node_, &builder2, nullptr);
-    EXPECT_EQ(builderHelper2.GetCallsCount(), callsCount);
+    EXPECT_EQ(builderHelper2.GetCallsCountAsync(), callsCount);
 
     // Testing builderHelper1
     modifier_->setBackground(node_, &builder1, nullptr);
-    EXPECT_EQ(builderHelper1.GetCallsCount(), callsCount);
+    EXPECT_EQ(builderHelper1.GetCallsCountAsync(), callsCount);
     modifier_->setBackground(node_, &builder1, nullptr);
-    EXPECT_EQ(builderHelper1.GetCallsCount(), ++callsCount);
+    EXPECT_EQ(builderHelper1.GetCallsCountAsync(), ++callsCount);
 }
 
 /*
@@ -161,12 +161,12 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundTestValidValues, TestSize.Leve
         {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "BOTTOM_RIGHT"},
     };
     std::string resultValue = "";
-    const auto& renderContext = builderHelper.GetCustomNode()->GetRenderContext();
+    const auto& renderContext = frameNode->GetRenderContext();
 
     for (auto [inputValue, expectedValue]: testPlan) {
         auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
         modifier_->setBackground(node_, &builder, &optInputValue);
-        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+        EXPECT_EQ(builderHelper.GetCallsCountAsync(), ++callsCount);
         if (renderContext) {
             auto background = renderContext->GetBackgroundAlign();
             resultValue = background.has_value() ? Converter::Convert(background.value()) : "";
