@@ -79,7 +79,7 @@ public:
                 }
             }
         };
-        CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr,
+        CustomNodeBuilder customBuilder = Converter::ArkValue<CustomNodeBuilder>(checkCallback,
             start ? TEST_RESOURCE_ID_1 : TEST_RESOURCE_ID_2);
         return customBuilder;
     }

@@ -165,7 +165,7 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
 
     static constexpr int32_t contextId = 123;
     CustomNodeBuilder customBuilder =
-        Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr, contextId);
+        Converter::ArkValue<CustomNodeBuilder>(checkCallback, contextId);
 
     EXPECT_EQ(checkEvent.has_value(), false);
     EXPECT_EQ(pattern->GetUnitNode(), nullptr);

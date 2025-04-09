@@ -112,7 +112,7 @@ public:
                 CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
             }
         };
-        return Converter::ArkValue<CustomNodeBuilder>(checkCallback, nullptr, EXPECTED_CONTEXT_ID);
+        return Converter::ArkValue<CustomNodeBuilder>(checkCallback, EXPECTED_CONTEXT_ID);
     }
     template<typename OptCallback, typename ArkCallback>
     OptCallback CreateOnAppearCallback(FrameNode* frameNode)

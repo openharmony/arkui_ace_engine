@@ -97,7 +97,7 @@ public:
             }
         };
         CustomNodeBuilder customBuilder =
-            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+            Converter::ArkValue<CustomNodeBuilder>(checkCallback, TEST_RESOURCE_ID);
         return customBuilder;
     }
 };

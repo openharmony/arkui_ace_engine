@@ -5125,7 +5125,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
         .value_or(ModalTransition::DEFAULT);
     if (isShowValue) {
         CallbackHelper(*builder).BuildAsync([frameNode, isShowValue, modalStyle](
-            const RefPtr<UINode>& uiNode) {
+            const RefPtr<UINode>& uiNode) mutable {
             auto weakNode = AceType::WeakClaim(frameNode);
             PipelineContext::SetCallBackNode(weakNode);
             auto buildFunc = [uiNode]() -> RefPtr<UINode> {
@@ -5133,7 +5133,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
             };
             ContentCoverParam contentCoverParam;
             ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, std::move(buildFunc),
-                const_cast<ModalStyle&>(modalStyle), nullptr, nullptr, nullptr, nullptr, contentCoverParam);
+                modalStyle, nullptr, nullptr, nullptr, nullptr, contentCoverParam);
             }, node);
     } else {
         ContentCoverParam contentCoverParam;
@@ -5174,20 +5174,18 @@ void BindContentCover1Impl(Ark_NativePointer node,
 
     if (isShowValue) {
         CallbackHelper(*builder).BuildAsync([weakNode, frameNode, isShowValue, modalStyle, contentCoverParam,
-            onShowCallback = std::cref(onShowCallback),
-            onDismissCallback = std::cref(onDismissCallback),
-            onWillShowCallback = std::cref(onWillShowCallback),
-            onWillDismissCallback = std::cref(onWillDismissCallback)
-        ](
-            const RefPtr<UINode>& uiNode) {
+            onShowCallback = std::move(onShowCallback),
+            onDismissCallback = std::move(onDismissCallback),
+            onWillShowCallback = std::move(onWillShowCallback),
+            onWillDismissCallback = std::move(onWillDismissCallback)
+        ](const RefPtr<UINode>& uiNode) mutable {
             PipelineContext::SetCallBackNode(weakNode);
             auto buildFunc = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
             ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, std::move(buildFunc),
-                const_cast<ModalStyle&>(modalStyle),  std::function<void()>(onShowCallback.get()),
-                std::function<void()>(onDismissCallback.get()), std::function<void()>(onWillShowCallback.get()),
-                std::function<void()>(onWillDismissCallback.get()), contentCoverParam);
+                modalStyle, std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+                std::move(onWillDismissCallback), contentCoverParam);
             }, node);
     } else {
         ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, nullptr,
@@ -5228,25 +5226,22 @@ void BindSheetImpl(Ark_NativePointer node,
         g_bindSheetParams(sheetStyle, sheetOptions.value());
     }
     CallbackHelper(*builder).BuildAsync([frameNode, isShowValue, sheetStyle,
-        titleBuilder = std::cref(cbs.titleBuilder), onAppear = std::cref(cbs.onAppear),
-        onDisappear = std::cref(cbs.onDisappear), shouldDismiss = std::cref(cbs.shouldDismiss),
-        onWillDismiss = std::cref(cbs.onWillDismiss), onWillAppear = std::cref(cbs.onWillAppear),
-        onWillDisappear = std::cref(cbs.onWillDisappear), onHeightDidChange = std::cref(cbs.onHeightDidChange),
-        onDetentsDidChange = std::cref(cbs.onDetentsDidChange), onWidthDidChange = std::cref(cbs.onWidthDidChange),
-        onTypeDidChange = std::cref(cbs.onTypeDidChange), sheetSpringBack = std::cref(cbs.sheetSpringBack)](
-        const RefPtr<UINode>& uiNode) {
+        titleBuilder = std::move(cbs.titleBuilder), onAppear = std::move(cbs.onAppear),
+        onDisappear = std::move(cbs.onDisappear), shouldDismiss = std::move(cbs.shouldDismiss),
+        onWillDismiss = std::move(cbs.onWillDismiss), onWillAppear = std::move(cbs.onWillAppear),
+        onWillDisappear = std::move(cbs.onWillDisappear), onHeightDidChange = std::move(cbs.onHeightDidChange),
+        onDetentsDidChange = std::move(cbs.onDetentsDidChange), onWidthDidChange = std::move(cbs.onWidthDidChange),
+        onTypeDidChange = std::move(cbs.onTypeDidChange), sheetSpringBack = std::move(cbs.sheetSpringBack)](
+        const RefPtr<UINode>& uiNode) mutable {
         auto buildFunc = [frameNode, uiNode]() {
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             ViewStackProcessor::GetInstance()->Push(uiNode);
         };
         ViewAbstractModelNG::BindSheet(frameNode, isShowValue, nullptr, std::move(buildFunc),
-            std::function<void()>(titleBuilder.get()), const_cast<SheetStyle&>(sheetStyle),
-            std::function<void()>(onAppear.get()), std::function<void()>(onDisappear.get()),
-            std::function<void()>(shouldDismiss.get()), std::function<void(const int32_t)>(onWillDismiss.get()),
-            std::function<void()>(onWillAppear.get()), std::function<void()>(onWillDisappear.get()),
-            std::function<void(const float)>(onHeightDidChange.get()), std::function<void(const float)>(
-                onDetentsDidChange.get()), std::function<void(const float)>(onWidthDidChange.get()),
-            std::function<void(const float)>(onTypeDidChange.get()), std::function<void()>(sheetSpringBack.get()));
+            std::move(titleBuilder), sheetStyle, std::move(onAppear), std::move(onDisappear),
+            std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
+            std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
+            std::move(onTypeDidChange), std::move(sheetSpringBack));
         }, node);
 }
 void OnVisibleAreaChangeImpl(Ark_NativePointer node,

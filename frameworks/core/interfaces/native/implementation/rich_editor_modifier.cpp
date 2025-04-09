@@ -690,12 +690,11 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
     CHECK_NULL_VOID(convMenuParam);
     CallbackHelper(*content).BuildAsync([frameNode, span, response, convMenuParam = convMenuParam.value()](
-        const RefPtr<UINode>& uiNode) {
+        const RefPtr<UINode>& uiNode) mutable {
         std::function<void()> builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        RichEditorModelNG::BindSelectionMenu(frameNode, const_cast<TextSpanType&>(span),
-            const_cast<TextResponseType&>(response), builder, const_cast<SelectMenuParam&>(convMenuParam));
+        RichEditorModelNG::BindSelectionMenu(frameNode, span, response, builder, convMenuParam);
         }, node);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
