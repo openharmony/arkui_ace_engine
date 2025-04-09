@@ -148,6 +148,7 @@ private:
     void UpdateImageNode();
     void UpdateVideoNode();
     void UpdatePlayMode();
+    void UpdateImageHdrMode(const RefPtr<FrameNode>& imageNode);
     void HandleImageAnalyzerMode();
     void MovingPhotoFormatConvert(MovingPhotoFormat format);
     void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
