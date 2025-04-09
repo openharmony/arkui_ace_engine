@@ -20,6 +20,7 @@ import { LazyForEachType, PeerNode, PeerNodeType } from "./PeerNode";
 import { LazyForEachOps } from "./generated/ArkLazyForEachOpsMaterialized"
 import { InternalListener } from "./DataChangeListener";
 import { IDataSource } from "./component/lazyForEach";
+import { setNeedCreate } from "./ArkComponentRoot";
 
 class LazyForEachManager {
     static isDummy: boolean = false
@@ -161,6 +162,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
 
     LazyForEachManager.Prepare(parent, dataSource.totalCount() as int32, offset)
     LazyForEachManager.SetInsertMark(parent, mark.value, false)
+    const prevVal = setNeedCreate(true) // force synchronous create of inner CustomComponents in order to layout them correctly
 	while (true) {
         // console.log(`LazyForEach[${parent}]: index=${index}`)
         if (index < 0 || index >= dataSource.totalCount()) break
@@ -183,6 +185,7 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
         }
         LazyForEachManager.SetInsertMark(parent, moreUp ? visibleRange.markUp : visibleRange.markDown, moreUp)
 	}
+    setNeedCreate(prevVal)
 	parent.setInsertMark(nullptr, false)
 
     // create DataNode to provide count information to parent
