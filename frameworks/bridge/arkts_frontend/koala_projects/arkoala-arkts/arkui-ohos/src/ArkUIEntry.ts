@@ -203,6 +203,7 @@ export class Application {
             root = this.computeRoot()
         } catch (e) {
             if (e instanceof Error) {
+                InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} \n ${e.message}`)
                 const stack = e.stack
                 if (stack) {
                     InteropNativeModule._NativeLog("ArkTS Application.start stack trace: " + stack)
@@ -298,6 +299,7 @@ export class Application {
                 if (this.enableDumpTree) dumpTree(this.rootState!.value)
             } catch (error) {
                 if (error instanceof Error) {
+                    InteropNativeModule._NativeLog(`ArkTS Application.enter error name: ${error.name} \n ${error.message}`)
                     if (error.stack) {
                         leaveForeignContext()
                         InteropNativeModule._NativeLog(error.stack!.toString())
