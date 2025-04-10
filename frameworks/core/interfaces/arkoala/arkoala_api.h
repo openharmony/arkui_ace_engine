@@ -899,6 +899,13 @@ struct GestrueFunction {
     ActionFuncPtr endFunction;
 };
 
+struct ArkUISliderCustomContentOptions {
+    ArkUI_CharPtr accessibilityText;
+    ArkUI_CharPtr accessibilityDescription;
+    ArkUI_CharPtr accessibilityLevel;
+    ArkUI_Bool accessibilityGroup;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -3747,6 +3754,10 @@ struct ArkUISliderModifier {
     ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setPrefix)(ArkUINodeHandle node, ArkUINodeHandle prefix, ArkUISliderCustomContentOptions* options);
+    void (*resetPrefix)(ArkUINodeHandle node);
+    void (*setSuffix)(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCustomContentOptions* options);
+    void (*resetSuffix)(ArkUINodeHandle node);
 };
 
 struct ArkUIProgressModifier {
