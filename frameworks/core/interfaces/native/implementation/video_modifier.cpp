@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "color_metrics_peer.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
@@ -299,9 +300,10 @@ void SurfaceBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //VideoModelNG::SetSurfaceBackgroundColor(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    Color backgroundColor = Color::BLACK;
+    backgroundColor.SetValue(value->colorValue.value);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
 }
 void EnableShortcutKeyImpl(Ark_NativePointer node,
                            Ark_Boolean value)
@@ -309,7 +311,7 @@ void EnableShortcutKeyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //VideoModelNG::SetEnableShortcutKey(frameNode, convValue);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, convValue);
 }
 } // VideoAttributeModifier
 const GENERATED_ArkUIVideoModifier* GetVideoModifier()
