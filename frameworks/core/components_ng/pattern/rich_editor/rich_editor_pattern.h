@@ -562,6 +562,7 @@ public:
     std::u16string DeleteForwardOperation(int32_t length);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
     void NotifyKeyboardClosedByUser() override

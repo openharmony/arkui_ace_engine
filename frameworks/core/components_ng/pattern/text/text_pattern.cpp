@@ -1377,6 +1377,7 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
         auto left = textContentGlobalOffset.GetX();
         auto right = textContentGlobalOffset.GetX() + contentRect_.Width();
         aiRect = RectT(left, top, right - left, bottom - top);
+        AdjustAIEntityRect(aiRect);
     } else {
         aiRect = textSelector_.firstHandle.CombineRectT(textSelector_.secondHandle);
     }

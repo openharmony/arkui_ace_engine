@@ -3299,6 +3299,13 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
     return false;
 }
 
+void RichEditorPattern::AdjustAIEntityRect(RectF& aiRect)
+{
+    auto offset = GetPaintRectGlobalOffset(); // component offset relative to window
+    aiRect -= offset; // aiRect offset relative to component
+    aiRect = aiRect.IntersectRectT(contentRect_) + offset;
+}
+
 std::pair<int32_t, int32_t> RichEditorPattern::GetStartAndEnd(int32_t start, const RefPtr<SpanItem>& item)
 {
     return isSpanStringMode_
