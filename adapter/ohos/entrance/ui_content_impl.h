@@ -506,8 +506,8 @@ private:
     std::shared_ptr<Rosen::RSCanvasNode> canvasNode_ = nullptr;
     std::atomic<bool> cachedAnimateFlag_ = false;
     ViewportConfig cachedConfig_;
-    OHOS::Rosen::WindowSizeChangeReason cachedReason_;
-    std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_;
+    OHOS::Rosen::WindowSizeChangeReason cachedReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
+    std::shared_ptr<OHOS::Rosen::RSTransaction> cachedRsTransaction_ = nullptr;
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> cachedAvoidAreas_;
 };
 
