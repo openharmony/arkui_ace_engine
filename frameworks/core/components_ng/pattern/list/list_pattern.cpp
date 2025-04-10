@@ -477,7 +477,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 }
 
 void ListPattern::HandleOtherEvents(const RefPtr<ListEventHub>& listEventHub, bool indexChanged, float finalOffset)
- {
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     FireObserverOnDidScroll(finalOffset);
@@ -504,7 +504,7 @@ void ListPattern::HandleOtherEvents(const RefPtr<ListEventHub>& listEventHub, bo
     auto onJSFrameNodeReachEnd = listEventHub->GetJSFrameNodeOnReachEnd();
     FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
     OnScrollStop(listEventHub->GetOnScrollStop(), listEventHub->GetJSFrameNodeOnScrollStop());
- }
+}
 
 void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
