@@ -758,7 +758,7 @@ class c3 extends ViewPU {
         this.n4.set(newValue);
     }
     get buttonBackgroundCornerRadius() {
-        return this.o4.set();
+        return this.o4.get();
     }
     set buttonBackgroundCornerRadius(newValue) {
         this.o4.set(newValue);
