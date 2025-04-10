@@ -421,8 +421,8 @@ void ListItemDragManager::HandleOnItemDragUpdate(const GestureEvent& info)
     PointF point(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
     HandleAutoScroll(from, point, frameRect);
 
-    int32_t to = ScaleNearItem(from, frameRect, 
-    realOffset_ - frameRect.GetOffset() + OffsetF(listGeometry->GetPadding()->left.value_or(0), 
+    int32_t to = ScaleNearItem(from, frameRect,
+    realOffset_ - frameRect.GetOffset() + OffsetF(listGeometry->GetPadding()->left.value_or(0),
     listGeometry->GetPadding()->top.value_or(0)));
     if (to == from) {
         return;
