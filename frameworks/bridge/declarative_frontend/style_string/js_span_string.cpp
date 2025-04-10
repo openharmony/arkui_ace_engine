@@ -490,7 +490,9 @@ RefPtr<SpanBase> JSSpanString::ParseJsDecorationSpan(int32_t start, int32_t leng
     if (decorationSpan && decorationSpan->GetDecorationSpan()) {
         return AceType::MakeRefPtr<DecorationSpan>(decorationSpan->GetDecorationSpan()->GetTextDecorationType(),
             decorationSpan->GetDecorationSpan()->GetColor(),
-            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(), start, start + length);
+            decorationSpan->GetDecorationSpan()->GetTextDecorationStyle(),
+            decorationSpan->GetDecorationSpan()->GetLineThicknessScale(),
+            start, start + length);
     }
     return nullptr;
 }

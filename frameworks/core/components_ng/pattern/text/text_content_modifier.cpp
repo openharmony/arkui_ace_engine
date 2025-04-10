@@ -603,6 +603,7 @@ void TextContentModifier::ModifyTextShadowsInTextStyle(TextStyle& textStyle)
 
 void TextContentModifier::ModifyDecorationInTextStyle(TextStyle& textStyle)
 {
+    // seems no need add here
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         if (textDecorationAnimatable_) {
             uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));

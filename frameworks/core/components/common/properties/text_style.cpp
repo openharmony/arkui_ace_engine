@@ -14,6 +14,8 @@
  */
 
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_styles.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 const std::vector<WordBreak> WORD_BREAK_TYPES = {
@@ -76,6 +78,34 @@ void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue> &json, const st
     exportStyle.backgroundRadius->ToJsonValue(radiusJson, styleJson, filter);
 
     json->PutExtAttr("textBackgroundStyle", styleJson, filter);
+}
+
+void TextStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
+                            const NG::InspectorFilter& filter)
+{
+    CHECK_NULL_VOID(json);
+    CHECK_NULL_VOID(style);
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("decoration", GetDeclarationString(style->GetTextDecorationColor(), style->GetTextDecoration(),
+        style->GetTextDecorationStyle(), style->GetLineThicknessScale()).c_str(), filter);
+}
+
+std::string TextStyle::GetDeclarationString(
+    const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+    const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale)
+{
+    auto jsonSpanDeclaration = JsonUtil::Create(true);
+    jsonSpanDeclaration->Put(
+        "type", V2::ConvertWrapTextDecorationToStirng(textDecoration.value_or(TextDecoration::NONE)).c_str());
+    jsonSpanDeclaration->Put("color", (color.value_or(Color::BLACK).ColorToString()).c_str());
+    jsonSpanDeclaration->Put("style", V2::ConvertWrapTextDecorationStyleToString(
+        textDecorationStyle.value_or(TextDecorationStyle::SOLID)).c_str());
+    jsonSpanDeclaration->Put("thicknessScale",
+        StringUtils::DoubleToString(static_cast<double>(lineThicknessScale.value_or(1.0f))).c_str());
+    return jsonSpanDeclaration->ToString();
 }
 
 void TextStyle::UpdateColorByResourceId()

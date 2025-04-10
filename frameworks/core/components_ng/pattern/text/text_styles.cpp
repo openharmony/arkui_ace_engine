@@ -128,6 +128,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecoration, TextDecoration);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationColor, TextDecorationColor);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextDecorationStyle, TextDecorationStyle);
+    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, LineThicknessScale, LineThicknessScale);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, TextCase, TextCase);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
@@ -193,6 +194,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(fontStyle, TextDecoration, SetTextDecoration);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationColor, SetTextDecorationColor);
         UPDATE_TEXT_STYLE(fontStyle, TextDecorationStyle, SetTextDecorationStyle);
+        UPDATE_TEXT_STYLE(fontStyle, LineThicknessScale, SetLineThicknessScale);
         UPDATE_TEXT_STYLE(fontStyle, TextCase, SetTextCase);
 
         UPDATE_TEXT_STYLE(fontStyle, VariableFontWeight, SetVariableFontWeight);

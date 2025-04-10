@@ -62,6 +62,7 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert000, TestSize.Level1)
     spanString3->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(5), 5, 8));
 
     // Add text decoration (line through) span
+    // change Test by search MakeRefPtr<DecorationSpan>
     spanString3->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
 
@@ -690,6 +691,93 @@ HWTEST_F(HtmlConvertTestNg, SpanStringConvert014, TestSize.Level1)
     spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
         TextDecoration::LINE_THROUGH, Color::BLUE, TextDecorationStyle::WAVY, 0, 1));
 
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*spanString);
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_EQ(IsSpanItemSame(dstSpan->GetSpanItems(), spanString->GetSpanItems()), true);
+}
+
+/**
+ * @tc.name: HTMLLineThicknessScaleTest001
+ * @tc.desc: This test case checks the conversion of a SpanString containing a mixture of
+ *           spans including different DecorationSpans, It ensures that all styles are applied
+ *           correctly and the conversion between HTML and SpanString is accurate.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a mutable SpanString with an image option
+     */
+    auto imageOption = GetImageOption("src/appIcon-1.png");
+    auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"testNewDecoration\n123");
+
+    // Add 4 different text decoration span
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::SOLID, 1.0f, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::WAVY, 5.0f, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DASHED, -5.0f, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DOTTED, 0, 0, 1));
+
+    // Add paragraph style span
+    auto spanParagraphStyle = GetDefaultParagraphStyle();
+    auto paragraphSpan = AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 4, 7);
+    spanString->AddSpan(paragraphSpan);
+
+    // Insert the span string into the mutable string
+    mutableStr->InsertSpanString(2, spanString);
+
+    /**
+     * @tc.steps3: Convert the mutable SpanString to HTML using the SpanToHtml converter.
+     */
+    SpanToHtml convert;
+    auto out = convert.ToHtml(*mutableStr);
+
+    /**
+     * @tc.steps4: Convert the resulting HTML back to a SpanString and validate the number of span items.
+     * @tc.expected: The number of span items should match the total number of spans added.
+     */
+    HtmlToSpan toSpan;
+    auto dstSpan = toSpan.ToSpanString(out);
+    EXPECT_NE(dstSpan, nullptr);
+    auto items = dstSpan->GetSpanItems();
+    EXPECT_NE(items.size(), 0);
+}
+
+/**
+ * @tc.name: HTMLLineThicknessScaleTest002
+ * @tc.desc: This test case checks the conversion of a SpanString with multiple styles,
+ *           It verifies that all styles are correctly applied.
+ * @tc.level: 1
+ */
+HWTEST_F(HtmlConvertTestNg, HTMLLineThicknessScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a SpanString with multiple spans.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"testNewDecoration123");
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 6));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 10));
+    spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 10, 12));
+    spanString->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(10), 5, 8));
+    /**
+     * @tc.steps2: Create a SpanString with multiple spans, including 3 different text decoration.
+     */
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::SOLID, 1.0f, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::SOLID, 5.0f, 2, 6));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::OVERLINE, Color::BLACK, TextDecorationStyle::SOLID, -1.0f, 7, 9));
+    /**
+     * @tc.steps3: Create a SpanString with multiple spans, including font styles, letter spacing, and text decoration.
+     * @tc.expected: Convert the resulting HTML back to a SpanString and check if the conversion valid.
+     */
     SpanToHtml convert;
     auto out = convert.ToHtml(*spanString);
     HtmlToSpan toSpan;

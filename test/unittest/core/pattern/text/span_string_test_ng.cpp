@@ -2486,4 +2486,76 @@ HWTEST_F(SpanStringTestNg, GetSpanResultObject003, TestSize.Level1)
     auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
     EXPECT_FALSE(resultObject.isInit);
 }
+
+/**
+ * @tc.name: SpanLineThicknessScaleTest001
+ * @tc.desc: Test new attribute of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"SpanLineThicknessScaleTest123");
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::UNDERLINE, Color::BLACK, TextDecorationStyle::WAVY, 1.0f, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::LINE_THROUGH, Color::BLACK, TextDecorationStyle::DASHED, 5.0f, 0, 2));
+    spanString->AddSpan(AceType::MakeRefPtr<DecorationSpan>(
+        TextDecoration::OVERLINE, Color::BLACK, TextDecorationStyle::DOTTED, 10.0f, 0, 3));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(1.0);
+    textShadow.SetOffsetX(2.0);
+    textShadow.SetOffsetY(3.0);
+    vector<Shadow> textShadows { textShadow };
+    spanString->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 7, 9));
+
+    /**
+     * @tc.steps2: call GetSpans to get spans
+     * @tc.expected: The SpanString should be successfully created
+     */
+    auto firstSpans = spanString->GetSpans(0, 9);
+    EXPECT_NE(firstSpans.size(), 0);
+}
+
+/**
+ * @tc.name: SpanLineThicknessScaleTest002
+ * @tc.desc: Test new attribute of DecorationSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Initialize a spanString and AddSpan
+     * @tc.expected: The SpanString and style should be successfully created and applied
+     */
+    std::string buffer;
+    RefPtr<FontSpan> fontSpan = AceType::MakeRefPtr<FontSpan>(testFont1, 0, 9);
+    buffer = fontSpan->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("FontSpan"), 0);
+
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    auto decorationSpan1 = AceType::MakeRefPtr<DecorationSpan>(TextDecoration::UNDERLINE,
+        Color::RED, TextDecorationStyle::WAVY, 1.0f, 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan1));
+    decorationSpan1->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan1->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+
+    auto decorationSpan2 = AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE,
+        Color::RED, TextDecorationStyle::DASHED, 5.0f, 0, 1);
+    EXPECT_FALSE(fontSpan->IsAttributesEqual(decorationSpan2));
+    decorationSpan2->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
+    buffer.clear();
+    buffer = decorationSpan2->ToString();
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("DecorationSpan"), 0);
+}
+
+
 } // namespace OHOS::Ace::NG

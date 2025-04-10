@@ -544,6 +544,13 @@ public:
     bool operator==(const TextStyle& rhs) const;
     bool operator!=(const TextStyle& rhs) const;
 
+    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,
+        const NG::InspectorFilter& filter);
+
+    static std::string GetDeclarationString(
+        const std::optional<Color>& color, const std::optional<TextDecoration>& textDecoration,
+        const std::optional<TextDecorationStyle>& textDecorationStyle, const std::optional<float>& lineThicknessScale);
+
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         TextBaseline, TextBaseline, TextBaseline::ALPHABETIC, TextStyleAttribute::RE_CREATE);
     ACE_DEFINE_TEXT_STYLE(BaselineOffset, Dimension, TextStyleAttribute::BASELINE_SHIFT);
@@ -594,6 +601,7 @@ public:
     ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(
         TextDirection, TextDirection, TextDirection::AUTO, ParagraphStyleAttribute::DIRECTION);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(HeightOnly, bool, false, TextStyleAttribute::RE_CREATE);
+    ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(LineThicknessScale, float, 1.0f, TextStyleAttribute::RE_CREATE);
 
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);

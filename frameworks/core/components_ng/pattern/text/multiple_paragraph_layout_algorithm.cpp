@@ -72,7 +72,6 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
-
     auto themeScopeId = frameNode->GetThemeScopeId();
     auto content = textLayoutProperty->GetContent().value_or(u"");
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
@@ -82,8 +81,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto symbolType = textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM);
     textStyle.SetSymbolType(symbolType);
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
-        // Update Symbol TextStyle
-        textStyle.SetSymbolUid(frameNode->GetId() + 1);
+        textStyle.SetSymbolUid(frameNode->GetId() + 1); // Update Symbol TextStyle
         UpdateSymbolStyle(textStyle);
     } else {
         auto fontManager = pipeline->GetFontManager();
@@ -95,6 +93,8 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
                 textLayoutProperty->GetFontFamilyValue(textTheme->GetTextStyle().GetFontFamilies()));
         }
     }
+    auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
+    textStyle.SetLineThicknessScale(lineThicknessScale);
     if (contentModifier) {
         if (textLayoutProperty->GetIsAnimationNeededValue(true)) {
             SetPropertyToModifier(textLayoutProperty, contentModifier, textStyle);
@@ -104,8 +104,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     }
     textStyle.SetHalfLeading(textLayoutProperty->GetHalfLeadingValue(pipeline->GetHalfLeading()));
     SetAdaptFontSizeStepToTextStyle(textStyle, textLayoutProperty->GetAdaptFontSizeStep());
-    // Register callback for fonts.
-    FontRegisterCallback(frameNode, textStyle);
+    FontRegisterCallback(frameNode, textStyle); // Register callback for fonts.
     textStyle.SetTextDirection(GetTextDirection(content, layoutWrapper));
     textStyle.SetLocale(Localization::GetInstance()->GetFontLocale());
     UpdateTextColorIfForeground(frameNode, textStyle);
