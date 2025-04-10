@@ -76,6 +76,8 @@ namespace OHOS::NWeb {
     class NWebMessage;
     class NWebKeyEvent;
     class NWebSelectMenuBound;
+    class NWebUpdateScrollUpdateData;
+    class NWebNestedScrollUpdateDataImpl;
     enum class CursorType;
 }
 namespace OHOS::Ace::NG {
@@ -106,7 +108,6 @@ enum class WebInfoType : int32_t {
 };
 
 using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
-
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
@@ -620,6 +621,7 @@ public:
         return isVirtualKeyBoardShow_ == VkState::VK_SHOW;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeById(int64_t accessibilityId);
     std::shared_ptr<NG::TransitionalNodeInfo> GetFocusedAccessibilityNode(int64_t accessibilityId,
         bool isAccessibilityFocus);

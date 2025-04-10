@@ -5844,6 +5844,31 @@ void WebPattern::ReleaseResizeHold()
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
 }
+
+bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    isAvailable = true;
+    // not a nested scrolling scene
+    bool hasHorizontalParent = parentsMap_.find(Axis::HORIZONTAL) != parentsMap_.end();
+    bool hasVerticalParent = parentsMap_.find(Axis::VERTICAL) != parentsMap_.end();
+    if (!hasHorizontalParent && !hasVerticalParent) {
+        return false;
+    }
+    float offset = y;
+    float velocity = yVelocity;
+    if (expectedScrollAxis_ == Axis::HORIZONTAL) {
+        offset = x;
+        velocity = xVelocity;
+        y = 0.0f;
+        yVelocity = 0.0f;
+    } else {
+        x = 0.0f;
+        xVelocity = 0.0f;
+    }
+    bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
+    return isConsumed;
+}
+
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;

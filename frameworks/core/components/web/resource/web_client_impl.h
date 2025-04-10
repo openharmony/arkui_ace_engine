@@ -301,6 +301,8 @@ public:
     void OnScrollStart(const float x, const float y) override;
 
     void RestoreRenderFit() override;
+
+    bool OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

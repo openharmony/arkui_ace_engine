@@ -1346,4 +1346,12 @@ void WebClientImpl::OnScrollStart(const float x, const float y)
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnScrollStart(x, y);
 }
+
+bool WebClientImpl::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVelocity, bool& isAvailable)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->OnNestedScroll(x, y, xVelocity, yVelocity, isAvailable);
+}
 } // namespace OHOS::Ace
