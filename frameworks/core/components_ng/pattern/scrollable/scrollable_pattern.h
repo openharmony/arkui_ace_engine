@@ -792,9 +792,16 @@ public:
 
     void SetBackToTop(bool backToTop);
 
+    void ResetBackToTop();
+
     bool GetBackToTop() const
     {
         return backToTop_;
+    }
+
+    void UseDefaultBackToTop(bool useDefaultBackToTop)
+    {
+        useDefaultBackToTop_ = useDefaultBackToTop;
     }
 
     void OnStatusBarClick() override;
@@ -907,6 +914,11 @@ protected:
     void CheckScrollBarOff();
 
     void RecordScrollEvent(Recorder::EventType eventType);
+
+    bool IsBackToTopRunning() const
+    {
+        return isBackToTopRunning_;
+    }
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
@@ -1097,7 +1109,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
-    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
+    bool isBackToTopRunning_ = false;
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
@@ -1134,6 +1146,7 @@ private:
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
 
     bool backToTop_ = false;
+    bool useDefaultBackToTop_ = true;
 };
 } // namespace OHOS::Ace::NG
 
