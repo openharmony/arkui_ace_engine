@@ -534,6 +534,7 @@ private:
     void UpdateListDirectionInCardStyle();
     bool UpdateStartListItemIndex();
     bool UpdateEndListItemIndex();
+    bool CalculateJumpOffset();
     float UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayoutAlgorithm, bool isJump);
     RefPtr<ListContentModifier> listContentModifier_;
     void CreatePositionInfo(std::unique_ptr<JsonValue>& json);
