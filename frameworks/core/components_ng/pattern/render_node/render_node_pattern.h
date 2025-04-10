@@ -106,6 +106,11 @@ public:
         label_ = label;
     }
 
+    const std::string& GetLabel()
+    {
+        return label_;
+    }
+
 private:
     void OnModifyDone() override;
 

@@ -113,6 +113,7 @@ ace_unittest("capi_all_accessors_test") {
     "progress_mask_accessor_test.cpp",
     "pulse_symbol_effect_accessor_test.cpp",
     "rect_shape_accessor_test.cpp",
+    "render_node_accessor_test.cpp",
     "rendering_context_settings_accessor_test.cpp",
     "replace_symbol_effect_accessor_test.cpp",
     "richeditor_base_controller_accessor_test.cpp",

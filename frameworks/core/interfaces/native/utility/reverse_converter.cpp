@@ -715,4 +715,10 @@ void AssignArkValue(Ark_RichEditorImageSpanStyleResult& dst, const ImageStyleRes
         static_cast<OHOS::Ace::ImageFit>(src.objectFit));
     dst.layoutStyle = ArkValue<Opt_RichEditorLayoutStyle>(src);
 }
+
+void AssignArkValue(Ark_Position& dst, const OffsetT<Dimension>& src)
+{
+    dst.x = Converter::ArkValue<Opt_Length>(src.GetX());
+    dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
+}
 } // namespace OHOS::Ace::NG::Converter
