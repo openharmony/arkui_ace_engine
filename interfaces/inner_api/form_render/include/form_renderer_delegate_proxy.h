@@ -55,6 +55,7 @@ public:
     int32_t OnCheckManagerDelegate(bool &checkFlag) override;
 private:
     static bool WriteInterfaceToken(MessageParcel& data);
+    int32_t SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 
     static inline BrokerDelegator<FormRendererDelegateProxy> delegator_;
 };
