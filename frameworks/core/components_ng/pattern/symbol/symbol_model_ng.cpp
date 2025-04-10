@@ -215,14 +215,24 @@ void SymbolModelNG::SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const s
     InitialCustomSymbol(frameNode, symbolId, fontFamilyName);
 }
 
-void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, frameNode);
+    }
 }
 
-void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (optValue) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, optValue.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, frameNode);
+    }
 }
 
 void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,

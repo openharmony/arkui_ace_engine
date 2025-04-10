@@ -48,8 +48,8 @@ public:
     static void SetSymbolGlyphInitialize(FrameNode* framwNode, const std::uint32_t& symbolId);
     static void SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId,
         const char* fontFamilyName);
-    static void SetMinFontScale(FrameNode* frameNode, const float value);
-    static void SetMaxFontScale(FrameNode* frameNode, const float value);
+    static void SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value);
+    static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value);
     static void UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t symbolEffectType, const bool isActive,
         const std::int16_t isTxtActiveSource);
 };

@@ -22,6 +22,7 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+constexpr float SCALE_LIMIT = 1.f;
 namespace SymbolGlyphModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -101,16 +102,20 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SymbolGlyphModelNG::SetMinFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    SymbolModelNG::SetMinFontScale(frameNode, convValue);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SymbolGlyphModelNG::SetMaxFontScale(frameNode, convValue);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidatePositive(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    SymbolModelNG::SetMaxFontScale(frameNode, convValue);
 }
 bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)
 {

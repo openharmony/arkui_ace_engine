@@ -36,6 +36,10 @@ const auto ATTRIBUTE_RENDERING_STRATEGY_NAME = "renderingStrategy";
 const auto ATTRIBUTE_RENDERING_STRATEGY_DEFAULT_VALUE = "SymbolRenderingStrategy.SINGLE";
 const auto ATTRIBUTE_UNICODE_NAME = "unicode";
 const auto ATTRIBUTE_UNICODE_NAME_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_MIN_FONT_SCALE_NAME = "minFontScale";
+const auto ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE = "0.850000";
+const auto ATTRIBUTE_MAX_FONT_SCALE_NAME = "maxFontScale";
+const auto ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE = "3.200000";
 
 enum ResIntegerID {
     INT_RES_0_ID,
@@ -517,6 +521,166 @@ HWTEST_F(SymbolGlyphModifierTest, setSymbolGlyphOptionsTestValidValues, TestSize
 
     for (auto& [input, value, expected] : testSymbolGlyphOptionsResValidValues) {
         checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setMinFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+}
+
+/*
+ * @tc.name: setMinFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestValidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumValidValues = {
+        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "0.100000" },
+        { "0.89", Converter::ArkValue<Ark_Number>(0.89), "0.890000" },
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+    };
+    Opt_Union_Number_Resource initValueMinFontScale;
+    // Initial setup
+    initValueMinFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMinFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMinFontScaleNumValidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMinFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMinFontScaleTestInvalidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMinFontScaleNumInvalidValues = {
+        { "-1.01", Converter::ArkValue<Ark_Number>(-1.01), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "2.89", Converter::ArkValue<Ark_Number>(2.89), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+        { "-1", Converter::ArkValue<Ark_Number>(-1), ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE },
+    };
+    Opt_Union_Number_Resource initValueMinFontScale;
+
+    // Initial setup
+    initValueMinFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(2.1));
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                                                     const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMinFontScaleNumInvalidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMaxFontScaleDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestValidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues = {
+        { "1", Converter::ArkValue<Ark_Number>(1), "1.000000" },
+        { "1.5", Converter::ArkValue<Ark_Number>(1.5), "1.500000" },
+        { "1.99", Converter::ArkValue<Ark_Number>(1.99), "1.990000" },
+    };
+    Opt_Union_Number_Resource initValueMaxFontScale;
+    // Initial setup
+    initValueMaxFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(
+        std::get<1>(testFixtureMaxFontScaleNumValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                          const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleNumValidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(SymbolGlyphModifierTest, setMaxFontScaleTestInvalidValues, TestSize.Level1)
+{
+    std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumInvalidValues = {
+        { "0.1", Converter::ArkValue<Ark_Number>(0.1), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-1.5", Converter::ArkValue<Ark_Number>(-1.5), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+        { "-0.99", Converter::ArkValue<Ark_Number>(-0.99), "ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE" },
+    };
+    Opt_Union_Number_Resource initValueMaxFontScale;
+
+    // Initial setup
+    initValueMaxFontScale = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.1));
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                                                     const Opt_Union_Number_Resource& value) {
+        Opt_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+    for (auto& [input, value, expected] : testFixtureMaxFontScaleNumInvalidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(value));
     }
 }
 
