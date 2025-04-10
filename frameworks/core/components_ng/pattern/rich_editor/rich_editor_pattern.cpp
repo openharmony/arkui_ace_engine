@@ -7793,6 +7793,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     if (InRangeRect(info.GetGlobalLocation(), selectRange)) {
         selectedType_ = TextSpanType::IMAGE;
         textSelector_.Update(selectRange.first, selectRange.second);
+        SetCaretPositionWithAffinity({ selectRange.second, TextAffinity::UPSTREAM });
         FireOnSelect(selectRange.first, selectRange.second);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
