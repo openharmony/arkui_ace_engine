@@ -2748,10 +2748,22 @@ void NavigationPattern::NotifyNavDestinationSwitch(const RefPtr<NavDestinationCo
     std::string navigationId = host->GetInspectorIdValue("");
     std::optional<NavDestinationInfo> fromInfo;
     std::optional<NavDestinationInfo> toInfo;
+    RefPtr<NavPathInfo> pathInfo = nullptr;
+    if (from) {
+        pathInfo = from->GetNavPathInfo();
+    } else if (to) {
+        pathInfo = to->GetNavPathInfo();
+    }
+    if (pathInfo) {
+        pathInfo->OpenScope();
+    }
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_HIDDEN, from, true, fromInfo);
     BuildNavDestinationInfoFromContext(navigationId, NavDestinationState::ON_SHOWN, to, false, toInfo);
     UIObserverHandler::GetInstance().NotifyNavDestinationSwitch(
         std::move(fromInfo), std::move(toInfo), operation);
+    if (pathInfo) {
+        pathInfo->CloseScope();
+    }
 }
 
 void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
