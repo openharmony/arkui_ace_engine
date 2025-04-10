@@ -215,6 +215,8 @@ void ViewAbstractModelImpl::SetHeight(const CalcDimension& height)
     }
 }
 
+void ViewAbstractModelImpl::SetToolbarBuilder(std::function<void()>&& buildFunc) {}
+
 void ViewAbstractModelImpl::SetMinWidth(const CalcDimension& minWidth)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
