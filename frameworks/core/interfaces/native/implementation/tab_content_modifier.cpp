@@ -294,8 +294,46 @@ void TabBar2Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TabContentModelNG::SetTabBar2(frameNode, convValue);
+    Converter::VisitUnion(*value,
+        [](const Ark_ComponentContent& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
+        },
+        [frameNode](const Ark_SubTabBarStyle& style) {
+            g_setSubTabBarStyle(frameNode, style);
+        },
+        [frameNode](const Ark_BottomTabBarStyle& style) {
+            g_setBottomTabBarStyle(frameNode, style);
+        },
+        [frameNode](const Ark_String& arkContent) {
+            auto text = Converter::OptConvert<std::string>(arkContent);
+            TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelNG::SetTabBar(frameNode, text, std::nullopt, nullptr);
+        },
+        [frameNode](const Ark_Resource& arkContent) {
+            auto text = Converter::OptConvert<std::string>(arkContent);
+            TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelNG::SetTabBar(frameNode, text, std::nullopt, nullptr);
+        },
+        [frameNode](const CustomNodeBuilder& arkBuilder) {
+            auto builder = [callback = CallbackHelper(arkBuilder), frameNode]() {
+                auto builderNode = callback.BuildSync(frameNode);
+                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+            };
+            TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelNG::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+        },
+        [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
+            std::optional<std::string> label;
+            std::optional<std::string> icon;
+            if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(arkTabBarOptions)) {
+                label = tabBarOptions->text;
+                icon = tabBarOptions->icon;
+            }
+            TabContentModelNG::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+            TabContentModelNG::SetTabBar(frameNode, label, icon, nullptr);
+        },
+        []() {}
+    );
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     const VoidCallback* value)
