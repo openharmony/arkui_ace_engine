@@ -28,6 +28,8 @@
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+using testing::NiceMock;
+
 namespace OHOS::Ace::NG {
 
 extern "C" const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
@@ -63,7 +65,7 @@ public:
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
 
-        themeManager_ = AceType::MakeRefPtr<MockThemeManager>();
+        themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
         // assume using of test/mock/core/common/mock_theme_constants.cpp in build
