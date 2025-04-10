@@ -55,7 +55,7 @@ void OverlayModifier::Draw(DrawingContext& context)
 {
     auto extensionHandler = extensionHandler_.Upgrade();
     if (extensionHandler) {
-        extensionHandler->Draw(context);
+        extensionHandler->OverlayDraw(context);
     } else {
         onDraw(context);
     }
@@ -82,7 +82,7 @@ void ForegroundModifier::Draw(DrawingContext& context)
 {
     auto extensionHandler = extensionHandler_.Upgrade();
     if (extensionHandler) {
-        extensionHandler->Draw(context);
+        extensionHandler->ForegroundDraw(context);
     } else {
         onDraw(context);
     }
