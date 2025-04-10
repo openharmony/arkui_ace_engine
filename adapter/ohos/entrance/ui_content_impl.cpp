@@ -2916,7 +2916,7 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
     if (cachedAnimateFlag_.load()) {
-        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction");
+        TAG_LOGD(AceLogTag::ACE_WINDOW, "ExecKeyFrameCachedAnimateAction.");
         UpdateViewportConfig(cachedConfig_, cachedReason_, cachedRsTransaction_, cachedAvoidAreas_);
         cachedAnimateFlag_.store(false);
     }
