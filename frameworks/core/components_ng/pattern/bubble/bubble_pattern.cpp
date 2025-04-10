@@ -467,15 +467,16 @@ void BubblePattern::StartEnteringTransitionEffects(
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
     auto& renderContext = popupNode->GetRenderContext();
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     renderContext->SetTransitionInCallback(
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),
@@ -572,6 +573,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
     CHECK_NULL_VOID(layoutProp);
     auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
     auto isBlock = layoutProp->GetBlockEventValue(true);
+    auto isTips = layoutProp->GetIsTips().value_or(false);
     AnimationUtils::Animate(
         optionAlpha,
         [weak = WeakClaim(this)]() {
@@ -582,14 +584,14 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock]() {
+        [weak = WeakClaim(this), finish, showInSubWindow, popupId, isBlock, isTips]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
                 return;
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
-            if (showInSubWindow) {
+            if (showInSubWindow && !isTips) {
                 std::vector<Rect> rects;
                 if (!isBlock) {
                     auto rect = Rect(pattern->GetChildOffset().GetX(), pattern->GetChildOffset().GetY(),

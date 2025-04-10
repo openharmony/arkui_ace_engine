@@ -2052,7 +2052,9 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     } else {
         ShowPopupAnimationNG(popupNode);
     }
-    SetPopupHotAreas(popupNode);
+    if (!popupInfo.isTips) {
+        SetPopupHotAreas(popupNode);
+    }
     auto accessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetShowedState(1);
