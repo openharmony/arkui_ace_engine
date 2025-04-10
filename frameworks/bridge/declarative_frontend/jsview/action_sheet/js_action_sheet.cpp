@@ -339,7 +339,6 @@ void ParseLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
         return;
     }
 
-    properties.levelOrder = std::make_optional(NG::LevelOrder::ORDER_DEFAULT);
     auto levelOrderValue = obj->GetProperty("levelOrder");
     if (!levelOrderValue->IsObject()) {
         return;
