@@ -2916,8 +2916,8 @@ void UIContentImpl::CacheAnimateInfo(const ViewportConfig& config,
 void UIContentImpl::ExecKeyFrameCachedAnimateAction()
 {
     TAG_LOGD(AceLogTag::ACE_WINDOW, "exec keyframe cache in");
-    const int32_t waitDuration = 50;
     if (cachedAnimateFlag_.load()) {
+        const int32_t waitDuration = 50;
         AnimationOption option;
         option.SetDuration(watiDuration);
         AnimationUtils::Animate(option,
