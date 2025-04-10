@@ -98,8 +98,10 @@ void FormRenderWindow::Destroy()
 #ifdef ENABLE_ROSEN_BACKEND
     frameCallback_.userData_ = nullptr;
     frameCallback_.callback_ = nullptr;
-    rsUIDirector_->Destroy();
-    rsUIDirector_.reset();
+    if (rsUIDirector_) {
+        rsUIDirector_->Destroy();
+        rsUIDirector_.reset();
+    }
     callbacks_.clear();
 #endif
 }
@@ -128,6 +130,7 @@ void FormRenderWindow::OnShow()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 #endif
 }
@@ -142,6 +145,7 @@ void FormRenderWindow::OnHide()
 void FormRenderWindow::FlushTasks()
 {
 #ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 #endif
 }
