@@ -473,7 +473,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
             }
         }
     }
-    HandleOtherEvents(listEventHub, host, indexChanged, finalOffset);
+    HandleOtherEvents(listEventHub, indexChanged, finalOffset);
 }
 
 void ListPattern::HandleOtherEvents(const RefPtr<ListEventHub>& listEventHub, bool indexChanged, float finalOffset)
