@@ -63,6 +63,17 @@ void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode
     }
 }
 
+namespace {
+void MeasureItem(GridIrregularFiller& filler, const GridIrregularFiller::FillParameters& params, FrameNode* node,
+    int32_t index, int32_t col, int32_t row)
+{
+    filler.MeasureItem(params, node, index, col, row);
+    // clean flag to prevent remeasure in LayoutTask
+    node->GetLayoutProperty()->CleanDirty();
+    node->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+}
+} // namespace
+
 void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
@@ -71,7 +82,7 @@ void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* no
     if (!node->CheckNeedForceMeasureAndLayout() && info_.lineHeightMap_.count(pos.second)) {
         return;
     }
-    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+    MeasureItem(filler, params_, node, index, pos.first, pos.second);
 }
 
 void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
@@ -82,7 +93,7 @@ void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* no
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     const auto pos = info_.GetItemPos(index);
-    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+    MeasureItem(filler, params_, node, index, pos.first, pos.second);
 }
 
 bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction)

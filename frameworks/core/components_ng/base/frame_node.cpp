@@ -4823,24 +4823,21 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    RefPtr<LayoutWrapper> child;
+
     if (scrollWindowAdapter) {
-        auto child = scrollWindowAdapter->GetChildByIndex(index);
-        if (child) {
-            child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
-            if (addToRenderTree) {
-                child->SetActive(true);
-            }
-        }
-        return child;
+        child = scrollWindowAdapter->GetChildByIndex(index);
+    } else {
+        child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     }
 
-    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
             child->SetActive(true);
         }
     }
+
     return child;
 }
 

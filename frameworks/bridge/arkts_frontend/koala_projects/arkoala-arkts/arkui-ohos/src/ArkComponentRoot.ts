@@ -22,9 +22,11 @@ import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, With
 
 let _isNeedCreate: boolean = false
 
-export function setNeedCreate(isNeedCreate: boolean)
+export function setNeedCreate(isNeedCreate: boolean): boolean
 {
+    const temp = _isNeedCreate
     _isNeedCreate = isNeedCreate
+    return temp
 }
 
 /** @memo */
