@@ -453,11 +453,33 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
     paintStateFlag_ = !NearZero(finalOffset) && !isJump;
     isFramePaintStateValid_ = true;
-    ACE_SCOPED_TRACE("scrollType:list, offset:%f, id:%d, tag:%s", finalOffset, 
+    ACE_SCOPED_TRACE("scrollType:list, offset:%f, id:%d, tag:%s", finalOffset,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     auto onScroll = listEventHub->GetOnScroll();
     PrintOffsetLog(AceLogTag::ACE_LIST, host->GetId(), finalOffset);
-    HandleScrollEvent(listEventHub, finalOffset);
+    if (onScroll) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            FireOnScroll(finalOffset, onScroll);
+        } else {
+            if (!NearZero(finalOffset)) {
+                auto offsetPX = Dimension(finalOffset);
+                auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
+                auto source = GetScrollSource();
+                if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR ||
+                    source == SCROLL_FROM_ANIMATION_CONTROLLER) {
+                    source = SCROLL_FROM_NONE;
+                }
+                onScroll(offsetVP, GetScrollState(source));
+            }
+        }
+    }
+    HandleOtherEvents(listEventHub, host, indexChanged, finalOffset);
+}
+
+void ListPattern::HandleOtherEvents(const RefPtr<ListEventHub>& listEventHub, bool indexChanged, float finalOffset)
+ {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     FireObserverOnDidScroll(finalOffset);
     auto onDidScroll = listEventHub->GetOnDidScroll();
     if (onDidScroll) {
@@ -482,28 +504,7 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onJSFrameNodeReachEnd = listEventHub->GetJSFrameNodeOnReachEnd();
     FireOnReachEnd(onReachEnd, onJSFrameNodeReachEnd);
     OnScrollStop(listEventHub->GetOnScrollStop(), listEventHub->GetJSFrameNodeOnScrollStop());
-}
-
-void ListPattern::HandleScrollEvent(const RefPtr<ListEventHub>& listEventHub, float finalOffset)
-{
-    auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll) {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            FireOnScroll(finalOffset, onScroll);
-        } else {
-            if (!NearZero(finalOffset)) {
-                auto offsetPX = Dimension(finalOffset);
-                auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
-                auto source = GetScrollSource();
-                if (source == SCROLL_FROM_AXIS || source == SCROLL_FROM_BAR || 
-                    source == SCROLL_FROM_ANIMATION_CONTROLLER) {
-                    source = SCROLL_FROM_NONE;
-                }
-                onScroll(offsetVP, GetScrollState(source));
-            }
-        }
-    }
-} 
+ }
 
 void ListPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
 {
