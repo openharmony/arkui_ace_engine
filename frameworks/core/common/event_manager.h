@@ -340,6 +340,9 @@ public:
 
     void AddToMousePendingRecognizers(const WeakPtr<NG::NGGestureRecognizer>& recognizer);
 
+    template<typename T>
+    bool CheckDifferentTargetDisplay(const std::vector<T>& historyEvents, const std::vector<T>& events);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
