@@ -7358,7 +7358,6 @@ void WebDelegate::OnSafeInsetsChange()
         return;
     }
     auto windowRect = context->GetDisplayWindowRectInfo();
-
     int left = 0;
     if (resultSafeArea.left_.IsValid() && resultSafeArea.left_.end > currentArea_.Left()) {
         left = static_cast<int>(
@@ -7366,7 +7365,8 @@ void WebDelegate::OnSafeInsetsChange()
     }
     int top = 0;
     if (resultSafeArea.top_.IsValid() && resultSafeArea.top_.end > currentArea_.Top()) {
-        top = static_cast<int>(resultSafeArea.top_.end - std::max(currentArea_.Top(), 0.0));
+        top = static_cast<int>(resultSafeArea.top_.end -
+            std::max<double>(currentArea_.Top(), resultSafeArea.top_.start));
     }
     int right = 0;
     if (resultSafeArea.right_.IsValid() && resultSafeArea.right_.start < currentArea_.Right()) {
@@ -7375,9 +7375,9 @@ void WebDelegate::OnSafeInsetsChange()
     }
     int bottom = 0;
     if (resultSafeArea.bottom_.IsValid() && resultSafeArea.bottom_.start < currentArea_.Bottom()) {
-        bottom = static_cast<int>(std::min(windowRect.Height(), currentArea_.Bottom()) - resultSafeArea.bottom_.start);
+        bottom = static_cast<int>(
+            std::min<double>(resultSafeArea.bottom_.end, currentArea_.Bottom()) - resultSafeArea.bottom_.start);
     }
-
     if (left < 0 || bottom < 0 || right < 0 || top < 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "WebDelegate::OnSafeInsetsChange occur errors "
                 "ltrb:%{public}d,%{public}d,%{public}d,%{public}d", left, top, right, bottom);
