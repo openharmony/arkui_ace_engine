@@ -386,7 +386,7 @@ private:
         explicit JsInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~JsInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
@@ -427,7 +427,7 @@ private:
         explicit WebInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~WebInteractionOperation() = default;
         // Accessibility override.
-        void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
+        RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
