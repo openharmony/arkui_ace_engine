@@ -1039,7 +1039,10 @@ ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, 
 {
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() } };
     for (int i = 0; i < size; i++) {
-        distanceMap[static_cast<SourceTool>(toolTypeArray[i])] = distanceArray[i];
+        SourceTool st = static_cast<SourceTool>(toolTypeArray[i]);
+        if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK) {
+            distanceMap[st] = distanceArray[i];
+        }
     }
     auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
     CHECK_NULL_RETURN(gestureForDistanceMap, ERROR_CODE_PARAM_INVALID);
