@@ -848,6 +848,21 @@ void BubblePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
     UpdateBubbleText();
+    if (isTips_) {
+        auto host = GetHost();
+        auto popupTheme = GetPopupTheme();
+        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+        CHECK_NULL_VOID(childNode);
+        auto popupPaintProp = host->GetPaintProperty<BubbleRenderProperty>();
+        auto renderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(popupTheme);
+        auto defaultBGcolor = popupTheme->GetDefaultBGColor();
+        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(defaultBGcolor);
+        renderContext->UpdateBackgroundColor(backgroundColor);
+        BlurStyleOption styleOption;
+        styleOption.colorMode = static_cast<ThemeColorMode>(popupTheme->GetBgThemeColorMode());
+        renderContext->UpdateBackBlurStyle(styleOption);
+    }
 }
 
 void BubblePattern::UpdateAgingTextSize()

@@ -2354,14 +2354,14 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
-    std::string messageString = message;
-    tipsParam->SetMessage(messageString);
+    tipsParam->SetMessage(std::string(message));
     tipsParam->SetShowInSubWindow(true);
     tipsParam->SetAppearingTime(timeOptions.appearingTime);
     tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
     tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
     tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
+    tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
     if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
