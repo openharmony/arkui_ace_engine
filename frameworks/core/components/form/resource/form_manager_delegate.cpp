@@ -825,7 +825,8 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 {
     int32_t externalErrorCode = 0;
     std::string errorMsg;
-    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
+    int64_t parsedRequestCode = static_cast<int64_t>(StringUtils::StringToLongInt(code.c_str()));
+    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(parsedRequestCode, externalErrorCode, errorMsg);
     TAG_LOGI(AceLogTag::ACE_FORM,
         "OnFormError, code:%{public}s, msg:%{public}s, externalErrorCode:%{public}d, errorMsg: %{public}s",
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
