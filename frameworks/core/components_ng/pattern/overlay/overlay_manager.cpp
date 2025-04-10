@@ -6646,6 +6646,7 @@ void OverlayManager::RemoveFilterAnimation()
     CHECK_NULL_VOID(menuTheme);
     AnimationOption option;
     option.SetOnFinishEvent([weak = WeakClaim(this), filterId = filterNode->GetId()] {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "remove filter animation finish");
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(overlayManager);
         auto filterNode = overlayManager->GetFilterColumnNode();
@@ -6655,11 +6656,14 @@ void OverlayManager::RemoveFilterAnimation()
         }
         if (!overlayManager->hasFilterActived) {
             overlayManager->RemoveFilter();
+        } else {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark actived filter need to be removed, filterId: %{public}d", filterId);
+            overlayManager->SetMarkRemoveFilterId(filterId);
         }
     });
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "removeFilter with animation");
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "start remove filter animation");
     AnimationUtils::Animate(
         option,
         [filterContext]() {
@@ -7728,16 +7732,24 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     AnimationOption option;
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
-    option.SetOnFinishEvent([] {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        auto manager = pipelineContext->GetOverlayManager();
-        CHECK_NULL_VOID(manager);
-        manager->SetFilterActive(false);
+    option.SetOnFinishEvent([weak = WeakClaim(this), filterId = columnNode->GetId()] {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "show filter animation finish");
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->SetFilterActive(false);
+
+        auto filterNode = overlayManager->GetFilterColumnNode();
+        CHECK_NULL_VOID(filterNode);
+        if (filterNode->GetId() == filterId && filterId == overlayManager->GetMarkRemoveFilterId()) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "remove marked filer node, filterId: %{public}d", filterId);
+            overlayManager->RemoveFilter();
+        }
     });
     filterRenderContext->UpdateBackBlurRadius(Dimension(0.0f));
     if (!menuTheme->GetHasBackBlur()) {
         filterRenderContext->UpdateBackgroundColor(maskColor.ChangeOpacity(0.0f));
     }
+    TAG_LOGI(AceLogTag::ACE_OVERLAY, "start show filter animation");
     AnimationUtils::Animate(
         option,
         [filterRenderContext, styleOption, maskColor, menuTheme]() {
