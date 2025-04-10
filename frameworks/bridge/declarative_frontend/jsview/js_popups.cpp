@@ -54,6 +54,12 @@ constexpr int HAPTIC_FEEDBACK_MODE_AUTO = 2;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 }
+constexpr int32_t OUTER_BORDER_WIDTH = 0;
+constexpr int32_t INNER_BORDER_WIDTH = 1;
+constexpr int32_t OUTER_BORDER_LINEAR_GRADIENT = 0;
+constexpr int32_t INNER_BORDER_LINEAR_GRADIENT = 1;
+const std::vector<std::string> BORDER_WIDTH_TYPE = {"outlineWidth", "borderWidth"};
+const std::vector<std::string> BORDER_LINEAR_GRADIENT_TYPE = {"outlineLinearGradient", "borderLinearGradient"};
 
 using DoubleBindCallback = std::function<void(const std::string&)>;
 
@@ -172,15 +178,15 @@ static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
 }
 
 void SetBorderLinearGradientDirection(const JSRef<JSObject>& obj,
-    PopupLinearGradientProperties& popupBorberLinearGradient)
+    PopupLinearGradientProperties& popupBorderLinearGradient)
 {
-    popupBorberLinearGradient.popupDirection = GradientDirection::BOTTOM;
+    popupBorderLinearGradient.popupDirection = GradientDirection::BOTTOM;
     auto directionValue = obj->GetProperty("direction");
     if (directionValue->IsNumber()) {
         auto gradientDirection = directionValue->ToNumber<int32_t>();
         if (gradientDirection >= static_cast<int32_t>(GradientDirection::LEFT) &&
             gradientDirection <= static_cast<int32_t>(GradientDirection::END_TO_START)) {
-            popupBorberLinearGradient.popupDirection = static_cast<GradientDirection>(gradientDirection);
+            popupBorderLinearGradient.popupDirection = static_cast<GradientDirection>(gradientDirection);
         }
     }
 }
@@ -198,7 +204,7 @@ void ParseGradientColor(const JSRef<JSArray>& colorArray, PopupGradientColor& gr
 }
 
 void SetBorderLinearGradientColors(const JSRef<JSObject>& obj,
-    PopupLinearGradientProperties& popupBorberLinearGradient)
+    PopupLinearGradientProperties& popupBorderLinearGradient)
 {
     auto colorsValues = obj->GetProperty("colors");
     if (!colorsValues->IsArray()) {
@@ -213,15 +219,14 @@ void SetBorderLinearGradientColors(const JSRef<JSObject>& obj,
         auto colorArray = JSRef<JSArray>::Cast(colorInfo);
         PopupGradientColor gradientColor;
         ParseGradientColor(colorArray, gradientColor);
-        popupBorberLinearGradient.gradientColors.push_back(gradientColor);
+        popupBorderLinearGradient.gradientColors.push_back(gradientColor);
     }
 }
 
 void SetPopupBorderWidthInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
-    const char* borderWidthParam)
+    const int32_t& borderWidthParamFlag)
 {
-    std::string outlineWidth = "outlineWidth";
-    auto popupBorderWidthVal = popupObj->GetProperty(borderWidthParam);
+    auto popupBorderWidthVal = popupObj->GetProperty(BORDER_WIDTH_TYPE[borderWidthParamFlag].c_str());
     if (popupBorderWidthVal->IsNull()) {
         return;
     }
@@ -232,30 +237,28 @@ void SetPopupBorderWidthInfo(const JSRef<JSObject>& popupObj, const RefPtr<Popup
     if (popupBorderWidth.Value() < 0) {
         return;
     }
-    if (borderWidthParam == outlineWidth) {
+    if (OUTER_BORDER_WIDTH == borderWidthParamFlag) {
         popupParam->SetOutlineWidth(popupBorderWidth);
     } else {
         popupParam->SetInnerBorderWidth(popupBorderWidth);
     }
 }
 
-void SetPopupBorderInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
-    const char* borderWidthParam, const char* borderColorParam)
+void SetPopupBorderLinearGradientInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
+    const int32_t& borderColorParamFlag)
 {
-    std::string outlineLinearGradient = "outlineLinearGradient";
-    PopupLinearGradientProperties popupBorberLinearGradient;
-    auto borderLinearGradientVal = popupObj->GetProperty(borderColorParam);
+    PopupLinearGradientProperties popupBorderLinearGradient;
+    auto borderLinearGradientVal = popupObj->GetProperty(BORDER_LINEAR_GRADIENT_TYPE[borderColorParamFlag].c_str());
     if (borderLinearGradientVal->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(borderLinearGradientVal);
-        SetBorderLinearGradientDirection(obj, popupBorberLinearGradient);
-        SetBorderLinearGradientColors(obj, popupBorberLinearGradient);
-        if (borderColorParam == outlineLinearGradient) {
-            popupParam->SetOutlineLinearGradient(popupBorberLinearGradient);
+        SetBorderLinearGradientDirection(obj, popupBorderLinearGradient);
+        SetBorderLinearGradientColors(obj, popupBorderLinearGradient);
+        if (OUTER_BORDER_LINEAR_GRADIENT == borderColorParamFlag) {
+            popupParam->SetOutlineLinearGradient(popupBorderLinearGradient);
         } else {
-            popupParam->SetInnerBorderLinearGradient(popupBorberLinearGradient);
+            popupParam->SetInnerBorderLinearGradient(popupBorderLinearGradient);
         }
     }
-    SetPopupBorderWidthInfo(popupObj, popupParam, borderWidthParam);
 }
 
 void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
@@ -513,13 +516,10 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
         }
     }
-
-    const char* outlineLinearGradient = "outlineLinearGradient";
-    const char* outlineWidth = "outlineWidth";
-    SetPopupBorderInfo(popupObj, popupParam, outlineWidth, outlineLinearGradient);
-    const char* borderLinearGradient = "borderLinearGradient";
-    const char* borderWidth = "borderWidth";
-    SetPopupBorderInfo(popupObj, popupParam, borderWidth, borderLinearGradient);
+    SetPopupBorderWidthInfo(popupObj, popupParam, OUTER_BORDER_WIDTH);
+    SetPopupBorderWidthInfo(popupObj, popupParam, INNER_BORDER_WIDTH);
+    SetPopupBorderLinearGradientInfo(popupObj, popupParam, OUTER_BORDER_LINEAR_GRADIENT);
+    SetPopupBorderLinearGradientInfo(popupObj, popupParam, INNER_BORDER_LINEAR_GRADIENT);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
