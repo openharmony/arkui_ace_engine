@@ -312,6 +312,16 @@ public:
 
     void GetThumbnailPixelMap(bool isSync);
 
+    void RecordTouchDownPoint(const TouchEvent& downTouchEvent)
+    {
+        touchDownPoint_ = downTouchEvent;
+    }
+
+    const TouchEvent& GetTouchDownPoint()
+    {
+        return touchDownPoint_;
+    }
+
     virtual void NotifyTransDragWindowToFwk() {}
 
     virtual void NotifyMenuShow(bool isMenuShow) {}
@@ -344,6 +354,7 @@ private:
     std::function<void(GestureEvent&)> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
+    TouchEvent touchDownPoint_;
     bool isReceivedLongPress_ = false;
     bool isNotInPreviewState_ = false;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
